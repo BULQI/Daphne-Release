@@ -27,6 +27,8 @@ namespace DaphneGui
         public SimSetupControl()
         {
             InitializeComponent();
+            
+            
         }
 
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -93,6 +95,8 @@ namespace DaphneGui
             experiment_name_box.Text = exp_name;
             experiment_name_box.SelectAll();
             experiment_name_box.Focus();
+
+            
         }
 
 

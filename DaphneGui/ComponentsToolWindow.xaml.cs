@@ -409,23 +409,23 @@ namespace DaphneGui
             p.rc_scenario.cellpopulations.Add(cp);
             //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);
 #endif
-            ReactionComplexProcessor Processor = new ReactionComplexProcessor();
+            ////ReactionComplexProcessor Processor = new ReactionComplexProcessor();
 
             MainWindow.Sim.Load(p, true);
             //MainWindow.Sim.Load(MainWindow.SOP.Protocol, true, true);
 
-            //Processor.Initialize(MainWindow.SOP.Protocol, crc, (TissueSimulation)MainWindow.Sim);
-            Processor.Initialize(p, crc, (TissueSimulation)MainWindow.Sim);
-            Processor.Go();
+            //////Processor.Initialize(MainWindow.SOP.Protocol, crc, (TissueSimulation)MainWindow.Sim);
+            ////Processor.Initialize(p, crc, (TissueSimulation)MainWindow.Sim);
+            ////Processor.Go();
 
-            MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
-            MainWindow.ST_ReacComplexChartWindow.RC = Processor;  //crc.Processor;
-            MainWindow.ST_ReacComplexChartWindow.DataContext = Processor; //crc.Processor;
-            MainWindow.ST_ReacComplexChartWindow.Render();
+            ////MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
+            ////MainWindow.ST_ReacComplexChartWindow.RC = Processor;  //crc.Processor;
+            ////MainWindow.ST_ReacComplexChartWindow.DataContext = Processor; //crc.Processor;
+            ////MainWindow.ST_ReacComplexChartWindow.Render();
 
-            MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = Processor.dInitialTime;  //crc.Processor.dInitialTime;
-            MW.VTKDisplayDocWindow.Activate();
-            MainWindow.ST_ReacComplexChartWindow.Activate();
+            ////MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = Processor.dInitialTime;  //crc.Processor.dInitialTime;
+            ////MW.VTKDisplayDocWindow.Activate();
+            ////MainWindow.ST_ReacComplexChartWindow.Activate();
         }
 
         public ConfigReactionComplex GetConfigReactionComplex()

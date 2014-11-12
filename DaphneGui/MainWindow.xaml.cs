@@ -1068,6 +1068,7 @@ namespace DaphneGui
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    
                     sim.restart();
                     UpdateGraphics();
 
@@ -1080,7 +1081,12 @@ namespace DaphneGui
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
-                    ProtocolToolWindow.Close();
+
+                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+                    {
+                        ProtocolToolWindow.Close();
+                    }
+
                     ImportSBML.IsEnabled = false;
                     // prevent all fit/analysis-related things
                     hideFit();
@@ -1723,14 +1729,83 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void runButton_Click(object sender, RoutedEventArgs e)
+        public void runButton_Click(object sender, RoutedEventArgs e)
         {
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
+
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
+                if (crc == null)
+                {
+                    MessageBox.Show("Please select a reaction complex to process.");
+                    return;
+                }
+                if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
+                {
+                    sim.RunStatus = SimulationBase.RUNSTAT_OFF;
+                }
+
+                
+            }
+
             runSim();
         }
 
+        public void SimulationTestFunction()
+        {
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+            
+            VatReactionComplex vatSim = (VatReactionComplex)Sim;
+
+            // terminate the simulation thread first
+            if (simThread != null && simThread.IsAlive)
+            {
+                simThread.Suspend();
+            }
+
+            // start reporter
+            if (Properties.Settings.Default.skipDataBaseWrites == false)
+            {
+                sim.Reporter.StartReporter(sim);
+            }
+
+            //This resets the mol concs and reaction rates instead of reloading the whole simulation
+            vatSim.resetConcsAndRates(sop.Protocol);
+
+            double dt = sop.Protocol.scenario.time_config.sampling_interval;
+            double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
+            int nSteps = Math.Min((int)(sop.Protocol.scenario.time_config.duration / dt), 10000);
+
+            int interval = nSteps / 100;
+            if (interval == 0)
+                interval = 1;
+
+            for (int i = 1; i < nSteps; i++)
+            {
+                vatSim.Step(dt);
+                if (i % interval == 0)
+                {
+                    vatSim.Reporter.AppendReporter();
+                }
+            }
+            ReacComplexChartWindow.Activate();
+            ReacComplexChartWindow.Render();
+
+            sim.Reporter.CloseReporter();
+
+            if (simThread != null)
+            {
+                simThread.Resume();
+            }
+            
+        }
+       
         /// <summary>
         /// save when simulation is paused state
         /// </summary>
@@ -2005,6 +2080,7 @@ namespace DaphneGui
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // GUI Resources
+                // Set the data context for the main tab control config GUI
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
                 
@@ -2064,7 +2140,6 @@ namespace DaphneGui
             {
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
                 // GUI Resources
-
                 // gmk - The code inside the if-statement insures that the information in the protocol window
                 // updates when a new scenario of the same workbench-type is loaded.
                 // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
@@ -2072,10 +2147,12 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
+                    ReacComplexChartWindow.Reset();
                     ToolWin = new ToolWinVatRC();
                     ToolWin.MW = this;
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
+                    ReacComplexChartWindow.redraw_flag = false;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
@@ -2092,8 +2169,8 @@ namespace DaphneGui
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
 
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.Clear();
+                if (ProtocolToolWindowContainer.Items.Count > 0)
+                    ProtocolToolWindowContainer.Items.Clear();
                     ToolWinType = ToolWindowType.VatRC;
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
@@ -2262,6 +2339,7 @@ namespace DaphneGui
             }
         }
 
+        
         private void run()
         {
             while (true)
@@ -2421,6 +2499,23 @@ namespace DaphneGui
 
             gc.EnableComponents(finished);
 
+            if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                ReacComplexChartWindow.Tag = Sim;
+                ReacComplexChartWindow.MW = this;
+                
+                ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
+                if (crc == null)
+                {
+                    MessageBox.Show("Please select a reaction complex to process..");
+                    return;
+                }
+
+                ReacComplexChartWindow.DataContext = crc;
+                ReacComplexChartWindow.Activate();
+                ReacComplexChartWindow.Render();
+            }
+
             //Set the box and blob visibilities to how they were pre-run
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
@@ -2542,8 +2637,15 @@ namespace DaphneGui
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
         private void runSim()
-        {            
-            VTKDisplayDocWindow.Activate();
+        {
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            //else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            //{
+            //    ReacComplexChartWindow.Activate();
+            //}
 
             //MessageBox.Show("In runSim()");
 
@@ -2637,33 +2739,47 @@ namespace DaphneGui
                 }
                 else
                 {
-                    // Display message box
-                    MessageBoxResult result = saveDialog();
-
-                    // Process message box results
-                    switch (result)
+                    //skg
+                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                     {
-                        case MessageBoxResult.Yes:
-                            sop.Protocol.SerializeToFile();
-                            orig_content = sop.Protocol.SerializeToStringSkipDeco();
-                            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
-                            lockSaveStartSim(true);
-                            tempFileContent = false;
-                            break;
-                        case MessageBoxResult.No:
-                            if (saveScenarioUsingDialog() == true)
-                            {
+                        // Display message box
+                        MessageBoxResult result = saveDialog();
+
+                        // Process message box results
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                sop.Protocol.SerializeToFile();
+                                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
                                 lockSaveStartSim(true);
                                 tempFileContent = false;
-                            }
-                            break;
-                        case MessageBoxResult.Cancel:
-                            // Do nothing...
-                            break;
+                                break;
+                            case MessageBoxResult.No:
+                                if (saveScenarioUsingDialog() == true)
+                                {
+                                    // initiating a run starts always at repetition 1
+                                    repetition = 1;
+                                    lockSaveStartSim(true);
+                                    tempFileContent = false;
+                                }
+                                break;
+                            case MessageBoxResult.Cancel:
+                                // Do nothing...
+                                break;
+                        }
+                    }
+                    else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+                    {
+                        //sop.Protocol.SerializeToFile();
+                        //orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+                        // initiating a run starts always at repetition 1
+                        repetition = 1;
+                        lockSaveStartSim(true);
+                        tempFileContent = false;
                     }
                 }
 
@@ -2848,13 +2964,6 @@ namespace DaphneGui
                 prepareProtocol(ReadJson(""));
             }
 
-            ////skg testing
-            //Protocol.ScenarioType st = SOP.Protocol.GetScenarioType();
-
-            //if (true)
-            //{
-            //}
-
         }
 
         // This sets whether the Save command can be executed, which enables/disables the menu item
@@ -3007,16 +3116,22 @@ namespace DaphneGui
             ProtocolToolWindow.IsEnabled = true;
             saveScenario.IsEnabled = true;
             displayTitle();
-            MainWindow.ST_ReacComplexChartWindow.ClearChart();
-            if (ToolWinType == ToolWindowType.Tissue)
-            {
-                VTKDisplayDocWindow.Activate();
-            }
-            else if (ToolWinType == ToolWindowType.VatRC)
-            {
-                ReacComplexChartWindow.Activate();
-            }
 
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                if (ToolWinType == ToolWindowType.Tissue)
+                {
+                    VTKDisplayDocWindow.Activate();
+                }
+            	else if (ToolWinType == ToolWindowType.VatRC)
+            	{
+                    ReacComplexChartWindow.Activate();
+            	}
+            }
+            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                toolWin.Activate();
+            }            
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)

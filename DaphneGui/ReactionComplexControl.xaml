@@ -1,0 +1,132 @@
+﻿<UserControl x:Class="DaphneGui.ReactionComplexControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             mc:Ignorable="d" 
+             Tag="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem}"
+             x:Name="RCC"
+             >
+    
+    <!--The data context should be set to a ConfigCompartment-->
+    <!--REACTION COMPLEXES LIST-->
+    <StackPanel Orientation="Vertical" Margin="8">
+        <StackPanel>
+            <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
+            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="50"
+                            ItemsSource="{Binding reaction_complexes}"
+                            DisplayMemberPath="Name"
+                            SelectedIndex="0">
+            </ListBox>
+        </StackPanel>
+
+        <!--PUSH BUTTONS-->
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
+                <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
+                <TextBox x:Name="TextBoxRCName" Width="150" HorizontalAlignment="Left" Text="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.Name}" ></TextBox>
+                <Button x:Name="ButtonEditComplex" Width="50" Click="ButtonEditComplex_Click">Edit</Button>
+                <Button x:Name="ButtonCopyComplex" Width="50" Click="ButtonCopyComplex_Click">Copy</Button>
+                <Button x:Name="ButtonNewReactionComplex" Width="50" Click="ButtonNewReactionComplex_Click">New</Button>
+                <Button x:Name="ButtonRemoveComplex" Width="60" Click="ButtonRemoveComplex_Click">Remove</Button>
+            </StackPanel>
+        </StackPanel>
+
+        <!--REACTIONS-->
+        <StackPanel Margin="0,10" >
+            <TextBlock Text="Reactions" />
+            <ListView x:Name="ListViewReacComplexReactions"
+                    ItemsSource="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.reactions, Mode=TwoWay}"
+                    SelectedIndex="0" >
+                <ListView.View>
+                    <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="GridViewColumnHeader">
+                                <Setter Property="Height" Value="Auto"></Setter>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+
+                        <GridViewColumn Width="80" Header="Rate constant">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Width="300" Header="Reaction" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TotalReactionString}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
+        
+        <!--MOLECULES-->
+        <StackPanel Margin="0,10" DataContext="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem}" Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}" >
+            <TextBlock Text="Initial Molecular concentrations" Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}" />
+            <ListView x:Name="lvReactionComplexMolecules"
+                      ItemsSource="{Binding Path=molpops, Mode=TwoWay}" 
+                      SelectedIndex="0" 
+                      Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}"  >
+                <ListView.View>
+                    <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="GridViewColumnHeader">
+                                <Setter Property="Height" Value="Auto"></Setter>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+
+                        <GridViewColumn Width="200" Header="Molecule" >
+
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=molecule.Name}">
+                                              <TextBlock.Style>
+                                                <Style>
+                                                  <Setter Property="TextBlock.Foreground" Value="Black" />
+                                                </Style>
+                                              </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+
+                        </GridViewColumn>
+                        <GridViewColumn Width="100" Header="Concentration">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <uc:DoublesBox SliderEnabled="False"  Number="{Binding mp_distribution.concentration, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                    </GridView>
+                </ListView.View>
+
+            </ListView>
+        </StackPanel>
+    </StackPanel>
+    
+</UserControl>

@@ -3800,6 +3800,7 @@ namespace Daphne
 
     }
 
+    //public GetMolsInAllRCs
 
     //  -----------------------------------------------------------------------
     //  Differentiation Schemes
@@ -4428,6 +4429,33 @@ namespace Daphne
         }
 
         /// <summary>
+        /// Add a molecular population to a compartment, given a molecule.
+        /// Meant to be used for a new or cloned ConfigMolecule.
+        /// </summary>
+        /// <param name="mol"></param>
+        /// <param name="comp"></param>
+        /// <param name="isCell"></param>
+        public void AddMolPop(ConfigMolecule mol, Boolean isCell)
+        {
+            if (molecules_dict.ContainsKey(mol.entity_guid) == true)
+                return;
+
+            ConfigMolecularPopulation cmp;
+
+            if (isCell == true)
+            {
+                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            }
+            else
+            {
+                cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+            }
+            cmp.molecule = mol.Clone(null);
+            cmp.Name = mol.Name;
+            molpops.Add(cmp);
+        }
+
+        /// <summary>
         /// push a molecule into this compartment
         /// </summary>
         /// <param name="m">the molecule</param>
@@ -4746,8 +4774,7 @@ namespace Daphne
 
     public class ConfigReaction : ConfigEntity
     {
-        public ConfigReaction()
-            : base()
+        public ConfigReaction() : base()
         {
             rate_const = 0;
 
@@ -4756,8 +4783,7 @@ namespace Daphne
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
         }
 
-        public ConfigReaction(ConfigReaction reac)
-            : base()
+        public ConfigReaction(ConfigReaction reac) : base()
         {
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
@@ -4949,8 +4975,7 @@ namespace Daphne
         // True if the reaction involves bulk and boundary molecules. Default is false.
         public bool isBoundary;
 
-        public ConfigReactionTemplate()
-            : base()
+        public ConfigReactionTemplate() : base()
         {
             reactants_stoichiometric_const = new ObservableCollection<int>();
             products_stoichiometric_const = new ObservableCollection<int>();
@@ -4981,65 +5006,10 @@ namespace Daphne
         }
 
     }
-
-#if OLD_RC
-    public class ConfigReactionGuidRatePair : ConfigEntity
-    {
-        public ConfigReactionGuidRatePair() : base()
-        {
-        }
-
-        private double originalRate;
-        public double OriginalRate 
-        {
-            get
-            {
-                return originalRate;
-            }
-            set
-            {
-                originalRate = value;
-                OnPropertyChanged("OriginalRate");
-            }
-        }
-        private double reactionComplexRate;
-        public double ReactionComplexRate
-        {
-            get
-            {
-                return reactionComplexRate;
-            }
-            set
-            {
-                reactionComplexRate = value;
-                OnPropertyChanged("ReactionComplexRate");
-            }
-        }
-
-        public override string GenerateNewName(Level level, string ending)
-        {
-            throw new NotImplementedException();
-        }
-    }
-#endif
+    
     public class ConfigReactionComplex : ConfigEntity
     {
         public string Name { get; set; }
-#if OLD_RC
-        private ObservableCollection<string> _reactions_guid_ref;
-        public ObservableCollection<string> reactions_guid_ref 
-        {
-            get
-            {
-                return _reactions_guid_ref;
-            }
-            set
-            {
-                _reactions_guid_ref = value;
-                OnPropertyChanged("reactions_guid_ref");
-            }
-        }
-#endif
         private ObservableCollection<ConfigReaction> _reactions;
         public ObservableCollection<ConfigReaction> reactions
         {
@@ -5065,13 +5035,11 @@ namespace Daphne
         [JsonIgnore]
         public Dictionary<string, ConfigMolecule> molecules_dict;
 
-        public ConfigReactionComplex()
-            : this("NewRC")
+        public ConfigReactionComplex() : this("NewRC")
         {
         }
 
-        public ConfigReactionComplex(string name)
-            : base()
+        public ConfigReactionComplex(string name) : base()
         {
             Name = name;
             reactions = new ObservableCollection<ConfigReaction>();
@@ -5252,7 +5220,7 @@ namespace Daphne
                     if (configMolecule != null)
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-
+                        configMolPop.molecule = configMolecule.Clone(null);
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
 
@@ -5271,17 +5239,14 @@ namespace Daphne
             CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
             CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
             CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
-        }
-
-        
+        }        
     }
 
     public class ConfigCell : ConfigEntity
     {
         public string renderLabel { get; set; }        //label to color scheme
 
-        public ConfigCell()
-            : base()
+        public ConfigCell() : base()
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
@@ -6916,7 +6881,19 @@ namespace Daphne
 
     public class MolPopHomogeneousLevel : MolPopDistribution
     {
-        public double concentration { get; set; }
+        private double _concentration;
+        public double concentration
+        {
+            get
+            {
+                return _concentration;
+            }
+            set
+            {
+                _concentration = value;
+                OnPropertyChanged("concentration");
+            }
+        }
 
         public MolPopHomogeneousLevel()
         {
@@ -8212,7 +8189,7 @@ namespace Daphne
 
 
 
-
+    
     /// <summary>
     /// Base class for all EntityModel classes.
     /// It provides support for property change notifications 

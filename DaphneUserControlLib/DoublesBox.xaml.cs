@@ -112,31 +112,18 @@ namespace DaphneUserControlLib
 
             string sRounded = dRounded.ToString();
 
-            char[] charsToTrim1 = {'0', '-'};
+            char[] charsToTrim1 = { '0', '-' };
             sRounded = sRounded.Trim(charsToTrim1);
             char[] charsToTrim2 = { '.' };
             sRounded = sRounded.Trim(charsToTrim2);
 
             int nDigits = sRounded.Length;
 
-            //int nDigits = dRounded.ToString().Replace(Convert.ToString(cDecimal), "").Replace(Convert.ToString(m_cDASH), "").Length;
-
             // Add lagging zeros, if necessary:
             if (nDigits < nSignificants)
             {
                 int nToAppend = nSignificants - nDigits;
                 result.Append(m_strZeros.Substring(0, nToAppend));
-                ////if (nAfterDecimal != 0)
-                ////{
-                ////    if (result.ToString().IndexOf(cDecimal) == -1)
-                ////    {
-                ////        result.Append(cDecimal);
-                ////    }
-
-                ////    int i = (d == 0) ? 0 : Math.Min(0, nDigits - nSignificants);
-
-                ////    result.Append(m_strZeros.Substring(0, nAfterDecimal + i));
-                ////}
             }
 
             return result.ToString();
@@ -181,15 +168,6 @@ namespace DaphneUserControlLib
             set
             {
                 max = value;
-                //if (AutoRange)
-                //{
-                //    max = Number + Number / RangeFactor;
-                //}
-                //else
-                //{
-                //    max = AbsMaximum;
-                //}
-
                 OnPropertyChanged("Maximum");
             }
         }
@@ -203,15 +181,6 @@ namespace DaphneUserControlLib
             set
             {
                 min = value;
-                //if (AutoRange)
-                //{
-                //    min = Number - Number / RangeFactor;
-                //}
-                //else
-                //{
-                //    min = AbsMinimum;
-                //}
-                
                 OnPropertyChanged("Minimum");
             }
         }
@@ -257,76 +226,10 @@ namespace DaphneUserControlLib
             Maximum = max;
         }
 
-
-        private string ToFormatted(double number)
+        public string ToFormatted(double number)
         {
             return number.ConvertToSignificantDigits(SignificantDigits, SNLowerThreshold, SNUpperThreshold);
         }
-
-        ////private string ToFormatted(double number)
-        ////{
-        ////    string sTemp = Maths.Round('.', number, SignificantDigits);
-        ////    return sTemp;
-        ////}
-
-        
-
-        ////private string ToFormatted(double number)
-        ////{
-
-            
-        ////    string result = "";
-
-        ////    //Default format
-        ////    string newFormat = "{0:0.";
-        ////    for (int i = 0; i < DecimalPlaces; i++)
-        ////    {
-        ////        newFormat += "0"; //#
-        ////    }
-        ////    newFormat += "}";
-
-        ////    //If need scientific notation - positive exponent
-        ////    if (number >= SNUpperThreshold || number < 0 || (number >= 1 && Number < SNLowerThreshold))
-        ////    {
-        ////        if (DecimalPlaces == 0)
-        ////            DecimalPlaces++;
-
-        ////        newFormat = "{0:#.";
-        ////        for (int i = 0; i < DecimalPlaces; i++)
-        ////        {
-        ////            newFormat += "0"; //#
-        ////        }
-
-        ////        if (Number >= 1 && Number < 10)
-        ////        {
-        ////            newFormat += "}";
-        ////        }
-        ////        else
-        ////        {
-        ////            newFormat += "E+00}";
-        ////        }
-        ////    }
-        ////    //Need scientific notation - negative exponent
-        ////    else if (number <= SNLowerThreshold && number > 0 && number < 1)
-        ////    {
-        ////        if (DecimalPlaces == 0)
-        ////            DecimalPlaces++;
-
-        ////        newFormat = "{0:#.";
-        ////        for (int i = 0; i < DecimalPlaces; i++)
-        ////        {
-        ////            newFormat += "0";  //"#";
-        ////        }
-
-        ////        newFormat += "E-00}";
-        ////    }
-
-        ////    Format = newFormat;
-        ////    result = string.Format(Format, number);
-        ////    OnPropertyChanged("Format");
-
-        ////    return result;
-        ////}
 
         public double ToDisplayNumber()
         {
@@ -393,13 +296,16 @@ namespace DaphneUserControlLib
             }
             catch
             {
-                MessageBox.Show("Please enber a valid number.");
+                MessageBox.Show("Please enter a valid number.");
                 //throw new Exception("Invalid number entered");
                 return;
             }
 
-            Number = d;
-            SetMinMax();
+            if (Number != d)
+            {
+                Number = d;
+                SetMinMax();
+            }
         }
 
         private string GetNumericChars(string input)
@@ -434,21 +340,13 @@ namespace DaphneUserControlLib
             {
                 double currval = (double)GetValue(NumberProperty);
                 double newval = value;
-                //double reldiff = 0;
-                //bool changed = false;
 
-                //if (currval != 0)
-                //{
-                //    reldiff = Math.Abs((value - currval) / currval);
-                //}
-
-                //if (currval == 0 || reldiff > 0.01)
-                //{
-                //    //SetValue(NumberProperty, newval);
-                //    changed = true;
-                //}
-
-                SetValue(NumberProperty, newval);
+                if (currval != newval)
+                {
+                    //slFNumber.Value = newval;
+                    SetValue(NumberProperty, newval);
+                    //OnPropertyChanged("Number");
+                }
                 FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
                 {
@@ -459,7 +357,6 @@ namespace DaphneUserControlLib
                 {
                     OnPropertyChanged("Number");
                 }
-                ////}
             }
         }
         public static void NumberPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -748,7 +645,7 @@ namespace DaphneUserControlLib
                 SetValue(AbsMinimumProperty, value);
                 if (!AutoRange)
                 {
-                    Minimum = value; //SetMinMax();
+                    Minimum = value;
                 }
                 OnPropertyChanged("AbsMinimum");
             }
@@ -783,6 +680,8 @@ namespace DaphneUserControlLib
             uc.AbsMaximum = (double)(e.NewValue);
         }
 
+        
+
 
 
 #if USE_CAPTION
@@ -807,6 +706,26 @@ namespace DaphneUserControlLib
 #endif
 
 
+    }
+
+    public class NumberToFormattedNumberConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string s = "";
+            double d = (double) value;
+
+            DoublesBox db = new DoublesBox();
+            db.Number = d;
+
+            s = db.ToFormatted(d);
+            return s;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
     }
 }
 

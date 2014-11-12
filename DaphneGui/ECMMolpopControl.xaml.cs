@@ -253,7 +253,8 @@ namespace DaphneGui
             bool bOK = true;
             foreach (string molguid in cr.reactants_molecule_guid_ref)
             {
-                if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp) == false
+                //if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp) == false
+                if (MainWindow.ToolWin.Protocol.scenario.environment.comp.HasMolecule(molguid) == false
                         && MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true) == false )
                 {
                     return false;
@@ -262,7 +263,7 @@ namespace DaphneGui
 
             foreach (string molguid in cr.products_molecule_guid_ref)
             {
-                if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp) == false
+                if (MainWindow.ToolWin.Protocol.scenario.environment.comp.HasMolecule(molguid) == false
                             && MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true) == false)
                 {
                     return false;
@@ -271,7 +272,7 @@ namespace DaphneGui
 
             foreach (string molguid in cr.modifiers_molecule_guid_ref)
             {
-                if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp) == false
+                if (MainWindow.ToolWin.Protocol.scenario.environment.comp.HasMolecule(molguid) == false
                             && MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true) == false)
                 {
                     return false;

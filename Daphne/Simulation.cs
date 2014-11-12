@@ -1325,6 +1325,49 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// FOR VAT RC, INSTEAD OF RELOADING THE WHOLE SIMULATION, JUST RELOAD 
+        /// THE MOL CONCS PLUS THE REACTION RATES. THIS IS FOR THE CASE WHEN THE
+        /// USER DRAGS THE INITIAL CONCS ON GRAPH OR VIA SLIDER OR DRAGS THE RATES VIA SLIDER
+        /// </summary>
+        public void resetConcsAndRates(Protocol protocol)
+        {
+            reset();
+            Reporter.StartReporter(this);
+            ListTimes.Add(0);
+
+            scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
+            envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+            //Molecules
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            foreach (ConfigReactionComplex crc in envHandle.comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation cmp in crc.molpops)
+                {
+                    string molguid = cmp.molecule.entity_guid;
+                    if (comp.Populations.ContainsKey(molguid) == true)
+                    {
+                        double[] initArray = new double[1];
+                        double conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
+                        initArray[0] = conc;
+                        ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+                        sf.Initialize("const", initArray);
+                        comp.Populations[molguid].Conc *= 0;
+                        comp.Populations[molguid].Conc += sf;
+                        if (DictGraphConcs.ContainsKey(molguid) == true)
+                            DictGraphConcs[molguid].Add(conc);
+                    }
+                }
+            }
+
+            //Reactions
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+            reacs = protocol.GetReactions(protocol.scenario.environment.comp, false);
+            comp.BulkReactions.Clear();
+            AddCompartmentBulkReactions(comp, protocol.entity_repository, reacs);
+        }
+
         public override void Step(double dt)
         {
             double t = 0, localStep;

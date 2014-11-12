@@ -549,10 +549,6 @@
                                         <ContentPresenter MinHeight="100" Content="{Binding Wfh}" />
                                     </DockPanel>
                                 </docking:DocumentWindow>
-
-                                <!-- This is the window that contains the reaction complex graph-->
-                                <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
-                               
                                 <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ComponentsToolWindow}" />                                
@@ -564,11 +560,7 @@
                                     ConverterParameter=ReacComplexChartWindow}" />
                                 <local:RenderSkinWindow x:Name="renderSkinWindow" Visibility="Collapsed"
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
-                                
-                                <!-- "#FFE7F5DC" -->
-
                             </docking:TabbedMdiContainer>
-
                         </docking:TabbedMdiHost>
                     </docking:Workspace>
 

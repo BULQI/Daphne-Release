@@ -41,6 +41,7 @@
                 </StackPanel>
             </DataTemplate>
             
+
             <!-- cellPopDistributionTypeTemplate -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
