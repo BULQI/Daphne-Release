@@ -66,12 +66,6 @@ namespace DaphneGui
             throw new Exception("VatReactionComplex does not implement CellPopsHaveMolecule method.");
         }
 
-        //protected override void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        //{
-        //    throw new Exception("VatReactionComplex does not implement ecmAvailableReactionsListView_Filter method.");
-        //}
-
-
         public override void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
         {
             throw new Exception("VatReactionComplex does not implement RegionFocusToGUISection method.");
