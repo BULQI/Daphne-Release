@@ -285,12 +285,9 @@ namespace Workbench
             }
         }
 
-        ////public void UpdateGrids()
-        ////{
-        ////    dgInitConcs.ItemsSource = null;
-        ////    dgInitConcs.ItemsSource = RC.initConcs;
-        ////}
+        private void btnSaveReport_Click(object sender, RoutedEventArgs e)
+        {
 
-        
+        }
     }
 }

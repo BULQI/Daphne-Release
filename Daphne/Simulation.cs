@@ -1060,7 +1060,7 @@ namespace Daphne
     public class VatReactionComplex : SimulationBase
     {
         // variables used in graphing
-        public int MaxTime { get; set; }
+        public int MaxTime { get; set; }        
 
         private double dmaxtime;
         public double dMaxTime
@@ -1332,8 +1332,7 @@ namespace Daphne
         /// </summary>
         public void resetConcsAndRates(Protocol protocol)
         {
-            reset();
-            Reporter.StartReporter(this);
+            reset();            
             ListTimes.Add(0);
 
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
