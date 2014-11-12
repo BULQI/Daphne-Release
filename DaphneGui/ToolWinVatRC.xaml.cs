@@ -23,7 +23,7 @@ namespace DaphneGui
         public ToolWinVatRC()
         {
             TitleText = "Vat Reaction Complex";
-            ToroidalVisibility = Visibility.Hidden;
+            ToroidalVisibility = Visibility.Collapsed;
             SimRepetitionVisibility = Visibility.Hidden;
             // Shouldn't have to set this, since extents control isn't used here but...
             ZExtentVisibility = Visibility.Hidden;

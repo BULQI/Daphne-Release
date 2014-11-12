@@ -2015,12 +2015,15 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    ToolWin = new ToolWinTissue();
-                    ToolWin.MW = this;
+                    if (ToolWinType != ToolWindowType.Tissue)
+                    {
+                        ToolWin = new ToolWinTissue();
+                        ToolWinType = ToolWindowType.Tissue;
+                        ToolWin.MW = this;
+                    }
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
 
-                    ToolWinType = ToolWindowType.Tissue;
                     ToolWin.Tag = sop;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
