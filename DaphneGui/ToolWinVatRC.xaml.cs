@@ -78,6 +78,10 @@ namespace DaphneGui
         {
             return RCControl.GetSelectedReactionComplex();
         }
-        
+
+        protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            GetMolsInAllRCs();
+        }
     }
 }
