@@ -435,7 +435,7 @@ namespace Daphne
 
             string header = "Vat molecular concentrations by time";
 
-            vat_conc_file = createStreamWriter("vat_conc_report", "txt");
+            vat_conc_file = createStreamWriter("conc_report", "txt");
             vat_conc_file.WriteLine("Vat molecule concentrations report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
             vat_conc_file.WriteLine(header);
 
@@ -444,8 +444,9 @@ namespace Daphne
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
                 hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
-                vat_conc_file.Write("\t", kvp.Value.Molecule.Name);
+                vat_conc_file.Write("\t{0}", kvp.Value.Molecule.Name);
             }
+            vat_conc_file.WriteLine();
             
         }
 
@@ -455,13 +456,13 @@ namespace Daphne
             Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
             hSim.ListTimes.Add(hSim.AccumulatedTime);
-            vat_conc_file.WriteLine(hSim.AccumulatedTime);
+            //vat_conc_file.WriteLine(hSim.AccumulatedTime);
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
                 hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
-                vat_conc_file.Write("\t{0:G4}", (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
+                //vat_conc_file.Write("\t{0:G4}", (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
             }
-            vat_conc_file.WriteLine();
+            //vat_conc_file.WriteLine();
         }
 
         public override void AppendReporter()
@@ -469,10 +470,33 @@ namespace Daphne
             appendTimesAndConcs();
         }
 
+        private void WriteConcs()
+        {
+            double[] defaultLoc = { 0.0, 0.0, 0.0 };
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            //foreach (double d in hSim.ListTimes)
+            //{
+                vat_conc_file.WriteLine(hSim.AccumulatedTime);
+
+                foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+                {
+                    //vat_conc_file.Write("\t{0:G4}", (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
+                    string name = kvp.Value.Molecule.Name;
+                    double conc = kvp.Value.Conc.Value(defaultLoc);
+                    vat_conc_file.Write("\t{0}: {1:G4}", name, conc);
+                    //vat_conc_file.Write("\t{0}: {1:G4}", comp.Populations[kvp.Key].Molecule.Name, (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
+                }
+                vat_conc_file.WriteLine();
+            //}
+        }
+
         public override void CloseReporter()
         {
+
             if (vat_conc_file != null)
             {
+                WriteConcs();
                 vat_conc_file.Close();
                 vat_conc_file = null;
             }

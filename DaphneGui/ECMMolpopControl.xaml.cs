@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Collections.ObjectModel;
 
 using Daphne;
 using DaphneUserControlLib;
@@ -60,6 +61,47 @@ namespace DaphneGui
                 break;
             }
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
+
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+
+            // Show details if user adds a molpop
+            MolDetailsExpander.IsExpanded = true;
+        }
+
+        private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool needRefresh = false;
+
+            foreach (var item in lvAvailableReacs.SelectedItems)
+            {
+                ConfigReaction reac = (ConfigReaction)item;
+
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid) == false)
+                {
+                    MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
+                    needRefresh = true;
+                }
+            }
+
+            //Refresh the filter
+            if (needRefresh && lvAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+        }
+
+
+        private void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
+
+            if (crc != null)
+            {
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Contains(crc) == false)
+                {
+                    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crc.Clone(true));
+                    CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+                }
+            }
         }
 
         /// <summary>
@@ -106,10 +148,9 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.box_spec = box;
            
-            // gmk - fix after merging Axin's changes from main
-            //Color spec_color = ColorHelper.pickASolidColor();
-            //spec_color.A = 80;
-            //gg.gaussian_spec_color = spec_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            Color spec_color = ColorHelper.pickASolidColor();
+            spec_color.A = 80;
+            gg.gaussian_spec_color = spec_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
@@ -142,6 +183,109 @@ namespace DaphneGui
             {
                 ((VTKFullGraphicsController)MainWindow.GC).RemoveRegionWidget(mpg.gauss_spec.box_spec.box_guid);
             }
+        }
+
+        /// <summary>
+        /// Filter for bulk molecules. 
+        /// gmk - Rename? Should be usable by all workbenches.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void EcsMoleculesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule mol = e.Item as ConfigMolecule;
+            if (mol == null || mol.molecule_location != MoleculeLocation.Bulk)
+            {
+                e.Accepted = false;
+                return;
+            }
+            e.Accepted = true;
+            return;
+        }
+
+
+        /// <summary>
+        /// Filter (return true) for reaction that has necessary molecules in the environment comp and one or more cell membrane.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+
+            if (cr == null)
+            {
+                return;
+            }
+
+            e.Accepted = reactionIsAvailable(cr);
+        }
+
+        protected virtual void ecmAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
+            bool bOK = true;
+
+            if (crc == null)
+            {
+                return;
+            }
+
+            foreach (ConfigReaction cr in crc.reactions)
+            {
+                if (reactionIsAvailable(cr) == false)
+                {
+                    bOK = false;
+                }
+            }
+
+            //Finally, if the ecm already contains this reaction complex, exclude it from the available reactions list
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(crc.entity_guid) == true)
+            {
+                bOK = false;
+            }
+
+            e.Accepted = bOK;
+        }
+
+        private bool reactionIsAvailable(ConfigReaction cr)
+        {
+            bool bOK = true;
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                //if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp) == false
+                if (MainWindow.ToolWin.Protocol.scenario.environment.comp.HasMolecule(molguid) == false
+                        && MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true) == false )
+                {
+                    return false;
+                }
+            }
+
+            foreach (string molguid in cr.products_molecule_guid_ref)
+            {
+                if (MainWindow.ToolWin.Protocol.scenario.environment.comp.HasMolecule(molguid) == false
+                            && MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true) == false)
+                {
+                    return false;
+                }
+            }
+
+            foreach (string molguid in cr.modifiers_molecule_guid_ref)
+            {
+                if (MainWindow.ToolWin.Protocol.scenario.environment.comp.HasMolecule(molguid) == false
+                            && MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true) == false)
+                {
+                    return false;
+                }
+            }
+
+            //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
+            {
+                return false;
+            }
+
+            return bOK;
         }
 
         /// <summary>
@@ -214,7 +358,6 @@ namespace DaphneGui
                 }
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibMol.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibMol);
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
@@ -224,8 +367,6 @@ namespace DaphneGui
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
                 cb.SelectedItem = newLibMol;
-
-
             }
             //user picked an existing molecule
             else
@@ -247,13 +388,24 @@ namespace DaphneGui
                     molpop.Name = new_mol_name;
             }
 
-            ////update render informaiton
-            //(MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(molpop.renderLabel, false);
-            //molpop.renderLabel = molpop.molecule.entity_guid;
-            //(MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
+            if (lvAvailableReacs.ItemsSource != null)
+            {
+                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            }
+            if (lbAvailableReacCx.ItemsSource != null)
+            {
+                CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+            }
 
-            //if (lvAvailableReacs.ItemsSource != null)
-            //    CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+
+            //update render informaiton
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(molpop.renderLabel, false);
+            molpop.renderLabel = molpop.molecule.entity_guid;
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
+
+
         }
 
         /// <summary>
@@ -361,8 +513,22 @@ namespace DaphneGui
                 return;
             }
             MainWindow.GenericPush(molpop.molecule.Clone(null));
+
+            CollectionViewSource.GetDefaultView(ecm_molecule_combo_box.ItemsSource).Refresh();
         }
 
+        private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (lvEcsReactions.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
+        }
 
         /// <summary>
         /// Remove a molecular population from the ECS.
@@ -389,6 +555,14 @@ namespace DaphneGui
                     }
                 }
 
+                foreach (ConfigReactionComplex crc in MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.ToList())
+                {
+                    if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
+                    {
+                        MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(crc);
+                    }
+                }
+
                 //Delete the gaussian box if any
                 if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
@@ -400,9 +574,6 @@ namespace DaphneGui
 
                 //Delete the molecular population
                 MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
-
-                // gmk - fix this when reactions are adde to the ECS tab
-                //CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -412,11 +583,40 @@ namespace DaphneGui
 
             if (lbEcsMolPops.Items.Count == 0)
                 lbEcsMolPops.SelectedIndex = -1;
+
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+        }
+
+        private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (lvEcsReactions.SelectedIndex < 0)
+                return;
+
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(reac);
+
+            }
+        }
+
+        private void RemoveEcmReacCompButton_Click(object sender, RoutedEventArgs e)
+        {
+            int nIndex = ReactionComplexListBox.SelectedIndex;
+
+            if (nIndex >= 0)
+            {
+                ConfigReactionComplex rc = (ConfigReactionComplex)ReactionComplexListBox.SelectedItem;
+                MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
+                CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+            }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            cvs.Filter += ToolWinBase.FilterFactory.BulkMolecules_Filter;
         }
 
 

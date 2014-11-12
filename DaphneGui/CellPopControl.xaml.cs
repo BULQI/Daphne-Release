@@ -77,7 +77,13 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
-            //cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            //if about rendering...
+            //for now, use name as label
+            cp.renderLabel = cp.Cell.entity_guid;
+
+            //add rendering options to scenario
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
+
             scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
@@ -187,6 +193,7 @@ namespace DaphneGui
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
+                cellPop.cellPopDist.Initialize();
             }
             else if (cpdt == CellPopDistributionType.Gaussian)
             {
@@ -203,14 +210,17 @@ namespace DaphneGui
 
                 // Create new GaussianSpecification
                 GaussianSpecification gg = new GaussianSpecification();
-                //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
-                
+                var render_cell = MainWindow.SOP.GetRenderCell(cellPop.renderLabel);
+                Color cellpop_color = render_cell.base_color.EntityColor;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellpop_color.R, cellpop_color.G, cellpop_color.B);
+
                 // Associate box with gg.box and add both to appropriate VTK lists
                 AddGaussianSpecification(gg, box);
                 
                 // Create a new 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).Initialize(gg);
+                ((CellPopGaussian)cellPop.cellPopDist).InitializeGaussSpec(gg);
+                cellPop.cellPopDist.Initialize();
 
                 // Connect the VTK callback
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
@@ -222,13 +232,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                 {
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+                    cellPop.cellPopDist.Initialize();
                 }
                 else
                 {
-                    CellPopulation tempCellPop = new CellPopulation();
-                    tempCellPop.cellPopDist = cellPop.cellPopDist;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-                    cellPop.CellStates = tempCellPop.CellStates;
                 }
                 // Remove box and Gaussian if applicable.
                 if (current_dist.DistType == CellPopDistributionType.Gaussian)
@@ -239,7 +247,6 @@ namespace DaphneGui
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
             }
-            //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
 
             // needed by the slider?
             ToolBarTray tr = new ToolBarTray();
@@ -279,7 +286,6 @@ namespace DaphneGui
                 newLibCell.CellName = newLibCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibCell.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibCell);
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {

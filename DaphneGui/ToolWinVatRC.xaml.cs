@@ -24,7 +24,7 @@ namespace DaphneGui
         public ToolWinVatRC()
         {
             TitleText = "Vat Reaction Complex";
-            ToroidalVisibility = Visibility.Hidden;
+            ToroidalVisibility = Visibility.Collapsed;
             SimRepetitionVisibility = Visibility.Hidden;
             // Shouldn't have to set this, since extents control isn't used here but...
             ZExtentVisibility = Visibility.Hidden;
@@ -64,15 +64,15 @@ namespace DaphneGui
             throw new Exception("VatReactionComplex does not implement CellHasMolecule method.");
         }
 
-        protected override bool CellPopsHaveMolecule(string molguid, bool isMembrane)
+        public override bool CellPopsHaveMolecule(string molguid, bool isMembrane)
         {
             throw new Exception("VatReactionComplex does not implement CellPopsHaveMolecule method.");
         }
 
-        protected override void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        {
-            throw new Exception("VatReactionComplex does not implement ecmAvailableReactionsListView_Filter method.");
-        }
+        //protected override void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        //{
+        //    throw new Exception("VatReactionComplex does not implement ecmAvailableReactionsListView_Filter method.");
+        //}
 
 
         public override void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)

@@ -861,6 +861,7 @@ namespace DaphneGui
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
+                cellPop.cellPopDist.Initialize();
             }
             else if (cpdt == CellPopDistributionType.Gaussian)
             {
@@ -885,8 +886,8 @@ namespace DaphneGui
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                //((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
-                ((CellPopGaussian)cellPop.cellPopDist).Initialize(gg);
+                ((CellPopGaussian)cellPop.cellPopDist).InitializeGaussSpec(gg);
+                cellPop.cellPopDist.Initialize();
 
                 // Connect the VTK callback
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
@@ -898,13 +899,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                 {
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+                    cellPop.cellPopDist.Initialize();
                 }
                 else
                 {
-                    CellPopulation tempCellPop = new CellPopulation();
-                    tempCellPop.cellPopDist = cellPop.cellPopDist;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-                    cellPop.CellStates = tempCellPop.CellStates;
                 }
                 // Remove box and Gaussian if applicable.
                 if (current_dist.DistType == CellPopDistributionType.Gaussian)
@@ -1080,8 +1079,8 @@ namespace DaphneGui
                 ////}
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibCell.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibCell);
+
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
                     B.repositoryPush(newLibCell, status); // push into B, inserts as new
@@ -1581,8 +1580,8 @@ namespace DaphneGui
                 }
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibMol.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibMol);
+
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
                     B.repositoryPush(newLibMol, status); // push into B, inserts as new

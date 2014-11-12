@@ -17,16 +17,20 @@
         
         <Grid.Resources>
 
+            <local:CellPopulationToSolidBrushConv x:Key="CellPopulationToSolidBrushConv" />
+            
             <CollectionViewSource x:Key="cellTypesListView" Source="{Binding Path=Protocol.entity_repository.cells}"/>
+            
+            <CollectionViewSource x:Key="ggBoxSpecsListView" Source="{Binding Path=scenario.box_specifications}"/>
             
             <!-- cellPopListItemTemplate -->
             <DataTemplate x:Key="cellPopListItemTemplate">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="10" Height="10"
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center"
-                                Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
-                                Stroke="Black" StrokeThickness="0.5"/>
+                                               Margin="5,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Fill="{Binding Converter={StaticResource CellPopulationToSolidBrushConv}}"
+                                               Stroke="Black" StrokeThickness="0.5"/>
 
                     <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0"/>
 
@@ -36,6 +40,7 @@
 
                 </StackPanel>
             </DataTemplate>
+            
 
             <!-- cellPopDistributionTypeTemplate -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
@@ -71,7 +76,181 @@
                                     Content="{Binding Path=cellPopDist}"   />
                 </Grid>
             </DataTemplate>
+
+            <!-- Style for eyeball visibility checkboxes in list views -->
+            <Style x:Key="EyeballCheckboxStyle" TargetType="CheckBox">
+                <Setter Property="SnapsToDevicePixels" Value="true"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type CheckBox}">
+                            <Grid Width="13" Height="13">
+                                <Image x:Name="_image" Source="Images/cartoonEyeClosed.png" Opacity="0.6"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="_image" Property="Source" Value="Images/cartoonEyeOpen.png"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="_image" Property="Opacity" Value="0.2" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Gaussian Box Specification : gaussBoxSpecDetailsTemplate  - cannot go in Dictionary1 -->
+            <DataTemplate x:Key="gaussBoxSpecDetailsTemplate">
+                <Grid Margin="0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30" />
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="74" />
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="74" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+                        <Grid  VerticalAlignment="Center">
+                            <Rectangle Fill="White"
+                                       Stroke="Black"
+                                       StrokeThickness="0.5"
+                                       Width="15"
+                                       Height="15"
+                                       />
+                            <CheckBox x:Name="box_widget_on_checkbox"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                        Style="{StaticResource EyeballCheckboxStyle}"
+                                        IsChecked="{Binding Path=box_spec.box_visibility}"                                      
+                                        />
+                        </Grid>
+                        <Grid VerticalAlignment="Center">
+                            <Rectangle Fill="LightPink"
+                                   Stroke="Black"
+                                   StrokeThickness="0.5"
+                                   Width="15"
+                                   Height="15"
+                                   />
+                            <!--Click="gaussian_region_actor_checkbox_clicked"-->
+                            <CheckBox x:Name="gauss_blob_on_checkbox"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                    Style="{StaticResource EyeballCheckboxStyle}"
+                                    IsChecked="{Binding Path=gaussian_region_visibility}"                        
+                                      CommandParameter="{Binding}"
+                                    />
+                        </Grid>
+                    </StackPanel>
+                    <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
+                    <TextBlock Text="std. dev. (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
+                    <TextBlock Text="X" Grid.Column="0" Grid.Row="2" Margin="2,0" TextAlignment="Right"/>
+                    <uc:DoublesBox x:Name="dbl_x_trans"
+                                   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"     
+                                   Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                    <uc:DoublesBox x:Name="dbl_x_scale"
+                                   Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                    <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
+                    <uc:DoublesBox x:Name="dbl_y_trans"
+                                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                    <uc:DoublesBox x:Name="dbl_y_scale"
+                                   Grid.Column="3" Grid.Row="3"   Grid.ColumnSpan="2" 
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                    <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
+                    <uc:DoublesBox x:Name="dbl_z_trans"
+                                   Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="2"  
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                    <uc:DoublesBox x:Name="dbl_z_scale"
+                                   Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                </Grid>
+            </DataTemplate>
             
+            <!-- cellpop distribution type: CellPopGaussian -->
+            <DataTemplate DataType="{x:Type daph:CellPopGaussian}">
+                <StackPanel Orientation="Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                    </Grid>
+                    <!-- ListView as level of indirection for getting to the correct BoxSpec -->
+                    <ListView x:Name="cellPopGaussianBoxSpecsListView"
+                                ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
+                                DisplayMemberPath="box_guid"
+                                SelectedValue="{Binding Path=gauss_spec, Mode=OneWay}"
+                                SelectedValuePath="box_spec"
+                                Visibility="Collapsed"
+                                />
+                    <!--Content="{Binding ElementName=cellPopGaussianBoxSpecsListView, Path=SelectedItem}"-->
+                    <ContentControl Name="GaussianBoxSpecDetails"
+                                    Content="{Binding Path=gauss_spec}"  
+                                    HorizontalAlignment="Center"
+                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
+                                    Margin="0,2"/>
+                </StackPanel>
+            </DataTemplate>
 
             <!-- cellPopDetailsTemplate: Context CellPopulation? -->
             <DataTemplate x:Key="cellPopDetailsTemplate">
@@ -152,7 +331,7 @@
                         </StackPanel>
                     </Grid>
                     <Grid>
-                        <Expander ExpandDirection="Down" Padding="6" IsExpanded="True" Margin="0,-10,0,0"  Canvas.ZIndex="1"  
+                        <Expander ExpandDirection="Down" Padding="6" IsExpanded="False" Margin="0,-10,0,0"  Canvas.ZIndex="1"  
                                 Header="Cell Placement Method"
                                 x:Name="CPMExpander"
                                 >
@@ -197,6 +376,7 @@
                                                 </Button.ToolTip>
                                             </Button>
 
+                                            
                                         </StackPanel>
                                         <StackPanel Orientation="Vertical" Margin="16,0">
                                             <Grid>
@@ -208,6 +388,13 @@
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Column="0" Grid.Row="0">
+                                                    <ContentControl Name="cellPopDistrib"
+                                                        Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                        ContentTemplate="{StaticResource cellPopDistributionDetailsTemplate}" 
+                                                        Margin="6,2"/>
+                                                </StackPanel>
 
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                                     <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Actual Cell Locations</TextBlock>
@@ -264,12 +451,33 @@
                 </StackPanel>
             </DataTemplate>
 
- 
+            <!-- Color field template -->
+            <!-- CellPopsListBox -->
+            <DataTemplate x:Key="colorItemTemplate">
+                <StackPanel Orientation="Horizontal">
+
+                    <Rectangle Width="10" Height="10" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="7">
+                                        <Setter Property="Fill" Value="{Binding ElementName=CellPopsListBox, Path=SelectedItem.cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+
+                    </Rectangle>
+                    <TextBlock Width="40" Text="{Binding}" Margin="5,0,0,0"/>
+                </StackPanel>
+            </DataTemplate>
 
         </Grid.Resources>
-
-        
-        <Expander ExpandDirection="Down" Padding="5"
+     
+        <StackPanel>
+            
+            <Expander ExpandDirection="Down" Padding="5"
                     IsExpanded="True"
                     Header="Cell Populations"
                     x:Name="CellPopsExpander"
@@ -280,7 +488,8 @@
                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                     >
 
-            <StackPanel>
+                <StackPanel>
+                <!-- CELL POPULATIONS -->
                 <ListBox x:Name="CellPopsListBox"  
                         ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
                         ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
@@ -293,8 +502,9 @@
                     <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
                 </StackPanel>
                 
-                <Expander ExpandDirection="Down" Padding="6"
-                                    IsExpanded="True"
+                    <!-- Cell populations details -->
+                    <Expander ExpandDirection="Down" Padding="6"
+                                    IsExpanded="False"
                                     Header="Cell Population Details"
                                     x:Name="CellPopsDetailsExpander"
                                     Margin="0,-15,0,0" 
@@ -312,18 +522,20 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander  Padding="0"
+                    <!-- Cell Properties -->
+                    <Expander  Padding="0"
                                 ExpandDirection="Down"
-                                IsExpanded="True"
+                                IsExpanded="False"
                                 Header="Cell Properties"                                              
                                 x:Name="CellPropertiesExpander"
                                 Margin="6, 0,0,0" 
                                 >
 
-                        <local:DaphneStackPanel x:Name="CellPropertiesPanel" >
+                        <local:DaphneStackPanel x:Name="CellPropertiesPanel">
                         
                         <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
-                            <local:CellPropertiesControl Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                            <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
+                                            Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
                                             DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                         </StackPanel>
 
@@ -332,15 +544,142 @@
                         </StackPanel>
 
                         <StackPanel Margin="10,0">
-                            <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
+                            <local:CellDetailsControl x:Name="ucCellPopCellDetails" 
+                                                      Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                                                      DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                         </StackPanel>
                     </local:DaphneStackPanel>
 
                 </Expander>
+             
+                </StackPanel>
+            </Expander>
 
-            </StackPanel>
-        </Expander>
-        
+            <!-- CELL DEATH PARAMETERS -->
+            <Expander
+                            Padding="5" 
+                            ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Cell Death Parameters"                                              
+                                x:Name="CellDeathParamsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                <StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="2"  
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    TextAlignment="Left"
+                                    Width="Auto"
+                                    />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="time constant" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="2"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+                        <editors:DoubleEditBox x:Name="deathConstant_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="E2"
+                                                StepValue="0.1"
+                                                Width="100" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                        <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="order parameter" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="3"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+
+                        <editors:DoubleEditBox x:Name="deathOrder_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="F0"
+                                                StepValue="0.1"
+                                                Width="100" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                        <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+            </Expander>
+
+            <!-- Cell Interaction Parameters -->
+            <Expander
+                    Padding="5" 
+                    ExpandDirection="Down"
+                    IsExpanded="False"
+                    Header="Cell Interaction Parameters"                                              
+                    x:Name="CellParamsExpander"
+                    Margin="0,5,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                <StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="penetration resistance" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="2"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+                        <editors:DoubleEditBox x:Name="phi1_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="F2"
+                                                StepValue="100"
+                                                Width="50" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                        <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="phi2" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="3"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+
+                        <editors:DoubleEditBox x:Name="phi2_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="N2"
+                                                StepValue="0.1"
+                                                Width="50" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                        <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+            </Expander>
+
+        </StackPanel>
 
     </Grid>
 </UserControl>

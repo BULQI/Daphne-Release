@@ -170,7 +170,7 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="View Stores"                   Name="pushMenu">
+                <MenuItem Header="Catalogs"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
                     <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
                     <MenuItem Header="Reactions..."              Name="pushReac"        Click="pushReac_Click" />

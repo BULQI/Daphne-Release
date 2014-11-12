@@ -297,14 +297,14 @@ namespace DaphneGui
             //}
 
             ////This code re-generates the scenarios - DO NOT DELETE
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            try
+            {
+                CreateAndSerializeDaphneProtocols();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -433,7 +433,6 @@ namespace DaphneGui
             autoZoomFitMenu.IsChecked = Properties.Settings.Default.autoZoomFit;
             openLastScenarioMenu.IsChecked = Properties.Settings.Default.lastOpenScenario != "";
             skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataBaseWrites;
-            SystemOfPersistence.changesCounter = Properties.Settings.Default.changesCounter;
             // TEMP_SUMMARY
             writeCellSummariesMenu.IsChecked = Properties.Settings.Default.writeCellsummaries;
 
@@ -463,8 +462,8 @@ namespace DaphneGui
             }
             else
             {
-                //file = "daphne_driver_locomotion_scenario.json";
-                file = "daphne_vatRC_ligand_receptor_scenario.json";
+                file = "daphne_driver_locomotion_scenario.json";
+                //file = "daphne_vatRC_ligand_receptor_scenario.json";
             }
 
             int repeat = 0;
@@ -1798,6 +1797,8 @@ namespace DaphneGui
             ReacComplexChartWindow.Activate();
             ReacComplexChartWindow.Render();
 
+            sim.Reporter.CloseReporter();
+
             if (simThread != null)
             {
                 simThread.Resume();
@@ -2090,12 +2091,15 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    ToolWin = new ToolWinTissue();
-                    ToolWin.MW = this;
+                    if (ToolWinType != ToolWindowType.Tissue)
+                    {
+                        ToolWin = new ToolWinTissue();
+                        ToolWinType = ToolWindowType.Tissue;
+                        ToolWin.MW = this;
+                    }
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
 
-                    ToolWinType = ToolWindowType.Tissue;
                     ToolWin.Tag = sop;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
@@ -2105,20 +2109,23 @@ namespace DaphneGui
                     ProtocolToolWindow = ((ToolWinTissue)ToolWin);
                 }
 
-                    ToolWin = new ToolWinTissue();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
-
-                if (ProtocolToolWindowContainer.Items.Count > 0)
-                    ProtocolToolWindowContainer.Items.RemoveAt(0);
-
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
-
                 // only create during construction or when the type changes
-                if(sim == null || sim is TissueSimulation == false)
+                if (sim == null || sim is TissueSimulation == false)
                 {
+                    //ProtocolToolWin = new ToolWinTissue();ds
+                    //ProtocolToolWin.MW = this;
+                    //ProtocolToolWin.Protocol = SOP.Protocol;
+                    //ProtocolToolWin.Title = ProtocolToolWin.TitleText;
+
+                    //ToolWinType = ToolWindowType.Tissue;
+                    //ProtocolToolWin.Tag = sop;
+
+                    //if (ProtocolToolWindowContainer.Items.Count > 0)
+                    //    ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                    //ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    //ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
+
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
@@ -2138,8 +2145,6 @@ namespace DaphneGui
                 // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
                 // when the user pushes the Apply button. 
                 // There is probably redundancy here, but I'm not sure how to restructure it.
-
-                //tmcContainer
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
@@ -3027,9 +3032,6 @@ namespace DaphneGui
             {
                 Properties.Settings.Default.lastOpenScenario = extractFileName();
             }
-
-            // remember the changes counter
-            Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
 
             // save the preferences
             Properties.Settings.Default.Save();

@@ -35,10 +35,6 @@ namespace Daphne
         /// User level
         /// </summary>
         public Level UserStore { get; set; }
-        /// <summary>
-        /// edit / change counter, used for pushing
-        /// </summary>
-        public static ulong changesCounter;
 
 
         public ObservableCollection<RenderSkin> SkinList { get; set; }
@@ -262,7 +258,7 @@ namespace Daphne
         /// <summary>
         /// enum for push status
         /// </summary>
-        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
+        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_EXISTING_ITEM };
 
         /// <summary>
         /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
@@ -280,11 +276,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.molecules_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigGene)
             {
@@ -294,11 +287,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.genes_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigTransitionDriver)
             {
@@ -308,11 +298,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.transition_drivers_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigDiffScheme)
             {
@@ -322,11 +309,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.diff_schemes_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigReaction)
             {
@@ -336,11 +320,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.reactions_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigReactionTemplate)
             {
@@ -350,11 +331,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.reaction_templates_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigCell)
             {
@@ -364,11 +342,8 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.cells_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
             else if (e is ConfigReactionComplex)
             {
@@ -378,19 +353,12 @@ namespace Daphne
                     return PushStatus.PUSH_CREATE_ITEM;
                 }
 
-                // newer
-                if (e.change_stamp > entity_repository.reaction_complexes_dict[e.entity_guid].change_stamp)
-                {
-                    return PushStatus.PUSH_NEWER_ITEM;
-                }
+                // existing
+                return PushStatus.PUSH_EXISTING_ITEM;
             }
-            // invalid type
-            else
-            {
-                return PushStatus.PUSH_INVALID;
-            }
-            // must be older
-            return PushStatus.PUSH_OLDER_ITEM;
+
+            // must be invalid type
+            return PushStatus.PUSH_INVALID;
         }
 
         /// <summary>
@@ -545,7 +513,7 @@ namespace Daphne
                 else
                 {
                     // list update
-                    for (int i = 0; i < entity_repository.reactions.Count; i++)
+                    for (int i = 0; i < entity_repository.reaction_templates.Count; i++)
                     {
                         if (entity_repository.reaction_templates[i].entity_guid == e.entity_guid)
                         {
@@ -1005,7 +973,7 @@ namespace Daphne
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
                 PushStatus s2 =  pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID)
                 {
                     ConfigMolecule newmol = molpop.molecule.Clone(null);
                     repositoryPush(newmol, s2);
@@ -1016,7 +984,7 @@ namespace Daphne
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
                 PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID)
                 {
                     ConfigMolecule newmol = molpop.molecule.Clone(null);
                     repositoryPush(newmol, s2);
@@ -1027,7 +995,7 @@ namespace Daphne
             foreach (ConfigGene gene in cell.genes)
             {
                 PushStatus s2 = pushStatus(gene);
-                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID)
                 {
                     ConfigGene newgene = gene.Clone(null);
                     repositoryPush(newgene, s2);
@@ -1053,11 +1021,10 @@ namespace Daphne
             SchemePusher(cell.div_scheme, sourceLevel, s);
 
             //Now push the cell itself
-            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
+            if (s != PushStatus.PUSH_INVALID)
             {
                 repositoryPush(cell, s);
             }
-            
         }
 
         private void ReactionPusher(ConfigReaction reac, Level sourceLevel, PushStatus s)
@@ -1097,7 +1064,7 @@ namespace Daphne
 
             //Now push the reaction itself
             PushStatus s2 = pushStatus(reac);
-            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            if (s2 != PushStatus.PUSH_INVALID)
             {
                 ConfigReaction newreac = reac.Clone(true);
                 repositoryPush(newreac, s2);
@@ -1143,7 +1110,7 @@ namespace Daphne
             if (entity != null)
             {
                 PushStatus s2 = this.pushStatus(entity);
-                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID)
                 {
                     if (entity is ConfigGene)
                     {
@@ -1182,7 +1149,7 @@ namespace Daphne
             foreach (ConfigMolecularPopulation molpop in rc.molpops)
             {
                 PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID)
                 {
                     ConfigMolecule newmol = molpop.molecule.Clone(null);
                     repositoryPush(newmol, s2);
@@ -1190,7 +1157,7 @@ namespace Daphne
             }
 
             //Push the reaction complex itself
-            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
+            if (s != PushStatus.PUSH_INVALID)
             {
                 repositoryPush(rc, s);
             }
@@ -1208,7 +1175,7 @@ namespace Daphne
                 if (gene != null)
                 {
                     PushStatus s2 = pushStatus(gene);
-                    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                    if (s2 != PushStatus.PUSH_INVALID)
                     {
                         ConfigGene newgene = gene.Clone(null);
                         repositoryPush(newgene, s2);
@@ -1218,7 +1185,7 @@ namespace Daphne
 
             //Now push the scheme itself
             PushStatus s3 = pushStatus(scheme);
-            if (s3 != PushStatus.PUSH_INVALID && s3 != PushStatus.PUSH_OLDER_ITEM)
+            if (s3 != PushStatus.PUSH_INVALID)
             {
                 ConfigDiffScheme newscheme = scheme.Clone(true);
                 repositoryPush(newscheme, s3);
@@ -1229,7 +1196,7 @@ namespace Daphne
         private void ReactionTemplatePusher(ConfigReactionTemplate crt)
         {
             PushStatus s2 = pushStatus(crt);
-            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            if (s2 != PushStatus.PUSH_INVALID)
             {
                 ConfigReactionTemplate newcrt = crt.Clone(true);
                 repositoryPush(newcrt, s2);
@@ -2041,18 +2008,17 @@ namespace Daphne
         /// the base must push into the environment as all scenarios have one
         /// </summary>
         /// <param name="e">the entity to push</param>
-        /// <param name="forced">true for update regardless of change stamp</param>
-        public virtual void entityPush(ConfigEntity e, bool forced)
+        public virtual void entityPush(ConfigEntity e)
         {
             if (e is ConfigMolecule)
             {
                 // molecules exist in compartments
                 // env
-                environment.comp.pushMolecule(e as ConfigMolecule, forced);
+                environment.comp.pushMolecule(e as ConfigMolecule);
 
                 foreach (ConfigReactionComplex rc in environment.comp.reaction_complexes)
                 {
-                    rc.pushMolecule(e as ConfigMolecule, forced);
+                    rc.pushMolecule(e as ConfigMolecule);
                 }
             }
             else if (e is ConfigTransitionDriver)
@@ -2065,12 +2031,12 @@ namespace Daphne
             {
                 // reactions exist in compartments
                 // env
-                environment.comp.pushReaction(e as ConfigReaction, forced);
+                environment.comp.pushReaction(e as ConfigReaction);
 
                 // and in reaction complexes
                 foreach (ConfigReactionComplex rc in environment.comp.reaction_complexes)
                 {
-                    rc.pushReaction(e as ConfigReaction, forced);
+                    rc.pushReaction(e as ConfigReaction);
                 }
             }
             else if (e is ConfigCell)
@@ -2080,7 +2046,7 @@ namespace Daphne
             {
                 // reaction complexes exist in compartments
                 // env
-                environment.comp.pushReactionComplex(e as ConfigReactionComplex, forced);
+                environment.comp.pushReactionComplex(e as ConfigReactionComplex);
             }
         }
 
@@ -2311,11 +2277,10 @@ namespace Daphne
         /// special case, push into the entity level; updates all occurrences of e
         /// </summary>
         /// <param name="e">the entity to push</param>
-        /// <param name="forced">true for update regardless of change stamp</param>
-        public override void entityPush(ConfigEntity e, bool forced)
+        public override void entityPush(ConfigEntity e)
         {
             // call base
-            base.entityPush(e, forced);
+            base.entityPush(e);
 
             if (e is ConfigMolecule)
             {
@@ -2323,17 +2288,17 @@ namespace Daphne
                 // cells
                 foreach (CellPopulation cp in cellpopulations)
                 {
-                    cp.Cell.cytosol.pushMolecule(e as ConfigMolecule, forced);
-                    cp.Cell.membrane.pushMolecule(e as ConfigMolecule, forced);
+                    cp.Cell.cytosol.pushMolecule(e as ConfigMolecule);
+                    cp.Cell.membrane.pushMolecule(e as ConfigMolecule);
 
                     // molecules exist in reaction complexes and need to be updated there too
                     foreach (ConfigReactionComplex rc in cp.Cell.cytosol.reaction_complexes)
                     {
-                        rc.pushMolecule(e as ConfigMolecule, forced);
+                        rc.pushMolecule(e as ConfigMolecule);
                     }
                     foreach (ConfigReactionComplex rc in cp.Cell.membrane.reaction_complexes)
                     {
-                        rc.pushMolecule(e as ConfigMolecule, forced);
+                        rc.pushMolecule(e as ConfigMolecule);
                     }
                 }
 
@@ -2345,10 +2310,7 @@ namespace Daphne
                     // death
                     if (cp.Cell.death_driver.entity_guid == e.entity_guid)
                     {
-                        if (forced == true || cp.Cell.death_driver.change_stamp < e.change_stamp)
-                        {
-                            cp.Cell.death_driver = e as ConfigTransitionDriver;
-                        }
+                        cp.Cell.death_driver = e as ConfigTransitionDriver;
                     }
                     // div
 
@@ -2368,10 +2330,7 @@ namespace Daphne
                 {
                     if (cp.Cell.diff_scheme.entity_guid == e.entity_guid)
                     {
-                        if (forced == true || cp.Cell.diff_scheme.change_stamp < e.change_stamp)
-                        {
-                            cp.Cell.diff_scheme = e as ConfigDiffScheme;
-                        }
+                        cp.Cell.diff_scheme = e as ConfigDiffScheme;
                     }
                 }
             }
@@ -2381,16 +2340,16 @@ namespace Daphne
                 // cells
                 foreach (CellPopulation cp in cellpopulations)
                 {
-                    cp.Cell.cytosol.pushReaction(e as ConfigReaction, forced);
-                    cp.Cell.membrane.pushReaction(e as ConfigReaction, forced);
+                    cp.Cell.cytosol.pushReaction(e as ConfigReaction);
+                    cp.Cell.membrane.pushReaction(e as ConfigReaction);
                     // reactions exist in reaction complexes and need to be updated there too
                     foreach (ConfigReactionComplex rc in cp.Cell.cytosol.reaction_complexes)
                     {
-                        rc.pushReaction(e as ConfigReaction, forced);
+                        rc.pushReaction(e as ConfigReaction);
                     }
                     foreach (ConfigReactionComplex rc in cp.Cell.membrane.reaction_complexes)
                     {
-                        rc.pushReaction(e as ConfigReaction, forced);
+                        rc.pushReaction(e as ConfigReaction);
                     }
                 }
 
@@ -2401,10 +2360,7 @@ namespace Daphne
                 {
                     if (cp.Cell.entity_guid == e.entity_guid)
                     {
-                        if (forced == true || cp.Cell.change_stamp < e.change_stamp)
-                        {
-                            cp.Cell = e as ConfigCell;
-                        }
+                        cp.Cell = e as ConfigCell;
                     }
                 }
             }
@@ -2414,8 +2370,8 @@ namespace Daphne
                 // cells
                 foreach (CellPopulation cp in cellpopulations)
                 {
-                    cp.Cell.cytosol.pushReactionComplex(e as ConfigReactionComplex, forced);
-                    cp.Cell.membrane.pushReactionComplex(e as ConfigReactionComplex, forced);
+                    cp.Cell.cytosol.pushReactionComplex(e as ConfigReactionComplex);
+                    cp.Cell.membrane.pushReactionComplex(e as ConfigReactionComplex);
                 }
             }
         }
@@ -3643,15 +3599,9 @@ namespace Daphne
             // initialize time_stamp
         }
 
-        public void incrementChangeStamp()
-        {
-            change_stamp = SystemOfPersistence.changesCounter++;
-        }
-
         public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
-        public ulong change_stamp { get; set; }
     }
 
     /// <summary>
@@ -3679,10 +3629,6 @@ namespace Daphne
             }
         }
 
-        //public double MolecularWeight { get; set; }
-        //public double EffectiveRadius { get; set; }
-        //public double DiffusionCoefficient { get; set; }
-
         private double molWeight;
         public double MolecularWeight
         {
@@ -3695,7 +3641,6 @@ namespace Daphne
                 if (molWeight != value)
                 {
                     molWeight = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("MolecularWeight");
                 }
             }
@@ -3712,7 +3657,6 @@ namespace Daphne
                 if (effRadius != value)
                 {
                     effRadius = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("EffectiveRadius");
                 }
             }
@@ -3729,7 +3673,6 @@ namespace Daphne
                 if (diffCoeff != value)
                 {
                     diffCoeff = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("DiffusionCoefficient");
                 }
             }
@@ -3882,7 +3825,6 @@ namespace Daphne
                 if (copyNumber != value)
                 {
                     copyNumber = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("CopyNumber");
                 }
             }
@@ -3900,7 +3842,6 @@ namespace Daphne
                 if (activationLevel != value)
                 {
                     activationLevel = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("ActivationLevel");
                 }
             }
@@ -4402,15 +4343,11 @@ namespace Daphne
         /// push a molecule into this molpop
         /// </summary>
         /// <param name="m">the molecule</param>
-        /// <param name="forced">true for forced push regardless of change stamp</param>
-        public void pushMolecule(ConfigMolecule m, bool forced)
+        public void pushMolecule(ConfigMolecule m)
         {
             if (molecule.entity_guid == m.entity_guid)
             {
-                if (forced == true || molecule.change_stamp < m.change_stamp)
-                {
-                    molecule = m;
-                }
+                molecule = m;
             }
         }
     }
@@ -4492,7 +4429,7 @@ namespace Daphne
         }
 
         /// <summary>
-        /// Add a molecular population to a compartement, given a molecule.
+        /// Add a molecular population to a compartment, given a molecule.
         /// Meant to be used for a new or cloned ConfigMolecule.
         /// </summary>
         /// <param name="mol"></param>
@@ -4522,23 +4459,19 @@ namespace Daphne
         /// push a molecule into this compartment
         /// </summary>
         /// <param name="m">the molecule</param>
-        /// <param name="forced">true for forced push regardless of change stamp</param>
-        public void pushMolecule(ConfigMolecule m, bool forced)
+        public void pushMolecule(ConfigMolecule m)
         {
             if (molecules_dict.ContainsKey(m.entity_guid) == true)
             {
-                if (forced == true || molecules_dict[m.entity_guid].change_stamp < m.change_stamp)
-                {
-                    molecules_dict[m.entity_guid] = m;
-                }
+                molecules_dict[m.entity_guid] = m;
             }
             foreach (ConfigMolecularPopulation mp in molpops)
             {
-                mp.pushMolecule(m, forced);
+                mp.pushMolecule(m);
                 // should always be in the dictionary also, but check for safety
                 if (molpops_dict.ContainsKey(mp.molpop_guid) == true)
                 {
-                    molpops_dict[mp.molpop_guid].pushMolecule(m, forced);
+                    molpops_dict[mp.molpop_guid].pushMolecule(m);
                 }
             }
         }
@@ -4547,21 +4480,17 @@ namespace Daphne
         /// push a reaction into this compartment
         /// </summary>
         /// <param name="r">the reaction</param>
-        /// <param name="forced">true for forced push regardless of change stamp</param>
-        public void pushReaction(ConfigReaction r, bool forced)
+        public void pushReaction(ConfigReaction r)
         {
             for (int i = 0; i < Reactions.Count; i++)
             {
                 if (Reactions[i].entity_guid == r.entity_guid)
                 {
-                    if (forced == true || Reactions[i].change_stamp < r.change_stamp)
+                    Reactions[i] = r;
+                    // should always be in the dictionary also, but check for safety
+                    if (reactions_dict.ContainsKey(r.entity_guid) == true)
                     {
-                        Reactions[i] = r;
-                        // should always be in the dictionary also, but check for safety
-                        if (reactions_dict.ContainsKey(r.entity_guid) == true)
-                        {
-                            reactions_dict[r.entity_guid] = r;
-                        }
+                        reactions_dict[r.entity_guid] = r;
                     }
                 }
             }
@@ -4571,21 +4500,17 @@ namespace Daphne
         /// push a reaction complex into this compartment
         /// </summary>
         /// <param name="rc">the reaction complex</param>
-        /// <param name="forced">true for forced push regardless of change stamp</param>
-        public void pushReactionComplex(ConfigReactionComplex rc, bool forced)
+        public void pushReactionComplex(ConfigReactionComplex rc)
         {
             for (int i = 0; i < reaction_complexes.Count; i++)
             {
                 if (reaction_complexes[i].entity_guid == rc.entity_guid)
                 {
-                    if (forced == true || reaction_complexes[i].change_stamp < rc.change_stamp)
+                    reaction_complexes[i] = rc;
+                    // should always be in the dictionary also, but check for safety
+                    if (reaction_complexes_dict.ContainsKey(rc.entity_guid) == true)
                     {
-                        reaction_complexes[i] = rc;
-                        // should always be in the dictionary also, but check for safety
-                        if (reaction_complexes_dict.ContainsKey(rc.entity_guid) == true)
-                        {
-                            reaction_complexes_dict[rc.entity_guid] = rc;
-                        }
+                        reaction_complexes_dict[rc.entity_guid] = rc;
                     }
                 }
             }
@@ -5026,7 +4951,6 @@ namespace Daphne
             set
             {
                 _rate_const = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("rate_const");
             }
         }
@@ -5096,7 +5020,6 @@ namespace Daphne
             set
             {
                 _reactions = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("reactions");
             }
         }
@@ -5135,7 +5058,6 @@ namespace Daphne
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            bool changed = false;
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
@@ -5144,8 +5066,6 @@ namespace Daphne
                     if (reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         reactions_dict.Add(cr.entity_guid, cr);
-                        changed = true;
-                        
                     }
                 }
             }
@@ -5158,21 +5078,13 @@ namespace Daphne
                     if (reactions_dict.ContainsKey(cr.entity_guid) == true)
                     {
                         reactions_dict.Remove(cr.entity_guid);
-                        changed = true;
                     }
                 }
             }
-
-            if (changed == true)
-            {
-                this.incrementChangeStamp();
-            }
-
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            bool changed = false;
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
@@ -5182,7 +5094,6 @@ namespace Daphne
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == false)
                     {
                         molecules_dict.Add(cm.molecule.entity_guid, cm.molecule);
-                        changed = true;
                     }
                 }
             }
@@ -5195,14 +5106,8 @@ namespace Daphne
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == true)
                     {
                         molecules_dict.Remove(cm.molecule.entity_guid);
-                        changed = true;
                     }
                 }
-            }
-
-            if (changed == true)
-            {
-                this.incrementChangeStamp();
             }
         }
 
@@ -5210,21 +5115,17 @@ namespace Daphne
         /// push a reaction into this reaction complex
         /// </summary>
         /// <param name="r">the reaction</param>
-        /// <param name="forced">true for forced push regardless of change stamp</param>
-        public void pushReaction(ConfigReaction r, bool forced)
+        public void pushReaction(ConfigReaction r)
         {
             for (int i = 0; i < reactions.Count; i++)
             {
                 if (reactions[i].entity_guid == r.entity_guid)
                 {
-                    if (forced == true || reactions[i].change_stamp < r.change_stamp)
+                    reactions[i] = r;
+                    // should always be in the dictionary also, but check for safety
+                    if (reactions_dict.ContainsKey(r.entity_guid) == true)
                     {
-                        reactions[i] = r;
-                        // should always be in the dictionary also, but check for safety
-                        if (reactions_dict.ContainsKey(r.entity_guid) == true)
-                        {
-                            reactions_dict[r.entity_guid] = r;
-                        }
+                        reactions_dict[r.entity_guid] = r;
                     }
                 }
             }
@@ -5234,19 +5135,15 @@ namespace Daphne
         /// push a molecule into this reaction comlex
         /// </summary>
         /// <param name="m">the molecule</param>
-        /// <param name="forced">true for forced push regardless of change stamp</param>
-        public void pushMolecule(ConfigMolecule m, bool forced)
+        public void pushMolecule(ConfigMolecule m)
         {
             if (molecules_dict.ContainsKey(m.entity_guid) == true)
             {
-                if (forced == true || molecules_dict[m.entity_guid].change_stamp < m.change_stamp)
-                {
-                    molecules_dict[m.entity_guid] = m;
-                }
+                molecules_dict[m.entity_guid] = m;
             }
             foreach (ConfigMolecularPopulation mp in molpops)
             {
-                mp.pushMolecule(m, forced);
+                mp.pushMolecule(m);
                 // if we ever add a dictionary for molpops, enable this
                 /*
                 // should always be in the dictionary also, but check for safety
@@ -5395,7 +5292,6 @@ namespace Daphne
             set
             {
                 cellName = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("CellName");
             }
         }
@@ -5410,7 +5306,6 @@ namespace Daphne
             set
             {
                 cellRadius = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("CellRadius");
             }
         }
@@ -5445,7 +5340,6 @@ namespace Daphne
             set
             {
                 transductionConstant = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("TransductionConstant");
             }
         }
@@ -5460,7 +5354,6 @@ namespace Daphne
             set
             {
                 dragCoefficient = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("DragCoefficient");
             }
         }
@@ -5478,7 +5371,6 @@ namespace Daphne
             set
             {
                 sigma = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("Sigma");
             }
         }
@@ -5486,7 +5378,6 @@ namespace Daphne
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
 
-        //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
@@ -5500,7 +5391,6 @@ namespace Daphne
             set
             {
                 _diff_scheme = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("diff_scheme");
             }
         }
@@ -5519,27 +5409,9 @@ namespace Daphne
             set
             {
                 _death_driver = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("death_driver");
             }
         }
-
-
-        //private ConfigTransitionDriver _div_driver;
-        //public ConfigTransitionDriver div_driver 
-        //{
-        //    get
-        //    {
-        //        return _div_driver;
-        //    }
-
-        //    set
-        //    {
-        //        _div_driver = value;
-        //        OnPropertyChanged("div_driver");
-        //    }
-        //}
-
 
         private ConfigDiffScheme _div_scheme;
         public ConfigDiffScheme div_scheme
@@ -5552,7 +5424,6 @@ namespace Daphne
             set
             {
                 _div_scheme = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("div_scheme");
             }
         }
@@ -5797,6 +5668,22 @@ namespace Daphne
             }
             return true;
         }
+
+        /// <summary>
+        /// Initialize the cell states
+        /// </summary>
+        /// <param name="extents"></param>
+        /// <param name="box"></param>
+        public void Initialize()
+        {
+            if (cellPop != null)
+            {
+                cellPop.CellStates.Clear();
+                AddByDistr(cellPop.number);
+            }
+
+        }
+
         /// <summary>
         /// Return true if the position of the new cell doesn't overlap with existing cell positions.
         /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
@@ -5931,12 +5818,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
-            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
-
-            if (_cellPop != null)
-            {
-                AddByDistr(cellPop.number);
-            }
         }
 
         public override double[] nextPosition()
@@ -5966,16 +5847,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Uniform;
-            if (_cellPop != null)
-            {
-                AddByDistr(_cellPop.number);
-            }
-            //else
-            //{
-            //    // json deserialization puts us here
-            //    AddByDistr(1);
-            //}
-            //OnPropertyChanged("CellStates");
         }
 
         public override double[] nextPosition()
@@ -6024,8 +5895,7 @@ namespace Daphne
         /// </summary>
         /// <param name="extents"></param>
         /// <param name="box"></param>
-        //public void Initialize(double[] extents, BoxSpecification box)
-        public void Initialize(GaussianSpecification _gaussSpec)
+        public void InitializeGaussSpec(GaussianSpecification _gaussSpec)
         {
             gauss_spec = _gaussSpec;
 
@@ -6042,14 +5912,6 @@ namespace Daphne
             {
                 sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4 };
             }
-
-            if (cellPop != null)
-            {
-                cellPop.CellStates.Clear();
-                AddByDistr(cellPop.number);
-                //OnPropertyChanged("CellStates");
-            }
-
         }
 
         public override void Resize(double[] newExtents)
