@@ -357,6 +357,7 @@ namespace Daphne
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+            cellPop.cellPopDist.Initialize();
             cellPop.CellStates[0] = new CellState(envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2);
             ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
             //rendering
@@ -529,6 +530,7 @@ namespace Daphne
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+            cellPop.cellPopDist.Initialize();
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
             cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * configCell.CellRadius - envHandle.gridstep / 2,
                                                   envHandle.extent_y / 2 - envHandle.gridstep / 2,
