@@ -32,10 +32,7 @@ namespace DaphneGui
         // This would be set to Hidden if we implement a 2D environment
         // and want to reuse the EnvironmentExtents control.
         // This field is not relevant to VatRC.
-        public Visibility ZExtentVisibility { get; set; }
-
-        
-        
+        public Visibility ZExtentVisibility { get; set; }     
 
         public ToolWinBase()
         {
@@ -158,90 +155,6 @@ namespace DaphneGui
         {
         }
 
-        //// gmk - should this be removed?
-        ///// <summary>
-        ///// Filter (return true) for reaction that has necessary molecules in the environment comp and one or more cell membrane.
-        ///// </summary>
-        ///// <param name="sender"></param>
-        ///// <param name="e"></param>
-        //protected virtual void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        //{
-        //    ConfigReaction cr = e.Item as ConfigReaction;
-        //    bool bOK = false;
-
-        //    foreach (string molguid in cr.reactants_molecule_guid_ref)
-        //    {
-        //        //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-        //        //if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-        //        if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
-        //            bOK = true;
-        //        }
-        //        else
-        //        {
-        //            bOK = false;
-        //            break;
-        //        }
-        //    }
-        //    if (bOK)
-        //    {
-        //        foreach (string molguid in cr.products_molecule_guid_ref)
-        //        {
-        //            //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-        //            if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-        //            if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
-        //                bOK = true;
-        //            }
-        //            else
-        //            {
-        //                bOK = false;
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    if (bOK)
-        //    {
-        //        foreach (string molguid in cr.modifiers_molecule_guid_ref)
-        //        {
-        //            //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-        //            if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-        //            if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
-        //                bOK = true;
-        //            }
-        //            else
-        //            {
-        //                bOK = false;
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-        //    if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
-        //    {
-        //        bOK = false;
-        //    }
-
-        //    e.Accepted = bOK;
-        //}
-
-        /// <summary>
-        /// Filter for bulk molecules. 
-        /// gmk - Rename? Should be usable by all workbenches.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected void EcsMoleculesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigMolecule mol = e.Item as ConfigMolecule;
-            if (mol == null || mol.molecule_location != MoleculeLocation.Bulk)
-            {
-                e.Accepted = false;
-                return;
-            }
-            e.Accepted = true;
-            return;
-        }
-
         /// <summary> 
         /// Gather filters that may be reused throughout the GUI.
         /// </summary>
@@ -358,50 +271,15 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Moved from SimConfigToolWindow.xaml.cs but not evaluated.
+        /// Initialization of the reports tab.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         protected virtual void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
-            // gmk - uncomment and fix
-            //lbRptCellPops.SelectedIndex = 0;
-            //ICollectionView icv = CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource);
-            //if (icv != null)
-            //{
-            //    icv.Refresh();
-            //}
-
-            GetMolsInAllRCs();
         }
-
-        /// <summary>
-        /// Moved from SimConfigToolWindow.xaml.cs but not evaluated.
-        /// </summary>
-        protected virtual void Save_Selected_Tab()
-        {
-            // Called by MainWindow.resetButton_Click
-            //Code to preserve focus to the element that was in focus before "Apply" button clicked.
-
-            //TabItem selectedTab = ConfigTabControl.SelectedItem as TabItem;
-
-            //int nCellPopSelIndex = -1;
-            //if (selectedTab == ProtocolToolWindow.tabCellPop)
-            //{
-            //    nCellPopSelIndex = ProtocolToolWindow.CellPopsListBox.SelectedIndex;
-            //}
-
-            //int nMolPopSelIndex = -1;
-            //if (selectedTab == ProtocolToolWindow.tabECM)
-            //{
-            //    nMolPopSelIndex = ProtocolToolWindow.lbEcsMolPops.SelectedIndex;
-            //}
-        }
-
-
 
     }
-
 
 
     public class ToolwinComponentVisibilityConverter : IValueConverter
