@@ -562,8 +562,11 @@
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />
-                                <local:RenderSkinWindow x:Name="renderSkinWindow" Visibility="Collapsed"
-                                       HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
+                                <local:RenderSkinWindow x:Name="renderSkinWindow"
+                                       HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
+                                       Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                        ConverterParameter=renderSkinWindow}"                 
+                                                        />
                                 
                                 <!-- "#FFE7F5DC" -->
 

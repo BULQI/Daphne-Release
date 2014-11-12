@@ -654,6 +654,7 @@ namespace DaphneGui
 
         public void UpdateGraphics()
         {
+            if (gc == null) return;
             vtkDataBasket.UpdateData();
             gc.DrawFrame(sim.GetProgressPercent());
         }
@@ -1077,10 +1078,16 @@ namespace DaphneGui
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
                     optionsMenu.IsEnabled = false;
-                    gc.DisableComponents();
+                    if (gc != null)
+                    {
+                        gc.DisableComponents();
+                    }
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
-                    ProtocolToolWindow.Close();
+                    if (ToolWinType == ToolWindowType.Tissue)
+                    {
+                        ProtocolToolWindow.Close();
+                    }
                     ImportSBML.IsEnabled = false;
                     // prevent all fit/analysis-related things
                     hideFit();
@@ -1149,9 +1156,13 @@ namespace DaphneGui
                 sim.reset();
                 // reset cell tracks and free memory
                 //////////gc.CleanupTracks();
-                gc.ResetGraphics();
+
                 fitCellOpacitySlider.Value = 1.0;
-                UpdateGraphics();
+                if (gc != null)
+                {
+                    gc.ResetGraphics();
+                    UpdateGraphics();
+                }
 
                 // prevent all fit/analysis-related things
                 hideFit();
@@ -2104,8 +2115,13 @@ namespace DaphneGui
                     sim.Reporter.AppPath = orig_path + @"\";
                     // no graphics for the VatRC
                     vtkDataBasket = new VTKNullDataBasket();
-                    gc = new VTKNullGraphicsController();
+                    //gc is irrelevant for VatRC, keep a derived class
+                    //will cause unnecessary binding errors.
+                    //gc = new VTKNullGraphicsController();
+                    gc = null;
                 }
+                renderSkinWindow.Visibility = System.Windows.Visibility.Collapsed;
+                MdiTabContainer.
             }
             else
             {
@@ -2153,7 +2169,10 @@ namespace DaphneGui
             }
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
-            gc.CreatePipelines();
+            if (gc != null)
+            {
+                gc.CreatePipelines();
+            }
 
 
             // clear the vcr cache
@@ -2418,7 +2437,7 @@ namespace DaphneGui
             saveButton.IsEnabled = true;
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
-
+            if (gc != null)
             gc.EnableComponents(finished);
 
             //Set the box and blob visibilities to how they were pre-run
@@ -2542,8 +2561,11 @@ namespace DaphneGui
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
         private void runSim()
-        {            
-            VTKDisplayDocWindow.Activate();
+        {
+            if (ToolWinType == ToolWindowType.Tissue)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
 
             //MessageBox.Show("In runSim()");
 
@@ -2903,6 +2925,7 @@ namespace DaphneGui
             }
 
             // vtk cleanup
+            if (gc != null)
             gc.Cleanup();
 
             // close the dev help
