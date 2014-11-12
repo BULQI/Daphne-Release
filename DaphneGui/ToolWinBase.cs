@@ -51,29 +51,30 @@ namespace DaphneGui
         {
         }
 
-        /// <summary>
-        /// Add a molecular population to a compartement.
-        /// Intended as a utility to be used by the derived classes.
-        /// </summary>
-        /// <param name="mol"></param>
-        /// <param name="comp"></param>
-        /// <param name="isCell"></param>
-        protected void AddMolPopToCmpartment(ConfigMolecule mol, ConfigCompartment comp, Boolean isCell)
-        {
-            ConfigMolecularPopulation cmp;
+        //Moved to ConfigCompartment
+        ///// <summary>
+        ///// Add a molecular population to a compartement.
+        ///// Intended as a utility to be used by the derived classes.
+        ///// </summary>
+        ///// <param name="mol"></param>
+        ///// <param name="comp"></param>
+        ///// <param name="isCell"></param>
+        //protected void AddMolPopToCmpartment(ConfigMolecule mol, ConfigCompartment comp, Boolean isCell)
+        //{
+        //    ConfigMolecularPopulation cmp;
 
-            if (isCell == true)
-            {
-                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            }
-            else
-            {
-                cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-            }
-            cmp.molecule = mol.Clone(null);
-            cmp.Name = mol.Name;
-            comp.molpops.Add(cmp);
-        }
+        //    if (isCell == true)
+        //    {
+        //        cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+        //    }
+        //    else
+        //    {
+        //        cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+        //    }
+        //    cmp.molecule = mol.Clone(null);
+        //    cmp.Name = mol.Name;
+        //    comp.molpops.Add(cmp);
+        //}
 
         /// <summary>
         /// Functionality to preserve focus when the Apply button is clicked.
@@ -95,12 +96,12 @@ namespace DaphneGui
         {
             if (isMembrane == true)
             {
-                if (CompartmentHasMolecule(molguid, cell.membrane))
+                if (cell.membrane.HasMolecule(molguid))
                 {
                     return true;
                 }
             }
-            else if (CompartmentHasMolecule(molguid, cell.cytosol))
+            else if (cell.cytosol.HasMolecule(molguid))
             {
                 return true;
             }
@@ -129,6 +130,7 @@ namespace DaphneGui
             return false;
         }
 
+        // skg - remove this - belongs in ConfigCompartment
         /// <summary>
         /// Check to see if a compartment contains a molecular population of type molecule.
         /// gmk - Modified and reorganized from previous code. Needs evaluation.
@@ -136,15 +138,15 @@ namespace DaphneGui
         /// <param name="molguid"></param>
         /// <param name="compartment"></param>
         /// <returns></returns>
-        public bool CompartmentHasMolecule(string molguid, ConfigCompartment compartment)
-        {
-            foreach (ConfigMolecularPopulation molpop in compartment.molpops)
-            {
-                if (molpop.molecule.entity_guid == molguid)
-                    return true;
-            }
-            return false;
-        }
+        //protected bool CompartmentHasMolecule(string molguid, ConfigCompartment compartment)
+        //{
+        //    foreach (ConfigMolecularPopulation molpop in compartment.molpops)
+        //    {
+        //        if (molpop.molecule.entity_guid == molguid)
+        //            return true;
+        //    }
+        //    return false;
+        //}
 
 
         /// <summary>
@@ -170,8 +172,8 @@ namespace DaphneGui
         //    foreach (string molguid in cr.reactants_molecule_guid_ref)
         //    {
         //        //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-        //        if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-        //        {
+        //        //if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+        //        if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
         //            bOK = true;
         //        }
         //        else
@@ -186,7 +188,7 @@ namespace DaphneGui
         //        {
         //            //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
         //            if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-        //            {
+        //            if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
         //                bOK = true;
         //            }
         //            else
@@ -202,7 +204,7 @@ namespace DaphneGui
         //        {
         //            //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
         //            if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-        //            {
+        //            if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
         //                bOK = true;
         //            }
         //            else
@@ -332,6 +334,29 @@ namespace DaphneGui
         {
         }
 
+        public ObservableCollection<ConfigMolecularPopulation> allmols { get; set; }
+        public void GetMolsInAllRCs()
+        {
+            if (Protocol == null)
+            {
+                MessageBox.Show("In GetMolsInAllRCs, Protocol is null.");
+                return;
+            }
+            allmols = new ObservableCollection<ConfigMolecularPopulation>();
+            ConfigCompartment comp = Protocol.scenario.environment.comp;
+            allmols.Clear();
+            foreach (ConfigReactionComplex crc in comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                {
+                    if (allmols.Contains(molpop) == false)
+                    {
+                        allmols.Add(molpop);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Moved from SimConfigToolWindow.xaml.cs but not evaluated.
         /// </summary>
@@ -346,6 +371,8 @@ namespace DaphneGui
             //{
             //    icv.Refresh();
             //}
+
+            GetMolsInAllRCs();
         }
 
         /// <summary>

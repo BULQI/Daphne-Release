@@ -221,12 +221,17 @@
     <Compile Include="Pushing\PushEntity.xaml.cs">
       <DependentUpon>PushEntity.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ReactioComplexListControl.xaml.cs">
-      <DependentUpon>ReactioComplexListControl.xaml</DependentUpon>
+    <Compile Include="ReactionComplexChart.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ReactionComplexControl.xaml.cs">
+      <DependentUpon>ReactionComplexControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
-    <Compile Include="Rendering\BindingList.cs" />
+    <Compile Include="ReportVatRC.xaml.cs">
+      <DependentUpon>ReportVatRC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RenderSkinEditor.xaml.cs">
       <DependentUpon>RenderSkinEditor.xaml</DependentUpon>
     </Compile>
@@ -253,9 +258,6 @@
     </Compile>
     <Compile Include="Workbench\AddReactionControl.xaml.cs">
       <DependentUpon>AddReactionControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Workbench\ChartManager.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Workbench\ChartViewToolWindow.xaml.cs">
       <DependentUpon>ChartViewToolWindow.xaml</DependentUpon>
@@ -340,11 +342,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ReactioComplexListControl.xaml">
+    <Page Include="ReactionComplexControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RenderSkinEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReportVatRC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

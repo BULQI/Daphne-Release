@@ -28,7 +28,6 @@ namespace DaphneGui
             ToroidalVisibility = Visibility.Visible;
             SimRepetitionVisibility = Visibility.Visible;
             ZExtentVisibility = Visibility.Visible;
-
             InitializeComponent();
             DataContext = this;
         }

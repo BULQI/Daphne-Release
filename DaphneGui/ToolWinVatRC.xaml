@@ -15,19 +15,12 @@
 
     <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
-        <TabControl.Resources>
-    
-        </TabControl.Resources>
-            
-           
-
         <!-- SIM SETUP -->
         <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <local:SimSetupControl DataContext="{Binding}"/>
             </ScrollViewer>
         </TabItem>
-
 
         <!-- REACTION COMPLEXES -->
         <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes">
@@ -36,8 +29,7 @@
                     <Expander Padding="5" ExpandDirection="Down" IsExpanded="True"
                           Header="Reaction Complexes" x:Name="ReacComplexExpander"
                           Margin="0,4,0,0" Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
-                          Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
-                   >
+                          Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <Expander.Resources>
                             <Style  TargetType="{x:Type ListBoxItem}">
@@ -53,8 +45,12 @@
                                 </Style.Triggers>
                             </Style>
                         </Expander.Resources>
-                        <local:ReactioComplexListControl DataContext="{Binding}"/>
-
+                        <StackPanel>
+                            <StackPanel>
+                                <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Visible"
+                                          DataContext="{Binding Path=MW.SOP.Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </StackPanel>
                     </Expander>
 
 
@@ -62,14 +58,13 @@
             </ScrollViewer>
         </TabItem>
 
-
         <!-- REPORTS -->
         <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-
+                <!--<StackPanel>-->
+                    <local:ReportVatRC x:Name="vatControl" DataContext="{Binding}"></local:ReportVatRC>
                 <!-- Report Settings -->
-                <Expander ExpandDirection="Down" Padding="5"
+                <!--<Expander ExpandDirection="Down" Padding="5"
                     IsExpanded="True"
                     Header="Report Settings"
                     Margin="0,4,0,0" 
@@ -83,10 +78,10 @@
                             ContentTemplate="{StaticResource reportSettingsTemplate}" 
                             Margin="6"
                     />
-                </Expander>
+                </Expander>-->
 
                 <!--Molecules in Vat -->
-                <Expander ExpandDirection="Down" Padding="5"
+                <!--<Expander ExpandDirection="Down" Padding="5"
                         IsExpanded="True"
                         Header="Molecules in Vat"
                         Margin="0,0,0,0" 
@@ -142,11 +137,9 @@
                                 </DataGridTemplateColumn>                                                               
                             </DataGrid.Columns>
                         </DataGrid>
+                    </Expander>-->
 
-
-                    </Expander>
-
-                </StackPanel>
+                <!--</StackPanel>-->
             </ScrollViewer>
         </TabItem>
         

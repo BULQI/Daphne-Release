@@ -59,7 +59,7 @@
                                         RenderTransform="1.0,0,0,0.5,0,7"
                                         Minimum="0.001" 
                                         Maximum="28800" 
-                                        Value="{Binding Path=Protocol.scenario.time_config.duration, UpdateSourceTrigger=PropertyChanged}" 
+                                        Value="{Binding Path=MW.SOP.Protocol.scenario.time_config.duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                         IsSnapToTickEnabled="True" 
                                         TickFrequency="10" 
                                         KeyboardNavigation.IsTabStop="False"

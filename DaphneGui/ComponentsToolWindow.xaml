@@ -429,7 +429,7 @@
                             <Button x:Name="btnEditComplex" Width="50" Click="btnEditReactionComplex_Click">Edit</Button>
                             <Button x:Name="btnCopyComplex" Width="50" Click="btnCopyReactionComplex_Click">Copy</Button>
                             <Button x:Name="btnAddComplex" Width="50" Click="btnAddReactionComplex_Click">New</Button>
-                            <Button x:Name="btnRemoveComplex" Width="60" Click="btnRemoveReactionComplex_Click">Remove</Button>
+                            <Button x:Name="btnRemoveComplex" Width="60" Click="btnRemoveReactionComplex_Click">Remove</Button> 
                         </StackPanel>
 
                         <!-- List of Reactions in selected Reaction Complex -->

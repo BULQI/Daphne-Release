@@ -32,6 +32,8 @@
     <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
 
+    
+
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
     <!-- molpopDistributionTypeTemplate -->
@@ -52,8 +54,10 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <ContentControl Name="solfac_dist_cc" Grid.ColumnSpan="2" Grid.Row="0"  Margin="0,6" 
-                                    BorderBrush="DarkGray" BorderThickness="1" Content="{Binding Path=mp_distribution}"  />
+            <ContentControl Name="molpop_dist_cc" 
+                            Grid.ColumnSpan="2" Grid.Row="0" Margin="0,6" 
+                            BorderBrush="DarkGray" BorderThickness="1" 
+                    Content="{Binding Path=mp_distribution}"  />
         </Grid>
     </DataTemplate>   
     
@@ -99,13 +103,21 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
-    
-    <!-- ConfigDiffScheme properties template : DataContext must be ConfigDiffScheme -->
-    <DataTemplate x:Key="diffSchemeTemplate">
+
+    <!-- ConfigMolecule properties template with all non-editable fields : DataContext must be ConfigMolecule -->
+    <DataTemplate x:Key="readonlyMoleculeTemplate">
         <StackPanel Orientation="Vertical">
-            <Label Height="24" Width="200" HorizontalAlignment="Left">Differentiation Scheme:</Label>
             <StackPanel Orientation="Horizontal">
-                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
+                <TextBlock Width="150" Text="Name"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Width="150" Text="{Binding Path=Name}" Height="24" IsEnabled="False"></TextBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -170,15 +182,20 @@
         </StackPanel>
     </DataTemplate>
 
-    <!-- ConfigMolecule properties template with all non-editable fields : DataContext must be ConfigMolecule -->
-    <DataTemplate x:Key="readonlyMoleculeTemplate">
+    <!-- ConfigDiffScheme properties template : DataContext must be ConfigDiffScheme -->
+    <DataTemplate x:Key="diffSchemeTemplate">
         <StackPanel Orientation="Vertical">
+            <Label Height="24" Width="200" HorizontalAlignment="Left">Differentiation Scheme:</Label>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Width="150" Text="Name"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
             </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- ConfigTransitionDriver properties template : DataContext must be ConfigTransitionDriver -->
+    <DataTemplate x:Key="transitionDriverTemplate">
+        <StackPanel Orientation="Vertical">
+            <Label Height="24" Width="150" HorizontalAlignment="Left">Transition Driver:</Label>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" Height="24" IsEnabled="False"></TextBox>
                 <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
@@ -244,13 +261,10 @@
             </StackPanel>
     </DataTemplate>
 
-    <!-- ConfigTransitionDriver properties template : DataContext must be ConfigTransitionDriver -->
-    <DataTemplate x:Key="transitionDriverTemplate">
-        <StackPanel Orientation="Vertical">
-            <Label Height="24" Width="150" HorizontalAlignment="Left">Transition Driver:</Label>
-            <StackPanel Orientation="Horizontal">
-                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
-            </StackPanel>
+    <!-- Display a list of ReactionComplexes  - not sure if this is a keeper -->
+    <DataTemplate x:Key="RCListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" />
         </StackPanel>
     </DataTemplate>
     
@@ -458,4 +472,56 @@
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
 
+    <!-- Reaction complex reactions : DataContext must be ConfigReactionComplex -->
+    <DataTemplate x:Key="reactionComplexReactionsTemplate">
+        <StackPanel Margin="0,10" >
+            <TextBlock Text="Reactions" />
+            <ListView x:Name="lvReacComplexReactions"
+                  ItemsSource="{Binding Path=reactions, Mode=TwoWay}"
+                  SelectedIndex="0" >
+                <ListView.View>
+                    <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="GridViewColumnHeader">
+                                <Setter Property="Height" Value="Auto"></Setter>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+                        
+                        <GridViewColumn Width="80" Header="Rate constant">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <GridViewColumn Width="300" Header="Reaction" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TotalReactionString}">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                  <Setter Property="TextBlock.Foreground" Value="Black">
+                                                  </Setter>
+                                                </Style>
+                                            </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
+    </DataTemplate>
+    
 </ResourceDictionary>

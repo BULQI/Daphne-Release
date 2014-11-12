@@ -137,17 +137,17 @@ namespace DaphneGui
             List<ConfigReaction> temp = new List<ConfigReaction>();
             foreach (ConfigReaction cr in lbAllReactions.SelectedItems)
             {
-                RightList.Add(cr);
-                temp.Add(cr);                                
+                if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
+                {
+                    RightList.Add(cr);
+                    temp.Add(cr);
+                }        
             }
 
             foreach (ConfigReaction cr in temp)
             {
                 LeftList.Remove(cr);
             }
-
-            //lbCxReactions.ItemsSource = null;
-            //lbCxReactions.ItemsSource = RightList;
 
             //listbox does not refresh without this
             lbAllReactions.ItemsSource = null;
@@ -165,8 +165,11 @@ namespace DaphneGui
 
             foreach (ConfigReaction reac in lbCxReactions.SelectedItems)
             {
-                LeftList.Add(reac);
                 temp.Remove(reac);
+                if (LeftList.Where(m => m.entity_guid == reac.entity_guid).Any()) continue;
+                {
+                    LeftList.Add(reac);
+                }
             }
 
             RightList.Clear();
@@ -188,6 +191,13 @@ namespace DaphneGui
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
                 //selectedRC.reactions.Clear();
+                foreach (ConfigReaction cr in selectedRC.reactions.ToList())
+                {
+                    if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
+                    {
+                        selectedRC.reactions.Remove(cr);
+                    }
+                }
                 foreach (ConfigReaction reac in RightList)
                 {
                     if (selectedRC.reactions_dict.ContainsKey(reac.entity_guid) != true)
@@ -197,7 +207,7 @@ namespace DaphneGui
                         selectedRC.RefreshMolPops(newreac);
                     }
                 }
-                
+
             }
             else
             {
