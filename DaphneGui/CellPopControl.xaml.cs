@@ -286,7 +286,6 @@ namespace DaphneGui
                 newLibCell.CellName = newLibCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibCell.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibCell);
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
