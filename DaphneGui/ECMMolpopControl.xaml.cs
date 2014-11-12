@@ -357,7 +357,6 @@ namespace DaphneGui
                 }
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibMol.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibMol);
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
