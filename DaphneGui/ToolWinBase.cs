@@ -271,21 +271,12 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Moved from SimConfigToolWindow.xaml.cs but not evaluated.
+        /// Initialization of the reports tab.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         protected virtual void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
-            // gmk - uncomment and fix
-            //lbRptCellPops.SelectedIndex = 0;
-            //ICollectionView icv = CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource);
-            //if (icv != null)
-            //{
-            //    icv.Refresh();
-            //}
-
-            GetMolsInAllRCs();
         }
 
     }
