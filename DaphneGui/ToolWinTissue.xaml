@@ -52,7 +52,7 @@
             </TabItem>
 
         <!-- EXTRACELLULAR MEDIUM -->
-        <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
+        <TabItem x:Name="tabECM" Header="Extracellular Medium" Loaded="ECMTabItem_Loaded" AutomationProperties.AutomationId="DaphneECMTab" >
             <TabItem.Resources>
             </TabItem.Resources>
             
@@ -65,7 +65,7 @@
         </TabItem>
 
         <!-- CELL POPULATIONS -->
-        <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
+        <TabItem x:Name="tabCellPop" Header="Cell Populations" Loaded="CellPopTabItem_Loaded" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <TabItem.Resources>
             </TabItem.Resources>
 
