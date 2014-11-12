@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Blank Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "1e0a719f-38f6-4ec2-8f8e-5528e303ce3b",
+  "experiment_guid": "9354bfeb-be77-44d1-9459-d2543545b87c",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",

@@ -1079,8 +1079,8 @@ namespace DaphneGui
                 ////}
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibCell.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibCell);
+
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
                     B.repositoryPush(newLibCell, status); // push into B, inserts as new
@@ -1580,8 +1580,8 @@ namespace DaphneGui
                 }
 
                 Protocol B = MainWindow.SOP.Protocol;
-                newLibMol.incrementChangeStamp();
                 Level.PushStatus status = B.pushStatus(newLibMol);
+
                 if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
                     B.repositoryPush(newLibMol, status); // push into B, inserts as new
