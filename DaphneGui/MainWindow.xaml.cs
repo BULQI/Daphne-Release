@@ -463,8 +463,8 @@ namespace DaphneGui
             }
             else
             {
-                file = "daphne_driver_locomotion_scenario.json";
-                //file = "daphne_vatRC_ligand_receptor_scenario.json";
+                //file = "daphne_driver_locomotion_scenario.json";
+                file = "daphne_vatRC_ligand_receptor_scenario.json";
             }
 
             int repeat = 0;
@@ -1768,6 +1768,12 @@ namespace DaphneGui
             if (simThread != null && simThread.IsAlive)
             {
                 simThread.Suspend();
+            }
+
+            // start reporter
+            if (Properties.Settings.Default.skipDataBaseWrites == false)
+            {
+                sim.Reporter.StartReporter(sim);
             }
 
             //This resets the mol concs and reaction rates instead of reloading the whole simulation

@@ -761,10 +761,7 @@ namespace Daphne
                 }
             }
 
-            //foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
-            //{
-            //    envHandle.comp.molpops.Add(configMolpop);
-            //}
+            protocol.reporter_file_name = "Vat";
         }
 
         public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)
@@ -968,10 +965,7 @@ namespace Daphne
             envHandle.comp.reaction_complexes.Add(configRC);
             //envHandle.comp.reaction_complexes_dict.Add(configRC.entity_guid, configRC);
 
-            //foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
-            //{
-            //    envHandle.comp.molpops.Add(configMolpop);
-            //}
+            protocol.reporter_file_name = "Vat 2 site ab binding";
 
 
 

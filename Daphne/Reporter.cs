@@ -416,6 +416,7 @@ namespace Daphne
     public class VatReactionComplexReporter : ReporterBase
     {
         private VatReactionComplex hSim;
+        private StreamWriter vat_conc_file;
 
         public VatReactionComplexReporter()
         {
@@ -432,12 +433,20 @@ namespace Daphne
             hSim.DictGraphConcs.Clear();
             hSim.ListTimes.Clear();
 
+            string header = "Vat molecular concentrations by time";
+
+            vat_conc_file = createStreamWriter("vat_conc_report", "txt");
+            vat_conc_file.WriteLine("Vat molecule concentrations report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+            vat_conc_file.WriteLine(header);
+
             Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
                 hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
+                vat_conc_file.Write("\t", kvp.Value.Molecule.Name);
             }
+            
         }
 
         private void appendTimesAndConcs()
@@ -446,10 +455,13 @@ namespace Daphne
             Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
             hSim.ListTimes.Add(hSim.AccumulatedTime);
+            vat_conc_file.WriteLine(hSim.AccumulatedTime);
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
                 hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+                vat_conc_file.Write("\t{0:G4}", (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
             }
+            vat_conc_file.WriteLine();
         }
 
         public override void AppendReporter()
@@ -459,6 +471,11 @@ namespace Daphne
 
         public override void CloseReporter()
         {
+            if (vat_conc_file != null)
+            {
+                vat_conc_file.Close();
+                vat_conc_file = null;
+            }
         }
     }
 }
