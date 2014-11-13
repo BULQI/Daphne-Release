@@ -535,7 +535,7 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-
+            CellPopsListBox.SelectedIndex = 0;
         }
 
 

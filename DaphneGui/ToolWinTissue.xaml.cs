@@ -266,6 +266,42 @@ namespace DaphneGui
             //MainWindow.ST_RenderSkinWindow.Activate();
         }
 
+        /// <summary>
+        /// Select the first cell in the list by default
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void CellPopTabItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            CellPopControl.CellPopsListBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Select the first molecule in the list by default
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void ECMTabItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            EcmMolpopControl.lbEcsMolPops.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Select first items in the lists by default.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            toolWinTissue.lbRptCellPops.SelectedItem = 0;
+            //toolWinTissue.dgEcmMols.SelectedItem = 0;
+            //toolWinTissue.dgCellDetails.SelectedItem = 0;
+            //toolWinTissue.dgCellStates.SelectedItem = 0;
+            //toolWinTissue.dgEcmProbeMols.SelectedItem = 0;
+            //toolWinTissue.dgCellMembMols.SelectedItem = 0;
+            //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
+        }
+
 
     }
 }

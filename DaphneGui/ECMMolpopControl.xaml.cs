@@ -617,6 +617,8 @@ namespace DaphneGui
         {
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BulkMolecules_Filter;
+
+            lbEcsMolPops.SelectedIndex = 0;
         }
 
 
