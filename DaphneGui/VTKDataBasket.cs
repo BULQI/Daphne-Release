@@ -1921,4 +1921,107 @@ namespace DaphneGui
             }
         }
     }
+
+    /// <summary>
+    /// Accumulate chart data for molecular populations in a compartment.
+    /// Will be used by VatRC and CellRC workbenches.
+    ///     VatRC one ChartDatBasket for environment
+    ///     CellRC one ChartDataBasket each for environment, cytosol, and membrane
+    /// </summary>
+    public class ChartDataBasket
+    {
+        private Compartment comp;
+        private double[] defaultLoc;
+        private Dictionary<string, List<double>> DictGraphConcs;
+        private List<double> ListTimes;
+
+        public ChartDataBasket()
+        {
+        }
+
+        public void SetupChartData(Compartment _comp, double[] _defaultLoc, List<double> listTimes, Dictionary<string, List<double>> dictGraphConcs)
+        {
+            comp = _comp;
+            defaultLoc = (double[])_defaultLoc.Clone();
+            ListTimes = listTimes;
+            DictGraphConcs = dictGraphConcs;
+
+            Cleanup();
+
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                DictGraphConcs.Add(kvp.Key, new List<double>());
+            }
+
+        }
+
+        public void UpdateData(double accumulatedTime)
+        {
+            ListTimes.Add(accumulatedTime);
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+            }
+        }
+
+        public void Cleanup()
+        {
+            DictGraphConcs.Clear();
+            ListTimes.Clear();
+        }
+
+    }
+
+    /// <summary>
+    /// chart graphics for the VatRC
+    /// </summary>
+    public class VTKVatRCDataBasket : IVTKDataBasket
+    {
+        //double[] defaultLoc = { 0.0, 0.0, 0.0 };
+        //private Compartment comp;
+        private VatReactionComplex hSim;
+        private ChartDataBasket chartData;
+
+        public VTKVatRCDataBasket()
+        {
+            chartData = new ChartDataBasket();
+        }
+
+        public void SetupVTKData(Protocol protocol)
+        {
+            hSim = (VatReactionComplex)MainWindow.Sim;
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            chartData.SetupChartData(comp, new double[]{0.0, 0.0, 0.0}, hSim.ListTimes, hSim.DictGraphConcs);
+
+            //Cleanup();
+
+            //foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            //{
+            //    hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
+            //}
+        }
+
+        public void UpdateData()
+        {
+            if (MainWindow.Sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
+            {
+                chartData.UpdateData(hSim.AccumulatedTime);
+
+            //    hSim.ListTimes.Add(hSim.AccumulatedTime);
+            //    foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            //    {
+            //        hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+            //    }
+            }
+        }
+
+        public void Cleanup()
+        {
+            chartData.Cleanup();
+            //hSim.DictGraphConcs.Clear();
+            //hSim.ListTimes.Clear();
+        }
+    }
+
 }
