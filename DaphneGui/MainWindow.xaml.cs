@@ -2477,38 +2477,40 @@ namespace DaphneGui
 
             gc.EnableComponents(finished);
 
-            if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            {
-                ReacComplexChartWindow.Tag = Sim;
-                ReacComplexChartWindow.MW = this;
+            //if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            //{
+            //    ReacComplexChartWindow.Tag = Sim;
+            //    ReacComplexChartWindow.MW = this;
                 
-                ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
-                if (crc == null)
-                {
-                    MessageBox.Show("Please select a reaction complex to process..");
-                    return;
-                }
+            //    ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
+            //    if (crc == null)
+            //    {
+            //        MessageBox.Show("Please select a reaction complex to process..");
+            //        return;
+            //    }
 
-                ReacComplexChartWindow.DataContext = crc;
-                ReacComplexChartWindow.Activate();
-                ReacComplexChartWindow.Render();
-            }
+            //    ReacComplexChartWindow.DataContext = crc;
+            //    ReacComplexChartWindow.Activate();
+            //    ReacComplexChartWindow.Render();
+            //}
 
-            //Set the box and blob visibilities to how they were pre-run
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-            {
-                GaussianSpecification next;
+            toolWin.GUIUpdate(finished);
 
-                ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
-                while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
-                {
-                    BoxSpecification box = next.box_spec;
+            ////Set the box and blob visibilities to how they were pre-run
+            //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            //{
+            //    GaussianSpecification next;
 
-                    // Save current visibility statuses
-                    box.box_visibility = box.current_box_visibility;
-                    next.gaussian_region_visibility = next.current_gaussian_region_visibility;
-                }
-            }
+            //    ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
+            //    while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
+            //    {
+            //        BoxSpecification box = next.box_spec;
+
+            //        // Save current visibility statuses
+            //        box.box_visibility = box.current_box_visibility;
+            //        next.gaussian_region_visibility = next.current_gaussian_region_visibility;
+            //    }
+            //}
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();

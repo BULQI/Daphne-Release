@@ -302,6 +302,21 @@ namespace DaphneGui
             //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
         }
 
+        public override void GUIUpdate(bool finished)
+        {
+            // Note: finished not used for Tissue simulation
 
+            GaussianSpecification next;
+
+            Protocol.scenario.resetGaussRetrieve();
+            while ((next = Protocol.scenario.nextGaussSpec()) != null)
+            {
+                BoxSpecification box = next.box_spec;
+
+                // Save current visibility statuses
+                box.box_visibility = box.current_box_visibility;
+                next.gaussian_region_visibility = next.current_gaussian_region_visibility;
+            }
+        }
     }
 }

@@ -304,6 +304,14 @@ namespace DaphneGui
                 handler(this, new PropertyChangedEventArgs(name));
             }
         }
+
+        /// <summary>
+        /// Workbench specific tasks to update the GUI after a simulation.
+        /// </summary>
+        /// <param name="finished"></param>
+        public virtual void GUIUpdate(bool finished)
+        {
+        }
     }
 
 

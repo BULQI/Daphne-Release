@@ -83,5 +83,17 @@ namespace DaphneGui
         {
             GetMolsInAllRCs();
         }
+
+        public override void GUIUpdate(bool finished)
+        {
+            if (finished)
+            {
+                MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
+                MW.ReacComplexChartWindow.MW = MW;
+                MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
+                MW.ReacComplexChartWindow.Activate();
+                MW.ReacComplexChartWindow.Render();
+            }
+        }
     }
 }
