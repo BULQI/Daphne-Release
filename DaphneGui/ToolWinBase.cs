@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 
 using Daphne;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
@@ -21,10 +22,24 @@ namespace DaphneGui
 
     public enum ToolWindowType {BaseType, Tissue, VatRC};
 
-    public class ToolWinBase : ToolWindow, IRegionFocus
+    public class ToolWinBase : ToolWindow, IRegionFocus, INotifyPropertyChanged
     {
         public MainWindow MW { get; set; }
-        public Protocol Protocol { get; set; }
+
+        private Protocol _protocol;
+        public Protocol Protocol
+        {
+            get { return _protocol; }
+            set
+            {
+                if (_protocol != value)
+                {
+                    _protocol = value;
+                    OnPropertyChanged("Protocol");
+                }
+            }
+        }
+
         public string TitleText { get; set; }
         public Visibility ToroidalVisibility { get; set; }
         public Visibility SimRepetitionVisibility { get; set; }
@@ -279,6 +294,16 @@ namespace DaphneGui
         {
         }
 
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
     }
 
 
