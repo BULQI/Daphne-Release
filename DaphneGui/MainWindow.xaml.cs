@@ -2154,8 +2154,9 @@ namespace DaphneGui
                     sim = new VatReactionComplex();
                     // set the reporter's path
                     sim.Reporter.AppPath = orig_path + @"\";
-                    // no graphics for the VatRC
-                    vtkDataBasket = new VTKNullDataBasket();
+                    //// no graphics for the VatRC
+                    //vtkDataBasket = new VTKNullDataBasket();
+                    vtkDataBasket = new VTKVatRCDataBasket();
                     gc = new VTKNullGraphicsController();
                 }
             }
