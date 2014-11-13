@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Cell locomotion with driver molecule.",
   "experiment_reps": 1,
-  "experiment_guid": "faefc026-6cb2-4cff-9ec6-adf66506825b",
+  "experiment_guid": "23b716b1-21cb-481c-97e0-332ea71e2ef7",
   "experiment_description": "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -11,8 +11,8 @@
         "Cell": {
           "CurrentDeathState": 0,
           "CurrentDivState": 0,
-          "CellName": "Leukocyte_staticReceptor_motile",
           "renderLabel": "ee07f8a6-8278-4458-b55c-63a65b39d11a",
+          "CellName": "Leukocyte_staticReceptor_motile",
           "CellRadius": 5.0,
           "locomotor_mol_guid_ref": "5e3cb6c3-d8a0-492d-aa08-353c14673962",
           "TransductionConstant": 100.0,
@@ -36,7 +36,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "eb847d55-5258-4218-9007-4f7f4f6b8416"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 44.0,
@@ -61,7 +60,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "568f09e0-620e-483a-88aa-aa4d0560071d"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0,
@@ -92,7 +90,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "5e2e1846-b116-432a-b66e-4566b4d6eec2"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 250.0,
@@ -117,7 +114,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "cc950463-5c70-4d61-a76e-2caf4056f414"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0,
@@ -142,7 +138,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "7e2f5d55-9272-4b40-a016-f07a026edd5d"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0,
@@ -211,7 +206,7 @@
           "entity_guid": "ee07f8a6-8278-4458-b55c-63a65b39d11a"
         },
         "cellpopulation_name": "Leukocyte_staticReceptor_motile",
-        "cellpopulation_guid": "90e0b8a7-8c7c-4342-bcc9-b9aa9dc04918",
+        "cellpopulation_guid": "2256c3a4-5d8b-4c89-999a-48bf3d77e216",
         "cellpopulation_id": 0,
         "report_xvf": {
           "position": true,
@@ -227,7 +222,7 @@
           {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "41a6aecb-b338-4ccc-b95b-672bc6315bff"
+            "molpop_guid_ref": "292697c7-c653-4134-9161-8429958d4759"
           }
         ],
         "number": 1,
@@ -318,7 +313,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "41a6aecb-b338-4ccc-b95b-672bc6315bff",
+            "molpop_guid": "292697c7-c653-4134-9161-8429958d4759",
             "molecule": {
               "Name": "CXCL13",
               "renderLabel": "75b0d156-7802-476b-9629-856d04b5fd2b",
@@ -333,9 +328,8 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": false,
               "mp_extended": 0,
-              "molpop_guid_ref": "41a6aecb-b338-4ccc-b95b-672bc6315bff"
+              "molpop_guid_ref": "292697c7-c653-4134-9161-8429958d4759"
             },
-            "mp_dist_name": "Linear",
             "mp_distribution": {
               "$type": "Daphne.MolPopLinear, Daphne",
               "x1": 0.0,
@@ -405,8 +399,8 @@
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
-        "CellName": "Leukocyte_staticReceptor_motile",
         "renderLabel": "ee07f8a6-8278-4458-b55c-63a65b39d11a",
+        "CellName": "Leukocyte_staticReceptor_motile",
         "CellRadius": 5.0,
         "locomotor_mol_guid_ref": "5e3cb6c3-d8a0-492d-aa08-353c14673962",
         "TransductionConstant": 100.0,
@@ -430,7 +424,6 @@
                 "mp_extended": 2,
                 "molpop_guid_ref": "eb847d55-5258-4218-9007-4f7f4f6b8416"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 44.0,
@@ -455,7 +448,6 @@
                 "mp_extended": 2,
                 "molpop_guid_ref": "568f09e0-620e-483a-88aa-aa4d0560071d"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 0.0,
@@ -486,7 +478,6 @@
                 "mp_extended": 2,
                 "molpop_guid_ref": "5e2e1846-b116-432a-b66e-4566b4d6eec2"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 250.0,
@@ -511,7 +502,6 @@
                 "mp_extended": 2,
                 "molpop_guid_ref": "cc950463-5c70-4d61-a76e-2caf4056f414"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 0.0,
@@ -536,7 +526,6 @@
                 "mp_extended": 2,
                 "molpop_guid_ref": "7e2f5d55-9272-4b40-a016-f07a026edd5d"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 0.0,
