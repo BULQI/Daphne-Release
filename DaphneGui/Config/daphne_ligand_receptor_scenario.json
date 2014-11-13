@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Ligand Receptor Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "6222e5f7-80b1-4fcd-a4b3-297815b1f8de",
+  "experiment_guid": "541c8e0c-3e53-4ca8-b4c4-6adeac963f7b",
   "experiment_description": "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -11,8 +11,8 @@
         "Cell": {
           "CurrentDeathState": 0,
           "CurrentDivState": 0,
-          "CellName": "Leukocyte_staticReceptor",
           "renderLabel": "8f694912-7f27-4118-a51b-e610d32a4ee1",
+          "CellName": "Leukocyte_staticReceptor",
           "CellRadius": 5.0,
           "locomotor_mol_guid_ref": "",
           "TransductionConstant": 0.0,
@@ -36,7 +36,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "8c2dbc2a-d6cf-40e7-9fad-b13c75bbd442"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 44.0,
@@ -61,7 +60,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "69b8a5cf-c196-44a6-8363-bff4cbbdffd5"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0,
@@ -86,7 +84,7 @@
           "entity_guid": "8f694912-7f27-4118-a51b-e610d32a4ee1"
         },
         "cellpopulation_name": "Leukocyte_staticReceptor",
-        "cellpopulation_guid": "e4df36e3-be2f-46ce-a620-741d39d5d433",
+        "cellpopulation_guid": "330e1ebb-20cd-4ba2-956c-27d881db12f7",
         "cellpopulation_id": 1,
         "report_xvf": {
           "position": false,
@@ -102,7 +100,7 @@
           {
             "mean": false,
             "mp_extended": 1,
-            "molpop_guid_ref": "e536927a-27af-4a89-bd94-dc1d61eb256f"
+            "molpop_guid_ref": "c03cd502-824b-460c-9701-c98cb85503d5"
           }
         ],
         "number": 1,
@@ -193,7 +191,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "e536927a-27af-4a89-bd94-dc1d61eb256f",
+            "molpop_guid": "c03cd502-824b-460c-9701-c98cb85503d5",
             "molecule": {
               "Name": "CXCL13",
               "renderLabel": "75b0d156-7802-476b-9629-856d04b5fd2b",
@@ -208,9 +206,8 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 0,
-              "molpop_guid_ref": "e536927a-27af-4a89-bd94-dc1d61eb256f"
+              "molpop_guid_ref": "c03cd502-824b-460c-9701-c98cb85503d5"
             },
-            "mp_dist_name": "Uniform",
             "mp_distribution": {
               "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
               "concentration": 0.030411100000000003,
@@ -267,8 +264,8 @@
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
-        "CellName": "Leukocyte_staticReceptor",
         "renderLabel": "8f694912-7f27-4118-a51b-e610d32a4ee1",
+        "CellName": "Leukocyte_staticReceptor",
         "CellRadius": 5.0,
         "locomotor_mol_guid_ref": "",
         "TransductionConstant": 0.0,
@@ -292,7 +289,6 @@
                 "mp_extended": 1,
                 "molpop_guid_ref": "8c2dbc2a-d6cf-40e7-9fad-b13c75bbd442"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 44.0,
@@ -317,7 +313,6 @@
                 "mp_extended": 1,
                 "molpop_guid_ref": "69b8a5cf-c196-44a6-8363-bff4cbbdffd5"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 0.0,
