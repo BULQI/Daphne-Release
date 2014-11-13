@@ -1389,7 +1389,7 @@ namespace Daphne
         {
             base.RunForward();
             // no rendering in the vat rc
-            clearFlag(SIMFLAG_RENDER);
+            //clearFlag(SIMFLAG_RENDER);
         }
 
         protected override int linearDistributionCase(int dim)
