@@ -95,5 +95,9 @@ namespace DaphneGui
                 MW.ReacComplexChartWindow.Render();
             }
         }
+
+        public override void LockSaveStartSim()
+        {
+        }
     }
 }

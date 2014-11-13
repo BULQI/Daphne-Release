@@ -311,6 +311,36 @@ namespace DaphneGui
         /// <param name="finished"></param>
         public virtual void GUIUpdate(bool finished)
         {
+            GaussianSpecification next;
+
+            Protocol.scenario.resetGaussRetrieve();
+            while ((next = Protocol.scenario.nextGaussSpec()) != null)
+            {
+                BoxSpecification box = next.box_spec;
+
+                // Save current visibility statuses
+                box.box_visibility = box.current_box_visibility;
+                next.gaussian_region_visibility = next.current_gaussian_region_visibility;
+            }
+        }
+
+        public virtual void LockSaveStartSim()
+        {
+            GaussianSpecification next;
+
+            Protocol.scenario.resetGaussRetrieve();
+            while ((next = Protocol.scenario.nextGaussSpec()) != null)
+            {
+                BoxSpecification box = next.box_spec;
+
+                // Save current visibility statuses
+                box.current_box_visibility = box.box_visibility;
+                next.current_gaussian_region_visibility = next.gaussian_region_visibility;
+
+                // Property changed notifications will take care of turning off the Widgets and Actors
+                box.box_visibility = false;
+                next.gaussian_region_visibility = false;
+            }
         }
     }
 
