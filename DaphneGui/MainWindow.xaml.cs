@@ -265,8 +265,13 @@ namespace DaphneGui
             e.CanExecute = true;
         }
 
+        public static DocumentWindow ST_VTKDisplayDocWindow;
+        public static CellStudioToolWindow ST_CellStudioToolWindow;
+        public static ComponentsToolWindow ST_ComponentsToolWindow;
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
+
+
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
         private const int ATTACH_PARENT_PROCESS = -1;
@@ -277,6 +282,10 @@ namespace DaphneGui
 
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
             ST_RenderSkinWindow = renderSkinWindow;
+            ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
+            ST_CellStudioToolWindow = CellStudioToolWindow;
+            ST_ComponentsToolWindow = ComponentsToolWindow;
+
 
             this.ToolWinCellInfo.Close();
 
@@ -654,6 +663,7 @@ namespace DaphneGui
 
         public void UpdateGraphics()
         {
+            if (gc == null) return;
             vtkDataBasket.UpdateData();
             gc.DrawFrame(sim.GetProgressPercent());
         }
@@ -1081,8 +1091,7 @@ namespace DaphneGui
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
-
-                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+                    if (ToolWinType == ToolWindowType.Tissue)
                     {
                         ProtocolToolWindow.Close();
                     }
@@ -2093,6 +2102,14 @@ namespace DaphneGui
                         ToolWin = new ToolWinTissue();
                         ToolWinType = ToolWindowType.Tissue;
                         ToolWin.MW = this;
+
+                        MdiTabContainer.Items.Clear();
+                        MdiTabContainer.Items.Add(ST_VTKDisplayDocWindow);
+                        MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
+                        MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
+                        MdiTabContainer.Items.Add(ST_RenderSkinWindow);
+                        ST_VTKDisplayDocWindow.Activate();
+
                     }
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
@@ -2125,8 +2142,18 @@ namespace DaphneGui
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
-                    ToolWin = new ToolWinVatRC();
-                    ToolWin.MW = this;
+                    if (ToolWinType != ToolWindowType.VatRC)
+                    {
+                        ToolWin = new ToolWinVatRC();
+                        ToolWin.MW = this;
+                        ToolWinType = ToolWindowType.VatRC;
+
+                        MdiTabContainer.Items.Clear();
+                        MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
+                        MdiTabContainer.Items.Add(ST_ReacComplexChartWindow);
+                        ST_ReacComplexChartWindow.Activate();
+                    }
+
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
                     ReacComplexChartWindow.redraw_flag = false;
@@ -2141,16 +2168,16 @@ namespace DaphneGui
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    ToolWin = new ToolWinVatRC();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
+                    //ToolWin = new ToolWinVatRC();
+                    //ToolWin.MW = this;
+                    //ToolWin.Protocol = SOP.Protocol;
+                    //ToolWin.Title = ToolWin.TitleText;
 
-                if (ProtocolToolWindowContainer.Items.Count > 0)
-                    ProtocolToolWindowContainer.Items.Clear();
-                    ToolWinType = ToolWindowType.VatRC;
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
+                    //if (ProtocolToolWindowContainer.Items.Count > 0)
+                    //    ProtocolToolWindowContainer.Items.Clear();
+                    //ToolWinType = ToolWindowType.VatRC;
+                    //ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    //ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
 
                     // create the simulation
                     sim = new VatReactionComplex();
@@ -2618,7 +2645,7 @@ namespace DaphneGui
         /// </summary>
         private void runSim()
         {
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            if (ToolWinType == ToolWindowType.Tissue)
             {
                 VTKDisplayDocWindow.Activate();
             }

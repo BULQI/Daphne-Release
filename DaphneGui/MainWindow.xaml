@@ -552,14 +552,17 @@
                                 <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ComponentsToolWindow}" />                                
-                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" Title="Cells Library" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=CellStudioToolWindow}" />
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />
-                                <local:RenderSkinWindow x:Name="renderSkinWindow" Visibility="Collapsed"
-                                       HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
+                                <local:RenderSkinWindow x:Name="renderSkinWindow" Title="Render Skin"
+                                       HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
+                                       Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                        ConverterParameter=renderSkinWindow}"                 
+                                                        />
                             </docking:TabbedMdiContainer>
                         </docking:TabbedMdiHost>
                     </docking:Workspace>
