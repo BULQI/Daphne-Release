@@ -1754,57 +1754,59 @@ namespace DaphneGui
             runSim();
         }
 
-        public void SimulationTestFunction()
-        {
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
-            {
-                throw new InvalidCastException();
-            }
+        //public void SimulationTestFunction()
+        //{
+        //    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+        //    {
+        //        throw new InvalidCastException();
+        //    }
             
-            VatReactionComplex vatSim = (VatReactionComplex)Sim;
+        //    VatReactionComplex vatSim = (VatReactionComplex)Sim;
 
-            // terminate the simulation thread first
-            if (simThread != null && simThread.IsAlive)
-            {
-                simThread.Suspend();
-            }
+        //    // terminate the simulation thread first
+        //    if (simThread != null && simThread.IsAlive)
+        //    {
+        //        simThread.Suspend();
+        //    }
 
-            // start reporter
-            if (Properties.Settings.Default.skipDataBaseWrites == false)
-            {
-                sim.Reporter.StartReporter(sim);
-            }
+        //    // start reporter
+        //    if (Properties.Settings.Default.skipDataBaseWrites == false)
+        //    {
+        //        sim.Reporter.StartReporter(sim);
+        //    }
 
-            //This resets the mol concs and reaction rates instead of reloading the whole simulation
-            vatSim.resetConcsAndRates(sop.Protocol);
+        //    //This resets the mol concs and reaction rates instead of reloading the whole simulation
+        //    vatSim.resetConcsAndRates(sop.Protocol);
+        //    vtkDataBasket.Cleanup();
+        //    vtkDataBasket.SetupVTKData(sop.Protocol);
 
-            double dt = sop.Protocol.scenario.time_config.sampling_interval;
-            double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
-            int nSteps = Math.Min((int)(sop.Protocol.scenario.time_config.duration / dt), 10000);
+        //    double dt = sop.Protocol.scenario.time_config.sampling_interval;
+        //    double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
+        //    int nSteps = Math.Min((int)(sop.Protocol.scenario.time_config.duration / dt), 10000);
 
-            int interval = nSteps / 100;
-            if (interval == 0)
-                interval = 1;
+        //    int interval = nSteps / 100;
+        //    if (interval == 0)
+        //        interval = 1;
 
-            for (int i = 1; i < nSteps; i++)
-            {
-                vatSim.Step(dt);
-                if (i % interval == 0)
-                {
-                    vatSim.Reporter.AppendReporter();
-                }
-            }
-            ReacComplexChartWindow.Activate();
-            ReacComplexChartWindow.Render();
+        //    for (int i = 1; i < nSteps; i++)
+        //    {
+        //        vatSim.Step(dt);
+        //        if (i % interval == 0)
+        //        {
+        //            vatSim.Reporter.AppendReporter();
+        //        }
+        //    }
+        //    ReacComplexChartWindow.Activate();
+        //    ReacComplexChartWindow.Render();
 
-            sim.Reporter.CloseReporter();
+        //    sim.Reporter.CloseReporter();
 
-            if (simThread != null)
-            {
-                simThread.Resume();
-            }
+        //    if (simThread != null)
+        //    {
+        //        simThread.Resume();
+        //    }
             
-        }
+        //}
        
         /// <summary>
         /// save when simulation is paused state
