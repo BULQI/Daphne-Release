@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Ligand Receptor Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "17a9d188-5b6b-4039-95be-0f9fecd4766e",
+  "experiment_guid": "64dfdba7-9733-4a07-8772-df2a0d3a0419",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
@@ -16,83 +16,7 @@
     "environment": {
       "$type": "Daphne.ConfigPointEnvironment, Daphne",
       "comp": {
-        "molpops": [
-          {
-            "molpop_guid": "8241c3cc-1642-41a4-8040-abe3736b8287",
-            "molecule": {
-              "Name": "CXCL13",
-              "renderLabel": "75b0d156-7802-476b-9629-856d04b5fd2b",
-              "MolecularWeight": 7.96,
-              "EffectiveRadius": 1.0,
-              "DiffusionCoefficient": 4500.0,
-              "molecule_location": 0,
-              "entity_guid": "75b0d156-7802-476b-9629-856d04b5fd2b"
-            },
-            "Name": "CXCL13",
-            "report_mp": {
-              "mp_extended": 0,
-              "molpop_guid_ref": "8241c3cc-1642-41a4-8040-abe3736b8287"
-            },
-            "mp_dist_name": "Uniform",
-            "mp_distribution": {
-              "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
-              "concentration": 0.0304,
-              "mp_distribution_type": 0,
-              "boundaryCondition": null
-            },
-            "renderLabel": "75b0d156-7802-476b-9629-856d04b5fd2b"
-          },
-          {
-            "molpop_guid": "0352c4f8-f0c0-460d-bb61-6f882236eaea",
-            "molecule": {
-              "Name": "CXCR5",
-              "renderLabel": "fa9f68ab-c27d-4bfd-ad4a-17fbfbcf6bb8",
-              "MolecularWeight": 43.0,
-              "EffectiveRadius": 1.0,
-              "DiffusionCoefficient": 750.0,
-              "molecule_location": 0,
-              "entity_guid": "fa9f68ab-c27d-4bfd-ad4a-17fbfbcf6bb8"
-            },
-            "Name": "CXCR5",
-            "report_mp": {
-              "mp_extended": 0,
-              "molpop_guid_ref": "0352c4f8-f0c0-460d-bb61-6f882236eaea"
-            },
-            "mp_dist_name": "Uniform",
-            "mp_distribution": {
-              "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
-              "concentration": 1.0,
-              "mp_distribution_type": 0,
-              "boundaryCondition": null
-            },
-            "renderLabel": "fa9f68ab-c27d-4bfd-ad4a-17fbfbcf6bb8"
-          },
-          {
-            "molpop_guid": "95a9a68a-a918-49c2-bed0-5bd5e06588ff",
-            "molecule": {
-              "Name": "CXCL13:CXCR5",
-              "renderLabel": "76f487b3-ea08-4bf6-8b7b-8e5a75246538",
-              "MolecularWeight": 50.96,
-              "EffectiveRadius": 1.0,
-              "DiffusionCoefficient": 750.0,
-              "molecule_location": 0,
-              "entity_guid": "76f487b3-ea08-4bf6-8b7b-8e5a75246538"
-            },
-            "Name": "CXCL13:CXCR5",
-            "report_mp": {
-              "mp_extended": 0,
-              "molpop_guid_ref": "95a9a68a-a918-49c2-bed0-5bd5e06588ff"
-            },
-            "mp_dist_name": "Uniform",
-            "mp_distribution": {
-              "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
-              "concentration": 0.0,
-              "mp_distribution_type": 0,
-              "boundaryCondition": null
-            },
-            "renderLabel": "76f487b3-ea08-4bf6-8b7b-8e5a75246538"
-          }
-        ],
+        "molpops": [],
         "Reactions": [],
         "reaction_complexes": [
           {
@@ -144,7 +68,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "8241c3cc-1642-41a4-8040-abe3736b8287"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0304,
@@ -169,7 +92,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "0352c4f8-f0c0-460d-bb61-6f882236eaea"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 1.0,
@@ -194,7 +116,6 @@
                   "mp_extended": 0,
                   "molpop_guid_ref": "95a9a68a-a918-49c2-bed0-5bd5e06588ff"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0,
@@ -216,7 +137,7 @@
     "deathConstant": 0.001,
     "deathOrder": 1
   },
-  "reporter_file_name": "",
+  "reporter_file_name": "Vat",
   "entity_repository": {
     "reaction_complexes": [
       {
@@ -268,7 +189,6 @@
               "mp_extended": 0,
               "molpop_guid_ref": "8241c3cc-1642-41a4-8040-abe3736b8287"
             },
-            "mp_dist_name": "Uniform",
             "mp_distribution": {
               "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
               "concentration": 0.0304,
@@ -293,7 +213,6 @@
               "mp_extended": 0,
               "molpop_guid_ref": "0352c4f8-f0c0-460d-bb61-6f882236eaea"
             },
-            "mp_dist_name": "Uniform",
             "mp_distribution": {
               "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
               "concentration": 1.0,
@@ -318,7 +237,6 @@
               "mp_extended": 0,
               "molpop_guid_ref": "95a9a68a-a918-49c2-bed0-5bd5e06588ff"
             },
-            "mp_dist_name": "Uniform",
             "mp_distribution": {
               "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
               "concentration": 0.0,
