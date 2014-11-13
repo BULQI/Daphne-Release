@@ -17,7 +17,6 @@ using System.Windows.Controls.Primitives;
 
 using Daphne;
 using DaphneUserControlLib;
-using DaphneGui;
 
 namespace Workbench
 {
@@ -34,11 +33,10 @@ namespace Workbench
         public MainWindow MW;       //handle to main window
         public bool redraw_flag;    //true if redraw and not creating a new chart
 
-
-        //For testing
-        public static byte TestMethod;
-        public static byte TEST_BY_CONFIG = 0,
-                           TEST_BY_SIM = 1;
+        ////For testing
+        //public static byte TestMethod;
+        //public static byte TEST_BY_CONFIG = 0,
+        //                   TEST_BY_SIM = 1;
 
         public ChartViewToolWindow()
         {
@@ -50,7 +48,9 @@ namespace Workbench
             Chart.ToolWin = this;
             redraw_flag = false;
 
-            TestMethod = ChartViewToolWindow.TEST_BY_CONFIG;
+            //TestMethod = ChartViewToolWindow.TEST_BY_CONFIG;
+
+
         }
 
         public void Render()
@@ -93,8 +93,8 @@ namespace Workbench
 
                     btnIncSize.IsEnabled = true;
                     btnDecSize.IsEnabled = true;
-                    btnDiscard.IsEnabled = true;
-                    btnSave.IsEnabled = true;
+                    //btnDiscard.IsEnabled = true;
+                    //btnSave.IsEnabled = true;
 
                     Chart.Draw();
                 }
@@ -157,50 +157,50 @@ namespace Workbench
             Chart.Draw();            
         }        
 
-        ////KEEP THIS
-        ////private void btnDiscard_Click(object sender, RoutedEventArgs e)
+        //////KEEP THIS
+        //////private void btnDiscard_Click(object sender, RoutedEventArgs e)
+        //////{
+        //////    if (RC == null)
+        //////        return;
+
+        //////    RC.RestoreOriginalConcs();
+        //////    //Fix this
+        //////    ////RC.RestoreOriginalRateConstants();
+
+        //////    //if (toggleButton != null)
+        //////    //{
+        //////    //    //This causes a redraw
+        //////    //    toggleButton.IsChecked = true;
+        //////    //}
+        //////}
+
+
+        //////KEEP THIS
+        ////private void btnSave_Click(object sender, RoutedEventArgs e)
         ////{
-        ////    if (RC == null)
-        ////        return;
-
-        ////    RC.RestoreOriginalConcs();
-        ////    //Fix this
-        ////    ////RC.RestoreOriginalRateConstants();
-
-        ////    //if (toggleButton != null)
-        ////    //{
-        ////    //    //This causes a redraw
-        ////    //    toggleButton.IsChecked = true;
-        ////    //}
+        ////    if (Chart != null)
+        ////    {
+        ////        Chart.SaveChanges();
+        ////    }
         ////}
-
-
-        ////KEEP THIS
-        //private void btnSave_Click(object sender, RoutedEventArgs e)
+        //private void btnDiscard_Click(object sender, EventArgs e)
         //{
-        //    if (Chart != null)
-        //    {
-        //        Chart.SaveChanges();
-        //    }
+        //    ////HERE JUST NEED TO COPY FROM PROTOCOL TO ENTITY!!
+
+        //    //RC.RestoreOriginalConcs();
+        //    //RC.RunForward();
+        //    //Chart.ListTimes = RC.ListTimes;
+        //    //Chart.DictConcs = RC.DictGraphConcs;
+        //    //Chart.DrawChart();
         //}
-        private void btnDiscard_Click(object sender, EventArgs e)
-        {
-            ////HERE JUST NEED TO COPY FROM PROTOCOL TO ENTITY!!
 
-            //RC.RestoreOriginalConcs();
-            //RC.RunForward();
-            //Chart.ListTimes = RC.ListTimes;
-            //Chart.DictConcs = RC.DictGraphConcs;
-            //Chart.DrawChart();
-        }
-
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            //if (Chart != null)
-            //{
-            //    Chart.SaveChanges();
-            //}
-        }
+        //private void btnSave_Click(object sender, EventArgs e)
+        //{
+        //    //if (Chart != null)
+        //    //{
+        //    //    Chart.SaveChanges();
+        //    //}
+        //}
         
 #if OLD_RC
         //DELETE?
@@ -228,10 +228,10 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                if (TestMethod == TEST_BY_CONFIG)
+                //if (TestMethod == TEST_BY_CONFIG)
                     MW.runButton_Click(null, null);
-                else
-                    MW.SimulationTestFunction();
+                //else
+                //    MW.SimulationTestFunction();
             }
         }
 
@@ -262,28 +262,42 @@ namespace Workbench
         {
             if (e.PropertyName == "Number")
             {
+                //if (significantChange() == true)
+                //{
+
+                //}
+
                 redraw_flag = true;
 
-                if (TestMethod == TEST_BY_CONFIG)
+                //if (TestMethod == TEST_BY_CONFIG)
                     MW.runButton_Click(null, null);
-                else
-                    MW.SimulationTestFunction();
+                //else
+                //    MW.SimulationTestFunction();
             }
         }
 
-        private void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            if (TestMethod == TEST_BY_SIM)
-            {
-                TestMethod = TEST_BY_CONFIG;
-                txtTestMethod.Text = "Using Config";
-            }
-            else 
-            {
-                TestMethod = TEST_BY_SIM;
-                txtTestMethod.Text = "Using Simulation";
-            }
-        }
+        //private bool significantChange()
+        //{
+        //    double d = CRC.
+        //    foreach (f
+
+
+        //    return true;
+        //}
+
+        //private void btnTest_Click(object sender, RoutedEventArgs e)
+        //{
+        //    //if (TestMethod == TEST_BY_SIM)
+        //    //{
+        //    //    TestMethod = TEST_BY_CONFIG;
+        //    //    txtTestMethod.Text = "Using Config";
+        //    //}
+        //    //else 
+        //    //{
+        //    //    TestMethod = TEST_BY_SIM;
+        //    //    txtTestMethod.Text = "Using Simulation";
+        //    //}
+        //}
 
         private void btnSaveReport_Click(object sender, RoutedEventArgs e)
         {
