@@ -837,6 +837,7 @@ namespace DaphneGui
 
         /// <summary>
         /// Loads the imported reaction complex into the GUI
+        /// gmk - SBML-specific. Needs to be modified for workbenches.
         /// </summary>
         /// <param name="protocol"></param>
         private void LoadReactionComplex(Protocol protocol)
@@ -1035,13 +1036,6 @@ namespace DaphneGui
                     {
                         return;
                     }
-
-                    // it doesn't make sense to run a simulation if there are no cells after the reinitialization
-                    //if (Simulation.dataBasket.Cells.Count < 1)
-                    //{
-                    //    MessageBox.Show("Aborting simulation! Load a valid scenario or add cells into the current one.", "Empty simulation", MessageBoxButton.OK, MessageBoxImage.Error);
-                    //    return;
-                    //}
 
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
@@ -1745,21 +1739,21 @@ namespace DaphneGui
             saveButton.IsEnabled = false;
             mutex = true;
 
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            {
-                ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
-                if (crc == null)
-                {
-                    MessageBox.Show("Please select a reaction complex to process.");
-                    return;
-                }
-                if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
-                {
-                    sim.RunStatus = SimulationBase.RUNSTAT_OFF;
-                }
+            //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            //{
+            //    ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
+            //    if (crc == null)
+            //    {
+            //        MessageBox.Show("Please select a reaction complex to process.");
+            //        return;
+            //    }
+            //    if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
+            //    {
+            //        sim.RunStatus = SimulationBase.RUNSTAT_OFF;
+            //    }
 
                 
-            }
+            //}
 
             runSim();
         }
