@@ -307,6 +307,7 @@ namespace DaphneGui
 
         /// <summary>
         /// Workbench specific tasks to update the GUI after a simulation.
+        /// Reset the box and Gaussian visibilities to there values prior to running the simulation.
         /// </summary>
         /// <param name="finished"></param>
         public virtual void GUIUpdate(bool finished)
@@ -324,6 +325,10 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// Workbench specific tasks prior to running the simulation.
+        /// Save the box and Gaussian visibility settings.
+        /// </summary>
         public virtual void LockSaveStartSim()
         {
             GaussianSpecification next;
@@ -341,6 +346,15 @@ namespace DaphneGui
                 box.box_visibility = false;
                 next.gaussian_region_visibility = false;
             }
+        }
+
+        /// <summary>
+        /// Display messsage box with choices for saving the Protocol to file.
+        /// </summary>
+        /// <returns></returns>
+        public virtual MessageBoxResult ScenarioContentChanged()
+        {
+            return MW.saveDialog();
         }
     }
 

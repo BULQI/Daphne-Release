@@ -99,5 +99,16 @@ namespace DaphneGui
         public override void LockSaveStartSim()
         {
         }
+
+        /// <summary>
+        /// VatRC skips the dialog for saving the Protocol because of the interactive real-time controls.
+        /// gmk - Still need to workout mechanisms for reminding users to save Protocols before exiting.
+        /// </summary>
+        /// <returns></returns>
+        public override MessageBoxResult ScenarioContentChanged()
+        {
+            return MessageBoxResult.None;
+        }
+
     }
 }
