@@ -48,7 +48,7 @@
                         <StackPanel>
                             <StackPanel>
                                 <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Visible"
-                                          DataContext="{Binding Path=MW.SOP.Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                          DataContext="{Binding Path=Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                         </StackPanel>
                     </Expander>
