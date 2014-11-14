@@ -1060,43 +1060,6 @@ namespace Daphne
 
     public class VatReactionComplex : SimulationBase
     {
-        // variables used in graphing
-        public int MaxTime { get; set; }        
-
-        private double dmaxtime;
-        public double dMaxTime
-        {
-            get
-            {
-                return dmaxtime;
-            }
-            set
-            {
-                if (dmaxtime != value)
-                {
-                    dmaxtime = value;
-                    OnPropertyChanged("dMaxTime");
-                }
-            }
-        }
-
-        private double dinittime;
-        public double dInitialTime
-        {
-            get
-            {
-                return dinittime;
-            }
-            set
-            {
-                if (dinittime != value)
-                {
-                    dinittime = value;
-                    OnPropertyChanged("dInitialTime");
-                }
-            }
-        }
-
         //List of times that will be graphed on x-axis. There is only one times list no matter how many molecules
         private List<double> listTimes;
         public List<double> ListTimes
@@ -1125,30 +1088,6 @@ namespace Daphne
             }
         }
 
-        //save the original concentrations
-        private Dictionary<string, double> dictOriginalConcs;
-
-        //Initial concentrations - user can change initial concentrations of molecules
-        private Dictionary<string, double> dictInitialConcs;
-
-        //for wpf binding
-        private ObservableCollection<MolConcInfo> _initConcs;
-        public ObservableCollection<MolConcInfo> initConcs
-        {
-            get
-            {
-                return _initConcs;
-            }
-            set
-            {
-                _initConcs = value;
-            }
-        }
-
-        //Convenience dictionary of initial concs and mol info
-        public Dictionary<string, MolConcInfo> initConcsDict { get; set; }
-
-
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
@@ -1157,108 +1096,6 @@ namespace Daphne
             reset();
             listTimes = new List<double>();
             dictGraphConcs = new Dictionary<string, List<double>>();
-            dictOriginalConcs = new Dictionary<string, double>();
-            dictInitialConcs = new Dictionary<string, double>();
-            initConcs = new ObservableCollection<MolConcInfo>();
-            initConcsDict = new Dictionary<string, MolConcInfo>();
-
-            initConcs.CollectionChanged += new NotifyCollectionChangedEventHandler(initConcs_CollectionChanged);
-        }
-
-        private void initConcs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            //if (e.Action == NotifyCollectionChangedAction.Add)
-            //{
-            //    foreach (var nn in e.NewItems)
-            //    {
-            //    }
-            //}            
-            OnPropertyChanged("initConcs");
-        }
-
-        //Save the original concs in a temp array in case user wants to discard the changes
-        public void SaveOriginalConcs()
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-
-            if (comp == null)
-            {
-                return;
-            }
-
-            dictOriginalConcs.Clear();
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                string molguid = kvp.Key;
-                double conc = kvp.Value.Conc.Value(new double[] { 0.0, 0.0, 0.0 });
-
-                dictOriginalConcs[molguid] = conc;
-            }
-        }
-
-        //Restores original concs
-        //If user made changes by dragging initial concs and wants to discard the changes, do that here
-        //by copying the original concs back to mol pops
-        public void RestoreOriginalConcs()
-        {
-            foreach (KeyValuePair<string, double> kvp in dictOriginalConcs)
-            {
-                dictInitialConcs[kvp.Key] = kvp.Value;
-            }
-            OnPropertyChanged("initConcs");
-        }
-
-        public void OverwriteOriginalConcs()
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            ConfigReactionComplex crc = envHandle.comp.reaction_complexes.First();
-            double[] initArray = new double[1];
-
-            if (comp == null || crc == null)
-            {
-                return;
-            }
-
-            dictOriginalConcs.Clear();
-            //Copy current (may have changed) initial concs to Originals dict
-            foreach (KeyValuePair<string, double> kvp in dictInitialConcs)
-            {
-                dictOriginalConcs[kvp.Key] = kvp.Value;
-
-                //Now overwrite the concs in Protocoluration
-                ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(crc.molpops.First());
-                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mp_distribution;
-
-                homo.concentration = kvp.Value;
-            }
-        }
-
-        //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs
-        public void SaveInitialConcs()
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-
-            if (comp == null)
-            {
-                return;
-            }
-
-            dictInitialConcs.Clear();
-            initConcs.Clear();
-            initConcsDict.Clear();
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                string molguid = kvp.Key;
-                //double conc = 0.0;
-                double conc = comp.Populations[molguid].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
-
-                dictInitialConcs[molguid] = conc;
-
-                MolConcInfo mci = new MolConcInfo(molguid, conc, ProtocolHandle);
-
-                initConcs.Add(mci);
-                initConcsDict.Add(molguid, mci);
-            }
         }
 
         public override void Load(Protocol protocol, bool completeReset)
@@ -1292,82 +1129,6 @@ namespace Daphne
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
         }
 
-        public override void reset()
-        {
-            base.reset();
-
-            double minVal = 1e7;
-
-            dInitialTime = 1 / minVal;
-            dMaxTime = 2 * dInitialTime;
-            MaxTime = (int)dMaxTime;
-
-            if (SimulationBase.dataBasket.Environment == null || SimulationBase.dataBasket.Environment.Comp == null)
-            {
-                return;
-            }
-
-            SaveOriginalConcs();
-            SaveInitialConcs();
-
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            double[] initArray = new double[1];
-            ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                string molguid = kvp.Key;
-                double conc = dictInitialConcs[molguid];
-
-                initArray[0] = conc;
-                sf.Initialize("const", initArray);
-                comp.Populations[molguid].Conc *= 0;
-                comp.Populations[molguid].Conc += sf;
-            }
-        }
-
-        /// <summary>
-        /// FOR VAT RC, INSTEAD OF RELOADING THE WHOLE SIMULATION, JUST RELOAD 
-        /// THE MOL CONCS PLUS THE REACTION RATES. THIS IS FOR THE CASE WHEN THE
-        /// USER DRAGS THE INITIAL CONCS ON GRAPH OR VIA SLIDER OR DRAGS THE RATES VIA SLIDER
-        /// </summary>
-        public void resetConcsAndRates(Protocol protocol)
-        {
-            reset();            
-            ListTimes.Add(0);
-
-            scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
-            envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
-
-            //Molecules
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            foreach (ConfigReactionComplex crc in envHandle.comp.reaction_complexes)
-            {
-                foreach (ConfigMolecularPopulation cmp in crc.molpops)
-                {
-                    string molguid = cmp.molecule.entity_guid;
-                    if (comp.Populations.ContainsKey(molguid) == true)
-                    {
-                        double[] initArray = new double[1];
-                        double conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
-                        initArray[0] = conc;
-                        ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-                        sf.Initialize("const", initArray);
-                        comp.Populations[molguid].Conc *= 0;
-                        comp.Populations[molguid].Conc += sf;
-                        if (DictGraphConcs.ContainsKey(molguid) == true)
-                            DictGraphConcs[molguid].Add(conc);
-                    }
-                }
-            }
-
-            //Reactions
-            List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = protocol.GetReactions(protocol.scenario.environment.comp, false);
-            comp.BulkReactions.Clear();
-            AddCompartmentBulkReactions(comp, protocol.entity_repository, reacs);
-        }
-
         public override void Step(double dt)
         {
             double t = 0, localStep;
@@ -1388,8 +1149,6 @@ namespace Daphne
         public override void RunForward()
         {
             base.RunForward();
-            // no rendering in the vat rc
-            clearFlag(SIMFLAG_RENDER);
         }
 
         protected override int linearDistributionCase(int dim)

@@ -17,7 +17,6 @@ using System.Windows.Controls.Primitives;
 
 using Daphne;
 using DaphneUserControlLib;
-using DaphneGui;
 
 namespace Workbench
 {
@@ -35,11 +34,6 @@ namespace Workbench
         public bool redraw_flag;    //true if redraw and not creating a new chart
 
 
-        //For testing
-        public static byte TestMethod;
-        public static byte TEST_BY_CONFIG = 0,
-                           TEST_BY_SIM = 1;
-
         public ChartViewToolWindow()
         {
             InitializeComponent();
@@ -49,8 +43,6 @@ namespace Workbench
             Chart.panelRC = panelRC;
             Chart.ToolWin = this;
             redraw_flag = false;
-
-            TestMethod = ChartViewToolWindow.TEST_BY_CONFIG;
         }
 
         public void Render()
@@ -88,13 +80,9 @@ namespace Workbench
 
                     System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
                     Chart.SetContextMenu(menu);
-                    //menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
-                    //menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
 
                     btnIncSize.IsEnabled = true;
                     btnDecSize.IsEnabled = true;
-                    btnDiscard.IsEnabled = true;
-                    btnSave.IsEnabled = true;
 
                     Chart.Draw();
                 }
@@ -157,50 +145,50 @@ namespace Workbench
             Chart.Draw();            
         }        
 
-        ////KEEP THIS
-        ////private void btnDiscard_Click(object sender, RoutedEventArgs e)
+        //////KEEP THIS
+        //////private void btnDiscard_Click(object sender, RoutedEventArgs e)
+        //////{
+        //////    if (RC == null)
+        //////        return;
+
+        //////    RC.RestoreOriginalConcs();
+        //////    //Fix this
+        //////    ////RC.RestoreOriginalRateConstants();
+
+        //////    //if (toggleButton != null)
+        //////    //{
+        //////    //    //This causes a redraw
+        //////    //    toggleButton.IsChecked = true;
+        //////    //}
+        //////}
+
+
+        //////KEEP THIS
+        ////private void btnSave_Click(object sender, RoutedEventArgs e)
         ////{
-        ////    if (RC == null)
-        ////        return;
-
-        ////    RC.RestoreOriginalConcs();
-        ////    //Fix this
-        ////    ////RC.RestoreOriginalRateConstants();
-
-        ////    //if (toggleButton != null)
-        ////    //{
-        ////    //    //This causes a redraw
-        ////    //    toggleButton.IsChecked = true;
-        ////    //}
+        ////    if (Chart != null)
+        ////    {
+        ////        Chart.SaveChanges();
+        ////    }
         ////}
-
-
-        ////KEEP THIS
-        //private void btnSave_Click(object sender, RoutedEventArgs e)
+        //private void btnDiscard_Click(object sender, EventArgs e)
         //{
-        //    if (Chart != null)
-        //    {
-        //        Chart.SaveChanges();
-        //    }
+        //    ////HERE JUST NEED TO COPY FROM PROTOCOL TO ENTITY!!
+
+        //    //RC.RestoreOriginalConcs();
+        //    //RC.RunForward();
+        //    //Chart.ListTimes = RC.ListTimes;
+        //    //Chart.DictConcs = RC.DictGraphConcs;
+        //    //Chart.DrawChart();
         //}
-        private void btnDiscard_Click(object sender, EventArgs e)
-        {
-            ////HERE JUST NEED TO COPY FROM PROTOCOL TO ENTITY!!
 
-            //RC.RestoreOriginalConcs();
-            //RC.RunForward();
-            //Chart.ListTimes = RC.ListTimes;
-            //Chart.DictConcs = RC.DictGraphConcs;
-            //Chart.DrawChart();
-        }
-
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            //if (Chart != null)
-            //{
-            //    Chart.SaveChanges();
-            //}
-        }
+        //private void btnSave_Click(object sender, EventArgs e)
+        //{
+        //    //if (Chart != null)
+        //    //{
+        //    //    Chart.SaveChanges();
+        //    //}
+        //}
         
 #if OLD_RC
         //DELETE?
@@ -228,10 +216,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                if (TestMethod == TEST_BY_CONFIG)
-                    MW.runButton_Click(null, null);
-                else
-                    MW.SimulationTestFunction();
+                MW.runButton_Click(null, null);
             }
         }
 
@@ -263,11 +248,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-
-                if (TestMethod == TEST_BY_CONFIG)
-                    MW.runButton_Click(null, null);
-                else
-                    MW.SimulationTestFunction();
+                MW.runButton_Click(null, null);
             }
         }
 

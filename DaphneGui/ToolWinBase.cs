@@ -304,6 +304,58 @@ namespace DaphneGui
                 handler(this, new PropertyChangedEventArgs(name));
             }
         }
+
+        /// <summary>
+        /// Workbench specific tasks to update the GUI after a simulation.
+        /// Reset the box and Gaussian visibilities to there values prior to running the simulation.
+        /// </summary>
+        /// <param name="finished"></param>
+        public virtual void GUIUpdate(bool finished)
+        {
+            GaussianSpecification next;
+
+            Protocol.scenario.resetGaussRetrieve();
+            while ((next = Protocol.scenario.nextGaussSpec()) != null)
+            {
+                BoxSpecification box = next.box_spec;
+
+                // Save current visibility statuses
+                box.box_visibility = box.current_box_visibility;
+                next.gaussian_region_visibility = next.current_gaussian_region_visibility;
+            }
+        }
+
+        /// <summary>
+        /// Workbench specific tasks prior to running the simulation.
+        /// Save the box and Gaussian visibility settings.
+        /// </summary>
+        public virtual void LockSaveStartSim()
+        {
+            GaussianSpecification next;
+
+            Protocol.scenario.resetGaussRetrieve();
+            while ((next = Protocol.scenario.nextGaussSpec()) != null)
+            {
+                BoxSpecification box = next.box_spec;
+
+                // Save current visibility statuses
+                box.current_box_visibility = box.box_visibility;
+                next.current_gaussian_region_visibility = next.gaussian_region_visibility;
+
+                // Property changed notifications will take care of turning off the Widgets and Actors
+                box.box_visibility = false;
+                next.gaussian_region_visibility = false;
+            }
+        }
+
+        /// <summary>
+        /// Display messsage box with choices for saving the Protocol to file.
+        /// </summary>
+        /// <returns></returns>
+        public virtual MessageBoxResult ScenarioContentChanged()
+        {
+            return MW.saveDialog();
+        }
     }
 
 

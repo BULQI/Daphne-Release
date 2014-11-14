@@ -711,7 +711,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.scenario.time_config.integrator_step = 0.001;
         }
 
         public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
@@ -724,12 +724,11 @@ namespace Daphne
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
-            protocol.experiment_name = "Ligand Receptor Vat RC";
-            protocol.experiment_description = "...";
-            protocol.scenario.time_config.duration = 10.0;
-            protocol.scenario.time_config.rendering_interval = 0.1;
-            protocol.scenario.time_config.sampling_interval = 0.1;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.experiment_description = "CXCL13/CXCR5 binding";
+            protocol.scenario.time_config.duration = 1.0;
+            protocol.scenario.time_config.rendering_interval = 0.02;
+            protocol.scenario.time_config.sampling_interval = 0.02;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
@@ -783,11 +782,11 @@ namespace Daphne
 
             // Experiment
             protocol.experiment_name = "SPR Vat RC";
-            protocol.experiment_description = "...";
+            protocol.experiment_description = "Simulation of two-state receptor binding to ligand.";
             protocol.scenario.time_config.duration = 100.0;
             protocol.scenario.time_config.rendering_interval = 2.0;
             protocol.scenario.time_config.sampling_interval = 1.0;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
@@ -2625,7 +2624,7 @@ namespace Daphne
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
 
             //MOLECULES
-            double[] conc = new double[3] { 0.0304, 1, 0 };
+            double[] conc = new double[3] { 2, 1, 0 };
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
@@ -2682,7 +2681,7 @@ namespace Daphne
             crc = new ConfigReactionComplex("CXCL12/CXCR4 binding");
 
             //MOLECULES
-            conc = new double[3] { 0.03, 1, 0 };
+            conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL12", "CXCR4", "CXCL12:CXCR4" };
 
             for (int i = 0; i < type.Length; i++)
@@ -2729,7 +2728,7 @@ namespace Daphne
             crc = new ConfigReactionComplex("CXCL13/CXCR5 binding");
 
             //MOLECULES
-            conc = new double[3] { 0.03, 1, 0 };
+            conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)

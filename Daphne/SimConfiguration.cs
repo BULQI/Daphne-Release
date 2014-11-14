@@ -2591,7 +2591,7 @@ namespace Daphne
             duration = 100;
             rendering_interval = 1;
             sampling_interval = 1;
-            integrator_step = 0.01;
+            integrator_step = 0.001;
         }
     }
 

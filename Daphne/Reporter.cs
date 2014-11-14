@@ -442,8 +442,7 @@ namespace Daphne
         }
 
         private void appendTimesAndConcs()
-        {
-            double[] defaultLoc = { 0.0, 0.0, 0.0 };
+        {            double[] defaultLoc = { 0.0, 0.0, 0.0 };
             Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
             hSim.ListTimes.Add(hSim.AccumulatedTime);
