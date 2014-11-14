@@ -52,7 +52,7 @@
             <!--GRAPH-->
             <StackPanel Grid.Column="0" Grid.Row="2" >
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 
-                    <wf:Panel x:Name="panelRC" Visible="False" />
+                    <wf:Panel x:Name="panelRC" Visible="True" />
                 </WindowsFormsHost>
             </StackPanel>
 
@@ -199,7 +199,7 @@
 
                 <GroupBox x:Name="ReportGroup" Margin="0,10">
                     <GroupBox.Header>
-                        <TextBlock Text="Reports" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="Reports"/>
                     </GroupBox.Header>
 
                     <StackPanel Orientation="Horizontal">
@@ -208,7 +208,6 @@
                 </GroupBox>-->
 
             </StackPanel>
-            
 
         </Grid>
     </ScrollViewer>

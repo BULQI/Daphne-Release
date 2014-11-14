@@ -305,7 +305,7 @@ namespace DaphneGui
             //    showExceptionBox(exceptionMessage(e));
             //}
 
-            ////This code re-generates the scenarios - DO NOT DELETE
+            //////This code re-generates the scenarios - DO NOT DELETE
             //try
             //{
             //    CreateAndSerializeDaphneProtocols();

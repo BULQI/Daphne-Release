@@ -79,12 +79,12 @@ namespace Workbench
                     Chart.DrawLine = true;
 
                     System.Windows.Forms.MenuItem[] menuItems = 
-                {   
-                    new System.Windows.Forms.MenuItem("Zoom in"),
-                    new System.Windows.Forms.MenuItem("Zoom out"),
-                    new System.Windows.Forms.MenuItem("Save Changes"),
-                    new System.Windows.Forms.MenuItem("Discard Changes"),
-                };
+                    {   
+                        new System.Windows.Forms.MenuItem("Zoom in"),
+                        new System.Windows.Forms.MenuItem("Zoom out"),
+                        new System.Windows.Forms.MenuItem("Save Changes"),
+                        new System.Windows.Forms.MenuItem("Discard Changes"),
+                    };
 
                     System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
                     Chart.SetContextMenu(menu);

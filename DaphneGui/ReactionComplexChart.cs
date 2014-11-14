@@ -446,6 +446,9 @@ namespace DaphneGui
             CalculateXMax();
             CalculateYMax();
 
+            Focus();
+            Invalidate();
+
             panelRC.Controls.Add(this);
         }
 

@@ -12,13 +12,6 @@
         MinHeight="120"
         >
 
-    <Window.CommandBindings>
-        <!--<CommandBinding Command=    "push:MyCommands.PushCommand"
-                        Executed=   "PushCommandExecuted"
-                        CanExecute= "PushCommandCanExecute"/>-->
-        
-    </Window.CommandBindings>
-
     <Window.Resources>
 
         <CollectionViewSource x:Key="pushMoleculesListView"
@@ -41,6 +34,7 @@
                     
                     <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                               ItemsSource="{Binding}" 
+                              LoadingRow="grid_LoadingRow"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -48,13 +42,14 @@
                                             CanExecute="PushCommandCanExecute"/>
 
                         </DataGrid.CommandBindings>
-                        
+
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" 
-                                              
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
-                            />
+                                 >
+                                
+                            </DataGridTextColumn>
                             <DataGridTemplateColumn Header="Diff Coeff" x:Name="colDiffCoeff" Width="90" MaxWidth="150">
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
@@ -105,7 +100,8 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgGenes" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                              ItemsSource="{Binding}">
+                              ItemsSource="{Binding}"
+                              LoadingRow="grid_LoadingRow">
 
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -158,7 +154,8 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}"  >
+                                ItemsSource="{Binding}" 
+                               LoadingRow="grid_LoadingRow">
                         
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -167,7 +164,7 @@
                         </DataGrid.CommandBindings>
                         
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn x:Name="colRate" Header="Radius" Width="100" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colRate" Header="Rate constant" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
@@ -202,7 +199,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgCell" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}"  >
+                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
 
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -249,7 +246,7 @@
                 <StackPanel>
                     <DataGrid x:Name="dgReacComp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                               SelectedItem="0"
-                                ItemsSource="{Binding}"  >
+                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
                                             Executed="PushCommandExecuted"
@@ -309,7 +306,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReacTemp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}"  >
+                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
@@ -319,7 +316,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgDiff" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}"  >
+                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
@@ -329,7 +326,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgTrans" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}"  >
+                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
                     </DataGrid>
                 </StackPanel>
             </StackPanel>

@@ -424,82 +424,47 @@ namespace Daphne
 
         public override void StartReporter(SimulationBase sim)
         {
-            //if (sim is VatReactionComplex == false)
-            //{
-            //    throw new InvalidCastException();
-            //}
+            if (sim is VatReactionComplex == false)
+            {
+                throw new InvalidCastException();
+            }
 
-            //hSim = sim as VatReactionComplex;
-            //hSim.DictGraphConcs.Clear();
-            //hSim.ListTimes.Clear();
+            hSim = sim as VatReactionComplex;
+            hSim.DictGraphConcs.Clear();
+            hSim.ListTimes.Clear();
 
-            //string header = "Vat molecular concentrations by time";
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
-            //vat_conc_file = createStreamWriter("conc_report", "txt");
-            //vat_conc_file.WriteLine("Vat molecule concentrations report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
-            //vat_conc_file.WriteLine(header);
-
-            //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-
-            //foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            //{
-            //    hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
-            //    vat_conc_file.Write("\t{0}", kvp.Value.Molecule.Name);
-            //}
-            //vat_conc_file.WriteLine();
-            
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
+            }
         }
 
         private void appendTimesAndConcs()
-        {
-            //double[] defaultLoc = { 0.0, 0.0, 0.0 };
-            //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+        {            double[] defaultLoc = { 0.0, 0.0, 0.0 };
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
-            //hSim.ListTimes.Add(hSim.AccumulatedTime);
-            ////vat_conc_file.WriteLine(hSim.AccumulatedTime);
-            //foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            //{
-            //    hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
-            //    //vat_conc_file.Write("\t{0:G4}", (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
-            //}
-            ////vat_conc_file.WriteLine();
+            hSim.ListTimes.Add(hSim.AccumulatedTime);
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+            }
         }
 
         public override void AppendReporter()
         {
-            //appendTimesAndConcs();
-        }
-
-        private void WriteConcs()
-        {
-            //double[] defaultLoc = { 0.0, 0.0, 0.0 };
-            //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-
-            ////foreach (double d in hSim.ListTimes)
-            ////{
-            //    vat_conc_file.WriteLine(hSim.AccumulatedTime);
-
-            //    foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            //    {
-            //        //vat_conc_file.Write("\t{0:G4}", (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
-            //        string name = kvp.Value.Molecule.Name;
-            //        double conc = kvp.Value.Conc.Value(defaultLoc);
-            //        vat_conc_file.Write("\t{0}: {1:G4}", name, conc);
-            //        //vat_conc_file.Write("\t{0}: {1:G4}", comp.Populations[kvp.Key].Molecule.Name, (comp.Populations[kvp.Key].Conc.Value(defaultLoc)));
-            //    }
-            //    vat_conc_file.WriteLine();
-            ////}
+            appendTimesAndConcs();
         }
 
         public override void CloseReporter()
         {
 
-            //if (vat_conc_file != null)
-            //{
-            //    WriteConcs();
-            //    vat_conc_file.Close();
-            //    vat_conc_file = null;
-            //}
+            if (vat_conc_file != null)
+            {
+                vat_conc_file.Close();
+                vat_conc_file = null;
+            }
         }
     }
 }
