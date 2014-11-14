@@ -33,10 +33,6 @@ namespace Workbench
         public MainWindow MW;       //handle to main window
         public bool redraw_flag;    //true if redraw and not creating a new chart
 
-        ////For testing
-        //public static byte TestMethod;
-        //public static byte TEST_BY_CONFIG = 0,
-        //                   TEST_BY_SIM = 1;
 
         public ChartViewToolWindow()
         {
@@ -47,10 +43,6 @@ namespace Workbench
             Chart.panelRC = panelRC;
             Chart.ToolWin = this;
             redraw_flag = false;
-
-            //TestMethod = ChartViewToolWindow.TEST_BY_CONFIG;
-
-
         }
 
         public void Render()
@@ -88,13 +80,9 @@ namespace Workbench
 
                     System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
                     Chart.SetContextMenu(menu);
-                    //menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
-                    //menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
 
                     btnIncSize.IsEnabled = true;
                     btnDecSize.IsEnabled = true;
-                    //btnDiscard.IsEnabled = true;
-                    //btnSave.IsEnabled = true;
 
                     Chart.Draw();
                 }
@@ -228,10 +216,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                //if (TestMethod == TEST_BY_CONFIG)
-                    MW.runButton_Click(null, null);
-                //else
-                //    MW.SimulationTestFunction();
+                MW.runButton_Click(null, null);
             }
         }
 
@@ -262,42 +247,10 @@ namespace Workbench
         {
             if (e.PropertyName == "Number")
             {
-                //if (significantChange() == true)
-                //{
-
-                //}
-
                 redraw_flag = true;
-
-                //if (TestMethod == TEST_BY_CONFIG)
-                    MW.runButton_Click(null, null);
-                //else
-                //    MW.SimulationTestFunction();
+                MW.runButton_Click(null, null);
             }
         }
-
-        //private bool significantChange()
-        //{
-        //    double d = CRC.
-        //    foreach (f
-
-
-        //    return true;
-        //}
-
-        //private void btnTest_Click(object sender, RoutedEventArgs e)
-        //{
-        //    //if (TestMethod == TEST_BY_SIM)
-        //    //{
-        //    //    TestMethod = TEST_BY_CONFIG;
-        //    //    txtTestMethod.Text = "Using Config";
-        //    //}
-        //    //else 
-        //    //{
-        //    //    TestMethod = TEST_BY_SIM;
-        //    //    txtTestMethod.Text = "Using Simulation";
-        //    //}
-        //}
 
         private void btnSaveReport_Click(object sender, RoutedEventArgs e)
         {
