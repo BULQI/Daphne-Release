@@ -136,5 +136,10 @@ namespace DaphneGui
         {
 
         }
+
+        private void integrator_step_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
     }
 }

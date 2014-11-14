@@ -439,6 +439,7 @@ namespace Daphne
             duration = protocol.scenario.time_config.duration;
             sampleStep = protocol.scenario.time_config.sampling_interval;
             renderStep = protocol.scenario.time_config.rendering_interval;
+            integratorStep = protocol.scenario.time_config.integrator_step;
             // make sure the simulation does not start to run immediately
             RunStatus = RUNSTAT_OFF;
 
@@ -858,7 +859,7 @@ namespace Daphne
         public TissueSimulation()
         {
             dataBasket = new DataBasket(this);
-            integratorStep = 0.001;
+            //integratorStep = 0.001;
             reporter = new TissueSimulationReporter();
             reset();
         }
@@ -1151,7 +1152,7 @@ namespace Daphne
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
-            integratorStep = 0.001;
+            //integratorStep = 0.001;
             reporter = new VatReactionComplexReporter();
             reset();
             listTimes = new List<double>();

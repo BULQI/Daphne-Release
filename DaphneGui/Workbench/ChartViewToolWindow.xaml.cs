@@ -79,12 +79,12 @@ namespace Workbench
                     Chart.DrawLine = true;
 
                     System.Windows.Forms.MenuItem[] menuItems = 
-                {   
-                    new System.Windows.Forms.MenuItem("Zoom in"),
-                    new System.Windows.Forms.MenuItem("Zoom out"),
-                    new System.Windows.Forms.MenuItem("Save Changes"),
-                    new System.Windows.Forms.MenuItem("Discard Changes"),
-                };
+                    {   
+                        new System.Windows.Forms.MenuItem("Zoom in"),
+                        new System.Windows.Forms.MenuItem("Zoom out"),
+                        new System.Windows.Forms.MenuItem("Save Changes"),
+                        new System.Windows.Forms.MenuItem("Discard Changes"),
+                    };
 
                     System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
                     Chart.SetContextMenu(menu);
@@ -268,20 +268,6 @@ namespace Workbench
                     MW.runButton_Click(null, null);
                 else
                     MW.SimulationTestFunction();
-            }
-        }
-
-        private void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            if (TestMethod == TEST_BY_SIM)
-            {
-                TestMethod = TEST_BY_CONFIG;
-                txtTestMethod.Text = "Using Config";
-            }
-            else 
-            {
-                TestMethod = TEST_BY_SIM;
-                txtTestMethod.Text = "Using Simulation";
             }
         }
 

@@ -144,6 +144,39 @@
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="integrator step" Margin="6,0"
+                            Grid.Column="0" Grid.Row="4"  
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            TextAlignment="Right"
+                            Width="120"
+                />
+                <Slider Name="integrator_step_slider"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Width="100"
+                        RenderTransform="1.0,0,0,0.5,0,7"
+                        Maximum="{Binding ElementName=time_duration_slider, Mode=OneWay, Path=Value}"
+                        Minimum="0.001"
+                        Value="{Binding Path=Protocol.scenario.time_config.integrator_step}" 
+                        IsSnapToTickEnabled="True" 
+                        TickFrequency="0.01" 
+                        KeyboardNavigation.IsTabStop="False"
+                        ValueChanged="integrator_step_slider_ValueChanged"
+                />
+                <editors:DoubleEditBox x:Name="IntegratorStep" 
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="N3"
+                                        StepValue="0.01"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=integrator_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                />
+                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+            </StackPanel>
+
             <StackPanel Orientation="Horizontal" Visibility="{Binding Path=SimRepetitionVisibility}">
                 <TextBlock Text="repetitions" Margin="6,0"
                                             Grid.Column="0" Grid.Row="5"  

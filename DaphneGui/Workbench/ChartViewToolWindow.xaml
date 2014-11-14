@@ -52,7 +52,7 @@
             <!--GRAPH-->
             <StackPanel Grid.Column="0" Grid.Row="2" >
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 
-                    <wf:Panel x:Name="panelRC" Visible="False" />
+                    <wf:Panel x:Name="panelRC" Visible="True" />
                 </WindowsFormsHost>
             </StackPanel>
 
@@ -183,23 +183,9 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <!--<Button x:Name="btnRefresh" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRefresh_Click" >Refresh</Button>-->
-
-
-                <GroupBox x:Name="TestGroup" Margin="0,10">
-                    <GroupBox.Header>
-                        <TextBlock Text="For Testing" FontWeight="Bold" FontSize="16"/>
-                    </GroupBox.Header>
-                    
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="btnTest" Width="150" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnTest_Click" >Change Test Method</Button>
-                        <TextBox x:Name="txtTestMethod" Width="150" Margin="10,8" Height="24" IsEnabled="False" Text="Config"></TextBox>
-                    </StackPanel>
-                </GroupBox>
-
                 <GroupBox x:Name="ReportGroup" Margin="0,10">
                     <GroupBox.Header>
-                        <TextBlock Text="Reports" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="Reports"/>
                     </GroupBox.Header>
 
                     <StackPanel Orientation="Horizontal">
@@ -208,7 +194,6 @@
                 </GroupBox>
 
             </StackPanel>
-            
 
         </Grid>
     </ScrollViewer>

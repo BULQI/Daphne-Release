@@ -258,6 +258,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 15;
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 10;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -420,6 +421,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 30;
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
@@ -596,6 +598,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -686,6 +689,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 100;
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             // Global Paramters
             //LoadEntitiesFromUserStore(protocol);
@@ -707,6 +711,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
+            protocol.scenario.time_config.integrator_step = 0.01;
         }
 
         public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
@@ -724,6 +729,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 10.0;
             protocol.scenario.time_config.rendering_interval = 0.1;
             protocol.scenario.time_config.sampling_interval = 0.1;
+            protocol.scenario.time_config.integrator_step = 0.01;
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
@@ -781,6 +787,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 100.0;
             protocol.scenario.time_config.rendering_interval = 2.0;
             protocol.scenario.time_config.sampling_interval = 1.0;
+            protocol.scenario.time_config.integrator_step = 0.01;
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
