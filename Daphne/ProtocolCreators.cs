@@ -711,7 +711,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.scenario.time_config.integrator_step = 0.001;
         }
 
         public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
