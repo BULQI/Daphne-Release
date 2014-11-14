@@ -481,7 +481,6 @@ namespace DaphneGui
             do
             {
                 // attempt to load a default simulation file; if it doesn't exist disable the gui
-                //skg daphne Wednesday, May 08, 2013
                 protocol_path = new Uri(appPath + @"\Config\" + file);
                 orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
 
@@ -532,8 +531,6 @@ namespace DaphneGui
 #if DATABASE_HOOKED_UP        
             this.menu_ActivateAnalysisChart.IsEnabled = false;
 #endif
-
-            // this.ProtocolSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
 
             if (file_exists)
             {
@@ -1041,33 +1038,6 @@ namespace DaphneGui
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
                     toolWin.LockSaveStartSim();
-                    //// hide the regions used to control Gaussians
-                    //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-                    //{
-                    //    GaussianSpecification next;
-
-                    //    ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
-                    //    while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
-                    //    {
-                    //        BoxSpecification box = next.box_spec;
-
-                    //        // Save current visibility statuses
-                    //        box.current_box_visibility = box.box_visibility;
-                    //        next.current_gaussian_region_visibility = next.gaussian_region_visibility;
-
-                    //        // Property changed notifications will take care of turning off the Widgets and Actors
-                    //        box.box_visibility = false;
-                    //        next.gaussian_region_visibility = false;
-                    //    }
-                    //}
-
-                    //// always reset the simulation for now to start at the beginning
-                    //if (Properties.Settings.Default.skipDataBaseWrites == false)
-                    //{
-                    //    DataBaseTools.CreateExpInDataBase();
-                    //    DataBaseTools.SaveCellSetIDs();
-                    //    DataBaseTools.CreateSaveAttributes();
-                    //}
 
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
@@ -1135,10 +1105,6 @@ namespace DaphneGui
         /// <param name="xmlConfigString">scenario as a string</param>
         private void lockAndResetSim(bool newFile, Protocol protocol)
         {
-            //skg
-            //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
-            //    return;
-
             // prevent when a fit is in progress
             lock (cellFitLock)
             {
@@ -1739,78 +1705,8 @@ namespace DaphneGui
             saveButton.IsEnabled = false;
             mutex = true;
 
-            //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            //{
-            //    ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
-            //    if (crc == null)
-            //    {
-            //        MessageBox.Show("Please select a reaction complex to process.");
-            //        return;
-            //    }
-            //    if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
-            //    {
-            //        sim.RunStatus = SimulationBase.RUNSTAT_OFF;
-            //    }
-
-                
-            //}
-
             runSim();
         }
-
-        //public void SimulationTestFunction()
-        //{
-        //    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
-        //    {
-        //        throw new InvalidCastException();
-        //    }
-            
-        //    VatReactionComplex vatSim = (VatReactionComplex)Sim;
-
-        //    // terminate the simulation thread first
-        //    if (simThread != null && simThread.IsAlive)
-        //    {
-        //        simThread.Suspend();
-        //    }
-
-        //    // start reporter
-        //    if (Properties.Settings.Default.skipDataBaseWrites == false)
-        //    {
-        //        sim.Reporter.StartReporter(sim);
-        //    }
-
-        //    //This resets the mol concs and reaction rates instead of reloading the whole simulation
-        //    vatSim.resetConcsAndRates(sop.Protocol);
-        //    vtkDataBasket.Cleanup();
-        //    vtkDataBasket.SetupVTKData(sop.Protocol);
-
-        //    double dt = sop.Protocol.scenario.time_config.sampling_interval;
-        //    double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
-        //    int nSteps = Math.Min((int)(sop.Protocol.scenario.time_config.duration / dt), 10000);
-
-        //    int interval = nSteps / 100;
-        //    if (interval == 0)
-        //        interval = 1;
-
-        //    for (int i = 1; i < nSteps; i++)
-        //    {
-        //        vatSim.Step(dt);
-        //        if (i % interval == 0)
-        //        {
-        //            vatSim.Reporter.AppendReporter();
-        //        }
-        //    }
-        //    ReacComplexChartWindow.Activate();
-        //    ReacComplexChartWindow.Render();
-
-        //    sim.Reporter.CloseReporter();
-
-        //    if (simThread != null)
-        //    {
-        //        simThread.Resume();
-        //    }
-            
-        //}
        
         /// <summary>
         /// save when simulation is paused state
@@ -2163,17 +2059,6 @@ namespace DaphneGui
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    //ToolWin = new ToolWinVatRC();
-                    //ToolWin.MW = this;
-                    //ToolWin.Protocol = SOP.Protocol;
-                    //ToolWin.Title = ToolWin.TitleText;
-
-                    //if (ProtocolToolWindowContainer.Items.Count > 0)
-                    //    ProtocolToolWindowContainer.Items.Clear();
-                    //ToolWinType = ToolWindowType.VatRC;
-                    //ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    //ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
-
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
@@ -2498,41 +2383,7 @@ namespace DaphneGui
             // TODO: Should probably combine these...
 
             gc.EnableComponents(finished);
-
-            //if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            //{
-            //    ReacComplexChartWindow.Tag = Sim;
-            //    ReacComplexChartWindow.MW = this;
-                
-            //    ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
-            //    if (crc == null)
-            //    {
-            //        MessageBox.Show("Please select a reaction complex to process..");
-            //        return;
-            //    }
-
-            //    ReacComplexChartWindow.DataContext = crc;
-            //    ReacComplexChartWindow.Activate();
-            //    ReacComplexChartWindow.Render();
-            //}
-
             toolWin.GUIUpdate(finished);
-
-            ////Set the box and blob visibilities to how they were pre-run
-            //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-            //{
-            //    GaussianSpecification next;
-
-            //    ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
-            //    while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
-            //    {
-            //        BoxSpecification box = next.box_spec;
-
-            //        // Save current visibility statuses
-            //        box.box_visibility = box.current_box_visibility;
-            //        next.gaussian_region_visibility = next.current_gaussian_region_visibility;
-            //    }
-            //}
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
@@ -2644,10 +2495,6 @@ namespace DaphneGui
             {
                 VTKDisplayDocWindow.Activate();
             }
-            //else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            //{
-            //    ReacComplexChartWindow.Activate();
-            //}
 
             //MessageBox.Show("In runSim()");
 
@@ -2741,47 +2588,37 @@ namespace DaphneGui
                 }
                 else
                 {
-                    //skg
-                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+                    MessageBoxResult result = toolWin.ScenarioContentChanged();
+                    // Process message box results
+                    switch (result)
                     {
-                        // Display message box
-                        MessageBoxResult result = saveDialog();
-
-                        // Process message box results
-                        switch (result)
-                        {
-                            case MessageBoxResult.Yes:
-                                sop.Protocol.SerializeToFile();
-                                orig_content = sop.Protocol.SerializeToStringSkipDeco();
-                                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+                        case MessageBoxResult.Yes:
+                            sop.Protocol.SerializeToFile();
+                            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+                            // initiating a run starts always at repetition 1
+                            repetition = 1;
+                            lockSaveStartSim(true);
+                            tempFileContent = false;
+                            break;
+                        case MessageBoxResult.No:
+                            if (saveScenarioUsingDialog() == true)
+                            {
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
                                 lockSaveStartSim(true);
                                 tempFileContent = false;
-                                break;
-                            case MessageBoxResult.No:
-                                if (saveScenarioUsingDialog() == true)
-                                {
-                                    // initiating a run starts always at repetition 1
-                                    repetition = 1;
-                                    lockSaveStartSim(true);
-                                    tempFileContent = false;
-                                }
-                                break;
-                            case MessageBoxResult.Cancel:
-                                // Do nothing...
-                                break;
-                        }
-                    }
-                    else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-                    {
-                        //sop.Protocol.SerializeToFile();
-                        //orig_content = sop.Protocol.SerializeToStringSkipDeco();
-                        orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-                        // initiating a run starts always at repetition 1
-                        repetition = 1;
-                        lockSaveStartSim(true);
-                        tempFileContent = false;
+                            }
+                            break;
+                        case MessageBoxResult.None:
+                            // initiating a run starts always at repetition 1
+                            repetition = 1;
+                            lockSaveStartSim(true);
+                            tempFileContent = false;
+                            break;
+                        case MessageBoxResult.Cancel:
+                            // Do nothing...
+                            break;
                     }
                 }
 
