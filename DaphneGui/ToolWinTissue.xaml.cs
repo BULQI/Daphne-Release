@@ -293,6 +293,7 @@ namespace DaphneGui
         /// <param name="e"></param>
         protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
+            // gmk - re-evaluate this section. Not sure if it is doing anything useful.
             toolWinTissue.lbRptCellPops.SelectedItem = 0;
             //toolWinTissue.dgEcmMols.SelectedItem = 0;
             //toolWinTissue.dgCellDetails.SelectedItem = 0;
