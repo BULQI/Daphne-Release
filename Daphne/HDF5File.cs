@@ -5,7 +5,7 @@ using System.Text;
 
 using HDF5DotNet;
 
-namespace TestHDF
+namespace Daphne
 {
     /// <summary>
     /// encapsulate the file and what it needs to know
