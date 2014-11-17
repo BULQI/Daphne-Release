@@ -405,7 +405,6 @@ namespace DaphneGui
             autoZoomFitMenu.IsChecked = Properties.Settings.Default.autoZoomFit;
             openLastScenarioMenu.IsChecked = Properties.Settings.Default.lastOpenScenario != "";
             skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataBaseWrites;
-            SystemOfPersistence.changesCounter = Properties.Settings.Default.changesCounter;
             // TEMP_SUMMARY
             writeCellSummariesMenu.IsChecked = Properties.Settings.Default.writeCellsummaries;
 
@@ -510,8 +509,8 @@ namespace DaphneGui
                     if (!Directory.Exists(SkinFolderPath))
                     {
                         Directory.CreateDirectory(SkinFolderPath);
-                        RenderSkin sk = new RenderSkin("default", null);
-                        sk.FileName = SkinFolderPath + "default.json";
+                        RenderSkin sk = new RenderSkin("default_skin", null);
+                        sk.FileName = SkinFolderPath + "default_skin.json";
                         sop.SkinList.Add(sk);
                     }
 
@@ -531,8 +530,8 @@ namespace DaphneGui
                     //create a default if none exxists
                     if (sop.SkinList.Count == 0)
                     {
-                        RenderSkin sk = new RenderSkin("default", null);
-                        sk.FileName = SkinFolderPath + "default.json";
+                        RenderSkin sk = new RenderSkin("default_skin", null);
+                        sk.FileName = SkinFolderPath + "default_skin.json";
                         sk.SerializeToFile();
                         sop.SkinList.Add(sk);
                     }
@@ -2866,9 +2865,6 @@ namespace DaphneGui
             {
                 Properties.Settings.Default.lastOpenScenario = extractFileName();
             }
-
-            // remember the changes counter
-            Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
 
             // save the preferences
             Properties.Settings.Default.Save();

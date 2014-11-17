@@ -173,15 +173,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigMolecule mol in left)
                     {
-                        ConfigMolecule mol2 = FindMolInList(right, mol);
-                        if (mol2 == null) {
-                            filtered_mol_list.Add(mol);
-                        }
-                        else {
-                            if (mol.change_stamp != mol2.change_stamp) {
-                                filtered_mol_list.Add(mol);
-                            }
-                        }
+                        filtered_mol_list.Add(mol);
                     }
                     return filtered_mol_list;
                 case PushLevelEntityType.Gene:
@@ -191,16 +183,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigGene gene in left2)
                     {
-                        ConfigGene gene2 = FindGeneInList(right2, gene);
-                        if (gene2 == null) {
-                            filtered_gene_list.Add(gene);
-                        }
-                        else {
-                            if (gene.change_stamp != gene2.change_stamp)
-                            {
-                                filtered_gene_list.Add(gene);
-                            }
-                        }
+                        filtered_gene_list.Add(gene);
                     }
                     return filtered_gene_list;
                 case PushLevelEntityType.Reaction:
@@ -210,17 +193,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigReaction reac in left3)
                     {
-                        ConfigReaction reac2 = FindReactionInList(right3, reac);
-                        if (reac2 == null)
-                        {
-                            filtered_reac_list.Add(reac);
-                        }
-                        else {
-                            if (reac.change_stamp != reac2.change_stamp)
-                            {
-                                filtered_reac_list.Add(reac);
-                            }
-                        }
+                        filtered_reac_list.Add(reac);
                     }
                     return filtered_reac_list;
                 case PushLevelEntityType.Cell:
@@ -230,17 +203,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigCell cell in left4)
                     {
-                        ConfigCell cell2 = FindCellInList(right4, cell);
-                        if (cell2 == null)
-                        {
-                            filtered_cell_list.Add(cell);
-                        }
-                        else {
-                            if (cell.change_stamp != cell2.change_stamp)
-                            {
-                                filtered_cell_list.Add(cell);
-                            }
-                        }
+                        filtered_cell_list.Add(cell);
                     }
                     return filtered_cell_list;
                 case PushLevelEntityType.ReactionComplex:
@@ -249,17 +212,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigReactionComplex> filtered_rc_list = new ObservableCollection<ConfigReactionComplex>();
                     foreach (ConfigReactionComplex rc in left5)
                     {
-                        ConfigReactionComplex rc2 = FindReacCompInList(right5, rc);
-                        if (rc2 == null)
-                        {
-                            filtered_rc_list.Add(rc);
-                        }
-                        else {
-                            if (rc.change_stamp != rc2.change_stamp)
-                            {
-                                filtered_rc_list.Add(rc);
-                            }
-                        }
+                        filtered_rc_list.Add(rc);
                     }
                     return filtered_rc_list;
                 case PushLevelEntityType.ReactionTemplate:
@@ -268,18 +221,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigReactionTemplate> filtered_rt_list = new ObservableCollection<ConfigReactionTemplate>();
                     foreach (ConfigReactionTemplate rt in left6)
                     {
-                        ConfigReactionTemplate rt2 = FindReacTempInList(right6, rt);
-                        if (rt2 == null)
-                        {
-                            filtered_rt_list.Add(rt);
-                        }
-                        else
-                        {
-                            if (rt.change_stamp != rt2.change_stamp)
-                            {
-                                filtered_rt_list.Add(rt);
-                            }
-                        }
+                        filtered_rt_list.Add(rt);
                     }
                     return filtered_rt_list;
                 case PushLevelEntityType.TransDriver:
@@ -288,18 +230,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigTransitionDriver> filtered_td_list = new ObservableCollection<ConfigTransitionDriver>();
                     foreach (ConfigTransitionDriver td in left7)
                     {
-                        ConfigTransitionDriver td2 = FindTransDriverInList(right7, td);
-                        if (td2 == null)
-                        {
-                            filtered_td_list.Add(td);
-                        }
-                        else
-                        {
-                            if (td.change_stamp != td2.change_stamp)
-                            {
-                                filtered_td_list.Add(td);
-                            }
-                        }
+                        filtered_td_list.Add(td);
                     }
                     return filtered_td_list;
                 case PushLevelEntityType.DiffScheme:
@@ -308,18 +239,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigDiffScheme> filtered_ds_list = new ObservableCollection<ConfigDiffScheme>();
                     foreach (ConfigDiffScheme ds in left8)
                     {
-                        ConfigDiffScheme ds2 = FindDiffSchemeInList(right8, ds);
-                        if (ds2 == null)
-                        {
-                            filtered_ds_list.Add(ds);
-                        }
-                        else
-                        {
-                            if (ds.change_stamp != ds2.change_stamp)
-                            {
-                                filtered_ds_list.Add(ds);
-                            }
-                        }
+                        filtered_ds_list.Add(ds);
                     }
                     return filtered_ds_list;
 
@@ -339,14 +259,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigMolecule mol in right)
                     {
-                        ConfigMolecule mol2 = FindMolInList(left, mol);
-                        if (mol2 != null)
-                        {
-                            if (mol.change_stamp != mol2.change_stamp)
-                            {
-                                filtered_mol_list.Add(mol);
-                            }
-                        }
+                        filtered_mol_list.Add(mol);
                     }
                     return filtered_mol_list;
                 case PushLevelEntityType.Gene:
@@ -356,11 +269,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigGene gene in right2)
                     {
-                        ConfigGene gene2 = FindGeneInList(left2, gene);
-                        if (gene.change_stamp != gene2.change_stamp)
-                            {
-                                filtered_gene_list.Add(gene);
-                            }
+                        filtered_gene_list.Add(gene);
                     }
                     return filtered_gene_list;
                 case PushLevelEntityType.Reaction:
@@ -370,11 +279,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigReaction reac in right3)
                     {
-                        ConfigReaction reac2 = FindReactionInList(left3, reac);
-                        if (reac.change_stamp != reac2.change_stamp)
-                            {
-                                filtered_reac_list.Add(reac);
-                            }
+                        filtered_reac_list.Add(reac);
                     }
                     return filtered_reac_list;
                 case PushLevelEntityType.Cell:
@@ -384,11 +289,7 @@ namespace DaphneGui.Pushing
 
                     foreach (ConfigCell cell in right4)
                     {
-                        ConfigCell cell2 = FindCellInList(left4, cell);
-                        if (cell.change_stamp != cell2.change_stamp)
-                            {
-                                filtered_cell_list.Add(cell);
-                            }
+                        filtered_cell_list.Add(cell);
                     }
                     return filtered_cell_list;
                 case PushLevelEntityType.ReactionComplex:
@@ -397,11 +298,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigReactionComplex> filtered_rc_list = new ObservableCollection<ConfigReactionComplex>();
                     foreach (ConfigReactionComplex rc in right5)
                     {
-                        ConfigReactionComplex rc2 = FindReacCompInList(left5, rc);
-                        if (rc.change_stamp != rc2.change_stamp)
-                        {
-                            filtered_rc_list.Add(rc);
-                        }
+                        filtered_rc_list.Add(rc);
                     }
                     return filtered_rc_list;
                 case PushLevelEntityType.ReactionTemplate:
@@ -410,12 +307,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigReactionTemplate> filtered_rt_list = new ObservableCollection<ConfigReactionTemplate>();
                     foreach (ConfigReactionTemplate rt in right6)
                     {
-                        ConfigReactionTemplate rt2 = FindReacTempInList(left6, rt);
-                        
-                            if (rt.change_stamp != rt2.change_stamp)
-                            {
-                                filtered_rt_list.Add(rt);
-                            }
+                        filtered_rt_list.Add(rt);
                     }
                     return filtered_rt_list;
                 case PushLevelEntityType.TransDriver:
@@ -424,11 +316,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigTransitionDriver> filtered_td_list = new ObservableCollection<ConfigTransitionDriver>();
                     foreach (ConfigTransitionDriver td in right7)
                     {
-                        ConfigTransitionDriver td2 = FindTransDriverInList(left7, td);
-                        if (td.change_stamp != td2.change_stamp)
-                        {
-                            filtered_td_list.Add(td);
-                        }
+                        filtered_td_list.Add(td);
                     }
                     return filtered_td_list;
                 case PushLevelEntityType.DiffScheme:
@@ -437,11 +325,7 @@ namespace DaphneGui.Pushing
                     ObservableCollection<ConfigDiffScheme> filtered_ds_list = new ObservableCollection<ConfigDiffScheme>();
                     foreach (ConfigDiffScheme ds in right8)
                     {
-                        ConfigDiffScheme ds2 = FindDiffSchemeInList(left8, ds);
-                        if (ds.change_stamp != ds2.change_stamp)
-                        {
-                            filtered_ds_list.Add(ds);
-                        }
+                        filtered_ds_list.Add(ds);
                 }
                     return filtered_ds_list;
                 default:
@@ -561,14 +445,7 @@ namespace DaphneGui.Pushing
                 e.Accepted = true;
                 return;
             }
-            else if (source_mol.change_stamp != dest_mol.change_stamp)
-            {
-                e.Accepted = true;
-            }
-            else
-            {
-                e.Accepted = false;
-            }
+            e.Accepted = true;
         }
 
         private void LevelAComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -704,16 +581,6 @@ namespace DaphneGui.Pushing
                     //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
                     //    return;
                     //}
-
-                    while (ConfigMolecule.FindMoleculeByName(LevelB.entity_repository, newmol.Name) == true)
-                    {
-                        string entered_name = newmol.Name;
-                        newmol.ValidateName(MainWindow.SOP.Protocol);
-                        MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
-                        AddEditMolecule aem = new AddEditMolecule(newmol, MoleculeDialogType.NEW);
-
-                    }
-
                     levelB.repositoryPush(newmol, status);
                     break;
                 case PushLevelEntityType.Gene:
