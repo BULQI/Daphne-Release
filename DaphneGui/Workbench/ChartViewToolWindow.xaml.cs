@@ -189,22 +189,6 @@ namespace Workbench
         //    //    Chart.SaveChanges();
         //    //}
         //}
-        
-#if OLD_RC
-        //DELETE?
-        //private string GetNumerics(string input)
-        //{
-        //    var sb = new StringBuilder();
-        //    string goodChars = "0123456789.eE+-";
-        //    foreach (var c in input)
-        //    {                
-        //        if (goodChars.IndexOf(c) >=0 )
-        //            sb.Append(c);
-        //    }
-        //    string output = sb.ToString();
-        //    return output;
-        //}
-#endif
 
         /// <summary>
         /// This handler is called if user changes a reaction rate by slider or in text box
