@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 
 using Daphne;
 using DaphneUserControlLib;
+using System.IO;
 
 namespace DaphneGui
 {
@@ -492,6 +493,8 @@ namespace DaphneGui
                         break;
 
                     case MolPopDistributionType.Explicit:
+                        MolPopExplicit mpe = new MolPopExplicit();
+                        current_mol.mp_distribution = mpe;
                         break;
 
                     default:
@@ -621,6 +624,56 @@ namespace DaphneGui
             lbEcsMolPops.SelectedIndex = 0;
         }
 
+        private void MolPopBrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Configure open file dialog box
+            Uri uri = MainWindow.protocol_path;
+            
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.InitialDirectory = System.IO.Path.GetDirectoryName(uri.AbsolutePath);
+
+            dlg.DefaultExt = ".csv"; // Default file extension
+            dlg.Filter = "CSV docs (.csv)|*.csv;*.txt"; // Filter files by extension
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
+            MolPopExplicit mpe = cmp.mp_distribution as MolPopExplicit;
+
+            //initialize all ('how many' depends on grid step) concs to zero
+            int totalExpectedValues = envHandle.NumGridPts[0] * envHandle.NumGridPts[1] * envHandle.NumGridPts[2];
+            mpe.conc = new double[totalExpectedValues];
+            for (int i = 0; i < totalExpectedValues; i++)
+            {
+                mpe.conc[i] = 0;
+            }   
+            
+            Nullable<bool> result = dlg.ShowDialog();   //this allows user to choose a csv file                   
+            if (result == true)
+            {
+                mpe.MolFileName = dlg.FileName;
+                mpe.Load(envHandle.NumGridPts);
+            }
+            
+        }
+
+        private void MolPopLoadButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
+            MolPopExplicit mpe = cmp.mp_distribution as MolPopExplicit;
+
+            //initialize all (depends on grid step) concs to zero
+            int totalExpectedValues = envHandle.NumGridPts[0] * envHandle.NumGridPts[1] * envHandle.NumGridPts[2];
+            mpe.conc = new double[totalExpectedValues];
+            for (int i = 0; i < totalExpectedValues; i++)
+            {
+                mpe.conc[i] = 0;
+            }
+            mpe.Load(envHandle.NumGridPts);
+                
+        }
 
     }
+
+
 }

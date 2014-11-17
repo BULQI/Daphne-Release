@@ -7238,9 +7238,105 @@ namespace Daphne
         public MolPopExplicit()
         {
             mp_distribution_type = MolPopDistributionType.Explicit;
+            Description = "";
+            MolFileName = "";
         }
 
         public double[] conc;
+        public string Description { get; set; }
+
+        private string molFileName;
+        public string MolFileName
+        {
+            get
+            {
+                return molFileName;
+            }
+            set
+            {
+                if (molFileName != value)
+                {
+                    molFileName = value;
+                    OnPropertyChanged("MolFileName");
+                }
+            }
+        }
+
+        public void Load(int[] numGridPoints)
+        {
+            if (MolFileName == null || MolFileName.Length == 0)
+            {
+                MessageBox.Show("File name not specified. \nAll molecular concentrations set to zero.", "File not specified", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (File.Exists(MolFileName) == false)
+            {
+                MessageBox.Show(string.Format("File not found:  {0}. \nAll molecular concentrations set to zero.", MolFileName), "File not found", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string readText = File.ReadAllText(MolFileName);
+            if (readText.Length == 0)
+            {
+                MessageBox.Show(string.Format("Input file is empty:  {0}. \nAll molecular concentrations set to zero.", MolFileName), "Empty file", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            double[] readconcs;
+            try
+            {
+                readconcs = readText.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(s => double.Parse(s)).ToArray();
+            }
+            catch (FormatException e) 
+            {
+                MessageBox.Show(string.Format("This file contains invalid data. \nAll molecular concentrations set to zero."),
+                   "Invalid data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            catch (OverflowException ex)
+            {
+                MessageBox.Show(string.Format("This file contains a value that is out of range. \nAll molecular concentrations set to zero."),
+                   "Data out of range", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            //at this point, we have a file with valid double values
+            //call input validator to check for other problems
+            if (validateInput(numGridPoints, readconcs) == true)
+            {
+                //This means input values are valid so copy them            
+                conc = readconcs;
+                MessageBox.Show("File successfully loaded.", "Load succeeded", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private bool validateInput(int[] numGridPoints, double[] readconcs)
+        {
+            int actualValuesInFile = readconcs.Length;
+            int totalExpectedValues = numGridPoints[0] * numGridPoints[1] * numGridPoints[2];
+
+            //Check for negative numbers
+            if (readconcs.Where(s => s < 0).Any())
+            {
+                MessageBox.Show(string.Format("This file contains negative values. \nAll molecular concentrations set to zero."),
+                    "Invalid number of points", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            //Check for invalid number of entries - if more entries exist than needed, then we just use as many values as provided
+            else if (actualValuesInFile < totalExpectedValues)
+            {
+                MessageBox.Show(string.Format("This file contains {0} values. The number of expected values is: {1}. \nAll molecular concentrations set to zero.", actualValuesInFile, totalExpectedValues),
+                    "Invalid number of points", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }            
+            //OK
+            else
+            {
+                return true;
+            }
+
+        }
     }
 
     public class GaussianSpecification : EntityModelBase

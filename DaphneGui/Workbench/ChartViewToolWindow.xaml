@@ -50,9 +50,9 @@
             </StackPanel>
             
             <!--GRAPH-->
-            <StackPanel Grid.Column="0" Grid.Row="2" >
+            <StackPanel Grid.Column="0" Grid.Row="2" MinHeight="300" MinWidth="500">
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 
-                    <wf:Panel x:Name="panelRC" Visible="True" />
+                    <wf:Panel x:Name="panelRC" Visible="True"  />
                 </WindowsFormsHost>
             </StackPanel>
 

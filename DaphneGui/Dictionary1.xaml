@@ -448,7 +448,7 @@
 
                 <StackPanel Orientation="Horizontal" Margin="20,0">
 
-                    <uc:DoublesBox      HorizontalAlignment="Left"
+                    <uc:DoublesBox     HorizontalAlignment="Left"
                                                 TextFieldWidth="100"
                                                 Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
                                                 DecimalPlaces="2" 
