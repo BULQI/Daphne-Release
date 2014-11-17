@@ -849,26 +849,10 @@ namespace DaphneGui
                 sop.Protocol.entity_repository.reaction_complexes.Add(crc);
             }
 
-#if OLD_RC
-           foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
-            {
-                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule.entity_guid];
-                sop.Protocol.entity_repository.molecules.Add(configMol);
-                //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
-            }
-            foreach (ConfigGene configGenePop in crc.genes)
-            {
-                ConfigGene configGen = protocol.entity_repository.genes_dict[configGenePop.entity_guid];
-
-                sop.Protocol.entity_repository.genes.Add(configGen);
-                //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
-            }
-#else
             foreach (ConfigMolecule cm in crc.molecules_dict.Values)
             {
                 sop.Protocol.entity_repository.molecules.Add(cm.Clone(null));
             }
-#endif
 
             //Reactions in the reaction complex
             foreach (ConfigReaction cr in crc.reactions)
@@ -878,9 +862,6 @@ namespace DaphneGui
                 cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
                 sop.Protocol.entity_repository.reactions.Add(cr);
             }
-
-            ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tabLibraries;
-
             ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
         }
 
