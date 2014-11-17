@@ -83,5 +83,32 @@ namespace DaphneGui
         {
             GetMolsInAllRCs();
         }
+
+        public override void GUIUpdate(bool finished)
+        {
+            if (finished)
+            {
+                MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
+                MW.ReacComplexChartWindow.MW = MW;
+                MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
+                MW.ReacComplexChartWindow.Activate();
+                MW.ReacComplexChartWindow.Render();
+            }
+        }
+
+        public override void LockSaveStartSim()
+        {
+        }
+
+        /// <summary>
+        /// VatRC skips the dialog for saving the Protocol because of the interactive real-time controls.
+        /// gmk - Still need to workout mechanisms for reminding users to save Protocols before exiting.
+        /// </summary>
+        /// <returns></returns>
+        public override MessageBoxResult ScenarioContentChanged()
+        {
+            return MessageBoxResult.None;
+        }
+
     }
 }

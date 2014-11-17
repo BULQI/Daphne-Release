@@ -217,13 +217,6 @@ namespace DaphneGui
                 {
                     crc.reactions.Add(reac);
                     crc.RefreshMolPops(reac);
-#if OLD_RC
-                    ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.entity_guid = reac.entity_guid;
-                    pair.OriginalRate = reac.rate_const;
-                    pair.ReactionComplexRate = pair.OriginalRate;
-                    crc.ReactionRates.Add(pair);
-#endif
                 }
                 MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crc);
             }

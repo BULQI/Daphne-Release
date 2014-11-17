@@ -137,20 +137,30 @@ namespace Daphne
 
             for (int i = 0; i < totalReactionString.Length; i++)
             {
-                ConfigReaction configReaction = findReaction(totalReactionString[i], userstore);
-    
+                // Check whether this reaction has already been added to the protocol ER. If not, add it.
+                if (findReaction(totalReactionString[i], protocol) == null)
+                {
+                    ConfigReaction configReaction = findReaction(totalReactionString[i], userstore);
                     if (configReaction != null)
                     {
                         ConfigReaction newReac = configReaction.Clone(true);
                         protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
 
+                        // Add the reaction template associated with this reaction
                         string reacTemplateGuid = newReac.reaction_template_guid_ref;
-                        ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
-                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
-                        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
-
+                        // Check whether this reaction template is already added to the protocol ER. If not, add it.
+                        if (findReactionTemplateByGuid(reacTemplateGuid, protocol) == null)
+                        {
+                            ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
+                            if (configReacTemplate != null)
+                            {
+                                ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
+                                protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+                            }
+                        }
                         itemsLoaded++;
                     }
+                }
             }
 
             return itemsLoaded;
@@ -711,7 +721,7 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.scenario.time_config.integrator_step = 0.001;
         }
 
         public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
@@ -724,19 +734,18 @@ namespace Daphne
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
-            protocol.experiment_name = "Ligand Receptor Vat RC";
-            protocol.experiment_description = "...";
-            protocol.scenario.time_config.duration = 10.0;
-            protocol.scenario.time_config.rendering_interval = 0.1;
-            protocol.scenario.time_config.sampling_interval = 0.1;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.experiment_description = "chemotactic receptor/ligand binding";
+            protocol.scenario.time_config.duration = 1.0;
+            protocol.scenario.time_config.rendering_interval = 0.02;
+            protocol.scenario.time_config.sampling_interval = 0.02;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // bulk molecules
-            string[] item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            string[] item = new string[] { "CXCL13", "CXCR5", "CXCL13:CXCR5", "CXCL12", "CXCR4", "CXCL12:CXCR4" };
             int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
             if (itemsLoaded != item.Length)
             {
@@ -744,8 +753,10 @@ namespace Daphne
             }
 
             // reactions
-            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
-                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+            item = new string[] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5",
+                                  "CXCL12 + CXCR4 -> CXCL12:CXCR4",
+                                  "CXCL12:CXCR4 -> CXCL12 + CXCR4" };
             itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
@@ -753,9 +764,13 @@ namespace Daphne
             }
 
             // RC
-            item = new string[1] { "Ligand/Receptor" };
+            item = new string[] { "CXCL13/CXCR5 binding", "CXCL12/CXCR4 binding" };
             itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
-            
+            if (itemsLoaded != item.Count())
+            {
+                System.Windows.MessageBox.Show("Unable to load all reaction complexes.");
+            }
+
             //This adds RC to envHandle.comp
             for (int i = 0; i < item.Length; i++)
             {
@@ -769,8 +784,65 @@ namespace Daphne
                 }
             }
 
-            protocol.reporter_file_name = "Vat";
+            protocol.reporter_file_name = "Vat_LigandReceptor";
         }
+
+        //public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
+        //{
+        //    if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+        //    {
+        //        throw new InvalidCastException();
+        //    }
+
+        //    ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+        //    // Experiment
+        //    protocol.experiment_description = "CXCL13/CXCR5 binding";
+        //    protocol.scenario.time_config.duration = 1.0;
+        //    protocol.scenario.time_config.rendering_interval = 0.02;
+        //    protocol.scenario.time_config.sampling_interval = 0.02;
+        //    protocol.scenario.time_config.integrator_step = 0.001;
+
+        //    //Load needed entities from User Store
+        //    Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+        //    userstore = userstore.Deserialize();
+
+        //    // bulk molecules
+        //    string[] item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+        //    int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+        //    if (itemsLoaded != item.Length)
+        //    {
+        //        System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+        //    }
+
+        //    // reactions
+        //    item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+        //                          "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+        //    itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+        //    if (itemsLoaded != item.Length)
+        //    {
+        //        System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+        //    }
+
+        //    // RC
+        //    item = new string[1] { "Ligand/Receptor" };
+        //    itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
+            
+        //    //This adds RC to envHandle.comp
+        //    for (int i = 0; i < item.Length; i++)
+        //    {
+        //        foreach (ConfigReactionComplex ent in protocol.entity_repository.reaction_complexes)
+        //        {
+        //            if (ent.Name == item[i])
+        //            {
+        //                envHandle.comp.reaction_complexes.Add(ent.Clone(true));
+        //                break;
+        //            }
+        //        }
+        //    }
+
+        //    protocol.reporter_file_name = "Vat";
+        //}
 
         public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)
         {
@@ -783,11 +855,11 @@ namespace Daphne
 
             // Experiment
             protocol.experiment_name = "SPR Vat RC";
-            protocol.experiment_description = "...";
+            protocol.experiment_description = "Simulation of two-state receptor binding to ligand.";
             protocol.scenario.time_config.duration = 100.0;
             protocol.scenario.time_config.rendering_interval = 2.0;
             protocol.scenario.time_config.sampling_interval = 1.0;
-            protocol.scenario.time_config.integrator_step = 0.01;
+            protocol.scenario.time_config.integrator_step = 0.001;
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
@@ -974,7 +1046,7 @@ namespace Daphne
             envHandle.comp.reaction_complexes.Add(configRC);
             //envHandle.comp.reaction_complexes_dict.Add(configRC.entity_guid, configRC);
 
-            protocol.reporter_file_name = "Vat 2 site ab binding";
+            protocol.reporter_file_name = "Vat_2site_ab_binding";
 
 
 
@@ -2625,7 +2697,7 @@ namespace Daphne
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
 
             //MOLECULES
-            double[] conc = new double[3] { 0.0304, 1, 0 };
+            double[] conc = new double[3] { 2, 1, 0 };
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
@@ -2661,17 +2733,7 @@ namespace Daphne
 
                 if (reac != null)
                 {
-#if OLD_RC
-                    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                    grp.entity_guid = reac.entity_guid;
-                    grp.OriginalRate = reac.rate_const;
-                    grp.ReactionComplexRate = reac.rate_const;
-#endif
-
                     crc.reactions.Add(reac.Clone(true));
-#if OLD_RC
-                    crc.ReactionRates.Add(grp);
-#endif
                 }
             }
 
@@ -2682,7 +2744,7 @@ namespace Daphne
             crc = new ConfigReactionComplex("CXCL12/CXCR4 binding");
 
             //MOLECULES
-            conc = new double[3] { 0.03, 1, 0 };
+            conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL12", "CXCR4", "CXCL12:CXCR4" };
 
             for (int i = 0; i < type.Length; i++)
@@ -2729,7 +2791,7 @@ namespace Daphne
             crc = new ConfigReactionComplex("CXCL13/CXCR5 binding");
 
             //MOLECULES
-            conc = new double[3] { 0.03, 1, 0 };
+            conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
@@ -3168,6 +3230,19 @@ namespace Daphne
                 if (cr.entity_guid == guid) 
                 {
                     return cr;
+                }
+            }
+            return null;
+        }
+
+        // given a reaction guid, return the ConfigReaction 
+        public static ConfigReactionTemplate findReactionTemplateByGuid(string guid, Protocol protocol)
+        {
+            foreach (ConfigReactionTemplate crt in protocol.entity_repository.reaction_templates)
+            {
+                if (crt.entity_guid == guid)
+                {
+                    return crt;
                 }
             }
             return null;
