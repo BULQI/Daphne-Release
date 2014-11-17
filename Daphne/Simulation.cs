@@ -896,12 +896,6 @@ namespace Daphne
             {
                 return;
             }
-#if OLD_RC
-            if (is_reaction_complex == true)
-            {
-                scenarioHandle = protocol.rc_scenario;
-            }
-#endif
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.Environment = SimulationModule.kernel.Get<ECSEnvironment>();
@@ -1091,7 +1085,6 @@ namespace Daphne
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
-            //integratorStep = 0.001;
             reporter = new VatReactionComplexReporter();
             reset();
             listTimes = new List<double>();

@@ -1337,9 +1337,6 @@ namespace Daphne
         public string experiment_guid { get; set; }
         public string experiment_description { get; set; }
         public ScenarioBase scenario { get; set; }
-#if OLD_RC
-        public TissueScenario rc_scenario { get; set; }
-#endif
         public SimulationParams sim_params { get; set; }
         public string reporter_file_name { get; set; }
 
@@ -1380,9 +1377,7 @@ namespace Daphne
             {
                 throw new NotImplementedException();
             }
-#if OLD_RC
-            rc_scenario = new TissueScenario();
-#endif
+
             sim_params = new SimulationParams();
 
             //////LoadDefaultGlobalParameters();
@@ -5096,10 +5091,6 @@ namespace Daphne
         }
 
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-#if OLD_RC
-        public ObservableCollection<ConfigGene> genes { get; set; }        
-        public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; } 
-#endif
 
         [JsonIgnore]
         public Dictionary<string, ConfigReaction> reactions_dict;
@@ -5115,16 +5106,10 @@ namespace Daphne
             Name = name;
             reactions = new ObservableCollection<ConfigReaction>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
-#if OLD_RC
-            genes = new ObservableCollection<ConfigGene>();
-#endif
             reactions_dict = new Dictionary<string, ConfigReaction>();
             reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
             molecules_dict = new Dictionary<string, ConfigMolecule>();
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
-#if OLD_RC
-            ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
-#endif
         }
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -5306,37 +5291,11 @@ namespace Daphne
         {
             return molecules_dict.ContainsKey(guid);
         }
-#if OLD_RC
-        private bool HasGene(string guid)
-        {
-            foreach (ConfigGene gene in genes)
-            {
-                if (gene.entity_guid == guid)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-#endif
 
         private void CreateReactionMolpops(ConfigReaction reac, ObservableCollection<string> mols)
         {
             foreach (string molguid in mols)
             {
-#if OLD_RC
-               if (er.genes_dict.ContainsKey(molguid))
-                {
-                    if (HasGene(molguid) == false)
-                    {
-                        ConfigGene configGene = new ConfigGene(er.genes_dict[molguid].Name, er.genes_dict[molguid].CopyNumber, er.genes_dict[molguid].ActivationLevel);
-                        configGene.entity_guid = er.genes_dict[molguid].entity_guid;
-                        genes.Add(configGene);
-                    }
-                }
-                else
-#endif
                 if (molecules_dict.ContainsKey(molguid) == true)
                 {
                     ConfigMolecule configMolecule = molecules_dict[molguid];
