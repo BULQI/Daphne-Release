@@ -282,7 +282,7 @@
                         </DataGrid.CommandBindings>
 
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn x:Name="colRate" Header="Radius" Width="100" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colRate" Header="Reaction rate" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>

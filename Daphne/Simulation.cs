@@ -1082,6 +1082,19 @@ namespace Daphne
             }
         }
 
+        public bool generateReport;
+        public ReporterBase Reporter
+        {
+            get
+            {
+                return reporter;
+            }
+            set
+            {
+                reporter = value;
+            }
+        }
+
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
@@ -1089,6 +1102,7 @@ namespace Daphne
             reset();
             listTimes = new List<double>();
             dictGraphConcs = new Dictionary<string, List<double>>();
+            generateReport = false;
         }
 
         public override void Load(Protocol protocol, bool completeReset)
@@ -1100,7 +1114,6 @@ namespace Daphne
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
-            // call the base
             base.Load(protocol, completeReset);
 
             // exit if no reset required
@@ -1116,7 +1129,6 @@ namespace Daphne
             dataBasket.Clear();
 
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
@@ -1141,7 +1153,7 @@ namespace Daphne
 
         public override void RunForward()
         {
-            base.RunForward();
+                base.RunForward();
         }
 
         protected override int linearDistributionCase(int dim)

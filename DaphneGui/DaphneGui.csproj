@@ -229,9 +229,6 @@
     </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
-    <Compile Include="ReportVatRC.xaml.cs">
-      <DependentUpon>ReportVatRC.xaml</DependentUpon>
-    </Compile>
     <Compile Include="RenderSkinEditor.xaml.cs">
       <DependentUpon>RenderSkinEditor.xaml</DependentUpon>
     </Compile>
@@ -347,10 +344,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RenderSkinEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ReportVatRC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

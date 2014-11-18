@@ -2706,7 +2706,7 @@ namespace Daphne
 
                 if (configMolecule != null)
                 {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
@@ -2716,7 +2716,7 @@ namespace Daphne
                     configMolPop.mp_distribution = hl;
 
                     // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
 
                     crc.molpops.Add(configMolPop);
                 }
@@ -2753,7 +2753,7 @@ namespace Daphne
 
                 if (configMolecule != null)
                 {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
@@ -2763,7 +2763,7 @@ namespace Daphne
                     configMolPop.mp_distribution = hl;
 
                     // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
 
                     crc.molpops.Add(configMolPop);
                 }
@@ -2800,7 +2800,7 @@ namespace Daphne
 
                 if (configMolecule != null)
                 {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
@@ -2810,7 +2810,7 @@ namespace Daphne
                     configMolPop.mp_distribution = hl;
 
                     // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
 
                     crc.molpops.Add(configMolPop);
                 }
