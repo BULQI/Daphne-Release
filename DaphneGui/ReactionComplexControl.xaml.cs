@@ -48,11 +48,10 @@ namespace DaphneGui
             if (crc == null)
                 return;
 
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
             arc.ShowDialog();
 
-            // update the list of all molecules
-            MainWindow.ToolWin.GetMolsInAllRCs();
+            crc.RefreshMolPops(MainWindow.SOP.Protocol.entity_repository);
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
@@ -72,9 +71,6 @@ namespace DaphneGui
             cc.reaction_complexes.Add(crcNew);
 
             ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
-
-            // update the list of all molecules
-            MainWindow.ToolWin.GetMolsInAllRCs();
         }
 
         private void ButtonNewReactionComplex_Click(object sender, RoutedEventArgs e)
@@ -82,12 +78,9 @@ namespace DaphneGui
             // This data context should be a compartment
             // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
             // Will AddReacComplex need to access the ER for available reactions? 
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex, MainWindow.SOP.Protocol.scenario.environment.comp);
             if (arc.ShowDialog() == true)
                 ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
-
-            // update the list of all molecules
-            MainWindow.ToolWin.GetMolsInAllRCs();
         }
 
         private void ButtonRemoveComplex_Click(object sender, RoutedEventArgs e)
@@ -115,9 +108,6 @@ namespace DaphneGui
 
                 if (ListBoxReactionComplexes.Items.Count == 0)
                     ListBoxReactionComplexes.SelectedIndex = -1;
-
-                // update the list of all molecules
-                MainWindow.ToolWin.GetMolsInAllRCs();
             }
         }
 
