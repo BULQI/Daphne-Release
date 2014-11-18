@@ -1082,10 +1082,7 @@ namespace Daphne
             }
         }
 
-        //public Dictionary<string, bool> molpopReportOn;
-        public List<string> molpopReportOn;
         public bool generateReport;
-
         public ReporterBase Reporter
         {
             get
@@ -1105,7 +1102,6 @@ namespace Daphne
             reset();
             listTimes = new List<double>();
             dictGraphConcs = new Dictionary<string, List<double>>();
-            molpopReportOn = new List<string>();
             generateReport = false;
         }
 
@@ -1118,7 +1114,6 @@ namespace Daphne
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
-            // call the base
             base.Load(protocol, completeReset);
 
             // exit if no reset required
@@ -1134,25 +1129,9 @@ namespace Daphne
             dataBasket.Clear();
 
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
-
-            foreach (ConfigReactionComplex crc in scenarioHandle.environment.comp.reaction_complexes)
-            {
-                foreach (ConfigMolecularPopulation configMolpop in crc.molpops)
-                {
-                    if (configMolpop.report_mp.mp_extended == ExtendedReport.LEAN)
-                    {
-                        if (molpopReportOn.Contains(configMolpop.molecule.entity_guid) == false)
-                        {
-                            molpopReportOn.Add(configMolpop.molecule.entity_guid);
-                        }
-                    }
-                }
-            }
-
         }
 
         public override void Step(double dt)
