@@ -1082,6 +1082,22 @@ namespace Daphne
             }
         }
 
+        //public Dictionary<string, bool> molpopReportOn;
+        public List<string> molpopReportOn;
+        public bool generateReport;
+
+        public ReporterBase Reporter
+        {
+            get
+            {
+                return reporter;
+            }
+            set
+            {
+                reporter = value;
+            }
+        }
+
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
@@ -1089,6 +1105,8 @@ namespace Daphne
             reset();
             listTimes = new List<double>();
             dictGraphConcs = new Dictionary<string, List<double>>();
+            molpopReportOn = new List<string>();
+            generateReport = false;
         }
 
         public override void Load(Protocol protocol, bool completeReset)
@@ -1120,6 +1138,21 @@ namespace Daphne
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
+
+            foreach (ConfigReactionComplex crc in scenarioHandle.environment.comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation configMolpop in crc.molpops)
+                {
+                    if (configMolpop.report_mp.mp_extended == ExtendedReport.LEAN)
+                    {
+                        if (molpopReportOn.Contains(configMolpop.molecule.entity_guid) == false)
+                        {
+                            molpopReportOn.Add(configMolpop.molecule.entity_guid);
+                        }
+                    }
+                }
+            }
+
         }
 
         public override void Step(double dt)
@@ -1141,7 +1174,7 @@ namespace Daphne
 
         public override void RunForward()
         {
-            base.RunForward();
+                base.RunForward();
         }
 
         protected override int linearDistributionCase(int dim)
