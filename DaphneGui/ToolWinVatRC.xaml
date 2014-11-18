@@ -99,7 +99,7 @@
                         >
                         <StackPanel>
                             <DataGrid x:Name="dgVatMols" 
-                                    ItemsSource="{Binding Path=allmols}" AutoGenerateColumns="False"                           
+                                    ItemsSource="{Binding Path=Protocol.scenario.AllMols}" AutoGenerateColumns="False"                           
                                     MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"

@@ -86,8 +86,8 @@ namespace DaphneGui
 
         protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
-            GetMolsInAllRCs();
-            dgVatMols.ItemsSource = ((ToolWinVatRC)DataContext).allmols;
+            ((VatReactionComplexScenario)Protocol.scenario).InitializeAllMols();
+            dgVatMols.ItemsSource = ((VatReactionComplexScenario)Protocol.scenario).AllMols;
         }
 
         public override void GUIUpdate(bool finished)
