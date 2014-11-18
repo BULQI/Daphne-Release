@@ -51,11 +51,14 @@ namespace DaphneGui
             }
         }
 
+        private ConfigCompartment comp;
+
         //To add a new rc
-        public AddReacComplex(ReactionComplexDialogType type)
+        public AddReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp)
         {
             InitializeComponent();
             dlgType = type;
+            comp = _comp;
 
             Title = "Add Reaction Complex";
             if (type == ReactionComplexDialogType.EditComplex)
@@ -70,11 +73,12 @@ namespace DaphneGui
         }
 
         //To edit an existing rc
-        public AddReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc)
+        public AddReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp)
         {
             InitializeComponent();
             dlgType = type;
             selectedRC = crc;
+            comp = _comp;
             Initialize();
         }
 
@@ -151,8 +155,7 @@ namespace DaphneGui
 
             //listbox does not refresh without this
             lbAllReactions.ItemsSource = null;
-            lbAllReactions.ItemsSource = LeftList;
-                        
+            lbAllReactions.ItemsSource = LeftList;                  
         }
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
@@ -204,7 +207,7 @@ namespace DaphneGui
                     {
                         ConfigReaction newreac = reac.Clone(true);
                         selectedRC.reactions.Add(newreac);
-                        selectedRC.RefreshMolPops(newreac);
+                        selectedRC.AddReactionMolPops(newreac, MainWindow.SOP.Protocol.entity_repository);
                     }
                 }
 
@@ -216,7 +219,11 @@ namespace DaphneGui
                 foreach (ConfigReaction reac in RightList)
                 {
                     crc.reactions.Add(reac);
-                    crc.RefreshMolPops(reac);
+                    crc.AddReactionMolPops(reac, MainWindow.SOP.Protocol.entity_repository);
+                }
+                if (comp != null)
+                {
+                    comp.reaction_complexes.Add(crc);
                 }
                 MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crc);
             }
