@@ -2085,13 +2085,45 @@ namespace Daphne
 
     public class VatReactionComplexScenario : ScenarioBase
     {
+        public ObservableCollection<ConfigMolecularPopulation> AllMols { get; set; }
+
         public VatReactionComplexScenario()
         {
             environment = new ConfigPointEnvironment();
+            AllMols = new ObservableCollection<ConfigMolecularPopulation>();
+            environment.comp.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
         }
 
         public override void InitializeStorageClasses()
         {
+            InitializeAllMols();
+            //AllMols.CollectionChanged += new NotifyCollectionChangedEventHandler(allMols_CollectionChanged);
+        }
+
+        //private void allMols_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        //{
+
+        //}
+
+        private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            InitializeAllMols();
+        }
+
+        public void InitializeAllMols()
+        {
+            AllMols.Clear();
+
+            foreach (ConfigReactionComplex crc in environment.comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                {
+                    if (AllMols.Contains(molpop) == false)
+                    {
+                        AllMols.Add(molpop);
+                    }
+                }
+            }
         }
     }
 
@@ -5292,13 +5324,14 @@ namespace Daphne
             return molecules_dict.ContainsKey(guid);
         }
 
-        private void CreateReactionMolpops(ConfigReaction reac, ObservableCollection<string> mols)
+        private void CreateReactionMolpops(ConfigReaction reac, ObservableCollection<string> mols, EntityRepository er)
         {
             foreach (string molguid in mols)
             {
-                if (molecules_dict.ContainsKey(molguid) == true)
+                if (molecules_dict.ContainsKey(molguid) == false)
                 {
-                    ConfigMolecule configMolecule = molecules_dict[molguid];
+                    ConfigMolecule configMolecule = er.molecules_dict[molguid];
+                    //ConfigMolecule configMolecule = molecules_dict[molguid];
 
                     if (configMolecule != null)
                     {
@@ -5309,7 +5342,7 @@ namespace Daphne
 
                         MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
-                        hl.concentration = 1;
+                        hl.concentration = 0;
                         configMolPop.mp_distribution = hl;
                         molpops.Add(configMolPop);
                     }
@@ -5317,11 +5350,22 @@ namespace Daphne
             }
         }
 
-        public void RefreshMolPops(ConfigReaction reac)
+        public void RefreshMolPops(EntityRepository er)
         {
-            CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
-            CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
-            CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
+            molpops.Clear();
+            molecules_dict.Clear();
+
+            foreach (ConfigReaction reac in reactions)
+            {
+                AddReactionMolPops(reac, er);
+            }
+        }      
+
+        public void AddReactionMolPops(ConfigReaction reac, EntityRepository er)
+        {
+            CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref, er);
+            CreateReactionMolpops(reac, reac.products_molecule_guid_ref, er);
+            CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref, er);
         }        
     }
 
