@@ -4268,7 +4268,7 @@ namespace Daphne
         }
     }
 
-    public enum ReportType { CELL_MP, ECM_MP };
+    public enum ReportType { CELL_MP, ECM_MP, VAT_MP };
 
     // Note: Neumann option may be added later.
     public enum MolBoundaryType { None = 0, Dirichlet, Neumann }
@@ -4365,7 +4365,7 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             molpop_guid = id.ToString();
 
-            if (rt == ReportType.CELL_MP)
+            if (rt == ReportType.CELL_MP || rt == ReportType.VAT_MP)
             {
                 reportMP = new ReportMP();
             }
