@@ -50,6 +50,9 @@ namespace DaphneGui
 
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
             arc.ShowDialog();
+
+            // update the list of all molecules
+            MainWindow.ToolWin.GetMolsInAllRCs();
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
@@ -69,6 +72,9 @@ namespace DaphneGui
             cc.reaction_complexes.Add(crcNew);
 
             ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
+
+            // update the list of all molecules
+            MainWindow.ToolWin.GetMolsInAllRCs();
         }
 
         private void ButtonNewReactionComplex_Click(object sender, RoutedEventArgs e)
@@ -80,6 +86,8 @@ namespace DaphneGui
             if (arc.ShowDialog() == true)
                 ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
 
+            // update the list of all molecules
+            MainWindow.ToolWin.GetMolsInAllRCs();
         }
 
         private void ButtonRemoveComplex_Click(object sender, RoutedEventArgs e)
@@ -108,6 +116,8 @@ namespace DaphneGui
                 if (ListBoxReactionComplexes.Items.Count == 0)
                     ListBoxReactionComplexes.SelectedIndex = -1;
 
+                // update the list of all molecules
+                MainWindow.ToolWin.GetMolsInAllRCs();
             }
         }
 
@@ -125,7 +135,7 @@ namespace DaphneGui
             }
         }
 
-        //SHOWMOLECULES
+        //SHOW MOLECULES
         public static DependencyProperty ShowMoleculesProperty = DependencyProperty.Register("ShowMolecules", typeof(Visibility), typeof(ReactionComplexControl), new FrameworkPropertyMetadata(Visibility.Hidden, ShowMoleculesPropertyChanged));
         public Visibility ShowMolecules
         {
