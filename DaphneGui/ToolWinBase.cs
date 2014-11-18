@@ -262,29 +262,6 @@ namespace DaphneGui
         {
         }
 
-        public ObservableCollection<ConfigMolecularPopulation> allmols { get; set; }
-        public void GetMolsInAllRCs()
-        {
-            if (Protocol == null)
-            {
-                MessageBox.Show("In GetMolsInAllRCs, Protocol is null.");
-                return;
-            }
-            allmols = new ObservableCollection<ConfigMolecularPopulation>();
-            ConfigCompartment comp = Protocol.scenario.environment.comp;
-            allmols.Clear();
-            foreach (ConfigReactionComplex crc in comp.reaction_complexes)
-            {
-                foreach (ConfigMolecularPopulation molpop in crc.molpops)
-                {
-                    if (allmols.Contains(molpop) == false)
-                    {
-                        allmols.Add(molpop);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Initialization of the reports tab.
         /// </summary>
