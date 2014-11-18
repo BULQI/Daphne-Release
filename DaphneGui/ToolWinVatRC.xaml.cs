@@ -40,9 +40,14 @@ namespace DaphneGui
             TabItem selectedTab = toolWinVatRC.ConfigTabControl.SelectedItem as TabItem;
 
             int reportVatMolSelectedIndex = -1;
-            if (selectedTab == tabReports)
+            int vatRCSelectedIndex = -1;
+            if (selectedTab == toolWinVatRC.tabReactionComplexes)
             {
-                reportVatMolSelectedIndex = vatControl.dgVatMols.SelectedIndex;
+                vatRCSelectedIndex = RCControl.ListBoxReactionComplexes.SelectedIndex;
+            }
+            else if (selectedTab == tabReports)
+            {
+                reportVatMolSelectedIndex = dgVatMols.SelectedIndex;
             }
 
             MW.Apply();
@@ -50,11 +55,11 @@ namespace DaphneGui
             toolWinVatRC.ConfigTabControl.SelectedItem = selectedTab;
             if (selectedTab == toolWinVatRC.tabReactionComplexes)
             {
-                // gmk - add code to reset the selected RC
+                RCControl.ListBoxReactionComplexes.SelectedIndex = vatRCSelectedIndex;
             }
             else if (selectedTab == toolWinVatRC.tabReports)
             {
-                vatControl.dgVatMols.SelectedIndex = reportVatMolSelectedIndex;
+                dgVatMols.SelectedIndex = reportVatMolSelectedIndex;
             }
 
         }
@@ -82,6 +87,7 @@ namespace DaphneGui
         protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
             GetMolsInAllRCs();
+            dgVatMols.ItemsSource = ((ToolWinVatRC)DataContext).allmols;
         }
 
         public override void GUIUpdate(bool finished)
@@ -93,6 +99,7 @@ namespace DaphneGui
                 MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
                 MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
+                
             }
         }
 
@@ -108,6 +115,12 @@ namespace DaphneGui
         public override MessageBoxResult ScenarioContentChanged()
         {
             return MessageBoxResult.None;
+        }
+
+        private void GenerateReport_ButtonClick(object sender, RoutedEventArgs e)
+        {
+            ((VatReactionComplexReporter)MainWindow.Sim.Reporter).reportOn = true;
+            MW.runButton_Click(null, null);
         }
 
     }

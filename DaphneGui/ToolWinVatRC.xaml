@@ -61,10 +61,17 @@
         <!-- REPORTS -->
         <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <!--<StackPanel>-->
-                    <local:ReportVatRC x:Name="vatControl" DataContext="{Binding}"></local:ReportVatRC>
-                <!-- Report Settings -->
-                <!--<Expander ExpandDirection="Down" Padding="5"
+                    <!--<local:ReportVatRC x:Name="vatControl" DataContext="{Binding}"></local:ReportVatRC>-->
+                <StackPanel>
+                    <StackPanel.Resources>
+                        <ObjectDataProvider x:Key="molsList"
+                            MethodName="GetMolsInAllRCs"             
+                            ObjectType="{x:Type daph:ConfigMolecule}">
+                        </ObjectDataProvider>
+
+                    </StackPanel.Resources>
+                    <!-- Report Settings -->
+                    <Expander ExpandDirection="Down" Padding="5"
                     IsExpanded="True"
                     Header="Report Settings"
                     Margin="0,4,0,0" 
@@ -73,15 +80,15 @@
                     BorderBrush="Black"
                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                     >
-                    <ContentControl Name="ReportSettings"
+                        <ContentControl Name="ReportSettings"
                             Content="{Binding Path=Protocol}"
                             ContentTemplate="{StaticResource reportSettingsTemplate}" 
                             Margin="6"
                     />
-                </Expander>-->
+                    </Expander>
 
-                <!--Molecules in Vat -->
-                <!--<Expander ExpandDirection="Down" Padding="5"
+                    <!--Molecules in Vat -->
+                    <Expander ExpandDirection="Down" Padding="5"
                         IsExpanded="True"
                         Header="Molecules in Vat"
                         Margin="0,0,0,0" 
@@ -90,56 +97,62 @@
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                         >
-                        <DataGrid x:Name="dgVatMols" 
-                            ItemsSource="{Binding Path=Protocol.scenario.environment.comp.molpops}" AutoGenerateColumns="False" 
-                            MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
-                            CanUserReorderColumns="False" CanUserResizeRows="False"
-                            CanUserSortColumns="False" RowHeaderWidth="0"
-                            VerticalContentAlignment="Center"
-                            CanUserAddRows="False"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            >
+                        <StackPanel>
+                            <DataGrid x:Name="dgVatMols" 
+                                    ItemsSource="{Binding Path=allmols}" AutoGenerateColumns="False"                           
+                                    MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
+                                    CanUserReorderColumns="False" CanUserResizeRows="False"
+                                    CanUserSortColumns="False" RowHeaderWidth="0"
+                                    VerticalContentAlignment="Center"
+                                    CanUserAddRows="False"
+                                    BorderThickness="1"
+                                    BorderBrush="Black"
+                                    >
 
-                       <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader" >
-                                <Setter Property="FontSize" Value="12" />
-                                <Setter Property="Height" Value="24" />
-                                <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="BorderBrush" Value="Black" />
-                                <Setter Property="Background">
-                                    <Setter.Value>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Offset="0.0" Color="White" />
-                                            <GradientStop Offset="1.0" Color="Beige" />
-                                        </LinearGradientBrush>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" >
+                                        <Setter Property="FontSize" Value="12" />
+                                        <Setter Property="Height" Value="24" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Offset="0.0" Color="White" />
+                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
 
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="molecular population" Width="150">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="molecular population" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Report" Width="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>                                                               
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Expander>-->
+                                    <DataGridTemplateColumn Header="report" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Expander>
 
-                <!--</StackPanel>-->
+                    <!-- Generate report-->
+                    <Button  Content="Generate Report" ClickMode="Release" Click="GenerateReport_ButtonClick" />
+                    
+                </StackPanel>
+
             </ScrollViewer>
         </TabItem>
         
