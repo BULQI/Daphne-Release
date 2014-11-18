@@ -917,7 +917,7 @@ namespace DaphneGui
 
             DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(combo);
             if (dataGrid == null) return;
-            ConfigDiffScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
                 //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
@@ -957,13 +957,13 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
 
-            ConfigDiffScheme new_scheme = null;
+            ConfigTransitionScheme new_scheme = null;
             if (schemeName == "Division")
             {
                 new_scheme = cell.div_scheme;
                 if (new_scheme == null)
                 {
-                    cell.div_scheme = new_scheme = new ConfigDiffScheme();
+                    cell.div_scheme = new_scheme = new ConfigTransitionScheme();
                 }
             }
             else if (schemeName == "Differentiation")
@@ -971,7 +971,7 @@ namespace DaphneGui
                 new_scheme = cell.diff_scheme;
                 if (new_scheme == null)
                 {
-                    cell.diff_scheme = new_scheme = new ConfigDiffScheme();
+                    cell.diff_scheme = new_scheme = new ConfigTransitionScheme();
                 }
             }
             else return;
@@ -1081,7 +1081,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            ConfigDiffScheme ds = cell.diff_scheme;
+            ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool

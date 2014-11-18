@@ -182,7 +182,7 @@
         </StackPanel>
     </DataTemplate>
 
-    <!-- ConfigDiffScheme properties template : DataContext must be ConfigDiffScheme -->
+    <!-- ConfigTransitionScheme properties template : DataContext must be ConfigTransitionScheme -->
     <DataTemplate x:Key="diffSchemeTemplate">
         <StackPanel Orientation="Vertical">
             <Label Height="24" Width="200" HorizontalAlignment="Left">Differentiation Scheme:</Label>

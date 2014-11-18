@@ -236,7 +236,7 @@ namespace Daphne
             // Division before differentiation
             if (cell.div_scheme != null)
             {
-                ConfigDiffScheme config_divScheme = cell.div_scheme;
+                ConfigTransitionScheme config_divScheme = cell.div_scheme;
                 ConfigTransitionDriver config_td = config_divScheme.Driver;
 
                 simCell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
@@ -262,7 +262,7 @@ namespace Daphne
             // Differentiation
             if (cell.diff_scheme != null)
             {
-                ConfigDiffScheme config_diffScheme = cell.diff_scheme;
+                ConfigTransitionScheme config_diffScheme = cell.diff_scheme;
                 ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                 simCell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);

@@ -262,7 +262,7 @@ namespace Daphne
 
         /// <summary>
         /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
-        /// ConfigMolecule, ConfigTransitionDriver, ConfigDiffScheme, ConfigReaction, ConfigCell, ConfigReactionComplex
+        /// ConfigMolecule, ConfigTransitionDriver, ConfigTransitionScheme, ConfigReaction, ConfigCell, ConfigReactionComplex
         /// </summary>
         /// <param name="e">entity to test</param>
         /// <returns>status</returns>
@@ -301,7 +301,7 @@ namespace Daphne
                 // existing
                 return PushStatus.PUSH_EXISTING_ITEM;
             }
-            else if (e is ConfigDiffScheme)
+            else if (e is ConfigTransitionScheme)
             {
                 // item does not exist
                 if (entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid) == false)
@@ -446,15 +446,15 @@ namespace Daphne
                     entity_repository.transition_drivers_dict[e.entity_guid] = e as ConfigTransitionDriver;
                 }
             }
-            else if (e is ConfigDiffScheme)
+            else if (e is ConfigTransitionScheme)
             {
                 // insert
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
-                    entity_repository.diff_schemes.Add(e as ConfigDiffScheme);
+                    entity_repository.diff_schemes.Add(e as ConfigTransitionScheme);
                     if (entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                        entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigTransitionScheme);
                     }
                 }
                 // update
@@ -465,11 +465,11 @@ namespace Daphne
                     {
                         if (entity_repository.diff_schemes[i].entity_guid == e.entity_guid)
                         {
-                            entity_repository.diff_schemes[i] = e as ConfigDiffScheme;
+                            entity_repository.diff_schemes[i] = e as ConfigTransitionScheme;
                         }
                     }
                     // dict update
-                    entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigDiffScheme;
+                    entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigTransitionScheme;
                 }
             }
             else if (e is ConfigReaction)
@@ -591,7 +591,7 @@ namespace Daphne
         private void InitDiffSchemeDict()
         {
             entity_repository.diff_schemes_dict.Clear();
-            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
+            foreach (ConfigTransitionScheme ds in entity_repository.diff_schemes)
             {
                 entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
             }
@@ -710,7 +710,7 @@ namespace Daphne
             {
                 foreach (var nn in e.NewItems)
                 {
-                    ConfigDiffScheme cds = nn as ConfigDiffScheme;
+                    ConfigTransitionScheme cds = nn as ConfigTransitionScheme;
 
                     if (cds != null)
                     {
@@ -722,7 +722,7 @@ namespace Daphne
             {
                 foreach (var dd in e.OldItems)
                 {
-                    ConfigDiffScheme cds = dd as ConfigDiffScheme;
+                    ConfigTransitionScheme cds = dd as ConfigTransitionScheme;
 
                     //Remove gene from genes_dict
                     entity_repository.diff_schemes_dict.Remove(cds.entity_guid);
@@ -952,9 +952,9 @@ namespace Daphne
                 {
                     ReactionPusher(e as ConfigReaction, sourceLevel, s);
                 }
-                else if (e is ConfigDiffScheme)
+                else if (e is ConfigTransitionScheme)
                 {
-                    SchemePusher(e as ConfigDiffScheme, sourceLevel, s);
+                    SchemePusher(e as ConfigTransitionScheme, sourceLevel, s);
                 }
                 else if (e is ConfigReactionComplex)
                 {
@@ -1164,7 +1164,7 @@ namespace Daphne
 
         }
 
-        private void SchemePusher(ConfigDiffScheme scheme, Level sourceLevel, PushStatus s)
+        private void SchemePusher(ConfigTransitionScheme scheme, Level sourceLevel, PushStatus s)
         {
             if (scheme == null)
                 return;
@@ -1187,7 +1187,7 @@ namespace Daphne
             PushStatus s3 = pushStatus(scheme);
             if (s3 != PushStatus.PUSH_INVALID)
             {
-                ConfigDiffScheme newscheme = scheme.Clone(true);
+                ConfigTransitionScheme newscheme = scheme.Clone(true);
                 repositoryPush(newscheme, s3);
             }
         }
@@ -2019,7 +2019,7 @@ namespace Daphne
             else if (e is ConfigTransitionDriver)
             {
             }
-            else if (e is ConfigDiffScheme)
+            else if (e is ConfigTransitionScheme)
             {
             }
             else if (e is ConfigReaction)
@@ -2319,13 +2319,13 @@ namespace Daphne
                     //}
                 }
             }
-            else if (e is ConfigDiffScheme)
+            else if (e is ConfigTransitionScheme)
             {
                 foreach (CellPopulation cp in cellpopulations)
                 {
                     if (cp.Cell.diff_scheme.entity_guid == e.entity_guid)
                     {
-                        cp.Cell.diff_scheme = e as ConfigDiffScheme;
+                        cp.Cell.diff_scheme = e as ConfigTransitionScheme;
                     }
                 }
             }
@@ -2532,7 +2532,7 @@ namespace Daphne
         public ObservableCollection<ConfigGene> genes { get; set; }
         public ObservableCollection<ConfigReaction> reactions { get; set; }
         public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
-        public ObservableCollection<ConfigDiffScheme> diff_schemes { get; set; }
+        public ObservableCollection<ConfigTransitionScheme> diff_schemes { get; set; }
         public ObservableCollection<ConfigTransitionDriver> transition_drivers { get; set; }
 
         [JsonIgnore]
@@ -2548,7 +2548,7 @@ namespace Daphne
         [JsonIgnore]
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
         [JsonIgnore]
-        public Dictionary<string, ConfigDiffScheme> diff_schemes_dict;
+        public Dictionary<string, ConfigTransitionScheme> diff_schemes_dict;
         [JsonIgnore]
         public Dictionary<string, ConfigTransitionDriver> transition_drivers_dict;
 
@@ -2567,8 +2567,8 @@ namespace Daphne
             reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
             reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
-            diff_schemes = new ObservableCollection<ConfigDiffScheme>();
-            diff_schemes_dict = new Dictionary<string, ConfigDiffScheme>();
+            diff_schemes = new ObservableCollection<ConfigTransitionScheme>();
+            diff_schemes_dict = new Dictionary<string, ConfigTransitionScheme>();
             transition_drivers = new ObservableCollection<ConfigTransitionDriver>();
             transition_drivers_dict = new Dictionary<string, ConfigTransitionDriver>();
         }
@@ -3376,7 +3376,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             bool bResult = true;
-            ConfigDiffScheme ds = value as ConfigDiffScheme;
+            ConfigTransitionScheme ds = value as ConfigTransitionScheme;
 
             if (ds == null)
             {
@@ -3387,7 +3387,7 @@ namespace Daphne
         }
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            ConfigDiffScheme ds = null;
+            ConfigTransitionScheme ds = null;
 
             return ds;
         }
@@ -3420,7 +3420,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string name = "";
-            ConfigDiffScheme scheme = value as ConfigDiffScheme;
+            ConfigTransitionScheme scheme = value as ConfigTransitionScheme;
 
             if (scheme != null)
             {
@@ -3431,7 +3431,7 @@ namespace Daphne
         }
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            ConfigDiffScheme scheme = null;
+            ConfigTransitionScheme scheme = null;
 
             return scheme;
         }
@@ -4078,7 +4078,7 @@ namespace Daphne
     //    Centrocyte        gsDiv          none       gsDif2        
     //    Plasmacyte        gsDif1        gsDif2       none   
 
-    public class ConfigDiffScheme : ConfigEntity, IEquatable<ConfigDiffScheme>
+    public class ConfigTransitionScheme : ConfigEntity, IEquatable<ConfigTransitionScheme>
     {
         public string Name { get; set; }
 
@@ -4105,7 +4105,7 @@ namespace Daphne
         //  The order of states (rows) should match the order in Drive.states
         public ObservableCollection<ConfigActivationRow> activationRows { get; set; }
 
-        public ConfigDiffScheme()
+        public ConfigTransitionScheme()
             : base()
         {
             genes = new ObservableCollection<string>();
@@ -4187,14 +4187,14 @@ namespace Daphne
             OnPropertyChanged("Driver");
         }
 
-        public ConfigDiffScheme Clone(bool identical)
+        public ConfigTransitionScheme Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
 
-            ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
+            ConfigTransitionScheme new_cds = JsonConvert.DeserializeObject<ConfigTransitionScheme>(jsonSpec, Settings);
 
             if (identical == false)
             {
@@ -4206,17 +4206,59 @@ namespace Daphne
             return new_cds;
         }
 
-        public bool Equals(ConfigDiffScheme other)
+        public bool Equals(ConfigTransitionScheme cts)
         {
-            if (other == null)
+            //name
+            if (this.Name != cts.Name)
+                return false;
+
+            //guid
+            if (this.entity_guid != cts.entity_guid)
+                return false;
+
+            //driver
+            if (this.Driver == null && cts.Driver != null)
+                return false;
+            else if (this.Driver != null && cts.Driver == null)
+                return false;
+            else if (this.Driver == null && cts.Driver == null)
             {
-                return this.Name == "None";
             }
-            return this.Name == other.Name;
+            else if (this.Driver.Equals(cts.Driver) == false)
+            {
+                return false;
+            }
+
+            //genes
+            if (cts.genes.Count != this.genes.Count)
+                return false;
+
+            //Note that here we are depending on the order of genes.
+            //If the genes lists have the same genes but in different order, the list is considered NOT equal.
+            for (int i = 0; i < this.genes.Count; i++)
+            {
+                if (this.genes[i] != cts.genes[i])
+                {
+                    return false;
+                }
+            }
+            
+            //activation rows
+            if (this.activationRows.Count != cts.activationRows.Count)
+                return false;
+
+            for (int i = 0; i < this.activationRows.Count; i++)
+            {
+                if (this.activationRows[i].Equals(cts.activationRows[i]) == false)
+                    return false;                
+            }
+
+            return true;
+
         }
     }
 
-    public class ConfigActivationRow : EntityModelBase
+    public class ConfigActivationRow : EntityModelBase, IEquatable<ConfigActivationRow>
     {
         private ObservableCollection<double> _activations;
         public ObservableCollection<double> activations
@@ -4241,6 +4283,22 @@ namespace Daphne
         private void activations_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("activations");
+        }
+
+        public bool Equals(ConfigActivationRow car)
+        {
+            if (this.activations.Count != car.activations.Count)
+                return false;
+
+            //Note that each double value here applies to a gene. 
+            //We are expecting them to be in the right order.
+            for (int i = 0; i < activations.Count; i++)
+            {
+                if (activations[i] != car.activations[i])
+                    return false;
+            }
+
+            return true;
         }
     }
 
@@ -4297,7 +4355,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigMolecularPopulation : EntityModelBase
+    public class ConfigMolecularPopulation : EntityModelBase, IEquatable<ConfigMolecularPopulation>
     {
         public string molpop_guid { get; set; }
 
@@ -4392,6 +4450,27 @@ namespace Daphne
             {
                 molecule = m;
             }
+        }
+
+        public bool Equals(ConfigMolecularPopulation molpop)
+        {
+            if (this.molpop_guid != molpop.molpop_guid)
+                return false;
+
+            if (this.Name != molpop.Name)
+                return false;
+
+            if (this.renderLabel != molpop.renderLabel)
+                return false;
+
+            if (this.molecule.entity_guid != molpop.molecule.entity_guid)
+                return false;
+
+            if (this.mp_distribution.mp_distribution_type != molpop.mp_distribution.mp_distribution_type)
+                return false;
+            
+
+            return true;
         }
     }
 
@@ -5233,6 +5312,7 @@ namespace Daphne
         {
             if (this.Name != crc.Name)
                 return false;
+
             if (this.entity_guid != crc.entity_guid)
                 return false;
 
@@ -5258,8 +5338,18 @@ namespace Daphne
             if (crc.molpops.Count != this.molpops.Count)
                 return false;
 
-            foreach (ConfigMolecularPopulation cmp in molpops)
+            foreach (ConfigMolecularPopulation cmp in this.molpops)
             {
+                if (crc.molpops.Contains(cmp) == false)
+                    return false;
+                else 
+                {
+                    ConfigMolecularPopulation crcmolpop = crc.molpops.First(s => s.molpop_guid == cmp.molpop_guid);
+                    if (crcmolpop.Equals(cmp) == false)
+                    {
+                        return false;
+                    }
+                }
             }
 
 
@@ -5463,8 +5553,8 @@ namespace Daphne
 
         public ObservableCollection<ConfigGene> genes { get; set; }
 
-        private ConfigDiffScheme _diff_scheme;
-        public ConfigDiffScheme diff_scheme
+        private ConfigTransitionScheme _diff_scheme;
+        public ConfigTransitionScheme diff_scheme
         {
             get
             {
@@ -5496,8 +5586,8 @@ namespace Daphne
             }
         }
 
-        private ConfigDiffScheme _div_scheme;
-        public ConfigDiffScheme div_scheme
+        private ConfigTransitionScheme _div_scheme;
+        public ConfigTransitionScheme div_scheme
         {
             get
             {
@@ -8495,7 +8585,7 @@ namespace Daphne
             {
                 return !strtype.StartsWith("CELL_");
             }
-            return true;
+            
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

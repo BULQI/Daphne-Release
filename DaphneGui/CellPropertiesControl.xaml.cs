@@ -40,7 +40,7 @@ namespace DaphneGui
             public object ConvertBack(object value, Type targetType,
                 object parameter, CultureInfo culture)
             {
-                ConfigDiffScheme val = value as ConfigDiffScheme;
+                ConfigTransitionScheme val = value as ConfigTransitionScheme;
                 if (val != null && val.Name == "") return null;
                 return value;
             }
@@ -80,7 +80,7 @@ namespace DaphneGui
             }
             else
             {
-                ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+                ConfigTransitionScheme diffNew = (ConfigTransitionScheme)combo.SelectedItem;
 
                 if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
                 {

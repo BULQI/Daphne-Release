@@ -231,7 +231,7 @@
                                         >
                                 <ComboBox.ItemsSource>
                                     <CompositeCollection>
-                                        <daph:ConfigDiffScheme Name=""/>
+                                        <daph:ConfigTransitionScheme Name=""/>
                                         <CollectionContainer Collection="{Binding Source={StaticResource diffSchemesListView}}" />
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>

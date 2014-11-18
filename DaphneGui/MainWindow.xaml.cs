@@ -3098,7 +3098,7 @@ namespace DaphneGui
 
                 UserWantsNewEntity = pm.UserWantsNewEntity;
             }
-            else if (source is ConfigDiffScheme)
+            else if (source is ConfigTransitionScheme)
             {
                 MessageBox.Show(string.Format("Entity type {0} 'save' operation not yet supported.", source.GetType().ToString()));
                 return;

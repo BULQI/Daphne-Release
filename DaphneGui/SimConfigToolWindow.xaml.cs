@@ -2295,7 +2295,7 @@ namespace DaphneGui
         public object ConvertBack(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            ConfigDiffScheme val = value as ConfigDiffScheme;
+            ConfigTransitionScheme val = value as ConfigTransitionScheme;
             if (val != null && val.Name == "") return null;
             return value;
         }
