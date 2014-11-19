@@ -5,27 +5,38 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:work="clr-namespace:Workbench"
+        xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-        Loaded="Window_Loaded"
         Title="Daphne"
         Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
+        Name="mainWindow"
         >
 
     <Window.Resources>
+
+        <local:CellRenderPopFromProtocolConverter x:Key="CellRenderPopFromProtocolConverter"/>
+
+        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+
+        <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
+        
+        <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
+        
+        <local:SimSetupControl x:Key="simSetupControl"/>
         <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
 
-        <!--<ObjectDataProvider x:Key="cellRenderMethodEnum"
-                            MethodName="GetValues" 
+        <ObjectDataProvider x:Key="RenderMethodEnum"
+                            MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:CellRenderMethod" />
+                <x:Type TypeName="daph:RenderMethod" />
             </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>-->
-
+        </ObjectDataProvider>
+        
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
             <Grid>
@@ -159,14 +170,13 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="Save Entities"                 Name="pushMenu">
+                <MenuItem Header="Catalogs"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
                     <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
                     <MenuItem Header="Reactions..."              Name="pushReac"        Click="pushReac_Click" />
                     <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" />
                     <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" />
                     <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" />
-                    <MenuItem Header="Reaction Templates..."     Name="pushReacTemp"    Click="pushReacTemp_Click" />
                     <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />                  
                 </MenuItem>
                 
@@ -221,9 +231,9 @@
                     </Style>
                 </ToolBarTray.Resources>                
                 <ToolBar Name="SaveToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                    <Button Content="Apply" HorizontalAlignment="Left" Name="resetButton" 
+                    <Button Content="Apply" HorizontalAlignment="Left" Name="applyButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
-                                Margin="0" Click="resetButton_Click">
+                                Margin="0" Click="applyButton_Click">
                         <Button.ToolTip>
                             <ToolTip>
                                 <StackPanel Width="200" Orientation="Horizontal">
@@ -361,9 +371,9 @@
 
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
                 
-                <!-- Sim Config Tab control -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Protocol" />
+                <!-- Workbench Tab control -->
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="ProtocolToolWindowContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
+                    <local:ToolWinBase x:Name="ProtocolToolWindow"/>
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
@@ -377,15 +387,26 @@
                                 <TextBlock Text="Cells Library" />
                             </Grid>
                         </DataTemplate>
+
+                        <DataTemplate x:Key="renderTabTemplate">
+                            <Grid>
+                                <!--<Border BorderThickness="1" CornerRadius="4,4,4,4" BorderBrush="Lime"></Border>-->
+                                <!--<Image Source="Images/MyGreenCells.bmp" />-->
+                                <TextBlock Text="Render Skin" />
+                            </Grid>
+                        </DataTemplate>
+
                     </docking:SplitContainer.Resources>
                     
                     <!-- VTK Windows Forms Host panel -->
                     <!-- Workspace -->
                     <docking:Workspace>
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
-                            <docking:TabbedMdiContainer Background="LightGray" >
-                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" >
-                                    <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
+                            <docking:TabbedMdiContainer Name="MdiTabContainer" Background="LightGray">
+                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige"
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=VTKDisplayWindow}">
+                                    <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel" Visibility="{Binding ElementName=VTKDisplayDocWindow, Path=Visibility}">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->
                                             <Style TargetType="{x:Type Image}" x:Key="toolbarImageStyle">
@@ -425,7 +446,7 @@
                                                           IsChecked="{Binding HandToolButton_IsChecked}" 
                                                           IsEnabled="{Binding HandToolButton_IsEnabled}"
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" />
+                                                    <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="PreviewButton" 
                                                           IsChecked="{Binding PreviewButton_IsChecked}" 
@@ -442,13 +463,31 @@
                                                 <ComboBox Name="CellRenderMethodCB" Width="100"
                                                           BorderBrush="LightGray" 
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
+                                                          ItemsSource="{Binding Converter={StaticResource CellRenderPopFromProtocolConverter}}"
+                                                          IsSynchronizedWithCurrentItem="True"
+                                                          DisplayMemberPath="name"
                                                           />
                                                 <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>
                                                 <ComboBox x:Name="CellsColorByCB" Width="100" 
-                                                          ItemsSource="{Binding Path=CellAttributeArrayNames}" 
-                                                          SelectedValue="{Binding Path=CellColorArrayName}"
+                                                          ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                          SelectedItem="{Binding ElementName=CellRenderMethodCB, Path=SelectedItem.renderMethod, UpdateSourceTrigger=PropertyChanged}"
+                                                          SelectionChanged="CellsColorByCB_SelectionChanged"
                                                           BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells color by attribute">
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Choose cell render method">
+                                                    <ComboBox.ItemContainerStyle>
+                                                        <Style TargetType="ComboBoxItem">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ComboBox.ItemContainerStyle>
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
                                                 </ComboBox>
 
                                                 <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
@@ -510,21 +549,21 @@
                                         <ContentPresenter MinHeight="100" Content="{Binding Wfh}" />
                                     </DockPanel>
                                 </docking:DocumentWindow>
-
-                                <!-- This is the window that contains the reaction complex graph-->
-                                <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
-                               
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
-                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
-                                    
-                                </local:CellStudioToolWindow>
-
-                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" ></work:ChartViewToolWindow>
-                                
-                                <!-- "#FFE7F5DC" -->
-
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=ComponentsToolWindow}" />                                
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" Title="Cells Library" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CellStudioToolWindow}" />
+                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=ReacComplexChartWindow}" />
+                                <local:RenderSkinWindow x:Name="renderSkinWindow" Title="Render Skin"
+                                       HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
+                                       Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                        ConverterParameter=renderSkinWindow}"                 
+                                                        />
                             </docking:TabbedMdiContainer>
-
                         </docking:TabbedMdiHost>
                     </docking:Workspace>
 

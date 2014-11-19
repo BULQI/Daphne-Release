@@ -147,9 +147,12 @@ namespace Daphne
                                        ConfigCompartment[] configComp, CellState cellState,
                                        List<ConfigReaction>[] bulk_reacs,
                                        List<ConfigReaction> boundary_reacs,
-                                       List<ConfigReaction> transcription_reacs)
+                                       List<ConfigReaction> transcription_reacs,
+                                       bool[] result)
         {
             Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
+
+            simCell.renderLabel = cell.renderLabel ?? cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
 
             simComp[0] = simCell.Cytosol;
@@ -162,25 +165,6 @@ namespace Daphne
 
             // modify molpop information before setting
             addCellMolpops(cellState, configComp, simComp);
-            /*for (int comp = 0; comp < 2; comp++)
-            {
-                foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
-                {
-                    //config_comp's distribution changed. may need to keep 
-                    //it for not customized cell later(?)
-
-                    if (cellState.cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid) == false)
-                    {
-                        continue;
-                    }
-
-                    MolPopExplicit mp_explicit = new MolPopExplicit();
-
-                    mp_explicit.conc = cellState.cmState.molPopDict[cmp.molecule.entity_guid];
-                    cmp.mp_distribution = mp_explicit;            
-                }
-                addCompartmentMolpops(simComp[comp], configComp[comp]);
-            }*/
 
             // cell genes
             foreach (ConfigGene cg in cell.genes)
@@ -202,8 +186,8 @@ namespace Daphne
             //CELL REACTIONS
             AddCompartmentBulkReactions(simCell.Cytosol, protocol.entity_repository, bulk_reacs[0]);
             AddCompartmentBulkReactions(simCell.PlasmaMembrane, protocol.entity_repository, bulk_reacs[1]);
-            // membrane; no boundary
-            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
+            // membrane has no boundary
+            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs, result);
             AddCellTranscriptionReactions(simCell, protocol.entity_repository, transcription_reacs);
 
             // locomotion - merged from release-dev
@@ -252,7 +236,7 @@ namespace Daphne
             // Division before differentiation
             if (cell.div_scheme != null)
             {
-                ConfigDiffScheme config_divScheme = cell.div_scheme;
+                ConfigTransitionScheme config_divScheme = cell.div_scheme;
                 ConfigTransitionDriver config_td = config_divScheme.Driver;
 
                 simCell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
@@ -278,7 +262,7 @@ namespace Daphne
             // Differentiation
             if (cell.diff_scheme != null)
             {
-                ConfigDiffScheme config_diffScheme = cell.diff_scheme;
+                ConfigTransitionScheme config_diffScheme = cell.diff_scheme;
                 ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                 simCell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
@@ -311,15 +295,28 @@ namespace Daphne
                     simCell.SetGeneActivities(simCell.Differentiator);
                 }
             }
+            //generaiton
+            simCell.generation = cellState.CellGeneration;
 
             // add the cell
             AddCell(simCell);
         }
 
-        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        /// <summary>
+        /// adds a list of molpops to the compartment
+        /// </summary>
+        /// <param name="simComp">the compartment</param>
+        /// <param name="molpops">the list of molpops</param>
+        private void addCompartmentMolpops(Compartment simComp, ObservableCollection<ConfigMolecularPopulation> molpops)
         {
-            foreach (ConfigMolecularPopulation cmp in configComp.molpops)
+            foreach (ConfigMolecularPopulation cmp in molpops)
             {
+                // avoid duplicates
+                if (simComp.Populations.ContainsKey(cmp.molecule.entity_guid) == true)
+                {
+                    continue;
+                }
+
                 Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cmp.molecule.Name),
                                                                      new ConstructorArgument("mw", cmp.molecule.MolecularWeight),
                                                                      new ConstructorArgument("effRad", cmp.molecule.EffectiveRadius),
@@ -421,6 +418,20 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// add molpops for a whole compartment, includes reaction complexes
+        /// </summary>
+        /// <param name="simComp">the simlation compartment</param>
+        /// <param name="configComp">the config compartment that describes the simulation compartment</param>
+        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        {
+            addCompartmentMolpops(simComp, configComp.molpops);
+            foreach (ConfigReactionComplex rc in configComp.reaction_complexes)
+            {
+                addCompartmentMolpops(simComp, rc.molpops);
+            }
+        }
+
         public virtual void Load(Protocol protocol, bool completeReset)
         {
             ProtocolHandle = protocol;
@@ -428,6 +439,7 @@ namespace Daphne
             duration = protocol.scenario.time_config.duration;
             sampleStep = protocol.scenario.time_config.sampling_interval;
             renderStep = protocol.scenario.time_config.rendering_interval;
+            integratorStep = protocol.scenario.time_config.integrator_step;
             // make sure the simulation does not start to run immediately
             RunStatus = RUNSTAT_OFF;
 
@@ -455,7 +467,60 @@ namespace Daphne
             get { return reporter; }
         }
 
-        public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs)
+        protected void prepareBoundaryReactionReport(int size, ref bool[] result)
+        {
+            result = new bool[size];
+            for (int i = 0; i < size; i++)
+            {
+                result[i] = false;
+            }
+        }
+
+        protected void boundaryReactionReport(List<ConfigReaction> boundary_reacs, bool[] result, string id)
+        {
+            // should always be so, but for safety have this check
+            if (boundary_reacs.Count == result.Length)
+            {
+                bool allPresent = true;
+
+                for (int i = 0; i < result.Length; i++)
+                {
+                    if (result[i] == false)
+                    {
+                        allPresent = false;
+                        break;
+                    }
+                }
+                if (allPresent == false)
+                {
+                    // configure the message box to be displayed
+                    string messageBoxText = "Not all boundary reactions could be added into " + id + ":";
+                    string caption = "Boundary reaction warning";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
+
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        if (result[i] == false)
+                        {
+                            messageBoxText += "\n" + boundary_reacs[i].TotalReactionString;
+                        }
+                    }
+                    // display message box
+                    MessageBox.Show(messageBoxText, caption, button, icon);
+                }
+            }
+        }
+
+        /// <summary>
+        /// adds boundary reactions to the compartment
+        /// </summary>
+        /// <param name="comp">the compartment</param>
+        /// <param name="boundary">its boundary compartment</param>
+        /// <param name="er">the entity repository</param>
+        /// <param name="config_reacs">the boundary reactions</param>
+        /// <param name="result">result array, null when no reporting needed</param>
+        public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs, bool[] result)
         {
             //foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             //{
@@ -476,8 +541,10 @@ namespace Daphne
             // When comp is ECS then ECS boundary reactions may not apply to some cell types. 
             // The continue statements below catch these cases.
 
-            foreach (ConfigReaction cr in config_reacs)
+            for (int i = 0; i < config_reacs.Count; i++)
             {
+                ConfigReaction cr = config_reacs[i];
+
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryAssociation)
                 {
                     if (!boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) || !boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
@@ -487,6 +554,10 @@ namespace Daphne
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryAssociation(boundary.Populations[cr.reactants_molecule_guid_ref[1]],
                                                                                            comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                            boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
+                    if (result != null)
+                    {
+                        result[i] = true;
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryDissociation)
                 {
@@ -497,6 +568,10 @@ namespace Daphne
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryDissociation(boundary.Populations[cr.products_molecule_guid_ref[1]],
                                                                                             comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                                             boundary.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
+                    if (result != null)
+                    {
+                        result[i] = true;
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedBoundaryActivation)
                 {
@@ -507,6 +582,10 @@ namespace Daphne
                     comp.AddBoundaryReaction(boundary.Interior.Id, new CatalyzedBoundaryActivation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                                    comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                                                    boundary.Populations[cr.modifiers_molecule_guid_ref[0]], cr.rate_const));
+                    if (result != null)
+                    {
+                        result[i] = true;
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportTo)
                 {
@@ -516,6 +595,10 @@ namespace Daphne
                     }
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportTo(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                            boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
+                    if (result != null)
+                    {
+                        result[i] = true;
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportFrom)
                 {
@@ -525,9 +608,12 @@ namespace Daphne
                     }
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportFrom(boundary.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                              comp.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
+                    if (result != null)
+                    {
+                        result[i] = true;
+                    }
                 }
             }
-            return;
         }
 
         public static void AddCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
@@ -773,7 +859,7 @@ namespace Daphne
         public TissueSimulation()
         {
             dataBasket = new DataBasket(this);
-            integratorStep = 0.001;
+            //integratorStep = 0.001;
             reporter = new TissueSimulationReporter();
             reset();
         }
@@ -810,12 +896,6 @@ namespace Daphne
             {
                 return;
             }
-#if OLD_RC
-            if (is_reaction_complex == true)
-            {
-                scenarioHandle = protocol.rc_scenario;
-            }
-#endif
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.Environment = SimulationModule.kernel.Get<ECSEnvironment>();
@@ -842,6 +922,7 @@ namespace Daphne
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
+            bool[] result = null;
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
@@ -857,11 +938,31 @@ namespace Daphne
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
                 boundary_reacs = protocol.GetReactions(configComp[0], true);
                 transcription_reacs = protocol.GetTranscriptionReactions(configComp[0]);
+                //need to figure out how to set the label
+                if (cp.renderLabel == null)
+                {
+                    cp.renderLabel = cp.Cell.entity_guid;
+                }
                 
                 for (int i = 0; i < cp.number; i++)
                 {
+                    // only report boundary reaction failures for the first cell of the population
+                    if (i == 0)
+                    {
+                        prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
+                    }
+                    else
+                    {
+                        result = null;
+                    }
                     instantiateCell(protocol, cp.Cell, cp.cellpopulation_id, configComp,
-                                    cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs);
+                                    cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs, result);
+                    // report if needed
+                    if (result != null)
+                    {
+                        // report if a reaction could not be inserted
+                        boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
+                    }
                 }
             }
 
@@ -906,10 +1007,14 @@ namespace Daphne
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
+
+            prepareBoundaryReactionReport(reacs.Count, ref result);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
-                AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs);
+                AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs, result);
             }
+            // report if a reaction could not be inserted
+            boundaryReactionReport(reacs, result, "the ECS");
 
             // general parameters
             Pair.Phi1 = protocol.sim_params.phi1;
@@ -949,43 +1054,6 @@ namespace Daphne
 
     public class VatReactionComplex : SimulationBase
     {
-        // variables used in graphing
-        public int MaxTime { get; set; }
-
-        private double dmaxtime;
-        public double dMaxTime
-        {
-            get
-            {
-                return dmaxtime;
-            }
-            set
-            {
-                if (dmaxtime != value)
-                {
-                    dmaxtime = value;
-                    OnPropertyChanged("dMaxTime");
-                }
-            }
-        }
-
-        private double dinittime;
-        public double dInitialTime
-        {
-            get
-            {
-                return dinittime;
-            }
-            set
-            {
-                if (dinittime != value)
-                {
-                    dinittime = value;
-                    OnPropertyChanged("dInitialTime");
-                }
-            }
-        }
-
         //List of times that will be graphed on x-axis. There is only one times list no matter how many molecules
         private List<double> listTimes;
         public List<double> ListTimes
@@ -1014,140 +1082,27 @@ namespace Daphne
             }
         }
 
-        //save the original concentrations
-        private Dictionary<string, double> dictOriginalConcs;
-
-        //Initial concentrations - user can change initial concentrations of molecules
-        private Dictionary<string, double> dictInitialConcs;
-
-        //for wpf binding
-        private ObservableCollection<MolConcInfo> _initConcs;
-        public ObservableCollection<MolConcInfo> initConcs
+        public bool generateReport;
+        public ReporterBase Reporter
         {
             get
             {
-                return _initConcs;
+                return reporter;
             }
             set
             {
-                _initConcs = value;
+                reporter = value;
             }
         }
-
-        //Convenience dictionary of initial concs and mol info
-        public Dictionary<string, MolConcInfo> initConcsDict { get; set; }
-
 
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
-            integratorStep = 0.001;
             reporter = new VatReactionComplexReporter();
             reset();
             listTimes = new List<double>();
             dictGraphConcs = new Dictionary<string, List<double>>();
-            dictOriginalConcs = new Dictionary<string, double>();
-            dictInitialConcs = new Dictionary<string, double>();
-            initConcs = new ObservableCollection<MolConcInfo>();
-            initConcsDict = new Dictionary<string, MolConcInfo>();
-
-            initConcs.CollectionChanged += new NotifyCollectionChangedEventHandler(initConcs_CollectionChanged);
-        }
-
-        private void initConcs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            //if (e.Action == NotifyCollectionChangedAction.Add)
-            //{
-            //    foreach (var nn in e.NewItems)
-            //    {
-            //    }
-            //}            
-            OnPropertyChanged("initConcs");
-        }
-
-        //Save the original concs in a temp array in case user wants to discard the changes
-        public void SaveOriginalConcs()
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-
-            if (comp == null)
-            {
-                return;
-            }
-
-            dictOriginalConcs.Clear();
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                string molguid = kvp.Key;
-                double conc = kvp.Value.Conc.Value(new double[] { 0.0, 0.0, 0.0 });
-
-                dictOriginalConcs[molguid] = conc;
-            }
-        }
-
-        //Restores original concs
-        //If user made changes by dragging initial concs and wants to discard the changes, do that here
-        //by copying the original concs back to mol pops
-        public void RestoreOriginalConcs()
-        {
-            foreach (KeyValuePair<string, double> kvp in dictOriginalConcs)
-            {
-                dictInitialConcs[kvp.Key] = kvp.Value;
-            }
-            OnPropertyChanged("initConcs");
-        }
-
-        public void OverwriteOriginalConcs()
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            ConfigReactionComplex crc = envHandle.comp.reaction_complexes.First();
-            double[] initArray = new double[1];
-
-            if (comp == null || crc == null)
-            {
-                return;
-            }
-
-            dictOriginalConcs.Clear();
-            //Copy current (may have changed) initial concs to Originals dict
-            foreach (KeyValuePair<string, double> kvp in dictInitialConcs)
-            {
-                dictOriginalConcs[kvp.Key] = kvp.Value;
-
-                //Now overwrite the concs in Protocoluration
-                ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(crc.molpops.First());
-                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mp_distribution;
-
-                homo.concentration = kvp.Value;
-            }
-        }
-
-        //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs
-        public void SaveInitialConcs()
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-
-            if (comp == null)
-            {
-                return;
-            }
-
-            dictInitialConcs.Clear();
-            initConcs.Clear();
-            initConcsDict.Clear();
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                string molguid = kvp.Key;
-                //double conc = 0.0;
-                double conc = comp.Populations[molguid].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
-
-                dictInitialConcs[molguid] = conc;
-
-                MolConcInfo mci = new MolConcInfo(molguid, conc, ProtocolHandle);
-
-                initConcs.Add(mci);
-                initConcsDict.Add(molguid, mci);
-            }
+            generateReport = false;
         }
 
         public override void Load(Protocol protocol, bool completeReset)
@@ -1159,7 +1114,6 @@ namespace Daphne
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
-            // call the base
             base.Load(protocol, completeReset);
 
             // exit if no reset required
@@ -1174,51 +1128,10 @@ namespace Daphne
             // clear the databasket dictionaries
             dataBasket.Clear();
 
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
-
-            //List<ConfigReaction> reacs = new List<ConfigReaction>();
-            //reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-            List<ConfigReaction> rcReacs = new List<ConfigReaction>();
-            rcReacs = scenarioHandle.environment.comp.reaction_complexes[0].reactions.ToList();
-            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, rcReacs);
-
-
-            //AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
-            
-        }
-
-        public override void reset()
-        {
-            base.reset();
-
-            double minVal = 1e7;
-
-            dInitialTime = 1 / minVal;
-            dMaxTime = 2 * dInitialTime;
-            MaxTime = (int)dMaxTime;
-
-            if (SimulationBase.dataBasket.Environment == null || SimulationBase.dataBasket.Environment.Comp == null)
-            {
-                return;
-            }
-
-            SaveOriginalConcs();
-            SaveInitialConcs();
-
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            double[] initArray = new double[1];
-            ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                string molguid = kvp.Key;
-                double conc = dictInitialConcs[molguid];
-
-                initArray[0] = conc;
-                sf.Initialize("const", initArray);
-                comp.Populations[molguid].Conc *= 0;
-                comp.Populations[molguid].Conc += sf;
-            }
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
         }
 
         public override void Step(double dt)
@@ -1240,9 +1153,7 @@ namespace Daphne
 
         public override void RunForward()
         {
-            base.RunForward();
-            // no rendering in the vat rc
-            clearFlag(SIMFLAG_RENDER);
+                base.RunForward();
         }
 
         protected override int linearDistributionCase(int dim)

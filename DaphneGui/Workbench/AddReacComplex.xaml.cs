@@ -51,11 +51,14 @@ namespace DaphneGui
             }
         }
 
+        private ConfigCompartment comp;
+
         //To add a new rc
-        public AddReacComplex(ReactionComplexDialogType type)
+        public AddReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp)
         {
             InitializeComponent();
             dlgType = type;
+            comp = _comp;
 
             Title = "Add Reaction Complex";
             if (type == ReactionComplexDialogType.EditComplex)
@@ -70,11 +73,12 @@ namespace DaphneGui
         }
 
         //To edit an existing rc
-        public AddReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc)
+        public AddReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp)
         {
             InitializeComponent();
             dlgType = type;
             selectedRC = crc;
+            comp = _comp;
             Initialize();
         }
 
@@ -137,8 +141,11 @@ namespace DaphneGui
             List<ConfigReaction> temp = new List<ConfigReaction>();
             foreach (ConfigReaction cr in lbAllReactions.SelectedItems)
             {
-                RightList.Add(cr);
-                temp.Add(cr);                                
+                if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
+                {
+                    RightList.Add(cr);
+                    temp.Add(cr);
+                }        
             }
 
             foreach (ConfigReaction cr in temp)
@@ -146,13 +153,9 @@ namespace DaphneGui
                 LeftList.Remove(cr);
             }
 
-            //lbCxReactions.ItemsSource = null;
-            //lbCxReactions.ItemsSource = RightList;
-
             //listbox does not refresh without this
             lbAllReactions.ItemsSource = null;
-            lbAllReactions.ItemsSource = LeftList;
-                        
+            lbAllReactions.ItemsSource = LeftList;                  
         }
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
@@ -165,8 +168,11 @@ namespace DaphneGui
 
             foreach (ConfigReaction reac in lbCxReactions.SelectedItems)
             {
-                LeftList.Add(reac);
                 temp.Remove(reac);
+                if (LeftList.Where(m => m.entity_guid == reac.entity_guid).Any()) continue;
+                {
+                    LeftList.Add(reac);
+                }
             }
 
             RightList.Clear();
@@ -187,22 +193,24 @@ namespace DaphneGui
 
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
-                selectedRC.reactions.Clear();
-#if OLD_RC
-                selectedRC.ReactionRates.Clear();
-#endif
+                //selectedRC.reactions.Clear();
+                foreach (ConfigReaction cr in selectedRC.reactions.ToList())
+                {
+                    if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
+                    {
+                        selectedRC.reactions.Remove(cr);
+                    }
+                }
                 foreach (ConfigReaction reac in RightList)
                 {
-                    selectedRC.reactions.Add(reac);
-#if OLD_RC
-                    ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.entity_guid = reac.entity_guid;
-                    pair.OriginalRate = reac.rate_const;
-                    pair.ReactionComplexRate = pair.OriginalRate;
-                    selectedRC.ReactionRates.Add(pair);
-#endif
+                    if (selectedRC.reactions_dict.ContainsKey(reac.entity_guid) != true)
+                    {
+                        ConfigReaction newreac = reac.Clone(true);
+                        selectedRC.reactions.Add(newreac);
+                        selectedRC.AddReactionMolPops(newreac, MainWindow.SOP.Protocol.entity_repository);
+                    }
                 }
-                selectedRC.RefreshMolPops();
+
             }
             else
             {
@@ -211,16 +219,13 @@ namespace DaphneGui
                 foreach (ConfigReaction reac in RightList)
                 {
                     crc.reactions.Add(reac);
-#if OLD_RC
-                    ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.entity_guid = reac.entity_guid;
-                    pair.OriginalRate = reac.rate_const;
-                    pair.ReactionComplexRate = pair.OriginalRate;
-                    crc.ReactionRates.Add(pair);
-#endif
+                    crc.AddReactionMolPops(reac, MainWindow.SOP.Protocol.entity_repository);
+                }
+                if (comp != null)
+                {
+                    comp.reaction_complexes.Add(crc);
                 }
                 MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crc);
-                crc.RefreshMolPops();
             }
         }
 

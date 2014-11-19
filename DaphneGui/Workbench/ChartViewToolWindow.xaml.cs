@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
 
 using Daphne;
+using DaphneUserControlLib;
 
 namespace Workbench
 {
@@ -26,80 +27,84 @@ namespace Workbench
     {
         public Dictionary<string, List<double>> dictConcs = new Dictionary<string, List<double>>();
         public List<double> lTimes = new List<double>();
-        private ChartManager cm;
-        private System.Drawing.Size chartSize;
-        public ReactionComplexProcessor RC { get; set; }
+        private ReactionComplexChart Chart;
+        public VatReactionComplex RC { get; set; }      //Simulation object - used to plot graph
+        public ConfigReactionComplex CRC { get; set; }  //ConfigReactionComplex object - used for gui display and changes and not graph data
+        public MainWindow MW;       //handle to main window
+        public bool redraw_flag;    //true if redraw and not creating a new chart
 
-        public ToggleButton toggleButton { get; set; }
 
         public ChartViewToolWindow()
         {
             InitializeComponent();
-            chartSize = new System.Drawing.Size(700, 300);
-            DataContext = RC;
+            //chartSize = new System.Drawing.Size(700, 300);
+            CRC = DataContext as ConfigReactionComplex;
+            Chart = new ReactionComplexChart();
+            Chart.panelRC = panelRC;
+            Chart.ToolWin = this;
+            redraw_flag = false;
+            windowsFormsHost1.Width = Chart.Width;
+            windowsFormsHost1.Height = Chart.Height;
         }
 
-        public void ClearChart()
-        {
-            if (cm == null)
-                return;
-
-            cm.ClearChart();
-        }
-        
         public void Render()
         {
+            RC = Tag as VatReactionComplex;
+            CRC = DataContext as ConfigReactionComplex;
+
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
-            if (lTimes.Count > 0 && dictConcs.Count > 0)
+            if (redraw_flag == true)
             {
-                cm = new ChartManager(this, chartSize);
-                cm.PChart = pChartMolConcs;
-                
-                cm.ListTimes = lTimes;
-                cm.DictConcs = dictConcs;                
+                Chart.RedrawSeries();
+            }
+            else
+            {
+                Chart.Clear();
+                if (lTimes.Count > 0 && dictConcs.Count > 0)
+                {
+                    Chart.ListTimes = lTimes;
+                    Chart.DictConcs = dictConcs;
 
-                cm.LabelX = "Time";
-                cm.LabelY = "Concentration";
-                cm.TitleXY = "Time Trajectory of Molecular Concentrations";
-                cm.DrawLine = true;
+                    Chart.LabelX = "Time";
+                    Chart.LabelY = "Concentration";
+                    Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
+                    Chart.DrawLine = true;
 
-                System.Windows.Forms.MenuItem[] menuItems = 
-                {   
-                    new System.Windows.Forms.MenuItem("Zoom in"),
-                    new System.Windows.Forms.MenuItem("Zoom out"),
-                    new System.Windows.Forms.MenuItem("Save Changes"),
-                    new System.Windows.Forms.MenuItem("Discard Changes"),
-                };
+                    System.Windows.Forms.MenuItem[] menuItems = 
+                    {   
+                        new System.Windows.Forms.MenuItem("Zoom in"),
+                        new System.Windows.Forms.MenuItem("Zoom out"),
+                        new System.Windows.Forms.MenuItem("Save Changes"),
+                        new System.Windows.Forms.MenuItem("Discard Changes"),
+                    };
 
-                System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                cm.SetContextMenu(menu);
-                menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
-                menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
+                    System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
+                    Chart.SetContextMenu(menu);
 
-                btnIncSize.IsEnabled = true;
-                btnDecSize.IsEnabled = true;
-                btnDiscard.IsEnabled = true;
-                btnSave.IsEnabled = true;
+                    btnIncSize.IsEnabled = true;
+                    btnDecSize.IsEnabled = true;
 
-                cm.DrawChart();
-
-                dgInitConcs.ItemsSource = RC.initConcs;
-#if OLD_RC
-                dgReactionRates.ItemsSource = RC.CRC.ReactionRates;
-#endif
-
+                    Chart.Draw();
+                }
             }
         }
 
+        public void Reset()
+        {
+            if (Chart != null) {
+                Chart.Clear();
+            }
+
+        }
         
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            System.Drawing.Size sz = cm.ChartSize;
+            System.Drawing.Size sz = Chart.Size;
             int w = sz.Width;
             int h = sz.Height;
 
@@ -115,19 +120,19 @@ namespace Workbench
             windowsFormsHost1.Width = w;
             windowsFormsHost1.Height = h;
             
-            chartSize = sz;
-            cm.ChartSize = sz;
+            //chartSize = sz;
+            Chart.Size = sz;
 
-            cm.DrawChart();
+            Chart.Draw();
                        
         }
 
         private void btnDecSize_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            System.Drawing.Size sz = cm.ChartSize;
+            System.Drawing.Size sz = Chart.Size;
 
             sz.Width = (int)(sz.Width * 0.9);
             sz.Height = (int)(sz.Height * 0.9);
@@ -138,161 +143,105 @@ namespace Workbench
             windowsFormsHost1.Width = windowsFormsHost1.Width * 0.9;
             windowsFormsHost1.Height = windowsFormsHost1.Height * 0.9;            
 
-            chartSize = sz;
-            cm.ChartSize = sz;
-            cm.DrawChart();            
+            //chartSize = sz;
+            Chart.Size = sz;
+            Chart.Draw();            
         }        
 
-        private void btnDiscard_Click(object sender, RoutedEventArgs e)
-        {
-            if (RC == null)
-                return;
+        //////KEEP THIS
+        //////private void btnDiscard_Click(object sender, RoutedEventArgs e)
+        //////{
+        //////    if (RC == null)
+        //////        return;
 
-            RC.RestoreOriginalConcs();
-            RC.RestoreOriginalRateConstants();
+        //////    RC.RestoreOriginalConcs();
+        //////    //Fix this
+        //////    ////RC.RestoreOriginalRateConstants();
 
-            if (toggleButton != null)
-            {
-                //This causes a redraw
-                toggleButton.IsChecked = true;
-            }
-        }
+        //////    //if (toggleButton != null)
+        //////    //{
+        //////    //    //This causes a redraw
+        //////    //    toggleButton.IsChecked = true;
+        //////    //}
+        //////}
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (cm != null)
-            {
-                cm.SaveChanges();
-            }
-        }
-        private void btnDiscard_Click(object sender, EventArgs e)
-        {
-            RC.RestoreOriginalConcs();
-            RC.Go();
-            cm.ListTimes = RC.ListTimes;
-            cm.DictConcs = RC.DictGraphConcs;
-            cm.DrawChart();
-        }
 
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            if (cm != null)
-            {
-                cm.SaveChanges();
-            }
-        }
-                
-        private void slConc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Slider s = sender as Slider;
-            if (!s.IsLoaded)
-                return;
+        //////KEEP THIS
+        ////private void btnSave_Click(object sender, RoutedEventArgs e)
+        ////{
+        ////    if (Chart != null)
+        ////    {
+        ////        Chart.SaveChanges();
+        ////    }
+        ////}
+        //private void btnDiscard_Click(object sender, EventArgs e)
+        //{
+        //    ////HERE JUST NEED TO COPY FROM PROTOCOL TO ENTITY!!
 
-            if (e.OldValue == e.NewValue)
-                return;
+        //    //RC.RestoreOriginalConcs();
+        //    //RC.RunForward();
+        //    //Chart.ListTimes = RC.ListTimes;
+        //    //Chart.DictConcs = RC.DictGraphConcs;
+        //    //Chart.DrawChart();
+        //}
 
-            foreach (MolConcInfo mci in RC.initConcs)
-            {
-                RC.EditConc(mci.molguid, mci.conc);
-            }
+        //private void btnSave_Click(object sender, EventArgs e)
+        //{
+        //    //if (Chart != null)
+        //    //{
+        //    //    Chart.SaveChanges();
+        //    //}
+        //}
 
-            cm.RedrawSeries();
-            cm.RecalculateYMax();
-        }
-
-        private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Slider s = sender as Slider;
-            double m = s.Minimum;
-        }
-
-        private string GetNumerics(string input)
-        {
-            var sb = new StringBuilder();
-            string goodChars = "0123456789.eE+-";
-            foreach (var c in input)
-            {                
-                if (goodChars.IndexOf(c) >=0 )
-                    sb.Append(c);
-            }
-            string output = sb.ToString();
-            return output;
-        }
-
+        /// <summary>
+        /// This handler is called if user changes a reaction rate by slider or in text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Number")
             {
-                RC.UpdateRateConstants();
-                RC.Sim.Load(MainWindow.SOP.Protocol, true);
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
+                redraw_flag = true;
+                MW.runButton_Click(null, null);
             }
         }
 
         private void btnX_Axis_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.IsXLogarithmic = !cm.IsXLogarithmic;
-            cm.DrawChart();
+            Chart.IsXLogarithmic = !Chart.IsXLogarithmic;
+            Chart.Draw();
         }
 
         private void btnY_Axis_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.IsYLogarithmic = !cm.IsYLogarithmic;
-            cm.DrawChart();
+            Chart.IsYLogarithmic = !Chart.IsYLogarithmic;
+            Chart.Draw();
         }
 
+        /// <summary>
+        /// This handler is called if user changes a molecular concentration by slider or in text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Number")
             {
-                foreach (MolConcInfo mci in RC.initConcs)
-                {
-                    RC.EditConc(mci.molguid, mci.conc);
-                }
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
+                redraw_flag = true;
+                MW.runButton_Click(null, null);
             }
         }
 
-        private void dblMaxTime_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void btnSaveReport_Click(object sender, RoutedEventArgs e)
         {
-            if (e.PropertyName == "Number")
-            {
-                if (RC != null && cm != null)
-                {
-                    cm.RedrawSeries();
-                    cm.RecalculateYMax();
-                }
-            }
+
         }
-
-        private void btnRedraw_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (MolConcInfo mci in RC.initConcs)
-            {
-                RC.EditConc(mci.molguid, mci.conc);
-            }
-            RC.UpdateRateConstants();
-            cm.RedrawSeries();
-            cm.RecalculateYMax();
-
-            //This causes a refresh of the conc data grid
-            UpdateGrids();
-        }
-
-        public void UpdateGrids()
-        {
-            dgInitConcs.ItemsSource = null;
-            dgInitConcs.ItemsSource = RC.initConcs;
-        }
-
-        
     }
 }

@@ -6,9 +6,15 @@
              mc:Ignorable="d"              
              x:Name="UC"
              >
+    
+    <!--<UserControl.Resources>
+        <local:NumberToFormattedNumberConverter x:Key="NumberToFormattedNumberConv" />
+    </UserControl.Resources>-->
+    
     <StackPanel x:Name="stpMainPanel" Height="24" Width="230" VerticalAlignment="Center">  
 
         <StackPanel x:Name="stpControl" Orientation="Horizontal" Height="25" Width="220" VerticalAlignment="Center" HorizontalAlignment="Left">
+
             <Slider x:Name="slFNumber" Height="24" VerticalAlignment="Top" Margin="0,0" RenderTransform="1.0,0,0,0.5,0,4" 
                     Minimum="{Binding Path=Minimum, Mode=OneWay, ElementName=UC}" 
                     Maximum="{Binding Path=Maximum, Mode=OneWay, ElementName=UC}"
@@ -33,9 +39,10 @@
             <TextBox x:Name="tbFNumber" Height="24" VerticalAlignment="Top" Margin="0,0" 
                     BorderThickness="{Binding Path=TextBorderThickness, Mode=OneWay, ElementName=UC}"  
                     Width="{Binding Path=TextFieldWidth, Mode=OneWay, ElementName=UC}"
-                    Text="{Binding Path=FNumber, ElementName=UC}"
+                    Text="{Binding Path=FNumber, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ElementName=UC}"                    
                     IsReadOnly="{Binding Path=IsReadOnly, ElementName=UC}"
-                    GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus">
+                    GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus"
+                    >
             </TextBox>
             
         </StackPanel>

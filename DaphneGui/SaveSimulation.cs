@@ -26,11 +26,11 @@ namespace DaphneGui
             int RUN = 0, RESET = 1, ABORT = 2;
 
             buttons[RUN] = runButton.IsEnabled;
-            buttons[RESET] = resetButton.IsEnabled;
+            buttons[RESET] = applyButton.IsEnabled;
             buttons[ABORT] = abortButton.IsEnabled;
 
             runButton.IsEnabled = false;
-            resetButton.IsEnabled = false;
+            applyButton.IsEnabled = false;
             abortButton.IsEnabled = false;
             if (ProtocolSaver == null)
             {
@@ -64,7 +64,7 @@ namespace DaphneGui
                 if (dlg.ShowDialog() != true)
                 {
                     runButton.IsEnabled = buttons[RUN];
-                    resetButton.IsEnabled = buttons[RESET];
+                    applyButton.IsEnabled = buttons[RESET];
                     abortButton.IsEnabled = buttons[ABORT];
                     return;
                 }
@@ -122,6 +122,7 @@ namespace DaphneGui
                 cell_state.setDivisonDriverState(cell.Divider.CurrentState);
                 cell_state.setDifferentiationDriverState(cell.DifferentiationState);
                 cell_state.setGeneState(cell.Genes);
+                cell_state.setCellGeneration(cell.generation);
 
                 Dictionary<string, MolecularPopulation> membrane_mol_pop_dict = cell.PlasmaMembrane.Populations;
                 foreach (KeyValuePair<string, MolecularPopulation> kvpair in membrane_mol_pop_dict)
@@ -142,7 +143,7 @@ namespace DaphneGui
 
             ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];
-            resetButton.IsEnabled = buttons[RESET];
+            applyButton.IsEnabled = buttons[RESET];
             abortButton.IsEnabled = buttons[ABORT];
         }
 

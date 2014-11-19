@@ -9,28 +9,25 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Pushing
+namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for PushCell.xaml
+    /// Interaction logic for EnvironmentExtents.xaml
     /// </summary>
-    public partial class PushCell : Window
+    public partial class EnvironmentExtents : UserControl
     {
-        public PushCell()
+        public EnvironmentExtents()
         {
             InitializeComponent();
         }
 
-        private void CellCancelButton_Click(object sender, RoutedEventArgs e)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
+
         }
 
-        private void CellPushButton_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-        }
     }
 }
