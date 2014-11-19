@@ -123,7 +123,7 @@ namespace DaphneGui
         //////    if (cell == null)
         //////        return;
 
-        //////    ConfigDiffScheme ds = cell.diff_scheme;
+        //////    ConfigTransitionScheme ds = cell.diff_scheme;
         //////    ConfigGene gene = e.Item as ConfigGene;
 
         //////    //if gene is not in the cell's nucleus, then exclude it from the available gene pool

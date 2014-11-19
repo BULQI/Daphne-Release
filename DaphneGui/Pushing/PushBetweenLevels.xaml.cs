@@ -357,11 +357,11 @@ namespace DaphneGui.Pushing
                     }
                     break;
                 case PushLevelEntityType.DiffScheme:
-                    ObservableCollection<ConfigDiffScheme> dsleft = (ObservableCollection<ConfigDiffScheme>)LeftList;
-                    ObservableCollection<ConfigDiffScheme> dsright = (ObservableCollection<ConfigDiffScheme>)RightList;
-                    foreach (ConfigDiffScheme ds in dsleft)
+                    ObservableCollection<ConfigTransitionScheme> dsleft = (ObservableCollection<ConfigTransitionScheme>)LeftList;
+                    ObservableCollection<ConfigTransitionScheme> dsright = (ObservableCollection<ConfigTransitionScheme>)RightList;
+                    foreach (ConfigTransitionScheme ds in dsleft)
                     {
-                        ConfigDiffScheme ds2 = FindDiffSchemeInList(dsright, ds);
+                        ConfigTransitionScheme ds2 = FindDiffSchemeInList(dsright, ds);
                         if (ds2 != null)
                         {
                             if (ds.Equals(ds2))
@@ -370,9 +370,9 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigDiffScheme ds in dsright)
+                    foreach (ConfigTransitionScheme ds in dsright)
                     {
-                        ConfigDiffScheme ds2 = FindDiffSchemeInList(dsleft, ds);
+                        ConfigTransitionScheme ds2 = FindDiffSchemeInList(dsleft, ds);
                         if (ds2 != null)
                         {
                             if (ds.Equals(ds2))
@@ -444,9 +444,9 @@ namespace DaphneGui.Pushing
             }
             return null;
         }
-        private ConfigDiffScheme FindDiffSchemeInList(ObservableCollection<ConfigDiffScheme> list, ConfigDiffScheme entity)
+        private ConfigTransitionScheme FindDiffSchemeInList(ObservableCollection<ConfigTransitionScheme> list, ConfigTransitionScheme entity)
         {
-            foreach (ConfigDiffScheme e in list)
+            foreach (ConfigTransitionScheme e in list)
             {
                 if (entity.entity_guid == e.entity_guid)
                 {
@@ -676,7 +676,7 @@ namespace DaphneGui.Pushing
                     //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
                     //    return;
                     //}
-                    ConfigDiffScheme newscheme = ((ConfigDiffScheme)entity).Clone(true);
+                    ConfigTransitionScheme newscheme = ((ConfigTransitionScheme)entity).Clone(true);
                     levelB.repositoryPush(newscheme, status, levelA, true);
                     break;
                 case PushLevelEntityType.ReactionTemplate:
@@ -729,6 +729,7 @@ namespace DaphneGui.Pushing
                 // Set the background color of the DataGrid row based on whatever data you like from the row.
                 Color col = Color.FromRgb(228, 228, 228);
                 e.Row.Background = new SolidColorBrush(col);                    //Brushes.LightGray;
+                e.Row.IsEnabled = false;
             }
             else
             {
@@ -818,7 +819,7 @@ namespace DaphneGui.Pushing
                     return PushLevelReactionTemplate;
                 else if (item is ObservableCollection<ConfigCell>)
                     return PushLevelCellTemplate;
-                else if (item is ObservableCollection<ConfigDiffScheme>)
+                else if (item is ObservableCollection<ConfigTransitionScheme>)
                     return PushLevelDiffSchemeTemplate;
                 else if (item is ObservableCollection<ConfigReactionComplex>)
                     return PushLevelReacComplexTemplate;

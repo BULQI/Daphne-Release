@@ -1659,7 +1659,7 @@ namespace Daphne
         {
             // These can be reused to create other differentiation schemes
             ConfigTransitionDriver driver;
-            ConfigDiffScheme diffScheme;
+            ConfigTransitionScheme diffScheme;
             ConfigActivationRow actRow;
             string[] stateNames, geneNames;
             double[,] activations, alpha, beta;
@@ -1707,7 +1707,7 @@ namespace Daphne
                                                    { 0,     0,        0,       0,      0,    0,       0   },  // memory
                                                 };
 
-            diffScheme = new ConfigDiffScheme();
+            diffScheme = new ConfigTransitionScheme();
             diffScheme.Name = "B cell 7 state";
             driver = new ConfigTransitionDriver();
             driver.Name = "B cell 7 state driver";
@@ -1775,7 +1775,7 @@ namespace Daphne
                                                    { 0,      0,    0,       0   },  // memory
                                                 };
 
-            diffScheme = new ConfigDiffScheme();
+            diffScheme = new ConfigTransitionScheme();
             diffScheme.Name = "GC B cell";
             driver = new ConfigTransitionDriver();
             driver.Name = "GC B Cell driver";
@@ -3147,7 +3147,7 @@ namespace Daphne
         // given a diff scheme name, find its guid
         public static string findDiffSchemeGuid(string name, Level store)
         {
-            foreach (ConfigDiffScheme s in store.entity_repository.diff_schemes)
+            foreach (ConfigTransitionScheme s in store.entity_repository.diff_schemes)
             {
                 if (s.Name == name)
                 {

@@ -52,7 +52,7 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// ConfigDiffScheme Attached Dependency Property
+        /// ConfigTransitionScheme Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty RenderCellSourceProperty =
             DependencyProperty.RegisterAttached("RenderCellSource",
