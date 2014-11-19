@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-// using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace ManifoldRing
 {
@@ -254,7 +254,8 @@ namespace ManifoldRing
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(from.M.PrincipalPoints[i])));
                 if (n >= 0 && n < sf.array.Length)
                 {
-                    sf.array[n] = from.Value(from.M.PrincipalPoints[i]);
+                    //sf.array[n] = from.Value(from.M.PrincipalPoints[i]);
+                    sf.array[n] = from.Value(from.M.PrincipalPoints[i].ToArray() );
                 }
             }
             return sf;
@@ -283,7 +284,8 @@ namespace ManifoldRing
         // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
-            int[] idx = m.localToIndexArray(x);
+            //int[] idx = m.localToIndexArray(x);
+            int[] idx = m.localToIndexArray(new DenseVector(x));
 
             if (idx[0] == m.NodesPerSide(0) - 1)
             {
@@ -327,7 +329,8 @@ namespace ManifoldRing
         // Gradient operators indices could be created and stored once when the NodeInterpolator is instantiated, similar to Laplacian. 
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
-            int[] idx = m.localToIndexArray(x);
+            // int[] idx = m.localToIndexArray(x);
+            int[] idx = m.localToIndexArray(new DenseVector(x));
 
             if (idx[0] == m.NodesPerSide(0) - 1)
             {
@@ -686,7 +689,8 @@ namespace ManifoldRing
         // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
-            int[] idx = m.localToIndexArray(x);
+            //int[] idx = m.localToIndexArray(x);
+            int[] idx = m.localToIndexArray(new DenseVector(x));
 
             if (idx[0] == m.NodesPerSide(0) - 1)
             {
@@ -721,7 +725,7 @@ namespace ManifoldRing
         // Gradient operators indices could be created and stored once when the NodeInterpolator is instantiated, similar to Laplacian. 
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
-            int[] idx = m.localToIndexArray(x);
+            int[] idx = m.localToIndexArray(new DenseVector(x));
 
             if (idx[0] == m.NodesPerSide(0) - 1)
             {
