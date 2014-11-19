@@ -26,7 +26,7 @@ namespace DaphneGui
         public CellPropertiesControl()
         {
             InitializeComponent();
-            this.DataContext = this;
+            //this.DataContext = this;
         }
 
         public class diffSchemeValueConverter : IValueConverter
