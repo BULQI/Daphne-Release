@@ -109,11 +109,11 @@ namespace DaphneGui
         #region dynamic_datagrid generation
 
         /// <summary>
-        /// ConfigDiffScheme Attached Dependency Property
+        /// ConfigTransitionScheme Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty DiffSchemeSourceProperty =
             DependencyProperty.RegisterAttached("DiffSchemeSource",
-            typeof(ConfigDiffScheme), typeof(DiffSchemeDataGrid),
+            typeof(ConfigTransitionScheme), typeof(DiffSchemeDataGrid),
                 new FrameworkPropertyMetadata(null,
                     new PropertyChangedCallback(OnDiffSchemeChanged)));
 
@@ -126,9 +126,9 @@ namespace DaphneGui
         /// <summary>
         /// Gets the DiffScheme property.  
         /// </summary>
-        public static ConfigDiffScheme GetDiffSchemeSource(DependencyObject d)
+        public static ConfigTransitionScheme GetDiffSchemeSource(DependencyObject d)
         {
-            return (ConfigDiffScheme)d.GetValue(DiffSchemeSourceProperty);
+            return (ConfigTransitionScheme)d.GetValue(DiffSchemeSourceProperty);
         }
 
         public static string GetDiffSchemeTarget(DependencyObject d)
@@ -139,7 +139,7 @@ namespace DaphneGui
         /// <summary>
         /// Sets the MatrixSource property.  
         /// </summary>
-        public static void SetDiffSchemeSource(DependencyObject d, ConfigDiffScheme value)
+        public static void SetDiffSchemeSource(DependencyObject d, ConfigTransitionScheme value)
         {
             d.SetValue(DiffSchemeSourceProperty, value);
         }
@@ -159,7 +159,7 @@ namespace DaphneGui
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
             DataGrid dataGrid = d as DataGrid;
-            ConfigDiffScheme diffScheme = e.NewValue as ConfigDiffScheme;
+            ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
 
             string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);

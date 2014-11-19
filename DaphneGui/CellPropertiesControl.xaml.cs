@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Daphne;
 using System.Globalization;
 
+using System.Collections.ObjectModel;
+
 namespace DaphneGui
 {
     /// <summary>
@@ -24,6 +26,7 @@ namespace DaphneGui
         public CellPropertiesControl()
         {
             InitializeComponent();
+            //this.DataContext = this;
         }
 
         public class diffSchemeValueConverter : IValueConverter
@@ -37,7 +40,7 @@ namespace DaphneGui
             public object ConvertBack(object value, Type targetType,
                 object parameter, CultureInfo culture)
             {
-                ConfigDiffScheme val = value as ConfigDiffScheme;
+                ConfigTransitionScheme val = value as ConfigTransitionScheme;
                 if (val != null && val.Name == "") return null;
                 return value;
             }
@@ -77,7 +80,7 @@ namespace DaphneGui
             }
             else
             {
-                ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+                ConfigTransitionScheme diffNew = (ConfigTransitionScheme)combo.SelectedItem;
 
                 if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
                 {
@@ -96,13 +99,39 @@ namespace DaphneGui
             ////CellsListBox.SelectedIndex = nIndex;
         }
 
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            if (cvs.Source == null)
+            {
+                cvs.Source = new ObservableCollection<ConfigMolecule>();
+            }
+
+            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
+
+            if (this.Tag == null)
+            {
+                return;
+            }
+
+            if ((CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            CellPopulation cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
+            ConfigCell cell = cellpop.Cell;
+
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            {
+                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+            }
+
+        }
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("diffSchemesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.diff_schemes;
-
-            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
         }
+
     }
 }

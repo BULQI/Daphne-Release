@@ -9,18 +9,25 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Rendering
+namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for RenderMolPop.xaml
+    /// Interaction logic for EnvironmentExtents.xaml
     /// </summary>
-    public partial class RenderMolPop : Window
+    public partial class EnvironmentExtents : UserControl
     {
-        public RenderMolPop()
+        public EnvironmentExtents()
         {
             InitializeComponent();
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
     }
 }

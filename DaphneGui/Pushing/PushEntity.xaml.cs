@@ -19,7 +19,6 @@ namespace DaphneGui.Pushing
     /// </summary>
     public partial class PushEntity : Window
     {
-        public enum ChangeStamp { Newer = 0, Older, Same };
         public enum PushLevelEntityType { Molecule = 0, Gene, Reaction, Cell };
 
         public bool UserWantsNewEntity { get; set; }
@@ -27,7 +26,6 @@ namespace DaphneGui.Pushing
 
         public PushEntity()
         {
-            Tag = ChangeStamp.Newer;
             UserWantsNewEntity = false;
             IsReaction = false;
             
@@ -56,26 +54,12 @@ namespace DaphneGui.Pushing
             ConfigEntity left = (ConfigEntity)EntityLevelDetails.DataContext;
             ConfigEntity right = (ConfigEntity)ComponentLevelDetails.DataContext;
 
-            if (left.change_stamp > right.change_stamp)
-            {
-                Tag = ChangeStamp.Newer;
-            }
-            else if (left.change_stamp < right.change_stamp)
-            {
-                Tag = ChangeStamp.Older;
-            }
-            else 
-            {
-                Tag = ChangeStamp.Same;
-            }
-
             if (left is ConfigReaction)
             {
                 IsReaction = true;
+                btnSaveAsNew.IsEnabled = false;
             }
-
         }
-
     }
 
     public class EntityTemplateSelector : DataTemplateSelector
@@ -101,7 +85,7 @@ namespace DaphneGui.Pushing
                 return GeneTemplate;
             else if (item is ConfigCell)
                 return CellTemplate;
-            else if (item is ConfigDiffScheme)
+            else if (item is ConfigTransitionScheme)
                 return DiffSchemeTemplate;
             else if (item is ConfigReactionComplex)
                 return RCTemplate;

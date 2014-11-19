@@ -2,14 +2,15 @@
   "experiment_db_id": 0,
   "experiment_name": "Blank Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "e4cab395-ec8a-4230-bfa1-db8d4ae9cd12",
+  "experiment_guid": "6ce01b36-36e4-48e9-9ec2-6108c2a4457b",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
     "time_config": {
       "duration": 2.0,
       "rendering_interval": 0.2,
-      "sampling_interval": 0.2
+      "sampling_interval": 0.2,
+      "integrator_step": 0.001
     },
     "simInterpolate": 0,
     "simCellSize": 0,
@@ -29,10 +30,6 @@
     "deathOrder": 1
   },
   "reporter_file_name": "",
-  "popOptions": {
-    "cellPopOptions": [],
-    "molPopOptions": []
-  },
   "entity_repository": {
     "reaction_complexes": [],
     "cells": [],

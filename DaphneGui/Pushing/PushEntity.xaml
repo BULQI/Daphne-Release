@@ -16,10 +16,12 @@
             CellTemplate="{StaticResource editCellTemplate}"
             RCTemplate="{StaticResource reactionComplexTemplate}"
             DiffSchemeTemplate="{StaticResource diffSchemeTemplate}"
-            TransDrivTemplate="{StaticResource transitionDriverTemplate}"             />        
+            TransDrivTemplate="{StaticResource transitionDriverTemplate}"
+             />
     </Window.Resources>
     
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                VerticalScrollBarVisibility="Auto">
         <StackPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -36,28 +38,11 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock FontWeight="Bold" FontSize="16">From</TextBlock>
-                    <TextBlock FontWeight="Bold" FontSize="16" Margin="8,0" Foreground="#FF274F80">
-                        (Newer)
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
-                                        <Setter Property="Visibility" Value="Hidden"/>
-                                        <Setter Property="Width" Value="0" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
-                                        <Setter Property="Visibility" Value="Hidden"/>
-                                        <Setter Property="Width" Value="0" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                    <TextBlock FontWeight="Bold" FontSize="16">From</TextBlock>                    
                 </StackPanel>
                 
                 <GroupBox Grid.Row="1" Grid.Column="0" >
+                    
                     <ContentControl Name="EntityLevelDetails"
                             Content="{Binding}" 
                             ContentTemplateSelector="{StaticResource entityTemplateSelector}"
@@ -74,21 +59,9 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
                     <TextBlock FontWeight="Bold" FontSize="16">To</TextBlock>
-                    <TextBlock FontWeight="Bold" FontSize="16" Margin="8,0" Foreground="#FF274F80">
-                        (Newer)
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Hidden"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
                 </StackPanel>
                 <GroupBox Grid.Column="2" Grid.Row="1" >
+                    
                     <ContentControl Name="ComponentLevelDetails"
                                 Content="{Binding}" 
                                 ContentTemplateSelector="{StaticResource entityTemplateSelector}" 
@@ -97,6 +70,7 @@
 
                 <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Content="Overwrite Entity in Subcellular Components Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click"/>
+                    <Button Content="Save Entity as new" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSaveAsNew" VerticalAlignment="Top" Click="btnSave_Click_1" />
                     <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="20,20" Name="btnCancel" VerticalAlignment="Top" Click="btnCancel_Click" />
                 </StackPanel>
             </Grid>
