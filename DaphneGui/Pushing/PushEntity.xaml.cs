@@ -85,7 +85,7 @@ namespace DaphneGui.Pushing
                 return GeneTemplate;
             else if (item is ConfigCell)
                 return CellTemplate;
-            else if (item is ConfigDiffScheme)
+            else if (item is ConfigTransitionScheme)
                 return DiffSchemeTemplate;
             else if (item is ConfigReactionComplex)
                 return RCTemplate;

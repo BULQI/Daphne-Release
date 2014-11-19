@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Blank Tissue Simulation Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "07010d8a-bd03-4f60-829e-7f6440f3ad1d",
+  "experiment_guid": "b7ace295-97c1-4faa-ae7e-76e2e78f86c8",
   "experiment_description": "Libraries only.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -15,7 +15,8 @@
     "time_config": {
       "duration": 100.0,
       "rendering_interval": 1.0,
-      "sampling_interval": 100.0
+      "sampling_interval": 100.0,
+      "integrator_step": 0.001
     },
     "simInterpolate": 1,
     "simCellSize": 3,
