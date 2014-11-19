@@ -8,6 +8,8 @@ using Ninject.Parameters;
 
 using ManifoldRing;
 
+using MathNet.Numerics.LinearAlgebra.Double;
+
 namespace Daphne
 {
     /// <summary>
@@ -153,7 +155,8 @@ namespace Daphne
 
             InterpolatedLine l;
             Transform t;
-            double[] axis = new double[Transform.Dim];
+            //double[] axis = new double[Transform.Dim];
+            DenseVector axis = new DenseVector(Transform.Dim);
 
             data = new double[comp.Interior.Dim + 1];
             data[1] = comp.Interior.StepSize();
@@ -167,7 +170,7 @@ namespace Daphne
             t = new Transform();
             axis[2] = 1;
             t.rotate(axis, Math.PI / 2.0);
-            t.translate(new double[] { comp.Interior.Extent(0), 0, 0 });
+            t.translate(new DenseVector(new double[] { comp.Interior.Extent(0), 0, 0 }));
             comp.NaturalBoundaries.Add(l.Id, l);
             comp.NaturalBoundaryTransforms.Add(l.Id, t);
             sides.Add("right", l.Id);
@@ -186,7 +189,7 @@ namespace Daphne
             l = SimulationModule.kernel.Get<InterpolatedLine>();
             l.Initialize(data);
             t = new Transform();
-            t.translate(new double[] { 0, comp.Interior.Extent(1), 0 });
+            t.translate(new DenseVector(new double[] { 0, comp.Interior.Extent(1), 0 }));
             comp.NaturalBoundaries.Add(l.Id, l);
             comp.NaturalBoundaryTransforms.Add(l.Id, t);
             sides.Add("top", l.Id);
@@ -239,7 +242,8 @@ namespace Daphne
 
             InterpolatedRectangle r;
             Transform t;
-            double[] axis = new double[Transform.Dim];
+            //double[] axis = new double[Transform.Dim];
+            DenseVector axis = new DenseVector(Transform.Dim);
 
             data = new double[comp.Interior.Dim+1];
             // front: no rotation, translate +z
@@ -251,7 +255,7 @@ namespace Daphne
             r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
-            t.translate(new double[] { 0, 0, comp.Interior.Extent(2) });
+            t.translate(new DenseVector(new double[] { 0, 0, comp.Interior.Extent(2) }));
             comp.NaturalBoundaries.Add(r.Id, r);
             comp.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("front", r.Id);
@@ -262,7 +266,7 @@ namespace Daphne
             t = new Transform();
             axis[1] = 1;
             t.rotate(axis, Math.PI);
-            t.translate(new double[] { comp.Interior.Extent(0), 0, 0 });
+            t.translate(new DenseVector(new double[] { comp.Interior.Extent(0), 0, 0 }));
             comp.NaturalBoundaries.Add(r.Id, r);
             comp.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("back", r.Id);
@@ -274,7 +278,7 @@ namespace Daphne
             r.Initialize(data);
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
-            t.translate(new double[] { comp.Interior.Extent(0), 0, comp.Interior.Extent(2) });
+            t.translate(new DenseVector(new double[] { comp.Interior.Extent(0), 0, comp.Interior.Extent(2) }));
             comp.NaturalBoundaries.Add(r.Id, r);
             comp.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("right", r.Id);
@@ -297,7 +301,7 @@ namespace Daphne
             axis[0] = 1;
             axis[1] = 0;
             t.rotate(axis, -Math.PI / 2.0);
-            t.translate(new double[] { 0, comp.Interior.Extent(1), comp.Interior.Extent(2) });
+            t.translate(new DenseVector(new double[] { 0, comp.Interior.Extent(1), comp.Interior.Extent(2) }));
             comp.NaturalBoundaries.Add(r.Id, r);
             comp.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("top", r.Id);

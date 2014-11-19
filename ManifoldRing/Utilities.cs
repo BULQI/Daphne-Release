@@ -180,6 +180,7 @@ namespace ManifoldRing
                 tmp[2, 2] = Math.Cos(rad) + axis[2] * axis[2] * (1 - Math.Cos(rad));
 
                 rot = (Matrix)rot.Multiply(tmp);
+                rot = (Matrix)(rot * tmp);
             }
         }
 

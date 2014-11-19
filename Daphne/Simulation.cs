@@ -6,8 +6,7 @@ using System.Windows;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 
-
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 using ManifoldRing;
 
@@ -742,7 +741,7 @@ namespace Daphne
 
             dataBasket.Environment.Comp.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
             // set translation by reference: when the cell moves then the transform gets updated automatically
-            t.setTranslationByReference(c.SpatialState.X);
+            t.setTranslationByReference(new DenseVector(c.SpatialState.X));
             dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
@@ -904,7 +903,9 @@ namespace Daphne
             dataBasket.Clear();
 
             // set up the collision manager
-            MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
+            //MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
+            DenseVector box = new DenseVector(3);
+
 
             box[0] = envHandle.extent_x;
             box[1] = envHandle.extent_y;
