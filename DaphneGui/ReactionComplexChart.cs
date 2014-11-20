@@ -310,7 +310,8 @@ namespace DaphneGui
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
 
                     //Just change the value in the molpop and that will lead to a call to dblConcs_PropertyChanged in ChartViewToolWindow.xaml.cs
-                    ConfigMolecularPopulation molpop = ToolWin.CRC.molpops.Where(m => m.molecule.entity_guid == guid).First();
+                    VatReactionComplexScenario s = ToolWin.protocol.scenario as VatReactionComplexScenario;
+                    ConfigMolecularPopulation molpop = s.AllMols.Where(m => m.molecule.entity_guid == guid).First();
                     if (molpop != null)
                     {
                         MolPopHomogeneousLevel homogeneous = molpop.mp_distribution as MolPopHomogeneousLevel;

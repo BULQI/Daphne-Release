@@ -96,7 +96,14 @@ namespace DaphneGui
             {
                 MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
                 MW.ReacComplexChartWindow.MW = MW;
-                MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
+
+                //MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
+                MW.ReacComplexChartWindow.DataContext = this.Protocol;
+
+                //Protocol p = this.Protocol;
+                //VatReactionComplexScenario s = p.scenario as VatReactionComplexScenario;
+                //s.AllMols;   
+             
                 MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
                 

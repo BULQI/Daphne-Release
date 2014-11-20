@@ -45,7 +45,7 @@
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
                 
                 <DataGrid x:Name="dgInitConcs" 
-                        ItemsSource="{Binding Path=molpops, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                        ItemsSource="{Binding Path=scenario.AllMols, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
                         Height="150" MinWidth="150" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                         CanUserReorderColumns="False" CanUserResizeRows="False"
                         CanUserSortColumns="True" RowHeaderWidth="0"
@@ -105,7 +105,7 @@
             <StackPanel Grid.Column="0" Grid.Row="2" Margin="30,12">
                 <TextBlock>Reaction Rates</TextBlock>
                 <DataGrid x:Name="dgReactionRates" 
-                                ItemsSource="{Binding Path=reactions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                                ItemsSource="{Binding Path=scenario.AllReacs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
                                 MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
@@ -172,10 +172,9 @@
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Margin="30,0">
                 <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
                 <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
-                <!--<Button Content="X-Axis Log" Height="23" Name="btnLogX" Width="75" Click="btnX_Axis_Click" />
-                <Button Content="Y-Axis Log" Height="23" Name="btnLogY" Width="75" Click="btnY_Axis_Click" />-->
                 <Button Content="X-Axis: Linear" Height="23" Name="btnLogX" Width="120" Click="btnX_Axis_Click" IsEnabled="False" />
                 <Button Content="Y-Axis: Linear" Height="23" Name="btnLogY" Width="120" Click="btnY_Axis_Click" IsEnabled="False" />
+                <Button Content="Save Report" Height="23" Name="btnSaveReport" Width="120" Click="btnSaveReport_Click" />
             </StackPanel>
 
             <!--GRAPH-->

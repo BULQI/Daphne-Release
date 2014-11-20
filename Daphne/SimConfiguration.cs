@@ -2086,17 +2086,20 @@ namespace Daphne
     public class VatReactionComplexScenario : ScenarioBase
     {
         public ObservableCollection<ConfigMolecularPopulation> AllMols { get; set; }
+        public ObservableCollection<ConfigReaction> AllReacs { get; set; }
 
         public VatReactionComplexScenario()
         {
             environment = new ConfigPointEnvironment();
             AllMols = new ObservableCollection<ConfigMolecularPopulation>();
+            AllReacs = new ObservableCollection<ConfigReaction>();
             environment.comp.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
         }
 
         public override void InitializeStorageClasses()
         {
             InitializeAllMols();
+            InitializeAllReacs();
             //AllMols.CollectionChanged += new NotifyCollectionChangedEventHandler(allMols_CollectionChanged);
         }
 
@@ -2108,6 +2111,7 @@ namespace Daphne
         private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             InitializeAllMols();
+            InitializeAllReacs();
         }
 
         public void InitializeAllMols()
@@ -2121,6 +2125,22 @@ namespace Daphne
                     if (AllMols.Contains(molpop) == false)
                     {
                         AllMols.Add(molpop);
+                    }
+                }
+            }
+        }
+
+        public void InitializeAllReacs()
+        {
+            AllReacs.Clear();
+
+            foreach (ConfigReactionComplex crc in environment.comp.reaction_complexes)
+            {
+                foreach (ConfigReaction reac in crc.reactions)
+                {
+                    if (AllReacs.Contains(reac) == false)
+                    {
+                        AllReacs.Add(reac);
                     }
                 }
             }
@@ -7233,9 +7253,10 @@ namespace Daphne
         public MolPopDistribution()
         {
         }
+
     }
 
-    public class MolPopHomogeneousLevel : MolPopDistribution
+    public class MolPopHomogeneousLevel : MolPopDistribution, IEquatable<MolPopHomogeneousLevel>
     {
         private double _concentration;
         public double concentration
@@ -7256,9 +7277,17 @@ namespace Daphne
             mp_distribution_type = MolPopDistributionType.Homogeneous;
             concentration = 1.0;
         }
+
+        public bool Equals(MolPopHomogeneousLevel mph)
+        {
+            if (this.concentration != mph.concentration)
+                return false;
+
+            return true;
+        }
     }
 
-    public class MolPopLinear : MolPopDistribution
+    public class MolPopLinear : MolPopDistribution, IEquatable<MolPopLinear>
     {
         public double x1 { get; set; }
         public int dim { get; set; }
@@ -7309,9 +7338,14 @@ namespace Daphne
 
             }
         }
+
+        public bool Equals(MolPopLinear mpl)
+        {
+            return true;
+        }
     }
 
-    public class MolPopGaussian : MolPopDistribution
+    public class MolPopGaussian : MolPopDistribution, IEquatable<MolPopGaussian>
     {
         public double peak_concentration { get; set; }
         public GaussianSpecification gauss_spec { get; set; }
@@ -7321,12 +7355,23 @@ namespace Daphne
             mp_distribution_type = MolPopDistributionType.Gaussian;
             peak_concentration = 1.0;
         }
+
+        public bool Equals(MolPopGaussian mpg)
+        {
+            if (this.peak_concentration != mpg.peak_concentration)
+                return false;
+
+            if (this.gauss_spec.Equals(mpg.gauss_spec) == false)
+                return false;
+
+            return true;
+        }
     }
 
     /// <summary>
     /// added to store intermediate run state
     /// </summary>
-    public class MolPopExplicit : MolPopDistribution
+    public class MolPopExplicit : MolPopDistribution, IEquatable<MolPopExplicit>
     {
         public MolPopExplicit()
         {
@@ -7340,6 +7385,26 @@ namespace Daphne
             //create array of actual size, initialized to zeroes
             int totalExpectedValues = numGridPoints[0] * numGridPoints[1] * numGridPoints[2];
             conc = new double[totalExpectedValues];            
+        }
+
+        public bool Equals(MolPopExplicit mpe)
+        {
+            if (this.MolFileName.Equals(mpe.MolFileName) == false)
+                return false;
+
+            if (this.Description.Equals(mpe.Description) == false)
+                return false;
+
+            if (this.conc.Length != mpe.conc.Length)
+                return false;
+
+            for (int i = 0; i < this.conc.Length; i++)
+            {
+                if (this.conc[i] != mpe.conc[i])
+                    return false;
+            }
+
+            return true;
         }
 
         public double[] conc;
