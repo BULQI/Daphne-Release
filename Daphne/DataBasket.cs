@@ -7,7 +7,7 @@ using System.Text;
 
 //using DivisionLib;
 //using LangProcLib;
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
 
 namespace Daphne

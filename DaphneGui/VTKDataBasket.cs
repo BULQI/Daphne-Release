@@ -9,8 +9,8 @@ using System.Windows;
 
 using Daphne;
 
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.Distributions;
+//using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
 using Kitware.VTK;
 using System.Diagnostics;
