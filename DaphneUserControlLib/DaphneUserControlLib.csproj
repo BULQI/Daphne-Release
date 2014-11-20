@@ -90,6 +90,9 @@
     <Compile Include="DaphneColorDlg.xaml.cs">
       <DependentUpon>DaphneColorDlg.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ParamDistrControl.xaml.cs">
+      <DependentUpon>ParamDistrControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControlExtensions.cs" />
     <Page Include="DaphneColorDlg.xaml">
       <SubType>Designer</SubType>
@@ -102,6 +105,10 @@
     <Compile Include="DoublesBox.xaml.cs">
       <DependentUpon>DoublesBox.xaml</DependentUpon>
     </Compile>
+    <Page Include="ParamDistrControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -126,6 +133,12 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Daphne\Daphne.csproj">
+      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
+      <Name>Daphne</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -31,11 +31,19 @@
     <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
     <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
-
+    
+    <daph:ParameterDistributionTypeToStringConverter x:Key="ParamDistTypeEnumConv" />
     
 
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
+    <!-- parameterDistributionTypeTemplate -->
+    <DataTemplate x:Key="parameterDistributionTypeTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Converter={StaticResource ParamDistTypeEnumConv}}"/>
+        </StackPanel>
+    </DataTemplate>
+    
     <!-- molpopDistributionTypeTemplate -->
     <DataTemplate x:Key="molpopDistributionTypeTemplate">
         <StackPanel Orientation="Horizontal">

@@ -8801,7 +8801,7 @@ namespace Daphne
 
         public void Intialize()
         {
-            if (ParamDistr.DistributionType == DistributionType.CONSTANT)
+            if (ParamDistr.DistributionType == ParameterDistributionType.CONSTANT)
             {
                 ((ConstantParameterDistribution)ParamDistr).Value = Value;
             }
@@ -8820,14 +8820,56 @@ namespace Daphne
         }
     }
 
-    public enum DistributionType { CONSTANT=0, DISCRETE, POISSON, GAMMA, UNIFORM };
+    public enum ParameterDistributionType { CONSTANT=0, DISCRETE, POISSON, GAMMA, UNIFORM };
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(ParameterDistributionType), typeof(string))]
+    public class ParameterDistributionTypeToStringConverter : IValueConverter
+    {
+        private List<string> _param_dist_type_strings = new List<string>()
+                                {
+                                    "Constant",
+                                    "Discrete",
+                                    "Poisson",
+                                    "Gamma",
+                                    "Uniform",
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value as string == "") return "";
+            try
+            {
+                return _param_dist_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _param_dist_type_strings.FindIndex(item => item == str);
+            return (ParameterDistributionType)Enum.ToObject(typeof(ParameterDistributionType), (int)idx);
+        }
+    }
 
     public abstract class ParameterDistribution
     {
-        public DistributionType DistributionType;
+        public ParameterDistributionType DistributionType 
+        { 
+            get; 
+            
+            set; 
+        
+        }
         public bool isInitialized;
 
-        public ParameterDistribution(DistributionType _distributionType)
+        public ParameterDistribution(ParameterDistributionType _distributionType)
         {
             DistributionType = _distributionType;
             isInitialized = false;
@@ -8841,7 +8883,7 @@ namespace Daphne
         public double Value { get; set; }
 
         public ConstantParameterDistribution()
-            : base(DistributionType.CONSTANT)
+            : base(ParameterDistributionType.CONSTANT)
         {
         }
 
@@ -8863,7 +8905,7 @@ namespace Daphne
         private ContinuousUniform UniformDist;
 
         public UniformParameterDistribution()
-            : base(DistributionType.UNIFORM)
+            : base(ParameterDistributionType.UNIFORM)
         {
         }
 
@@ -8898,7 +8940,7 @@ namespace Daphne
         private Poisson PoissonDist;
 
         public PoissonParameterDistribution()
-            : base(DistributionType.POISSON)
+            : base(ParameterDistributionType.POISSON)
         {
         }
 
@@ -8932,7 +8974,7 @@ namespace Daphne
         private Gamma GammaDist;
 
         public GammaParameterDistribution()
-            : base(DistributionType.GAMMA)
+            : base(ParameterDistributionType.GAMMA)
         {
         }
 
@@ -8969,7 +9011,7 @@ namespace Daphne
         public Categorical DiscreteDist;
 
         public DiscreteParameterDistribution()
-            : base(DistributionType.DISCRETE)
+            : base(ParameterDistributionType.DISCRETE)
         {
             ProbMass = new List<double>();
         }
@@ -9010,5 +9052,7 @@ namespace Daphne
             return (double)DiscreteDist.Sample();
         }
     }
+
+
 
 }
