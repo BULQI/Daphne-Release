@@ -7335,6 +7335,13 @@ namespace Daphne
             MolFileName = "";
         }
 
+        public void Initialize(int[] numGridPoints)
+        {
+            //create array of actual size, initialized to zeroes
+            int totalExpectedValues = numGridPoints[0] * numGridPoints[1] * numGridPoints[2];
+            conc = new double[totalExpectedValues];            
+        }
+
         public double[] conc;
         public string Description { get; set; }
 
