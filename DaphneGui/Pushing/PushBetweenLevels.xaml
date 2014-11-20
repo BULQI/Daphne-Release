@@ -213,9 +213,9 @@
                             <DataGridTextColumn x:Name="colCellRadius" Header="Radius" Width="50" IsReadOnly="True"
                                  Binding="{Binding Path=CellRadius, Mode=OneWay}" />
                             <DataGridTextColumn x:Name="colCellTrans" Header="Transduction Constant" Width="100" IsReadOnly="True"
-                                 Binding="{Binding Path=TransductionConstant, Mode=OneWay}" />
-                            <DataGridTextColumn x:Name="colCellDrag" Header="Drag Coefficient" Width="100" IsReadOnly="True"
-                                 Binding="{Binding Path=DragCoefficient, Mode=OneWay}" />
+                                 Binding="{Binding Path=TransductionConstant.Value, Mode=OneWay}" />
+                            <DataGridTextColumn x:Name="colCellDrag" Header="Drag Coefficient.Value" Width="100" IsReadOnly="True"
+                                 Binding="{Binding Path=DragCoefficient.Value, Mode=OneWay}" />
                         </DataGrid.Columns>
                     </DataGrid>
 

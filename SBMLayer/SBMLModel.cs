@@ -2007,8 +2007,8 @@ namespace SBMLayer
                         {
                             cytosol = comp;
                             compartAttributes = GetCellAttributes(cytosol);
-                            gc.DragCoefficient = compartAttributes[0];
-                            gc.TransductionConstant = compartAttributes[1];
+                            gc.DragCoefficient.Value = compartAttributes[0];
+                            gc.TransductionConstant.Value = compartAttributes[1];
                             //Pull all cytosol species
                             for (int i = 0; i < speciesList.size(); i++)
                             {

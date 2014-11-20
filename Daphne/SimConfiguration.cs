@@ -16,6 +16,10 @@ using System.Windows.Data;
 using System.Windows;
 using System.Windows.Markup;
 
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Random;
+
+
 namespace Daphne
 {
     /// <summary>
@@ -5467,9 +5471,13 @@ namespace Daphne
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
-            TransductionConstant = 0.0;
-            DragCoefficient = 1.0;
-            Sigma = 0.0;
+            //TransductionConstant = 0.0;
+            //DragCoefficient = 1.0;
+            //Sigma = 0.0; 
+            
+            TransductionConstant = new DistributedParameter(0.0);
+            DragCoefficient = new DistributedParameter(1.0);
+            Sigma = new DistributedParameter(0.0);
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -5547,8 +5555,8 @@ namespace Daphne
             }
         }
 
-        private double transductionConstant;
-        public double TransductionConstant
+        private DistributedParameter transductionConstant;
+        public DistributedParameter TransductionConstant
         {
             get
             {
@@ -5561,8 +5569,8 @@ namespace Daphne
             }
         }
 
-        private double dragCoefficient;
-        public double DragCoefficient
+        private DistributedParameter dragCoefficient;
+        public DistributedParameter DragCoefficient
         {
             get
             {
@@ -5578,8 +5586,8 @@ namespace Daphne
         /// <summary>
         /// Parameter for stochastic force
         /// </summary>
-        private double sigma;
-        public double Sigma
+        private DistributedParameter sigma;
+        public DistributedParameter Sigma
         {
             get
             {
@@ -8760,6 +8768,240 @@ namespace Daphne
 #endif
 
         #endregion // IDisposable Members
+    }
+
+
+    public class DistributedParameter
+    {
+        public ParameterDistribution ParamDistr { get; set; }
+        public double Value { get; set; }
+        public bool isInitialized;
+
+        public DistributedParameter()
+        {
+            isInitialized = false;
+            // default
+            ParamDistr = new ConstantParameterDistribution();
+        }
+
+        public DistributedParameter(double val)
+        {
+            isInitialized = false;
+            // default
+            ParamDistr = new ConstantParameterDistribution();
+            Value = val;
+        }
+
+        public void Intialize()
+        {
+            if (ParamDistr.DistributionType == DistributionType.CONSTANT)
+            {
+                ((ConstantParameterDistribution)ParamDistr).Value = Value;
+            }
+
+            isInitialized = true;
+        }
+
+        public double GetValue()
+        {
+            if (isInitialized == false)
+            {
+                Intialize();
+            }
+
+            return ParamDistr.Sample();
+        }
+    }
+
+    public enum DistributionType { CONSTANT=0, DISCRETE, POISSON, GAMMA, UNIFORM };
+
+    public abstract class ParameterDistribution
+    {
+        public DistributionType DistributionType;
+        public bool isInitialized;
+
+        public ParameterDistribution(DistributionType _distributionType)
+        {
+            DistributionType = _distributionType;
+            isInitialized = false;
+        }
+        public abstract void Initialize();
+        public abstract double Sample();
+    }
+
+    public class ConstantParameterDistribution : ParameterDistribution
+    {
+        public double Value { get; set; }
+
+        public ConstantParameterDistribution()
+            : base(DistributionType.CONSTANT)
+        {
+        }
+
+        public override void Initialize()
+        {
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            return Value;
+        }
+    }
+
+    public class UniformParameterDistribution : ParameterDistribution
+    {
+        public double minValue { get; set; }
+        public double maxValue { get; set; }
+        private ContinuousUniform UniformDist;
+
+        public UniformParameterDistribution()
+            : base(DistributionType.UNIFORM)
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (maxValue <= minValue)
+            {
+                MessageBox.Show("The max value must be greater than the min value in a Uniform distribution. The range has been set to (0,1)");
+                minValue = 0.0;
+                maxValue = 1.0;
+            }
+
+            UniformDist = new ContinuousUniform(minValue, maxValue, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return UniformDist.Sample();
+        }
+    }
+
+
+    public class PoissonParameterDistribution : ParameterDistribution
+    {
+        public double Mean { get; set; }
+        private Poisson PoissonDist;
+
+        public PoissonParameterDistribution()
+            : base(DistributionType.POISSON)
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Mean <= 0)
+            {
+                MessageBox.Show("Lambda must be greater than zero in a Poisson distribution. Lambda has been set to 1.0.");
+                Mean = 1.0;
+            }
+
+            PoissonDist = new Poisson(Mean, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return (double)PoissonDist.Sample();
+        }
+    }
+
+    public class GammaParameterDistribution : ParameterDistribution
+    {
+        public double Shape { get; set; }
+        public double Rate { get; set; }
+        private Gamma GammaDist;
+
+        public GammaParameterDistribution()
+            : base(DistributionType.GAMMA)
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Rate <= 0)
+            {
+                MessageBox.Show("The rate parameter must be greater than zero in a Gamma distribution. The rate parameter has been set to 1.0.");
+                Rate = 1.0;
+            }
+            if (Shape <= 0)
+            {
+                MessageBox.Show("The shape parameter must be greater than zero in a Poisson distribution. The shape parameter has been set to 1.0.");
+            }
+
+            GammaDist = new Gamma(Shape, Rate, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return GammaDist.Sample();
+        }
+    }
+
+    public class DiscreteParameterDistribution : ParameterDistribution
+    {
+        public List<double> ProbMass { get; set; }
+        public Categorical DiscreteDist;
+
+        public DiscreteParameterDistribution()
+            : base(DistributionType.DISCRETE)
+        {
+            ProbMass = new List<double>();
+        }
+
+        public override void Initialize()
+        {
+            if (ProbMass.Count == 0)
+            {
+                MessageBox.Show("Warning. No categories in the discrete distribution. A distribution with a single category with probability 1 has been created. ");
+                ProbMass.Add(1.0);
+            }
+            Normalize();
+            DiscreteDist = new Categorical(ProbMass.ToArray(), Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        private void Normalize()
+        {
+            double sum = 0;
+            foreach (double val in ProbMass)
+            {
+                sum += val;
+            }
+
+            for (int i = 0; i < ProbMass.Count; i++)
+            {
+                ProbMass[i] /= sum;
+            }
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return (double)DiscreteDist.Sample();
+        }
     }
 
 }

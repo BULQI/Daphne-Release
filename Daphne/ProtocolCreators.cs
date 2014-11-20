@@ -1159,7 +1159,7 @@ namespace Daphne
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
 #endif
 
-            gc.DragCoefficient = 1.0;
+            gc.DragCoefficient.Value = 1.0;
             store.entity_repository.cells.Add(gc);
 
             //////////////////////////////////////////////
@@ -1228,8 +1228,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 100;
+            gc.DragCoefficient.Value = 1.0;
+            gc.TransductionConstant.Value = 100;
 
             store.entity_repository.cells.Add(gc);
 
@@ -1307,8 +1307,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 1e2;
+            gc.DragCoefficient.Value = 1.0;
+            gc.TransductionConstant.Value = 1e2;
 
             store.entity_repository.cells.Add(gc);
 
@@ -1390,8 +1390,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 100;
+            gc.DragCoefficient.Value = 1.0;
+            gc.TransductionConstant.Value = 100;
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
@@ -1492,8 +1492,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 100;
+            gc.DragCoefficient.Value = 1.0;
+            gc.TransductionConstant.Value = 100;
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
@@ -1580,8 +1580,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 0.0;
+            gc.DragCoefficient.Value = 1.0;
+            gc.TransductionConstant.Value = 0.0;
             store.entity_repository.cells.Add(gc);
 
             ////////////////////////////////
@@ -1647,10 +1647,10 @@ namespace Daphne
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
-            } 
-            
-            gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 0.0;
+            }
+
+            gc.DragCoefficient.Value = 1.0;
+            gc.TransductionConstant.Value = 0.0;
             store.entity_repository.cells.Add(gc);
 
         }
