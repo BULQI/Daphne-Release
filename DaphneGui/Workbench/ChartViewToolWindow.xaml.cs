@@ -85,6 +85,8 @@ namespace Workbench
 
                     btnIncSize.IsEnabled = true;
                     btnDecSize.IsEnabled = true;
+                    btnLogX.IsEnabled = true;
+                    btnLogY.IsEnabled = true;
 
                     Chart.Draw();
                 }
@@ -213,6 +215,14 @@ namespace Workbench
                 return;
 
             Chart.IsXLogarithmic = !Chart.IsXLogarithmic;
+            if (Chart.IsXLogarithmic == true)
+            {
+                btnLogX.Content = "X-Axis: Logarithmic";
+            }
+            else
+            {
+                btnLogX.Content = "X-Axis: Linear";
+            }
             Chart.Draw();
         }
 
@@ -222,6 +232,14 @@ namespace Workbench
                 return;
 
             Chart.IsYLogarithmic = !Chart.IsYLogarithmic;
+            if (Chart.IsYLogarithmic == true)
+            {
+                btnLogY.Content = "Y-Axis: Logarithmic";
+            }
+            else
+            {
+                btnLogY.Content = "Y-Axis: Linear";
+            }
             Chart.Draw();
         }
 

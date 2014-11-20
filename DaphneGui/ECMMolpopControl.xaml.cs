@@ -377,6 +377,12 @@ namespace DaphneGui
                 //if molecule has not changed, return
                 if (newmol.entity_guid == curr_mol_guid)
                 {
+                    //update render informaiton
+                    RenderPopOptions rpo = (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions;
+                    if (rpo.molPopOptions.Where(s => s.renderLabel == curr_mol_guid).Any() == false)
+                    {
+                        (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
+                    }
                     return;
                 }
 
@@ -494,6 +500,8 @@ namespace DaphneGui
 
                     case MolPopDistributionType.Explicit:
                         MolPopExplicit mpe = new MolPopExplicit();
+                        ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+                        mpe.Initialize(envHandle.NumGridPts);
                         current_mol.mp_distribution = mpe;
                         break;
 
@@ -639,14 +647,6 @@ namespace DaphneGui
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
             MolPopExplicit mpe = cmp.mp_distribution as MolPopExplicit;
 
-            //initialize all ('how many' depends on grid step) concs to zero
-            int totalExpectedValues = envHandle.NumGridPts[0] * envHandle.NumGridPts[1] * envHandle.NumGridPts[2];
-            mpe.conc = new double[totalExpectedValues];
-            for (int i = 0; i < totalExpectedValues; i++)
-            {
-                mpe.conc[i] = 0;
-            }   
-            
             Nullable<bool> result = dlg.ShowDialog();   //this allows user to choose a csv file                   
             if (result == true)
             {
@@ -662,13 +662,6 @@ namespace DaphneGui
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
             MolPopExplicit mpe = cmp.mp_distribution as MolPopExplicit;
 
-            //initialize all (depends on grid step) concs to zero
-            int totalExpectedValues = envHandle.NumGridPts[0] * envHandle.NumGridPts[1] * envHandle.NumGridPts[2];
-            mpe.conc = new double[totalExpectedValues];
-            for (int i = 0; i < totalExpectedValues; i++)
-            {
-                mpe.conc[i] = 0;
-            }
             mpe.Load(envHandle.NumGridPts);
                 
         }
