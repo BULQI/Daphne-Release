@@ -464,7 +464,14 @@ namespace Daphne
 
         public ReporterBase Reporter
         {
-            get { return reporter; }
+            get
+            {
+                return reporter;
+            }
+            set
+            {
+                reporter = value;
+            }
         }
 
         protected void prepareBoundaryReactionReport(int size, ref bool[] result)
@@ -1085,17 +1092,6 @@ namespace Daphne
         }
 
         public bool generateReport;
-        public ReporterBase Reporter
-        {
-            get
-            {
-                return reporter;
-            }
-            set
-            {
-                reporter = value;
-            }
-        }
 
         public VatReactionComplex()
         {

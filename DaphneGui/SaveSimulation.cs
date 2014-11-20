@@ -95,6 +95,7 @@ namespace DaphneGui
                 double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];
                 cur_mp.Conc.CopyArray(cur_conc_values);
                 mpex.conc = cur_conc_values;
+                mpex.Description = "saved state";
 
                 cmp.mp_distribution = mpex;
             }
