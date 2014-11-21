@@ -830,7 +830,7 @@ namespace Daphne
         /// <summary>
         /// constants used to set the run status
         /// </summary>
-        public static byte RUNSTAT_OFF = 0,
+        public const byte RUNSTAT_OFF = 0,
                            RUNSTAT_READY = 1,
                            RUNSTAT_RUN = 2,
                            RUNSTAT_PAUSE = 3,
@@ -1103,26 +1103,30 @@ namespace Daphne
 
         public override void Load(Protocol protocol, bool completeReset)
         {
-            if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
-            {
-                throw new InvalidCastException();
-            }
+            //no need ot check this?
+            //if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            //{
+            //    throw new InvalidCastException();
+            //}
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             base.Load(protocol, completeReset);
 
             // exit if no reset required
-            if (completeReset == false)
+            if (completeReset == true)
             {
-                return;
+                // instantiate the environment
+                dataBasket.Environment = SimulationModule.kernel.Get<PointEnvironment>();
+
+                // clear the databasket dictionaries
+                dataBasket.Clear();
             }
-
-            // instantiate the environment
-            dataBasket.Environment = SimulationModule.kernel.Get<PointEnvironment>();
-
-            // clear the databasket dictionaries
-            dataBasket.Clear();
+            else
+            {
+                dataBasket.Environment.Comp.Populations.Clear();
+                dataBasket.Environment.Comp.BulkReactions.Clear();
+            }
 
             List<ConfigReaction> reacs = new List<ConfigReaction>();
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
