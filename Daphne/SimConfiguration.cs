@@ -2085,7 +2085,9 @@ namespace Daphne
 
     public class VatReactionComplexScenario : ScenarioBase
     {
+        [JsonIgnore]
         public ObservableCollection<ConfigMolecularPopulation> AllMols { get; set; }
+        [JsonIgnore]
         public ObservableCollection<ConfigReaction> AllReacs { get; set; }
 
         public VatReactionComplexScenario()
