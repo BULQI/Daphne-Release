@@ -50,7 +50,12 @@
                                 <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Visible"
                                           DataContext="{Binding Path=Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
+                            <StackPanel>
+                                <Button x:Name="ButtonSaveRCToProtocol"  Click="ButtonSaveRCToProtocol_Click" >Save Reaction Complex to Subcellular Components Library...</Button>
+                            </StackPanel>
                         </StackPanel>
+                        
+                        
                     </Expander>
 
 
