@@ -4520,7 +4520,9 @@ namespace Daphne
 
             if (this.mp_distribution.mp_distribution_type != molpop.mp_distribution.mp_distribution_type)
                 return false;
-            
+
+            if (this.mp_distribution.Equals(molpop.mp_distribution) == false)
+                return false;
 
             return true;
         }
@@ -5386,25 +5388,16 @@ namespace Daphne
                 }
             }
 
-            //Check molpops?
+            //Check molpops
             if (crc.molpops.Count != this.molpops.Count)
                 return false;
 
-            foreach (ConfigMolecularPopulation cmp in this.molpops)
+            for (int i = 0; i < this.molpops.Count; i++)
             {
-                if (crc.molpops.Contains(cmp) == false)
+                if (this.molpops[i].Equals(crc.molpops[i]) == false)
                     return false;
-                else 
-                {
-                    ConfigMolecularPopulation crcmolpop = crc.molpops.First(s => s.molpop_guid == cmp.molpop_guid);
-                    if (crcmolpop.Equals(cmp) == false)
-                    {
-                        return false;
-                    }
-                }
             }
-
-
+            
             //Check molecules
             if (crc.molecules_dict.Count != this.molecules_dict.Count)
                 return false;
@@ -7245,7 +7238,7 @@ namespace Daphne
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
      XmlInclude(typeof(MolPopLinear)),
      XmlInclude(typeof(MolPopGaussian))]
-    public abstract class MolPopDistribution : EntityModelBase
+    public abstract class MolPopDistribution : EntityModelBase, IEquatable<MolPopDistribution>
     {
         public MolPopDistributionType mp_distribution_type { get; protected set; }
         public List<BoundaryCondition> boundaryCondition { get; set; }
@@ -7254,9 +7247,11 @@ namespace Daphne
         {
         }
 
+        public abstract bool Equals(MolPopDistribution mpd);        
+
     }
 
-    public class MolPopHomogeneousLevel : MolPopDistribution, IEquatable<MolPopHomogeneousLevel>
+    public class MolPopHomogeneousLevel : MolPopDistribution
     {
         private double _concentration;
         public double concentration
@@ -7278,16 +7273,17 @@ namespace Daphne
             concentration = 1.0;
         }
 
-        public bool Equals(MolPopHomogeneousLevel mph)
+        public override bool Equals(MolPopDistribution mph)
         {
-            if (this.concentration != mph.concentration)
+
+            if (this.concentration != (mph as MolPopHomogeneousLevel).concentration)
                 return false;
 
             return true;
         }
     }
 
-    public class MolPopLinear : MolPopDistribution, IEquatable<MolPopLinear>
+    public class MolPopLinear : MolPopDistribution
     {
         public double x1 { get; set; }
         public int dim { get; set; }
@@ -7339,13 +7335,21 @@ namespace Daphne
             }
         }
 
-        public bool Equals(MolPopLinear mpl)
+        public override bool Equals(MolPopDistribution mpd)
         {
+            MolPopLinear mpl = mpd as MolPopLinear;
+
+            if (this.x1 != mpl.x1 || this.dim != mpl.dim)
+                return false;
+
+            if (this.boundary_face != mpl.boundary_face)
+                return false;
+
             return true;
         }
     }
 
-    public class MolPopGaussian : MolPopDistribution, IEquatable<MolPopGaussian>
+    public class MolPopGaussian : MolPopDistribution
     {
         public double peak_concentration { get; set; }
         public GaussianSpecification gauss_spec { get; set; }
@@ -7356,8 +7360,10 @@ namespace Daphne
             peak_concentration = 1.0;
         }
 
-        public bool Equals(MolPopGaussian mpg)
+        public override bool Equals(MolPopDistribution mpd)
         {
+            MolPopGaussian mpg = mpd as MolPopGaussian;
+
             if (this.peak_concentration != mpg.peak_concentration)
                 return false;
 
@@ -7371,7 +7377,7 @@ namespace Daphne
     /// <summary>
     /// added to store intermediate run state
     /// </summary>
-    public class MolPopExplicit : MolPopDistribution, IEquatable<MolPopExplicit>
+    public class MolPopExplicit : MolPopDistribution
     {
         public MolPopExplicit()
         {
@@ -7387,8 +7393,10 @@ namespace Daphne
             conc = new double[totalExpectedValues];            
         }
 
-        public bool Equals(MolPopExplicit mpe)
+        public override bool Equals(MolPopDistribution mpd)
         {
+            MolPopExplicit mpe = mpd as MolPopExplicit;
+
             if (this.MolFileName.Equals(mpe.MolFileName) == false)
                 return false;
 
