@@ -54,6 +54,8 @@
                         CanUserAddRows="False"
                         BorderThickness="1"
                         BorderBrush="Black"
+                        Thumb.DragStarted="dgInitConcs_DragStarted"
+                        Thumb.DragCompleted="dgInitConcs_DragCompleted"
                         >
 
                     <DataGrid.ColumnHeaderStyle>
@@ -114,6 +116,8 @@
                                 CanUserAddRows="False"
                                 BorderThickness="1"
                                 BorderBrush="Black"
+                                Thumb.DragStarted="dgInitConcs_DragStarted"
+                                Thumb.DragCompleted="dgInitConcs_DragCompleted"
                                 >
 
                     <DataGrid.ColumnHeaderStyle>
