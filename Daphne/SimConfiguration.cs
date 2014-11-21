@@ -2105,11 +2105,6 @@ namespace Daphne
             //AllMols.CollectionChanged += new NotifyCollectionChangedEventHandler(allMols_CollectionChanged);
         }
 
-        //private void allMols_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        //{
-
-        //}
-
         private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             InitializeAllMols();
@@ -5272,6 +5267,7 @@ namespace Daphne
                     }
                 }
             }
+
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

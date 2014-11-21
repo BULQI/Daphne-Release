@@ -133,11 +133,8 @@ namespace Workbench
             windowsFormsHost1.Width = w;
             windowsFormsHost1.Height = h;
             
-            //chartSize = sz;
             Chart.Size = sz;
-
             Chart.Draw();
-                       
         }
 
         /// <summary>
@@ -161,7 +158,6 @@ namespace Workbench
             windowsFormsHost1.Width = windowsFormsHost1.Width * 0.9;
             windowsFormsHost1.Height = windowsFormsHost1.Height * 0.9;            
 
-            //chartSize = sz;
             Chart.Size = sz;
             Chart.Draw();            
         }        
@@ -236,16 +232,6 @@ namespace Workbench
                 redraw_flag = true;
                 MW.runButton_Click(null, null);
             }
-        }
-
-        /// <summary>
-        /// Button for generating report
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnSaveReport_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

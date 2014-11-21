@@ -50,8 +50,6 @@ namespace DaphneGui
 
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
             arc.ShowDialog();
-
-            crc.RefreshMolPops(MainWindow.SOP.Protocol.entity_repository);
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
