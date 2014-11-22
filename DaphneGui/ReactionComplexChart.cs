@@ -252,6 +252,7 @@ namespace DaphneGui
                     {
                         SeriesToDrag = ser;
                         bDrag = true;
+                        MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, true);
                         ser.Points[0].MarkerColor = Color.Red;  //  .DataPoints.Item(1).Marker.Visible = True    
                         SeriesToDrag.Points[0].IsValueShownAsLabel = true;
                         SeriesToDrag.Points[0].LabelFormat = "F3";
@@ -269,6 +270,7 @@ namespace DaphneGui
         private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             bDrag = false;
+            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
             //Circle was red during drag so change it back to gold
             if (SeriesToDrag != null)
             {

@@ -55,6 +55,8 @@
                         CanUserAddRows="False"
                         BorderThickness="1"
                         BorderBrush="Black"
+                        Thumb.DragStarted="dgInitConcs_DragStarted"
+                        Thumb.DragCompleted="dgInitConcs_DragCompleted"
                         >
 
                     <DataGrid.ColumnHeaderStyle>
@@ -115,6 +117,8 @@
                                 CanUserAddRows="False"
                                 BorderThickness="1"
                                 BorderBrush="Black"
+                                Thumb.DragStarted="dgInitConcs_DragStarted"
+                                Thumb.DragCompleted="dgInitConcs_DragCompleted"
                                 >
 
                     <DataGrid.ColumnHeaderStyle>
@@ -171,11 +175,10 @@
 
             <!--PUSH BUTTONS-->
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="30,0">
-                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
-                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
+                <Button x:Name="btnIncSize" Width="70" Height="23" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
+                <Button x:Name="btnDecSize" Width="70" Height="23" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
                 <Button Content="X-Axis: Linear" Height="23" Name="btnLogX" Width="120" Click="btnX_Axis_Click" IsEnabled="False" />
                 <Button Content="Y-Axis: Linear" Height="23" Name="btnLogY" Width="120" Click="btnY_Axis_Click" IsEnabled="False" />
-                <!--<Button Content="Save Report" Height="23" Name="btnSaveReport" Width="120" Click="btnSaveReport_Click" />-->
             </StackPanel>
 
             <!--GRAPH-->

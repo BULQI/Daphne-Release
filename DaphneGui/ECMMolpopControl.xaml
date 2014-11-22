@@ -40,7 +40,8 @@
                 <StackPanel  Grid.Column="0" Grid.Row="4">
                     <StackPanel.ToolTip>
                         <StackPanel Width="200" Orientation="Horizontal">
-                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">Tooltip To Be Provided.</TextBlock>
+                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                File format: .txt or .csv with one grid point per line. Grid point ordering: For an NxMxP grid, grid point (i,j,k) has index q = i + j*N + k*N*M </TextBlock>
                         </StackPanel>
                     </StackPanel.ToolTip>
                     <StackPanel>

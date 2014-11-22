@@ -233,5 +233,15 @@ namespace Workbench
                 MW.runButton_Click(null, null);
             }
         }
+
+        private void dgInitConcs_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, true);
+        }
+
+        private void dgInitConcs_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
+        }
     }
 }
