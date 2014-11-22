@@ -19,7 +19,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>                
-                <RowDefinition Height="32"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -27,7 +27,9 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Visibility="Hidden">
+            
+            <!--Shows Y coordinate when dragging a series-->
+            <StackPanel Orientation="Horizontal" Grid.Column="6" Grid.Row="0" Visibility="Hidden">
                 <TextBlock >Dragging Concentration:</TextBlock>
                 <uc:DoublesBox x:Name="dblMouseHover" HorizontalAlignment="Left" Margin="4,0"
                         Number="0.00"   
@@ -38,15 +40,14 @@
                 </uc:DoublesBox>
                                             
             </StackPanel>
-
             
             <!--MOLECULES-->
-            <StackPanel Grid.Column="0" Grid.Row="1" Margin="30,0">
+            <StackPanel Grid.Column="0" Grid.Row="0" Margin="30,0">
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
                 
                 <DataGrid x:Name="dgInitConcs" 
-                        ItemsSource="{Binding Path=molpops, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                        Height="150" MinWidth="150" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                        ItemsSource="{Binding Path=scenario.AllMols, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                        MaxHeight="160" MinWidth="150" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                         CanUserReorderColumns="False" CanUserResizeRows="False"
                         CanUserSortColumns="True" RowHeaderWidth="0"
                         HorizontalAlignment="Left"
@@ -104,11 +105,11 @@
             </StackPanel>
             
             <!--REACTIONS-->
-            <StackPanel Grid.Column="0" Grid.Row="2" Margin="30,12">
+            <StackPanel Grid.Column="0" Grid.Row="1" Margin="30,12">
                 <TextBlock>Reaction Rates</TextBlock>
                 <DataGrid x:Name="dgReactionRates" 
-                                ItemsSource="{Binding Path=reactions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                                ItemsSource="{Binding Path=scenario.AllReacs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                                MaxHeight="160" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 HorizontalAlignment="Left"
@@ -173,17 +174,15 @@
             </StackPanel>
 
             <!--PUSH BUTTONS-->
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Margin="30,0">
-                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
-                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
-                <!--<Button Content="X-Axis Log" Height="23" Name="btnLogX" Width="75" Click="btnX_Axis_Click" />
-                <Button Content="Y-Axis Log" Height="23" Name="btnLogY" Width="75" Click="btnY_Axis_Click" />-->
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="30,0">
+                <Button x:Name="btnIncSize" Width="70" Height="23" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
+                <Button x:Name="btnDecSize" Width="70" Height="23" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
                 <Button Content="X-Axis: Linear" Height="23" Name="btnLogX" Width="120" Click="btnX_Axis_Click" IsEnabled="False" />
                 <Button Content="Y-Axis: Linear" Height="23" Name="btnLogY" Width="120" Click="btnY_Axis_Click" IsEnabled="False" />
             </StackPanel>
 
             <!--GRAPH-->
-            <StackPanel Grid.Column="0" Grid.Row="4" >
+            <StackPanel Grid.Column="0" Grid.Row="3" >
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True" >
                     <wf:Panel x:Name="panelRC" Visible="True" />
                 </WindowsFormsHost>

@@ -2085,29 +2085,30 @@ namespace Daphne
 
     public class VatReactionComplexScenario : ScenarioBase
     {
+        [JsonIgnore]
         public ObservableCollection<ConfigMolecularPopulation> AllMols { get; set; }
+        [JsonIgnore]
+        public ObservableCollection<ConfigReaction> AllReacs { get; set; }
 
         public VatReactionComplexScenario()
         {
             environment = new ConfigPointEnvironment();
             AllMols = new ObservableCollection<ConfigMolecularPopulation>();
+            AllReacs = new ObservableCollection<ConfigReaction>();
             environment.comp.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
         }
 
         public override void InitializeStorageClasses()
         {
             InitializeAllMols();
+            InitializeAllReacs();
             //AllMols.CollectionChanged += new NotifyCollectionChangedEventHandler(allMols_CollectionChanged);
         }
-
-        //private void allMols_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        //{
-
-        //}
 
         private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             InitializeAllMols();
+            InitializeAllReacs();
         }
 
         public void InitializeAllMols()
@@ -2121,6 +2122,22 @@ namespace Daphne
                     if (AllMols.Contains(molpop) == false)
                     {
                         AllMols.Add(molpop);
+                    }
+                }
+            }
+        }
+
+        public void InitializeAllReacs()
+        {
+            AllReacs.Clear();
+
+            foreach (ConfigReactionComplex crc in environment.comp.reaction_complexes)
+            {
+                foreach (ConfigReaction reac in crc.reactions)
+                {
+                    if (AllReacs.Contains(reac) == false)
+                    {
+                        AllReacs.Add(reac);
                     }
                 }
             }
@@ -4500,7 +4517,9 @@ namespace Daphne
 
             if (this.mp_distribution.mp_distribution_type != molpop.mp_distribution.mp_distribution_type)
                 return false;
-            
+
+            if (this.mp_distribution.Equals(molpop.mp_distribution) == false)
+                return false;
 
             return true;
         }
@@ -5248,6 +5267,7 @@ namespace Daphne
                     }
                 }
             }
+
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -5366,25 +5386,16 @@ namespace Daphne
                 }
             }
 
-            //Check molpops?
+            //Check molpops
             if (crc.molpops.Count != this.molpops.Count)
                 return false;
 
-            foreach (ConfigMolecularPopulation cmp in this.molpops)
+            for (int i = 0; i < this.molpops.Count; i++)
             {
-                if (crc.molpops.Contains(cmp) == false)
+                if (this.molpops[i].Equals(crc.molpops[i]) == false)
                     return false;
-                else 
-                {
-                    ConfigMolecularPopulation crcmolpop = crc.molpops.First(s => s.molpop_guid == cmp.molpop_guid);
-                    if (crcmolpop.Equals(cmp) == false)
-                    {
-                        return false;
-                    }
-                }
             }
-
-
+            
             //Check molecules
             if (crc.molecules_dict.Count != this.molecules_dict.Count)
                 return false;
@@ -7225,7 +7236,7 @@ namespace Daphne
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
      XmlInclude(typeof(MolPopLinear)),
      XmlInclude(typeof(MolPopGaussian))]
-    public abstract class MolPopDistribution : EntityModelBase
+    public abstract class MolPopDistribution : EntityModelBase, IEquatable<MolPopDistribution>
     {
         public MolPopDistributionType mp_distribution_type { get; protected set; }
         public List<BoundaryCondition> boundaryCondition { get; set; }
@@ -7233,6 +7244,9 @@ namespace Daphne
         public MolPopDistribution()
         {
         }
+
+        public abstract bool Equals(MolPopDistribution mpd);        
+
     }
 
     public class MolPopHomogeneousLevel : MolPopDistribution
@@ -7255,6 +7269,15 @@ namespace Daphne
         {
             mp_distribution_type = MolPopDistributionType.Homogeneous;
             concentration = 1.0;
+        }
+
+        public override bool Equals(MolPopDistribution mph)
+        {
+
+            if (this.concentration != (mph as MolPopHomogeneousLevel).concentration)
+                return false;
+
+            return true;
         }
     }
 
@@ -7309,6 +7332,19 @@ namespace Daphne
 
             }
         }
+
+        public override bool Equals(MolPopDistribution mpd)
+        {
+            MolPopLinear mpl = mpd as MolPopLinear;
+
+            if (this.x1 != mpl.x1 || this.dim != mpl.dim)
+                return false;
+
+            if (this.boundary_face != mpl.boundary_face)
+                return false;
+
+            return true;
+        }
     }
 
     public class MolPopGaussian : MolPopDistribution
@@ -7320,6 +7356,19 @@ namespace Daphne
         {
             mp_distribution_type = MolPopDistributionType.Gaussian;
             peak_concentration = 1.0;
+        }
+
+        public override bool Equals(MolPopDistribution mpd)
+        {
+            MolPopGaussian mpg = mpd as MolPopGaussian;
+
+            if (this.peak_concentration != mpg.peak_concentration)
+                return false;
+
+            if (this.gauss_spec.Equals(mpg.gauss_spec) == false)
+                return false;
+
+            return true;
         }
     }
 
@@ -7340,6 +7389,28 @@ namespace Daphne
             //create array of actual size, initialized to zeroes
             int totalExpectedValues = numGridPoints[0] * numGridPoints[1] * numGridPoints[2];
             conc = new double[totalExpectedValues];            
+        }
+
+        public override bool Equals(MolPopDistribution mpd)
+        {
+            MolPopExplicit mpe = mpd as MolPopExplicit;
+
+            if (this.MolFileName.Equals(mpe.MolFileName) == false)
+                return false;
+
+            if (this.Description.Equals(mpe.Description) == false)
+                return false;
+
+            if (this.conc.Length != mpe.conc.Length)
+                return false;
+
+            for (int i = 0; i < this.conc.Length; i++)
+            {
+                if (this.conc[i] != mpe.conc[i])
+                    return false;
+            }
+
+            return true;
         }
 
         public double[] conc;
