@@ -2091,7 +2091,7 @@ namespace Daphne
         public ObservableCollection<ConfigReaction> AllReacs { get; set; }
 
         public RenderPopOptions popOptions { get; set; }
-
+        
         public VatReactionComplexScenario()
         {
             environment = new ConfigPointEnvironment();
@@ -2126,6 +2126,7 @@ namespace Daphne
                     if (AllMols.Contains(molpop) == false)
                     {
                         AllMols.Add(molpop);
+                        popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
                     }
                 }
             }
