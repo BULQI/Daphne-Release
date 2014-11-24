@@ -201,17 +201,16 @@ namespace DaphneGui
             //Edit existing
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
-                //Removed reactions
+                //For removed reactions
                 foreach (ConfigReaction cr in selectedRC.reactions.ToList())
                 {
                     if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
                     {
-                        selectedRC.reactions.Remove(cr);
-                        selectedRC.RefreshMolPops(MainWindow.SOP.Protocol.entity_repository);
+                        selectedRC.RemoveReaction(cr);
                         edited = true;
                     }
                 }
-                //Added reactions
+                //For added reactions
                 foreach (ConfigReaction reac in RightList)
                 {
                     if (selectedRC.reactions_dict.ContainsKey(reac.entity_guid) != true)

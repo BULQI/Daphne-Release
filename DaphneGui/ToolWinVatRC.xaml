@@ -160,7 +160,77 @@
 
             </ScrollViewer>
         </TabItem>
-        
+
+
+        <!-- RENDERING OPTIONS -->
+        <TabItem Header="Rendering" x:Name="tabRendering" AutomationProperties.AutomationId="DaphneReportsTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!--Graphing Molecules in Vat -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                        IsExpanded="True"
+                        Header="Graph Rendering Options"
+                        Margin="0,0,0,0" 
+                        Canvas.ZIndex="1"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        >
+                        <StackPanel>
+                            <!--Path=Protocol.scenario.popOptions.molPopOptions Path=Protocol.scenario.AllMols-->
+                            <DataGrid x:Name="dgGraphMols" 
+                                    ItemsSource="{Binding Path=Protocol.scenario.popOptions.molPopOptions}" AutoGenerateColumns="False"                           
+                                    MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
+                                    CanUserReorderColumns="False" CanUserResizeRows="False"
+                                    CanUserSortColumns="False" RowHeaderWidth="0"
+                                    VerticalContentAlignment="Center"
+                                    CanUserAddRows="False"
+                                    BorderThickness="1"
+                                    BorderBrush="Black"
+                                    >
+
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" >
+                                        <Setter Property="FontSize" Value="12" />
+                                        <Setter Property="Height" Value="24" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Offset="0.0" Color="White" />
+                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="molecular population" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="render on" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Expander>
+
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
 
     </TabControl>
 
