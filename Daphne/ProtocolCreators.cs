@@ -1159,7 +1159,7 @@ namespace Daphne
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
 #endif
 
-            gc.DragCoefficient.Value = 1.0;
+            gc.DragCoefficient.ConstValue = 1.0;
             store.entity_repository.cells.Add(gc);
 
             //////////////////////////////////////////////
@@ -1228,8 +1228,10 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.Value = 1.0;
-            gc.TransductionConstant.Value = 100;
+            gc.DragCoefficient.ConstValue = 1.0;
+
+            DistributedParameter distr_param = new DistributedParameter(100);
+            gc.TransductionConstant = distr_param;
 
             store.entity_repository.cells.Add(gc);
 
@@ -1307,8 +1309,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.Value = 1.0;
-            gc.TransductionConstant.Value = 1e2;
+            gc.DragCoefficient.ConstValue = 1.0;
+            gc.TransductionConstant.ConstValue = 1e2;
 
             store.entity_repository.cells.Add(gc);
 
@@ -1390,8 +1392,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.Value = 1.0;
-            gc.TransductionConstant.Value = 100;
+            gc.DragCoefficient.ConstValue = 1.0;
+            gc.TransductionConstant.ConstValue = 100;
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
@@ -1492,8 +1494,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.Value = 1.0;
-            gc.TransductionConstant.Value = 100;
+            gc.DragCoefficient.ConstValue = 1.0;
+            gc.TransductionConstant.ConstValue = 100;
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
@@ -1580,8 +1582,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.Value = 1.0;
-            gc.TransductionConstant.Value = 0.0;
+            gc.DragCoefficient.ConstValue = 1.0;
+            gc.TransductionConstant.ConstValue = 0.0;
             store.entity_repository.cells.Add(gc);
 
             ////////////////////////////////
@@ -1649,8 +1651,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.Value = 1.0;
-            gc.TransductionConstant.Value = 0.0;
+            gc.DragCoefficient.ConstValue = 1.0;
+            gc.TransductionConstant.ConstValue = 0.0;
             store.entity_repository.cells.Add(gc);
 
         }
