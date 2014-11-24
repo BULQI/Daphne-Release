@@ -193,7 +193,7 @@ namespace Daphne
             if (simCell.Cytosol.Populations.ContainsKey(cell.locomotor_mol_guid_ref) == true)
             {
                 MolecularPopulation driver = simCell.Cytosol.Populations[cell.locomotor_mol_guid_ref];
-
+                //nextValue = cell.TransductionConstant.GetValue();
                 simCell.Locomotor = new Locomotor(driver, cell.TransductionConstant.GetValue());
                 simCell.IsChemotactic = true;
             }
@@ -201,11 +201,12 @@ namespace Daphne
             {
                 simCell.IsChemotactic = false;
             }
-            double thisSigmaValue = cell.Sigma.GetValue();
-            if (thisSigmaValue > 0)
+            
+            nextValue = cell.Sigma.GetValue();
+            if (nextValue > 0)
             {
                 simCell.IsStochastic = true;
-                simCell.StochLocomotor = new StochLocomotor(thisSigmaValue);
+                simCell.StochLocomotor = new StochLocomotor(nextValue);
             }
             else
             {
