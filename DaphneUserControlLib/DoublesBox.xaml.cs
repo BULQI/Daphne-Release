@@ -338,6 +338,11 @@ namespace DaphneUserControlLib
             get { return (double)GetValue(NumberProperty); }
             set
             {
+                if (double.IsNaN(value) || double.IsInfinity(value))
+                {
+                    return;
+                }
+
                 double currval = (double)GetValue(NumberProperty);
                 double newval = value;
 
