@@ -269,9 +269,6 @@
     </Compile>
     <Compile Include="GuiExtension.cs" />
     <Compile Include="RecentFileList.cs" />
-    <Compile Include="SimConfigToolWindow.xaml.cs">
-      <DependentUpon>SimConfigToolWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
     <Page Include="About.xaml">
@@ -398,10 +395,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SimConfigToolWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
