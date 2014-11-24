@@ -5477,6 +5477,7 @@ namespace Daphne
             
             TransductionConstant = new DistributedParameter(0.0);
             DragCoefficient = new DistributedParameter(1.0);
+            //DragCoefficient.ConstValue = 1.0;
             Sigma = new DistributedParameter(0.0);
 
             membrane = new ConfigCompartment();
@@ -8777,33 +8778,49 @@ namespace Daphne
         #endregion // IDisposable Members
     }
 
-
-    public class DistributedParameter
+    /// <summary>
+    /// Class to handle parameters whose values may be set by a probability distribution.
+    /// </summary>
+    public class DistributedParameter : EntityModelBase
     {
-        public ParameterDistribution ParamDistr { get; set; }
-        public double Value { get; set; }
+        private ParameterDistribution paramDistr;
+        public ParameterDistribution ParamDistr 
+        {
+            get
+            {
+                return paramDistr;
+            }
+            set
+            {
+                paramDistr = value;
+                OnPropertyChanged("ParamDistr");
+            }
+        }
+
+        public double ConstValue { get; set; }
         public bool isInitialized;
 
         public DistributedParameter()
         {
             isInitialized = false;
-            // default
-            ParamDistr = new ConstantParameterDistribution();
         }
 
-        public DistributedParameter(double val)
+        public DistributedParameter(double _constValue)
         {
             isInitialized = false;
-            // default
-            ParamDistr = new ConstantParameterDistribution();
-            Value = val;
-        }
+            ConstValue = _constValue;
+        }    
 
         public void Intialize()
         {
+            if (ParamDistr == null)
+            {
+                ParamDistr = new ConstantParameterDistribution();
+            }
+
             if (ParamDistr.DistributionType == ParameterDistributionType.CONSTANT)
             {
-                ((ConstantParameterDistribution)ParamDistr).Value = Value;
+                ((ConstantParameterDistribution)ParamDistr).Value = ConstValue;
             }
 
             isInitialized = true;
@@ -8820,7 +8837,10 @@ namespace Daphne
         }
     }
 
-    public enum ParameterDistributionType { CONSTANT=0, DISCRETE, POISSON, GAMMA, UNIFORM };
+    /// <summary>
+    /// Types of probability distributions for distributed parameters.
+    /// </summary>
+    public enum ParameterDistributionType { CONSTANT=0, POISSON, GAMMA, UNIFORM, CATEGORICAL };
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -8831,10 +8851,10 @@ namespace Daphne
         private List<string> _param_dist_type_strings = new List<string>()
                                 {
                                     "Constant",
-                                    "Discrete",
                                     "Poisson",
                                     "Gamma",
                                     "Uniform",
+                                    "Categorical"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -8858,15 +8878,12 @@ namespace Daphne
         }
     }
 
-    public abstract class ParameterDistribution
+    /// <summary>
+    /// Abstract class for probability distributions on parameters.
+    /// </summary>
+    public abstract class ParameterDistribution :EntityModelBase
     {
-        public ParameterDistributionType DistributionType 
-        { 
-            get; 
-            
-            set; 
-        
-        }
+        public ParameterDistributionType DistributionType { get; set; }
         public bool isInitialized;
 
         public ParameterDistribution(ParameterDistributionType _distributionType)
@@ -8878,6 +8895,9 @@ namespace Daphne
         public abstract double Sample();
     }
 
+    /// <summary>
+    /// Parameter value is constant.
+    /// </summary>
     public class ConstantParameterDistribution : ParameterDistribution
     {
         public double Value { get; set; }
@@ -8885,6 +8905,7 @@ namespace Daphne
         public ConstantParameterDistribution()
             : base(ParameterDistributionType.CONSTANT)
         {
+            Value = 0;
         }
 
         public override void Initialize()
@@ -8898,27 +8919,34 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Probability distribution for the parameter is uniform.
+    /// </summary>
     public class UniformParameterDistribution : ParameterDistribution
     {
-        public double minValue { get; set; }
-        public double maxValue { get; set; }
+        public double MinValue { get; set; }
+        public double MaxValue { get; set; }
+        [JsonIgnore]
         private ContinuousUniform UniformDist;
 
         public UniformParameterDistribution()
             : base(ParameterDistributionType.UNIFORM)
         {
+            MinValue = 0.0;
+            MaxValue = 1.0;
+            UniformDist = new ContinuousUniform(MinValue, MaxValue, Rand.MersenneTwister);
         }
 
         public override void Initialize()
         {
-            if (maxValue <= minValue)
+            if (MaxValue <= MinValue)
             {
                 MessageBox.Show("The max value must be greater than the min value in a Uniform distribution. The range has been set to (0,1)");
-                minValue = 0.0;
-                maxValue = 1.0;
+                MinValue = 0.0;
+                MaxValue = 1.0;
             }
 
-            UniformDist = new ContinuousUniform(minValue, maxValue, Rand.MersenneTwister);
+            UniformDist = new ContinuousUniform(MinValue, MaxValue, Rand.MersenneTwister);
             isInitialized = true;
         }
 
@@ -8933,15 +8961,20 @@ namespace Daphne
         }
     }
 
-
+    /// <summary>
+    /// Probability distribution for the parameter is a Poisson distribution.
+    /// </summary>
     public class PoissonParameterDistribution : ParameterDistribution
     {
         public double Mean { get; set; }
+        [JsonIgnore]
         private Poisson PoissonDist;
 
         public PoissonParameterDistribution()
             : base(ParameterDistributionType.POISSON)
         {
+            Mean = 1.0;
+            PoissonDist = new Poisson(Mean, Rand.MersenneTwister);
         }
 
         public override void Initialize()
@@ -8967,15 +9000,22 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Probability distribution for the parameter is a Gamma distribution.
+    /// </summary>
     public class GammaParameterDistribution : ParameterDistribution
     {
         public double Shape { get; set; }
         public double Rate { get; set; }
+        [JsonIgnore]
         private Gamma GammaDist;
 
         public GammaParameterDistribution()
             : base(ParameterDistributionType.GAMMA)
         {
+            Rate = 1.0;
+            Shape = 1.0;
+            GammaDist = new Gamma(Shape, Rate, Rand.MersenneTwister);
         }
 
         public override void Initialize()
@@ -9005,33 +9045,42 @@ namespace Daphne
         }
     }
 
-    public class DiscreteParameterDistribution : ParameterDistribution
+    /// <summary>
+    /// Probability distribution for the parameter is a categorical distribution.
+    /// </summary>
+    public class CategoricalParameterDistribution : ParameterDistribution
     {
-        public List<double> ProbMass { get; set; }
-        public Categorical DiscreteDist;
+        public Dictionary<double, double> ProbMass { get; set; }
+        [JsonIgnore]
+        public Categorical CategoricalDist;
 
-        public DiscreteParameterDistribution()
-            : base(ParameterDistributionType.DISCRETE)
+        public CategoricalParameterDistribution()
+            : base(ParameterDistributionType.CATEGORICAL)
         {
-            ProbMass = new List<double>();
+            ProbMass = new Dictionary<double, double>();
+            ProbMass.Add(0.0, 0.5);
+            ProbMass.Add(1.0, 0.5);
+            CategoricalDist = new Categorical(ProbMass.Values.ToArray(), Rand.MersenneTwister);
         }
 
         public override void Initialize()
         {
             if (ProbMass.Count == 0)
             {
-                MessageBox.Show("Warning. No categories in the discrete distribution. A distribution with a single category with probability 1 has been created. ");
-                ProbMass.Add(1.0);
+                MessageBox.Show("Warning. No categories in the distribution. A distribution with binary categories of equal probability has been created. ");
+                ProbMass.Add(0.0, 0.5);
+                ProbMass.Add(1.0, 0.5);
+
             }
             Normalize();
-            DiscreteDist = new Categorical(ProbMass.ToArray(), Rand.MersenneTwister);
+            CategoricalDist = new Categorical(ProbMass.Values.ToArray(), Rand.MersenneTwister);
             isInitialized = true;
         }
 
         private void Normalize()
         {
             double sum = 0;
-            foreach (double val in ProbMass)
+            foreach (double val in ProbMass.Values)
             {
                 sum += val;
             }
@@ -9049,7 +9098,7 @@ namespace Daphne
                 Initialize();
             }
 
-            return (double)DiscreteDist.Sample();
+            return CategoricalDist.Sample();
         }
     }
 
