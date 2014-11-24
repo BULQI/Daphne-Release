@@ -2,10 +2,51 @@
   "experiment_db_id": 0,
   "experiment_name": "Experiment1",
   "experiment_reps": 1,
-  "experiment_guid": "26c84e20-73c7-4301-8fb0-ef5b331f2bcb",
+  "experiment_guid": "04b88d67-ec41-4c22-8099-0b384cfe241c",
   "experiment_description": "chemotactic receptor/ligand binding",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
+    "popOptions": {
+      "cellPopOptions": [],
+      "molPopOptions": [
+        {
+          "renderOn": true,
+          "renderMethod": 10,
+          "name": "CXCL13",
+          "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418"
+        },
+        {
+          "renderOn": true,
+          "renderMethod": 10,
+          "name": "CXCR5",
+          "renderLabel": "2124fe46-3fbd-46dd-a273-be3371fe0ef4"
+        },
+        {
+          "renderOn": true,
+          "renderMethod": 10,
+          "name": "CXCL13:CXCR5",
+          "renderLabel": "bdb88439-192d-4214-bf2e-c9a463fa5379"
+        },
+        {
+          "renderOn": true,
+          "renderMethod": 10,
+          "name": "CXCL12",
+          "renderLabel": "2f432fd7-6c94-48c1-9266-f2a2adbfd141"
+        },
+        {
+          "renderOn": true,
+          "renderMethod": 10,
+          "name": "CXCR4",
+          "renderLabel": "02d41b88-2b47-4c15-9b8e-f363432c63e4"
+        },
+        {
+          "renderOn": true,
+          "renderMethod": 10,
+          "name": "CXCL12:CXCR4",
+          "renderLabel": "1430aee9-3518-4b4b-ba7c-1b6017355d95"
+        }
+      ]
+    },
     "time_config": {
       "duration": 1.0,
       "rendering_interval": 0.02,
@@ -56,8 +97,8 @@
               {
                 "molpop_guid": "ef7c30f1-4374-4c51-b36f-5e745eaf9d78",
                 "molecule": {
-                  "Name": "CXCL13",
                   "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+                  "Name": "CXCL13",
                   "MolecularWeight": 7.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 4500.0,
@@ -80,8 +121,8 @@
               {
                 "molpop_guid": "dd9e571a-2f5d-490e-941c-5c1c53bd587e",
                 "molecule": {
-                  "Name": "CXCR5",
                   "renderLabel": "2124fe46-3fbd-46dd-a273-be3371fe0ef4",
+                  "Name": "CXCR5",
                   "MolecularWeight": 43.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 750.0,
@@ -104,8 +145,8 @@
               {
                 "molpop_guid": "6db311a3-3480-4678-81ab-8f0746d0d4a5",
                 "molecule": {
-                  "Name": "CXCL13:CXCR5",
                   "renderLabel": "bdb88439-192d-4214-bf2e-c9a463fa5379",
+                  "Name": "CXCL13:CXCR5",
                   "MolecularWeight": 50.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 750.0,
@@ -164,8 +205,8 @@
               {
                 "molpop_guid": "f039da62-ba7e-4dfb-9f37-24f952df8d9d",
                 "molecule": {
-                  "Name": "CXCL12",
                   "renderLabel": "2f432fd7-6c94-48c1-9266-f2a2adbfd141",
+                  "Name": "CXCL12",
                   "MolecularWeight": 7.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 4500.0,
@@ -188,8 +229,8 @@
               {
                 "molpop_guid": "e3f89d8c-9e0d-4851-a2a1-47bbb2b28118",
                 "molecule": {
-                  "Name": "CXCR4",
                   "renderLabel": "02d41b88-2b47-4c15-9b8e-f363432c63e4",
+                  "Name": "CXCR4",
                   "MolecularWeight": 43.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 750.0,
@@ -212,8 +253,8 @@
               {
                 "molpop_guid": "122c260e-c1ab-4f23-bea2-a846f3021404",
                 "molecule": {
-                  "Name": "CXCL12:CXCR4",
                   "renderLabel": "1430aee9-3518-4b4b-ba7c-1b6017355d95",
+                  "Name": "CXCL12:CXCR4",
                   "MolecularWeight": 50.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 750.0,
@@ -285,8 +326,8 @@
           {
             "molpop_guid": "ef7c30f1-4374-4c51-b36f-5e745eaf9d78",
             "molecule": {
-              "Name": "CXCL13",
               "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+              "Name": "CXCL13",
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
@@ -309,8 +350,8 @@
           {
             "molpop_guid": "dd9e571a-2f5d-490e-941c-5c1c53bd587e",
             "molecule": {
-              "Name": "CXCR5",
               "renderLabel": "2124fe46-3fbd-46dd-a273-be3371fe0ef4",
+              "Name": "CXCR5",
               "MolecularWeight": 43.0,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 750.0,
@@ -333,8 +374,8 @@
           {
             "molpop_guid": "6db311a3-3480-4678-81ab-8f0746d0d4a5",
             "molecule": {
-              "Name": "CXCL13:CXCR5",
               "renderLabel": "bdb88439-192d-4214-bf2e-c9a463fa5379",
+              "Name": "CXCL13:CXCR5",
               "MolecularWeight": 50.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 750.0,
@@ -393,8 +434,8 @@
           {
             "molpop_guid": "f039da62-ba7e-4dfb-9f37-24f952df8d9d",
             "molecule": {
-              "Name": "CXCL12",
               "renderLabel": "2f432fd7-6c94-48c1-9266-f2a2adbfd141",
+              "Name": "CXCL12",
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
@@ -417,8 +458,8 @@
           {
             "molpop_guid": "e3f89d8c-9e0d-4851-a2a1-47bbb2b28118",
             "molecule": {
-              "Name": "CXCR4",
               "renderLabel": "02d41b88-2b47-4c15-9b8e-f363432c63e4",
+              "Name": "CXCR4",
               "MolecularWeight": 43.0,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 750.0,
@@ -441,8 +482,8 @@
           {
             "molpop_guid": "122c260e-c1ab-4f23-bea2-a846f3021404",
             "molecule": {
-              "Name": "CXCL12:CXCR4",
               "renderLabel": "1430aee9-3518-4b4b-ba7c-1b6017355d95",
+              "Name": "CXCL12:CXCR4",
               "MolecularWeight": 50.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 750.0,
@@ -469,8 +510,8 @@
     "cells": [],
     "molecules": [
       {
-        "Name": "CXCL13",
         "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+        "Name": "CXCL13",
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
@@ -478,8 +519,8 @@
         "entity_guid": "f81a4a0f-5229-478f-b196-abeeb321c418"
       },
       {
-        "Name": "CXCR5",
         "renderLabel": "2124fe46-3fbd-46dd-a273-be3371fe0ef4",
+        "Name": "CXCR5",
         "MolecularWeight": 43.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
@@ -487,8 +528,8 @@
         "entity_guid": "2124fe46-3fbd-46dd-a273-be3371fe0ef4"
       },
       {
-        "Name": "CXCL13:CXCR5",
         "renderLabel": "bdb88439-192d-4214-bf2e-c9a463fa5379",
+        "Name": "CXCL13:CXCR5",
         "MolecularWeight": 50.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
@@ -496,8 +537,8 @@
         "entity_guid": "bdb88439-192d-4214-bf2e-c9a463fa5379"
       },
       {
-        "Name": "CXCL12",
         "renderLabel": "2f432fd7-6c94-48c1-9266-f2a2adbfd141",
+        "Name": "CXCL12",
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
@@ -505,8 +546,8 @@
         "entity_guid": "2f432fd7-6c94-48c1-9266-f2a2adbfd141"
       },
       {
-        "Name": "CXCR4",
         "renderLabel": "02d41b88-2b47-4c15-9b8e-f363432c63e4",
+        "Name": "CXCR4",
         "MolecularWeight": 43.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
@@ -514,8 +555,8 @@
         "entity_guid": "02d41b88-2b47-4c15-9b8e-f363432c63e4"
       },
       {
-        "Name": "CXCL12:CXCR4",
         "renderLabel": "1430aee9-3518-4b4b-ba7c-1b6017355d95",
+        "Name": "CXCL12:CXCR4",
         "MolecularWeight": 50.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,

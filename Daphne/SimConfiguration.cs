@@ -2090,12 +2090,16 @@ namespace Daphne
         [JsonIgnore]
         public ObservableCollection<ConfigReaction> AllReacs { get; set; }
 
+        public RenderPopOptions popOptions { get; set; }
+
         public VatReactionComplexScenario()
         {
             environment = new ConfigPointEnvironment();
             AllMols = new ObservableCollection<ConfigMolecularPopulation>();
             AllReacs = new ObservableCollection<ConfigReaction>();
             environment.comp.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
+
+            popOptions = new RenderPopOptions();
         }
 
         public override void InitializeStorageClasses()
@@ -5451,17 +5455,55 @@ namespace Daphne
             }
         }
 
-        public void RefreshMolPops(EntityRepository er)
+        public void RemoveReaction(ConfigReaction cr)
         {
-            molpops.Clear();
-            molecules_dict.Clear();
+            //remove reaction
+            reactions.Remove(cr);
 
+            //remove molpops whose molecules are not in the remaining reactions
+            ObservableCollection<ConfigMolecularPopulation> newmolpops = new ObservableCollection<ConfigMolecularPopulation>();
+
+            //Create a new molpops collection from the current reactions in the complex (molpops)
+            //We cannot lose the attributes of the existing mol pops so we have to do it this way
             foreach (ConfigReaction reac in reactions)
             {
-                AddReactionMolPops(reac, er);
+                AddMolPop(newmolpops, reac.reactants_molecule_guid_ref);
+                AddMolPop(newmolpops, reac.products_molecule_guid_ref);
+                AddMolPop(newmolpops, reac.modifiers_molecule_guid_ref);
             }
-        }      
+            molpops = newmolpops;
 
+            //recreate molecules_dict
+            molecules_dict.Clear();
+            foreach (ConfigMolecularPopulation molpop in molpops)
+            {               
+                molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+            }
+
+        }
+
+        /// <summary>
+        /// This copies existing molpops into the new list after user has deleted reactions from reaction complex).
+        /// It is only called when reactions are removed.
+        /// </summary>
+        /// <param name="newmolpops"></param>
+        /// <param name="guid_refs"></param>
+        private void AddMolPop(ObservableCollection<ConfigMolecularPopulation> newmolpops, ObservableCollection<string> guid_refs)
+        {
+            foreach (string guid in guid_refs)
+            {
+                ConfigMolecularPopulation cmp = molpops.Where(m => m.molecule.entity_guid == guid).First();
+                if (newmolpops.Contains(cmp) == false)
+                    newmolpops.Add(cmp);
+            }
+        }
+
+        /// <summary>
+        /// This creates new mol pops for a reaction complex but it initializes the properties to default values.
+        /// This is only called when a reaction is added to a reaction complex.
+        /// </summary>
+        /// <param name="reac"></param>
+        /// <param name="er"></param>
         public void AddReactionMolPops(ConfigReaction reac, EntityRepository er)
         {
             CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref, er);
