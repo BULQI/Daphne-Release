@@ -90,9 +90,6 @@
     <Compile Include="DaphneColorDlg.xaml.cs">
       <DependentUpon>DaphneColorDlg.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ParamDistrControl.xaml.cs">
-      <DependentUpon>ParamDistrControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UserControlExtensions.cs" />
     <Page Include="DaphneColorDlg.xaml">
       <SubType>Designer</SubType>
@@ -105,10 +102,6 @@
     <Compile Include="DoublesBox.xaml.cs">
       <DependentUpon>DoublesBox.xaml</DependentUpon>
     </Compile>
-    <Page Include="ParamDistrControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
