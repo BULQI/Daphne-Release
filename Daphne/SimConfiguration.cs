@@ -2106,7 +2106,6 @@ namespace Daphne
         {
             InitializeAllMols();
             InitializeAllReacs();
-            //AllMols.CollectionChanged += new NotifyCollectionChangedEventHandler(allMols_CollectionChanged);
         }
 
         private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -2115,6 +2114,44 @@ namespace Daphne
             InitializeAllReacs();
         }
 
+        /// <summary>
+        /// Returns true if any reaction complex in compartment contains mol pop with given renderLabel
+        /// </summary>
+        /// <param name="renderLabel"></param>
+        /// <returns></returns>
+        private bool FindMolPop(string renderLabel)
+        {
+            ConfigCompartment comp = environment.comp;
+            foreach (ConfigReactionComplex crc in comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                {
+                    if (molpop.renderLabel == renderLabel)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Removes from molPopOptions list after AllMols is changed.
+        /// </summary>
+        private void RemoveOldMolPopOptions()
+        {
+            foreach (RenderPop pop in popOptions.molPopOptions.ToList())
+            {
+                if (FindMolPop(pop.renderLabel) == false)
+                {
+                    popOptions.molPopOptions.Remove(pop);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes AllMols after user added/removed a reaction to/from reaction complex
+        /// </summary>
         public void InitializeAllMols()
         {
             AllMols.Clear();
@@ -2123,13 +2160,17 @@ namespace Daphne
             {
                 foreach (ConfigMolecularPopulation molpop in crc.molpops)
                 {
-                    if (AllMols.Contains(molpop) == false)
+                    bool molecule_found = AllMols.Where(m => m.molecule.entity_guid == molpop.molecule.entity_guid).Any();
+                    if (molecule_found == false)
                     {
                         AllMols.Add(molpop);
                         popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
+                        RenderPop rp = popOptions.GetMolRenderPop(molpop.renderLabel);
+                        rp.renderOn = true;
                     }
                 }
             }
+            RemoveOldMolPopOptions();
         }
 
         public void InitializeAllReacs()

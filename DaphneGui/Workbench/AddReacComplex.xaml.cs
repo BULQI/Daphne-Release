@@ -122,7 +122,13 @@ namespace DaphneGui
                 // don't show in left list, reactions that are already in reac complex
                 foreach (ConfigReaction cr in rightList)
                 {
-                    LeftList.Remove(cr);
+                    //LeftList.Remove(cr);
+                    //ConfigReaction leftReac = LeftList.Where(r => r.entity_guid == cr.entity_guid).First();
+                    ConfigReaction leftReac = LeftList.Where(r => r.entity_guid == "aaadfkas").First();
+                    if (leftReac != null)
+                    {
+                        LeftList.Remove(leftReac);
+                    }
                 }
                
                 // rc name

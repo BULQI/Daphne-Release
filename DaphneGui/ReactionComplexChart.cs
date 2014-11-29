@@ -87,6 +87,28 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// Initialize chart
+        /// </summary>
+        public void Initialize()
+        {
+            LabelX = "Time";
+            LabelY = "Concentration";
+            TitleXY = "Time Trajectory of Molecular Concentrations";
+            DrawLine = true;
+
+            System.Windows.Forms.MenuItem[] menuItems = 
+            {   
+                new System.Windows.Forms.MenuItem("Zoom in"),
+                new System.Windows.Forms.MenuItem("Zoom out"),
+                new System.Windows.Forms.MenuItem("Save Changes"),
+                new System.Windows.Forms.MenuItem("Discard Changes"),
+            };
+
+            System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
+            SetContextMenu(menu);
+        }
+
+        /// <summary>
         /// Sets the x and y size of the chart window
         /// </summary>
         /// <param name="size"></param>
@@ -554,6 +576,43 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// This updates the list of series for this graph
+        /// </summary>
+        public void UpdateSeries()
+        {
+            ListTimes = ToolWin.RC.ListTimes;
+            DictConcs = ToolWin.RC.DictGraphConcs;
+
+            //Remove any series that is no longer in DictConcs
+            foreach (Series s in Series.ToList())
+            {
+                string guid = ConvertMolNameToMolGuid(s.Name);
+                if (DictConcs.ContainsKey(guid) == false)
+                {
+                    Series.Remove(s);
+                }
+            }
+
+            //Add any series that are in DictConcs but not in this.Series
+            foreach (string guid in DictConcs.Keys)
+            {
+                string molname = ConvertMolGuidToMolName(guid);
+                bool exists = Series.Where(ser => ser.Name == molname).Any();
+                if (exists == false)
+                {
+                    Series s = new Series(molname);
+                    s.ChartType = SeriesChartType.Line;
+                    s.ChartArea = this.ChartAreas.First().Name;
+                    s.MarkerSize = 4;
+                    s.MarkerStyle = MarkerStyle.None;
+                    s.MarkerStep = 1;
+                    s.Color = colorTable[0 % colorTable.Count];
+                    this.Series.Add(s);
+                }
+            }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         public void RedrawSeries()
@@ -568,8 +627,16 @@ namespace DaphneGui
             foreach (Series s in Series)
             {
                 s.Points.Clear();
-                //string guid = ConvertMolNameToMolGuid(s.Name);
-                List<double> values = DictConcs[ConvertMolNameToMolGuid(s.Name)];
+                
+                string guid = ConvertMolNameToMolGuid(s.Name);
+
+                //This prevents a crash in case DictConcs contains fewer items than Series (if user removed 
+                //a reaction or turned off rendering for a molecule and did not click the Run button).
+                //If UpdateSeries was called before this function, this should not happen anyway.
+                if (DictConcs.ContainsKey(guid) == false)
+                    continue;
+
+                List<double> values = DictConcs[guid];
                 y = values.ToArray();
 
                 int n = x.Count() <= y.Count() ? x.Count() : y.Count();

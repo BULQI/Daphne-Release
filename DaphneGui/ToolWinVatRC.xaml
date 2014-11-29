@@ -47,7 +47,7 @@
                         </Expander.Resources>
                         <StackPanel>
                             <StackPanel>
-                                <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Visible"
+                                <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Visible" ShowAddButton="Visible"
                                           DataContext="{Binding Path=Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                             <StackPanel>
