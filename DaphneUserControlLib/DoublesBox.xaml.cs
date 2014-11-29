@@ -307,7 +307,7 @@ namespace DaphneUserControlLib
                 SetMinMax();
             }
 
-            tb.Text = ToFormatted(d);
+            tb.Text = ToFormatted(ToDisplayNumber());
         }
 
         private string GetNumericChars(string input)
@@ -348,12 +348,12 @@ namespace DaphneUserControlLib
                 double currval = (double)GetValue(NumberProperty);
                 double newval = value;
 
-                //if (currval != newval)
-                //{
+                if (currval != newval)
+                {
                     //slFNumber.Value = newval;
                     SetValue(NumberProperty, newval);
                     //OnPropertyChanged("Number");
-                //}
+                }
                 FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
                 {
