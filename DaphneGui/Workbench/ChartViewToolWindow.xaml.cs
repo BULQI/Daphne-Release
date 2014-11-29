@@ -63,6 +63,7 @@ namespace Workbench
 
             if (redraw_flag == true)
             {
+                Chart.UpdateSeries();
                 Chart.RedrawSeries();
             }
             else
@@ -70,24 +71,9 @@ namespace Workbench
                 Chart.Clear();
                 if (lTimes.Count > 0 && dictConcs.Count > 0)
                 {
+                    Chart.Initialize();
                     Chart.ListTimes = lTimes;
                     Chart.DictConcs = dictConcs;
-
-                    Chart.LabelX = "Time";
-                    Chart.LabelY = "Concentration";
-                    Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
-                    Chart.DrawLine = true;
-
-                    System.Windows.Forms.MenuItem[] menuItems = 
-                    {   
-                        new System.Windows.Forms.MenuItem("Zoom in"),
-                        new System.Windows.Forms.MenuItem("Zoom out"),
-                        new System.Windows.Forms.MenuItem("Save Changes"),
-                        new System.Windows.Forms.MenuItem("Discard Changes"),
-                    };
-
-                    System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                    Chart.SetContextMenu(menu);
 
                     btnIncSize.IsEnabled = true;
                     btnDecSize.IsEnabled = true;
@@ -104,7 +90,6 @@ namespace Workbench
             if (Chart != null) {
                 Chart.Clear();
             }
-
         }
         
         /// <summary>
@@ -172,7 +157,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(null, null);
+                MW.runButton_Click(this, null);
             }
         }
 
@@ -230,7 +215,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(null, null);
+                MW.runButton_Click(this, null);
             }
         }
 

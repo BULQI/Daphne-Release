@@ -306,6 +306,8 @@ namespace DaphneUserControlLib
                 Number = d;
                 SetMinMax();
             }
+
+            tb.Text = ToFormatted(ToDisplayNumber());
         }
 
         private string GetNumericChars(string input)

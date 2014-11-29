@@ -1696,6 +1696,21 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void runButton_Click(object sender, RoutedEventArgs e)
         {
+            //skg - For VatRC
+            //If user clicked Run button, this code will set the redraw_flag to false to signal the reac complex chart be refreshed.
+            //If ChartViewToolWindow called this method, i.e, the user changed values in the reac complex graph, then redraw_flag is true and we don't override it.
+            //Although this is relevant only for VatRC scenario type, I don't think we really need to check the scenario type because
+            //it doesn't have any effect on the other scenario types.
+            ChartViewToolWindow ch = sender as ChartViewToolWindow;
+            if (ch == null)
+            {
+                if (ReacComplexChartWindow != null)
+                {
+                    ReacComplexChartWindow.redraw_flag = false;
+                }
+            }
+            //end skg
+
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
