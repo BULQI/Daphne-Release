@@ -8884,6 +8884,7 @@ namespace Daphne
     public abstract class ParameterDistribution :EntityModelBase
     {
         public ParameterDistributionType DistributionType { get; set; }
+        [JsonIgnore]
         public bool isInitialized;
 
         public ParameterDistribution(ParameterDistributionType _distributionType)
@@ -8905,7 +8906,6 @@ namespace Daphne
         public ConstantParameterDistribution()
             : base(ParameterDistributionType.CONSTANT)
         {
-            Value = 0;
         }
 
         public override void Initialize()
@@ -8932,9 +8932,6 @@ namespace Daphne
         public UniformParameterDistribution()
             : base(ParameterDistributionType.UNIFORM)
         {
-            MinValue = 0.0;
-            MaxValue = 1.0;
-            UniformDist = new ContinuousUniform(MinValue, MaxValue, Rand.MersenneTwister);
         }
 
         public override void Initialize()
@@ -8973,8 +8970,6 @@ namespace Daphne
         public PoissonParameterDistribution()
             : base(ParameterDistributionType.POISSON)
         {
-            Mean = 1.0;
-            PoissonDist = new Poisson(Mean, Rand.MersenneTwister);
         }
 
         public override void Initialize()
@@ -9013,9 +9008,6 @@ namespace Daphne
         public GammaParameterDistribution()
             : base(ParameterDistributionType.GAMMA)
         {
-            Rate = 1.0;
-            Shape = 1.0;
-            GammaDist = new Gamma(Shape, Rate, Rand.MersenneTwister);
         }
 
         public override void Initialize()
@@ -9045,22 +9037,85 @@ namespace Daphne
         }
     }
 
+    public class CategoricalDistrItem : EntityModelBase
+    {
+        private double categoryValue;
+        public double CategoryValue
+        {
+            get
+            {
+                return categoryValue;
+            }
+
+            set
+            {
+                categoryValue = value;
+                OnPropertyChanged("CategoryValue");
+            }
+        }
+
+        private double prob;
+        public double Prob
+        {
+            get
+            {
+                return prob;
+            }
+
+            set
+            {
+                prob = value;
+                OnPropertyChanged("Prob");
+            }
+        }
+
+        public CategoricalDistrItem(double _value, double _prob)
+        {
+            CategoryValue = _value;
+            Prob = _prob;
+        }
+    }
+
     /// <summary>
     /// Probability distribution for the parameter is a categorical distribution.
     /// </summary>
     public class CategoricalParameterDistribution : ParameterDistribution
     {
-        public Dictionary<double, double> ProbMass { get; set; }
+        private ObservableCollection<CategoricalDistrItem> probMass;
+        public ObservableCollection<CategoricalDistrItem> ProbMass
+        {
+            get
+            {
+                return probMass;
+            }
+
+            set
+            {
+                probMass = value;
+                OnPropertyChanged("ProbMass");
+            }
+        }
+
         [JsonIgnore]
         public Categorical CategoricalDist;
 
         public CategoricalParameterDistribution()
             : base(ParameterDistributionType.CATEGORICAL)
         {
-            ProbMass = new Dictionary<double, double>();
-            ProbMass.Add(0.0, 0.5);
-            ProbMass.Add(1.0, 0.5);
-            CategoricalDist = new Categorical(ProbMass.Values.ToArray(), Rand.MersenneTwister);
+            probMass = new ObservableCollection<CategoricalDistrItem>();
+        }
+
+        public double[] ProbArray()
+        {
+            double[] probArray = new double[probMass.Count()];
+            int cnt = 0;
+
+            foreach (CategoricalDistrItem cdi in probMass)
+            {
+                probArray[cnt++] = cdi.Prob;
+            }
+
+            return probArray;
         }
 
         public override void Initialize()
@@ -9068,27 +9123,25 @@ namespace Daphne
             if (ProbMass.Count == 0)
             {
                 MessageBox.Show("Warning. No categories in the distribution. A distribution with binary categories of equal probability has been created. ");
-                ProbMass.Add(0.0, 0.5);
-                ProbMass.Add(1.0, 0.5);
-
+                probMass.Add(new CategoricalDistrItem(0.0, 0.5));
+                probMass.Add(new CategoricalDistrItem(1.0, 0.5));
             }
             Normalize();
-            CategoricalDist = new Categorical(ProbMass.Values.ToArray(), Rand.MersenneTwister);
+            CategoricalDist = new Categorical(ProbArray(), Rand.MersenneTwister);
             isInitialized = true;
         }
 
-        private void Normalize()
+        public void Normalize()
         {
             double sum = 0;
-            foreach (double val in ProbMass.Values)
-            {
-                sum += val;
-            }
-
+            sum = ProbArray().Sum();
+            
             for (int i = 0; i < ProbMass.Count; i++)
             {
-                ProbMass[i] /= sum;
+                ProbMass[i].Prob /= sum;
             }
+
+            OnPropertyChanged("ProbMass");
         }
 
         public override double Sample()
@@ -9098,7 +9151,9 @@ namespace Daphne
                 Initialize();
             }
 
-            return CategoricalDist.Sample();
+            int i = (int)CategoricalDist.Sample();
+
+            return probMass[i].CategoryValue;
         }
     }
 

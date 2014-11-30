@@ -202,7 +202,7 @@ namespace Daphne
                 simCell.IsChemotactic = false;
             }
             
-            nextValue = cell.Sigma.GetValue();
+            double nextValue = cell.Sigma.GetValue();
             if (nextValue > 0)
             {
                 simCell.IsStochastic = true;
