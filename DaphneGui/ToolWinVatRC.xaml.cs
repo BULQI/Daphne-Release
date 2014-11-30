@@ -64,6 +64,13 @@ namespace DaphneGui
 
         }
 
+        private void ButtonSaveRCToProtocol_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc_curr = (ConfigReactionComplex)(RCControl.ListBoxReactionComplexes.SelectedItem);
+            ConfigReactionComplex crc_new = crc_curr.Clone(true);
+            MainWindow.GenericPush(crc_new);
+        }
+
         protected override bool CellHasMolecule(string molguid, bool isMembrane, ConfigCell cell)
         {
             throw new Exception("VatReactionComplex does not implement CellHasMolecule method.");
@@ -96,7 +103,7 @@ namespace DaphneGui
             {
                 MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
                 MW.ReacComplexChartWindow.MW = MW;
-                MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
+                MW.ReacComplexChartWindow.DataContext = this.Protocol;
                 MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
                 

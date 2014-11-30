@@ -779,6 +779,17 @@ namespace Daphne
                     if (ent.Name == item[i])
                     {
                         envHandle.comp.reaction_complexes.Add(ent.Clone(true));
+
+                        //add mol pop display options
+                        foreach (ConfigMolecularPopulation molpop in ent.molpops)
+                        {
+                            ((VatReactionComplexScenario)protocol.scenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
+                        }
+                        foreach (RenderPop rp in ((VatReactionComplexScenario)protocol.scenario).popOptions.molPopOptions)
+                        {
+                            rp.renderOn = true;
+                        }
+                        
                         break;
                     }
                 }
@@ -1037,7 +1048,15 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
 
                     configRC.molpops.Add(configMolPop);
+
+                    //add mol pop display options
+                    ((VatReactionComplexScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);                    
                 }
+            }
+
+            foreach (RenderPop rp in ((VatReactionComplexScenario)protocol.scenario).popOptions.molPopOptions)
+            {
+                rp.renderOn = true;
             }
 
             // Add items to config compartment

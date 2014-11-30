@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Ligand Receptor Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "d29aeca3-0117-4473-9881-1089767ef572",
+  "experiment_guid": "6735bae4-ef90-4aab-b7e9-9064ab3ed917",
   "experiment_description": "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -23,8 +23,8 @@
               {
                 "molpop_guid": "15d12f4d-c7b2-4ce7-9842-1d046d8e3bb9",
                 "molecule": {
-                  "Name": "CXCR5|",
                   "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df",
+                  "Name": "CXCR5|",
                   "MolecularWeight": 43.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
@@ -47,8 +47,8 @@
               {
                 "molpop_guid": "b3fcd124-92bb-4196-92f0-6b5e4d20b41c",
                 "molecule": {
-                  "Name": "CXCL13:CXCR5|",
                   "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1",
+                  "Name": "CXCL13:CXCR5|",
                   "MolecularWeight": 50.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
@@ -84,7 +84,7 @@
           "entity_guid": "f015c7df-98cf-4516-aabb-cd030ef82301"
         },
         "cellpopulation_name": "Leukocyte_staticReceptor",
-        "cellpopulation_guid": "5b7fd4cf-0e49-4a94-ac92-b525ff5f54b2",
+        "cellpopulation_guid": "cd459a46-98d9-4b25-b8ca-ba2991f82ad1",
         "cellpopulation_id": 1,
         "report_xvf": {
           "position": false,
@@ -100,7 +100,7 @@
           {
             "mean": false,
             "mp_extended": 1,
-            "molpop_guid_ref": "b544ca33-0342-4b9a-b1f3-edcdbfe1ed14"
+            "molpop_guid_ref": "9e6a24ac-ad46-4aa0-80a3-662f538655df"
           }
         ],
         "number": 1,
@@ -192,10 +192,10 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "b544ca33-0342-4b9a-b1f3-edcdbfe1ed14",
+            "molpop_guid": "9e6a24ac-ad46-4aa0-80a3-662f538655df",
             "molecule": {
-              "Name": "CXCL13",
               "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+              "Name": "CXCL13",
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
@@ -207,7 +207,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 0,
-              "molpop_guid_ref": "b544ca33-0342-4b9a-b1f3-edcdbfe1ed14"
+              "molpop_guid_ref": "9e6a24ac-ad46-4aa0-80a3-662f538655df"
             },
             "mp_distribution": {
               "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
@@ -277,8 +277,8 @@
             {
               "molpop_guid": "15d12f4d-c7b2-4ce7-9842-1d046d8e3bb9",
               "molecule": {
-                "Name": "CXCR5|",
                 "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df",
+                "Name": "CXCR5|",
                 "MolecularWeight": 43.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
@@ -301,8 +301,8 @@
             {
               "molpop_guid": "b3fcd124-92bb-4196-92f0-6b5e4d20b41c",
               "molecule": {
-                "Name": "CXCL13:CXCR5|",
                 "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1",
+                "Name": "CXCL13:CXCR5|",
                 "MolecularWeight": 50.96,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
@@ -340,8 +340,8 @@
     ],
     "molecules": [
       {
-        "Name": "CXCL13",
         "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+        "Name": "CXCL13",
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
@@ -349,8 +349,8 @@
         "entity_guid": "f81a4a0f-5229-478f-b196-abeeb321c418"
       },
       {
-        "Name": "CXCR5|",
         "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df",
+        "Name": "CXCR5|",
         "MolecularWeight": 43.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
@@ -358,8 +358,8 @@
         "entity_guid": "287ef54b-3361-4e5c-b5aa-9ddcb73670df"
       },
       {
-        "Name": "CXCL13:CXCR5|",
         "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1",
+        "Name": "CXCL13:CXCR5|",
         "MolecularWeight": 50.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,

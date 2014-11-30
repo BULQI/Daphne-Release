@@ -2089,31 +2089,73 @@ namespace Daphne
 
     public class VatReactionComplexScenario : ScenarioBase
     {
+        [JsonIgnore]
         public ObservableCollection<ConfigMolecularPopulation> AllMols { get; set; }
+        [JsonIgnore]
+        public ObservableCollection<ConfigReaction> AllReacs { get; set; }
 
+        public RenderPopOptions popOptions { get; set; }
+        
         public VatReactionComplexScenario()
         {
             environment = new ConfigPointEnvironment();
             AllMols = new ObservableCollection<ConfigMolecularPopulation>();
+            AllReacs = new ObservableCollection<ConfigReaction>();
             environment.comp.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
+
+            popOptions = new RenderPopOptions();
         }
 
         public override void InitializeStorageClasses()
         {
             InitializeAllMols();
-            //AllMols.CollectionChanged += new NotifyCollectionChangedEventHandler(allMols_CollectionChanged);
+            InitializeAllReacs();
         }
-
-        //private void allMols_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        //{
-
-        //}
 
         private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             InitializeAllMols();
+            InitializeAllReacs();
         }
 
+        /// <summary>
+        /// Returns true if any reaction complex in compartment contains mol pop with given renderLabel
+        /// </summary>
+        /// <param name="renderLabel"></param>
+        /// <returns></returns>
+        private bool FindMolPop(string renderLabel)
+        {
+            ConfigCompartment comp = environment.comp;
+            foreach (ConfigReactionComplex crc in comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                {
+                    if (molpop.renderLabel == renderLabel)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Removes from molPopOptions list after AllMols is changed.
+        /// </summary>
+        private void RemoveOldMolPopOptions()
+        {
+            foreach (RenderPop pop in popOptions.molPopOptions.ToList())
+            {
+                if (FindMolPop(pop.renderLabel) == false)
+                {
+                    popOptions.molPopOptions.Remove(pop);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes AllMols after user added/removed a reaction to/from reaction complex
+        /// </summary>
         public void InitializeAllMols()
         {
             AllMols.Clear();
@@ -2122,9 +2164,30 @@ namespace Daphne
             {
                 foreach (ConfigMolecularPopulation molpop in crc.molpops)
                 {
-                    if (AllMols.Contains(molpop) == false)
+                    bool molecule_found = AllMols.Where(m => m.molecule.entity_guid == molpop.molecule.entity_guid).Any();
+                    if (molecule_found == false)
                     {
                         AllMols.Add(molpop);
+                        popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
+                        RenderPop rp = popOptions.GetMolRenderPop(molpop.renderLabel);
+                        rp.renderOn = true;
+                    }
+                }
+            }
+            RemoveOldMolPopOptions();
+        }
+
+        public void InitializeAllReacs()
+        {
+            AllReacs.Clear();
+
+            foreach (ConfigReactionComplex crc in environment.comp.reaction_complexes)
+            {
+                foreach (ConfigReaction reac in crc.reactions)
+                {
+                    if (AllReacs.Contains(reac) == false)
+                    {
+                        AllReacs.Add(reac);
                     }
                 }
             }
@@ -4504,7 +4567,9 @@ namespace Daphne
 
             if (this.mp_distribution.mp_distribution_type != molpop.mp_distribution.mp_distribution_type)
                 return false;
-            
+
+            if (this.mp_distribution.Equals(molpop.mp_distribution) == false)
+                return false;
 
             return true;
         }
@@ -5252,6 +5317,7 @@ namespace Daphne
                     }
                 }
             }
+
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -5370,25 +5436,16 @@ namespace Daphne
                 }
             }
 
-            //Check molpops?
+            //Check molpops
             if (crc.molpops.Count != this.molpops.Count)
                 return false;
 
-            foreach (ConfigMolecularPopulation cmp in this.molpops)
+            for (int i = 0; i < this.molpops.Count; i++)
             {
-                if (crc.molpops.Contains(cmp) == false)
+                if (this.molpops[i].Equals(crc.molpops[i]) == false)
                     return false;
-                else 
-                {
-                    ConfigMolecularPopulation crcmolpop = crc.molpops.First(s => s.molpop_guid == cmp.molpop_guid);
-                    if (crcmolpop.Equals(cmp) == false)
-                    {
-                        return false;
-                    }
-                }
             }
-
-
+            
             //Check molecules
             if (crc.molecules_dict.Count != this.molecules_dict.Count)
                 return false;
@@ -5444,17 +5501,55 @@ namespace Daphne
             }
         }
 
-        public void RefreshMolPops(EntityRepository er)
+        public void RemoveReaction(ConfigReaction cr)
         {
-            molpops.Clear();
-            molecules_dict.Clear();
+            //remove reaction
+            reactions.Remove(cr);
 
+            //remove molpops whose molecules are not in the remaining reactions
+            ObservableCollection<ConfigMolecularPopulation> newmolpops = new ObservableCollection<ConfigMolecularPopulation>();
+
+            //Create a new molpops collection from the current reactions in the complex (molpops)
+            //We cannot lose the attributes of the existing mol pops so we have to do it this way
             foreach (ConfigReaction reac in reactions)
             {
-                AddReactionMolPops(reac, er);
+                AddMolPop(newmolpops, reac.reactants_molecule_guid_ref);
+                AddMolPop(newmolpops, reac.products_molecule_guid_ref);
+                AddMolPop(newmolpops, reac.modifiers_molecule_guid_ref);
             }
-        }      
+            molpops = newmolpops;
 
+            //recreate molecules_dict
+            molecules_dict.Clear();
+            foreach (ConfigMolecularPopulation molpop in molpops)
+            {               
+                molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+            }
+
+        }
+
+        /// <summary>
+        /// This copies existing molpops into the new list after user has deleted reactions from reaction complex).
+        /// It is only called when reactions are removed.
+        /// </summary>
+        /// <param name="newmolpops"></param>
+        /// <param name="guid_refs"></param>
+        private void AddMolPop(ObservableCollection<ConfigMolecularPopulation> newmolpops, ObservableCollection<string> guid_refs)
+        {
+            foreach (string guid in guid_refs)
+            {
+                ConfigMolecularPopulation cmp = molpops.Where(m => m.molecule.entity_guid == guid).First();
+                if (newmolpops.Contains(cmp) == false)
+                    newmolpops.Add(cmp);
+            }
+        }
+
+        /// <summary>
+        /// This creates new mol pops for a reaction complex but it initializes the properties to default values.
+        /// This is only called when a reaction is added to a reaction complex.
+        /// </summary>
+        /// <param name="reac"></param>
+        /// <param name="er"></param>
         public void AddReactionMolPops(ConfigReaction reac, EntityRepository er)
         {
             CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref, er);
@@ -7234,7 +7329,7 @@ namespace Daphne
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
      XmlInclude(typeof(MolPopLinear)),
      XmlInclude(typeof(MolPopGaussian))]
-    public abstract class MolPopDistribution : EntityModelBase
+    public abstract class MolPopDistribution : EntityModelBase, IEquatable<MolPopDistribution>
     {
         public MolPopDistributionType mp_distribution_type { get; protected set; }
         public List<BoundaryCondition> boundaryCondition { get; set; }
@@ -7242,6 +7337,9 @@ namespace Daphne
         public MolPopDistribution()
         {
         }
+
+        public abstract bool Equals(MolPopDistribution mpd);        
+
     }
 
     public class MolPopHomogeneousLevel : MolPopDistribution
@@ -7264,6 +7362,15 @@ namespace Daphne
         {
             mp_distribution_type = MolPopDistributionType.Homogeneous;
             concentration = 1.0;
+        }
+
+        public override bool Equals(MolPopDistribution mph)
+        {
+
+            if (this.concentration != (mph as MolPopHomogeneousLevel).concentration)
+                return false;
+
+            return true;
         }
     }
 
@@ -7318,6 +7425,19 @@ namespace Daphne
 
             }
         }
+
+        public override bool Equals(MolPopDistribution mpd)
+        {
+            MolPopLinear mpl = mpd as MolPopLinear;
+
+            if (this.x1 != mpl.x1 || this.dim != mpl.dim)
+                return false;
+
+            if (this.boundary_face != mpl.boundary_face)
+                return false;
+
+            return true;
+        }
     }
 
     public class MolPopGaussian : MolPopDistribution
@@ -7329,6 +7449,19 @@ namespace Daphne
         {
             mp_distribution_type = MolPopDistributionType.Gaussian;
             peak_concentration = 1.0;
+        }
+
+        public override bool Equals(MolPopDistribution mpd)
+        {
+            MolPopGaussian mpg = mpd as MolPopGaussian;
+
+            if (this.peak_concentration != mpg.peak_concentration)
+                return false;
+
+            if (this.gauss_spec.Equals(mpg.gauss_spec) == false)
+                return false;
+
+            return true;
         }
     }
 
@@ -7349,6 +7482,28 @@ namespace Daphne
             //create array of actual size, initialized to zeroes
             int totalExpectedValues = numGridPoints[0] * numGridPoints[1] * numGridPoints[2];
             conc = new double[totalExpectedValues];            
+        }
+
+        public override bool Equals(MolPopDistribution mpd)
+        {
+            MolPopExplicit mpe = mpd as MolPopExplicit;
+
+            if (this.MolFileName.Equals(mpe.MolFileName) == false)
+                return false;
+
+            if (this.Description.Equals(mpe.Description) == false)
+                return false;
+
+            if (this.conc.Length != mpe.conc.Length)
+                return false;
+
+            for (int i = 0; i < this.conc.Length; i++)
+            {
+                if (this.conc[i] != mpe.conc[i])
+                    return false;
+            }
+
+            return true;
         }
 
         public double[] conc;

@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Cell locomotion with driver molecule.",
   "experiment_reps": 1,
-  "experiment_guid": "492c5548-7b23-4873-972d-b76715e1454c",
+  "experiment_guid": "9433fff6-5d8b-4b7e-b452-0170e9844c5c",
   "experiment_description": "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -23,8 +23,8 @@
               {
                 "molpop_guid": "7e87cae0-c944-4b8e-b269-e07dd6920d95",
                 "molecule": {
-                  "Name": "CXCR5|",
                   "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df",
+                  "Name": "CXCR5|",
                   "MolecularWeight": 43.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
@@ -47,8 +47,8 @@
               {
                 "molpop_guid": "19eb69c5-9478-47cb-96e2-0495aaa8f4b5",
                 "molecule": {
-                  "Name": "CXCL13:CXCR5|",
                   "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1",
+                  "Name": "CXCL13:CXCR5|",
                   "MolecularWeight": 50.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
@@ -77,8 +77,8 @@
               {
                 "molpop_guid": "9a93475e-51f4-469a-af6f-3cfb6dac00e4",
                 "molecule": {
-                  "Name": "A",
                   "renderLabel": "1f5dd61c-942e-4c27-b547-51ebcb408fa0",
+                  "Name": "A",
                   "MolecularWeight": 1.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 750.0,
@@ -101,8 +101,8 @@
               {
                 "molpop_guid": "482f8320-32a7-42b2-80ec-102c1bce80f0",
                 "molecule": {
-                  "Name": "A*",
                   "renderLabel": "bbe99799-de81-4d6d-a840-17b15e65c1f2",
+                  "Name": "A*",
                   "MolecularWeight": 1.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 7.5,
@@ -125,8 +125,8 @@
               {
                 "molpop_guid": "79a5a5ba-fabb-4639-9137-e80ecd498dc0",
                 "molecule": {
-                  "Name": "sApop",
                   "renderLabel": "ffde1640-e3e0-4f81-ac86-e3ff21913d0a",
+                  "Name": "sApop",
                   "MolecularWeight": 1.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1.0,
@@ -206,7 +206,7 @@
           "entity_guid": "745a8d8a-7859-4ab1-9c97-334a230e125d"
         },
         "cellpopulation_name": "Leukocyte_staticReceptor_motile",
-        "cellpopulation_guid": "a8fab8e9-d690-40dd-8537-fbe752937fd5",
+        "cellpopulation_guid": "07e8de15-87d1-4129-9c24-02df425656e7",
         "cellpopulation_id": 0,
         "report_xvf": {
           "position": true,
@@ -222,7 +222,7 @@
           {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "4438b370-614f-4f72-9716-59ae0eb2f5af"
+            "molpop_guid_ref": "ac9928e4-11f9-4956-a65b-ce14fa822813"
           }
         ],
         "number": 1,
@@ -314,10 +314,10 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "4438b370-614f-4f72-9716-59ae0eb2f5af",
+            "molpop_guid": "ac9928e4-11f9-4956-a65b-ce14fa822813",
             "molecule": {
-              "Name": "CXCL13",
               "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+              "Name": "CXCL13",
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
@@ -329,7 +329,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": false,
               "mp_extended": 0,
-              "molpop_guid_ref": "4438b370-614f-4f72-9716-59ae0eb2f5af"
+              "molpop_guid_ref": "ac9928e4-11f9-4956-a65b-ce14fa822813"
             },
             "mp_distribution": {
               "$type": "Daphne.MolPopLinear, Daphne",
@@ -412,8 +412,8 @@
             {
               "molpop_guid": "7e87cae0-c944-4b8e-b269-e07dd6920d95",
               "molecule": {
-                "Name": "CXCR5|",
                 "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df",
+                "Name": "CXCR5|",
                 "MolecularWeight": 43.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
@@ -436,8 +436,8 @@
             {
               "molpop_guid": "19eb69c5-9478-47cb-96e2-0495aaa8f4b5",
               "molecule": {
-                "Name": "CXCL13:CXCR5|",
                 "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1",
+                "Name": "CXCL13:CXCR5|",
                 "MolecularWeight": 50.96,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
@@ -466,8 +466,8 @@
             {
               "molpop_guid": "9a93475e-51f4-469a-af6f-3cfb6dac00e4",
               "molecule": {
-                "Name": "A",
                 "renderLabel": "1f5dd61c-942e-4c27-b547-51ebcb408fa0",
+                "Name": "A",
                 "MolecularWeight": 1.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 750.0,
@@ -490,8 +490,8 @@
             {
               "molpop_guid": "482f8320-32a7-42b2-80ec-102c1bce80f0",
               "molecule": {
-                "Name": "A*",
                 "renderLabel": "bbe99799-de81-4d6d-a840-17b15e65c1f2",
+                "Name": "A*",
                 "MolecularWeight": 1.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 7.5,
@@ -514,8 +514,8 @@
             {
               "molpop_guid": "79a5a5ba-fabb-4639-9137-e80ecd498dc0",
               "molecule": {
-                "Name": "sApop",
                 "renderLabel": "ffde1640-e3e0-4f81-ac86-e3ff21913d0a",
+                "Name": "sApop",
                 "MolecularWeight": 1.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1.0,
@@ -597,8 +597,8 @@
     ],
     "molecules": [
       {
-        "Name": "CXCL13",
         "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
+        "Name": "CXCL13",
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
@@ -606,8 +606,8 @@
         "entity_guid": "f81a4a0f-5229-478f-b196-abeeb321c418"
       },
       {
-        "Name": "A",
         "renderLabel": "1f5dd61c-942e-4c27-b547-51ebcb408fa0",
+        "Name": "A",
         "MolecularWeight": 1.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
@@ -615,8 +615,8 @@
         "entity_guid": "1f5dd61c-942e-4c27-b547-51ebcb408fa0"
       },
       {
-        "Name": "A*",
         "renderLabel": "bbe99799-de81-4d6d-a840-17b15e65c1f2",
+        "Name": "A*",
         "MolecularWeight": 1.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 7.5,
@@ -624,8 +624,8 @@
         "entity_guid": "bbe99799-de81-4d6d-a840-17b15e65c1f2"
       },
       {
-        "Name": "sApop",
         "renderLabel": "ffde1640-e3e0-4f81-ac86-e3ff21913d0a",
+        "Name": "sApop",
         "MolecularWeight": 1.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
@@ -633,8 +633,8 @@
         "entity_guid": "ffde1640-e3e0-4f81-ac86-e3ff21913d0a"
       },
       {
-        "Name": "CXCR5|",
         "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df",
+        "Name": "CXCR5|",
         "MolecularWeight": 43.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
@@ -642,8 +642,8 @@
         "entity_guid": "287ef54b-3361-4e5c-b5aa-9ddcb73670df"
       },
       {
-        "Name": "CXCL13:CXCR5|",
         "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1",
+        "Name": "CXCL13:CXCR5|",
         "MolecularWeight": 50.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,

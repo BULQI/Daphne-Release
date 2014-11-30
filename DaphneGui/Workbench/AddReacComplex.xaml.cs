@@ -122,7 +122,15 @@ namespace DaphneGui
                 // don't show in left list, reactions that are already in reac complex
                 foreach (ConfigReaction cr in rightList)
                 {
-                    LeftList.Remove(cr);
+                    bool exists = LeftList.Where(r => r.entity_guid == cr.entity_guid).Any();
+                    if (exists == true)
+                    {
+                        ConfigReaction leftReac = LeftList.Where(r => r.entity_guid == cr.entity_guid).First();
+                        if (leftReac != null)
+                        {
+                            LeftList.Remove(leftReac);
+                        }
+                    }
                 }
                
                 // rc name
@@ -187,20 +195,30 @@ namespace DaphneGui
             lbAllReactions.ItemsSource = LeftList;
         }
 
+        /// <summary>
+        /// This method is called when user clicks Save button.
+        /// It can save changes to a RC or also add a new rc depending on dlgType.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
+            bool edited = false;
 
+            //Edit existing
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
-                //selectedRC.reactions.Clear();
+                //For removed reactions
                 foreach (ConfigReaction cr in selectedRC.reactions.ToList())
                 {
                     if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
                     {
-                        selectedRC.reactions.Remove(cr);
+                        selectedRC.RemoveReaction(cr);
+                        edited = true;
                     }
                 }
+                //For added reactions
                 foreach (ConfigReaction reac in RightList)
                 {
                     if (selectedRC.reactions_dict.ContainsKey(reac.entity_guid) != true)
@@ -208,11 +226,18 @@ namespace DaphneGui
                         ConfigReaction newreac = reac.Clone(true);
                         selectedRC.reactions.Add(newreac);
                         selectedRC.AddReactionMolPops(newreac, MainWindow.SOP.Protocol.entity_repository);
+                        edited = true;
                     }
                 }
-
+                if (edited)
+                {
+                    VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
+                    s.InitializeAllMols();
+                    s.InitializeAllReacs();
+                }
             }
             else
+            //Add new RC
             {
                 ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
 

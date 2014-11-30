@@ -306,6 +306,8 @@ namespace DaphneUserControlLib
                 Number = d;
                 SetMinMax();
             }
+
+            tb.Text = ToFormatted(ToDisplayNumber());
         }
 
         private string GetNumericChars(string input)
@@ -338,6 +340,11 @@ namespace DaphneUserControlLib
             get { return (double)GetValue(NumberProperty); }
             set
             {
+                if (double.IsNaN(value) || double.IsInfinity(value))
+                {
+                    return;
+                }
+
                 double currval = (double)GetValue(NumberProperty);
                 double newval = value;
 

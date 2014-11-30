@@ -67,23 +67,27 @@ namespace Daphne
             {
                 r.Step(dt);
             }
-            foreach (List<Reaction> rlist in BoundaryReactions.Values)
+
+            if (!(this.Interior is PointManifold))
             {
-                foreach (Reaction r in rlist)
+                foreach (List<Reaction> rlist in BoundaryReactions.Values)
                 {
-                    r.Step(dt);
+                    foreach (Reaction r in rlist)
+                    {
+                        r.Step(dt);
+                    }
                 }
-            }
 
-            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
-            {
-                // Update boundary concentrations
-                molpop.Value.UpdateBoundary();
-
-                // Apply Laplacian and boundary fluxes
-                if (molpop.Value.IsDiffusing == true)
+                foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
                 {
-                    molpop.Value.Step(dt);
+                    // Update boundary concentrations
+                    molpop.Value.UpdateBoundary();
+
+                    // Apply Laplacian and boundary fluxes
+                    if (molpop.Value.IsDiffusing == true)
+                    {
+                        molpop.Value.Step(dt);
+                    }
                 }
             }
         }

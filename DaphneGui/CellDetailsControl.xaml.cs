@@ -116,12 +116,15 @@ namespace DaphneGui
             cmp.molecule = null;
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
-            foreach (ConfigMolecule item in cvs.View)
+            if (cvs.View != null)
             {
-                if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
-                cmp.molecule = item;
-                cmp.Name = cmp.molecule.Name;
-                break;
+                foreach (ConfigMolecule item in cvs.View)
+                {
+                    if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                    cmp.molecule = item;
+                    cmp.Name = cmp.molecule.Name;
+                    break;
+                }
             }
             if (cmp.molecule == null) return;
 
@@ -1313,6 +1316,9 @@ namespace DaphneGui
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            //This code assumes that CellDetailsControl is used only by CellPopulation control.
+            //This does not work when CellDetailsControl is used by CellStudioToolWindow.
+
             CollectionViewSource cvs;
 
             if (this.Tag == null)

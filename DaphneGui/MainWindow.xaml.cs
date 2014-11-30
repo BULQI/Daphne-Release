@@ -134,7 +134,9 @@ namespace DaphneGui
                            CONTROL_DB_LOAD = (1 << 1),
                            CONTROL_ZERO_FORCE = (1 << 2),
                            CONTROL_NEW_RUN = (1 << 3),
-                           CONTROL_UPDATE_GUI = (1 << 4);
+                           CONTROL_UPDATE_GUI = (1 << 4),
+                           CONTROL_MOUSE_DRAG = (1 << 5);
+                           
 
         public static byte controlFlags = CONTROL_NONE;
 
@@ -1008,7 +1010,15 @@ namespace DaphneGui
                 lock (sim)
                 {
                     // re-initialize; if there are no cells, always do a full reset
-                    initialState(false, SimulationBase.dataBasket.Cells.Count < 1 || completeReset == true, ReadJson(""));
+                    // for VatRc, complete reset is expensive
+                    if (ToolWinType == ToolWindowType.VatRC && !completeReset)
+                    {
+                        initialState(false, completeReset, null);
+                    }
+                    else
+                    {
+                        initialState(false, SimulationBase.dataBasket.Cells.Count < 1 || completeReset == true, ReadJson(""));
+                    }
                     enableCritical(loadSuccess);
                     if (loadSuccess == false)
                     {
@@ -1023,7 +1033,11 @@ namespace DaphneGui
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
-                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    //skip reserialize when user dragging 
+                    if (ToolWinType != ToolWindowType.VatRC && !completeReset)
+                    {
+                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    }
                     
                     sim.restart();
                     UpdateGraphics();
@@ -1682,6 +1696,21 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void runButton_Click(object sender, RoutedEventArgs e)
         {
+            //skg - For VatRC
+            //If user clicked Run button, this code will set the redraw_flag to false to signal the reac complex chart be refreshed.
+            //If ChartViewToolWindow called this method, i.e, the user changed values in the reac complex graph, then redraw_flag is true and we don't override it.
+            //Although this is relevant only for VatRC scenario type, I don't think we really need to check the scenario type because
+            //it doesn't have any effect on the other scenario types.
+            ChartViewToolWindow ch = sender as ChartViewToolWindow;
+            if (ch == null)
+            {
+                if (ReacComplexChartWindow != null)
+                {
+                    ReacComplexChartWindow.redraw_flag = false;
+                }
+            }
+            //end skg
+
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
@@ -2083,11 +2112,10 @@ namespace DaphneGui
             // reporter file name
             sim.Reporter.FileName = sop.Protocol.reporter_file_name;
 
-            // temporary solution to avoid popup resaving states -axin
-            if (true)
-            {
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
-            }
+            //if (true)
+            //{
+            //    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+            //}
 
             //this cannot be set before databaseket get updated from loading the new scenario
             if (gc is VTKFullGraphicsController)
@@ -2472,6 +2500,7 @@ namespace DaphneGui
         /// </summary>
         private void runSim()
         {
+
             if (ToolWinType == ToolWindowType.Tissue)
             {
                 VTKDisplayDocWindow.Activate();
@@ -2489,21 +2518,26 @@ namespace DaphneGui
             //sim.refreshDatabaseBufferRows();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
-                abortButton.IsEnabled = true;
-                sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
-
-                //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
-                //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
-
-                //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
-                if (gc is VTKFullGraphicsController == true)
+                if (ToolWinType == ToolWindowType.Tissue)
                 {
-                    ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
-                }
+                    abortButton.IsEnabled = true;
+                    sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
 
-                runButton.Content = "Continue";
-                statusBarMessagePanel.Content = "Paused...";
-                runButton.ToolTip = "Continue the Simulation.";
+                    //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
+                    //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
+
+                    //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
+                    if (gc is VTKFullGraphicsController == true)
+                    {
+                        ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
+                    }
+
+                    runButton.Content = "Continue";
+                    statusBarMessagePanel.Content = "Paused...";
+                    runButton.ToolTip = "Continue the Simulation.";
+                }
+                else if (ToolWinType == ToolWindowType.VatRC)
+                { }
             }
             else if (sim.RunStatus == SimulationBase.RUNSTAT_PAUSE)
             {
@@ -2558,8 +2592,8 @@ namespace DaphneGui
                         }
                     }
                 }*/
-
-                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
+                if (mouseDrag == false && tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
                     // initiating a run starts always at repetition 1
                     repetition = 1;
@@ -2579,7 +2613,7 @@ namespace DaphneGui
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(true);
+                            lockSaveStartSim(!mouseDrag);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
@@ -2587,14 +2621,14 @@ namespace DaphneGui
                             {
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
-                                lockSaveStartSim(true);
+                                lockSaveStartSim(!mouseDrag);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(true);
+                            lockSaveStartSim(!mouseDrag);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.Cancel:
@@ -2609,10 +2643,13 @@ namespace DaphneGui
                     {
                         sim.Reporter.StartReporter(sim);
                     }
-                    runButton.Content = "Pause";
-                    runButton.ToolTip = "Pause the Simulation.";
-                    statusBarMessagePanel.Content = "Running...";
-                    abortButton.IsEnabled = true;
+                    if (!mouseDrag)
+                    {
+                        runButton.Content = "Pause";
+                        runButton.ToolTip = "Pause the Simulation.";
+                        statusBarMessagePanel.Content = "Running...";
+                        abortButton.IsEnabled = true;
+                    }
                     sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 }
             }
