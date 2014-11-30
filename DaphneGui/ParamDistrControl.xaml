@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
-            xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:local="clr-namespace:DaphneGui"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              x:Name="paramDistrControl"
@@ -87,7 +88,7 @@
             
             <!-- distributed parameter type: Categorical -->
             <DataTemplate DataType="{x:Type daph:CategoricalParameterDistribution}">
-                <StackPanel Orientation="Vertical" Margin="16,0">
+                <StackPanel Orientation="Vertical" Margin="0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -98,20 +99,29 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
+
+                            <StackPanel  Margin="0,0,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                             <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Categorical</TextBlock>
-                            <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=ProbMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        MinHeight="50" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
-                                        CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" RowHeaderWidth="0"
-                                        VerticalContentAlignment="Center" CanUserAddRows="False" BorderThickness="1" BorderBrush="Black"
+                            <DataGrid x:Name="dgCategorical" AutoGenerateColumns="True" 
+                                        ItemsSource="{Binding Path=ProbMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        MinHeight="50" MinRowHeight="20" MinColumnWidth="50" RowHeaderWidth="0"
+                                        CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" 
+                                        CanUserDeleteRows="False"  CanUserAddRows="True"                            
+                                        VerticalContentAlignment="Center" BorderThickness="1" BorderBrush="Black"
                                         KeyDown="dgProbMass_KeyDown"
-                                        SourceUpdated="dgProbMass_SourceUpdated"
-                                        LostFocus="dgProbMass_LostFocus"
+                                        LostFocus="dgProbMass_Check"
+                                        SelectionMode="Extended"                 
+                                        SelectionUnit="FullRow"
                                         VirtualizingStackPanel.VirtualizationMode="Standard"
-                                                                    >
-                                <DataGrid.ContextMenu>
+                                        IsReadOnly="False"     
+                                        >
+                                
+                            <DataGrid.ContextMenu>
                                     <ContextMenu >
-                                        <MenuItem Header="Paste" Name="menuProbMassPaste" Click="menuProbMassPaste_Click"></MenuItem>
+                                        <MenuItem Header="Add" Name="menuProbMassAdd" Click="menuProbMassAdd_Click"></MenuItem>
+                                        <MenuItem Header="Delete" Name="menuProbMassDelete" Click="menuProbMassDelete_Click"
+                                                  CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
+                                        <MenuItem Header="Normalize" Name="menuProbMassNormalize" Click="menuProbMassNormalize_Click"></MenuItem>
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
 
@@ -130,10 +140,18 @@
                                                 </LinearGradientBrush>
                                             </Setter.Value>
                                         </Setter>
+                                        
                                     </Style>
                                 </DataGrid.ColumnHeaderStyle>
-                                <DataGrid.Columns>
-                                </DataGrid.Columns>
+                               
+                                <!--<DataGrid.Columns>
+                                    <DataGridTextColumn Header="Value"  IsReadOnly="False" ScrollViewer.CanContentScroll ="True"
+                                                        Binding="{Binding Path=ProbMass.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        Visibility="Visible" 
+                                                        />
+                                    <DataGridTextColumn Header="Probability" IsReadOnly="False" ScrollViewer.CanContentScroll ="False"
+                                                        Binding="{Binding Path=ProbMass.Prob, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataGrid.Columns>-->
 
                             </DataGrid>
                         </StackPanel>
