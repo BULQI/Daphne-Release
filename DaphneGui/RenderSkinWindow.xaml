@@ -211,11 +211,11 @@
 
                     <StackPanel Orientation="Horizontal" Width="220" >
 
-                        <StackPanel.Resources>
+                        <!--<StackPanel.Resources>
                             <local:diffSchemeValueConverter x:Key="diffSchemeValueConverter" />
-                        </StackPanel.Resources>
+                        </StackPanel.Resources>-->
 
-                        <Expander 
+                        <!--<Expander 
                                 Header="select another differentiator"   
                                 ExpandDirection="Down" 
                                 Padding="6" 
@@ -236,7 +236,7 @@
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>
                             </ComboBox>
-                        </Expander>
+                        </Expander>-->
 
                     </StackPanel>
                 </StackPanel>
