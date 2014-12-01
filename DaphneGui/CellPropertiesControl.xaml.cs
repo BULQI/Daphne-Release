@@ -26,24 +26,6 @@ namespace DaphneGui
         public CellPropertiesControl()
         {
             InitializeComponent();
-            //this.DataContext = this;
-        }
-
-        public class diffSchemeValueConverter : IValueConverter
-        {
-            public object Convert(object value, Type targetType,
-                object parameter, CultureInfo culture)
-            {
-                return value;
-            }
-
-            public object ConvertBack(object value, Type targetType,
-                object parameter, CultureInfo culture)
-            {
-                ConfigTransitionScheme val = value as ConfigTransitionScheme;
-                if (val != null && val.Name == "") return null;
-                return value;
-            }
         }
 
         private void CellTextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -56,7 +38,7 @@ namespace DaphneGui
             cell.ValidateName(MainWindow.SOP.Protocol);
         }
 
-        private void cbCellDiffSchemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cbLocoDriver_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //Don't want to do anything when first display this combo box
             //Only do something if user really clicked and selected a different scheme
@@ -73,31 +55,9 @@ namespace DaphneGui
             if (combo.SelectedIndex == -1)
                 return;
 
-            if (combo.SelectedIndex == 0)
-            {
-                cell.diff_scheme = null;
-                combo.Text = "None";
-            }
-            else
-            {
-                ConfigTransitionScheme diffNew = (ConfigTransitionScheme)combo.SelectedItem;
-
-                if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
-                {
-                    return;
-                }
-
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
-                if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
-                {
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(true);
-                }
-            }
-            ////int nIndex = CellsListBox.SelectedIndex;
-            ////CellsListBox.SelectedIndex = -1;
-            ////CellsListBox.SelectedIndex = nIndex;
+            cell.locomotor_mol_guid_ref = ((ConfigMolecule)cbLocomotorDriver1.SelectedItem).entity_guid;
         }
+
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -109,23 +69,23 @@ namespace DaphneGui
 
             ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
 
-            if (this.Tag == null)
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
             {
                 return;
             }
 
-            if ((CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem == null)
-            {
-                return;
-            }
-
-            CellPopulation cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
-            ConfigCell cell = cellpop.Cell;
-
+            int locoMol = -1;
             foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+                if (configMolpop.molecule.entity_guid == cell.locomotor_mol_guid_ref)
+                {
+                    locoMol = cell.cytosol.molpops.IndexOf(configMolpop);
+                }
             }
+
+            cbLocomotorDriver1.SelectedIndex = locoMol;
 
         }
 
