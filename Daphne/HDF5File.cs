@@ -10,18 +10,21 @@ namespace Daphne
     /// <summary>
     /// encapsulate the file and what it needs to know
     /// </summary>
-    class HDF5File
+    public class HDF5File
     {
         private string filename;
         private H5FileId fileId;
         // groups can be nested, so maintain a stack of open ones
         // note that this will only work for exclusive reads or writes, not mixed mode
         private List<H5GroupId> groupStack;
+        // to retrieve a list of subgroup names
+        private List<string> subGroups;
 
         public HDF5File(string fn)
         {
             filename = fn;
             groupStack = new List<H5GroupId>();
+            subGroups = new List<string>();
         }
 
         /// <summary>
@@ -49,12 +52,33 @@ namespace Daphne
         }
 
         /// <summary>
+        /// a utility to find the location for creating or opening a group; groups are hierarchical, i.e. if one is open then the one
+        /// to be opened or created will be with respect to the one that's open; otherwise, open / create it with respect to the file root
+        /// </summary>
+        /// <returns>location id</returns>
+        private H5LocId findLocation()
+        {
+            H5LocId loc;
+
+            // if a group is open, make this a subgroup, otherwise a standalone group
+            if (groupStack.Count > 0)
+            {
+                loc = groupStack.Last();
+            }
+            else
+            {
+                loc = fileId;
+            }
+            return loc;
+        }
+
+        /// <summary>
         ///  create a new group
         /// </summary>
         /// <param name="groupName">group's name</param>
         public void createGroup(string groupName)
         {
-            groupStack.Add(H5G.create(fileId, groupName));
+            groupStack.Add(H5G.create(findLocation(), groupName));
         }
 
         /// <summary>
@@ -63,7 +87,23 @@ namespace Daphne
         /// <param name="groupName"></param>
         public void openGroup(string groupName)
         {
-            groupStack.Add(H5G.open(fileId, groupName));
+            groupStack.Add(H5G.open(findLocation(), groupName));
+        }
+
+        /// <summary>
+        ///  try to open a group, if it doesn't exist create it
+        /// </summary>
+        /// <param name="groupName"></param>
+        public void openCreateGroup(string groupName)
+        {
+            try
+            {
+                openGroup(groupName);
+            }
+            catch
+            {
+                createGroup(groupName);
+            }
         }
 
         /// <summary>
@@ -172,6 +212,148 @@ namespace Daphne
             data = new double[size];
             H5D.read(dset, typeId, new H5Array<double>(data));
             H5D.close(dset);
+        }
+
+        private int groupCallback(H5GroupId id, string objectName, Object param)
+        {
+            subGroups.Add(objectName);
+            return 0;
+        }
+
+        /// <summary>
+        /// retrieve a list of subgroup names
+        /// </summary>
+        /// <param name="path">path to the parent group</param>
+        /// <returns>the list</returns>
+        public List<string> subGroupNames(string path)
+        {
+            int x = 0;
+            List<string> local = new List<string>();
+
+            subGroups.Clear();
+            H5G.iterate(fileId, path, groupCallback, null, ref x);
+            foreach(string s in subGroups)
+            {
+                local.Add(s);
+            }
+            return local;
+        }
+
+    }
+
+    // define the frame data classes here because they require knowledge of hdf5 data structures
+
+    /// <summary>
+    /// one simulation frame for the tissue simulation
+    /// </summary>
+    public class TissueSimulationFrameData : IFrameData
+    {
+        private int[] cellIds;
+        private double[] cellPos;
+
+        public int[] CellIDs
+        {
+            get
+            {
+                return cellIds;
+            }
+        }
+
+        public double[] CellPos
+        {
+            get
+            {
+                return cellPos;
+            }
+        }
+
+        public TissueSimulationFrameData()
+        {
+        }
+
+        /// <summary>
+        /// prepare the data from the cells (transfer to the frame) for writing
+        /// </summary>
+        public void prepareData()
+        {
+            if (cellPos == null || cellPos.GetLength(0) != SimulationBase.dataBasket.Cells.Count)
+            {
+                cellPos = new double[SimulationBase.dataBasket.Cells.Count * CellSpatialState.SingleDim];
+            }
+
+            cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
+
+            int i = 0;
+
+            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+            {
+                for (int j = 0; j < CellSpatialState.SingleDim; j++)
+                {
+                    cellPos[i * CellSpatialState.SingleDim + j] = c.SpatialState.X[j];
+                }
+                i++;
+            }
+        }
+
+        /// <summary>
+        /// write a simulation frame to file by index
+        /// </summary>
+        /// <param name="i">frame index</param>
+        public void writeData(int i)
+        {
+            writeData(String.Format("Frame_{0}", i));
+        }
+
+        /// <summary>
+        /// write a simulation frame to file by name
+        /// </summary>
+        /// <param name="groupName">group name in the HDF5 file</param>
+        public void writeData(string groupName)
+        {
+            prepareData();
+            DataBasket.hdf5file.createGroup(groupName);
+
+            // write the cell ids
+            long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
+
+            DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
+
+            // write the cell positions
+            dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
+            DataBasket.hdf5file.writeDSDouble("Position", dims, new H5Array<double>(cellPos));
+
+            // close the group
+            DataBasket.hdf5file.closeGroup();
+        }
+
+        /// <summary>
+        /// read a simulation frame
+        /// </summary>
+        /// <param name="i">frame index</param>
+        public void readData(int i)
+        {
+            readData(String.Format("Frame_{0}", i));
+        }
+
+        /// <summary>
+        /// read a simulation frame
+        /// </summary>
+        /// <param name="groupName">group name in the HDF5 file</param>
+        public void readData(string groupName)
+        {
+            DataBasket.hdf5file.openGroup(groupName);
+
+            // read the cell ids
+            long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
+
+            DataBasket.hdf5file.readDSInt("CellIDs", ref cellIds);
+
+            // read the cell positions
+            dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
+            DataBasket.hdf5file.readDSDouble("Position", ref cellPos);
+
+            // close the group
+            DataBasket.hdf5file.closeGroup();
         }
     }
 }

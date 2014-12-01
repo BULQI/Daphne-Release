@@ -63,7 +63,7 @@ namespace DaphneGui
         /// <summary>
         /// Path of the executable file in installation folder
         /// </summary>
-        public string execPath = string.Empty;
+        public string execPath;
 
         private DocWindow dw;
         private Thread simThread;
@@ -386,18 +386,24 @@ namespace DaphneGui
             if (AssumeIDE() == true)
             {
                 appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                execPath = appPath;
             }
             else
             {
                 appPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + @"\DaphneGui";
-                execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                execPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
             }
+
+            SetPathVariable();
 
             //Defines default location of SBML folder within Daphne's directory structure
             SBMLFolderPath = appPath + @"\Config\SBML\";
             //Used to check that SBML directory can be the initial directory
             string SBML_folder = new Uri(SBMLFolderPath).LocalPath;
-            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
+            if (Directory.Exists(SBML_folder) == false)
+            {
+                Directory.CreateDirectory(SBML_folder);
+            }
 
             // handle the application properties
             string file;
@@ -763,7 +769,6 @@ namespace DaphneGui
                 applyTempFilesAndSave(true);
             }
 
-            AddlibSBMLEnv();
             Protocol protocol = new Protocol();
 
             //Configure open file dialog box
@@ -874,8 +879,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void ExportSBML_Click(object sender, RoutedEventArgs e)
         {
-            AddlibSBMLEnv();
-            //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
@@ -903,8 +906,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void ExportReactionComplexSBML_Click(object sender, RoutedEventArgs e)
         {
-            AddlibSBMLEnv();
-            //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
@@ -931,25 +932,20 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Adds User environment variable for libSBML
+        /// Adds User environment variables for libraries
         /// </summary>
-        private void AddlibSBMLEnv()
+        private void SetPathVariable()
         {
             //Path of the dependencies folder
-            string dependencies;
+            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies",
+                   pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+            
+            // path for libSBML
+            pathEnv += ";" + dependencies;
+            // path for hdf5
+            pathEnv += ";" + dependencies + @"\hdf5";
 
-            //True means that we are in IDE, false that we have installed Daphne
-            if (execPath.Equals(string.Empty))
-            {
-                dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
-            }
-            else
-            {
-                dependencies = new Uri(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).LocalPath;
-            }
-            //Adds the dependecies folder to the environment variable PATH stored in the current process
-            string newPathEnv = System.Environment.GetEnvironmentVariable("PATH") + ";" + dependencies.Replace(@"/", @"\");
-            System.Environment.SetEnvironmentVariable("PATH", newPathEnv);
+            System.Environment.SetEnvironmentVariable("PATH", pathEnv, EnvironmentVariableTarget.Process);
         }
 
         private Nullable<bool> saveScenarioUsingDialog()
@@ -2058,6 +2054,16 @@ namespace DaphneGui
             {
                 throw new NotImplementedException();
             }
+
+            // hdf5
+            if (sim != null)
+            {
+                // this must come from some gui selection (which file do you want to open...?)
+                // and likely we need to do this in a different place, i.e. with a handler
+                // the file must get openend before a run or else the simulation will crash
+                DataBasket.createHDF5("framedata.hd5");
+            }
+
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             if (vtkDisplay_DockPanel.DataContext != gc)
             {
@@ -2236,6 +2242,10 @@ namespace DaphneGui
                             // check for flags and execute applicable task(s)
                             if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
                             {
+                                if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                {
+                                    sim.FrameData.writeData(sim.FrameNumber - 1);
+                                }
                                 UpdateGraphics();
                             }
                             if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
@@ -2261,6 +2271,11 @@ namespace DaphneGui
                                     if (Properties.Settings.Default.skipDataBaseWrites == false)
                                     {
                                         sim.Reporter.CloseReporter();
+                                        // this experiment sub-group
+                                        DataBasket.hdf5file.closeGroup();
+                                        // experiments group
+                                        DataBasket.hdf5file.closeGroup();
+                                        DataBasket.hdf5file.close();
                                     }
                                     // for profiling: close the application after a completed experiment
                                     if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
@@ -2280,19 +2295,24 @@ namespace DaphneGui
                         if (Properties.Settings.Default.skipDataBaseWrites == false)
                         {
                             sim.Reporter.CloseReporter();
+                            // this experiment sub-group
+                            DataBasket.hdf5file.closeGroup();
+                            // experiments group
+                            DataBasket.hdf5file.closeGroup();
+                            DataBasket.hdf5file.close();
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
-                    //else if (vcrControl != null && vcrControl.IsActive() == true)
-                    //{
-                    //    vcrControl.Play();
-                    //    if (vcrControl.IsActive() == false)
-                    //    {
-                    //        // switch from pause to the play button
-                    //        VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
-                    //    }
-                    //}
+                    else if (vcrControl != null && vcrControl.IsActive() == true)
+                    {
+                        vcrControl.Play();
+                        if (vcrControl.IsActive() == false)
+                        {
+                            // switch from pause to the play button
+                            VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
+                        }
+                    }
                 }
                 if (mutex == true)
                 {
@@ -2300,6 +2320,11 @@ namespace DaphneGui
                     mutex = false;
                 }
             }
+        }
+
+        private void VCRUpdate()
+        {
+            VCRbutton_Play.IsChecked = false;
         }
 
         // gui update delegate; needed because we can't access the gui elements directly; they are part of a different thread
@@ -2320,15 +2345,31 @@ namespace DaphneGui
             lockSaveStartSim(true);
         }
 
+        /// <summary>
+        /// create the vcr control if it has not been created yet, and load the current frame
+        /// </summary>
+        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
+        /// <param name="expID">experiment id</param>
+        /// <returns>true for success</returns>
+        private bool OpenVCR(bool lastFrame, int expID = -1)
+        {
+            // create the vcr control if needed, load the data, and set the last frame
+            if (vcrControl == null)
+            {
+                vcrControl = new VCRControl();
+            }
+            return vcrControl.OpenVCR(lastFrame, expID);
+        }
+
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            //if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
-            //{
-            //    VCR_Toolbar.IsEnabled = true;
-            //    VCR_Toolbar.DataContext = vcrControl;
-            //    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
-            //}
+            if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            {
+                VCR_Toolbar.IsEnabled = true;
+                VCR_Toolbar.DataContext = vcrControl;
+                VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+            }
 
             bool finished = false;
 
@@ -2614,6 +2655,13 @@ namespace DaphneGui
                     if (Properties.Settings.Default.skipDataBaseWrites == false)
                     {
                         sim.Reporter.StartReporter(sim);
+                        DataBasket.hdf5file.openWrite();
+                        DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
+
+                        // this must be auto-generative, i.e. we must know a valid id
+                        int id = 0;
+
+                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", id));
                     }
                     runButton.Content = "Pause";
                     runButton.ToolTip = "Pause the Simulation.";

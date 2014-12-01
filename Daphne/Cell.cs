@@ -16,7 +16,7 @@ namespace Daphne
         public double[] V;
         public double[] F;
 
-        public static int Dim = 9;
+        public static int SingleDim = 3, Dim = 3 * SingleDim;
     }
 
     public class Gene
@@ -112,6 +112,10 @@ namespace Daphne
             genes = new Dictionary<string, Gene>();
             exiting = false;
 
+            spatialState.X = new double[CellSpatialState.SingleDim];
+            spatialState.V = new double[CellSpatialState.SingleDim];
+            spatialState.F = new double[CellSpatialState.SingleDim];
+
             Cell_id = SafeCell_id++;
         }
 
@@ -186,16 +190,45 @@ namespace Daphne
             {
                 throw new Exception("Cell state length implausible.");
             }
-            spatialState.X = new double[] { s[0], s[1], s[2] };
-            spatialState.V = new double[] { s[3], s[4], s[5] };
-            spatialState.F = new double[] { s[6], s[7], s[8] };
+
+            int i;
+
+            // position
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                spatialState.X[i] = s[i];
+            }
+            // velocity
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                spatialState.V[i] = s[i + CellSpatialState.SingleDim];
+            }
+            // force
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                spatialState.F[i] = s[i + 2 * CellSpatialState.SingleDim];
+            }
         }
 
         public void setState(CellSpatialState s)
         {
-            spatialState.X = new double[] { s.X[0], s.X[1], s.X[2] };
-            spatialState.V = new double[] { s.V[0], s.V[1], s.V[2] };
-            spatialState.F = new double[] { s.F[0], s.F[1], s.F[2] };
+            int i;
+
+            // position
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                spatialState.X[i] = s.X[i];
+            }
+            // velocity
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                spatialState.V[i] = s.V[i];
+            }
+            // force
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                spatialState.F[i] = s.F[i];
+            }
         }
         
         /// <summary>
