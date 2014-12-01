@@ -1316,22 +1316,13 @@ namespace DaphneGui
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            //This code assumes that CellDetailsControl is used only by CellPopulation control.
-            //This does not work when CellDetailsControl is used by CellStudioToolWindow.
-
             CollectionViewSource cvs;
 
-            if (this.Tag == null)
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
             {
                 return;
             }
-
-            if ((CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem == null)
-            {
-                return;
-            }
-
-            CellPopulation cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
 
             // MOLECULES
 
@@ -1360,25 +1351,11 @@ namespace DaphneGui
                 cvs.Source = new ObservableCollection<ConfigMolecule>();
             }
             ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
-            foreach (ConfigMolecularPopulation configMolpop in cellpop.Cell.cytosol.molpops)
+            //foreach (ConfigMolecularPopulation configMolpop in cellpop.Cell.cytosol.molpops)
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
             }
-
-            // GENES
-
-            //// cellGeneListItemTemplate - listbox of genes in the cell
-            //cvs = (CollectionViewSource)(FindResource("cytoGenes2ListView"));
-            //if (cvs.Source == null)
-            //{
-            //    cvs.Source = new ObservableCollection<ConfigGene>();
-            //}
-            //((ObservableCollection<ConfigGene>)cvs.Source).Clear();
-            //cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
-            //foreach (ConfigGene configGene in cellpop.Cell.genes)
-            //{
-            //    ((ObservableCollection<ConfigGene>)cvs.Source).Add(configGene);
-            //}
 
             // REACTIONS
 
