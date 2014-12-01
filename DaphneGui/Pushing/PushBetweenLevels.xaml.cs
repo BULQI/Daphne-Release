@@ -127,7 +127,9 @@ namespace DaphneGui.Pushing
                     break;
                 case PushLevelEntityType.Reaction:
                     LeftList = LevelA.entity_repository.reactions;
+                    //LeftList = MainWindow.ToolWin.PushReactionFilter(LeftList);
                     RightList = LevelB.entity_repository.reactions;
+                    //RightList = MainWindow.ToolWin.PushReactionFilter(RightList);
                     break;
                 case PushLevelEntityType.Cell:
                     LeftList = LevelA.entity_repository.cells;
@@ -143,7 +145,9 @@ namespace DaphneGui.Pushing
                     break;
                 case PushLevelEntityType.ReactionComplex:
                     LeftList = LevelA.entity_repository.reaction_complexes;
+                    //LeftList = MainWindow.ToolWin.PushReactionComplexFilter(LeftList);
                     RightList = LevelB.entity_repository.reaction_complexes;
+                    //RightList = MainWindow.ToolWin.PushReactionComplexFilter(RightList);
                     break;
                 case PushLevelEntityType.TransDriver:
                     LeftList = LevelA.entity_repository.transition_drivers;
