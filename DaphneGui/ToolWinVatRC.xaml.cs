@@ -130,5 +130,19 @@ namespace DaphneGui
             MW.runButton_Click(null, null);
         }
 
+        public override ObservableCollection<ConfigReaction> PushReactionFilter(ObservableCollection<ConfigReaction> configReac)
+        {
+            // Filter out boundary and gene reactions
+
+            return configReac;
+        }
+
+        public override ObservableCollection<ConfigReactionComplex> PushReactionFilter(ObservableCollection<ConfigReactionComplex> configReacComplex)
+        {
+            // Filter out RCs with boundary and gene reactions
+
+            return configReacComplex;
+        }
+
     }
 }

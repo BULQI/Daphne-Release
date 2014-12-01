@@ -333,7 +333,30 @@ namespace DaphneGui
         {
             return MW.saveDialog();
         }
+
+        /// <summary>
+        /// Filter any reactions that cannot be pushed between levels (eg., boundary and gene reactions for VatRC)
+        /// </summary>
+        /// <param name="configReac"></param>
+        /// <returns></returns>
+        public virtual ObservableCollection<ConfigReaction> PushReactionFilter(ObservableCollection<ConfigReaction> configReac)
+        {
+            return configReac;
+        }
+
+        /// <summary>
+        /// Filter any reaction complexes that cannot be pushed between levels (eg., RCs that contain boundary or gene reactions for VatRC)
+        /// </summary>
+        /// <param name="configReacComplex"></param>
+        /// <returns></returns>
+        public virtual ObservableCollection<ConfigReactionComplex> PushReactionFilter(ObservableCollection<ConfigReactionComplex> configReacComplex)
+        {
+            return configReacComplex;
+        }
+
     }
+
+
 
 
     public class ToolwinComponentVisibilityConverter : IValueConverter
