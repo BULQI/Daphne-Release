@@ -567,6 +567,16 @@ namespace DaphneGui
                 }
             }
 
+            // hdf5
+            DataBasket.hdf5file = new HDF5File();
+
+            // this must come from some gui selection (which file do you want to open or create...?)
+            // and likely we need to do this in a different place, i.e. with a handler
+            // the file must get openend before a run or else the simulation will crash
+            if (DataBasket.hdf5file.reCreate("framedata.hd5") == false)
+            {
+                MessageBox.Show("File might be currently open or disk cannot be accessed.", "Error creating HDF5 file", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             //setup render skin 
             /*
@@ -2017,7 +2027,7 @@ namespace DaphneGui
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-            this.ProtocolToolWindow.Tag = sop;
+                this.ProtocolToolWindow.Tag = sop;
                 this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
@@ -2053,15 +2063,6 @@ namespace DaphneGui
             else
             {
                 throw new NotImplementedException();
-            }
-
-            // hdf5
-            if (sim != null)
-            {
-                // this must come from some gui selection (which file do you want to open...?)
-                // and likely we need to do this in a different place, i.e. with a handler
-                // the file must get openend before a run or else the simulation will crash
-                DataBasket.createHDF5("framedata.hd5");
             }
 
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
@@ -2104,7 +2105,6 @@ namespace DaphneGui
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();
-
 
             // clear the vcr cache
             if (vcrControl != null)
@@ -2656,11 +2656,13 @@ namespace DaphneGui
                     {
                         sim.Reporter.StartReporter(sim);
                         DataBasket.hdf5file.openWrite();
+                        // super-group containing all experiments
                         DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
 
-                        // this must be auto-generative, i.e. we must know a valid id
-                        int id = 0;
+                        // for now pick a safe id, highest id + 1
+                        int id = DataBasket.findHighestExperimentId() + 1;
 
+                        // group for this experiment
                         DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", id));
                     }
                     runButton.Content = "Pause";
@@ -2890,6 +2892,12 @@ namespace DaphneGui
             if (simThread != null && simThread.IsAlive)
             {
                 simThread.Abort();
+            }
+
+            // clear the vcr cache
+            if (vcrControl != null)
+            {
+                vcrControl.ReleaseVCR();
             }
 
             // vtk cleanup

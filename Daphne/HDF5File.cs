@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 using HDF5DotNet;
 
@@ -20,11 +21,25 @@ namespace Daphne
         // to retrieve a list of subgroup names
         private List<string> subGroups;
 
-        public HDF5File(string fn)
+        public HDF5File()
         {
-            filename = fn;
-            groupStack = new List<H5GroupId>();
-            subGroups = new List<string>();
+        }
+
+        /// <summary>
+        /// (re)create the file
+        /// </summary>
+        /// <param name="fn">file name</param>
+        /// <returns>true for success</returns>
+        public bool reCreate(string fn)
+        {
+            if (fileId == null)
+            {
+                filename = fn;
+                groupStack = new List<H5GroupId>();
+                subGroups = new List<string>();
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -32,7 +47,17 @@ namespace Daphne
         /// </summary>
         public void openWrite()
         {
-            fileId = H5F.create(filename, H5F.CreateMode.ACC_TRUNC);
+            if (filename != "" && fileId == null)
+            {
+                if (File.Exists(filename) == true)
+                {
+                    fileId = H5F.open(filename, H5F.OpenMode.ACC_RDWR);
+                }
+                else
+                {
+                    fileId = H5F.create(filename, H5F.CreateMode.ACC_TRUNC);
+                }
+            }
         }
 
         /// <summary>
@@ -40,7 +65,10 @@ namespace Daphne
         /// </summary>
         public void openRead()
         {
-            fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+            if (filename != "" && fileId == null)
+            {
+                fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+            }
         }
 
         /// <summary>
@@ -48,7 +76,11 @@ namespace Daphne
         /// </summary>
         public void close()
         {
-            H5F.close(fileId);
+            if (fileId != null)
+            {
+                H5F.close(fileId);
+                fileId = null;
+            }
         }
 
         /// <summary>
@@ -78,7 +110,12 @@ namespace Daphne
         /// <param name="groupName">group's name</param>
         public void createGroup(string groupName)
         {
-            groupStack.Add(H5G.create(findLocation(), groupName));
+            H5LocId loc = findLocation();
+
+            if (loc != null)
+            {
+                groupStack.Add(H5G.create(loc, groupName));
+            }
         }
 
         /// <summary>
@@ -87,7 +124,12 @@ namespace Daphne
         /// <param name="groupName"></param>
         public void openGroup(string groupName)
         {
-            groupStack.Add(H5G.open(findLocation(), groupName));
+            H5LocId loc = findLocation();
+
+            if (loc != null)
+            {
+                groupStack.Add(H5G.open(loc, groupName));
+            }
         }
 
         /// <summary>
@@ -111,8 +153,11 @@ namespace Daphne
         /// </summary>
         public void closeGroup()
         {
-            H5G.close(groupStack.Last());
-            groupStack.RemoveAt(groupStack.Count - 1);
+            if (groupStack.Count > 0)
+            {
+                H5G.close(groupStack.Last());
+                groupStack.RemoveAt(groupStack.Count - 1);
+            }
         }
 
         /// <summary>
@@ -123,13 +168,16 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void writeDSInt(string name, long[] dims, H5Array<int> data)
         {
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
-            H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
-            H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
+            if (groupStack.Count > 0)
+            {
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
+                H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
+                H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
 
-            H5D.write(dset, typeId, data);
-            H5D.close(dset);
-            H5S.close(spaceId);
+                H5D.write(dset, typeId, data);
+                H5D.close(dset);
+                H5S.close(spaceId);
+            }
         }
 
         /// <summary>
@@ -139,13 +187,16 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void readDSInt(string name, ref int[] data)
         {
-            H5DataSetId dset = H5D.open(groupStack.Last(), name);
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
-            long size = H5D.getStorageSize(dset) / sizeof(int);
+            if (groupStack.Count > 0)
+            {
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
+                long size = H5D.getStorageSize(dset) / sizeof(int);
 
-            data = new int[size];
-            H5D.read(dset, typeId, new H5Array<int>(data));
-            H5D.close(dset);
+                data = new int[size];
+                H5D.read(dset, typeId, new H5Array<int>(data));
+                H5D.close(dset);
+            }
         }
 
         /// <summary>
@@ -156,13 +207,16 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void writeDSLong(string name, long[] dims, H5Array<long> data)
         {
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
-            H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
-            H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
+            if (groupStack.Count > 0)
+            {
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
+                H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
+                H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
 
-            H5D.write(dset, typeId, data);
-            H5D.close(dset);
-            H5S.close(spaceId);
+                H5D.write(dset, typeId, data);
+                H5D.close(dset);
+                H5S.close(spaceId);
+            }
         }
 
         /// <summary>
@@ -172,13 +226,16 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void readDSLong(string name, ref long[] data)
         {
-            H5DataSetId dset = H5D.open(groupStack.Last(), name);
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
-            long size = H5D.getStorageSize(dset) / sizeof(long);
+            if (groupStack.Count > 0)
+            {
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
+                long size = H5D.getStorageSize(dset) / sizeof(long);
 
-            data = new long[size];
-            H5D.read(dset, typeId, new H5Array<long>(data));
-            H5D.close(dset);
+                data = new long[size];
+                H5D.read(dset, typeId, new H5Array<long>(data));
+                H5D.close(dset);
+            }
         }
 
         /// <summary>
@@ -189,13 +246,16 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void writeDSDouble(string name, long[] dims, H5Array<double> data)
         {
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
-            H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
-            H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
+            if (groupStack.Count > 0)
+            {
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
+                H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
+                H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
 
-            H5D.write(dset, typeId, data);
-            H5D.close(dset);
-            H5S.close(spaceId);
+                H5D.write(dset, typeId, data);
+                H5D.close(dset);
+                H5S.close(spaceId);
+            }
         }
 
         /// <summary>
@@ -205,13 +265,16 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void readDSDouble(string name, ref double[] data)
         {
-            H5DataSetId dset = H5D.open(groupStack.Last(), name);
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
-            long size = H5D.getStorageSize(dset) / sizeof(double);
+            if (groupStack.Count > 0)
+            {
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
+                long size = H5D.getStorageSize(dset) / sizeof(double);
 
-            data = new double[size];
-            H5D.read(dset, typeId, new H5Array<double>(data));
-            H5D.close(dset);
+                data = new double[size];
+                H5D.read(dset, typeId, new H5Array<double>(data));
+                H5D.close(dset);
+            }
         }
 
         private int groupCallback(H5GroupId id, string objectName, Object param)
@@ -227,14 +290,18 @@ namespace Daphne
         /// <returns>the list</returns>
         public List<string> subGroupNames(string path)
         {
-            int x = 0;
             List<string> local = new List<string>();
 
-            subGroups.Clear();
-            H5G.iterate(fileId, path, groupCallback, null, ref x);
-            foreach(string s in subGroups)
+            if (fileId != null)
             {
-                local.Add(s);
+                int x = 0;
+
+                subGroups.Clear();
+                H5G.iterate(fileId, path, groupCallback, null, ref x);
+                foreach (string s in subGroups)
+                {
+                    local.Add(s);
+                }
             }
             return local;
         }

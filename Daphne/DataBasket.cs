@@ -78,12 +78,24 @@ namespace Daphne
         }
 
         /// <summary>
-        /// create the hdf5 file
+        /// find the highest experiment id; assumes it is the last entry
         /// </summary>
-        /// <param name="fileName">the file's name</param>
-        public static void createHDF5(string fileName)
+        /// <returns>the highest id or -1 if empty</returns>
+        public static int findHighestExperimentId()
         {
-            hdf5file = new HDF5File(fileName);
+            List<string> local = hdf5file.subGroupNames("/Experiments_VCR");
+
+            if (local.Count > 0)
+            {
+                string last = local.Last();
+                string[] parts = last.Split('_');
+
+                if(parts.Length >= 2)
+                {
+                    return Convert.ToInt32(parts[1]);
+                }
+            }
+            return -1;
         }
 
         /// <summary>
