@@ -5170,6 +5170,53 @@ namespace Daphne
 
             return false;
         }
+
+        public bool HasBulkMolecule(EntityRepository repos)
+        {
+            foreach (string molguid in reactants_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                    return true;
+            }
+            foreach (string molguid in products_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                    return true;
+            }
+            foreach (string molguid in modifiers_molecule_guid_ref)
+            {
+                if (!repos.genes_dict.ContainsKey(molguid))
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool HasGene(EntityRepository repos)
+        {
+            foreach (string molguid in modifiers_molecule_guid_ref)
+            {
+                if (repos.genes_dict.ContainsKey(molguid))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+
+        public bool IsBoundaryReaction(EntityRepository repos)
+        {
+            if (HasBoundaryMolecule(repos) == true && HasBulkMolecule(repos) == true)
+                return true;
+
+            return false;
+        }
+
         public string reaction_template_guid_ref { get; set; }
 
         private double _rate_const;
@@ -6715,6 +6762,8 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();
+
+            renderLabel = cellpopulation_guid;
         }
     }
 
@@ -7897,10 +7946,15 @@ namespace Daphne
         //default color
         public void AddRenderCell(string label, string name)
         {
+            //Don't want duplicates
+            if (renderCells.Any(c => c.name == name) == true)
+                return;
+
             RenderCell renc = new RenderCell();
             renc.renderLabel = label;
             renc.name = name;
             renc.base_color = new RenderColor(ColorHelper.pickASolidColor());
+
 
             //cell_pop
             ColorHelper.resetColorPicker();
@@ -7968,7 +8022,7 @@ namespace Daphne
             {
                 renc.gen_shade_colors.Add(new RenderColor(color));
             }
-
+            
             renderCells.Add(renc);
         }
 

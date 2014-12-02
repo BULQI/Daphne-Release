@@ -68,6 +68,8 @@ namespace DaphneGui
                 }
             }
 
+
+
             double[] extents = new double[3] { envHandle.extent_x, 
                                                envHandle.extent_y, 
                                                envHandle.extent_z };
@@ -76,13 +78,25 @@ namespace DaphneGui
 
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
+            cp.cellPopDist.Initialize();
 
+
+            cp.CellStates[0] = new CellState(envHandle.extent_x - 2 * cp.Cell.CellRadius - envHandle.gridstep / 2,
+                                                  envHandle.extent_y / 2 - envHandle.gridstep / 2,
+                                                  envHandle.extent_z / 2 - envHandle.gridstep / 2);
+
+           
+
+            
             //if about rendering...
             //for now, use name as label
-            cp.renderLabel = cp.Cell.entity_guid;
+            //cp.renderLabel = cp.Cell.entity_guid;
 
             //add rendering options to scenario
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
+
+            //This is needed because without it, a new cell pop was showing black square to the left.
+            MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cp.renderLabel, cp.Cell.CellName);
 
             scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
@@ -294,7 +308,10 @@ namespace DaphneGui
 
                 cp.Cell = newLibCell.Clone(true);
                 cp.Cell.CellName = newLibCell.CellName;
+                cp.renderLabel = cp.Cell.renderLabel;
                 cb.SelectedItem = newLibCell;
+
+                MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cp.renderLabel, cp.Cell.CellName);
             }
             //user picked existing cell type 
             else
@@ -540,4 +557,5 @@ namespace DaphneGui
 
 
     }
+
 }

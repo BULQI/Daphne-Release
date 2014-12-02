@@ -74,6 +74,12 @@
                     <local:CellPopControl DataContext="{Binding ElementName=toolWinTissue}" x:Name="CellPopControl"/>                  
                 </StackPanel>
 
+                <!-- Put Cell Properties expander here -->
+
+                <!-- Put CELL DEATH PARAMETERS expander here -->
+
+                <!-- Put Cell Interaction Parameters expander here -->
+
             </ScrollViewer>
         </TabItem>
 

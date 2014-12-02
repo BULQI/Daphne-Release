@@ -367,6 +367,9 @@ namespace DaphneGui
 
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
+
+                MainWindow.SOP.SelectedRenderSkin.AddRenderMol(molpop.molecule.renderLabel, newLibMol.Name);
+
                 cb.SelectedItem = newLibMol;
             }
             //user picked an existing molecule

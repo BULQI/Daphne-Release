@@ -522,7 +522,7 @@
                     </StackPanel>
                 </Expander>
 
-                    <!-- Cell Properties -->
+                    <!-- Cell Properties (Move to ToolWinTissure) -->
                     <Expander  Padding="0"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
@@ -555,7 +555,7 @@
                 </StackPanel>
             </Expander>
 
-            <!-- CELL DEATH PARAMETERS -->
+            <!-- CELL DEATH PARAMETERS  (Move to ToolWinTissure) -->
             <Expander
                             Padding="5" 
                             ExpandDirection="Down"
@@ -621,7 +621,7 @@
 
             </Expander>
 
-            <!-- Cell Interaction Parameters -->
+            <!-- Cell Interaction Parameters  (Move to ToolWinTissure) -->
             <Expander
                     Padding="5" 
                     ExpandDirection="Down"

@@ -308,14 +308,14 @@ namespace DaphneGui
             //}
 
             //////This code re-generates the scenarios - DO NOT DELETE
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            try
+            {
+                CreateAndSerializeDaphneProtocols();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -2506,16 +2506,6 @@ namespace DaphneGui
                 VTKDisplayDocWindow.Activate();
             }
 
-            //MessageBox.Show("In runSim()");
-
-            //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP
-            //YOU CAN ONLY CALL THIS AFTER LOADING A DRIVER-LOCOMOTOR SCENARIO
-            //TestStepperLocomotion(nSteps, dt);
-
-            //YOU CAN ONLY CALL THIS AFTER LOADING A LIGAND-RECEPTOR SCENARIO
-            //TestStepperLigandReceptor(nSteps, 0.01);
-
-            //sim.refreshDatabaseBufferRows();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
                 if (ToolWinType == ToolWindowType.Tissue)
