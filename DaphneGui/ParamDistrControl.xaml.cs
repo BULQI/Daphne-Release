@@ -137,8 +137,6 @@ namespace DaphneGui
 
                 distr.isInitialized = false;
             }
-
-
         }
 
         private void dgProbMass_Check(object sender, RoutedEventArgs e)
@@ -180,6 +178,7 @@ namespace DaphneGui
                 }
             }
 
+            //Refresh(distr.ProbMass);
         }
 
         private void menuProbMassDelete_Click(object sender, RoutedEventArgs e)
@@ -226,6 +225,26 @@ namespace DaphneGui
             distr.isInitialized = false;
         }
 
+        private void menuProbMassRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            DistributedParameter distrParam = (DistributedParameter)paramDistrControl.DataContext;
+            CategoricalParameterDistribution distr = (CategoricalParameterDistribution)distrParam.ParamDistr;
+
+            if (distr == null)
+                return;
+
+            if (distr.ProbMass != null)
+            {
+                CategoricalDistrItem[] probMassArray = distr.ProbMass.ToArray();
+                distr.ProbMass.Clear();
+                foreach (CategoricalDistrItem cdi in probMassArray)
+                {
+                    distr.ProbMass.Add(cdi);
+                }
+
+                DataGrid dg = sender as DataGrid;
+            }
+        }
     }
 
 }

@@ -102,7 +102,7 @@
 
                             <StackPanel  Margin="0,0,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                             <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Categorical</TextBlock>
-                            <DataGrid x:Name="dgCategorical" AutoGenerateColumns="True" 
+                            <DataGrid x:Name="dgCategorical" AutoGenerateColumns="False" 
                                         ItemsSource="{Binding Path=ProbMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         MinHeight="50" MinRowHeight="20" MinColumnWidth="50" RowHeaderWidth="0"
                                         CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" 
@@ -113,7 +113,7 @@
                                         SelectionMode="Extended"                 
                                         SelectionUnit="FullRow"
                                         VirtualizingStackPanel.VirtualizationMode="Standard"
-                                        IsReadOnly="False"     
+                                        IsReadOnly="False"    
                                         >
                                 
                             <DataGrid.ContextMenu>
@@ -122,6 +122,7 @@
                                         <MenuItem Header="Delete" Name="menuProbMassDelete" Click="menuProbMassDelete_Click"
                                                   CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
                                         <MenuItem Header="Normalize" Name="menuProbMassNormalize" Click="menuProbMassNormalize_Click"></MenuItem>
+                                        <MenuItem Header="Refresh" Name="menuProbMassRefresh" Click="menuProbMassRefresh_Click"></MenuItem>
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
 
@@ -144,14 +145,14 @@
                                     </Style>
                                 </DataGrid.ColumnHeaderStyle>
                                
-                                <!--<DataGrid.Columns>
+                                <DataGrid.Columns>
                                     <DataGridTextColumn Header="Value"  IsReadOnly="False" ScrollViewer.CanContentScroll ="True"
-                                                        Binding="{Binding Path=ProbMass.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        Binding="{Binding Path=CategoryValue}"
                                                         Visibility="Visible" 
                                                         />
                                     <DataGridTextColumn Header="Probability" IsReadOnly="False" ScrollViewer.CanContentScroll ="False"
-                                                        Binding="{Binding Path=ProbMass.Prob, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DataGrid.Columns>-->
+                                                        Binding="{Binding Path=Prob}"/>
+                                </DataGrid.Columns>
 
                             </DataGrid>
                         </StackPanel>
