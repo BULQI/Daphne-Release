@@ -54,7 +54,6 @@ namespace ManifoldRing
         public Transform(bool hasRot = true)
         {
             pos = new DenseVector(Dim);
-
             this.HasRot = hasRot;
 
             if (HasRot == true)
@@ -110,7 +109,9 @@ namespace ManifoldRing
                         throw new Exception("Dimension mismatch.");
                     }
 
-                    rot.SetSubMatrix(0, 0, value);
+                    rot[0, 0] = value[0, 0]; rot[1, 0] = value[1, 0]; rot[2, 0] = value[2, 0];
+                    rot[0, 1] = value[0, 1]; rot[1, 1] = value[1, 1]; rot[2, 1] = value[2, 1];
+                    rot[0, 2] = value[0, 2]; rot[1, 2] = value[1, 2]; rot[2, 2] = value[2, 2];
                 }
             }
         }
@@ -180,7 +181,6 @@ namespace ManifoldRing
                 tmp[2, 2] = Math.Cos(rad) + axis[2] * axis[2] * (1 - Math.Cos(rad));
 
                 rot = (Matrix)rot.Multiply(tmp);
-                rot = (Matrix)(rot * tmp);
             }
         }
 
