@@ -12,7 +12,7 @@
                     ImageSource="Images/Properties16.png"
                     x:Name="MyToolWindow"
                     >
-    
+
     <!-- These comments are here as a Navigation Aid -->
     <!-- To find component library genes, search for                "GenesExpander" or "LIBRARY GENES"         -->
     <!-- To find component library molecules, search for            "MoleculesExpander" or "LIBRARY MOLECULES"             -->
@@ -31,12 +31,12 @@
     <!-- To find cell reactions in cytosol gui, search for          "Reactions in cell Cytosol"     -->
     <!-- To find cell membrane molecules, search for                "CellMembraneMolPopsListBox" or "Cell Membrane Mol Pops" -->
     <!-- To find cell cytosol molecules, search for                 "CellMembraneMolPopsListBox" or "Cell Cytosol Mol Pops -->
-    
+
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
-        
+
         <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
 
@@ -81,8 +81,8 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
-            <!--<Style TargetType="{x:Type DataGridRowHeader}">
+
+        <!--<Style TargetType="{x:Type DataGridRowHeader}">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="DataGridRowHeader" />
@@ -109,10 +109,10 @@
                 </Style.Triggers>
             </Style>
 
-            <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" /> 
+            <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
             <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
-            
+
             <!-- <daph:ManyToBooleanConverter x:Key="ManyConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
@@ -212,7 +212,7 @@
             <!--<CollectionViewSource x:Key="solfacSolfacTypesListView"  
                                   Source="{Binding Path=entity_repository.solfac_types}"/>-->
 
-            
+
             <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="moleculesListView2"  
@@ -220,7 +220,7 @@
             <CollectionViewSource x:Key="molPopsListView"  
                                   Source="{Binding Path=scenario.environment.comp.molpops}"
                                   />
-            
+
             <CollectionViewSource x:Key="bulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   
@@ -234,20 +234,20 @@
 
             <!--<CollectionViewSource x:Key="diffSchemesListView"  
                                   Source="{Binding Path=entity_repository.diff_schemes}"/>-->
-            
+
             <CollectionViewSource x:Key="ecmReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   />
             <CollectionViewSource x:Key="ecmReactionComplexesListView"  
                                   Source="{Binding Path=entity_repository.reaction_complexes}"
-                                  />           
+                                  />
             <!--<CollectionViewSource x:Key="membraneMolPopsListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="membraneMolPopsCollectionViewSource_Filter"/>
             <CollectionViewSource x:Key="cytosolMolPopsListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="cytosolMoleculesCollectionViewSource_Filter" />-->
-            
+
             <!--<CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   Filter="cytosolAvailableReactionsListView_Filter"/>
@@ -260,7 +260,7 @@
                                   Source="{Binding Path=entity_repository.reactions}"
                                   Filter="ecmAvailableReactionsListView_Filter"                                   
                                   />
-            
+
             <CollectionViewSource x:Key="baseCellTypesListView"  
                                   Source="{Binding Path=entity_repository.CellBaseTypeLabel}"/>
 
@@ -298,7 +298,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-           
+
             <sys:Int32 x:Key="ToolTipInitialShowDelay">100</sys:Int32>
             <Style TargetType="TextBlock">
                 <Setter Property="ToolTipService.InitialShowDelay" Value="{StaticResource ToolTipInitialShowDelay}"/>
@@ -495,9 +495,9 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-            
+
             <!-- =========================== -->
-            
+
             <!-- Reaction list view template -->
             <!--<DataTemplate x:Key="reacListViewTemplate">
                 <ListView x:Name="lvReacComplexReactions" 
@@ -550,8 +550,8 @@
 
 
             <!-- Differentiator -->
-            
-            
+
+
             <DataTemplate x:Key="diffSchemeListItemTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Path=Name}" />
@@ -560,13 +560,13 @@
 
             <DataTemplate x:Key="diffCellEditingTemplate">
                 <ComboBox x:Name="comboDiffCellEditing">
-                    
+
                 </ComboBox>
             </DataTemplate>
             <DataTemplate x:Key="diffCellTemplate">
                 <ComboBox x:Name="comboDiffCell">
-                    
-                </ComboBox>  
+
+                </ComboBox>
             </DataTemplate>
 
             <!-- Box Specification -->
@@ -770,7 +770,7 @@
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
                                         IsChecked="{Binding Path=box_spec.box_visibility}"                                      
-                                        />                                                
+                                        />
                         </Grid>
                         <Grid VerticalAlignment="Center">
                             <Rectangle Fill="LightPink"
@@ -788,7 +788,7 @@
                                       CommandParameter="{Binding}"
                                     />
                         </Grid>
-                    </StackPanel>                    
+                    </StackPanel>
                     <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
                     <TextBlock Text="std. dev. (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
                     <!--<Line Margin="4,0,4,3" 
@@ -808,8 +808,8 @@
                                    DecimalPlaces="2"     
                                    Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
-                        
-                    </uc:DoublesBox>                                        
+
+                    </uc:DoublesBox>
                     <uc:DoublesBox x:Name="dbl_x_scale"
                                    Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
@@ -832,7 +832,7 @@
                                    >
 
                     </uc:DoublesBox>
-                    
+
                     <uc:DoublesBox x:Name="dbl_y_scale"
                                    Grid.Column="3" Grid.Row="3"   Grid.ColumnSpan="2" 
                                    TextFieldWidth="70"
@@ -843,7 +843,7 @@
                                    >
 
                     </uc:DoublesBox>
-                    
+
                     <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
                     <uc:DoublesBox x:Name="dbl_z_trans"
                                    Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="2"  
@@ -855,7 +855,7 @@
                                    >
 
                     </uc:DoublesBox>
-                                       <uc:DoublesBox x:Name="dbl_z_scale"
+                    <uc:DoublesBox x:Name="dbl_z_scale"
                                    Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
                                    TextFieldWidth="70"
                                    SliderWidth="40"
@@ -914,18 +914,18 @@
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
-                    
+
                     <StackPanel  Grid.Column="0" Grid.Row="4">
                         <TextBlock Text="impose gradient" Margin="60,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="100">
-                            
+
                         </TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="0,-4">
-                    <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="0,-4">
+                        <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
                                            Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="100">                                    
-                    </TextBlock>
-                    <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
+                                           Width="100">
+                        </TextBlock>
+                        <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
                                            SelectedValue="{Binding Path=boundary_face, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                            SelectionChanged="cbBoundFace_SelectionChanged">
@@ -941,14 +941,14 @@
                             </ComboBox.ItemContainerStyle>
 
                         </ComboBox>
-                </StackPanel>
+                    </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
                         <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
                                            HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
                                            Width="160"/>
-                </StackPanel>
-                <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
-                    <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                    </StackPanel>
+                    <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
+                        <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
@@ -964,7 +964,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
-                    </TextBlock>
+                        </TextBlock>
                         <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
                                         Number="{Binding Path=boundaryCondition[0].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         SNLowerThreshold="0.001"
@@ -972,8 +972,8 @@
                                         SliderEnabled="False">
                         </uc:DoublesBox>
                     </StackPanel>
-                <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
-                    <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                    <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
+                        <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
@@ -989,7 +989,7 @@
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
-                    </TextBlock>
+                        </TextBlock>
                         <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
                                         Number="{Binding Path=boundaryCondition[1].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                        
                                         SNLowerThreshold="0.001"
@@ -1033,7 +1033,7 @@
                                                     Value="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}"
                                                     />-->
                             <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                        </StackPanel>                        
+                        </StackPanel>
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
                     <!--<ListView x:Name="molpopGaussianBoxSpecsListView" Visibility="Hidden"
@@ -1058,7 +1058,7 @@
 
             <!--"{Binding Path=spec_cell_list, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
 
-            <DataTemplate DataType="{x:Type daph:CellPopSpecific}">                            
+            <DataTemplate DataType="{x:Type daph:CellPopSpecific}">
                 <StackPanel x:Name="panelCoordinates" Grid.Row="1" Grid.Column="0">
                 </StackPanel>
             </DataTemplate>
@@ -1066,7 +1066,7 @@
             <DataTemplate DataType="{x:Type daph:CellPopUniform}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock>Number of cells:    </TextBlock>                        
+                        <TextBlock>Number of cells:</TextBlock>
                         <TextBox IsReadOnly="True" IsEnabled="False" Width="50" Margin="8,-2" Text="{Binding ElementName=numberBox, Path=Value}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -1106,7 +1106,7 @@
             </DataTemplate>
 
 
-            <DataTemplate x:Key="molpopDistributionDetailsTemplate">
+            <!--<DataTemplate x:Key="molpopDistributionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -1116,14 +1116,14 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <ContentControl Name="solfac_dist_cc"
+                    <ContentControl Name="molpop_dist_cc"
                                     Grid.ColumnSpan="2" Grid.Row="0"
                                     Margin="0,6"
                                     BorderBrush="DarkGray" BorderThickness="1"
                                     Content="{Binding Path=mp_distribution}"  />
                 </Grid>
-            </DataTemplate>           
-            
+            </DataTemplate>-->
+
             <DataTemplate x:Key="cellPopDistributionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -1140,17 +1140,17 @@
                                     BorderBrush="DarkGray" BorderThickness="1"
                                     Content="{Binding Path=cellPopDist}"   />
                 </Grid>
-            </DataTemplate>           
+            </DataTemplate>
 
             <!-- =========================== -->
             <!-- Mol Pops -->
 
             <DataTemplate x:Key="molListItemTemplate">
-                <StackPanel Orientation="Horizontal">                    
+                <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0"/>
                 </StackPanel>
             </DataTemplate>
-            
+
             <!-- skg daphne -->
             <!-- Reaction -->
             <DataTemplate x:Key="reacListItemTemplate">
@@ -1160,7 +1160,7 @@
             </DataTemplate>
 
             <!-- =========================== -->
-            <!-- Cell Population -->            
+            <!-- Cell Population -->
             <!-- Cell Pop Distributions -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
@@ -1179,7 +1179,7 @@
                     <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0"/>
 
                     <StackPanel Orientation="Horizontal">
-                        
+
                     </StackPanel>
 
                 </StackPanel>
@@ -1206,14 +1206,14 @@
                     <TextBlock Width="40" Text="{Binding}" Margin="5,0,0,0"/>
                 </StackPanel>
             </DataTemplate>
-            
-            <DataTemplate x:Key="cellPopDetailsTemplate">                
+
+            <DataTemplate x:Key="cellPopDetailsTemplate">
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto"/>                          
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -1229,12 +1229,12 @@
                                         Grid.Column="0" Grid.Row="1"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
-                                        Grid.Column="1" Grid.Row="1"  Margin="0,2"   />                        
-                        
+                                        Grid.Column="1" Grid.Row="1"  Margin="0,2"   />
+
                         <TextBlock Text="cell type" Margin="6,0"
                                         Grid.Column="0" Grid.Row="0"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"  />
-                        
+
                         <ComboBox x:Name="cell_type_combo_box"
                                         Grid.Column="1" Grid.Row="0" Margin="0,2"
                                         MinWidth="80"
@@ -1270,7 +1270,7 @@
                                     TickFrequency="1" 
                                     KeyboardNavigation.IsTabStop="False"
                                     />
-                            
+
                             <editors:Int32EditBox CheckBoxVisibility="Collapsed" 
                                     SpinnerVisibility="Collapsed"
                                     HorizontalAlignment="Right"
@@ -1292,19 +1292,19 @@
                                 x:Name="CPMExpander"
                                 Margin="0,10,0,0" 
                                 Canvas.ZIndex="1"         >
-                            
-                                <StackPanel Orientation="Vertical">                                
+
+                            <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Vertical">
-                                    <StackPanel>                                        
+                                    <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="8,0">
-                                            
+
                                             <ComboBox x:Name="cbCellLocationType" Margin="0,4" Width="200" HorizontalAlignment="Left"
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
                                                 SelectionChanged="cbCellLocationType_SelectionChanged">
                                             </ComboBox>
-                                            
+
                                             <Button x:Name="btnRegenerateCellPositions" Height="22" Margin="8,0" Click="btnRegenerateCellPositions_Click" Content="Reset">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
@@ -1319,7 +1319,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Button.Style>
-                                                
+
                                                 <Button.ToolTip>
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
@@ -1332,9 +1332,9 @@
                                                     </ToolTip>
                                                 </Button.ToolTip>
                                             </Button>
-                                            
+
                                         </StackPanel>
-                                            <StackPanel Orientation="Vertical" Margin="16,0">                                            
+                                        <StackPanel Orientation="Vertical" Margin="16,0">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -1344,7 +1344,7 @@
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
-                                                
+
                                                 <StackPanel Grid.Column="0" Grid.Row="0">
                                                     <ContentControl Name="cellPopDistrib"
                                                         Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
@@ -1390,7 +1390,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </Style>
-                                                        </DataGrid.ColumnHeaderStyle>                                                        
+                                                        </DataGrid.ColumnHeaderStyle>
                                                         <DataGrid.Columns>
                                                             <DataGridTextColumn Header="Cell"  Width="40" IsReadOnly="True"
                                                                 ScrollViewer.CanContentScroll ="False"
@@ -1403,7 +1403,7 @@
                                                 </StackPanel>
                                             </Grid>
 
-                                        </StackPanel>                                        
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -1412,7 +1412,7 @@
                 </StackPanel>
             </DataTemplate>
 
-           
+
 
             <Style TargetType="editors:DoubleEditBox">
                 <Setter Property="CheckBoxVisibility" Value="Collapsed" />
@@ -1423,13 +1423,13 @@
                 <Setter Property="Width" Value="60" />
                 <Setter Property="CenterSlotHorizontalAlignment" Value="Right" />
             </Style>
-            
+
             <DataTemplate x:Key="cellTypeListItemTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Path=cell_subset_type.cell_subset_name}"/>
                 </StackPanel>
             </DataTemplate>
-            
+
             <DataTemplate x:Key="cellTypeReceptorItemTemplate">
                 <TextBlock Text="{Binding Path=receptor_solfac_type_guid_ref, 
                         Converter={StaticResource SolfacGUIDtoReceptorNameConv}, 
@@ -1439,7 +1439,7 @@
             </DataTemplate>
 
             <!-- =========================== -->
-            <!-- Mol Pop Distributions -->            
+            <!-- Mol Pop Distributions -->
             <DataTemplate x:Key="molpopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
@@ -1478,7 +1478,7 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    
+
                     <TextBlock Text="rate constant" Margin="6,0"
                             Grid.Column="0" Grid.Row="0"  
                             HorizontalAlignment="Right" VerticalAlignment="Center"
@@ -1499,7 +1499,7 @@
                                 Text="{Binding Path=ReacTypeString, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                              IsReadOnly="True" />
 
-                    
+
                 </Grid>
             </DataTemplate>
 
@@ -1580,7 +1580,7 @@
         </TabControl.Resources>
 
         <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">        
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
 
@@ -1735,11 +1735,11 @@
                         </ComboBox>
                         <!--<Button Click="Button_Click"></Button>-->
                     </StackPanel>
-                    
+
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
-        
+
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -1759,15 +1759,15 @@
 
                         <StackPanel>
 
-                        <TextBlock Text="Extracellular Medium Extents" FontWeight="Bold" Margin="0,-10,0,0" />
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="X" Margin="6,0"
+                            <TextBlock Text="Extracellular Medium Extents" FontWeight="Bold" Margin="0,-10,0,0" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="X" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     TextAlignment="Right"
                                                     Width="60"
                                                     />
-                            <Slider Name="extent_x_slider"
+                                <Slider Name="extent_x_slider"
                                                 Orientation="Horizontal"
                                                 VerticalAlignment="Center"
                                                 Width="100"
@@ -1779,7 +1779,7 @@
                                                 TickFrequency="1" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
-                            <editors:DoubleEditBox x:Name="ExtentXReadout" 
+                                <editors:DoubleEditBox x:Name="ExtentXReadout" 
                                                               CenterSlotHorizontalAlignment="Right"
                                                                   CheckBoxVisibility="Collapsed" 
                                                                   SpinnerVisibility="Collapsed"
@@ -1787,16 +1787,16 @@
                                                                   Width="60"
                                                               Value="{Binding ElementName=extent_x_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                               />
-                            <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Y" Margin="6,0"
+                                <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Y" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     TextAlignment="Right"
                                                     Width="60"
                                                     />
-                            <Slider Name="extent_y_slider"
+                                <Slider Name="extent_y_slider"
                                                     Orientation="Horizontal"
                                                     VerticalAlignment="Center"
                                                     Width="100"
@@ -1808,7 +1808,7 @@
                                                     TickFrequency="1" 
                                                     KeyboardNavigation.IsTabStop="False"
                                                     />
-                            <editors:DoubleEditBox x:Name="ExtentYReadout"                                                    
+                                <editors:DoubleEditBox x:Name="ExtentYReadout"                                                    
                                                                   CenterSlotHorizontalAlignment="Right"
                                                                   CheckBoxVisibility="Collapsed" 
                                                                   SpinnerVisibility="Collapsed"
@@ -1816,16 +1816,16 @@
                                                                   Width="60" 
                                                                   Value="{Binding ElementName=extent_y_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                                   />
-                            <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Z" Margin="6,0"
+                                <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Z" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     TextAlignment="Right"
                                                     Width="60"
                                                     />
-                        <Slider Name="extent_z_slider"
+                                <Slider Name="extent_z_slider"
                                                 Orientation="Horizontal"
                                                 VerticalAlignment="Center"
                                                 Width="100"
@@ -1837,7 +1837,7 @@
                                                 TickFrequency="1" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
-                        <editors:DoubleEditBox x:Name="ExtentZReadout" 
+                                <editors:DoubleEditBox x:Name="ExtentZReadout" 
                                                               CenterSlotHorizontalAlignment="Right"
                                                                   CheckBoxVisibility="Collapsed" 
                                                                   SpinnerVisibility="Collapsed"
@@ -1845,8 +1845,8 @@
                                                                   Width="60" 
                                                               Value="{Binding ElementName=extent_z_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                               />
-                        <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
+                                <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="grid size" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
@@ -1878,7 +1878,7 @@
                             </StackPanel>
 
                         </StackPanel>
-                        
+
                     </Expander>
                     <!-- Library Molecular Populations -->
                     <Expander
@@ -1910,7 +1910,7 @@
                                     </StackPanel>
                                 </DataTemplate>
                             </StackPanel.Resources>
-                            <!-- Molecular Populations -->                            
+                            <!-- Molecular Populations -->
                             <StackPanel>
                                 <StackPanel.ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
@@ -2055,7 +2055,7 @@
                                 </StackPanel>
 
                             </Expander>
-                           
+
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Molecule Properties"
@@ -2071,12 +2071,12 @@
                                             Margin="6"/>
 
                                     <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushEcmMoleculeButton_Click">
-                                        
+
                                     </Button>
                                 </StackPanel>
-                                
+
                             </Expander>
-                            
+
                         </StackPanel>
                     </Expander>
                     <!-- Reactions -->
@@ -2091,7 +2091,7 @@
                         BorderThickness="1"
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-                        
+
                         <StackPanel>
                             <!-- Reactions -->
                             <StackPanel>
@@ -2106,12 +2106,12 @@
                                 </TextBlock>
 
                             </StackPanel>
-                            
+
                             <ListView x:Name="lvEcsReactions" 
                                       ItemsSource="{Binding Path=scenario.environment.comp.Reactions}"
                                       SelectedIndex="-1"
                                 >
-                                
+
                                 <ListView.View>
                                     <GridView>
                                         <GridView.ColumnHeaderContainerStyle>
@@ -2164,14 +2164,14 @@
                                         </GridViewColumn>
                                     </GridView>
                                 </ListView.View>
-                                
+
                             </ListView>
-                            
+
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="PushEcmReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushEcmReacButton_Click" />
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
-                            
+
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Add a reaction"
@@ -2206,7 +2206,7 @@
                                                     <GridViewColumn.CellTemplate>
                                                         <DataTemplate>
                                                             <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
-                                                                Number="{Binding rate_const}">                                                                
+                                                                Number="{Binding rate_const}">
                                                             </uc:DoublesBox>
                                                         </DataTemplate>
                                                     </GridViewColumn.CellTemplate>
@@ -2244,7 +2244,7 @@
                                     Canvas.ZIndex="1"
                                     
                                     >
-                                   
+
                                 <Grid>
                                     <local:AddReactionControl Margin="0,6"/>
                                 </Grid>
@@ -2252,7 +2252,7 @@
 
                         </StackPanel>
                     </Expander>
-                    
+
                     <!-- Remove reaction complexes for now 10/15/13 -->
                     <!-- Reaction Complexes -->
                     <Expander
@@ -2269,7 +2269,7 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <StackPanel>
-                            
+
                             <StackPanel>
                                 <StackPanel.Resources>
                                     <DataTemplate x:Key="reacComplexListItemTemplate">
@@ -2277,7 +2277,7 @@
                                             <TextBlock Text="{Binding Path=Name}" />
                                         </StackPanel>
                                     </DataTemplate>
-                                    <DataTemplate x:Key="ecsReacComplexListItemTemplate">                                        
+                                    <DataTemplate x:Key="ecsReacComplexListItemTemplate">
                                         <TextBlock Text="{Binding   Converter={StaticResource ReacComplexGUIDtoStringConv},
                                                             ConverterParameter={StaticResource ecmReactionComplexesListView}}">
                                         </TextBlock>
@@ -2293,7 +2293,7 @@
                                 </StackPanel.ToolTip>
                                 <TextBlock Text="Reaction Complexes" Margin="0,-10,0,0" >
                                 </TextBlock>
-                        
+
                                 <ListBox x:Name="ReactionComplexListBox" MinHeight="50" 
                                     ItemsSource="{Binding Path=scenario.environment.comp.reaction_complexes}" 
                                     DisplayMemberPath="Name"
@@ -2301,7 +2301,7 @@
                                  />
 
                             </StackPanel>
-                    
+
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" />
                             </StackPanel>
@@ -2327,7 +2327,7 @@
                                                                 />
                                     </StackPanel >
                                     <StackPanel x:Name="spReacComp"  >
-                                        <StackPanel.Resources>                                            
+                                        <StackPanel.Resources>
                                             <DataTemplate x:Key="cellReacListItemTemplate">
                                                 <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
@@ -2343,7 +2343,7 @@
                                         </ContentControl>
 
                                     </StackPanel>
-                                    
+
                                 </StackPanel>
                             </Expander>
 
@@ -2356,7 +2356,7 @@
                                 BorderThickness="1"
                                 BorderBrush="Black"
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-                                              
+
                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                     <StackPanel.Resources>
                                         <DataTemplate x:Key="reacCxListItemTemplate">
@@ -2366,7 +2366,7 @@
                                         </DataTemplate>
 
                                     </StackPanel.Resources>
-                                    
+
                                     <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                                     <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
                                         ItemsSource="{Binding Path=entity_repository.reaction_complexes}"                                                      
@@ -2378,11 +2378,11 @@
                                         <Button Name="AddReacCxButton"  Width="50" Content="Add" Click="AddEcmReacCompButton_Click"/>
                                     </StackPanel>
 
-                                    <ContentControl Name="AddReactionComplexDetails"
+                                    <ContentControl Name="AddReactionComplexDetails3"
                                         Content="{Binding ElementName=lbAvailableReacCx, Path=SelectedItem}" 
                                         ContentTemplate="{StaticResource reacListViewTemplate}" 
                                         Margin="6"/>
-                                
+
                                 </StackPanel>
                             </Expander>
                         </StackPanel>
@@ -2394,7 +2394,7 @@
         <!-- LIBRARY CELL POPULATIONS -->
         <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
+                <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8" >
 
                     <!-- CELL POPULATIONS -->
                     <Expander ExpandDirection="Down" Padding="5"
@@ -2430,7 +2430,7 @@
 
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel HorizontalAlignment="Left">
-                                            <ContentControl Name="CellPopDetails"
+                                        <ContentControl Name="CellPopDetails"
                                                     Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
                                                     ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
                                                     Margin="6,0"/>
@@ -2438,7 +2438,7 @@
 
                                 </StackPanel>
                             </Expander>
-                            
+
                             <Expander  Padding="0"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
@@ -2446,7 +2446,7 @@
                                 x:Name="CellDetExpander"
                                 Margin="6, 0,0,0" 
                                 >
-                               
+
                                 <local:DaphneStackPanel x:Name="EcmMolpopPanelCellMolPops" >
                                     <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
                                         <local:CellPropertiesControl Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
@@ -2459,11 +2459,11 @@
 
                                     <StackPanel Margin="10,0">
                                         <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
-                                    </StackPanel>                                    
+                                    </StackPanel>
                                 </local:DaphneStackPanel>
- 
+
                             </Expander>
-                            
+
                         </StackPanel>
                     </Expander>
 
@@ -2628,7 +2628,7 @@
                             </StackPanel>
                         </DataTemplate>
                         <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
-                        
+
                     </StackPanel.Resources>
 
                     <!-- Report Settings -->
@@ -2871,7 +2871,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.Resources>
-                            
+
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="cell population" >
                                     <DataGridTemplateColumn.CellTemplate>
@@ -2910,7 +2910,7 @@
                                         </Style>
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
-                                
+
                             </DataGrid.Columns>
                         </DataGrid>
                     </Expander>
@@ -2999,8 +2999,8 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
-                            </Expander>    
-                            
+                            </Expander>
+
                             <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
                             Header="Molecules in membrane"
@@ -3144,7 +3144,7 @@
                         </StackPanel>
                     </Expander>
                 </StackPanel>
-                    
+
             </ScrollViewer>
         </TabItem>
 
@@ -3378,6 +3378,6 @@
 
         
         <!-- LIBRARIES: CELLS -->
-        
+
     </TabControl>
 </docking:ToolWindow>

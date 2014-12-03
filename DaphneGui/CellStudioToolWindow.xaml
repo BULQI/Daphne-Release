@@ -96,7 +96,7 @@
                                         >
                                     <ComboBox.ItemsSource>
                                         <CompositeCollection>
-                                            <daph:ConfigDiffScheme Name=""/>
+                                        <daph:ConfigTransitionScheme Name=""/>
                                             <CollectionContainer Collection="{Binding Source={StaticResource diffSchemesListView}}" />
                                         </CompositeCollection>
                                     </ComboBox.ItemsSource>
@@ -300,7 +300,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
                                                 <Button Name="CellAddReacCxButton"  Width="50" Content="Add" Click="CellAddReacCxButton_Click" />
                                             </StackPanel>
-                                            <ContentControl Name="CellAddReactionComplexDetails"
+                                            <ContentControl Name="CellAddReactionComplexDetails2"
                                                         Content="{Binding ElementName=lbCellAvailableReacCx, Path=SelectedItem}" 
                                                         ContentTemplate="{StaticResource addReacComplexDetailsTemplate}" 
                                                         Margin="6"/>

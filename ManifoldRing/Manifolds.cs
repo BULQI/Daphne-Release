@@ -1366,7 +1366,8 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            return sf;
+            // return zeros - no diffusion
+            return new ScalarField(this);
         }
 
         /// <summary>

@@ -3,13 +3,70 @@
                     xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
                     xmlns:local="clr-namespace:DaphneGui"
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+                    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+                    xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     >
+    
+    <!-- gmk - Can we put all the converters here for convenience?  -->
+    <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
+    <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
+    <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
+    <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
+    <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
+    <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
+    <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
+    <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
+    <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
+    <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
+    <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
+    <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+    <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
+    <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
+    <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+    <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
+    <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
+    <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
+    <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
+    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
+    <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
+    <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
 
-    <CollectionViewSource x:Key="testMoleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"
-                                  />
+    
 
-    <!--These templates are used for pushing entities to protocol (i.e. push from entity to protocol) and not for pushing entities between levels-->
+    <!-- DATA TEMPLATES: must come after definition of converters -->
+
+    <!-- molpopDistributionTypeTemplate -->
+    <DataTemplate x:Key="molpopDistributionTypeTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
+        </StackPanel>
+    </DataTemplate>
+    
+    <!-- molpopDistributionDetailsTemplate -->
+    <DataTemplate x:Key="molpopDistributionDetailsTemplate">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <ContentControl Name="molpop_dist_cc" 
+                            Grid.ColumnSpan="2" Grid.Row="0" Margin="0,6" 
+                            BorderBrush="DarkGray" BorderThickness="1" 
+                    Content="{Binding Path=mp_distribution}"  />
+        </Grid>
+    </DataTemplate>   
+    
+    <!-- Generic template for presenting a list of molecular populations: DataContext must be Compartment -->
+    <DataTemplate x:Key="compMolListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0"/>
+        </StackPanel>
+    </DataTemplate>
     
     <!-- ConfigMolecule properties template : DataContext must be ConfigMolecule -->
     <DataTemplate x:Key="moleculeTemplate">
@@ -28,7 +85,7 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
-
+    
     <!-- ConfigMolecule properties template with non-editable Name field : DataContext must be ConfigMolecule -->
     <DataTemplate x:Key="editMoleculeTemplate">
         <StackPanel Orientation="Vertical">
@@ -125,7 +182,7 @@
         </StackPanel>
     </DataTemplate>
 
-    <!-- ConfigDiffScheme properties template : DataContext must be ConfigDiffScheme -->
+    <!-- ConfigTransitionScheme properties template : DataContext must be ConfigTransitionScheme -->
     <DataTemplate x:Key="diffSchemeTemplate">
         <StackPanel Orientation="Vertical">
             <Label Height="24" Width="200" HorizontalAlignment="Left">Differentiation Scheme:</Label>
@@ -140,18 +197,17 @@
         <StackPanel Orientation="Vertical">
             <Label Height="24" Width="150" HorizontalAlignment="Left">Transition Driver:</Label>
             <StackPanel Orientation="Horizontal">
-                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
+                <TextBox Width="150" Text="{Binding Path=Name}" Height="24" IsEnabled="False"></TextBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
 
-
-
     <!-- Reaction list view template -->
     <DataTemplate x:Key="reacListViewTemplate">
-        <ListView x:Name="lvReacComplexReactions" 
-                                            ItemsSource="{Binding Path=reactions, Mode=TwoWay}"
-                                            SelectedIndex="0"  >
+        <ListView x:Name="lvReacComplexReactions" ItemsSource="{Binding Path=reactions, Mode=TwoWay}" SelectedIndex="0"  >
             <ListView.View>
                 <GridView>
                     <GridView.ColumnHeaderContainerStyle>
@@ -197,8 +253,275 @@
         </ListView>
     </DataTemplate>
 
+    <!-- Report settings template : DataContext must be Protocol -->
+    <DataTemplate x:Key="reportSettingsTemplate">
+            <StackPanel>
+                <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
+                <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>           
+            </StackPanel>
+    </DataTemplate>
 
+    <!-- Display a list of ReactionComplexes  - not sure if this is a keeper -->
+    <DataTemplate x:Key="RCListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" />
+        </StackPanel>
+    </DataTemplate>
+    
+    <!-- Box Specification -->
+    <DataTemplate x:Key="boxSpecDetailsTemplate">
+        <Grid Margin="0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="15" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="50" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid Grid.Column="0" Grid.Row="0"
+                          VerticalAlignment="Center">
+                <Rectangle Fill="White"
+                                   Stroke="Black"
+                                   StrokeThickness="0.5"
+                                   Width="15"
+                                   Height="15"
+                                   />
+                <CheckBox x:Name="box_widget_on_checkbox"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                    Style="{StaticResource EyeballCheckboxStyle}"
+                                    IsChecked="{Binding Path=box_visibility}"
+                                    />
+            </Grid>
+            <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
+            <TextBlock Text="size (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
 
+            <TextBlock Text="X" Grid.Column="0" Grid.Row="2" Margin="2,0" TextAlignment="Right"/>
+            <Slider x:Name="x_trans_slider"
+                            Grid.Column="1" Grid.Row="2"
+                            Orientation="Horizontal"
+                            Width="60"
+                            RenderTransform="1.0,0,0,0.5,0,4"
+                            Minimum="{Binding Path=x_trans_min}" 
+                            Maximum="{Binding Path=x_trans_max}"
+                            Value="{Binding Path=x_trans}" 
+                            KeyboardNavigation.IsTabStop="False"
+                            />
+            <editors:DoubleEditBox Grid.Column="2" Grid.Row="2"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Left"
+                                        Format="G"
+                                        StepValue="10"
+                                        Width="50" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=x_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+            <Slider x:Name="x_scale_slider"
+                            Grid.Column="3" Grid.Row="2"
+                            Orientation="Horizontal"
+                            Width="60"
+                            RenderTransform="1.0,0,0,0.5,0,4"
+                            Minimum="{Binding Path=x_scale_min}" 
+                            Maximum="{Binding Path=x_scale_max}"
+                            Value="{Binding Path=x_scale}" 
+                            KeyboardNavigation.IsTabStop="False"
+                            />
+            <editors:DoubleEditBox Grid.Column="4" Grid.Row="2"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Left"
+                                        Format="G"
+                                        StepValue="10"
+                                        Minimum="1"
+                                        Width="50" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=x_scale_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+            <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
+            <Slider x:Name="y_trans_slider"
+                            Grid.Column="1" Grid.Row="3"
+                            Orientation="Horizontal"
+                            Width="60"
+                            RenderTransform="1.0,0,0,0.5,0,4"
+                            Minimum="{Binding Path=y_trans_min}" 
+                            Maximum="{Binding Path=y_trans_max}"
+                            Value="{Binding Path=y_trans}" 
+                            KeyboardNavigation.IsTabStop="False"
+                            />
+            <editors:DoubleEditBox Grid.Column="2" Grid.Row="3"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Left"
+                                        Format="G"
+                                        StepValue="10"
+                                        Width="50" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=y_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+            <Slider x:Name="y_scale_slider"
+                            Grid.Column="3" Grid.Row="3"
+                            Orientation="Horizontal"
+                            Width="60"
+                            RenderTransform="1.0,0,0,0.5,0,4"
+                            Minimum="{Binding Path=y_scale_min}" 
+                            Maximum="{Binding Path=y_scale_max}"
+                            Value="{Binding Path=y_scale}" 
+                            KeyboardNavigation.IsTabStop="False"
+                            />
+            <editors:DoubleEditBox Grid.Column="4" Grid.Row="3"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Left"
+                                        Format="G"
+                                        StepValue="10"
+                                        Minimum="1"
+                                        Width="50" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=y_scale_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+            <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
+            <Slider x:Name="z_trans_slider"
+                            Grid.Column="1" Grid.Row="4"
+                            Orientation="Horizontal"
+                            Width="60"
+                            RenderTransform="1.0,0,0,0.5,0,4"
+                            Minimum="{Binding Path=z_trans_min}" 
+                            Maximum="{Binding Path=z_trans_max}"
+                            Value="{Binding Path=z_trans}" 
+                            KeyboardNavigation.IsTabStop="False"
+                            />
+            <editors:DoubleEditBox Grid.Column="2" Grid.Row="4"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Left"
+                                        Format="G"
+                                        StepValue="10"
+                                        Width="50" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=z_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+            <Slider x:Name="z_scale_slider"
+                            Grid.Column="3" Grid.Row="4"
+                            Orientation="Horizontal"
+                            Width="60"
+                            RenderTransform="1.0,0,0,0.5,0,4"
+                            Minimum="{Binding Path=z_scale_min}" 
+                            Maximum="{Binding Path=z_scale_max}"
+                            Value="{Binding Path=z_scale}" 
+                            KeyboardNavigation.IsTabStop="False"
+                            />
+            <editors:DoubleEditBox Grid.Column="4" Grid.Row="4"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Left"
+                                        Format="G"
+                                        StepValue="10"
+                                        Minimum="1"
+                                        Width="50" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=z_scale_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+        </Grid>
+    </DataTemplate>
+    
+    <!-- molpop homogeneous distribution details -->
+    <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
 
+            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
 
+                <StackPanel Orientation="Horizontal" Margin="20,0">
+
+                    <uc:DoublesBox     HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                >
+                    </uc:DoublesBox>
+
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+    <ObjectDataProvider x:Key="boundaryFaces"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="daph:BoundaryFace" />
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
+
+    <!-- Reaction complex reactions : DataContext must be ConfigReactionComplex -->
+    <DataTemplate x:Key="reactionComplexReactionsTemplate">
+        <StackPanel Margin="0,10" >
+            <TextBlock Text="Reactions" />
+            <ListView x:Name="lvReacComplexReactions"
+                  ItemsSource="{Binding Path=reactions, Mode=TwoWay}"
+                  SelectedIndex="0" >
+                <ListView.View>
+                    <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="GridViewColumnHeader">
+                                <Setter Property="Height" Value="Auto"></Setter>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+                        
+                        <GridViewColumn Width="80" Header="Rate constant">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <GridViewColumn Width="300" Header="Reaction" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TotalReactionString}">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                  <Setter Property="TextBlock.Foreground" Value="Black">
+                                                  </Setter>
+                                                </Style>
+                                            </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
+    </DataTemplate>
+    
 </ResourceDictionary>
