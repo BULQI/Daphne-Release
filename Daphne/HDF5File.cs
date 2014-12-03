@@ -23,6 +23,9 @@ namespace Daphne
 
         public HDF5File()
         {
+            filename = "";
+            groupStack = new List<H5GroupId>();
+            subGroups = new List<string>();
         }
 
         /// <summary>
@@ -35,8 +38,6 @@ namespace Daphne
             if (fileId == null)
             {
                 filename = fn;
-                groupStack = new List<H5GroupId>();
-                subGroups = new List<string>();
                 return true;
             }
             return false;
