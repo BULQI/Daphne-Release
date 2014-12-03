@@ -384,7 +384,6 @@ namespace DaphneGui
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                        current_mol.mp_dist_name = "Linear";
                         current_mol.mp_distribution = molpoplin;
                         break;
 
@@ -405,7 +404,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         /// <summary>
         /// switch to the sim setup panel
         /// </summary>
@@ -454,7 +453,7 @@ namespace DaphneGui
                 break;
             }
             if (gmp.molecule == null) return;
-            gmp.mp_dist_name = "New distribution";
+
             MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
 
@@ -614,7 +613,7 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid))
             {
                 MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(reac);
-                
+
             }
         }
 
@@ -862,6 +861,7 @@ namespace DaphneGui
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
+                cellPop.cellPopDist.Initialize();
             }
             else if (cpdt == CellPopDistributionType.Gaussian)
             {
@@ -886,8 +886,8 @@ namespace DaphneGui
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
-                ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
+                ((CellPopGaussian)cellPop.cellPopDist).InitializeGaussSpec(gg);
+                cellPop.cellPopDist.Initialize();
 
                 // Connect the VTK callback
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
@@ -899,13 +899,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                 {
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+                    cellPop.cellPopDist.Initialize();
                 }
                 else
                 {
-                    CellPopulation tempCellPop = new CellPopulation();
-                    tempCellPop.cellPopDist = cellPop.cellPopDist;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-                    cellPop.CellStates = tempCellPop.CellStates;
                 }
                 // Remove box and Gaussian if applicable.
                 if (current_dist.DistType == CellPopDistributionType.Gaussian)
@@ -1014,7 +1012,7 @@ namespace DaphneGui
                         int count = 0;
 
                         scenario.resetGaussRetrieve();
-                        while((next = scenario.nextGaussSpec()) != null)
+                        while ((next = scenario.nextGaussSpec()) != null)
                         {
                             if (next.box_spec.box_guid == key)
                             {
@@ -1100,7 +1098,7 @@ namespace DaphneGui
                 //of configCell, it will has its own entity_guid - only the name stays the same ---
                 if (cell_to_clone.entity_guid != curr_cell_type_guid)
                 {
-                cp.Cell = cell_to_clone.Clone(true);
+                    cp.Cell = cell_to_clone.Clone(true);
 
                     string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                     if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
@@ -1893,7 +1891,7 @@ namespace DaphneGui
             if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform)
             {
                 current_dist.Reset();
-                MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                MW.applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
 
@@ -2251,13 +2249,6 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            var val = value as Protocol;
-            if (val != null && val.scenario is TissueScenario)
-            {
-                var ts = val.scenario as TissueScenario;
-                return ts.cellpopulations;
-            }
-
             return value;
         }
 
@@ -2304,7 +2295,7 @@ namespace DaphneGui
         public object ConvertBack(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            ConfigDiffScheme val = value as ConfigDiffScheme;
+            ConfigTransitionScheme val = value as ConfigTransitionScheme;
             if (val != null && val.Name == "") return null;
             return value;
         }
@@ -2594,40 +2585,40 @@ namespace DaphneGui
 }
 
 
-    ///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER - KEEP THIS FOR REFERENCE
-    //public class CommonEventHandler
-    //{
-    //    private CommonEventHandler() { }
+///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER - KEEP THIS FOR REFERENCE
+//public class CommonEventHandler
+//{
+//    private CommonEventHandler() { }
 
-    //    private object Context { get; set; }
+//    private object Context { get; set; }
 
-    //    public static EventHandler CreateShowHandlerFor(object context)
-    //    {
-    //        CommonEventHandler handler = new CommonEventHandler();
+//    public static EventHandler CreateShowHandlerFor(object context)
+//    {
+//        CommonEventHandler handler = new CommonEventHandler();
 
-    //        handler.Context = context;
+//        handler.Context = context;
 
-    //        return new EventHandler(handler.HandleGenericShow);
-    //    }
+//        return new EventHandler(handler.HandleGenericShow);
+//    }
 
-    //    private void HandleGenericShow(object sender, EventArgs e)
-    //    {
-    //        Console.WriteLine(this.Context);
-    //    }
-    //}
+//    private void HandleGenericShow(object sender, EventArgs e)
+//    {
+//        Console.WriteLine(this.Context);
+//    }
+//}
 
-    //class Program
-    //{
-    //    static void Main(string[] args)
-    //    {
-    //        EventHandler show5 = CommonEventHandler.CreateShowHandlerFor(5);
-    //        EventHandler show7 = CommonEventHandler.CreateShowHandlerFor(7);
+//class Program
+//{
+//    static void Main(string[] args)
+//    {
+//        EventHandler show5 = CommonEventHandler.CreateShowHandlerFor(5);
+//        EventHandler show7 = CommonEventHandler.CreateShowHandlerFor(7);
 
-    //        show5(null, EventArgs.Empty);
-    //        Console.WriteLine("===");
-    //        show7(null, EventArgs.Empty);
-    //    }
-    //}
+//        show5(null, EventArgs.Empty);
+//        Console.WriteLine("===");
+//        show7(null, EventArgs.Empty);
+//    }
+//}
 
 
 

@@ -1,0 +1,240 @@
+﻿<UserControl x:Class="DaphneGui.SimSetupControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:local="clr-namespace:DaphneGui"
+             Loaded="UserControl_Loaded"
+             xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+             xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+             mc:Ignorable="d"
+             x:Name="SimSetup"
+             >
+    
+    <UserControl.Resources>
+        <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />      
+         <ObjectDataProvider x:Key="boundaryTypes"  MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="daph:BoundaryType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        <local:ToolWinBase x:Key="toolWinBase"/>
+    </UserControl.Resources>
+    
+    <Grid>
+
+        <Grid.Resources>
+            <daph:TextToColorConverter x:Key="textToColorConv" />
+        </Grid.Resources>
+        
+        <!-- SIM SETUP -->
+        <StackPanel Orientation="Vertical" Margin="8">
+
+            <!-- Experiment -->
+            <TextBlock Text="Experiment name" FontWeight="Bold" Margin="0,5,0,0" />
+            <TextBox Text="{Binding Path=Protocol.experiment_name, UpdateSourceTrigger=PropertyChanged}" x:Name="experiment_name_box"/>
+
+            <TextBlock Text="Description" FontWeight="Bold" Margin="0,10,0,0" />
+            <TextBox Text="{Binding Path=Protocol.experiment_description, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
+                                Height="40" MaxWidth="{Binding ElementName=experiment_name_box, Path=ActualWidth}"
+                                VerticalScrollBarVisibility="Auto"/>
+
+            <!-- TimeConfig -->
+            <TextBlock Text="Time configuration" FontWeight="Bold" Margin="0,10,0,0" />
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="total time" Margin="6,0"
+                                            Grid.Column="0" Grid.Row="2"  
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            TextAlignment="Right"
+                                            Width="120"
+                                            />
+                <Slider Name="time_duration_slider"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Width="100"
+                                        RenderTransform="1.0,0,0,0.5,0,7"
+                                        Minimum="0.001" 
+                                        Maximum="28800" 
+                                        Value="{Binding Path=Protocol.scenario.time_config.duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                        IsSnapToTickEnabled="True" 
+                                        TickFrequency="10" 
+                                        KeyboardNavigation.IsTabStop="False"
+                                        ValueChanged="time_duration_slider_ValueChanged"
+                                        />
+                <editors:DoubleEditBox x:Name="TimeDurationReadout" 
+                                                        CheckBoxVisibility="Collapsed" 
+                                                        SpinnerVisibility="Collapsed"
+                                                        HorizontalAlignment="Right"
+                                                        Format="F3"
+                                                        StepValue="100"
+                                                        Width="60" 
+                                                        CenterSlotHorizontalAlignment="Right"
+                                                        Value="{Binding ElementName=time_duration_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                                        />
+                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="rendering interval" Margin="6,0"
+                                            Grid.Column="0" Grid.Row="3"  
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            TextAlignment="Right"
+                                            Width="120"
+                                            />
+                <Slider Name="render_interval_slider"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Width="100"
+                                        RenderTransform="1.0,0,0,0.5,0,7"
+                                        Maximum="{Binding ElementName=time_duration_slider, Path=Value}" 
+                                        Minimum="0.001" 
+                                        Value="{Binding Path=Protocol.scenario.time_config.rendering_interval}" 
+                                        IsSnapToTickEnabled="True" 
+                                        TickFrequency="0.01" 
+                                        KeyboardNavigation.IsTabStop="False"
+                                        ValueChanged="rendering_interval_slider_ValueChanged"
+                                        />
+                <editors:DoubleEditBox x:Name="TimeStepReadout" 
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="N3"
+                                        StepValue="0.01"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=render_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                 />
+                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="sampling interval" Margin="6,0"
+                            Grid.Column="0" Grid.Row="4"  
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            TextAlignment="Right"
+                            Width="120"
+                />
+                <Slider Name="sampling_interval_slider"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Width="100"
+                        RenderTransform="1.0,0,0,0.5,0,7"
+                        Maximum="{Binding ElementName=time_duration_slider, Mode=OneWay, Path=Value}"
+                        Minimum="0.001"
+                        Value="{Binding Path=Protocol.scenario.time_config.sampling_interval}" 
+                        IsSnapToTickEnabled="True" 
+                        TickFrequency="0.01" 
+                        KeyboardNavigation.IsTabStop="False"
+                        ValueChanged="sampling_interval_slider_ValueChanged"
+                />
+                <editors:DoubleEditBox x:Name="SamplingInterval" 
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="N3"
+                                        StepValue="0.01"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                />
+                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="integrator step" Margin="6,0"
+                            Grid.Column="0" Grid.Row="4"  
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            TextAlignment="Right"
+                            Width="120"
+                />
+                <Slider Name="integrator_step_slider"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Width="100"
+                        RenderTransform="1.0,0,0,0.5,0,7"
+                        Maximum="{Binding ElementName=time_duration_slider, Mode=OneWay, Path=Value}"
+                        Minimum="0.001"
+                        Value="{Binding Path=Protocol.scenario.time_config.integrator_step}" 
+                        IsSnapToTickEnabled="True" 
+                        TickFrequency="0.01" 
+                        KeyboardNavigation.IsTabStop="False"
+                        ValueChanged="integrator_step_slider_ValueChanged"
+                />
+                <editors:DoubleEditBox x:Name="IntegratorStep" 
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="N3"
+                                        StepValue="0.01"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=integrator_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                />
+                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Visibility="{Binding Path=SimRepetitionVisibility}">
+                <TextBlock Text="repetitions" Margin="6,0"
+                                            Grid.Column="0" Grid.Row="5"  
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            TextAlignment="Right"
+                                            Width="120"
+                                            />
+                <Slider Name="exp_rep_slider"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Width="100"
+                                        RenderTransform="1.0,0,0,0.5,0,7"
+                                        Minimum="1" 
+                                        Maximum="50" 
+                                        Value="{Binding Path=Protocol.experiment_reps}" 
+                                        IsSnapToTickEnabled="True" 
+                                        TickFrequency="3" 
+                                        KeyboardNavigation.IsTabStop="False"
+                                        />
+                <editors:Int32EditBox x:Name="ExpRepReadout" 
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=exp_rep_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        />
+                <TextBlock Text="times" VerticalAlignment="Center" Margin="2,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Visibility="{Binding Path=ToroidalVisibility}">
+                <StackPanel.Resources>
+                    <ControlTemplate x:Key="ToroidalComboBoxTemplate">
+                        <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="12,10" Height="22"
+                            ItemsSource="{Binding Source={StaticResource boundaryTypes}}"
+                            SelectedIndex="{Binding Protocol.scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}, Mode=TwoWay}"
+                            >
+                        </ComboBox>
+                    </ControlTemplate>
+                    
+                </StackPanel.Resources>
+        
+                <TextBlock Text="Boundary Condition" FontWeight="Bold" Margin="0,20,0,0"/>
+                
+                <ContentControl>
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Template" Value="{x:Null}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ToroidalVisibility}" Value="Visible">
+                                    <Setter Property="Template" Value="{StaticResource ToroidalComboBoxTemplate}">
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+            </StackPanel>
+     </StackPanel>
+   </Grid>
+</UserControl>

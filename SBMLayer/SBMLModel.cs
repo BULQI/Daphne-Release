@@ -977,12 +977,7 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
-#if OLD_RC
-            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
-            double volume = envHandle.extent_x * envHandle.extent_y * envHandle.extent_z;
 
-            AddCompartment(compName, compName, true, volume, envHandle.NumGridPts.Length, "");
-#endif
             //Adds molecular populations
             Species specAnnot;
             foreach (ConfigMolecularPopulation confMolPop in crc.molpops)
@@ -990,13 +985,6 @@ namespace SBMLayer
                 AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
             }
 
-#if OLD_RC
-           foreach (ConfigGene confGenPop in crc.genes)
-            {
-                specAnnot= AddSpecies(confGenPop.Name + "_" + compName, confGenPop.Name, compName, false, false, false,confGenPop.ActivationLevel , "");
-                SetGeneAnnotation(confGenPop, specAnnot);
-            }
-#endif
             // Adds reactions
             foreach (ConfigReaction cr in crc.reactions)
             {
@@ -1891,24 +1879,7 @@ namespace SBMLayer
             //If # of compartments==1, then build as a reaction complex. If not, build as a spatial simulation scenario.
             if (IsReactionComplex())
             {
-#if OLD_RC
-                if (protocol.rc_scenario.environment is ConfigECSEnvironment == false)
-                {
-                    throw new InvalidCastException();
-                }
-
-                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
-#endif
                 ConfigReactionComplex crc = new ConfigReactionComplex(model.getId());
-#if OLD_RC
-                libsbmlcs.Compartment reactionComplexCompartment = compartments.get(0);
-                if (reactionComplexCompartment.isSetSize())
-                {
-                    envHandle.extent_x = (int)reactionComplexCompartment.getSize() / 3;
-                    envHandle.extent_y = (int)reactionComplexCompartment.getSize() / 3;
-                    envHandle.extent_z = (int)reactionComplexCompartment.getSize() / 3;
-                }
-#endif
                 //Add all molecular populations
                 Species crcSpec;
 
@@ -1921,12 +1892,6 @@ namespace SBMLayer
                         // protocol.rc_scenario.environment.ecs.molpops.Add(PreparePopulation(speciesList.get(i), MoleculeLocation.Bulk, true));
                         crc.molpops.Add(PreparePopulation(crcSpec, MoleculeLocation.Bulk, true));
                     }
-#if OLD_RC
-                   else
-	                {
-                        crc.genes.Add(PrepareGenes(crcSpec));    
-	                }
-#endif
                 }
 
                 libsbmlcs.Reaction sbmlReaction;
@@ -1947,16 +1912,7 @@ namespace SBMLayer
 
                         if (complexConfigReaction != null)
                         {
-#if OLD_RC
-                            ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                            grp.entity_guid = complexConfigReaction.entity_guid;
-                            grp.OriginalRate = complexConfigReaction.rate_const;
-                            grp.ReactionComplexRate = complexConfigReaction.rate_const;
-#endif
                             crc.reactions.Add(complexConfigReaction);
-#if OLD_RC
-                            crc.ReactionRates.Add(grp);
-#endif
                         }
                     }
                 }
@@ -2493,10 +2449,6 @@ namespace SBMLayer
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
 
-                    configMolPop.mp_dist_name = "Gaussian";
-                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    //configMolPop.mp_render_blending_weight = 2.0;
-
                     MolPopGaussian molPopGaussian = new MolPopGaussian();
                     molPopGaussian.peak_concentration = peakConc;
 
@@ -2516,7 +2468,7 @@ namespace SBMLayer
                     double boundaryEndConc = Convert.ToDouble(attributes.getValue(attributes.getIndex("boundary_end_conc")));
 
                     MolPopLinear molpoplin = new MolPopLinear();
-                    configMolPop.mp_dist_name = "Linear";
+                    //configMolPop.mp_dist_name = "Linear";
 
                     if (boundaryStart == Daphne.Boundary.left)
                     {
@@ -2547,7 +2499,6 @@ namespace SBMLayer
             if (!isDistributionSet)
             {
                 MolPopHomogeneousLevel uniformDistribution;
-                configMolPop.mp_dist_name = "Uniform";
                 uniformDistribution = new MolPopHomogeneousLevel();
                 uniformDistribution.concentration = species.getInitialConcentration();
                 configMolPop.mp_distribution = uniformDistribution;

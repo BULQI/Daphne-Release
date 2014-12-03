@@ -38,6 +38,7 @@ namespace DaphneGui
         {
             ConfigCell cc = new ConfigCell();
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cc.renderLabel, cc.CellName);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
         }
 
@@ -89,6 +90,8 @@ namespace DaphneGui
             cellNew.CellName = GenerateNewCellName(cell, "_Copy");
 
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cellNew);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cellNew.renderLabel, cellNew.CellName);
+
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
             CellsListBox.ScrollIntoView(CellsListBox.SelectedItem);
 
@@ -115,6 +118,7 @@ namespace DaphneGui
                 return;
 
             cell.ValidateName(MainWindow.SOP.Protocol);
+            MainWindow.SOP.SelectedRenderSkin.SetRenderCellName(cell.renderLabel, cell.CellName);
         }
 
 
@@ -186,7 +190,7 @@ namespace DaphneGui
             }
             else
             {
-                ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+                ConfigTransitionScheme diffNew = (ConfigTransitionScheme)combo.SelectedItem;
 
                 if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
                 {
@@ -533,7 +537,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            ConfigDiffScheme ds = cell.diff_scheme;
+            ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
