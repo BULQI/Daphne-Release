@@ -568,12 +568,15 @@ namespace DaphneGui
             }
 
             // hdf5
-            DataBasket.hdf5file = new HDF5File();
-
+            if (sim == null || SimulationBase.dataBasket == null)
+            {
+                MessageBox.Show("Need valid simulation and databasket object prior to initializing the hdf5 object.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
             // this must come from some gui selection (which file do you want to open or create...?)
             // and likely we need to do this in a different place, i.e. with a handler
             // the file must get openend before a run or else the simulation will crash
-            if (DataBasket.hdf5file.reCreate("framedata.hd5") == false)
+            if (DataBasket.hdf5file.initialize("framedata.hd5") == false)
             {
                 MessageBox.Show("File might be currently open or disk cannot be accessed.", "Error creating HDF5 file", MessageBoxButton.OK, MessageBoxImage.Error);
             }

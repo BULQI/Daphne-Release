@@ -72,6 +72,8 @@ namespace Daphne
             populations = new Dictionary<int, Dictionary<int, Cell>>();
             molecules = new Dictionary<string, Molecule>();
             genes = new Dictionary<string, Gene>();
+            // create the hdf5 object
+            hdf5file = new HDF5File();
 #if ALL_DATA
             ResetTrackData();
 #endif

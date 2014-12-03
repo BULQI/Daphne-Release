@@ -30,7 +30,7 @@ namespace Daphne
         /// </summary>
         /// <param name="fn">file name</param>
         /// <returns>true for success</returns>
-        public bool reCreate(string fn)
+        public bool initialize(string fn)
         {
             if (fileId == null)
             {
