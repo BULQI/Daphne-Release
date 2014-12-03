@@ -96,6 +96,7 @@ namespace DaphneGui
             gm.Name = gm.GenerateNewName(level, "_New");
 
             level.entity_repository.molecules.Add(gm);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderMol(gm.renderLabel, gm.Name);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
@@ -114,6 +115,7 @@ namespace DaphneGui
             ConfigMolecule newmol = cm.Clone(level);
             
             level.entity_repository.molecules.Add(newmol);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderMol(newmol.renderLabel, newmol.Name);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
@@ -276,6 +278,8 @@ namespace DaphneGui
                 Protocol p = level as Protocol;
                 cm.ValidateName(p);
             }
+
+            MainWindow.SOP.SelectedRenderSkin.SetRenderMolName(cm.renderLabel, cm.Name);
 
             int index = dgLibMolecules.SelectedIndex;
             dgLibMolecules.InvalidateVisual();

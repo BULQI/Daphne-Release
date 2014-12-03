@@ -3836,6 +3836,7 @@ namespace Daphne
 
                 newmol.entity_guid = id.ToString();
                 newmol.Name = newmol.GenerateNewName(level, "_Copy");
+                newmol.renderLabel = newmol.entity_guid;
             }
 
             return newmol;
@@ -5636,6 +5637,7 @@ namespace Daphne
                 Guid id = Guid.NewGuid();
 
                 newcell.entity_guid = id.ToString();
+                newcell.renderLabel = newcell.entity_guid;
             }
             return newcell;
         }
@@ -7945,10 +7947,17 @@ namespace Daphne
 
         //default color
         public void AddRenderCell(string label, string name)
-        {
-            //Don't want duplicates
-            if (renderCells.Any(c => c.name == name) == true)
+        {            
+            //Don't want duplicates but if name has changed, update it
+            if (renderCells.Any(c => c.renderLabel == label) == true)
+            {
+                RenderCell cell = renderCells.First(c => c.renderLabel == label);
+                if (cell.name != name)
+                {
+                    cell.name = name;
+                }
                 return;
+            }
 
             RenderCell renc = new RenderCell();
             renc.renderLabel = label;
@@ -8026,8 +8035,33 @@ namespace Daphne
             renderCells.Add(renc);
         }
 
+        /// <summary>
+        /// Method for updating render cell name
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="name"></param>
+        public void SetRenderCellName(string label, string name)
+        {
+            if (renderCells.Any(c => c.renderLabel == label) == true)
+            {
+                RenderCell cell = renderCells.First(c => c.renderLabel == label);
+                if (cell.name != name)
+                {
+                    cell.name = name;
+                }
+            }
+        }
+
         public void AddRenderMol(string label, string name)
         {
+            //Don't want duplicates but if name has changed, update it
+            if (renderMols.Any(m => m.renderLabel == label) == true)
+            {
+                RenderMol rm = renderMols.First(m => m.renderLabel == label);
+                rm.name = name;
+                return;
+            }
+
             RenderMol renm = new RenderMol();
             renm.renderLabel = label;
             renm.name = name;
@@ -8037,6 +8071,18 @@ namespace Daphne
             renm.color = new RenderColor(ColorHelper.pickASolidColor());
             renm.shades = 10;
             renderMols.Add(renm);
+        }
+
+        public void SetRenderMolName(string label, string name)
+        {
+            if (renderMols.Any(c => c.renderLabel == label) == true)
+            {
+                RenderMol rm = renderMols.First(c => c.renderLabel == label);
+                if (rm.name != name)
+                {
+                    rm.name = name;
+                }
+            }
         }
 
 

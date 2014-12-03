@@ -38,6 +38,7 @@ namespace DaphneGui
         {
             ConfigCell cc = new ConfigCell();
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cc.renderLabel, cc.CellName);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
         }
 
@@ -89,6 +90,8 @@ namespace DaphneGui
             cellNew.CellName = GenerateNewCellName(cell, "_Copy");
 
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cellNew);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cellNew.renderLabel, cellNew.CellName);
+
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
             CellsListBox.ScrollIntoView(CellsListBox.SelectedItem);
 
@@ -115,6 +118,7 @@ namespace DaphneGui
                 return;
 
             cell.ValidateName(MainWindow.SOP.Protocol);
+            MainWindow.SOP.SelectedRenderSkin.SetRenderCellName(cell.renderLabel, cell.CellName);
         }
 
 
