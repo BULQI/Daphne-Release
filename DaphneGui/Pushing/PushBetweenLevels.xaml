@@ -12,6 +12,13 @@
         MinHeight="120"
         >
 
+    <Window.CommandBindings>
+        <!--<CommandBinding Command=    "push:MyCommands.PushCommand"
+                        Executed=   "PushCommandExecuted"
+                        CanExecute= "PushCommandCanExecute"/>-->
+        
+    </Window.CommandBindings>
+
     <Window.Resources>
 
         <CollectionViewSource x:Key="pushMoleculesListView"
@@ -34,7 +41,6 @@
                     
                     <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                               ItemsSource="{Binding}" 
-                              LoadingRow="grid_LoadingRow"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -42,14 +48,13 @@
                                             CanExecute="PushCommandCanExecute"/>
 
                         </DataGrid.CommandBindings>
-
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" 
+                                              
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
-                                 >
-                                
-                            </DataGridTextColumn>
+                            />
                             <DataGridTemplateColumn Header="Diff Coeff" x:Name="colDiffCoeff" Width="90" MaxWidth="150">
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
@@ -100,8 +105,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgGenes" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                              ItemsSource="{Binding}"
-                              LoadingRow="grid_LoadingRow">
+                              ItemsSource="{Binding}">
 
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -154,8 +158,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}" 
-                               LoadingRow="grid_LoadingRow">
+                                ItemsSource="{Binding}"  >
                         
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -164,7 +167,7 @@
                         </DataGrid.CommandBindings>
                         
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn x:Name="colRate" Header="Rate constant" Width="100" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colRate" Header="Radius" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
@@ -199,7 +202,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgCell" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
+                                ItemsSource="{Binding}"  >
 
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -246,7 +249,7 @@
                 <StackPanel>
                     <DataGrid x:Name="dgReacComp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                               SelectedItem="0"
-                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
+                                ItemsSource="{Binding}"  >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
                                             Executed="PushCommandExecuted"
@@ -282,7 +285,7 @@
                         </DataGrid.CommandBindings>
 
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn x:Name="colRate" Header="Reaction rate" Width="100" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colRate" Header="Radius" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
@@ -306,7 +309,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReacTemp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
+                                ItemsSource="{Binding}"  >
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
@@ -316,7 +319,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgDiff" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
+                                ItemsSource="{Binding}"  >
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
@@ -326,7 +329,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgTrans" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
-                                ItemsSource="{Binding}" LoadingRow="grid_LoadingRow" >
+                                ItemsSource="{Binding}"  >
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
@@ -387,14 +390,29 @@
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
                             Margin="6"/>                        
                     </StackPanel>
+
+                    
                 </StackPanel>
+
+                
             </GroupBox>
-            <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel" VerticalAlignment="Center">
-                <Button x:Name="PushButtonArrow" Height="48" Width="48" 
-                            HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center"
+
+            <!--<Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push >" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
+                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                        VerticalAlignment="Top" VerticalContentAlignment="Top"
+                        Command="ApplicationCommands.Save"
+                        FocusManager.IsFocusScope="True"
+                        >-->
+            
+                <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel">
+                    
+                    <Button x:Name="PushButtonArrow" Height="48" Width="48" 
+                            HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                             Command="ApplicationCommands.Save"
-                            FocusManager.IsFocusScope="True">
-                        <StackPanel>
+                            FocusManager.IsFocusScope="True"    
+                            >
+                    <!--Click="PushButtonArrow_Click" Tag="Right"-->
+                    <StackPanel>
                             <StackPanel.Resources>
                                 <Style x:Key="ImageEnabled" TargetType="Image">
                                     <Style.Triggers>
@@ -404,13 +422,19 @@
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Resources>
-                        
                             <Image x:Name="LeftImage" Margin="200,0" Visibility="Hidden" Source="../Images/LeftArrow_48x48.png" Style="{StaticResource ImageEnabled}" Tag="../Images/LeftArrow_48x48.png" />
                             <Image x:Name="RightImage" Margin="200,0" Visibility="Hidden" Source="../Images/RightArrow_48x48.png" Style="{StaticResource ImageEnabled}" Tag="../ImagesRightArrow_48x48.png" />
                             <Image x:Name="ActualButtonImage" Style="{StaticResource ImageEnabled}"/>
                             <TextBlock>Left</TextBlock>
                         </StackPanel>
-                </Button>                    
+                    </Button>
+                    <!--<Button x:Name="PushButton" Height="24" Width="48" Content="Apply..."
+                            HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                                VerticalAlignment="Top" VerticalContentAlignment="Top"
+                                Command="ApplicationCommands.Save"
+                                FocusManager.IsFocusScope="True" >
+                    
+                    </Button>-->
             </StackPanel>
            
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >

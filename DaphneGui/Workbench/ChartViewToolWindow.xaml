@@ -19,7 +19,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>                
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="32"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -27,27 +27,76 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+
+            <!--<TextBlock Grid.Column="0" Grid.Row="1">Mouse Down Pos:</TextBlock>
+                <TextBox x:Name="txtMouseClick" Grid.Column="1" Grid.Row="1" Width="150" HorizontalAlignment="Left" >Mouse down</TextBox>
+                <TextBlock Grid.Column="2" Grid.Row="1">Mouse Up Pos:</TextBlock>
+                <TextBox x:Name="txtMouseUp" Grid.Column="3" Grid.Row="1" Width="150" HorizontalAlignment="Left" >Mouse up</TextBox> 
+            -->
             
-            <!--Shows Y coordinate when dragging a series-->
-            <StackPanel Orientation="Horizontal" Grid.Column="6" Grid.Row="0" Visibility="Hidden">
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Visibility="Hidden">
                 <TextBlock >Dragging Concentration:</TextBlock>
+                <!--<TextBox x:Name="txtMouseHover" Width="150" HorizontalAlignment="Left" >Dragging Conc</TextBox>-->
                 <uc:DoublesBox x:Name="dblMouseHover" HorizontalAlignment="Left" Margin="4,0"
-                        Number="0.00"   
-                        DecimalPlaces="3" 
-                        RangeFactor="2"
-                        SNLowerThreshold="0.001"
-                        SNUpperThreshold="1000">
+                                                Number="0.00"   
+                                                DecimalPlaces="3" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000">
+                    
                 </uc:DoublesBox>
                                             
             </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
+                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
+                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
+                <Button x:Name="btnSave"    Width="80" Height="24" HorizontalAlignment="Left"   Click="btnSave_Click" IsEnabled="False">Save Changes</Button>
+                <Button x:Name="btnDiscard" Width="100" Height="24" HorizontalAlignment="Left"  Click="btnDiscard_Click" IsEnabled="False">Discard Changes</Button>
+                <Button Content="X-Axis Log" Height="23" Name="btnLogX" Width="75" Click="btnX_Axis_Click" />
+                <Button Content="Y-Axis Log" Height="23" Name="btnLogY" Width="75" Click="btnY_Axis_Click" />
+            </StackPanel>
             
-            <!--MOLECULES-->
-            <StackPanel Grid.Column="0" Grid.Row="0" Margin="30,0">
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+                <TextBlock VerticalAlignment="Center" >Maximum time (minutes):</TextBlock>
+                <!--<Slider x:Name="slMaxTime" 
+                        Orientation="Horizontal"
+                        Width="100" Height="24"
+                        RenderTransform="1.0,0,0,0.5,0,4"
+                        Minimum="0.01" 
+                        Maximum="{Binding Path=dMaxTime}"                        
+                        Margin="10,0,0,0" IsSnapToTickEnabled="True" 
+                        ValueChanged="slMaxTime_ValueChanged"
+                        Value="{Binding Path=dInitialTime}"                        
+                        TickFrequency="0.01">
+                </Slider>
+                <TextBox x:Name="txtMaxTime" Width="150" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0"  VerticalAlignment="Center" 
+                      Text="{Binding ElementName=slMaxTime, Path=Value}">
+                </TextBox>-->
+
+                <uc:DoublesBox x:Name="dblMaxTime" HorizontalAlignment="Left" Margin="4,0"
+                                                Number="{Binding Path=dInitialTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                   
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                PropertyChanged="dblMaxTime_PropertyChanged"
+                               >
+
+                </uc:DoublesBox>
+
+            </StackPanel>
+
+            <StackPanel Grid.Column="0" Grid.Row="2" >
+                <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 
+                    <wf:Panel x:Name="pChartMolConcs" Visible="False" />
+                </WindowsFormsHost>
+            </StackPanel>
+
+            <StackPanel Grid.Column="0" Grid.Row="3" Margin="30,0">
+                <!-- new code -->
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
-                
                 <DataGrid x:Name="dgInitConcs" 
-                        ItemsSource="{Binding Path=scenario.AllMols, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                        MaxHeight="160" MinWidth="150" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                        ItemsSource="{Binding Path=initConcs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                        Height="150" MinWidth="150" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                         CanUserReorderColumns="False" CanUserResizeRows="False"
                         CanUserSortColumns="True" RowHeaderWidth="0"
                         HorizontalAlignment="Left"
@@ -55,8 +104,6 @@
                         CanUserAddRows="False"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Thumb.DragStarted="dgInitConcs_DragStarted"
-                        Thumb.DragCompleted="dgInitConcs_DragCompleted"
                         >
 
                     <DataGrid.ColumnHeaderStyle>
@@ -78,38 +125,71 @@
                     </DataGrid.ColumnHeaderStyle>
 
                     <DataGrid.Columns>
-                        <DataGridTextColumn x:Name="colMolName" Header="Molecule" Width="180" IsReadOnly="True"
-                                 Binding="{Binding Path=molecule.Name, Mode=OneWay}" />
-                        
-                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="300" MaxWidth="350">
+
+                        <DataGridTemplateColumn x:Name="colName" Header="Name"  Width="110" MinWidth="100" MaxWidth="200">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
+                                             Text="{Binding Path=molname, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >                                        
+                                    </TextBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="270" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <uc:DoublesBox x:Name="dblConcs" HorizontalAlignment="Left" Margin="4,0"
-                                                Number="{Binding Path=mp_distribution.concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                                Number="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                                 RangeFactor="1"
                                                 SNLowerThreshold="0.001"
                                                 SNUpperThreshold="1000"
-                                                PropertyChanged="dblConcs_PropertyChanged"     
+                                                PropertyChanged="dblConcs_PropertyChanged"       
                                                 >
+                                            
+
                                         </uc:DoublesBox>
-                                    </StackPanel>
+
+                                        <!--<Slider x:Name="slConc" 
+                                                Orientation="Horizontal"
+                                                Width="100"
+                                                RenderTransform="1.0,0,0,0.5,0,4"
+                                                Minimum="0.00" 
+                                                Maximum="10.00"
+                                                Value="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Margin="0,0,0,0" IsSnapToTickEnabled="True" 
+                                                TickFrequency="0.01"                                                
+                                                ValueChanged="slConc_ValueChanged"
+                                                >
+                                        </Slider>
+                                        <TextBox Width="150" TextAlignment="Center" Margin="20,0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />-->
+                                    </StackPanel>    
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
                     </DataGrid.Columns>
-
-
                 </DataGrid>
+                
             </StackPanel>
-            
-            <!--REACTIONS-->
-            <StackPanel Grid.Column="0" Grid.Row="1" Margin="30,12">
+
+            <StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
+
+                <StackPanel.Resources>
+                    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDToStringConv" />
+
+                    <CollectionViewSource x:Key="ecmReacsListView"  
+                                      Source="{Binding Path=SC.entity_repository.reactions}"
+                                      />
+                </StackPanel.Resources>
+
+                <!-- new code -->
                 <TextBlock>Reaction Rates</TextBlock>
+                
                 <DataGrid x:Name="dgReactionRates" 
-                                ItemsSource="{Binding Path=scenario.AllReacs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                MaxHeight="160" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                                ItemsSource="{Binding Path=CRC.ReactionRates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                                MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 HorizontalAlignment="Left"
@@ -117,8 +197,6 @@
                                 CanUserAddRows="False"
                                 BorderThickness="1"
                                 BorderBrush="Black"
-                                Thumb.DragStarted="dgInitConcs_DragStarted"
-                                Thumb.DragCompleted="dgInitConcs_DragCompleted"
                                 >
 
                     <DataGrid.ColumnHeaderStyle>
@@ -140,11 +218,13 @@
                     </DataGrid.ColumnHeaderStyle>
 
                     <DataGrid.Columns>
+
                         <DataGridTemplateColumn x:Name="colReac" Header="Reaction"  Width="200" MinWidth="100" MaxWidth="300">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                              Text="{Binding Path=TotalReactionString}">
+                                              Text="{Binding Path=entity_guid, Converter={StaticResource ReacGUIDToStringConv},
+                                                            ConverterParameter={StaticResource ecmReacsListView}}">
                                     </TextBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -156,7 +236,7 @@
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <uc:DoublesBox x:Name="dblReacRate" Margin="0,0"
-                                                Number="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                Number="{Binding Path=ReactionComplexRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
                                                 DecimalPlaces="3" 
                                                 RangeFactor="2"
                                                 SNLowerThreshold="0.001"
@@ -171,25 +251,29 @@
 
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click" >Redraw</Button>
             </StackPanel>
 
-            <!--PUSH BUTTONS-->
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="30,0">
-                <Button x:Name="btnIncSize" Width="70" Height="23" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
-                <Button x:Name="btnDecSize" Width="70" Height="23" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
-                <Button Content="X-Axis: Linear" Height="23" Name="btnLogX" Width="120" Click="btnX_Axis_Click" IsEnabled="False" />
-                <Button Content="Y-Axis: Linear" Height="23" Name="btnLogY" Width="120" Click="btnY_Axis_Click" IsEnabled="False" />
-            </StackPanel>
+                <!--<Menu DockPanel.Dock="Top">
+                    <MenuItem Header="_File">
+                    </MenuItem>
+                </Menu>-->
 
-            <!--GRAPH-->
-            <StackPanel Grid.Column="0" Grid.Row="3" >
-                <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True" >
-                    <wf:Panel x:Name="panelRC" Visible="True" />
-                </WindowsFormsHost>
-            </StackPanel>
-
+                
+            
 
         </Grid>
     </ScrollViewer>
 
+        <!--<StatusBar DockPanel.Dock="Bottom">
+            <TextBlock>Field 1</TextBlock>
+            <Separator/>
+            <TextBlock>Field 2</TextBlock>
+        </StatusBar>
+
+        <Grid x:Name="rootGrid">
+        </Grid>-->
+        
+       
 </docking:DocumentWindow>

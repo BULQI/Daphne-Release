@@ -413,158 +413,52 @@ namespace Daphne
         }
     }
 
-    public class CompartmentMolpopReporter
-    {
-        public List<double> listTimes;
-        public Dictionary<string, List<double>> dictGraphConcs;
-        private Compartment comp;
-        private double[] defaultLoc;
-
-        public CompartmentMolpopReporter()
-        {
-            listTimes = new List<double>();
-            dictGraphConcs = new Dictionary<string, List<double>>();
-        }
-
-        public void StartCompReporter(Compartment _comp, double[] _defaultLoc, ScenarioBase scenario)
-        {
-            defaultLoc = (double[])_defaultLoc.Clone();
-            comp = _comp;
-            dictGraphConcs.Clear();
-            listTimes.Clear();
-
-            foreach (ConfigMolecularPopulation configMolPop in ((VatReactionComplexScenario)scenario).AllMols)
-            {
-                if (configMolPop.report_mp.mp_extended == ExtendedReport.LEAN)
-                {
-                    if (comp.Populations.ContainsKey(configMolPop.molecule.entity_guid))
-                    {
-                        dictGraphConcs.Add(configMolPop.molecule.entity_guid, new List<double>());
-                    }
-                }
-            }
-        }
-
-        public void AppendReporter(double accumulatedTime)
-        {
-            listTimes.Add(accumulatedTime);
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-            {
-                if (dictGraphConcs.ContainsKey(kvp.Key))
-                {
-                    dictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
-                }
-            }
-        }
-
-        public void CloseCompReporter()
-        {
-            dictGraphConcs.Clear();
-            listTimes.Clear();            
-        }
-    }
-
     public class VatReactionComplexReporter : ReporterBase
     {
         private VatReactionComplex hSim;
-        private StreamWriter vat_conc_file;
-        private CompartmentMolpopReporter compMolpopReporter;
-        public bool reportOn;
 
         public VatReactionComplexReporter()
         {
-            compMolpopReporter = new CompartmentMolpopReporter();
-            reportOn = false;
         }
 
         public override void StartReporter(SimulationBase sim)
         {
-            if (reportOn == false)
-            {
-                return;
-            }
-
             if (sim is VatReactionComplex == false)
             {
                 throw new InvalidCastException();
             }
 
             hSim = sim as VatReactionComplex;
+            hSim.DictGraphConcs.Clear();
+            hSim.ListTimes.Clear();
 
-            startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
-            CloseReporter();
-            compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp,
-                                        new double[] { 0.0, 0.0, 0.0 },
-                                        SimulationBase.ProtocolHandle.scenario);
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
+            }
+        }
+
+        private void appendTimesAndConcs()
+        {
+            double[] defaultLoc = { 0.0, 0.0, 0.0 };
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            hSim.ListTimes.Add(hSim.AccumulatedTime);
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+            }
         }
 
         public override void AppendReporter()
         {
-            if (reportOn == false)
-            {
-                return;
-            }
-
-            compMolpopReporter.AppendReporter(hSim.AccumulatedTime);
+            appendTimesAndConcs();
         }
 
         public override void CloseReporter()
         {
-            if (compMolpopReporter.listTimes.Count > 0)
-            {
-                WriteToFile();
-                reportOn = false;
-            }
-
-            if (vat_conc_file != null)
-            {
-                vat_conc_file.Close();
-                vat_conc_file = null;
-                compMolpopReporter.CloseCompReporter();
-            }
         }
-
-        private void WriteToFile()
-        {
-            string header = "time";
-            bool create = false;
-
-            // header
-            foreach (ConfigMolecularPopulation configMolPop in ((VatReactionComplexScenario)SimulationBase.ProtocolHandle.scenario).AllMols)
-            {
-                if (configMolPop.report_mp.mp_extended == ExtendedReport.LEAN)
-                {
-                    if (SimulationBase.dataBasket.Environment.Comp.Populations.ContainsKey(configMolPop.molecule.entity_guid))
-                    {
-                        header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[configMolPop.molecule.entity_guid].Name;
-                        create = true;
-                    }
-                }
-            }
-
-            // was at least one molecule selected?
-            if (create == false)
-            {
-                return;
-            }
-
-            vat_conc_file = createStreamWriter("vatRC_report", "txt");
-            vat_conc_file.WriteLine("VatRC report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
-            vat_conc_file.WriteLine(header);
-
-            // write simulation data
-            for (int i = 0; i < compMolpopReporter.listTimes.Count; i++)
-            {
-                vat_conc_file.Write(compMolpopReporter.listTimes[i]);
-
-                foreach (KeyValuePair<string,List<double>> kvp in compMolpopReporter.dictGraphConcs)
-                {
-                        // mean concentration of this compartment molecular population
-                        vat_conc_file.Write("\t{0:G4}", kvp.Value[i]);
-                }
-                // terminate line
-                vat_conc_file.WriteLine();
-            }
-          }
     }
 }

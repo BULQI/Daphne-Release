@@ -186,7 +186,7 @@ namespace DaphneGui
             }
             else
             {
-                ConfigTransitionScheme diffNew = (ConfigTransitionScheme)combo.SelectedItem;
+                ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
                 if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
                 {
@@ -533,7 +533,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            ConfigTransitionScheme ds = cell.diff_scheme;
+            ConfigDiffScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool

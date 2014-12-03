@@ -14,8 +14,6 @@ using System.Windows.Shapes;
 using Daphne;
 using System.Globalization;
 
-using System.Collections.ObjectModel;
-
 namespace DaphneGui
 {
     /// <summary>
@@ -28,6 +26,23 @@ namespace DaphneGui
             InitializeComponent();
         }
 
+        public class diffSchemeValueConverter : IValueConverter
+        {
+            public object Convert(object value, Type targetType,
+                object parameter, CultureInfo culture)
+            {
+                return value;
+            }
+
+            public object ConvertBack(object value, Type targetType,
+                object parameter, CultureInfo culture)
+            {
+                ConfigDiffScheme val = value as ConfigDiffScheme;
+                if (val != null && val.Name == "") return null;
+                return value;
+            }
+        }
+
         private void CellTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
@@ -38,7 +53,7 @@ namespace DaphneGui
             cell.ValidateName(MainWindow.SOP.Protocol);
         }
 
-        private void cbLocoDriver_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cbCellDiffSchemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //Don't want to do anything when first display this combo box
             //Only do something if user really clicked and selected a different scheme
@@ -55,43 +70,46 @@ namespace DaphneGui
             if (combo.SelectedIndex == -1)
                 return;
 
-            cell.locomotor_mol_guid_ref = ((ConfigMolecule)cbLocomotorDriver1.SelectedItem).entity_guid;
-        }
-
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            if (cvs.Source == null)
+            if (combo.SelectedIndex == 0)
             {
-                cvs.Source = new ObservableCollection<ConfigMolecule>();
+                cell.diff_scheme = null;
+                combo.Text = "None";
             }
-
-            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
-
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
+            else
             {
-                return;
-            }
+                ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-            int locoMol = -1;
-            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
-            {
-                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
-                if (configMolpop.molecule.entity_guid == cell.locomotor_mol_guid_ref)
+                if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
                 {
-                    locoMol = cell.cytosol.molpops.IndexOf(configMolpop);
+                    return;
+                }
+
+                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
+                if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
+                {
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(true);
                 }
             }
-
-            cbLocomotorDriver1.SelectedIndex = locoMol;
-
+            ////int nIndex = CellsListBox.SelectedIndex;
+            ////CellsListBox.SelectedIndex = -1;
+            ////CellsListBox.SelectedIndex = nIndex;
         }
 
+        // QUESTION: why cell properties and diffschemes only
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-        }
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("diffSchemesListView"));
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.diff_schemes;
+            }
 
+            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            }
+        }
     }
 }

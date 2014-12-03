@@ -35,9 +35,6 @@
         <CollectionViewSource x:Key="GenesListView"  
                                   Source="{Binding Path=entity_repository.genes}"
                                   />
-
-        <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
-        
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
         
     </docking:ToolWindow.Resources>
@@ -66,10 +63,8 @@
                             Canvas.ZIndex="1"
                             BorderThickness="1"
                             BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
-                            Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                    ConverterParameter=ComponentsToolWindow_Genes}"
-                            >
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                >
 
                     <StackPanel>
 
@@ -79,7 +74,7 @@
                         <DataGrid x:Name="dgLibGenes" 
                                 ItemsSource="{Binding Source={StaticResource GenesListView}}" 
                                 AutoGenerateColumns="False" 
-                                MinHeight="20" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100"
+                                Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 VerticalContentAlignment="Center"
@@ -304,6 +299,21 @@
                                                                     SNUpperThreshold="1000"
                                                                     SliderEnabled="False" 
                                                                    >
+
+                                                    <!--<uc:DoublesBox.Style>
+                                                            <Style>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
+                                                                        <Setter Property="uc:DoublesBox.IsReadOnly" Value="True" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
+                                                                        <Setter Property="uc:DoublesBox.IsReadOnly" Value="False" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </uc:DoublesBox.Style>-->
+
+
                                                 </uc:DoublesBox>
 
                                             </DataTemplate>
@@ -383,13 +393,104 @@
                             </Style.Triggers>
                         </Style>
                     </Expander.Resources>
-
                     <StackPanel>
-                        <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Collapsed"
-                                              DataContext="{Binding Path=entity_repository, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel.Resources>
+                            <DataTemplate x:Key="reacComplexListItemTemplate">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Path=Name}" />
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate x:Key="rcReacListItemTemplate">
+                                <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                                </TextBlock>
+                            </DataTemplate>
+                        </StackPanel.Resources>
+
+                        <StackPanel>
+
+                            <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
+                            <ListBox x:Name="lbComplexes" MinHeight="50"
+                                            ItemsSource="{Binding Path=entity_repository.reaction_complexes}"                                                      
+                                            ItemTemplate="{Binding Source={StaticResource reacComplexListItemTemplate}}"
+                                            SelectedIndex="0">
+                            </ListBox>
+                        </StackPanel>
+
+                        <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
+                            <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
+                            <TextBox x:Name="txtCxName" Width="150" HorizontalAlignment="Left" Text="{Binding Path=Name}" ></TextBox>
+                            <Button x:Name="btnEditComplex" Width="50" Click="btnEditReactionComplex_Click">Edit</Button>
+                            <Button x:Name="btnCopyComplex" Width="50" Click="btnCopyReactionComplex_Click">Copy</Button>
+                            <Button x:Name="btnAddComplex" Width="50" Click="btnAddReactionComplex_Click">New</Button>
+                            <Button x:Name="btnRemoveComplex" Width="60" Click="btnRemoveReactionComplex_Click">Remove</Button>
+                        </StackPanel>
+
+                        <!-- List of Reactions in selected Reaction Complex -->
+                        <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" >
+                            <TextBlock Text="Reactions" />
+
+                            <ListView x:Name="lvReacComplexReactions" 
+                                      ItemsSource="{Binding Path=reactions, Mode=TwoWay}"
+                                      SelectedIndex="0"
+                                        >
+                                <ListView.View>
+                                    <GridView>
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="GridViewColumnHeader">
+                                                <Setter Property="Height" Value="Auto"></Setter>
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Offset="0.0" Color="White" />
+                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
+
+                                        <GridViewColumn Width="80" Header="Rate constant">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="300" Header="Reaction" >
+
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=TotalReactionString}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground" 
+                                                                        Value="Black">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                        <Button x:Name="btnSaveRCToProtocol" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="250" HorizontalAlignment="Right" 
+                                              Click="btnSaveReacToProtocol_Click" >Save reaction to components library</Button>
+                            
+                        <!--<ToggleButton x:Name="btnGraphReactionComplex" IsChecked="False" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" 
+                                              Checked="btnGraphReactionComplex_Checked" >Run Reaction Complex</ToggleButton>-->
+
+                        </StackPanel>
                     </StackPanel>
-                
                 </Expander>
+
+
+
             </StackPanel>
         </ScrollViewer>
 

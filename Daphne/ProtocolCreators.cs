@@ -137,30 +137,20 @@ namespace Daphne
 
             for (int i = 0; i < totalReactionString.Length; i++)
             {
-                // Check whether this reaction has already been added to the protocol ER. If not, add it.
-                if (findReaction(totalReactionString[i], protocol) == null)
-                {
-                    ConfigReaction configReaction = findReaction(totalReactionString[i], userstore);
+                ConfigReaction configReaction = findReaction(totalReactionString[i], userstore);
+    
                     if (configReaction != null)
                     {
                         ConfigReaction newReac = configReaction.Clone(true);
                         protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
 
-                        // Add the reaction template associated with this reaction
                         string reacTemplateGuid = newReac.reaction_template_guid_ref;
-                        // Check whether this reaction template is already added to the protocol ER. If not, add it.
-                        if (findReactionTemplateByGuid(reacTemplateGuid, protocol) == null)
-                        {
-                            ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
-                            if (configReacTemplate != null)
-                            {
-                                ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
-                                protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
-                            }
-                        }
+                        ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
+                        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+
                         itemsLoaded++;
                     }
-                }
             }
 
             return itemsLoaded;
@@ -268,7 +258,6 @@ namespace Daphne
             protocol.scenario.time_config.duration = 15;
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 10;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
-            protocol.scenario.time_config.integrator_step = 0.001;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -336,9 +325,8 @@ namespace Daphne
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
-                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    //configMolPop.mp_render_blending_weight = 2.0;
-                    //configMolPop.mp_render_on = true;
+                    configMolPop.mp_dist_name = "Uniform";
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     configMolPop.mp_distribution = hl;
@@ -368,7 +356,6 @@ namespace Daphne
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.cellPopDist.Initialize();
             cellPop.CellStates[0] = new CellState(envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2);
             ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
             //rendering
@@ -431,7 +418,6 @@ namespace Daphne
             protocol.scenario.time_config.duration = 30;
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
-            protocol.scenario.time_config.integrator_step = 0.001;
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
@@ -516,6 +502,7 @@ namespace Daphne
                     bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
                     molpoplin.boundaryCondition.Add(bc);
                     configMolPop.mp_distribution = molpoplin;
+                    configMolPop.mp_dist_name = "Linear";
 
                     // Reporting
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
@@ -542,7 +529,6 @@ namespace Daphne
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.cellPopDist.Initialize();
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
             cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * configCell.CellRadius - envHandle.gridstep / 2,
                                                   envHandle.extent_y / 2 - envHandle.gridstep / 2,
@@ -608,7 +594,6 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
-            protocol.scenario.time_config.integrator_step = 0.001;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -639,6 +624,7 @@ namespace Daphne
             box.y_scale = envHandle.extent_y / 4;
             box.z_scale = envHandle.extent_z / 5;
             gaussSpec.box_spec = box;
+            //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Rotate the box by 45 degrees about the box's y-axis.
             double theta = Math.PI / 4,
@@ -663,6 +649,7 @@ namespace Daphne
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                 configMolPop.molecule = cm.Clone(null);
                 configMolPop.Name = cm.Name;
+                configMolPop.mp_dist_name = "Gaussian";
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
@@ -699,7 +686,6 @@ namespace Daphne
             protocol.scenario.time_config.duration = 100;
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
-            protocol.scenario.time_config.integrator_step = 0.001;
 
             // Global Paramters
             //LoadEntitiesFromUserStore(protocol);
@@ -721,7 +707,6 @@ namespace Daphne
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
-            protocol.scenario.time_config.integrator_step = 0.001;
         }
 
         public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
@@ -734,18 +719,18 @@ namespace Daphne
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
-            protocol.experiment_description = "chemotactic receptor/ligand binding";
-            protocol.scenario.time_config.duration = 1.0;
-            protocol.scenario.time_config.rendering_interval = 0.02;
-            protocol.scenario.time_config.sampling_interval = 0.02;
-            protocol.scenario.time_config.integrator_step = 0.001;
+            protocol.experiment_name = "Ligand Receptor Vat RC";
+            protocol.experiment_description = "...";
+            protocol.scenario.time_config.duration = 10.0;
+            protocol.scenario.time_config.rendering_interval = 0.1;
+            protocol.scenario.time_config.sampling_interval = 0.1;
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // bulk molecules
-            string[] item = new string[] { "CXCL13", "CXCR5", "CXCL13:CXCR5", "CXCL12", "CXCR4", "CXCL12:CXCR4" };
+            string[] item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
             int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
             if (itemsLoaded != item.Length)
             {
@@ -753,10 +738,8 @@ namespace Daphne
             }
 
             // reactions
-            item = new string[] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
-                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5",
-                                  "CXCL12 + CXCR4 -> CXCL12:CXCR4",
-                                  "CXCL12:CXCR4 -> CXCL12 + CXCR4" };
+            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
             itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
@@ -764,13 +747,9 @@ namespace Daphne
             }
 
             // RC
-            item = new string[] { "CXCL13/CXCR5 binding", "CXCL12/CXCR4 binding" };
+            item = new string[1] { "Ligand/Receptor" };
             itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
-            if (itemsLoaded != item.Count())
-            {
-                System.Windows.MessageBox.Show("Unable to load all reaction complexes.");
-            }
-
+            
             //This adds RC to envHandle.comp
             for (int i = 0; i < item.Length; i++)
             {
@@ -779,81 +758,16 @@ namespace Daphne
                     if (ent.Name == item[i])
                     {
                         envHandle.comp.reaction_complexes.Add(ent.Clone(true));
-
-                        //add mol pop display options
-                        foreach (ConfigMolecularPopulation molpop in ent.molpops)
-                        {
-                            ((VatReactionComplexScenario)protocol.scenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
-                        }
-                        foreach (RenderPop rp in ((VatReactionComplexScenario)protocol.scenario).popOptions.molPopOptions)
-                        {
-                            rp.renderOn = true;
-                        }
-                        
                         break;
                     }
                 }
             }
 
-            protocol.reporter_file_name = "Vat_LigandReceptor";
+            foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
+            {
+                envHandle.comp.molpops.Add(configMolpop);
+            }
         }
-
-        //public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
-        //{
-        //    if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
-        //    {
-        //        throw new InvalidCastException();
-        //    }
-
-        //    ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
-
-        //    // Experiment
-        //    protocol.experiment_description = "CXCL13/CXCR5 binding";
-        //    protocol.scenario.time_config.duration = 1.0;
-        //    protocol.scenario.time_config.rendering_interval = 0.02;
-        //    protocol.scenario.time_config.sampling_interval = 0.02;
-        //    protocol.scenario.time_config.integrator_step = 0.001;
-
-        //    //Load needed entities from User Store
-        //    Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-        //    userstore = userstore.Deserialize();
-
-        //    // bulk molecules
-        //    string[] item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-        //    int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
-        //    if (itemsLoaded != item.Length)
-        //    {
-        //        System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-        //    }
-
-        //    // reactions
-        //    item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
-        //                          "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
-        //    itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
-        //    if (itemsLoaded != item.Length)
-        //    {
-        //        System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-        //    }
-
-        //    // RC
-        //    item = new string[1] { "Ligand/Receptor" };
-        //    itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
-            
-        //    //This adds RC to envHandle.comp
-        //    for (int i = 0; i < item.Length; i++)
-        //    {
-        //        foreach (ConfigReactionComplex ent in protocol.entity_repository.reaction_complexes)
-        //        {
-        //            if (ent.Name == item[i])
-        //            {
-        //                envHandle.comp.reaction_complexes.Add(ent.Clone(true));
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    protocol.reporter_file_name = "Vat";
-        //}
 
         public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)
         {
@@ -866,11 +780,10 @@ namespace Daphne
 
             // Experiment
             protocol.experiment_name = "SPR Vat RC";
-            protocol.experiment_description = "Simulation of two-state receptor binding to ligand.";
+            protocol.experiment_description = "...";
             protocol.scenario.time_config.duration = 100.0;
             protocol.scenario.time_config.rendering_interval = 2.0;
             protocol.scenario.time_config.sampling_interval = 1.0;
-            protocol.scenario.time_config.integrator_step = 0.001;
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
@@ -1039,6 +952,9 @@ namespace Daphne
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
+                    configMolPop.mp_dist_name = "Uniform";
+                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //configMolPop.mp_render_blending_weight = 2.0;
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1048,15 +964,7 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
 
                     configRC.molpops.Add(configMolPop);
-
-                    //add mol pop display options
-                    ((VatReactionComplexScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);                    
                 }
-            }
-
-            foreach (RenderPop rp in ((VatReactionComplexScenario)protocol.scenario).popOptions.molPopOptions)
-            {
-                rp.renderOn = true;
             }
 
             // Add items to config compartment
@@ -1065,7 +973,10 @@ namespace Daphne
             envHandle.comp.reaction_complexes.Add(configRC);
             //envHandle.comp.reaction_complexes_dict.Add(configRC.entity_guid, configRC);
 
-            protocol.reporter_file_name = "Vat_2site_ab_binding";
+            foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
+            {
+                envHandle.comp.molpops.Add(configMolpop);
+            }
 
 
 
@@ -1135,6 +1046,8 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1155,6 +1068,8 @@ namespace Daphne
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
+                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1201,6 +1116,7 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1219,6 +1135,8 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
+
+                    gmp.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1272,6 +1190,7 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1290,6 +1209,8 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
+
+                    gmp.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1352,6 +1273,8 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1373,6 +1296,8 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
+
+                    gmp.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1455,6 +1380,8 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1476,6 +1403,8 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
+
+                    gmp.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1555,6 +1484,8 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1573,6 +1504,8 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
+
+                    gmp.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1624,6 +1557,8 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1643,6 +1578,7 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
+                    gmp.mp_dist_name = "Uniform";
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1678,7 +1614,7 @@ namespace Daphne
         {
             // These can be reused to create other differentiation schemes
             ConfigTransitionDriver driver;
-            ConfigTransitionScheme diffScheme;
+            ConfigDiffScheme diffScheme;
             ConfigActivationRow actRow;
             string[] stateNames, geneNames;
             double[,] activations, alpha, beta;
@@ -1726,7 +1662,7 @@ namespace Daphne
                                                    { 0,     0,        0,       0,      0,    0,       0   },  // memory
                                                 };
 
-            diffScheme = new ConfigTransitionScheme();
+            diffScheme = new ConfigDiffScheme();
             diffScheme.Name = "B cell 7 state";
             driver = new ConfigTransitionDriver();
             driver.Name = "B cell 7 state driver";
@@ -1794,7 +1730,7 @@ namespace Daphne
                                                    { 0,      0,    0,       0   },  // memory
                                                 };
 
-            diffScheme = new ConfigTransitionScheme();
+            diffScheme = new ConfigDiffScheme();
             diffScheme.Name = "GC B cell";
             driver = new ConfigTransitionDriver();
             driver.Name = "GC B Cell driver";
@@ -2126,6 +2062,16 @@ namespace Daphne
             cr.rate_const = ecsDefaultDegradRate;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL13 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.rate_const = ecsDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
 
             ////////////////////////////////////////////////////////////////////////////////////
             // CXCL13 + CXCR5| <-> CXCL13:CXCR5|
@@ -2681,32 +2627,6 @@ namespace Daphne
             cr.rate_const = kr;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
-            //
-            // Association: CXCR4 + CXCL12 -> CXCL12:CXCR4
-            kr = 0.494;
-            kf = 23.6;
-            //
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            // Dissociation: CXCL13:CXCR5 -> CXCR5 + CXCL13
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = kr;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////
 
         }
@@ -2716,7 +2636,7 @@ namespace Daphne
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
 
             //MOLECULES
-            double[] conc = new double[3] { 2, 1, 0 };
+            double[] conc = new double[3] { 0.0304, 1, 0 };
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
@@ -2725,17 +2645,18 @@ namespace Daphne
 
                 if (configMolecule != null)
                 {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
+                    configMolPop.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     configMolPop.mp_distribution = hl;
 
                     // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
 
                     crc.molpops.Add(configMolPop);
                 }
@@ -2752,106 +2673,21 @@ namespace Daphne
 
                 if (reac != null)
                 {
+#if OLD_RC
+                    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+                    grp.entity_guid = reac.entity_guid;
+                    grp.OriginalRate = reac.rate_const;
+                    grp.ReactionComplexRate = reac.rate_const;
+#endif
+
                     crc.reactions.Add(reac.Clone(true));
+#if OLD_RC
+                    crc.ReactionRates.Add(grp);
+#endif
                 }
             }
 
             store.entity_repository.reaction_complexes.Add(crc);
-
-            ////////////////////////////////////////////////////////////////
-
-            crc = new ConfigReactionComplex("CXCL12/CXCR4 binding");
-
-            //MOLECULES
-            conc = new double[3] { 2, 1, 0 };
-            type = new string[3] { "CXCL12", "CXCR4", "CXCL12:CXCR4" };
-
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-
-                if (configMolecule != null)
-                {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
-
-                    configMolPop.molecule = configMolecule.Clone(null);
-                    configMolPop.Name = configMolecule.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    configMolPop.mp_distribution = hl;
-
-                    // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
-
-                    crc.molpops.Add(configMolPop);
-                }
-            }
-
-            //REACTIONS
-
-            // Reaction strings
-            type = new string[2] { "CXCL12:CXCR4 -> CXCL12 + CXCR4", "CXCL12 + CXCR4 -> CXCL12:CXCR4" };
-
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigReaction reac = findReaction(type[i], store);
-
-                if (reac != null)
-                {
-                    crc.reactions.Add(reac.Clone(true));
-                }
-            }
-
-            store.entity_repository.reaction_complexes.Add(crc);
-
-            ////////////////////////////////////////////////////////////////
-
-            crc = new ConfigReactionComplex("CXCL13/CXCR5 binding");
-
-            //MOLECULES
-            conc = new double[3] { 2, 1, 0 };
-            type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-
-                if (configMolecule != null)
-                {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
-
-                    configMolPop.molecule = configMolecule.Clone(null);
-                    configMolPop.Name = configMolecule.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    configMolPop.mp_distribution = hl;
-
-                    // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
-
-                    crc.molpops.Add(configMolPop);
-                }
-            }
-
-            //REACTIONS
-
-            // Reaction strings
-            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5" };
-
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigReaction reac = findReaction(type[i], store);
-
-                if (reac != null)
-                {
-                    crc.reactions.Add(reac.Clone(true));
-                }
-            }
-
-            store.entity_repository.reaction_complexes.Add(crc);
-
         }
 
         //Following function needs to be called only once
@@ -3166,7 +3002,7 @@ namespace Daphne
         // given a diff scheme name, find its guid
         public static string findDiffSchemeGuid(string name, Level store)
         {
-            foreach (ConfigTransitionScheme s in store.entity_repository.diff_schemes)
+            foreach (ConfigDiffScheme s in store.entity_repository.diff_schemes)
             {
                 if (s.Name == name)
                 {
@@ -3249,19 +3085,6 @@ namespace Daphne
                 if (cr.entity_guid == guid) 
                 {
                     return cr;
-                }
-            }
-            return null;
-        }
-
-        // given a reaction guid, return the ConfigReaction 
-        public static ConfigReactionTemplate findReactionTemplateByGuid(string guid, Protocol protocol)
-        {
-            foreach (ConfigReactionTemplate crt in protocol.entity_repository.reaction_templates)
-            {
-                if (crt.entity_guid == guid)
-                {
-                    return crt;
                 }
             }
             return null;

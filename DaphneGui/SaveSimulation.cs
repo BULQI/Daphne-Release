@@ -26,11 +26,11 @@ namespace DaphneGui
             int RUN = 0, RESET = 1, ABORT = 2;
 
             buttons[RUN] = runButton.IsEnabled;
-            buttons[RESET] = applyButton.IsEnabled;
+            buttons[RESET] = resetButton.IsEnabled;
             buttons[ABORT] = abortButton.IsEnabled;
 
             runButton.IsEnabled = false;
-            applyButton.IsEnabled = false;
+            resetButton.IsEnabled = false;
             abortButton.IsEnabled = false;
             if (ProtocolSaver == null)
             {
@@ -64,7 +64,7 @@ namespace DaphneGui
                 if (dlg.ShowDialog() != true)
                 {
                     runButton.IsEnabled = buttons[RUN];
-                    applyButton.IsEnabled = buttons[RESET];
+                    resetButton.IsEnabled = buttons[RESET];
                     abortButton.IsEnabled = buttons[ABORT];
                     return;
                 }
@@ -95,7 +95,6 @@ namespace DaphneGui
                 double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];
                 cur_mp.Conc.CopyArray(cur_conc_values);
                 mpex.conc = cur_conc_values;
-                mpex.Description = "saved state";
 
                 cmp.mp_distribution = mpex;
             }
@@ -144,7 +143,7 @@ namespace DaphneGui
 
             ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];
-            applyButton.IsEnabled = buttons[RESET];
+            resetButton.IsEnabled = buttons[RESET];
             abortButton.IsEnabled = buttons[ABORT];
         }
 
