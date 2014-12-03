@@ -75,6 +75,30 @@ namespace Daphne
         }
 
         /// <summary>
+        /// reset the colorindex to after the given color
+        /// so that picked color would be different
+        /// return true if the given color is found and the 
+        /// pointer is reset to next color
+        /// </summary>
+        /// <param name="c"></param>
+        public static bool resetColorPicker(Color c)
+        {
+
+            for (int i = 0; i < SolidColorValues.Length; i++)
+            {
+                var item = SolidColorValues[i];
+                var color = (Color)ColorConverter.ConvertFromString(item);
+                if (color == c)
+                {
+                    SolidColorIndex = i + 1;
+                    if (SolidColorIndex >= SolidColorValues.Length) SolidColorIndex = 0;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// using color brower for set of colors
         /// or rotating through the solid colors
         /// </summary>

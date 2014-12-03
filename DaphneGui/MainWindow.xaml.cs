@@ -82,7 +82,7 @@ namespace DaphneGui
                 SetValue(ToolWinTypeProperty, value);
             }
         }
-        
+
         /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
@@ -137,7 +137,7 @@ namespace DaphneGui
                            CONTROL_NEW_RUN = (1 << 3),
                            CONTROL_UPDATE_GUI = (1 << 4),
                            CONTROL_MOUSE_DRAG = (1 << 5);
-                           
+
 
         public static byte controlFlags = CONTROL_NONE;
 
@@ -1039,7 +1039,7 @@ namespace DaphneGui
                     {
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     }
-                    
+
                     sim.restart();
                     UpdateGraphics();
 
@@ -1703,7 +1703,7 @@ namespace DaphneGui
 
             runSim();
         }
-       
+
         /// <summary>
         /// save when simulation is paused state
         /// </summary>
@@ -1981,7 +1981,7 @@ namespace DaphneGui
                 // Set the data context for the main tab control config GUI
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                
+
                 if (newFile == true)
                 {
                     if (ToolWinType != ToolWindowType.Tissue)
@@ -2021,7 +2021,7 @@ namespace DaphneGui
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
                     gc = new VTKFullGraphicsController(this);
-                 }
+                }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
@@ -2051,7 +2051,7 @@ namespace DaphneGui
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
                 }
- 
+
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
@@ -2219,7 +2219,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         private void run()
         {
             while (true)
@@ -2486,15 +2486,27 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        private void runSim()
+        internal void runSim()
         {
 
-            if (ToolWinType == ToolWindowType.Tissue)
+            switch (ToolWinType)
             {
-                VTKDisplayDocWindow.Activate();
+                case ToolWindowType.Tissue:
+                    runSim_Tissue();
+                    break;
+                case ToolWindowType.VatRC:
+                    runSim_VatRc();
+                    break;
+                default:
+                    break;
             }
+        }
 
-            //MessageBox.Show("In runSim()");
+
+        private void runSim_Tissue()
+        {
+            VTKDisplayDocWindow.Activate();
+
 
             //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP
             //YOU CAN ONLY CALL THIS AFTER LOADING A DRIVER-LOCOMOTOR SCENARIO
@@ -2506,26 +2518,23 @@ namespace DaphneGui
             //sim.refreshDatabaseBufferRows();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
-                if (ToolWinType == ToolWindowType.Tissue)
+
+                abortButton.IsEnabled = true;
+                sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
+
+                //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
+                //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
+
+                //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
+                if (gc is VTKFullGraphicsController == true)
                 {
-                    abortButton.IsEnabled = true;
-                    sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
-
-                    //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
-                    //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
-
-                    //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
-                    if (gc is VTKFullGraphicsController == true)
-                    {
-                        ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
-                    }
-
-                    runButton.Content = "Continue";
-                    statusBarMessagePanel.Content = "Paused...";
-                    runButton.ToolTip = "Continue the Simulation.";
+                    ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
                 }
-                else if (ToolWinType == ToolWindowType.VatRC)
-                { }
+
+                runButton.Content = "Continue";
+                statusBarMessagePanel.Content = "Paused...";
+                runButton.ToolTip = "Continue the Simulation.";
+
             }
             else if (sim.RunStatus == SimulationBase.RUNSTAT_PAUSE)
             {
@@ -2580,8 +2589,7 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
-                if (mouseDrag == false && tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
                     // initiating a run starts always at repetition 1
                     repetition = 1;
@@ -2601,7 +2609,7 @@ namespace DaphneGui
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(!mouseDrag);
+                            lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
@@ -2609,14 +2617,14 @@ namespace DaphneGui
                             {
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
-                                lockSaveStartSim(!mouseDrag);
+                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(!mouseDrag);
+                            lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.Cancel:
@@ -2631,18 +2639,46 @@ namespace DaphneGui
                     {
                         sim.Reporter.StartReporter(sim);
                     }
-                    if (!mouseDrag)
-                    {
-                        runButton.Content = "Pause";
-                        runButton.ToolTip = "Pause the Simulation.";
-                        statusBarMessagePanel.Content = "Running...";
-                        abortButton.IsEnabled = true;
-                    }
+
+                    runButton.Content = "Pause";
+                    runButton.ToolTip = "Pause the Simulation.";
+                    statusBarMessagePanel.Content = "Running...";
+                    abortButton.IsEnabled = true;
+
                     runFinishedEvent.Reset();
                     sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 }
             }
         }
+
+        /// <summary>
+        /// Initiate a simulation run
+        /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
+        /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
+        /// </summary>
+        private void runSim_VatRc()
+        {
+
+            if (sim.RunStatus == SimulationBase.RUNSTAT_RUN) return;
+
+            bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
+            repetition = 1;
+            lockSaveStartSim(!mouseDrag);
+
+            if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
+            {
+                if (Properties.Settings.Default.skipDataBaseWrites == false)
+                {
+                    sim.Reporter.StartReporter(sim);
+                }
+                runFinishedEvent.Reset();
+                sim.RunStatus = SimulationBase.RUNSTAT_RUN;
+            }
+
+        }
+
+
+
 
         public MessageBoxResult saveDialog()
         {
@@ -2969,15 +3005,15 @@ namespace DaphneGui
                 {
                     VTKDisplayDocWindow.Activate();
                 }
-            	else if (ToolWinType == ToolWindowType.VatRC)
-            	{
+                else if (ToolWinType == ToolWindowType.VatRC)
+                {
                     ReacComplexChartWindow.Activate();
-            	}
+                }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 toolWin.Activate();
-            }            
+            }
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -3000,7 +3036,7 @@ namespace DaphneGui
             About about = new About();
             about.ShowDialog();
         }
-        
+
         /// <summary>
         /// This GenericPush method is called for pushing entities into the Protocol level.
         ///
@@ -3101,7 +3137,7 @@ namespace DaphneGui
                 }
 
                 UserWantsNewEntity = pm.UserWantsNewEntity;
-                
+
             }
             else if (source is ConfigReactionComplex)
             {
@@ -3110,7 +3146,8 @@ namespace DaphneGui
                 pm.EntityLevelDetails.DataContext = source;
                 pm.ComponentLevelDetails.DataContext = null;
 
-                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid)) {
+                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid))
+                {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
                     newEntity = ((ConfigReactionComplex)source).Clone(true);
@@ -3289,7 +3326,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
             //load the stores only as needed

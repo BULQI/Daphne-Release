@@ -7745,6 +7745,14 @@ namespace Daphne
             RenderCell renc = new RenderCell();
             renc.renderLabel = label;
             renc.name = name;
+
+            //try to resetColorPicker to pick a different color from last one.
+            for (int i = renderCells.Count - 1; i >= 0; i--)
+            {
+                Color c = renderCells[i].base_color.EntityColor;
+                if (ColorHelper.resetColorPicker(c) == true) break;
+            }
+
             renc.base_color = new RenderColor(ColorHelper.pickASolidColor());
 
             //cell_pop
@@ -7825,6 +7833,13 @@ namespace Daphne
             renm.min = 0.0;
             renm.max = 1.0;
             renm.blendingWeight = 10.0;
+
+            //try to resetColorPicker to pick a different color from last one.
+            for (int i = renderMols.Count - 1; i >= 0; i--)
+            {
+                Color c = renderMols[i].color.EntityColor;
+                if (ColorHelper.resetColorPicker(c) == true) break;
+            }
             renm.color = new RenderColor(ColorHelper.pickASolidColor());
             renm.shades = 10;
             renderMols.Add(renm);

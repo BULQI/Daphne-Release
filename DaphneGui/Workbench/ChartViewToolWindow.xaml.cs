@@ -207,7 +207,8 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(null, null);
+                MW.runSim();
+                //MW.runButton_Click(null, null);
             }
         }
 
@@ -255,7 +256,8 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(null, null);
+                MW.runSim();
+                //MW.runButton_Click(null, null);
             }
         }
 
@@ -281,7 +283,7 @@ namespace Workbench
         private void DelayedRunSim(object state, bool timedOut)
         {
             redraw_flag = true;
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runButton_Click(null, null); }), null);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runSim(); }), null);
             Console.WriteLine("last run fired");
         }
 
