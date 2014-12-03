@@ -50,8 +50,14 @@ namespace DaphneGui
 
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
             arc.ShowDialog();
+        }
 
-            crc.RefreshMolPops(MainWindow.SOP.Protocol.entity_repository);
+        private void ButtonAddComplex_Click(object sender, RoutedEventArgs e)
+        {            
+            ReactionComplexesInStore rcis = new ReactionComplexesInStore();
+            rcis.DataContext = MainWindow.SOP.Protocol.entity_repository;
+            rcis.Tag = MainWindow.SOP.Protocol.scenario.environment.comp;
+            rcis.ShowDialog();
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
@@ -99,6 +105,11 @@ namespace DaphneGui
                 int index = ListBoxReactionComplexes.SelectedIndex;
 
                 ConfigCompartment cc = this.DataContext as ConfigCompartment;
+
+                foreach (ConfigReaction reac in crc.reactions.ToList())
+                {
+                    crc.RemoveReaction(reac);
+                }
                 cc.reaction_complexes.Remove(crc);
 
                 ListBoxReactionComplexes.SelectedIndex = index;
@@ -142,6 +153,21 @@ namespace DaphneGui
             rcc.ShowMolecules = (Visibility)(e.NewValue);
         }
 
-
+        //SHOW ADD BUTTON
+        public static DependencyProperty ShowAddButtonProperty = DependencyProperty.Register("ShowAddButton", typeof(Visibility), typeof(ReactionComplexControl), new FrameworkPropertyMetadata(Visibility.Collapsed, ShowAddButtonPropertyChanged));
+        public Visibility ShowAddButton
+        {
+            get { return (Visibility)GetValue(ShowAddButtonProperty); }
+            set
+            {
+                SetValue(ShowAddButtonProperty, value);
+                OnPropertyChanged("ShowAddButton");
+            }
+        }
+        private static void ShowAddButtonPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ReactionComplexControl rcc = d as ReactionComplexControl;
+            rcc.ShowAddButton = (Visibility)(e.NewValue);
+        }
     }
 }

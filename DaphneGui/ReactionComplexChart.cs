@@ -87,6 +87,28 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// Initialize chart
+        /// </summary>
+        public void Initialize()
+        {
+            LabelX = "Time";
+            LabelY = "Concentration";
+            TitleXY = "Time Trajectory of Molecular Concentrations";
+            DrawLine = true;
+
+            System.Windows.Forms.MenuItem[] menuItems = 
+            {   
+                new System.Windows.Forms.MenuItem("Zoom in"),
+                new System.Windows.Forms.MenuItem("Zoom out"),
+                new System.Windows.Forms.MenuItem("Save Changes"),
+                new System.Windows.Forms.MenuItem("Discard Changes"),
+            };
+
+            System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
+            SetContextMenu(menu);
+        }
+
+        /// <summary>
         /// Sets the x and y size of the chart window
         /// </summary>
         /// <param name="size"></param>
@@ -117,87 +139,95 @@ namespace DaphneGui
             return ret;
         }
 
-        public void CalculateXMax()
+        public void SetXAxisLimits()
         {
-            double max = -1 * 2E100;
-            if (ListTimes.Count > 0)
-                max = ListTimes.Max();
-            ChartAreas[0].AxisX.Maximum = max * 1.1;
+                ChartAreas.First().AxisX.Minimum = getMin_Time();
+                ChartAreas.First().AxisX.Maximum = getMax_Time() * 1.1;
         }
 
-        public void CalculateYMax()
+        public void SetYAxisLimits()
         {
-            ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
+            ChartAreas.First().AxisY.Minimum = getMin_Series(DictConcs);
+            ChartAreas.First().AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
         }
 
         private double getMin_Series(Dictionary<string, List<double>> dt)
         {
-            double min = 2E100;
-            //go through the dictionary and get the min across
+            // Seed the minimum with something from the data
+            double min = getSeriesMin( dt.First().Value, IsYLogarithmic);
+            double seriesMin;
             foreach (KeyValuePair<string, List<double>> e in dt)
             {
-                if (IsYLogarithmic) //(cChart.ChartAreas[0].AxisY.IsLogarithmic)
+                seriesMin = getSeriesMin(e.Value, IsYLogarithmic);
+                if (!double.IsNaN(seriesMin) && min > seriesMin)
                 {
-                    if (e.Value.Where(a => a > 0).Count() > 0 && min > e.Value.Where(a => a > 0).Min())
-                    {
-                        min = e.Value.Min();
-                    }
-                }
-                else
-                {
-                    if (min > e.Value.Min())
-                    {
-                        min = e.Value.Min();
-                    }
+                    min = seriesMin;
                 }
             }
 
             return min;
+        }
+
+        private double getSeriesMin(List<double> e, bool IsLogarithmic)
+        {
+            if (IsLogarithmic)
+            {
+                if (e.Where(a => (a > 0) && !(double.IsNaN(a))).Count() > 0)
+                {
+                    return e.Where(a => (a > 0) && !(double.IsNaN(a))).Min();
+                }
+                else
+                {
+                    return double.NaN;
+                }
+            }
+
+            return e.Where(a => !(double.IsNaN(a)) ).Min();
         }
 
         private double getMax_Series(Dictionary<string, List<double>> dt)
         {
-            double max = -1 * 2E100;
-            //go through the dictionary and get the min across
+            // Seed the maximum with something from the data
+            double max = getSeriesMax(dt.First().Value, IsYLogarithmic);
+            double seriesMax;
+
             foreach (KeyValuePair<string, List<double>> e in dt)
             {
-                if (max < e.Value.Max())
+                seriesMax = getSeriesMax(e.Value, IsYLogarithmic);
+                if (!double.IsNaN(seriesMax) && max < seriesMax)
                 {
-                    max = e.Value.Max();
+                    max = seriesMax;
                 }
             }
 
             return max;
+        }
+
+        private double getSeriesMax(List<double> e, bool IsLogarithmic)
+        {
+            if (IsLogarithmic)
+            {
+                if (e.Where(a => (a > 0) && !(double.IsNaN(a))).Count() > 0)
+                {
+                    return e.Where(a => (a > 0) && !(double.IsNaN(a))).Max();
+                }
+                else
+                {
+                    return double.NaN;
+                }
+            }
+            
+            return e.Where(a => !(double.IsNaN(a))).Max();
         }
 
         private double getMin_Time()
         {
-            double min = 2E100;
-            //go through the list and get the min across
-            foreach (double d in ListTimes)
-            {
-                if (d < min)
-                {
-                    min = d;
-                }
-            }
-
-            return min;
+            return getSeriesMin(ListTimes, IsXLogarithmic); 
         }
 
         private double getMax_Time()
         {
-            double max = -1 * 2E100;
-            //go through the list and get the min across
-            foreach (double d in ListTimes)
-            {
-                if (d > max)
-                {
-                    max = d;
-                }
-            }
-
-            return max;
+            return getSeriesMax(ListTimes, IsXLogarithmic); 
         }
 
         public void SetContextMenu(ContextMenu menu)
@@ -231,10 +261,10 @@ namespace DaphneGui
             //If user clicked on an axis or on tick marks
             if (result.ChartElementType == ChartElementType.Axis || result.ChartElementType == ChartElementType.TickMarks)
             {
-                double valX = ChartAreas[0].AxisX.PixelPositionToValue(mouseDownLocation.X);
-                double valY = ChartAreas[0].AxisY.PixelPositionToValue(mouseDownLocation.Y);
+                double valX = ChartAreas.First().AxisX.PixelPositionToValue(mouseDownLocation.X);
+                double valY = ChartAreas.First().AxisY.PixelPositionToValue(mouseDownLocation.Y);
 
-                if (ChartAreas[0].AxisY.IsLogarithmic)
+                if (ChartAreas.First().AxisY.IsLogarithmic)
                 {
                     valY = Math.Pow(10, valY);
                 }
@@ -281,7 +311,7 @@ namespace DaphneGui
             SeriesToDrag = null;
             ToolWin.dblMouseHover.Number = 0;
 
-            CalculateYMax();
+            SetYAxisLimits();
             Focus();
             Invalidate();
         }
@@ -299,8 +329,8 @@ namespace DaphneGui
                 if (e.Y < 0 || e.Y >= Size.Height)
                     return;
 
-                double valu = ChartAreas[0].AxisY.PixelPositionToValue(e.Y);
-                if (ChartAreas[0].AxisY.IsLogarithmic)
+                double valu = ChartAreas.First().AxisY.PixelPositionToValue(e.Y);
+                if (ChartAreas.First().AxisY.IsLogarithmic)
                 {
                     valu = Math.Pow(10, valu);
                 }
@@ -311,7 +341,8 @@ namespace DaphneGui
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
 
                     //Just change the value in the molpop and that will lead to a call to dblConcs_PropertyChanged in ChartViewToolWindow.xaml.cs
-                    ConfigMolecularPopulation molpop = ToolWin.CRC.molpops.Where(m => m.molecule.entity_guid == guid).First();
+                    VatReactionComplexScenario s = ToolWin.protocol.scenario as VatReactionComplexScenario;
+                    ConfigMolecularPopulation molpop = s.AllMols.Where(m => m.molecule.entity_guid == guid).First();
                     if (molpop != null)
                     {
                         MolPopHomogeneousLevel homogeneous = molpop.mp_distribution as MolPopHomogeneousLevel;
@@ -372,21 +403,8 @@ namespace DaphneGui
                 colorCount++;
             }
 
-            if (IsXLogarithmic)
-            {
-                chartArear1.AxisX.Minimum = ListTimes.Where(a => a > 0).Min();
-                chartArear1.AxisX.Minimum = Math.Pow(10, Math.Floor(Math.Log10(chartArear1.AxisX.Minimum)));
-            }
-            else
-            {
-                chartArear1.AxisX.Minimum = 0;
-            }
-
-            chartArear1.AxisY.Minimum = getMin_Series(DictConcs) * 0.9;
-            if (IsYLogarithmic)
-            {
-                chartArear1.AxisY.Minimum = Math.Pow(10, Math.Floor(Math.Log10(chartArear1.AxisY.Minimum)));
-            }
+            SetXAxisLimits();
+            SetYAxisLimits();
 
             LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
@@ -406,9 +424,6 @@ namespace DaphneGui
                 LabelX = "Time (log)";
             }
 
-            chartArear1.AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
-
-            chartArear1.AxisX.Maximum = x.Max() * 1.11;   //x.Max() * 1.1 + 0.01;
             chartArear1.AxisX.Title = LabelX;
             chartArear1.AxisY.Title = LabelY;
             chartArear1.AxisX.TitleFont = new Font("Arial", 8);
@@ -444,8 +459,12 @@ namespace DaphneGui
             // Set chart control location
             Location = new System.Drawing.Point(1, 8);
 
-            CalculateXMax();
-            CalculateYMax();
+            SetXAxisLimits();
+            SetYAxisLimits();
+            
+            //// For debugging
+            //Console.WriteLine("Draw() final: {0}, {1}\t {2}, {3}", ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, 
+            //                                                        ChartAreas.First().AxisY.Minimum, ChartAreas.First().AxisY.Maximum);
 
             Focus();
             Invalidate();
@@ -478,13 +497,15 @@ namespace DaphneGui
             Series.Add(s);
             for (int i = 0; i < n; i++)
             {
-                double yval = y[i];
-                double xval = x[i];
-                //if logarithmic
-                if (!((IsYLogarithmic && yval <= 0) || (IsXLogarithmic && xval <= 0)))
+                if (ValidPoint(x[i], y[i]))
                 {
-                    s.Points.AddXY(xval, yval);
+                    s.Points.AddXY(x[i], y[i]);
                 }
+            }
+
+            if (s.Points.Count == 0)
+            {
+                Series.Remove(s);
             }
 
             // Add series to the chart
@@ -500,9 +521,8 @@ namespace DaphneGui
             s.MarkerSize = 4;
             s.MarkerStyle = MarkerStyle.None;
 
+            // Plot every data point
             s.MarkerStep = 1;
-            if (n / 10 > 1)
-                s.MarkerStep = n / 10;
 
             s.Color = colorTable[_color % colorTable.Count];
 
@@ -526,40 +546,69 @@ namespace DaphneGui
         private Series FindSeriesAtPoint(double startY)
         {
             Series s = null;
+            double lowest = ChartAreas.First().AxisY.Maximum - ChartAreas.First().AxisY.Minimum;
+            double delta = lowest * 0.05; 
+            double low = startY - delta;   
+            double high = startY + delta;
 
-            double min = getMin_Series(DictConcs);      //gets min of all series
-            double max = getMax_Series(DictConcs);      //gets max of all series
-            double low = startY - (max - min) * 0.05;   //5% is calculated as 5% of range of all series'
-            double high = startY + (max - min) * 0.05;
-
-            double lowest = 1000000000;
-
+            double y;
             foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
             {
-                double[] y;
-                string seriesName = "";
-                y = entry.Value.ToArray();
+                y = entry.Value[0];
 
-
-                if ((y[0] <= 0) && ChartAreas[0].AxisY.IsLogarithmic)
+                if ((y <= 0) && ChartAreas.First().AxisY.IsLogarithmic)
                     continue;
 
-                //Select the point if user clicked within 5% of it              
-                if (y[0] >= low && y[0] <= high)
+                //Consider this series if the user clicked within 5% of it's first value            
+                if (y >= low && y <= high)
                 {
-                    double dist = Math.Abs(startY - y[0]);
+                    double dist = Math.Abs(startY - y);
                     if (dist < lowest)
                     {
                         lowest = dist;
-                        seriesName = ConvertMolGuidToMolName(entry.Key);
-                        s = Series.FindByName(seriesName);
+                        s = Series.FindByName(ConvertMolGuidToMolName(entry.Key));
                     }
                 }
-
-                //Must find the closest series, not the first one 'near' the click
             }
 
             return s;
+        }
+
+        /// <summary>
+        /// This updates the list of series for this graph
+        /// </summary>
+        public void UpdateSeries()
+        {
+            ListTimes = ToolWin.RC.ListTimes;
+            DictConcs = ToolWin.RC.DictGraphConcs;
+
+            //Remove any series that is no longer in DictConcs
+            foreach (Series s in Series.ToList())
+            {
+                string guid = ConvertMolNameToMolGuid(s.Name);
+                if (DictConcs.ContainsKey(guid) == false)
+                {
+                    Series.Remove(s);
+                }
+            }
+
+            //Add any series that are in DictConcs but not in this.Series
+            foreach (string guid in DictConcs.Keys)
+            {
+                string molname = ConvertMolGuidToMolName(guid);
+                bool exists = Series.Where(ser => ser.Name == molname).Any();
+                if (exists == false)
+                {
+                    Series s = new Series(molname);
+                    s.ChartType = SeriesChartType.Line;
+                    s.ChartArea = this.ChartAreas.First().Name;
+                    s.MarkerSize = 4;
+                    s.MarkerStyle = MarkerStyle.None;
+                    s.MarkerStep = 1;
+                    s.Color = colorTable[0 % colorTable.Count];
+                    this.Series.Add(s);
+                }
+            }
         }
 
         /// <summary>
@@ -577,18 +626,24 @@ namespace DaphneGui
             foreach (Series s in Series)
             {
                 s.Points.Clear();
+                
                 string guid = ConvertMolNameToMolGuid(s.Name);
+
+                //This prevents a crash in case DictConcs contains fewer items than Series (if user removed 
+                //a reaction or turned off rendering for a molecule and did not click the Run button).
+                //If UpdateSeries was called before this function, this should not happen anyway.
+                if (DictConcs.ContainsKey(guid) == false)
+                    continue;
+
                 List<double> values = DictConcs[guid];
                 y = values.ToArray();
 
                 int n = x.Count() <= y.Count() ? x.Count() : y.Count();
                 for (int i = 0; i < n; i++)
                 {
-                    double xval = x[i];
-                    double yval = y[i];
-                    if (!((IsYLogarithmic && yval <= 0) || (IsXLogarithmic && xval <= 0)))
+                    if (ValidPoint(x[i], y[i]))
                     {
-                        s.Points.AddXY(xval, yval);
+                        s.Points.AddXY(x[i], y[i]);
                     }
                 }
 
@@ -603,7 +658,6 @@ namespace DaphneGui
                         if (s == SeriesToDrag)
                         {
                             s.Points[0].MarkerColor = Color.Red;
-                            //s.Points[0].Label = ToolWin.txtMouseHover.Text; 
                             s.Points[0].Label = ToolWin.dblMouseHover.FNumber;
                         }
                     }
@@ -614,11 +668,40 @@ namespace DaphneGui
             }
 
             //HAVE TO UPDATE X AXIS MAX TOO
-            CalculateXMax();
-            CalculateYMax();
+            SetXAxisLimits();
+            SetYAxisLimits();
+
+            // For debugging
+            ////Console.WriteLine("RedrawSeries(): {0}, {1}\t {2}, {3}",
+            //    ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, ChartAreas.First().AxisY.Minimum, ChartAreas.First().AxisY.Maximum);
 
             //Focus();
             Invalidate();
+        }
+
+        public bool ValidPoint(double xval, double yval)
+        {
+            if (IsYLogarithmic && yval <= 0)
+            {
+                return false;
+            }
+
+            if (IsXLogarithmic && xval <= 0)
+            {
+                return false;
+            }
+
+            if (double.IsNaN(yval))
+            {
+                return false;
+            }
+
+            if (double.IsNaN(xval) )
+            {
+                return false;
+            }
+
+            return true;
         }
 
 

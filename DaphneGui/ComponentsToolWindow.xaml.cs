@@ -96,6 +96,7 @@ namespace DaphneGui
             gm.Name = gm.GenerateNewName(level, "_New");
 
             level.entity_repository.molecules.Add(gm);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderMol(gm.renderLabel, gm.Name);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
@@ -114,6 +115,7 @@ namespace DaphneGui
             ConfigMolecule newmol = cm.Clone(level);
             
             level.entity_repository.molecules.Add(newmol);
+            MainWindow.SOP.SelectedRenderSkin.AddRenderMol(newmol.renderLabel, newmol.Name);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
@@ -176,6 +178,7 @@ namespace DaphneGui
 
         private void btnCopyReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
             if (lbComplexes.SelectedIndex < 0)
             {
                 MessageBox.Show("Select a reaction complex to copy from.");
@@ -193,6 +196,7 @@ namespace DaphneGui
 
         private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex, null);
             if (arc.ShowDialog() == true)
                 lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
@@ -200,6 +204,7 @@ namespace DaphneGui
 
         private void btnEditReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
             ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
             if (crc == null)
                 return;
@@ -211,6 +216,7 @@ namespace DaphneGui
 
         private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
             if (crc != null)
             {
@@ -273,6 +279,8 @@ namespace DaphneGui
                 cm.ValidateName(p);
             }
 
+            MainWindow.SOP.SelectedRenderSkin.SetRenderMolName(cm.renderLabel, cm.Name);
+
             int index = dgLibMolecules.SelectedIndex;
             dgLibMolecules.InvalidateVisual();
             dgLibMolecules.Items.Refresh();
@@ -283,6 +291,7 @@ namespace DaphneGui
 
         private void DrawSelectedReactionComplex()
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
             //Cleanup any previous RC stuff
@@ -325,6 +334,7 @@ namespace DaphneGui
 
         public ConfigReactionComplex GetConfigReactionComplex()
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
             if (lbComplexes.SelectedIndex < 0)
             {
                 MessageBox.Show("Select a reaction complex to process.");
@@ -349,6 +359,8 @@ namespace DaphneGui
 
         private void btnSaveReacToProtocol_Click(object sender, RoutedEventArgs e)
         {
+            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
+            ListView lvReacComplexReactions = RCControl.ListViewReacComplexReactions;
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
             if (crc == null)

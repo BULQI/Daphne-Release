@@ -2,10 +2,14 @@
   "experiment_db_id": 0,
   "experiment_name": "Blank Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "6ce01b36-36e4-48e9-9ec2-6108c2a4457b",
+  "experiment_guid": "eeffa1bc-521d-439c-953b-04b9810cd7df",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
+    "popOptions": {
+      "cellPopOptions": [],
+      "molPopOptions": []
+    },
     "time_config": {
       "duration": 2.0,
       "rendering_interval": 0.2,

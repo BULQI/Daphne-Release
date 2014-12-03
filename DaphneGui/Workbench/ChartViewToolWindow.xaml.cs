@@ -30,16 +30,17 @@ namespace Workbench
         public List<double> lTimes = new List<double>();
         private ReactionComplexChart Chart;
         public VatReactionComplex RC { get; set; }      //Simulation object - used to plot graph
-        public ConfigReactionComplex CRC { get; set; }  //ConfigReactionComplex object - used for gui display and changes and not graph data
+        public Protocol protocol { get; set; }
         public MainWindow MW;       //handle to main window
         public bool redraw_flag;    //true if redraw and not creating a new chart
 
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ChartViewToolWindow()
         {
             InitializeComponent();
-            //chartSize = new System.Drawing.Size(700, 300);
-            CRC = DataContext as ConfigReactionComplex;
+            protocol = DataContext as Protocol;
             Chart = new ReactionComplexChart();
             Chart.panelRC = panelRC;
             Chart.ToolWin = this;
@@ -49,16 +50,22 @@ namespace Workbench
             Chart.MouseUp += new System.Windows.Forms.MouseEventHandler(Chart_MouseUp);
         }
 
+        /// <summary>
+        /// This is called for initial draw and for redraws
+        /// Tag is used to store a pointer to VatReactionComplex (from simulation side).  This is what is drawn.
+        /// DataContext is Protocol. When the user changes mol concs or reac rates on right side, the changes are made on Config side.
+        /// </summary>
         public void Render()
         {
-            RC = Tag as VatReactionComplex;
-            CRC = DataContext as ConfigReactionComplex;
+            RC = Tag as VatReactionComplex;       
+            protocol = DataContext as Protocol;
 
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
             if (redraw_flag == true)
             {
+                Chart.UpdateSeries();
                 Chart.RedrawSeries();
             }
             else
@@ -66,24 +73,9 @@ namespace Workbench
                 Chart.Clear();
                 if (lTimes.Count > 0 && dictConcs.Count > 0)
                 {
+                    Chart.Initialize();
                     Chart.ListTimes = lTimes;
                     Chart.DictConcs = dictConcs;
-
-                    Chart.LabelX = "Time";
-                    Chart.LabelY = "Concentration";
-                    Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
-                    Chart.DrawLine = true;
-
-                    System.Windows.Forms.MenuItem[] menuItems = 
-                    {   
-                        new System.Windows.Forms.MenuItem("Zoom in"),
-                        new System.Windows.Forms.MenuItem("Zoom out"),
-                        new System.Windows.Forms.MenuItem("Save Changes"),
-                        new System.Windows.Forms.MenuItem("Discard Changes"),
-                    };
-
-                    System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                    Chart.SetContextMenu(menu);
 
                     btnIncSize.IsEnabled = true;
                     btnDecSize.IsEnabled = true;
@@ -100,9 +92,13 @@ namespace Workbench
             if (Chart != null) {
                 Chart.Clear();
             }
-
         }
         
+        /// <summary>
+        /// Zoom In
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
         {
             if (Chart == null)
@@ -124,13 +120,15 @@ namespace Workbench
             windowsFormsHost1.Width = w;
             windowsFormsHost1.Height = h;
             
-            //chartSize = sz;
             Chart.Size = sz;
-
             Chart.Draw();
-                       
         }
 
+        /// <summary>
+        /// Zoom Out
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnDecSize_Click(object sender, RoutedEventArgs e)
         {
             if (Chart == null)
@@ -147,55 +145,9 @@ namespace Workbench
             windowsFormsHost1.Width = windowsFormsHost1.Width * 0.9;
             windowsFormsHost1.Height = windowsFormsHost1.Height * 0.9;            
 
-            //chartSize = sz;
             Chart.Size = sz;
             Chart.Draw();            
         }        
-
-        //////KEEP THIS
-        //////private void btnDiscard_Click(object sender, RoutedEventArgs e)
-        //////{
-        //////    if (RC == null)
-        //////        return;
-
-        //////    RC.RestoreOriginalConcs();
-        //////    //Fix this
-        //////    ////RC.RestoreOriginalRateConstants();
-
-        //////    //if (toggleButton != null)
-        //////    //{
-        //////    //    //This causes a redraw
-        //////    //    toggleButton.IsChecked = true;
-        //////    //}
-        //////}
-
-
-        //////KEEP THIS
-        ////private void btnSave_Click(object sender, RoutedEventArgs e)
-        ////{
-        ////    if (Chart != null)
-        ////    {
-        ////        Chart.SaveChanges();
-        ////    }
-        ////}
-        //private void btnDiscard_Click(object sender, EventArgs e)
-        //{
-        //    ////HERE JUST NEED TO COPY FROM PROTOCOL TO ENTITY!!
-
-        //    //RC.RestoreOriginalConcs();
-        //    //RC.RunForward();
-        //    //Chart.ListTimes = RC.ListTimes;
-        //    //Chart.DictConcs = RC.DictGraphConcs;
-        //    //Chart.DrawChart();
-        //}
-
-        //private void btnSave_Click(object sender, EventArgs e)
-        //{
-        //    //if (Chart != null)
-        //    //{
-        //    //    Chart.SaveChanges();
-        //    //}
-        //}
 
         /// <summary>
         /// This handler is called if user changes a reaction rate by slider or in text box
@@ -212,6 +164,11 @@ namespace Workbench
             }
         }
 
+        /// <summary>
+        /// Push button to toggle X-Axis between linear and logarithmic
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnX_Axis_Click(object sender, RoutedEventArgs e)
         {
             if (Chart == null)
@@ -229,6 +186,11 @@ namespace Workbench
             Chart.Draw();
         }
 
+        /// <summary>
+        /// Push button to toggle Y-Axis between linear and logarithmic
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnY_Axis_Click(object sender, RoutedEventArgs e)
         {
             if (Chart == null)
@@ -259,11 +221,6 @@ namespace Workbench
                 MW.runSim();
                 //MW.runButton_Click(null, null);
             }
-        }
-
-        private void btnSaveReport_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void dgInitConcs_DragStarted(object sender, DragStartedEventArgs e)

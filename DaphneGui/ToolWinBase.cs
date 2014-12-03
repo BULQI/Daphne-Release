@@ -334,8 +334,34 @@ namespace DaphneGui
             return MW.saveDialog();
         }
 
-    }
+        /// <summary>
+        /// Filter any molecules that cannot be pushed between levels (eg., boundary molecules VatRC)
+        /// </summary>
+        /// <param name="configMol"></param>
+        /// <returns></returns>
+        public virtual void PushMoleculeFilter(object configMol, Level level)
+        {
+        }
 
+        /// <summary>
+        /// Filter any reactions that cannot be pushed between levels (eg., boundary and gene reactions for VatRC)
+        /// </summary>
+        /// <param name="configReac"></param>
+        /// <returns></returns>
+        public virtual void PushReactionFilter(object configReac, Level level)
+        {
+        }
+
+        /// <summary>
+        /// Filter any reaction complexes that cannot be pushed between levels (eg., RCs that contain boundary or gene reactions for VatRC)
+        /// </summary>
+        /// <param name="configReacComplex"></param>
+        /// <returns></returns>
+        public virtual void PushReactionComplexFilter(object configReacComplex, Level level)
+        {
+        }
+
+    }
 
     public class ToolwinComponentVisibilityConverter : IValueConverter
     {
@@ -351,6 +377,8 @@ namespace DaphneGui
                     case "ComponentsToolWindow":
                     case "CellStudioToolWindow":
                     case "ComponentsToolWindow_Genes":
+                    case "CatalogGenes":
+                    case "CatalogCells":
                         return Visibility.Visible;
                 }
             }

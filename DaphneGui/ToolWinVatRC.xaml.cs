@@ -64,6 +64,13 @@ namespace DaphneGui
 
         }
 
+        private void ButtonSaveRCToProtocol_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc_curr = (ConfigReactionComplex)(RCControl.ListBoxReactionComplexes.SelectedItem);
+            ConfigReactionComplex crc_new = crc_curr.Clone(true);
+            MainWindow.GenericPush(crc_new);
+        }
+
         protected override bool CellHasMolecule(string molguid, bool isMembrane, ConfigCell cell)
         {
             throw new Exception("VatReactionComplex does not implement CellHasMolecule method.");
@@ -96,7 +103,7 @@ namespace DaphneGui
             {
                 MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
                 MW.ReacComplexChartWindow.MW = MW;
-                MW.ReacComplexChartWindow.DataContext = GetSelectedReactionComplex();
+                MW.ReacComplexChartWindow.DataContext = this.Protocol;
                 MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
                 
@@ -121,6 +128,70 @@ namespace DaphneGui
         {
             ((VatReactionComplexReporter)MainWindow.Sim.Reporter).reportOn = true;
             MW.runButton_Click(null, null);
+        }
+
+        /// <summary>
+        /// Filter out boundary molecules
+        /// </summary>
+        /// <param name="configMol"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public override void PushMoleculeFilter(object configMols, Level level)
+        {
+            ObservableCollection<ConfigMolecule> mols = configMols as ObservableCollection<ConfigMolecule>;
+            EntityRepository er = level.entity_repository;   //MainWindow.SOP.Protocol.entity_repository;
+            // Filter out boundary mols
+            foreach (ConfigMolecule mol in mols.ToList())
+            {
+                if (mol.molecule_location == MoleculeLocation.Boundary)
+                {
+                    mols.Remove(mol);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Filter out boundary and gene reactions
+        /// </summary>
+        /// <param name="configReacs"></param>
+        /// <param name="level"></param>
+        public override void PushReactionFilter(object configReacs, Level level)
+        {
+            ObservableCollection<ConfigReaction> reacs = configReacs as ObservableCollection<ConfigReaction>;
+            EntityRepository er = level.entity_repository;   //MainWindow.SOP.Protocol.entity_repository;
+            // Filter out boundary and gene reactions
+            foreach (ConfigReaction reac in reacs.ToList())
+            {
+                if (reac.IsBoundaryReaction(er) || reac.HasGene(er)) {
+                    reacs.Remove(reac);
+                }
+                
+            }
+        }
+
+        /// <summary>
+        /// Filter out reaction complexes with boundary and gene reactions
+        /// </summary>
+        /// <param name="configReacComplexes"></param>
+        /// <param name="level"></param>
+        public override void PushReactionComplexFilter(object configReacComplexes, Level level)
+        {
+            ObservableCollection<ConfigReactionComplex> rcs = configReacComplexes as ObservableCollection<ConfigReactionComplex>;
+            EntityRepository er = level.entity_repository;  
+            // Filter out reaction complexes with boundary and gene reactions
+            foreach (ConfigReactionComplex crc in rcs.ToList())
+            {
+                for (int i = 0; i < crc.reactions.Count; i++ )
+                {
+                    if (crc.reactions[i].IsBoundaryReaction(er) || crc.reactions[i].HasGene(er))
+                    {
+                        rcs.Remove(crc);
+                        break;
+                    }
+                }
+
+            }
         }
 
     }

@@ -41,6 +41,10 @@ namespace Daphne
         /// handle to the simulation
         /// </summary>
         private SimulationBase hSim;
+        /// <summary>
+        /// data file
+        /// </summary>
+        public static HDF5File hdf5file;
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -68,9 +72,32 @@ namespace Daphne
             populations = new Dictionary<int, Dictionary<int, Cell>>();
             molecules = new Dictionary<string, Molecule>();
             genes = new Dictionary<string, Gene>();
+            // create the hdf5 object
+            hdf5file = new HDF5File();
 #if ALL_DATA
             ResetTrackData();
 #endif
+        }
+
+        /// <summary>
+        /// find the highest experiment id; assumes it is the last entry
+        /// </summary>
+        /// <returns>the highest id or -1 if empty</returns>
+        public static int findHighestExperimentId()
+        {
+            List<string> local = hdf5file.subGroupNames("/Experiments_VCR");
+
+            if (local.Count > 0)
+            {
+                string last = local.Last();
+                string[] parts = last.Split('_');
+
+                if(parts.Length >= 2)
+                {
+                    return Convert.ToInt32(parts[1]);
+                }
+            }
+            return -1;
         }
 
         /// <summary>
@@ -504,17 +531,12 @@ namespace Daphne
             return false;
         }
 
-#if ALL_DATA
         /// <summary>
         /// update all cells given a list of db rows
         /// </summary>
-        /// <param name="list">the db data</param>
-        /// <param name="progress">the progress state of playback</param>
-        public void UpdateCells(Dictionary<int, DBDict> list, int progress)
+        /// <param name="list">the frame data</param>
+        public void UpdateCells(TissueSimulationFrameData frame)
         {
-            // iterate through the list and update cells; we have to detect those that are new from division or got deleted by death
-            ConnectToExperiment();
-
             List<int> removalList = new List<int>();
 
             foreach (int key in cells.Keys)
@@ -522,16 +544,26 @@ namespace Daphne
                 removalList.Add(key);
             }
 
-            foreach (KeyValuePair<int, DBDict> kvpc in list)
+            foreach (int cell_id in frame.CellIDs)
             {
                 // take off the removal list
-                removalList.Remove(kvpc.Value.cell_id);
+                removalList.Remove(cell_id);
 
                 // if the cell exists update it
-                if (cells.ContainsKey(kvpc.Value.cell_id))
+                if (cells.ContainsKey(cell_id))
                 {
-                    ObjectLoader.LoadValues(cells[kvpc.Value.cell_id], kvpc.Value.state);
+#if CELL_CREATE
+                    // Note: we may not need this again; it's a leftover from the old
+                    // db implementation, but we need some mechanism to set the entire state
+                    ObjectLoader.LoadValues(cells[cell_id], kvpc.Value.state);
+#else
+                    for(int i = 0; i < CellSpatialState.SingleDim; i++)
+                    {
+                        cells[cell_id].SpatialState.X[i] = frame.CellPos[cell_id * CellSpatialState.SingleDim + i];
+                    }
+#endif
                 }
+#if CELL_CREATE
                 // create a new cell
                 else
                 {
@@ -607,6 +639,7 @@ namespace Daphne
                         }
                     }
                 }
+#endif
             }
 
             // remove cells
@@ -614,12 +647,10 @@ namespace Daphne
             {
                 RemoveCell(key);
             }
-
-            MainWindow.VTKBasket.UpdateData();
-            MainWindow.GC.DrawFrame(progress);
         }
     }
 
+#if ALL_DATA
     /// <summary>
     /// Data structure for single cell track data
     /// Reproduction of data structures and database methods from LPManager so can
@@ -703,6 +734,6 @@ namespace Daphne
             set { zeroForceTrackText = value; }
         }
 
-#endif
     }
+#endif
 }

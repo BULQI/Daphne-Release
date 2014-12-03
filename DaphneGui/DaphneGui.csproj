@@ -112,6 +112,9 @@
     <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.2.0\lib\net40-client\Castle.Core.dll</HintPath>
     </Reference>
+    <Reference Include="HDF5DotNet">
+      <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
+    </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
     </Reference>
@@ -227,6 +230,9 @@
     <Compile Include="ReactionComplexControl.xaml.cs">
       <DependentUpon>ReactionComplexControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ReactionComplexesInStore.xaml.cs">
+      <DependentUpon>ReactionComplexesInStore.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
     <Compile Include="RenderSkinEditor.xaml.cs">
@@ -340,6 +346,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ReactionComplexControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReactionComplexesInStore.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

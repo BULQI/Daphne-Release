@@ -31,8 +31,7 @@
         <CollectionViewSource x:Key="availableBulkMoleculesListView"/>
         <CollectionViewSource x:Key="availableBoundaryMoleculesListView"/>
         <CollectionViewSource x:Key="moleculesListView"  />
-        
-        <!--<CollectionViewSource x:Key="cytoGenes2ListView" />-->
+   
         <CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
                                   Filter="cytosolAvailableReactionsListView_Filter"/>
 
@@ -367,13 +366,6 @@
 
                                 <StackPanel Orientation="Vertical" >
                                     <StackPanel.Resources>
-                                        <!--<DataTemplate x:Key="cellGeneListItemTemplate">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Margin="10,0" Text="{Binding   Converter={StaticResource GeneGUIDtoNameConv},  
-                                                                                ConverterParameter={StaticResource cytoGenes2ListView}}">
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </DataTemplate>-->
                                     </StackPanel.Resources>
                                     <ListBox x:Name="CellNucleusGenesListBox" MinHeight="10" MaxHeight="100" 
                                                                     ItemsSource="{Binding Path=genes}" 

@@ -1939,7 +1939,7 @@ namespace DaphneGui
         {
         }
 
-        public void SetupChartData(Compartment _comp, double[] _defaultLoc, List<double> listTimes, Dictionary<string, List<double>> dictGraphConcs)
+        public void SetupChartData(Compartment _comp, double[] _defaultLoc, List<double> listTimes, Dictionary<string, List<double>> dictGraphConcs, RenderPopOptions rpo)
         {
             comp = _comp;
             defaultLoc = (double[])_defaultLoc.Clone();
@@ -1947,12 +1947,20 @@ namespace DaphneGui
             DictGraphConcs = dictGraphConcs;
 
             Cleanup();
-
+            
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
-                DictGraphConcs.Add(kvp.Key, new List<double>());
-            }
+                string molname = kvp.Value.Molecule.Name;
+                if (rpo.molPopOptions.Where(m => m.name == kvp.Value.Molecule.Name).Any())
+                {
+                    RenderPop rp = rpo.molPopOptions.Where(m => m.name == kvp.Value.Molecule.Name).First();
 
+                    if (rp.renderOn)
+                    {
+                        DictGraphConcs.Add(kvp.Key, new List<double>());
+                    }
+                }
+            }
         }
 
         public void UpdateData(double accumulatedTime)
@@ -1960,7 +1968,10 @@ namespace DaphneGui
             ListTimes.Add(accumulatedTime);
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
-                DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+                if (DictGraphConcs.ContainsKey(kvp.Key) == true)
+                {
+                    DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+                }
             }
         }
 
@@ -1990,7 +2001,10 @@ namespace DaphneGui
             hSim = (VatReactionComplex)MainWindow.Sim;
             Compartment comp = SimulationBase.dataBasket.Environment.Comp;
 
-            chartData.SetupChartData(comp, new double[]{0.0, 0.0, 0.0}, hSim.ListTimes, hSim.DictGraphConcs);
+            VatReactionComplexScenario scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
+            RenderPopOptions rpo = scenarioHandle.popOptions;
+
+            chartData.SetupChartData(comp, new double[]{0.0, 0.0, 0.0}, hSim.ListTimes, hSim.DictGraphConcs, rpo);
         }
 
         public void UpdateData()

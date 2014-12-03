@@ -116,12 +116,15 @@ namespace DaphneGui
             cmp.molecule = null;
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
-            foreach (ConfigMolecule item in cvs.View)
+            if (cvs.View != null)
             {
-                if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
-                cmp.molecule = item;
-                cmp.Name = cmp.molecule.Name;
-                break;
+                foreach (ConfigMolecule item in cvs.View)
+                {
+                    if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                    cmp.molecule = item;
+                    cmp.Name = cmp.molecule.Name;
+                    break;
+                }
             }
             if (cmp.molecule == null) return;
 
@@ -1315,17 +1318,11 @@ namespace DaphneGui
         {
             CollectionViewSource cvs;
 
-            if (this.Tag == null)
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
             {
                 return;
             }
-
-            if ((CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem == null)
-            {
-                return;
-            }
-
-            CellPopulation cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
 
             // MOLECULES
 
@@ -1354,25 +1351,11 @@ namespace DaphneGui
                 cvs.Source = new ObservableCollection<ConfigMolecule>();
             }
             ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
-            foreach (ConfigMolecularPopulation configMolpop in cellpop.Cell.cytosol.molpops)
+            //foreach (ConfigMolecularPopulation configMolpop in cellpop.Cell.cytosol.molpops)
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
             }
-
-            // GENES
-
-            //// cellGeneListItemTemplate - listbox of genes in the cell
-            //cvs = (CollectionViewSource)(FindResource("cytoGenes2ListView"));
-            //if (cvs.Source == null)
-            //{
-            //    cvs.Source = new ObservableCollection<ConfigGene>();
-            //}
-            //((ObservableCollection<ConfigGene>)cvs.Source).Clear();
-            //cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
-            //foreach (ConfigGene configGene in cellpop.Cell.genes)
-            //{
-            //    ((ObservableCollection<ConfigGene>)cvs.Source).Add(configGene);
-            //}
 
             // REACTIONS
 
