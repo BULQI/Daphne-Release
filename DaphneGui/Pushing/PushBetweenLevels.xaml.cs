@@ -119,7 +119,9 @@ namespace DaphneGui.Pushing
             {
                 case PushLevelEntityType.Molecule:
                     LeftList = LevelA.entity_repository.molecules;
+                    MainWindow.ToolWin.PushMoleculeFilter(LeftList, LevelA);
                     RightList = LevelB.entity_repository.molecules;
+                    MainWindow.ToolWin.PushMoleculeFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.Gene:
                     LeftList = LevelA.entity_repository.genes;
@@ -127,9 +129,9 @@ namespace DaphneGui.Pushing
                     break;
                 case PushLevelEntityType.Reaction:
                     LeftList = LevelA.entity_repository.reactions;
-                    //LeftList = MainWindow.ToolWin.PushReactionFilter(LeftList);
+                    MainWindow.ToolWin.PushReactionFilter(LeftList, LevelA);
                     RightList = LevelB.entity_repository.reactions;
-                    //RightList = MainWindow.ToolWin.PushReactionFilter(RightList);
+                    MainWindow.ToolWin.PushReactionFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.Cell:
                     LeftList = LevelA.entity_repository.cells;
@@ -145,9 +147,9 @@ namespace DaphneGui.Pushing
                     break;
                 case PushLevelEntityType.ReactionComplex:
                     LeftList = LevelA.entity_repository.reaction_complexes;
-                    //LeftList = MainWindow.ToolWin.PushReactionComplexFilter(LeftList);
+                    MainWindow.ToolWin.PushReactionComplexFilter(LeftList, LevelA);
                     RightList = LevelB.entity_repository.reaction_complexes;
-                    //RightList = MainWindow.ToolWin.PushReactionComplexFilter(RightList);
+                    MainWindow.ToolWin.PushReactionComplexFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.TransDriver:
                     LeftList = LevelA.entity_repository.transition_drivers;
@@ -641,6 +643,7 @@ namespace DaphneGui.Pushing
                     //    return;
                     //}
                     levelB.repositoryPush(newmol, status);
+                    MainWindow.SOP.SelectedRenderSkin.AddRenderMol(newmol.renderLabel, newmol.Name);
                     break;
                 case PushLevelEntityType.Gene:
                     ConfigGene newgene = ((ConfigGene)entity).Clone(null);
@@ -671,6 +674,7 @@ namespace DaphneGui.Pushing
                     //    return;
                     //}
                     levelB.repositoryPush(newcell, status, levelA, true);
+                    MainWindow.SOP.SelectedRenderSkin.AddRenderCell(newcell.renderLabel, newcell.CellName);
                     break;
                 case PushLevelEntityType.DiffScheme:
                     //status = levelB.pushStatus(entity);

@@ -172,10 +172,14 @@
                 
                 <MenuItem Header="Catalogs"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
-                    <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
+                    <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" 
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CatalogGenes}"/>
                     <MenuItem Header="Reactions..."              Name="pushReac"        Click="pushReac_Click" />
                     <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />
-                    <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" />
+                    <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" 
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CatalogCells}"/>
                     <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" IsEnabled="False"/>
                     <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" IsEnabled="False"/>
                 </MenuItem>
