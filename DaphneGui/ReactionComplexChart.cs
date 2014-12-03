@@ -270,7 +270,6 @@ namespace DaphneGui
         private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             bDrag = false;
-            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
             //Circle was red during drag so change it back to gold
             if (SeriesToDrag != null)
             {
@@ -618,7 +617,7 @@ namespace DaphneGui
             CalculateXMax();
             CalculateYMax();
 
-            Focus();
+            //Focus();
             Invalidate();
         }
 

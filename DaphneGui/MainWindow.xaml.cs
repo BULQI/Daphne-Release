@@ -113,6 +113,7 @@ namespace DaphneGui
         private static bool argDev = false, argBatch = false, argSave = false;
         private string argScenarioFile = "";
         private bool mutex = false;
+        public ManualResetEvent runFinishedEvent = new ManualResetEvent(true);
 
         /// <summary>
         /// uri for the scenario file
@@ -2266,6 +2267,8 @@ namespace DaphneGui
                                 }
                                 else if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
                                 {
+                                    //signal run finished if any one is waiting
+                                    runFinishedEvent.Set();
                                     // autosave the state
                                     if (argSave == true)
                                     {
@@ -2635,6 +2638,7 @@ namespace DaphneGui
                         statusBarMessagePanel.Content = "Running...";
                         abortButton.IsEnabled = true;
                     }
+                    runFinishedEvent.Reset();
                     sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 }
             }
