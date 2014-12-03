@@ -119,6 +119,9 @@
     <Reference Include="DaphneUserControlLib">
       <HintPath>..\dependencies\DaphneUserControlLib.dll</HintPath>
     </Reference>
+    <Reference Include="HDF5DotNet">
+      <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
+    </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
     </Reference>
