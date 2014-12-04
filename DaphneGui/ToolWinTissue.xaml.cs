@@ -304,7 +304,7 @@ namespace DaphneGui
             //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
         }
 
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        private void TissuePushCellButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = CellPopControl.SelectedCell;
 

@@ -538,21 +538,6 @@ namespace DaphneGui
             cp.number = cp.CellStates.Count;
         }
 
-
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
-
-            //Error case
-            if (cellpop == null)
-                return;
-
-            //Push cell
-            ConfigCell cell = cellpop.Cell;
-            ConfigCell newcell = cell.Clone(true);
-            MainWindow.GenericPush(newcell);
-        }
-
         //This method is called when the user clicks the Remove Cell button
         private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {

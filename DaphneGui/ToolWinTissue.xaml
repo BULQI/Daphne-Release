@@ -97,7 +97,7 @@
                             <!--DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"/>-->
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
-                                <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." Click="EcsPushCellButton_Click"/>
+                                <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." Click="TissuePushCellButton_Click"/>
                             </StackPanel>
 
                             <StackPanel Margin="10,0">
