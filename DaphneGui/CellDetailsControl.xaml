@@ -130,7 +130,7 @@
                                 </TabItem.Header>
 
                                 <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="30" MaxHeight="100"
+                                    <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="20" MaxHeight="100"
                                             ItemsSource="{Binding Path=membrane.molpops}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="0" 
@@ -241,7 +241,7 @@
                                 </TabItem.Header>
 
                                 <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" MaxHeight="100" 
+                                    <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="20" MaxHeight="100" 
                                                 ItemsSource="{Binding Path=cytosol.molpops}" 
                                                 DisplayMemberPath="Name"     
                                                 SelectedIndex="0"
