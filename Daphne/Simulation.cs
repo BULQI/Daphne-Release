@@ -444,11 +444,15 @@ namespace Daphne
             // make sure the simulation does not start to run immediately
             RunStatus = RUNSTAT_OFF;
 
+            //Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+
             // exit if no reset required
             if (completeReset == false)
             {
                 return;
             }
+
+            Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
 
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(protocol.scenario));
@@ -953,7 +957,8 @@ namespace Daphne
                 {
                     cp.renderLabel = cp.Cell.entity_guid;
                 }
-                
+
+                double[] temp = new double[cp.number];
                 for (int i = 0; i < cp.number; i++)
                 {
                     // only report boundary reaction failures for the first cell of the population
@@ -973,6 +978,8 @@ namespace Daphne
                         // report if a reaction could not be inserted
                         boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
                     }
+                    temp[i] = dataBasket.Cells.Last().Value.Locomotor.TransductionConstant;
+                    Console.WriteLine("{0}\n", dataBasket.Cells.Last().Value.Locomotor.TransductionConstant);
                 }
             }
 
