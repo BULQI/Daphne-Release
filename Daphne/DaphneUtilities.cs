@@ -41,7 +41,7 @@ namespace Daphne
             MersenneTwister = new MersenneTwister(seed);
             NormalDist = new MathNet.Numerics.Distributions.Normal(0.0, 1.0, MersenneTwister);
             UniformDist = new MathNet.Numerics.Distributions.ContinuousUniform(0.0, 1.0, MersenneTwister);
-            MT19937gen = new Troschuetz.Random.MT19937Generator();
+            MT19937gen = new Troschuetz.Random.MT19937Generator(seed);
             TroschuetzCUD = new Troschuetz.Random.ContinuousUniformDistribution(Rand.MT19937gen);
             //SystemRandom = new SystemRandomSource(seed);
         }
