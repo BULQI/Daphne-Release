@@ -68,9 +68,9 @@
                         CanExecute="CommandBindingSave_CanExecute" 
                         Executed="CommandBindingSave_Executed" />
 
-        <!--<CommandBinding Command="{x:Static custom:MainWindow.DeleteDBCommand}" 
-                        CanExecute="CommandBindingDeleteDB_CanExecute"
-                        Executed="CommandBindingDeleteDB_Executed" />-->
+        <CommandBinding Command="{x:Static local:MainWindow.ClearVCRDataCommand}" 
+                        CanExecute="CommandBindingClearVCRData_CanExecute"
+                        Executed="CommandBindingClearVCRData_Executed" />
     </Window.CommandBindings>
 
     <Window.InputBindings>
@@ -86,9 +86,9 @@
                     Modifiers="Control" 
                     Command="ApplicationCommands.Save" />
 
-        <!--<KeyBinding Key="D"
+        <KeyBinding Key="D"
                     Modifiers="Control" 
-                    Command="{x:Static custom:MainWindow.DeleteDBCommand}" />-->
+                    Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
     </Window.InputBindings>
 
     
@@ -130,12 +130,11 @@
                         <MenuItem Header="Run statistical summary" Name="runStatisticalSummaryMenu" IsCheckable="True" IsChecked="True" Click="runStatisticalSummary_click" />
                         <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" />
                     </MenuItem>
-                    <MenuItem Header="DataBase" Name = "DataBaseMenu">
-                        <MenuItem Header="Clear DataBase" Name="deleteDataBase" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.DeleteDBCommand}" />
-                        <MenuItem Header="Skip Writing Data" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataBase_Click" />
-                        <MenuItem Header="Buffer Database Writing" Name="bufferDatabaseWriteMenu" IsCheckable="True" IsChecked="False" Click="bufferDatabaseWriteMenu_Click"  />
+                    <MenuItem Header="Data storage" Name = "DataStorageMenu">
+                        <MenuItem Header="Clear VCR data file" Name="clearVCRdata" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
+                        <MenuItem Header="Skip data writes" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataWrite_Click" />
                         <Separator />
-                        <MenuItem Header="Select Report Folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
+                        <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
                     </MenuItem>
                     <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
                         <MenuItem Header="Cells..." Name="cellColorsMenu" />
@@ -172,10 +171,14 @@
                 
                 <MenuItem Header="Catalogs"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
-                    <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
+                    <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" 
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CatalogGenes}"/>
                     <MenuItem Header="Reactions..."              Name="pushReac"        Click="pushReac_Click" />
                     <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />
-                    <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" />
+                    <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" 
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CatalogCells}"/>
                     <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" IsEnabled="False"/>
                     <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" IsEnabled="False"/>
                 </MenuItem>
@@ -554,7 +557,7 @@
                                     ConverterParameter=ComponentsToolWindow}" />                                
                                 <local:CellStudioToolWindow x:Name="CellStudioToolWindow" Title="Cells Library" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                    ConverterParameter=CellStudioToolWindow}" />
+                                    ConverterParameter=CellStudioToolWindow}"/>
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />

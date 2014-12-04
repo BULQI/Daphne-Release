@@ -82,7 +82,7 @@ namespace DaphneGui
                 SetValue(ToolWinTypeProperty, value);
             }
         }
-        
+
         /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
@@ -91,7 +91,7 @@ namespace DaphneGui
         /// <summary>
         /// Path of the executable file in installation folder
         /// </summary>
-        public string execPath = string.Empty;
+        public string execPath;
 
         private DocWindow dw;
         private Thread simThread;
@@ -113,6 +113,7 @@ namespace DaphneGui
         private static bool argDev = false, argBatch = false, argSave = false;
         private string argScenarioFile = "";
         private bool mutex = false;
+        public ManualResetEvent runFinishedEvent = new ManualResetEvent(true);
 
         /// <summary>
         /// uri for the scenario file
@@ -136,7 +137,7 @@ namespace DaphneGui
                            CONTROL_NEW_RUN = (1 << 3),
                            CONTROL_UPDATE_GUI = (1 << 4),
                            CONTROL_MOUSE_DRAG = (1 << 5);
-                           
+
 
         public static byte controlFlags = CONTROL_NONE;
 
@@ -227,17 +228,17 @@ namespace DaphneGui
         /// <summary>
         /// custom routed command for delete db
         /// </summary>
-        public static RoutedCommand DeleteDBCommand = new RoutedCommand();
+        public static RoutedCommand ClearVCRDataCommand = new RoutedCommand();
 
         /// <summary>
-        /// executed command handler for delete db
+        /// executed command handler for clear vcr data
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void CommandBindingDeleteDB_Executed(object sender, ExecutedRoutedEventArgs e)
+        public void CommandBindingClearVCRData_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            string messageBoxText = "Are you sure you want to clear the database?";
-            string caption = "Clear database";
+            string messageBoxText = "Are you sure you want to clear the vcr data file?";
+            string caption = "Clear vcr data file";
             MessageBoxButton button = MessageBoxButton.YesNo;
             MessageBoxImage icon = MessageBoxImage.Warning;
 
@@ -247,22 +248,23 @@ namespace DaphneGui
             // Process message box results
             if (result == MessageBoxResult.Yes)
             {
-                //////////DataBaseTools.DeleteDataBase();
-                System.Windows.MessageBox.Show("All records deleted!");
-                VCR_Toolbar.IsEnabled = false; //Make sure that playback of half-deleted datasets is impossible.
+                // prevent playback of half-finished simulation
+                VCR_Toolbar.IsEnabled = false;
                 if (vcrControl != null)
                 {
                     vcrControl.ReleaseVCR();
                 }
+                DataBasket.hdf5file.clearFile();
+                System.Windows.MessageBox.Show("All file entries cleared!");
             }
         }
 
         /// <summary>
-        /// can execute command handler for delete db
+        /// can execute command handler for clear vcr data
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void CommandBindingDeleteDB_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        public void CommandBindingClearVCRData_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
@@ -308,14 +310,14 @@ namespace DaphneGui
             //}
 
             //////This code re-generates the scenarios - DO NOT DELETE
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            try
+            {
+                CreateAndSerializeDaphneProtocols();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -425,25 +427,31 @@ namespace DaphneGui
             if (AssumeIDE() == true)
             {
                 appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                execPath = appPath;
             }
             else
             {
                 appPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + @"\DaphneGui";
-                execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                execPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
             }
+
+            SetPathVariable();
 
             //Defines default location of SBML folder within Daphne's directory structure
             SBMLFolderPath = appPath + @"\Config\SBML\";
             //Used to check that SBML directory can be the initial directory
             string SBML_folder = new Uri(SBMLFolderPath).LocalPath;
-            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
+            if (Directory.Exists(SBML_folder) == false)
+            {
+                Directory.CreateDirectory(SBML_folder);
+            }
 
             // handle the application properties
             string file;
 
             autoZoomFitMenu.IsChecked = Properties.Settings.Default.autoZoomFit;
             openLastScenarioMenu.IsChecked = Properties.Settings.Default.lastOpenScenario != "";
-            skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataBaseWrites;
+            skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataWrites;
             // TEMP_SUMMARY
             writeCellSummariesMenu.IsChecked = Properties.Settings.Default.writeCellsummaries;
 
@@ -597,6 +605,28 @@ namespace DaphneGui
                 }
             }
 
+            // hdf5
+            bool proceedHDF5 = true;
+
+            if (sim == null || SimulationBase.dataBasket == null)
+            {
+                MessageBox.Show("Need valid simulation and databasket object prior to initializing the hdf5 object.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+                proceedHDF5 = false;
+            }
+            else
+            // this may have to come from some gui selection (which file do you want to open or create...?)
+            // and likely we need to do this in a different place, i.e. with a handler
+            // the file must get openend before a run or else the simulation will crash
+            if (DataBasket.hdf5file.initialize("framedata.hd5") == false)
+            {
+                MessageBox.Show("File might be currently open or disk cannot be accessed.", "Error creating HDF5 file", MessageBoxButton.OK, MessageBoxImage.Error);
+                proceedHDF5 = false;
+            }
+
+            if (proceedHDF5 == false)
+            {
+                clearVCRdata.IsEnabled = false;
+            }
 
             //setup render skin 
             /*
@@ -800,7 +830,6 @@ namespace DaphneGui
                 applyTempFilesAndSave(true);
             }
 
-            AddlibSBMLEnv();
             Protocol protocol = new Protocol();
 
             //Configure open file dialog box
@@ -893,8 +922,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void ExportSBML_Click(object sender, RoutedEventArgs e)
         {
-            AddlibSBMLEnv();
-            //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
@@ -922,8 +949,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void ExportReactionComplexSBML_Click(object sender, RoutedEventArgs e)
         {
-            AddlibSBMLEnv();
-            //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
@@ -950,25 +975,20 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Adds User environment variable for libSBML
+        /// Adds User environment variables for libraries
         /// </summary>
-        private void AddlibSBMLEnv()
+        private void SetPathVariable()
         {
             //Path of the dependencies folder
-            string dependencies;
+            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies",
+                   pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+            
+            // path for libSBML
+            pathEnv += ";" + dependencies;
+            // path for hdf5
+            pathEnv += ";" + dependencies + @"\hdf5";
 
-            //True means that we are in IDE, false that we have installed Daphne
-            if (execPath.Equals(string.Empty))
-            {
-                dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
-            }
-            else
-            {
-                dependencies = new Uri(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).LocalPath;
-            }
-            //Adds the dependecies folder to the environment variable PATH stored in the current process
-            string newPathEnv = System.Environment.GetEnvironmentVariable("PATH") + ";" + dependencies.Replace(@"/", @"\");
-            System.Environment.SetEnvironmentVariable("PATH", newPathEnv);
+            System.Environment.SetEnvironmentVariable("PATH", pathEnv, EnvironmentVariableTarget.Process);
         }
 
         private Nullable<bool> saveScenarioUsingDialog()
@@ -1038,7 +1058,7 @@ namespace DaphneGui
                     {
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     }
-                    
+
                     sim.restart();
                     UpdateGraphics();
 
@@ -1223,13 +1243,13 @@ namespace DaphneGui
 
         private void VCRbutton_Play_Checked(object sender, RoutedEventArgs e)
         {
-            DataBaseMenu.IsEnabled = false;
+            DataStorageMenu.IsEnabled = false;
             vcrControl.SetPlaybackState(VCRControlState.VCR_PLAY);
         }
 
         private void VCRbutton_Play_Unchecked(object sender, RoutedEventArgs e)
         {
-            DataBaseMenu.IsEnabled = true;
+            DataStorageMenu.IsEnabled = true;
             vcrControl.SetInactive();
         }
 
@@ -1323,9 +1343,9 @@ namespace DaphneGui
             Properties.Settings.Default.suggestExpNameChange = uniqueNamesMenu.IsChecked;
         }
 
-        private void skipDataBase_Click(object sender, RoutedEventArgs e)
+        private void skipDataWrite_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.skipDataBaseWrites = skipDataWriteMenu.IsChecked;
+            Properties.Settings.Default.skipDataWrites = skipDataWriteMenu.IsChecked;
 
             // these options aren't feasible without the database output being enabled
             if (skipDataWriteMenu.IsChecked)
@@ -1358,19 +1378,6 @@ namespace DaphneGui
             {
                 sim.Reporter.ReportFolder = appPath;
             }
-        }
-
-        private void bufferDatabaseWriteMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if (bufferDatabaseWriteMenu.IsChecked)
-            {
-                Properties.Settings.Default.bufferDataBaseWriting = true;
-            }
-            else
-            {
-                Properties.Settings.Default.bufferDataBaseWriting = false;
-            }
-
         }
 
         /// <summary>
@@ -1696,28 +1703,13 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void runButton_Click(object sender, RoutedEventArgs e)
         {
-            //skg - For VatRC
-            //If user clicked Run button, this code will set the redraw_flag to false to signal the reac complex chart be refreshed.
-            //If ChartViewToolWindow called this method, i.e, the user changed values in the reac complex graph, then redraw_flag is true and we don't override it.
-            //Although this is relevant only for VatRC scenario type, I don't think we really need to check the scenario type because
-            //it doesn't have any effect on the other scenario types.
-            ChartViewToolWindow ch = sender as ChartViewToolWindow;
-            if (ch == null)
-            {
-                if (ReacComplexChartWindow != null)
-                {
-                    ReacComplexChartWindow.redraw_flag = false;
-                }
-            }
-            //end skg
-
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
 
             runSim();
         }
-       
+
         /// <summary>
         /// save when simulation is paused state
         /// </summary>
@@ -1994,8 +1986,9 @@ namespace DaphneGui
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                
+
                 if (newFile == true)
                 {
                     if (ToolWinType != ToolWindowType.Tissue)
@@ -2035,7 +2028,7 @@ namespace DaphneGui
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
                     gc = new VTKFullGraphicsController(this);
-                 }
+                }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
@@ -2065,7 +2058,7 @@ namespace DaphneGui
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
                 }
- 
+
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
@@ -2083,6 +2076,7 @@ namespace DaphneGui
             {
                 throw new NotImplementedException();
             }
+
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             if (vtkDisplay_DockPanel.DataContext != gc)
             {
@@ -2125,7 +2119,6 @@ namespace DaphneGui
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();
-
 
             // clear the vcr cache
             if (vcrControl != null)
@@ -2233,7 +2226,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         private void run()
         {
             while (true)
@@ -2265,9 +2258,16 @@ namespace DaphneGui
                             // check for flags and execute applicable task(s)
                             if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
                             {
+                                if (Properties.Settings.Default.skipDataWrites == false)
+                                {
+                                    if (sim.FrameData != null)
+                                    {
+                                        sim.FrameData.writeData(sim.FrameNumber - 1);
+                                    }
+                                }
                                 UpdateGraphics();
                             }
-                            if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
+                            if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataWrites == false)
                             {
                                 sim.Reporter.AppendReporter();
                             }
@@ -2281,15 +2281,22 @@ namespace DaphneGui
                                 }
                                 else if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
                                 {
+                                    //signal run finished if any one is waiting
+                                    runFinishedEvent.Set();
                                     // autosave the state
                                     if (argSave == true)
                                     {
                                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
                                     }
                                     // close the reporter
-                                    if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                    if (Properties.Settings.Default.skipDataWrites == false)
                                     {
                                         sim.Reporter.CloseReporter();
+                                        // this experiment sub-group
+                                        DataBasket.hdf5file.closeGroup();
+                                        // experiments group
+                                        DataBasket.hdf5file.closeGroup();
+                                        DataBasket.hdf5file.close();
                                     }
                                     // for profiling: close the application after a completed experiment
                                     if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
@@ -2306,22 +2313,27 @@ namespace DaphneGui
                     }
                     else if (sim.RunStatus == SimulationBase.RUNSTAT_ABORT)
                     {
-                        if (Properties.Settings.Default.skipDataBaseWrites == false)
+                        if (Properties.Settings.Default.skipDataWrites == false)
                         {
                             sim.Reporter.CloseReporter();
+                            // this experiment sub-group
+                            DataBasket.hdf5file.closeGroup();
+                            // experiments group
+                            DataBasket.hdf5file.closeGroup();
+                            DataBasket.hdf5file.close();
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
-                    //else if (vcrControl != null && vcrControl.IsActive() == true)
-                    //{
-                    //    vcrControl.Play();
-                    //    if (vcrControl.IsActive() == false)
-                    //    {
-                    //        // switch from pause to the play button
-                    //        VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
-                    //    }
-                    //}
+                    else if (vcrControl != null && vcrControl.IsActive() == true)
+                    {
+                        vcrControl.Play();
+                        if (vcrControl.IsActive() == false)
+                        {
+                            // switch from pause to the play button
+                            VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
+                        }
+                    }
                 }
                 if (mutex == true)
                 {
@@ -2329,6 +2341,11 @@ namespace DaphneGui
                     mutex = false;
                 }
             }
+        }
+
+        private void VCRUpdate()
+        {
+            VCRbutton_Play.IsChecked = false;
         }
 
         // gui update delegate; needed because we can't access the gui elements directly; they are part of a different thread
@@ -2349,15 +2366,31 @@ namespace DaphneGui
             lockSaveStartSim(true);
         }
 
+        /// <summary>
+        /// create the vcr control if it has not been created yet, and load the current frame
+        /// </summary>
+        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
+        /// <param name="expID">experiment id</param>
+        /// <returns>true for success</returns>
+        private bool OpenVCR(bool lastFrame, int expID = -1)
+        {
+            // create the vcr control if needed, load the data, and set the last frame
+            if (vcrControl == null)
+            {
+                vcrControl = new VCRControl();
+            }
+            return vcrControl.OpenVCR(lastFrame, expID);
+        }
+
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            //if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
-            //{
-            //    VCR_Toolbar.IsEnabled = true;
-            //    VCR_Toolbar.DataContext = vcrControl;
-            //    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
-            //}
+            if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            {
+                VCR_Toolbar.IsEnabled = true;
+                VCR_Toolbar.DataContext = vcrControl;
+                VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+            }
 
             bool finished = false;
 
@@ -2498,46 +2531,44 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        private void runSim()
+        internal void runSim()
         {
 
-            if (ToolWinType == ToolWindowType.Tissue)
+            switch (ToolWinType)
             {
-                VTKDisplayDocWindow.Activate();
+                case ToolWindowType.Tissue:
+                    runSim_Tissue();
+                    break;
+                case ToolWindowType.VatRC:
+                    runSim_VatRc();
+                    break;
+                default:
+                    break;
             }
+        }
 
-            //MessageBox.Show("In runSim()");
-
-            //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP
-            //YOU CAN ONLY CALL THIS AFTER LOADING A DRIVER-LOCOMOTOR SCENARIO
-            //TestStepperLocomotion(nSteps, dt);
-
-            //YOU CAN ONLY CALL THIS AFTER LOADING A LIGAND-RECEPTOR SCENARIO
-            //TestStepperLigandReceptor(nSteps, 0.01);
-
-            //sim.refreshDatabaseBufferRows();
+        private void runSim_Tissue()
+        {
+            VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
-                if (ToolWinType == ToolWindowType.Tissue)
+
+                abortButton.IsEnabled = true;
+                sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
+
+                //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
+                //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
+
+                //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
+                if (gc is VTKFullGraphicsController == true)
                 {
-                    abortButton.IsEnabled = true;
-                    sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
-
-                    //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
-                    //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
-
-                    //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
-                    if (gc is VTKFullGraphicsController == true)
-                    {
-                        ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
-                    }
-
-                    runButton.Content = "Continue";
-                    statusBarMessagePanel.Content = "Paused...";
-                    runButton.ToolTip = "Continue the Simulation.";
+                    ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
                 }
-                else if (ToolWinType == ToolWindowType.VatRC)
-                { }
+
+                runButton.Content = "Continue";
+                statusBarMessagePanel.Content = "Paused...";
+                runButton.ToolTip = "Continue the Simulation.";
+
             }
             else if (sim.RunStatus == SimulationBase.RUNSTAT_PAUSE)
             {
@@ -2592,8 +2623,7 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
-                if (mouseDrag == false && tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
                     // initiating a run starts always at repetition 1
                     repetition = 1;
@@ -2613,7 +2643,7 @@ namespace DaphneGui
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(!mouseDrag);
+                            lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
@@ -2621,14 +2651,14 @@ namespace DaphneGui
                             {
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
-                                lockSaveStartSim(!mouseDrag);
+                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(!mouseDrag);
+                            lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.Cancel:
@@ -2639,21 +2669,64 @@ namespace DaphneGui
 
                 if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
                 {
-                    if (Properties.Settings.Default.skipDataBaseWrites == false)
+                    if (Properties.Settings.Default.skipDataWrites == false)
                     {
                         sim.Reporter.StartReporter(sim);
+                        DataBasket.hdf5file.openWrite(false);
+                        // super-group containing all experiments
+                        DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
+
+                        // for now pick a safe id, highest id + 1
+                        int id = DataBasket.findHighestExperimentId() + 1;
+
+                        // group for this experiment
+                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", id));
                     }
-                    if (!mouseDrag)
-                    {
-                        runButton.Content = "Pause";
-                        runButton.ToolTip = "Pause the Simulation.";
-                        statusBarMessagePanel.Content = "Running...";
-                        abortButton.IsEnabled = true;
-                    }
+
+                    runButton.Content = "Pause";
+                    runButton.ToolTip = "Pause the Simulation.";
+                    statusBarMessagePanel.Content = "Running...";
+                    abortButton.IsEnabled = true;
+
+                    runFinishedEvent.Reset();
                     sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 }
             }
         }
+
+        /// <summary>
+        /// Initiate a simulation run
+        /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
+        /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
+        /// </summary>
+        private void runSim_VatRc()
+        {
+
+            if (sim.RunStatus == SimulationBase.RUNSTAT_RUN) return;
+
+            if (vcrControl != null)
+            {
+                vcrControl.SetInactive();
+            }
+
+            bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
+            repetition = 1;
+            lockSaveStartSim(!mouseDrag);
+
+            if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
+            {
+                if (Properties.Settings.Default.skipDataWrites == false)
+                {
+                    sim.Reporter.StartReporter(sim);
+                }
+                runFinishedEvent.Reset();
+                sim.RunStatus = SimulationBase.RUNSTAT_RUN;
+            }
+
+        }
+
+
+
 
         public MessageBoxResult saveDialog()
         {
@@ -2868,6 +2941,12 @@ namespace DaphneGui
                 simThread.Abort();
             }
 
+            // clear the vcr cache
+            if (vcrControl != null)
+            {
+                vcrControl.ReleaseVCR();
+            }
+
             // vtk cleanup
             gc.Cleanup();
 
@@ -2980,15 +3059,15 @@ namespace DaphneGui
                 {
                     VTKDisplayDocWindow.Activate();
                 }
-            	else if (ToolWinType == ToolWindowType.VatRC)
-            	{
+                else if (ToolWinType == ToolWindowType.VatRC)
+                {
                     ReacComplexChartWindow.Activate();
-            	}
+                }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 toolWin.Activate();
-            }            
+            }
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -3011,7 +3090,7 @@ namespace DaphneGui
             About about = new About();
             about.ShowDialog();
         }
-        
+
         /// <summary>
         /// This GenericPush method is called for pushing entities into the Protocol level.
         ///
@@ -3112,7 +3191,7 @@ namespace DaphneGui
                 }
 
                 UserWantsNewEntity = pm.UserWantsNewEntity;
-                
+
             }
             else if (source is ConfigReactionComplex)
             {
@@ -3121,7 +3200,8 @@ namespace DaphneGui
                 pm.EntityLevelDetails.DataContext = source;
                 pm.ComponentLevelDetails.DataContext = null;
 
-                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid)) {
+                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid))
+                {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
                     newEntity = ((ConfigReactionComplex)source).Clone(true);
@@ -3300,7 +3380,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
             //load the stores only as needed

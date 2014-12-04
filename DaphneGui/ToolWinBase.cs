@@ -176,6 +176,23 @@ namespace DaphneGui
         {
         }
 
+        protected virtual void PushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+
+            if (button == null)
+                return;
+
+            ConfigCell cell = button.DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Push cell
+            ConfigCell newcell = cell.Clone(true);
+            MainWindow.GenericPush(newcell);
+        }
+
         /// <summary> 
         /// Gather filters that may be reused throughout the GUI.
         /// </summary>
@@ -339,8 +356,35 @@ namespace DaphneGui
         {
             return MW.saveDialog();
         }
-    }
 
+        /// <summary>
+        /// Filter any molecules that cannot be pushed between levels (eg., boundary molecules VatRC)
+        /// </summary>
+        /// <param name="configMol"></param>
+        /// <returns></returns>
+        public virtual void PushMoleculeFilter(object configMol, Level level)
+        {
+        }
+
+        /// <summary>
+        /// Filter any reactions that cannot be pushed between levels (eg., boundary and gene reactions for VatRC)
+        /// </summary>
+        /// <param name="configReac"></param>
+        /// <returns></returns>
+        public virtual void PushReactionFilter(object configReac, Level level)
+        {
+        }
+
+        /// <summary>
+        /// Filter any reaction complexes that cannot be pushed between levels (eg., RCs that contain boundary or gene reactions for VatRC)
+        /// </summary>
+        /// <param name="configReacComplex"></param>
+        /// <returns></returns>
+        public virtual void PushReactionComplexFilter(object configReacComplex, Level level)
+        {
+        }
+
+    }
 
     public class ToolwinComponentVisibilityConverter : IValueConverter
     {
@@ -356,6 +400,8 @@ namespace DaphneGui
                     case "ComponentsToolWindow":
                     case "CellStudioToolWindow":
                     case "ComponentsToolWindow_Genes":
+                    case "CatalogGenes":
+                    case "CatalogCells":
                         return Visibility.Visible;
                 }
             }

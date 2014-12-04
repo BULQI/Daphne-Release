@@ -21,7 +21,6 @@ namespace DaphneGui
     /// </summary>
     public partial class ToolWinTissue : ToolWinBase
     {
-
         public ToolWinTissue()
         {
             TitleText = "Tissue Simulation";
@@ -177,8 +176,6 @@ namespace DaphneGui
  
                                     // Select the Cellpop tab for focus
                                     toolWinTissue.ConfigTabControl.SelectedItem = tabCellPop;
-
-
                                 }
                             }
 
@@ -188,7 +185,6 @@ namespace DaphneGui
                 }
             }
         }
-
 
         private void btnNewSkinClick(object sender, RoutedEventArgs e)
         {

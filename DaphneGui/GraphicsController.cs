@@ -806,6 +806,23 @@ namespace DaphneGui
 
     public class VTKNullGraphicsController : EntityModelBase, IVTKGraphicsController
     {
+        // Public accessors for toolbar button binding w/property changed notification
+        public bool WhArrowToolButton_IsEnabled {get; set;}
+        public bool WhArrowToolButton_IsChecked {get; set;}
+        public bool HandToolButton_IsEnabled {get; set; }
+        public bool HandToolButton_IsChecked { get; set; }
+        public bool PreviewButton_IsEnabled {get; set; }
+        public bool PreviewButton_IsChecked { get; set; }
+        public bool ToolsToolbar_IsEnabled {get; set; }
+        public System.Windows.Visibility ColorScaleSlider_IsEnabled { get; set; }
+        public double ColorScaleMaxFactor {get; set; }
+        public ObservableCollection<string> ECSRenderingMethodNames { get; set; }
+        public bool OrientationMarker_IsChecked { get; set; }
+        public bool ResetCamera_IsChecked {get; set; }
+        public bool ScalarBarMarker_IsChecked { get; set; }
+        public string ECSRenderingMethod { get; set; }
+        public WindowsFormsHost Wfh {get; set;}
+
         public VTKNullGraphicsController()
         {
         }

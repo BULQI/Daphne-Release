@@ -71,7 +71,167 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
-                    <local:CellPopControl DataContext="{Binding ElementName=toolWinTissue}" x:Name="CellPopControl"/>                  
+                    <local:CellPopControl DataContext="{Binding ElementName=toolWinTissue}" x:Name="CellPopControl"/>
+
+                    <!-- Cell Properties -->
+                    <Expander  Padding="5"
+                                ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Cell Properties"                                              
+                                x:Name="CellPropertiesExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                        <local:DaphneStackPanel x:Name="CellPropertiesPanel">
+
+                            <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
+                                <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
+                                        DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
+                                        />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
+                                <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." 
+                                        DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
+                                        Click="PushCellButton_Click"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="10,0">
+                                <local:CellDetailsControl x:Name="ucCellPopCellDetails" 
+                                                      Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                                                      DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"/>
+                            </StackPanel>
+                        </local:DaphneStackPanel>
+
+                    </Expander>
+
+                    <!-- CELL DEATH PARAMETERS -->
+                    <Expander
+                            Padding="5" 
+                            ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Cell Death Parameters"                                              
+                                x:Name="CellDeathParamsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                        <StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="2"  
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    TextAlignment="Left"
+                                    Width="Auto"
+                                    />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="time constant" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="2"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+                                <editors:DoubleEditBox x:Name="deathConstant_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="E2"
+                                                StepValue="0.1"
+                                                Width="100" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="order parameter" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="3"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+
+                                <editors:DoubleEditBox x:Name="deathOrder_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="F0"
+                                                StepValue="0.1"
+                                                Width="100" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                                <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </Expander>
+
+                    <!-- Cell Interaction Parameters -->
+                    <Expander
+                    Padding="5" 
+                    ExpandDirection="Down"
+                    IsExpanded="False"
+                    Header="Cell Interaction Parameters"                                              
+                    x:Name="CellParamsExpander"
+                    Margin="0,5,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                        <StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="penetration resistance" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="2"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+                                <editors:DoubleEditBox x:Name="phi1_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="F2"
+                                                StepValue="100"
+                                                Width="50" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                                <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="phi2" Margin="6,0"
+                                    Grid.Column="0" Grid.Row="3"  
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    TextAlignment="Right"
+                                    Width="120"
+                                    />
+
+                                <editors:DoubleEditBox x:Name="phi2_readout" 
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                HorizontalAlignment="Right"
+                                                Format="N2"
+                                                StepValue="0.1"
+                                                Width="50" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}"
+                                                />
+                                <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </Expander>
+
                 </StackPanel>
 
             </ScrollViewer>
@@ -592,9 +752,6 @@
             </ScrollViewer>
 
         </TabItem>
-
-
-
 
         <!-- Rendering scheme -->
         <TabItem Header="Rendering Scheme" x:Name="tabRending" AutomationProperties.AutomationId="DaphneRenderTab">

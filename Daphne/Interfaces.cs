@@ -26,4 +26,13 @@ namespace Daphne
         void EnableComponents(bool finished);
         void ResetGraphics();
     }
+
+    public interface IFrameData
+    {
+        void prepareData();
+        void writeData(int i);
+        void writeData(string groupName);
+        void readData(int i);
+        void readData(string groupName);
+    }
 }

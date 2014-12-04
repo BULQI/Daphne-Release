@@ -34,7 +34,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="230" >
                     <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
-                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     </uc:DoublesBox>
                 </StackPanel>
 
@@ -53,12 +53,18 @@
                             Visibility="Visible"
                             >
 
+                        <!-- 
+                        cbLocomotorDriver1 binding needs to be OneWay.
+                        When the user selects a different cell population, the selected cell type updates before this control updates. 
+                        This causes the locomoter driver molecule of the first cell type to get changed to that of the second (newly-selected) cell type.
+                        -->
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="panelLocoDriver">
                                 <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
                                 <ComboBox   x:Name="cbLocomotorDriver1" MinWidth="100" Width="160"
                                             DisplayMemberPath="Name"
-                                            SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=TwoWay}"
+                                            SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=OneWay}"
+                                            SelectionChanged="cbLocoDriver_SelectionChanged"
                                             SelectedValuePath="entity_guid"
                                             IsSynchronizedWithCurrentItem="True">
 

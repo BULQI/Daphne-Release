@@ -130,5 +130,73 @@ namespace DaphneGui
             MW.runButton_Click(null, null);
         }
 
+        protected override void PushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+        }
+
+        /// <summary>
+        /// Filter out boundary molecules
+        /// </summary>
+        /// <param name="configMol"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public override void PushMoleculeFilter(object configMols, Level level)
+        {
+            ObservableCollection<ConfigMolecule> mols = configMols as ObservableCollection<ConfigMolecule>;
+            EntityRepository er = level.entity_repository;   //MainWindow.SOP.Protocol.entity_repository;
+            // Filter out boundary mols
+            foreach (ConfigMolecule mol in mols.ToList())
+            {
+                if (mol.molecule_location == MoleculeLocation.Boundary)
+                {
+                    mols.Remove(mol);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Filter out boundary and gene reactions
+        /// </summary>
+        /// <param name="configReacs"></param>
+        /// <param name="level"></param>
+        public override void PushReactionFilter(object configReacs, Level level)
+        {
+            ObservableCollection<ConfigReaction> reacs = configReacs as ObservableCollection<ConfigReaction>;
+            EntityRepository er = level.entity_repository;   //MainWindow.SOP.Protocol.entity_repository;
+            // Filter out boundary and gene reactions
+            foreach (ConfigReaction reac in reacs.ToList())
+            {
+                if (reac.IsBoundaryReaction(er) || reac.HasGene(er)) {
+                    reacs.Remove(reac);
+                }
+                
+            }
+        }
+
+        /// <summary>
+        /// Filter out reaction complexes with boundary and gene reactions
+        /// </summary>
+        /// <param name="configReacComplexes"></param>
+        /// <param name="level"></param>
+        public override void PushReactionComplexFilter(object configReacComplexes, Level level)
+        {
+            ObservableCollection<ConfigReactionComplex> rcs = configReacComplexes as ObservableCollection<ConfigReactionComplex>;
+            EntityRepository er = level.entity_repository;  
+            // Filter out reaction complexes with boundary and gene reactions
+            foreach (ConfigReactionComplex crc in rcs.ToList())
+            {
+                for (int i = 0; i < crc.reactions.Count; i++ )
+                {
+                    if (crc.reactions[i].IsBoundaryReaction(er) || crc.reactions[i].HasGene(er))
+                    {
+                        rcs.Remove(crc);
+                        break;
+                    }
+                }
+
+            }
+        }
+
     }
 }

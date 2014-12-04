@@ -17,6 +17,7 @@ using System.Windows.Controls.Primitives;
 
 using Daphne;
 using DaphneUserControlLib;
+using System.Threading;
 
 namespace Workbench
 {
@@ -46,6 +47,7 @@ namespace Workbench
             redraw_flag = false;
             windowsFormsHost1.Width = Chart.Width;
             windowsFormsHost1.Height = Chart.Height;
+            Chart.MouseUp += new System.Windows.Forms.MouseEventHandler(Chart_MouseUp);
         }
 
         /// <summary>
@@ -157,7 +159,8 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(this, null);
+                MW.runSim();
+                //MW.runButton_Click(null, null);
             }
         }
 
@@ -215,7 +218,8 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(this, null);
+                MW.runSim();
+                //MW.runButton_Click(null, null);
             }
         }
 
@@ -227,6 +231,24 @@ namespace Workbench
         private void dgInitConcs_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
+            ThreadPool.RegisterWaitForSingleObject(MW.runFinishedEvent,
+                       new WaitOrTimerCallback(DelayedRunSim),
+                       null, 50, true);
+
+        }
+
+        private void DelayedRunSim(object state, bool timedOut)
+        {
+            redraw_flag = true;
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runSim(); }), null);
+        }
+
+        private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG) == true)
+            {
+                dgInitConcs_DragCompleted(null, null);
+            }
         }
     }
 }
