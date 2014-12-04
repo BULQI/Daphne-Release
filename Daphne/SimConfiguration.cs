@@ -2615,11 +2615,13 @@ namespace Daphne
             phi1 = 100;
             deathConstant = 1e-3;
             deathOrder = 1;
+            globalRandomSeed = RandomSeed.Robust();
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
         public double deathConstant { get; set; }
         public int deathOrder { get; set; }
+        public int globalRandomSeed { get; set; }
     }
 
     public class EntityRepository
@@ -5566,13 +5568,9 @@ namespace Daphne
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
-            //TransductionConstant = 0.0;
-            //DragCoefficient = 1.0;
-            //Sigma = 0.0; 
             
             TransductionConstant = new DistributedParameter(0.0);
             DragCoefficient = new DistributedParameter(1.0);
-            //DragCoefficient.ConstValue = 1.0;
             Sigma = new DistributedParameter(0.0);
 
             membrane = new ConfigCompartment();
@@ -8952,7 +8950,20 @@ namespace Daphne
             }
         }
 
-        public double ConstValue { get; set; }
+        private double constValue;
+        public double ConstValue 
+        {
+            get
+            {
+                return constValue;
+            }
+            set
+            {
+                constValue = value;
+                isInitialized = false;
+            }
+        }
+
         public bool isInitialized;
 
         public DistributedParameter()
