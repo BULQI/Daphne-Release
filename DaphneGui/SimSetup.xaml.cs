@@ -27,8 +27,6 @@ namespace DaphneGui
         public SimSetupControl()
         {
             InitializeComponent();
-            
-            
         }
 
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -140,6 +138,17 @@ namespace DaphneGui
         private void integrator_step_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
 
+        }
+
+        private void global_random_seed_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (MainWindow.SOP == null)
+                return;
+            if (MainWindow.SOP.Protocol == null)
+                return;
+
+            int newSeed = Convert.ToInt32(global_random_seed.Text);
+            MainWindow.SOP.Protocol.sim_params.globalRandomSeed = newSeed;
         }
     }
 }
