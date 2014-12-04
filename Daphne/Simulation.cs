@@ -189,7 +189,6 @@ namespace Daphne
             AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs, result);
             AddCellTranscriptionReactions(simCell, protocol.entity_repository, transcription_reacs);
 
-            // locomotion - merged from release-dev
             if (simCell.Cytosol.Populations.ContainsKey(cell.locomotor_mol_guid_ref) == true)
             {
                 MolecularPopulation driver = simCell.Cytosol.Populations[cell.locomotor_mol_guid_ref];
@@ -958,6 +957,7 @@ namespace Daphne
                     cp.renderLabel = cp.Cell.entity_guid;
                 }
 
+                Console.WriteLine("Transduction values");
                 double[] temp = new double[cp.number];
                 for (int i = 0; i < cp.number; i++)
                 {
@@ -979,7 +979,7 @@ namespace Daphne
                         boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
                     }
                     temp[i] = dataBasket.Cells.Last().Value.Locomotor.TransductionConstant;
-                    Console.WriteLine("{0}\n", dataBasket.Cells.Last().Value.Locomotor.TransductionConstant);
+                    Console.WriteLine("{0} {1}", dataBasket.Cells.Last().Value.Locomotor.TransductionConstant, temp[i]);
                 }
             }
 
