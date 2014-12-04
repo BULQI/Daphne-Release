@@ -130,6 +130,10 @@ namespace DaphneGui
             MW.runButton_Click(null, null);
         }
 
+        protected override void PushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+        }
+
         /// <summary>
         /// Filter out boundary molecules
         /// </summary>
