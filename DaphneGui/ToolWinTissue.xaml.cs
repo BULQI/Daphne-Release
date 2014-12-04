@@ -21,6 +21,7 @@ namespace DaphneGui
     /// </summary>
     public partial class ToolWinTissue : ToolWinBase
     {
+        
 
         public ToolWinTissue()
         {
@@ -302,5 +303,19 @@ namespace DaphneGui
             //toolWinTissue.dgCellMembMols.SelectedItem = 0;
             //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
         }
+
+        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = CellPopControl.SelectedCell;
+
+            //Error case
+            if (cell == null)
+                return;
+
+            //Push cell
+            ConfigCell newcell = cell.Clone(true);
+            MainWindow.GenericPush(newcell);
+        }
+
     }
 }

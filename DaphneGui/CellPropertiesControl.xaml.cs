@@ -109,18 +109,9 @@ namespace DaphneGui
 
             ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
 
-            if (this.Tag == null)
-            {
+            ConfigCell cell = DataContext as ConfigCell;    
+            if (cell == null)
                 return;
-            }
-
-            if ((CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem == null)
-            {
-                return;
-            }
-
-            CellPopulation cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
-            ConfigCell cell = cellpop.Cell;
 
             foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
