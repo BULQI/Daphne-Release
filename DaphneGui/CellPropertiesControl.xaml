@@ -34,7 +34,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="230" >
                     <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
-                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     </uc:DoublesBox>
                 </StackPanel>
 

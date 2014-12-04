@@ -412,7 +412,7 @@
                     <StackPanel.Resources>
                         <DataTemplate x:Key="cellReacListItemTemplate">
                             <StackPanel Orientation="Horizontal">
-                                <TextBox Width="60" MinWidth="40" Text="{Binding rate_const, StringFormat=G5}" />
+                                <uc:DoublesBox Width="60" MinWidth="40" SliderEnabled="False" Number="{Binding rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                                 <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
                             </StackPanel>
                         </DataTemplate>

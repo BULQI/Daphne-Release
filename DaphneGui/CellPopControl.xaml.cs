@@ -14,17 +14,46 @@ using System.Windows.Shapes;
 
 using Daphne;
 using DaphneUserControlLib;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
     /// <summary>
     /// Interaction logic for CellPopControl.xaml
     /// </summary>
-    public partial class CellPopControl : UserControl
+    public partial class CellPopControl : UserControl, INotifyPropertyChanged
     {
+        private ConfigCell selectedCell;
+        public ConfigCell SelectedCell 
+        {
+            get
+            {
+                return selectedCell;
+            }
+            set
+            {
+                selectedCell = value;
+                OnPropertyChanged("SelectedCell");
+            }
+        }
+
         public CellPopControl()
         {
             InitializeComponent();
+        }
+
+        ///
+        //Notification handling
+        /// 
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
+            {
+                var e = new PropertyChangedEventArgs(propertyName);
+                handler(this, e);
+            }
         }
 
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
@@ -334,6 +363,14 @@ namespace DaphneGui
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
         {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex < 0)
+            {
+                return;
+            }
+
+            CellPopulation cp = (CellPopulation)(lb.SelectedItem);
+            SelectedCell = cp.Cell;
         }
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
@@ -499,21 +536,6 @@ namespace DaphneGui
                 cp.RemoveCells(rows_to_delete);
             }
             cp.number = cp.CellStates.Count;
-        }
-
-
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
-
-            //Error case
-            if (cellpop == null)
-                return;
-
-            //Push cell
-            ConfigCell cell = cellpop.Cell;
-            ConfigCell newcell = cell.Clone(true);
-            MainWindow.GenericPush(newcell);
         }
 
         //This method is called when the user clicks the Remove Cell button
