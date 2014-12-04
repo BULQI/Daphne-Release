@@ -1989,6 +1989,7 @@ namespace DaphneGui
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
                 if (newFile == true)

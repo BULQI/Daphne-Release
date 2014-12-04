@@ -558,7 +558,7 @@
                                     ConverterParameter=ComponentsToolWindow}" />                                
                                 <local:CellStudioToolWindow x:Name="CellStudioToolWindow" Title="Cells Library" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                    ConverterParameter=CellStudioToolWindow}" />
+                                    ConverterParameter=CellStudioToolWindow}"/>
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />

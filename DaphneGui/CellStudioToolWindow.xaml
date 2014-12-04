@@ -10,6 +10,7 @@
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     ImageSource="Images/Properties16.png"
                     x:Name="MyToolWindow"
+                    DataContextChanged="CellStudio_DataContextChanged"
                     >
 
     <!--<TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top"  AutomationProperties.AutomationId="DaphneTabsControl">-->
@@ -38,12 +39,12 @@
                                   Source="{Binding Path=entity_repository.molecules}"/>
 
 
-            <CompositeCollection x:Key="testCollection">
+            <!--<CompositeCollection x:Key="testCollection">
                 <daph:ConfigMolecule Name="None" entity_guid=""/>
                 <ComboBoxItem>None</ComboBoxItem>
                 <CollectionContainer
                  Collection="{Binding Source={StaticResource moleculesListView}}" />
-            </CompositeCollection>
+            </CompositeCollection>-->
         
 
 
@@ -182,11 +183,11 @@
                 <StackPanel>
                     <TextBlock Text="Cells Library" FontWeight="Bold" Margin="0,0,0,0"  />
                     <ListBox x:Name="CellsListBox" MinHeight="50" MaxHeight="100"
-                                    ItemsSource="{Binding Path=entity_repository.cells}" 
-                                    DisplayMemberPath="CellName"
-                                    SelectedIndex="0"
-                                    SelectionChanged="CellsListBox_SelectionChanged"
-                                    />
+                                ItemsSource="{Binding Path=entity_repository.cells}" 
+                                DisplayMemberPath="CellName"
+                                SelectedIndex="0"
+                                SelectionChanged="CellsListBox_SelectionChanged"
+                                />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                         <Button Name="CopyCellButton"  Width="50" Content="Copy" Click="CopyCellButton_Click" />
                         <Button Name="AddCellButton"  Width="50" Content="New" Click="AddLibCellButton_Click"/>
@@ -194,20 +195,26 @@
                     </StackPanel>
 
                     <Expander ExpandDirection="Down" Padding="6"
-                                    IsExpanded="True"
-                                    Header="Cell Details"
-                                    x:Name="CellsDetailsExpander"
-                                    Margin="0,-15,0,0" 
-                                    Canvas.ZIndex="1"
-                                    >
+                                IsExpanded="True"
+                                Header="Cell Details"
+                                x:Name="CellsDetailsExpander"
+                                Margin="0,-15,0,0" 
+                                Canvas.ZIndex="1"
+                                >
 
                         <local:DaphneStackPanel x:Name="panelCellMolPops" >
-                            <StackPanel Orientation="Horizontal">
-                                <ContentControl Name="CellDetails" 
+                            <!--<StackPanel Orientation="Horizontal">-->
+                                <!--<ContentControl Name="CellDetails" 
                                                 Content="{Binding ElementName=CellsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellDetailsTemplate}" 
-                                                Margin="6,4"/>
+                                                Margin="6,4"/>-->
+                            <StackPanel x:Name="CellPropertyStackPanel" Orientation="Horizontal" Margin="10,0">
+                                <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
+                                                Tag ="{Binding ElementName=CellPropertyStackPanel, Path=DataContext}"
+                                                DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"/>
                             </StackPanel>
+                                
+                    <!--</StackPanel>-->
 
                             <StackPanel Margin="10,6">
                                 <local:CellDetailsControl x:Name="ucCellDetails" DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"/>
@@ -216,7 +223,7 @@
 
                             <!-- Reaction Complexes in this cell and their location -->
                             <!-- Hidden for now 10/15/13 -->
-                            <Expander
+                            <!--<Expander
                                         Visibility="Hidden"
                                         Padding="5" 
                                         ExpandDirection="Down"
@@ -341,7 +348,9 @@
                                         </StackPanel>
                                     </Expander>
                                 </StackPanel>
-                            </Expander>
+                            </Expander>-->
+                            
+                            
                         </local:DaphneStackPanel>
                     </Expander>
                 </StackPanel>
