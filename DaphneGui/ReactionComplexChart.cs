@@ -300,7 +300,6 @@ namespace DaphneGui
         private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             bDrag = false;
-            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
             //Circle was red during drag so change it back to gold
             if (SeriesToDrag != null)
             {
@@ -676,7 +675,7 @@ namespace DaphneGui
             ////Console.WriteLine("RedrawSeries(): {0}, {1}\t {2}, {3}",
             //    ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, ChartAreas.First().AxisY.Minimum, ChartAreas.First().AxisY.Maximum);
 
-            Focus();
+            //Focus();
             Invalidate();
         }
 

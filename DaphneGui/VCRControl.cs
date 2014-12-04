@@ -1,5 +1,4 @@
-﻿//#define ALL_VCR
-//#define USE_DATACACHE
+﻿//#define USE_DATACACHE
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,11 +31,9 @@ namespace DaphneGui
     /// </summary>
     public class VCRControl : INotifyPropertyChanged
     {
-#if ALL_VCR
-        private DataReader reader;
+        private List<string> frameNames;
         private List<int> frames;
         private int frame;
-#endif
 #if USE_DATACACHE
         private Dictionary<int, List<DBRow>> dataCache;
 #endif
@@ -58,10 +55,9 @@ namespace DaphneGui
         /// </summary>
         public VCRControl()
         {
-#if ALL_VCR
             frame = -1;
-#endif
             SetInactive();
+            frameNames = new List<string>();
         }
 
         /// <summary>
@@ -70,41 +66,36 @@ namespace DaphneGui
         /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
         /// <param name="expID">experiment id</param>
         /// <returns>false for failure or empty simulation</returns>
-        public bool OpenVCR(bool lastFrame, int expID = -1)
+        public bool OpenVCR(bool lastFrame, int expID)
         {
-#if ALL_VCR
-            reader = new DataReader(expID < 0 ? MainWindow.SOP.Protocol.experiment_db_id : expID);
-
-            if (reader.TimeVals.Count == 0)
-            {
-                return false;
-            }
-#endif
-
 #if USE_DATACACHE
             dataCache = new Dictionary<int, List<DBRow>>();
 #endif
 
-#if ALL_VCR
-            if (reader != null
+            if (DataBasket.hdf5file != null
 #if USE_DATACACHE
                 && dataCache != null
 #endif
 )
             {
-                // build the list of frames
-                double lastFrameChecked = reader.TimeVals[0];
+                DataBasket.hdf5file.openRead();
+                frameNames.Clear();
+                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID < 0 ? MainWindow.SOP.Protocol.experiment_id : expID));
 
+                if (frameNames.Count == 0)
+                {
+                    return false;
+                }
+
+                // open the parent group that holds the frames for this experiment
+                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID < 0 ? MainWindow.SOP.Protocol.experiment_id : expID));
+
+                // build the list of frames
                 frames = new List<int>();
 
-                for (int i = 0; i < reader.TimeVals.Count; i++)
+                for (int i = 0; i < frameNames.Count; i++)
                 {
-                    // we have to add the frame if it is past the render step after the last frame or it is the very first or last one in the list
-                    if (reader.TimeVals[i] - lastFrameChecked >= Math.Max(MainWindow.Sim.RenderingInterval, Simulation.RENDER_STEP) || i == 0 || i == reader.TimeVals.Count - 1)
-                    {
-                        frames.Add(i);
-                        lastFrameChecked = reader.TimeVals[i];
-                    }
+                    frames.Add(i);
                 }
 
                 if (lastFrame == true)
@@ -116,7 +107,6 @@ namespace DaphneGui
                     CurrentFrame = 0;
                 }
             }
-#endif
             SetInactive();
             return true;
         }
@@ -170,11 +160,10 @@ namespace DaphneGui
         /// </summary>
         public void ReleaseVCR()
         {
-#if ALL_VCR
-            if (reader != null)
+            if (DataBasket.hdf5file != null)
             {
-                reader.CloseConnection();
-                reader = null;
+                DataBasket.hdf5file.closeGroup();
+                DataBasket.hdf5file.close();
             }
 #if USE_DATACACHE
             if (dataCache != null)
@@ -188,7 +177,6 @@ namespace DaphneGui
                 frames.Clear();
                 frames = null;
             }
-#endif
             SetInactive();
         }
 
@@ -197,7 +185,6 @@ namespace DaphneGui
         /// </summary>
         public int CurrentFrame
         {
-#if ALL_VCR
             get { return frame; }
             set
             {
@@ -208,12 +195,13 @@ namespace DaphneGui
                 NotifyPropertyChanged("CurrentFrame");
                 NotifyPropertyChanged("CurrentTime");
                 // synch vtk to the current frame
-                Simulation.dataBasket.UpdateCells(CurrentFrameData(), GetPlaybackPercent());
+                if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+                {
+                    SimulationBase.dataBasket.UpdateCells((TissueSimulationFrameData)CurrentFrameData());
+                    MainWindow.VTKBasket.UpdateData();
+                    MainWindow.GC.DrawFrame(GetPlaybackPercent());
+                }
             }
-#else
-            get { return -1; }
-            set { }
-#endif
         }
 
         /// <summary>
@@ -221,11 +209,10 @@ namespace DaphneGui
         /// </summary>
         public double CurrentTime
         {
-#if ALL_VCR
-            get { return frame < TotalFrames() - 1 ? frames[frame] * MainWindow.Sim.RenderingInterval : MainWindow.Sim.EndTime; }
+            get { return frame < TotalFrames() - 1 ? frames[frame] * MainWindow.SOP.Protocol.scenario.time_config.rendering_interval : MainWindow.SOP.Protocol.scenario.time_config.duration; }
             set
             {
-                int tmp = (int)((double)value / MainWindow.Sim.RenderingInterval);
+                int tmp = (int)((double)value / MainWindow.SOP.Protocol.scenario.time_config.rendering_interval);
 
                 // find the frame that qualifies as first one to include the time passed in
                 for (int i = 0; i < frames.Count; i++)
@@ -238,9 +225,6 @@ namespace DaphneGui
                 }
                 NotifyPropertyChanged("CurrentTime");
             }
-#else
-            get { return 0; }
-#endif
         }
 
         /// <summary>
@@ -249,23 +233,18 @@ namespace DaphneGui
         /// <returns>total number of frames</returns>
         public int TotalFrames()
         {
-#if ALL_VCR
             if (frames == null)
             {
                 return -1;
             }
             return frames.Count;
-#else
-            return -1;
-#endif
         }
 
-#if ALL_VCR
         /// <summary>
-        /// retrieve the current frame
+        /// read the current frame
+        /// <returns>frame read</returns>
         /// </summary>
-        /// <returns>DBRow holding the current frame</returns>
-        private Dictionary<int, DBDict> CurrentFrameData()
+        private IFrameData CurrentFrameData()
         {
 #if USE_DATACACHE
             if (dataCache == null)
@@ -286,13 +265,13 @@ namespace DaphneGui
                     }
                     return dataCache[frame];
 #else
-                    return reader.FetchByTime(frames[frame]);
+                    MainWindow.Sim.FrameData.readData(frames[frame]);
+                    return MainWindow.Sim.FrameData;
 #endif
                 }
                 return null;
             }
         }
-#endif
 
         /// <summary>
         /// advance the frame, can be by a negative number (rewind) by a number of frames; does not go past the first or last frame
@@ -306,7 +285,6 @@ namespace DaphneGui
                 SetInactive();
             }
 
-#if ALL_VCR
             int tmp = frame + delta;
 
             if (0 <= tmp && tmp < TotalFrames())
@@ -321,9 +299,6 @@ namespace DaphneGui
             {
                 CurrentFrame = TotalFrames() - 1;
             }
-#else
-            CurrentFrame = 0;
-#endif
         }
 
         /// <summary>
@@ -381,7 +356,6 @@ namespace DaphneGui
             {
                 if (playbackState == VCRControlState.VCR_PLAY)
                 {
-#if ALL_VCR
                     // insert a delay when needed to keep the fps steady
                     Delay();
 
@@ -399,9 +373,6 @@ namespace DaphneGui
                             SetInactive();
                         }
                     }
-#else
-                    SetInactive();
-#endif
                 }
             }
         }
@@ -412,11 +383,7 @@ namespace DaphneGui
         /// <returns>integer indicating the percent state of playback</returns>
         public int GetPlaybackPercent()
         {
-#if ALL_VCR
             return (int)(Math.Min(100, TotalFrames() <= 1 ? 0 : 100 * frame / (TotalFrames() - 1)));
-#else
-            return 0;
-#endif
         }
 
         /// <summary>

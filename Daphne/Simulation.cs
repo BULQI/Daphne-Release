@@ -824,6 +824,16 @@ namespace Daphne
             }
         }
 
+        public IFrameData FrameData
+        {
+            get { return frameData; }
+        }
+
+        public int FrameNumber
+        {
+            get { return renderCount; }
+        }
+
         public abstract void Step(double dt);
         protected abstract int linearDistributionCase(int dim);
 
@@ -855,6 +865,7 @@ namespace Daphne
         protected int renderCount, sampleCount;
         protected double integratorStep;
         protected ReporterBase reporter;
+        protected IFrameData frameData;
     }
 
     public class TissueSimulation : SimulationBase
@@ -868,6 +879,7 @@ namespace Daphne
             dataBasket = new DataBasket(this);
             //integratorStep = 0.001;
             reporter = new TissueSimulationReporter();
+            frameData = new TissueSimulationFrameData();
             reset();
         }
 

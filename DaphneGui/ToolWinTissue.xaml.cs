@@ -21,8 +21,6 @@ namespace DaphneGui
     /// </summary>
     public partial class ToolWinTissue : ToolWinBase
     {
-        
-
         public ToolWinTissue()
         {
             TitleText = "Tissue Simulation";
@@ -178,8 +176,6 @@ namespace DaphneGui
  
                                     // Select the Cellpop tab for focus
                                     toolWinTissue.ConfigTabControl.SelectedItem = tabCellPop;
-
-
                                 }
                             }
 
@@ -189,7 +185,6 @@ namespace DaphneGui
                 }
             }
         }
-
 
         private void btnNewSkinClick(object sender, RoutedEventArgs e)
         {
@@ -303,19 +298,5 @@ namespace DaphneGui
             //toolWinTissue.dgCellMembMols.SelectedItem = 0;
             //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
         }
-
-        private void TissuePushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = CellPopControl.SelectedCell;
-
-            //Error case
-            if (cell == null)
-                return;
-
-            //Push cell
-            ConfigCell newcell = cell.Clone(true);
-            MainWindow.GenericPush(newcell);
-        }
-
     }
 }
