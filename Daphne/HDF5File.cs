@@ -45,12 +45,13 @@ namespace Daphne
 
         /// <summary>
         /// open it for writing
+        /// <param name="trunc">true to force truncation (deletion)</param>
         /// </summary>
-        public void openWrite()
+        public void openWrite(bool trunc)
         {
             if (filename != "" && fileId == null)
             {
-                if (File.Exists(filename) == true)
+                if (trunc == false && File.Exists(filename) == true)
                 {
                     fileId = H5F.open(filename, H5F.OpenMode.ACC_RDWR);
                 }
@@ -82,6 +83,15 @@ namespace Daphne
                 H5F.close(fileId);
                 fileId = null;
             }
+        }
+
+        /// <summary>
+        /// clear all entries in the file
+        /// </summary>
+        public void clearFile()
+        {
+            close();
+            openWrite(true);
         }
 
         /// <summary>
