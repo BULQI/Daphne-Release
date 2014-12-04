@@ -206,6 +206,18 @@
                                         />
                 <TextBlock Text="times" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                <TextBlock Text="global random seed" Margin="6,0"
+                            Grid.Column="0" Grid.Row="5"  
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            TextAlignment="Right"
+                            Width="120"
+                            />
+                <TextBox Text="{Binding Path=Protocol.sim_params.globalRandomSeed, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                         x:Name="global_random_seed"
+                         LostFocus="global_random_seed_LostFocus"/>
+            </StackPanel>
 
             <StackPanel Orientation="Horizontal" Visibility="{Binding Path=ToroidalVisibility}">
                 <StackPanel.Resources>
