@@ -16,7 +16,7 @@
              >
 
     <UserControl.Resources>
-        <!-- gmk see if these are in the dictionary -->
+
         <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter" />
         <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
         <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
@@ -38,9 +38,6 @@
         <CollectionViewSource x:Key="membraneAvailableReactionsListView"  
                                   Filter="membraneAvailableReactionsListView_Filter"/>
 
-        <!--<CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
-                                  Filter="ecmAvailableReactionsListView_Filter"                                   
-                                  />-->
         <CollectionViewSource x:Key="membraneAvailableReactionComplexesListView"  
                                   Filter="membraneAvailableReactionComplexesListView_Filter"/>
         <CollectionViewSource x:Key="cytosolAvailableReactionComplexesListView"  
@@ -54,6 +51,7 @@
             <TextBlock Name="textblock"  Text="{Binding Path=driver_mol_guid_ref, Converter={StaticResource MolGUIDtoMolNameConverter},
                 ConverterParameter={StaticResource moleculesListView}}" />
         </DataTemplate>
+        
         <!-- Template for transitions schemes. Called from the code-behind -->
         <DataTemplate x:Key="DiffRegCellEditingTemplate" DataType="daph:ConfigTransitionDriverElement">
             <StackPanel Name="CellEditStackPanel" Orientation="Vertical">
@@ -104,95 +102,20 @@
 
     <Grid x:Name="CellDetailsGrid">
         <Grid.Resources>
-            <DataTemplate x:Key="cytosolMolPopDetailsTemplate">
-                <!--<local:DaphneStackPanel x:Name="cytosolMolPopDetails" Orientation="Horizontal" >
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
-                                <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                <ComboBox   x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                            DisplayMemberPath="Name"            
-                                            SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                            SelectedValuePath="entity_guid"
-                                            SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
-                                            GotFocus="cyto_molecule_combo_box_GotFocus"
-                                            SelectedIndex="0">
-
-                                    <ComboBox.ItemsSource>
-                                        <CompositeCollection>
-                                            <CollectionContainer Collection="{Binding Source={StaticResource availableBulkMoleculesListView}}" />
-                                            <daph:ConfigMolecule Name="New Molecule"/>
-                                        </CompositeCollection>
-                                    </ComboBox.ItemsSource>
-                                </ComboBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
-                                <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
-                                <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
-                            </StackPanel>
-
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel Margin="10,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal" Margin="28,10">
-                                    <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                    <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                                    <TextBlock Text=")" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
-                                <ContentControl Name="MolPopDistributionDetails"
-                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
-                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                        Margin="6,2"/>
-                            </StackPanel>
-
-                        </Grid>
-
-                    </StackPanel>
-
-                </local:DaphneStackPanel>-->
-            </DataTemplate>
-
         </Grid.Resources>
+        
         <local:DaphneStackPanel x:Name="panelCellMolPops" >
             <!-- Mol Pops in this cell by their location, i.e. cytoplasm or membrane -->
-            <Expander
-                                                Padding="5" 
-                                                ExpandDirection="Down"
-                                                    IsExpanded="False"
-                                                    Header="Cell Molecules and Genes"                                              
-                                                    x:Name="CellMolPopsExpander"
-                                                    Margin="0,10,0,0" 
-                                                    Canvas.ZIndex="1"
-                                                BorderThickness="1"
-                                                BorderBrush="Black"
-                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+            <Expander   Padding="5" 
+                        ExpandDirection="Down"
+                        IsExpanded="False"
+                        Header="Cell Molecules and Genes"                                              
+                        x:Name="CellMolPopsExpander"
+                        Margin="0,10,0,0" 
+                        Canvas.ZIndex="1"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                 <!-- Cell Molecular Populations -->
                 <StackPanel>
@@ -237,11 +160,11 @@
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                                     <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                                        DisplayMemberPath="Name"    
-                                                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                                                        SelectedValuePath="entity_guid"
-                                                                        SelectionChanged="memb_molecule_combo_box_SelectionChanged"
-                                                                        GotFocus="memb_molecule_combo_box_GotFocus">
+                                                                    DisplayMemberPath="Name"    
+                                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                                    SelectedValuePath="entity_guid"
+                                                                    SelectionChanged="memb_molecule_combo_box_SelectionChanged"
+                                                                    GotFocus="memb_molecule_combo_box_GotFocus">
 
                                                             <ComboBox.ItemsSource>
                                                             <CompositeCollection>
@@ -291,12 +214,12 @@
                                     </StackPanel>
 
                                     <Expander x:Name="membMolPropExpander" ExpandDirection="Down"
-                                                              IsExpanded="False"
-                                                              Header="Molecule Properties"
-                                                              Margin="0,0,0,0" 
-                                                              Canvas.ZIndex="1"
-                                                              DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem, Mode=TwoWay}"
-                                                              >
+                                                IsExpanded="False"
+                                                Header="Molecule Properties"
+                                                Margin="0,0,0,0" 
+                                                Canvas.ZIndex="1"
+                                                DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem, Mode=TwoWay}"
+                                                >
 
                                         <StackPanel>
                                             <ContentControl Name="membMoleculeDetails"
@@ -332,12 +255,6 @@
                                     <!-- Cell Cytosol Mol Pop Details-->
                                     <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}">
  
-                                        <!--<ContentControl x:Name="CytoMolPopDetails"
-                                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"    
-                                                        ContentTemplate="{StaticResource cytosolMolPopDetailsTemplate}"
-                                                        Margin="6">
-                                        </ContentControl>-->
-
                                         <local:DaphneStackPanel x:Name="cytosolMolPopDetails" Orientation="Horizontal" >
                                             <StackPanel>
                                                 <Grid>
@@ -1193,9 +1110,6 @@
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-
-                    <!--<local:DiffSchemeDataGrid local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding diff_scheme}" 
-                           Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />-->
                     
                     <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
                             Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
