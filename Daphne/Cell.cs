@@ -581,8 +581,6 @@ namespace Daphne
             if (dist != 0.0)
             {
                 double force = Pair.Phi1 * (1.0 / dist - 1.0 / radius);
-
-                //addForce(normal * force);
                 addForce(normal.Multiply(force).ToArray());
             }
         }
