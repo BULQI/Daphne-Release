@@ -2384,7 +2384,7 @@ namespace DaphneGui
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED && skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
