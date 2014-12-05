@@ -255,6 +255,7 @@ namespace DaphneGui
                     vcrControl.ReleaseVCR();
                 }
                 DataBasket.hdf5file.clearFile();
+                DataBasket.currentExperimentID = -1;
                 System.Windows.MessageBox.Show("All file entries cleared!");
             }
         }
@@ -289,7 +290,6 @@ namespace DaphneGui
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
-
 
             this.ToolWinCellInfo.Close();
 
@@ -604,6 +604,8 @@ namespace DaphneGui
                     openLastScenarioMenu.IsChecked = false;
                 }
             }
+
+            vcrControl = new VCRControl();
 
             // hdf5
             bool proceedHDF5 = true;
@@ -2305,7 +2307,7 @@ namespace DaphneGui
                                     }
 
                                     // update the gui; this is a non-issue if an application close just got requested, so may get skipped
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
                                 }
                             }
                         }
@@ -2365,26 +2367,10 @@ namespace DaphneGui
             lockSaveStartSim(true);
         }
 
-        /// <summary>
-        /// create the vcr control if it has not been created yet, and load the current frame
-        /// </summary>
-        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
-        /// <param name="expID">experiment id</param>
-        /// <returns>true for success</returns>
-        private bool OpenVCR(bool lastFrame, int expID = -1)
-        {
-            // create the vcr control if needed, load the data, and set the last frame
-            if (vcrControl == null)
-            {
-                vcrControl = new VCRControl();
-            }
-            return vcrControl.OpenVCR(lastFrame, expID);
-        }
-
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED && skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            if (expID >= 0 && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR(true, expID) == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
@@ -2515,9 +2501,7 @@ namespace DaphneGui
         private void updateGraphicsAndGUI()
         {
             lockAndResetSim(false, ReadJson(""));
-            //also need to delete every for this experiment in database.
-            //DataBaseTools.DeleteExperiment(configurator.Protocol.experiment_db_id);
-            //SC.Protocol.experiment_db_id = -1;//reset
+            // disable the vcr by passing expId == -1, from this call we should never attempt to read an hdf5 file
             runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
@@ -2676,10 +2660,10 @@ namespace DaphneGui
                         DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
 
                         // for now pick a safe id, highest id + 1
-                        int id = DataBasket.findHighestExperimentId() + 1;
+                        DataBasket.currentExperimentID = DataBasket.findHighestExperimentId() + 1;
 
                         // group for this experiment
-                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", id));
+                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", DataBasket.currentExperimentID));
                     }
 
                     runButton.Content = "Pause";

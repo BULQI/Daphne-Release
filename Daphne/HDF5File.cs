@@ -65,12 +65,14 @@ namespace Daphne
         /// <summary>
         /// open it for reading
         /// </summary>
-        public void openRead()
+        public bool openRead()
         {
-            if (filename != "" && fileId == null)
+            if (filename != "" && File.Exists(filename) == true && fileId == null)
             {
                 fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+                return true;
             }
+            return false;
         }
 
         /// <summary>
