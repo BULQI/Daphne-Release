@@ -1,8 +1,8 @@
 {
-  "experiment_db_id": 0,
+  "experiment_id": 0,
   "experiment_name": "Blank Tissue Simulation Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "3817195c-8b64-4a42-9022-1c1e6ff37bf7",
+  "experiment_guid": "c50d5512-5cd5-44f0-b7e8-0eb18e8e996a",
   "experiment_description": "Libraries only.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -43,7 +43,8 @@
     "phi1": 100.0,
     "phi2": 0.0,
     "deathConstant": 0.001,
-    "deathOrder": 1
+    "deathOrder": 1,
+    "globalRandomSeed": -886564884
   },
   "reporter_file_name": "",
   "entity_repository": {

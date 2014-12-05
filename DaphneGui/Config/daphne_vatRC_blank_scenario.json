@@ -1,8 +1,8 @@
 {
-  "experiment_db_id": 0,
+  "experiment_id": 0,
   "experiment_name": "Blank Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "eeffa1bc-521d-439c-953b-04b9810cd7df",
+  "experiment_guid": "5697d52b-a2bc-4af1-92af-7186089c63e5",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
@@ -31,7 +31,8 @@
     "phi1": 100.0,
     "phi2": 0.0,
     "deathConstant": 0.001,
-    "deathOrder": 1
+    "deathOrder": 1,
+    "globalRandomSeed": -1886594708
   },
   "reporter_file_name": "",
   "entity_repository": {
