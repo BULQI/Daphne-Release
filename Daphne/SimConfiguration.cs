@@ -9148,7 +9148,7 @@ namespace Daphne
             isInitialized = true;
         }
 
-        public double GetValue()
+        public double Sample()
         {
             if (isInitialized == false)
             {
