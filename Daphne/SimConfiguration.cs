@@ -9081,9 +9081,11 @@ namespace Daphne
 
     /// <summary>
     /// Class to handle parameters whose values may be set by a probability distribution.
+    /// The default is a constant distribution - always returns the same value.
     /// </summary>
     public class DistributedParameter : EntityModelBase
     {
+        // Then probabilistic distribution
         private ParameterDistribution paramDistr;
         public ParameterDistribution ParamDistr 
         {
@@ -9098,6 +9100,7 @@ namespace Daphne
             }
         }
 
+        // The default contant value
         private double constValue;
         public double ConstValue 
         {
@@ -9112,6 +9115,8 @@ namespace Daphne
             }
         }
 
+        // Needed to detect when to default to the constant distribution.
+        // Then we need to initalize it with the ConstValue.
         public bool isInitialized;
 
         public DistributedParameter()
@@ -9125,6 +9130,10 @@ namespace Daphne
             ConstValue = _constValue;
         }    
 
+        /// <summary>
+        /// If no probabilistic distribution has been chosen, then we need to initalize the constant distribution
+        /// with ConstValue.
+        /// </summary>
         public void Intialize()
         {
             if (ParamDistr == null)
@@ -9440,8 +9449,15 @@ namespace Daphne
                 probMass.Add(new CategoricalDistrItem(0.0, 0.5));
                 probMass.Add(new CategoricalDistrItem(1.0, 0.5));
             }
+            Console.WriteLine("Initialize:");
+            Console.WriteLine("\tbefore Normalize.");
+            Console.WriteLine("\t{0}\t{1}", Rand.NormalDist.Sample(), Rand.TroschuetzCUD.NextDouble());
             Normalize();
+            Console.WriteLine("\tafter Normalize.");
+            Console.WriteLine("\t{0}\t{1}", Rand.NormalDist.Sample(), Rand.TroschuetzCUD.NextDouble());
             CategoricalDist = new Categorical(ProbArray(), Rand.MersenneTwister);
+            Console.WriteLine("\tafter new categorical distribution");
+            Console.WriteLine("\t{0}\t{1}", Rand.NormalDist.Sample(), Rand.TroschuetzCUD.NextDouble());
             isInitialized = true;
         }
 

@@ -930,7 +930,6 @@ namespace Daphne
             //MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
             DenseVector box = new DenseVector(3);
 
-
             box[0] = envHandle.extent_x;
             box[1] = envHandle.extent_y;
             box[2] = envHandle.extent_z;
@@ -967,6 +966,20 @@ namespace Daphne
                 if (cp.renderLabel == null)
                 {
                     cp.renderLabel = cp.Cell.entity_guid;
+                }
+
+                // Force all cell distributed parameters to reinitialize otherwise we won't get reproducible results.
+                if (cp.Cell.TransductionConstant.ParamDistr != null)
+                {
+                    cp.Cell.TransductionConstant.ParamDistr.isInitialized = false;
+                }
+                if (cp.Cell.Sigma.ParamDistr != null)
+                {
+                    cp.Cell.Sigma.ParamDistr.isInitialized = false;
+                }
+                if (cp.Cell.DragCoefficient.ParamDistr != null)
+                {
+                    cp.Cell.DragCoefficient.ParamDistr.isInitialized = false;
                 }
 
                 Console.WriteLine("Transduction values");
