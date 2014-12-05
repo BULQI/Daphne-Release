@@ -5537,8 +5537,7 @@ namespace Daphne
                 if (molecules_dict.ContainsKey(molguid) == false)
                 {
                     ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                    //ConfigMolecule configMolecule = molecules_dict[molguid];
-
+                    //ConfigMolecule configMolecule = molecules_dict[molguid];                 
                     if (configMolecule != null)
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);

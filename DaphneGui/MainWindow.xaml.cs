@@ -830,7 +830,7 @@ namespace DaphneGui
                 applyTempFilesAndSave(true);
             }
 
-            Protocol protocol = new Protocol();
+            Protocol protocol = new Protocol("", "", Protocol.ScenarioType.TISSUE_SCENARIO);
 
             //Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -858,8 +858,6 @@ namespace DaphneGui
                         LoadProtocolFromSBML(protocol);
                     }
                 }
-                //Obtain filled out configurator and store in tempConfigurator
-                //SBMLToProtocol();
             }
         }
 
@@ -872,28 +870,29 @@ namespace DaphneGui
         {
             //ReactionComplex that was added
             ConfigReactionComplex crc = protocol.entity_repository.reaction_complexes.Last();
-
-            //Add reaction complex
-            // prevent when a fit is in progress
+                        // prevent when a fit is in progress
             lock (cellFitLock)
             {
-                sop.Protocol.entity_repository.reaction_complexes.Add(crc);
-            }
+                    sop.Protocol.entity_repository.reaction_complexes.Add(crc);
+            
+                //Add reaction complex
+                foreach (ConfigMolecule cm in crc.molecules_dict.Values)
+                {
+                    sop.Protocol.entity_repository.molecules.Add(cm.Clone(null));
+                }
 
-            foreach (ConfigMolecule cm in crc.molecules_dict.Values)
-            {
-                sop.Protocol.entity_repository.molecules.Add(cm.Clone(null));
+                //Reactions in the reaction complex
+                foreach (ConfigReaction cr in crc.reactions)
+                {
+                    if (!sop.Protocol.entity_repository.reaction_templates_dict.ContainsKey(cr.reaction_template_guid_ref))
+                    {
+                        sop.Protocol.entity_repository.reaction_templates.Add(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);      
+                    }
+                    int index = sop.Protocol.entity_repository.reaction_templates.IndexOf(sop.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);           
+                    cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
+                    sop.Protocol.entity_repository.reactions.Add(cr);
+                }
             }
-
-            //Reactions in the reaction complex
-            foreach (ConfigReaction cr in crc.reactions)
-            {
-                int index = protocol.entity_repository.reaction_templates.IndexOf(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
-
-                cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
-                sop.Protocol.entity_repository.reactions.Add(cr);
-            }
-            ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
         }
 
         /// <summary>
@@ -903,7 +902,7 @@ namespace DaphneGui
         private void LoadProtocolFromSBML(Protocol protocol)
         {
             protocol.InitializeStorageClasses();
-
+            
             //SetPaths
             protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
             protocol.TempFile = orig_path + @"\temp_scenario.json";
@@ -926,8 +925,8 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
-            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
-            //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
+            //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
             dlg.FileName = "SBMLModel";
 
             // Show open  file dialog box
@@ -2385,7 +2384,7 @@ namespace DaphneGui
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED && skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;

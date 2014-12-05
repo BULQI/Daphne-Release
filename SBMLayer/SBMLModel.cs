@@ -27,9 +27,13 @@ namespace SBMLayer
         private const int SBMLLEVEL = 3;
         private const int SBMLVERSION = 1;
         private const int SPATIALPKGVERSION = 1;
+        private const string spatialPackageName = "spatial";
 
         //Handles spatial components of current SBML model
-        private SpatialComponents world;
+        private SpatialComponents spatialComponents;
+        private SpatialModelPlugin spatialModelPlugin;
+        private Geometry geometry;
+        private CSGeometry csgGeometry;
 
         //Instance of a model contained within sbmlDoc
         private Model model;
@@ -78,9 +82,9 @@ namespace SBMLayer
             // Creates a template SBML model
             this.appPath = appPath;
             this.protocol = protocol;
-
+            
             // for now, restrict to the tissue scenario
-            if(protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
                 throw new InvalidCastException();
             }
@@ -328,7 +332,7 @@ namespace SBMLayer
 
                 if (isSpatialModel)
                 {
-                    world.ModifySpatialSpecies(species);
+                    spatialComponents.ModifySpatialSpecies(species);
                 }
             }
       
@@ -382,7 +386,7 @@ namespace SBMLayer
                 }
                 if (isSpatialModel)
                 {
-                    SpatialSpeciesRxnPlugin splug = (SpatialSpeciesRxnPlugin)currentGlobReaction.getPlugin("spatial");
+                    SpatialReactionPlugin splug = (SpatialReactionPlugin)currentGlobReaction.getPlugin(spatialPackageName);
                     splug.setIsLocal(false);
                 }
 	        }
@@ -460,7 +464,7 @@ namespace SBMLayer
 
 
             if ((internal_errors + consistency_errors) == 0)
-            {
+            {                
                 if (exportFlag)
                 {
                     File.AppendAllText(logFileName, "The model was correctly encoded into SBML");
@@ -564,19 +568,30 @@ namespace SBMLayer
                 attr.add("duration", Convert.ToString(protocol.scenario.time_config.duration), annotNamespace, annotprefix);
                 attr.add("rendering_interval", Convert.ToString(protocol.scenario.time_config.rendering_interval), annotNamespace, annotprefix);
                 attr.add("sampling_interval", Convert.ToString(protocol.scenario.time_config.sampling_interval), annotNamespace, annotprefix);
-                attr.add("gridstep", Convert.ToString(envHandle.gridstep), annotNamespace, annotprefix);
+                attr.add("integrator_step", Convert.ToString(protocol.scenario.time_config.integrator_step), annotNamespace, annotprefix);
+                attr.add("repetitions", Convert.ToString(protocol.experiment_reps), annotNamespace, annotprefix);
+                attr.add("grid_size", Convert.ToString(envHandle.gridstep), annotNamespace, annotprefix);
 
                 //Spatial Geometry params
-
                 attr.add("toroidal", Convert.ToString(envHandle.toroidal), annotNamespace, annotprefix);
-                attr.add("extent_x", Convert.ToString(envHandle.extent_x), annotNamespace, annotprefix);
-                attr.add("extent_y", Convert.ToString(envHandle.extent_y), annotNamespace, annotprefix);
-                attr.add("extent_z", Convert.ToString(envHandle.extent_z), annotNamespace, annotprefix);
+                if (!isSpatialModel)
+                {
+                    attr.add("extent_x", Convert.ToString(envHandle.extent_x), annotNamespace, annotprefix);
+                    attr.add("extent_y", Convert.ToString(envHandle.extent_y), annotNamespace, annotprefix);
+                    attr.add("extent_z", Convert.ToString(envHandle.extent_z), annotNamespace, annotprefix);
+                }
+                //Cell Death params
+                attr.add("death_constant", Convert.ToString(protocol.sim_params.deathConstant), annotNamespace, annotprefix);
+                attr.add("death_order", Convert.ToString(protocol.sim_params.deathOrder), annotNamespace, annotprefix);
+
+                //Cell Interaction params
+                attr.add("ph1", Convert.ToString(protocol.sim_params.phi1), annotNamespace, annotprefix);
+                attr.add("ph2", Convert.ToString(protocol.sim_params.phi2), annotNamespace, annotprefix);
             }
             else
             {
                 //ReactionComplex ID
-                attr.add("ReactionComplex", "true", annotNamespace, annotprefix);
+                attr.add("reaction_complex", "true", annotNamespace, annotprefix);
             }
 
             XMLNamespaces names = new XMLNamespaces();
@@ -598,8 +613,10 @@ namespace SBMLayer
             //Only add when compartment has 3 dimensions, i.e., when it's the cytosol compartment
             if (compartment.getSpatialDimensions() == 3)
             {
-                attr.add("dragCoeff", Convert.ToString(configCell.DragCoefficient), annotNamespace, annotprefix);
-                attr.add("transdConst", Convert.ToString(configCell.TransductionConstant), annotNamespace, annotprefix);
+                attr.add("dragCoeff", Convert.ToString(cellPop.Cell.DragCoefficient), annotNamespace, annotprefix);
+                attr.add("transdConst", Convert.ToString(cellPop.Cell.TransductionConstant), annotNamespace, annotprefix);
+                attr.add("stochForce", Convert.ToString(cellPop.Cell.Sigma), annotNamespace, annotprefix);
+                if (!isSpatialModel) { attr.add("cell_radius", Convert.ToString(cellPop.Cell.CellRadius), annotNamespace, annotprefix); }
                 attr.add("number", Convert.ToString(cellPop.number), annotNamespace, annotprefix);
 
                 if (!configCell.locomotor_mol_guid_ref.Equals(string.Empty))
@@ -621,11 +638,11 @@ namespace SBMLayer
         private void SetSpeciesAnnotation(ConfigMolecularPopulation confMolPop, Species species)
         {
             //Species specific params
-            ConfigMolecule tempConfMol = protocol.entity_repository.molecules_dict[confMolPop.molecule.entity_guid];
             XMLAttributes attr = new XMLAttributes();
-            attr.add("diff_coeff", Convert.ToString(tempConfMol.DiffusionCoefficient), annotNamespace, annotprefix);
-            attr.add("mol_weight", Convert.ToString(tempConfMol.MolecularWeight), annotNamespace, annotprefix);
-            attr.add("complex", Convert.ToString(tempConfMol.Name.Contains(":") ? true : false), annotNamespace, annotprefix); //If name of species has a :, it is stored as a complex
+            if (!isSpatialModel) { attr.add("diff_coeff", Convert.ToString(confMolPop.molecule.DiffusionCoefficient), annotNamespace, annotprefix); }
+            attr.add("mol_weight", Convert.ToString(confMolPop.molecule.MolecularWeight), annotNamespace, annotprefix);
+            attr.add("mol_radius", Convert.ToString(confMolPop.molecule.EffectiveRadius), annotNamespace, annotprefix);
+            attr.add("complex", Convert.ToString(confMolPop.molecule.Name.Contains(":") ? true : false), annotNamespace, annotprefix); //If name of species has a :, it is stored as a complex
 
             //Distribution of species
             if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
@@ -636,11 +653,11 @@ namespace SBMLayer
                 BoxSpecification box = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
 
                 attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
-                attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
+                attr.add("x_halfscale", Convert.ToString(box.half_x_scale), annotNamespace, annotprefix);
                 attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
-                attr.add("y_scale", Convert.ToString(box.y_scale), annotNamespace, annotprefix);
+                attr.add("y_halfscale", Convert.ToString(box.half_y_scale), annotNamespace, annotprefix);
                 attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
-                attr.add("z_scale", Convert.ToString(box.z_scale), annotNamespace, annotprefix);
+                attr.add("z_halfscale", Convert.ToString(box.half_z_scale), annotNamespace, annotprefix);
             }
             else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
@@ -692,21 +709,15 @@ namespace SBMLayer
         {
             if (isSpatialModel)
             {
-                SBMLNamespaces sbmlns = new SBMLNamespaces(SBMLLEVEL, SBMLVERSION, "spatial", SPATIALPKGVERSION);
+                SBMLNamespaces sbmlns = new SBMLNamespaces(SBMLLEVEL, SBMLVERSION, spatialPackageName, SPATIALPKGVERSION);
                 sbmlDoc = new SBMLDocument(sbmlns);
 
                 /*Declare our model uses other packages by referencing their XMLnamespaceURI
                  * Spatial Package
                  * It allows us to encode modeling spatial information such as spatially localized reactions, non-homogenously
                  * distributed species, and cellular geometries.*/
-                sbmlDoc.enablePackage(SpatialExtension.getXmlnsL3V1V1(), "spatial", true);
-                sbmlDoc.setPackageRequired("spatial", true);
-
-                /*Required Elements Package
-                 * It allows us to explicitly declare which elements in the models have had their math changed
-                 * and by which package and if an alternative math representation is present in SBML Core*/
-                sbmlDoc.enablePackage(RequiredElementsExtension.getXmlnsL3V1V1(), "req", true);
-                sbmlDoc.setPackageRequired("req", true);
+                sbmlDoc.enablePackage(SpatialExtension.getXmlnsL3V1V1(), spatialPackageName, true);
+                sbmlDoc.setPackageRequired(spatialPackageName, true);
             }
             else
             {
@@ -721,7 +732,7 @@ namespace SBMLayer
         /// <param name="e"></param>
         public void ConvertDaphneToSBML(int isSpatial)
         {
-            //Sets flag to know which type of SBML we are building
+            //Sets flag to know which type of SBML we are building:1 for Core, 2 for Spatial
             if (isSpatial == 1)
             {
                 isSpatialModel = false;
@@ -739,7 +750,7 @@ namespace SBMLayer
             //Configure spatial model constraints
             if (isSpatialModel)
             {
-                world = new SpatialComponents(protocol, ref model);
+                spatialComponents = new SpatialComponents(protocol, ref model);
             }
           
             SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
@@ -759,7 +770,7 @@ namespace SBMLayer
             Domain backgDomain=null;
             if (isSpatialModel)
             {
-                backgDomain= world.AddBackground(backgComp, scenario.cellpopulations.Count);
+                backgDomain= spatialComponents.AddBackground(backgComp);
             }
             //adds species in the ECS
             BoxSpecification spec;
@@ -800,9 +811,9 @@ namespace SBMLayer
 
                 if (isSpatialModel)
                 {
-                    world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[confMolPop.molecule.entity_guid].DiffusionCoefficient);
-                    //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
-                    world.SetBoxBoundaryCondition(species);
+                    spatialComponents.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[confMolPop.molecule.entity_guid].DiffusionCoefficient);
+                    //All boundary conditions are no flux if they don't specify a linear distribution- all others are not supported by SBML spatial
+                    spatialComponents.SetBoxBoundaryCondition(species);
                 } 
             }
 
@@ -822,7 +833,7 @@ namespace SBMLayer
             ConfigCompartment[] configComp;
             ConfigCell configCell = new ConfigCell();
             libsbmlcs.Compartment compartment;
-            int ordinal = 0;
+            int ordinal = 1;
             Domain membraneDomain=null, cytoDomain=null;
             DomainType membraneDomainType=null, cytoDomainType=null;
             foreach (CellPopulation cellPop in scenario.cellpopulations)
@@ -831,28 +842,24 @@ namespace SBMLayer
                 //Membrane
                 configCell = protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid];
                 cellMembraneId = string.Concat("Membrane_", configCell.CellName);
-                double radius = configCell.CellRadius;
+                double radius = cellPop.Cell.CellRadius;
                 sphere = new TinySphere();
                 sphere.Initialize(new double[] { radius });
                 compartment = AddCompartment(cellMembraneId, cellMembraneId, true, sphere.Area(), sphere.Dim, "");
                 SetCompartmentAnnotation(cellPop, compartment);
-
+                string [] membraneNames=new string[cellPop.number];
                 //Adds Domains and DomainTypes of every cell membrane
                 if (isSpatialModel)
                 {
-                    membraneDomainType = world.AddCellModel(compartment,true);
+                    membraneDomainType = spatialComponents.AddCellModel(compartment, true);
                     for (int z = 0; z < cellPop.number; z++)
                     {
                         CellState positions = cellPop.CellStates[z];
-                        membraneDomain = world.AddCellDomain(membraneDomainType, compartment, positions.X+radius, positions.Y, positions.Z);
-                        world.AddAdjacency(backgDomain.getSpatialId(), membraneDomain.getSpatialId());
+                        membraneDomain = spatialComponents.AddCellDomain(membraneDomainType, compartment, positions.X+radius, positions.Y, positions.Z, z);
+                        spatialComponents.AddAdjacency(backgDomain.getId(), membraneDomain.getId());
+                        membraneNames[z] = membraneDomain.getId();
                     }
                 }
-
-                //Setup necessary to extract molecular populations from each compartment (cytosol/membrane)
-                configComp = new ConfigCompartment[2];
-                configComp[0] = configCell.cytosol;
-                configComp[1] = configCell.membrane;
 
                 //Only add a cytosol compartment if there are any molecular populations in the cytosol 
                 //if (configComp[0].molpops.Count > 0)
@@ -866,18 +873,22 @@ namespace SBMLayer
                 //Adds DomainTypes and Domains for every cytosol
                 if (isSpatialModel)
                 {
-                    cytoDomainType = world.AddCellModel(compartment, false);
-                    
+                    //Only one csgObject for each cell type
+                    cytoDomainType = spatialComponents.AddCellModel(compartment, false);
+                    spatialComponents.AddCellGeometry(cytoDomainType, ordinal, radius);
                     for (int z = 0; z < cellPop.number; z++)
                     {
                         CellState positions = cellPop.CellStates[z];
-                        world.AddCellGeometry(cytoDomainType, ordinal, radius, positions.X, positions.Y, positions.Z);
-                        cytoDomain = world.AddCellDomain(cytoDomainType, compartment, positions.X, positions.Y, positions.Z);
-                        world.AddAdjacency(membraneDomain.getSpatialId(), cytoDomain.getSpatialId());
+                        cytoDomain = spatialComponents.AddCellDomain(cytoDomainType, compartment, positions.X, positions.Y, positions.Z, z);
+                        spatialComponents.AddAdjacency(membraneNames[z], cytoDomain.getId());
                     }
-
                     ordinal = ordinal + 1;
                 }
+
+                //Setup necessary to extract molecular populations from each compartment (cytosol/membrane)
+                configComp = new ConfigCompartment[2];
+                configComp[0] = configCell.cytosol;
+                configComp[1] = configCell.membrane;
 
                 //ConfigGene configGene;
                 //}
@@ -909,9 +920,9 @@ namespace SBMLayer
 
                         if (isSpatialModel)
 	                    {
-                            world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].DiffusionCoefficient);
+                            spatialComponents.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].DiffusionCoefficient);
                             //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
-                            world.SetDomainTypeBoundaryCondition(species,comp==0?cytoDomainType:membraneDomainType); 
+                            spatialComponents.SetDomainTypeBoundaryCondition(species,comp==0?cytoDomainType:membraneDomainType); 
 	                    }
                     }
                 }
@@ -946,7 +957,6 @@ namespace SBMLayer
 
             //Check for model consistency and serialize to file (provide output stream for log)
             CheckModelConsistency(true, outputLogFile);
-
             WriteSBMLModel();
         }
 
@@ -977,9 +987,9 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
+            AddCompartment(compName, compName, true, 1.0, 3);
 
             //Adds molecular populations
-            Species specAnnot;
             foreach (ConfigMolecularPopulation confMolPop in crc.molpops)
             {
                 AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
@@ -1649,7 +1659,7 @@ namespace SBMLayer
             CheckModelConsistency(false, inputLogFile);
 
             //Attempt to convert upwards imported SBMLdocument to supported Level and Version of SBML
-            if (sbmlDoc.getNumErrors() > 0)
+            if (sbmlDoc.getNumErrors() > 0 && (sbmlDoc.getNumErrors() != sbmlDoc.getErrorLog().getNumFailsWithSeverity(1)))
             {
                 MessageBox.Show("File could not be read into Daphne. Please select another one", "Error reading SBML file");
                 return null;
@@ -1665,9 +1675,20 @@ namespace SBMLayer
             //Obtain SBML model
             model = sbmlDoc.getModel();
 
+            //Determines whether input model uses the Spatial package
+            isSpatialModel=model.isPackageEnabled(spatialPackageName);
+            if (isSpatialModel)
+            {
+                spatialModelPlugin = (SpatialModelPlugin)model.getPlugin(spatialPackageName);
+                geometry = spatialModelPlugin.getGeometry();                
+                //Assumes there only active geometry definition is CsG
+                 GeometryDefinition b= geometry.getListOfGeometryDefinitions().get(0);
+                csgGeometry=(CSGeometry)spatialModelPlugin.getElementBySId(b.getId());
+                //TODO HOW DO WE EXACTRACT A CSG Geometry
+                string a = csgGeometry.getId();
+            }
             //Extracts all model components from the read SBML model and populates the Sim Configuration object
             PopulateProtocol();
-
             return protocol;
         }
 
@@ -1694,12 +1715,22 @@ namespace SBMLayer
                 protocol.scenario.time_config.duration = Convert.ToDouble(attributes.getValue(attributes.getIndex("duration")));
                 protocol.scenario.time_config.rendering_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("rendering_interval")));
                 protocol.scenario.time_config.sampling_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("sampling_interval")));
+                protocol.scenario.time_config.integrator_step = Convert.ToDouble(attributes.getValue(attributes.getIndex("integrator_step")));
+                protocol.experiment_reps = Convert.ToInt32(attributes.getValue(attributes.getIndex("repetitions")));
 
-                envHandle.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("gridstep")));
+                envHandle.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("grid_size")));
                 envHandle.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
-                envHandle.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
-                envHandle.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
-                envHandle.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
+
+                if (!isSpatialModel)
+                {
+                    envHandle.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
+                    envHandle.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
+                    envHandle.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
+                }
+                protocol.sim_params.deathConstant = Convert.ToDouble(attributes.getValue(attributes.getIndex("death_constant")));
+                protocol.sim_params.deathOrder = Convert.ToInt32(attributes.getValue(attributes.getIndex("death_order")));
+                protocol.sim_params.phi1 = Convert.ToDouble(attributes.getValue(attributes.getIndex("ph1")));
+                protocol.sim_params.phi2 = Convert.ToDouble(attributes.getValue(attributes.getIndex("ph2")));
             }
             else
             {
@@ -1729,7 +1760,7 @@ namespace SBMLayer
             annotation = annotation.getChild("daphnecomps");
             attributes = annotation.getAttributes();
 
-            return new double[] { Convert.ToDouble(attributes.getValue(attributes.getIndex("dragCoeff"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("transdConst"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("number"))) };
+            return new double[] { Convert.ToDouble(attributes.getValue(attributes.getIndex("dragCoeff"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("transdConst"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("number"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("stochForce"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("cell_radius"))) };
         }
 
         /// <summary>
@@ -1798,7 +1829,7 @@ namespace SBMLayer
                 annotation = annotation.getChild("daphnemodel");
                 //Model description
                 XMLAttributes attributes = annotation.getAttributes();
-                if (attributes.getIndex("ReactionComplex") == -1)
+                if (attributes.getIndex("reaction_complex") == -1)
                 {
                     return false;
                 }
@@ -1860,11 +1891,31 @@ namespace SBMLayer
         }
 
         /// <summary>
+        /// Extracts the size of the simulation container from Spatial components
+        /// </summary>
+        private void SetBoxExtents() {
+            ListOfCSGObjects csgObjects = csgGeometry.getListOfCsgObjects();
+            CSGScale csgScale;
+            for (int i = 0; i < csgObjects.size(); i++)
+			{
+                if (csgObjects.get(i).getOrdinal()==0)
+	            {
+                    csgScale = (CSGScale)csgObjects.get(i).getCsgNode();
+                    envHandle.extent_x= (Int32)csgScale.getScaleX();
+                    envHandle.extent_y = (Int32)csgScale.getScaleY();
+                    envHandle.extent_z = (Int32)csgScale.getScaleZ();
+	            }     
+			}
+
+        }
+
+        /// <summary>
         /// Populates Protocol object with SBML model 
         /// </summary>
         /// <param name="sc"></param>
         private void PopulateProtocol()
         {
+
             //Set up predefined molecules, reactionTemplates, reactions, cells and reaction complexes
             ProtocolCreators.LoadDefaultGlobalParameters(protocol);
 
@@ -1907,6 +1958,7 @@ namespace SBMLayer
                         complexConfigReaction = new ConfigReaction();
 
                         buildConfigReaction(sbmlReaction, ref complexConfigReaction);
+                        complexConfigReaction.GetTotalReactionString(protocol.entity_repository);
                         protocol.entity_repository.reactions.Add(complexConfigReaction);
                         protocol.entity_repository.reactions_dict.Add(complexConfigReaction.entity_guid, complexConfigReaction);
 
@@ -1935,6 +1987,8 @@ namespace SBMLayer
 
                 //Parse additional simulation elem these params as a custom annotation
                 GetModelAnnotation();
+
+                if (isSpatialModel) { SetBoxExtents(); }
 
                 /****Populate Protocol with ECS molPops****/
                 double CompSize = 0;
@@ -2007,8 +2061,9 @@ namespace SBMLayer
                         {
                             cytosol = comp;
                             compartAttributes = GetCellAttributes(cytosol);
-                            gc.DragCoefficient.ConstValue = compartAttributes[0];
-                            gc.TransductionConstant.ConstValue = compartAttributes[1];
+                            gc.DragCoefficient = compartAttributes[0];
+                            gc.TransductionConstant = compartAttributes[1];
+                            gc.Sigma= compartAttributes[3];
                             //Pull all cytosol species
                             for (int i = 0; i < speciesList.size(); i++)
                             {
@@ -2059,7 +2114,7 @@ namespace SBMLayer
                             cr = new ConfigReaction();
 
                             buildConfigReaction(cellReaction, ref cr);
-
+                            cr.GetTotalReactionString(protocol.entity_repository);
                             //Add the reaction to repository collection
                             protocol.entity_repository.reactions.Add(cr);
                             gc.cytosol.Reactions.Add(cr.Clone(true));
@@ -2079,9 +2134,11 @@ namespace SBMLayer
                     minDisSquared *= minDisSquared;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
                     // Don't start the cell on a lattice point, until gradient interpolation method improves.
+                    cellPop.cellPopDist.Initialize();
                     cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * gc.CellRadius - envHandle.gridstep / 2,
                                                           envHandle.extent_y / 2 - envHandle.gridstep / 2,
                                                           envHandle.extent_z / 2 - envHandle.gridstep / 2);
+
                     //cellPop.cellpopulation_color = Syste/m.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
 
                     if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
@@ -2129,14 +2186,13 @@ namespace SBMLayer
                         cr = new ConfigReaction();
 
                         buildConfigReaction(ecsReaction, ref cr);
-
+                        cr.GetTotalReactionString(protocol.entity_repository);
                         //Add the reaction to repository collection
                         protocol.entity_repository.reactions.Add(cr);
                         protocol.scenario.environment.comp.Reactions.Add(cr.Clone(true));
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -2346,6 +2402,7 @@ namespace SBMLayer
             double diffusion = 0;
             //Molecular weight in kDa
             double weight = 0;
+            double radius = 0;
             bool complex = false;
             if (species.isSetAnnotation())
             {
@@ -2356,6 +2413,7 @@ namespace SBMLayer
                 diffusion = Convert.ToDouble(attributes.getValue(attributes.getIndex("diff_coeff")));
                 weight = Convert.ToDouble(attributes.getValue(attributes.getIndex("mol_weight")));
                 complex = Convert.ToBoolean(attributes.getValue(attributes.getIndex("complex")));
+                radius = Convert.ToDouble(attributes.getValue(attributes.getIndex("mol_radius")));
             }
             else
             {
@@ -2391,7 +2449,7 @@ namespace SBMLayer
                     diffusion = 750;
                 }
             }
-            return new double[] { weight, diffusion };
+            return new double[] { weight, diffusion, radius };
         }
 
         /// <summary>
@@ -2431,9 +2489,9 @@ namespace SBMLayer
                     box.x_trans = Convert.ToDouble(attributes.getValue(attributes.getIndex("x_trans")));
                     box.y_trans = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_trans")));
                     box.z_trans = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_trans")));
-                    box.x_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("x_scale")));
-                    box.y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_scale")));
-                    box.z_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_scale")));
+                    box.half_x_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("x_halfscale")));
+                    box.half_y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_halfscale")));
+                    box.half_z_scale= Convert.ToDouble(attributes.getValue(attributes.getIndex("z_halfscale")));
 
                     gaussSpec.box_spec = box;
                     //gg.gaussian_spec_name = "gaussian";
@@ -2518,8 +2576,7 @@ namespace SBMLayer
             //Create new molecule, add such molecule to the entity repository and continue.
             //Obtain diffusion coefficients (below included) for ECS molecules from spatial diffusion params
             double[] speciesAnnot = GetSpeciesAnnotation(tempSpecies, location, inECS);
-            double effRad = 1.0; //All seem to have molWeight/effRad=1 (default)!
-            ConfigMolecule configMolecule = new ConfigMolecule(tempSpecies.getId(), speciesAnnot[0], effRad, speciesAnnot[1]);
+            ConfigMolecule configMolecule = new ConfigMolecule(tempSpecies.getId(), speciesAnnot[0], speciesAnnot[2], speciesAnnot[1]);
             if (location == MoleculeLocation.Bulk)
             {
                 configMolecule.molecule_location = MoleculeLocation.Bulk;
