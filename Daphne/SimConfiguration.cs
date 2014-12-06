@@ -251,7 +251,7 @@ namespace Daphne
                     return crt.entity_guid;
                 }
             }
-            return null;
+            return "";
         }
 
 
