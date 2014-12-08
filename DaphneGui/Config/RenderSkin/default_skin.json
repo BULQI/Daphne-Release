@@ -298,7 +298,7 @@
       ],
       "shades": 0,
       "name": "Leukocyte_staticReceptor_motile",
-      "renderLabel": "2964a07e-52a8-46b2-b2c5-4c69c2b0eff8"
+      "renderLabel": "745a8d8a-7859-4ab1-9c97-334a230e125d"
     }
   ],
   "renderMols": [
@@ -312,7 +312,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13",
-      "renderLabel": "71eecf85-da98-47d6-99bd-57ff3a85e9ad"
+      "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418"
     },
     {
       "color": {
@@ -324,7 +324,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "A",
-      "renderLabel": "793f802d-6fcb-4ea4-826a-67d57678504f"
+      "renderLabel": "1f5dd61c-942e-4c27-b547-51ebcb408fa0"
     },
     {
       "color": {
@@ -336,7 +336,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "A*",
-      "renderLabel": "840bf3f6-c637-4ff5-92e5-ce6fde1b0c97"
+      "renderLabel": "bbe99799-de81-4d6d-a840-17b15e65c1f2"
     },
     {
       "color": {
@@ -348,7 +348,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sApop",
-      "renderLabel": "c0a9ef74-aa0e-4d91-bbaf-004ba10a1211"
+      "renderLabel": "ffde1640-e3e0-4f81-ac86-e3ff21913d0a"
     },
     {
       "color": {
@@ -360,7 +360,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR5|",
-      "renderLabel": "16b62996-5952-458f-ac99-8890df601005"
+      "renderLabel": "287ef54b-3361-4e5c-b5aa-9ddcb73670df"
     },
     {
       "color": {
@@ -372,7 +372,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13:CXCR5|",
-      "renderLabel": "566f043d-e47c-4dde-9a0c-897179b1dc04"
+      "renderLabel": "e35a4ce8-9269-495b-8bb3-8b66f5db12e1"
     }
   ]
 }
