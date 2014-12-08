@@ -241,7 +241,6 @@ namespace Workbench
         {
             redraw_flag = true;
             Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runSim(); }), null);
-            Console.WriteLine("last run fired");
         }
 
         private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)

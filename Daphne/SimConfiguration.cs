@@ -251,7 +251,7 @@ namespace Daphne
                     return crt.entity_guid;
                 }
             }
-            return null;
+            return "";
         }
 
 
@@ -1331,7 +1331,6 @@ namespace Daphne
         public enum ScenarioType { UNASSIGNED, TISSUE_SCENARIO, VAT_REACTION_COMPLEX };
 
         public static int SafeCellPopulationID = 0;
-        public int experiment_id { get; set; }
         public string experiment_name { get; set; }
         public int experiment_reps { get; set; }
         public string experiment_guid { get; set; }
@@ -1360,7 +1359,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             experiment_guid = id.ToString();
-            experiment_id = 0;
             experiment_name = "Experiment1";
             experiment_reps = 1;
             experiment_description = "Whole sim config description";
@@ -5531,8 +5529,7 @@ namespace Daphne
                 if (molecules_dict.ContainsKey(molguid) == false)
                 {
                     ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                    //ConfigMolecule configMolecule = molecules_dict[molguid];
-
+                    //ConfigMolecule configMolecule = molecules_dict[molguid];                 
                     if (configMolecule != null)
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);

@@ -170,6 +170,23 @@ namespace DaphneGui
         {
         }
 
+        protected virtual void PushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+
+            if (button == null)
+                return;
+
+            ConfigCell cell = button.DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Push cell
+            ConfigCell newcell = cell.Clone(true);
+            MainWindow.GenericPush(newcell);
+        }
+
         /// <summary> 
         /// Gather filters that may be reused throughout the GUI.
         /// </summary>

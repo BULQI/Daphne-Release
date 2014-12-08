@@ -78,9 +78,12 @@ namespace DaphneGui
 #endif
 )
             {
-                DataBasket.hdf5file.openRead();
+                if (DataBasket.hdf5file.openRead() == false)
+                {
+                    return false;
+                }
                 frameNames.Clear();
-                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID < 0 ? MainWindow.SOP.Protocol.experiment_id : expID));
+                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
 
                 if (frameNames.Count == 0)
                 {
@@ -88,7 +91,7 @@ namespace DaphneGui
                 }
 
                 // open the parent group that holds the frames for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID < 0 ? MainWindow.SOP.Protocol.experiment_id : expID));
+                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
 
                 // build the list of frames
                 frames = new List<int>();
@@ -106,9 +109,10 @@ namespace DaphneGui
                 {
                     CurrentFrame = 0;
                 }
+                SetInactive();
+                return true;
             }
-            SetInactive();
-            return true;
+            return false;
         }
 
         /// <summary>

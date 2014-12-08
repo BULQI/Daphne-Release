@@ -69,13 +69,14 @@ namespace DaphneGui
 
             ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
 
-            ConfigCell cell = DataContext as ConfigCell;
+            ConfigCell cell = DataContext as ConfigCell;    
             if (cell == null)
             {
                 return;
             }
 
             int locoMol = -1;
+
             foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
