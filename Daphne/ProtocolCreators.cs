@@ -145,22 +145,16 @@ namespace Daphne
                     {
                         ConfigReaction newReac = configReaction.Clone(true);
                         protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
-
-                        // Add the reaction template associated with this reaction
-                        string reacTemplateGuid = newReac.reaction_template_guid_ref;
-                        // Check whether this reaction template is already added to the protocol ER. If not, add it.
-                        if (findReactionTemplateByGuid(reacTemplateGuid, protocol) == null)
-                        {
-                            ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
-                            if (configReacTemplate != null)
-                            {
-                                ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
-                                protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
-                            }
-                        }
                         itemsLoaded++;
                     }
                 }
+            }
+
+            //Add all reaction templates instead of just the ones associated with reactions in totalReactionString[]
+            foreach (ConfigReactionTemplate crt in userstore.entity_repository.reaction_templates)
+            {
+                ConfigReactionTemplate copycrt = crt.Clone(true);
+                protocol.repositoryPush(copycrt, Level.PushStatus.PUSH_CREATE_ITEM);
             }
 
             return itemsLoaded;
@@ -3254,7 +3248,7 @@ namespace Daphne
             return null;
         }
 
-        // given a reaction guid, return the ConfigReaction 
+        // given a reaction template guid, return the ConfigReactionTemplate
         public static ConfigReactionTemplate findReactionTemplateByGuid(string guid, Protocol protocol)
         {
             foreach (ConfigReactionTemplate crt in protocol.entity_repository.reaction_templates)

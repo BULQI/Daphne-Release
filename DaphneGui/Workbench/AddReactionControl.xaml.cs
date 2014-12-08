@@ -177,7 +177,7 @@ namespace DaphneGui
             if (cr.reaction_template_guid_ref == "")
             {
                 string msg = string.Format("Unsupported reaction.");
-                MessageBox.Show(msg);
+                MessageBox.Show(msg, "Unsupported reaction", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             ConfigReactionTemplate crt = MainWindow.SOP.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];

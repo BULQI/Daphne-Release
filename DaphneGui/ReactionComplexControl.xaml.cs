@@ -48,7 +48,7 @@ namespace DaphneGui
             if (crc == null)
                 return;
 
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
+            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
             arc.ShowDialog();
         }
 
@@ -70,11 +70,16 @@ namespace DaphneGui
                 return;
             }
 
+            //Need to add rc to the compartment plus the entity repository
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)ListBoxReactionComplexes.SelectedItem;
-            ConfigReactionComplex crcNew = crcCurr.Clone(false);
+            ConfigReactionComplex crcCopy = crcCurr.Clone(false);
+            crcCopy.Name = crcCopy.GenerateNewName(MainWindow.SOP.Protocol, "_Copy");            
+            crcCopy.ValidateName(MainWindow.SOP.Protocol);
+            MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcCopy);
 
             ConfigCompartment cc = this.DataContext as ConfigCompartment;
-            cc.reaction_complexes.Add(crcNew);
+            ConfigReactionComplex crcLocal = crcCopy.Clone(true);
+            cc.reaction_complexes.Add(crcLocal);
 
             ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }
@@ -84,8 +89,9 @@ namespace DaphneGui
             // This data context should be a compartment
             // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
             // Will AddReacComplex need to access the ER for available reactions? 
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex, MainWindow.SOP.Protocol.scenario.environment.comp);
-            if (arc.ShowDialog() == true)
+            NewEditReacComplex dlg = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, MainWindow.SOP.Protocol.scenario.environment.comp);
+
+            if (dlg.ShowDialog() == true)
                 ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }
 

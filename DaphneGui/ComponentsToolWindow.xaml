@@ -172,7 +172,8 @@
                                 CanUserAddRows="False"
                                 BorderThickness="1"
                                 BorderBrush="Black"
-                                
+                                SelectionMode="Extended"
+                                SelectionUnit="FullRow"
                                 >
 
                             <DataGrid.ColumnHeaderStyle>

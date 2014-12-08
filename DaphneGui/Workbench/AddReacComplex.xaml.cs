@@ -19,8 +19,8 @@ namespace DaphneGui
     /// Interaction logic for AddReacComplex.xaml
     /// </summary>
     /// 
-    public enum ReactionComplexDialogType { AddComplex, EditComplex }
-    public partial class AddReacComplex : Window
+    public enum ReactionComplexDialogType { NewComplex, EditComplex }
+    public partial class NewEditReacComplex : Window
     {
         protected ReactionComplexDialogType dlgType;
         protected ConfigReactionComplex selectedRC;
@@ -52,9 +52,10 @@ namespace DaphneGui
         }
 
         private ConfigCompartment comp;
+        private Point mouseLocation;
 
-        //To add a new rc
-        public AddReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp)
+        //To create a new rc
+        public NewEditReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp)
         {
             InitializeComponent();
             dlgType = type;
@@ -73,7 +74,7 @@ namespace DaphneGui
         }
 
         //To edit an existing rc
-        public AddReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp)
+        public NewEditReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp)
         {
             InitializeComponent();
             dlgType = type;
@@ -88,7 +89,7 @@ namespace DaphneGui
             RightList.Clear();
 
             //if adding a new rc
-            if (dlgType == ReactionComplexDialogType.AddComplex)
+            if (dlgType == ReactionComplexDialogType.NewComplex)
             {
                 //leftList is whole reactions list initially
                 foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
@@ -223,10 +224,12 @@ namespace DaphneGui
                 {
                     if (selectedRC.reactions_dict.ContainsKey(reac.entity_guid) != true)
                     {
-                        ConfigReaction newreac = reac.Clone(true);
-                        selectedRC.reactions.Add(newreac);
-                        selectedRC.AddReactionMolPops(newreac, MainWindow.SOP.Protocol.entity_repository);
-                        edited = true;
+                        
+                            ConfigReaction newreac = reac.Clone(true);
+                            selectedRC.reactions.Add(newreac);
+                            selectedRC.AddReactionMolPops(newreac, MainWindow.SOP.Protocol.entity_repository);
+                            edited = true;
+                        
                     }
                 }
                 if (edited)
@@ -240,6 +243,8 @@ namespace DaphneGui
             //Add new RC
             {
                 ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
+                crc.Name = crc.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                crc.ValidateName(MainWindow.SOP.Protocol);
 
                 foreach (ConfigReaction reac in RightList)
                 {
@@ -258,6 +263,78 @@ namespace DaphneGui
         {
             DialogResult = false;
         }
+
+        private void LeftListBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            ListBox lbSource = sender as ListBox;
+            if (lbSource.SelectedIndex < 0)
+                return;
+
+            //mouseLocation = System.Windows.Forms.Control.MousePosition;
+            mouseLocation = Mouse.GetPosition(Application.Current.MainWindow);
+            //MoleculeAdorner.location = PointToScreen(mouseLocation);
+
+            ConfigReaction reac = lbSource.SelectedItem as ConfigReaction;
+
+            if (reac != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragDrop.DoDragDrop(lbSource,
+                             reac,
+                             DragDropEffects.Copy);
+
+                //adorner = new MoleculeAdorner(lbSource);
+                //AdornerLayer.GetAdornerLayer(lbSource).Add(adorner);
+
+            }
+        }
+
+        private void RightListBox_Drop(object sender, DragEventArgs e)
+        {
+            List<ConfigReaction> temp = new List<ConfigReaction>();
+            foreach (ConfigReaction cr in lbAllReactions.SelectedItems)
+            {
+                if (RightList.Where(m => m.entity_guid == cr.entity_guid).Any()) continue;
+                {
+                    RightList.Add(cr);
+                    temp.Add(cr);
+                }
+            }
+
+            foreach (ConfigReaction cr in temp)
+            {
+                LeftList.Remove(cr);
+            }
+
+            //listbox does not refresh without this
+            lbAllReactions.ItemsSource = null;
+            lbAllReactions.ItemsSource = LeftList;         
+        }
+
+        private void RightListBox_DragEnter(object sender, DragEventArgs e)
+        {
+            //ListBox lb = sender as ListBox;
+            //if (lb != null)
+            //{
+            //    ConfigReaction reac = e.Data.GetData(typeof(ConfigReaction)) as ConfigReaction;
+            //    if (reac != null)
+            //    {
+            //        string name = reac.TotalReactionString;
+            //    }
+
+            //}
+
+        }
+
+        private void RightListBox_DragLeave(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void RightListBox_DragOver(object sender, DragEventArgs e)
+        {
+            //e.Effects = DragDropEffects.Copy;
+        }
+
 
         private void AddReactions_Expanded(object sender, RoutedEventArgs e)
         {

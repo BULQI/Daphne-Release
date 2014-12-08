@@ -26,7 +26,7 @@
         <StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
                 <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
-                <TextBox x:Name="TextBoxRCName" Width="150" HorizontalAlignment="Left" Text="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.Name}" ></TextBox>
+                <TextBox x:Name="TextBoxRCName" Width="150" HorizontalAlignment="Left" Text="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></TextBox>
                 <Button x:Name="ButtonEditComplex" Width="50" Click="ButtonEditComplex_Click">Edit</Button>
                 <Button x:Name="ButtonAddComplex" Width="50" Click="ButtonAddComplex_Click"
                         Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}">Add</Button>
