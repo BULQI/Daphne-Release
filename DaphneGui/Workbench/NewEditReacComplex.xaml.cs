@@ -16,7 +16,7 @@ using System.Collections.ObjectModel;
 namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for AddReacComplex.xaml
+    /// Interaction logic for NewEditReacComplex.xaml
     /// </summary>
     /// 
     public enum ReactionComplexDialogType { NewComplex, EditComplex }
