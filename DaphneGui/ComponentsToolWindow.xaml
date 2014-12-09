@@ -348,7 +348,7 @@
                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
                                     HorizontalAlignment="Left">
                             <Grid>
-                                <local:AddReactionControl />
+                                <local:AddReactionControl Tag="component"/>
                             </Grid>
                         </Expander>
                     </StackPanel>
