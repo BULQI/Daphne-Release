@@ -1,7 +1,7 @@
 {
   "experiment_name": "Cell locomotion with driver molecule.",
   "experiment_reps": 1,
-  "experiment_guid": "edacb7fb-0edc-4376-bd37-f8464df848fc",
+  "experiment_guid": "db659b07-27e6-4edb-9ac7-e3dbbd1624ab",
   "experiment_description": "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -205,7 +205,7 @@
           "entity_guid": "745a8d8a-7859-4ab1-9c97-334a230e125d"
         },
         "cellpopulation_name": "Leukocyte_staticReceptor_motile",
-        "cellpopulation_guid": "63512d3e-07cd-4ae5-8432-0ab88d7d3aca",
+        "cellpopulation_guid": "7a181200-f816-4e2f-9733-de93f9fdbe54",
         "cellpopulation_id": 0,
         "report_xvf": {
           "position": true,
@@ -221,7 +221,7 @@
           {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "4151eda5-43ee-4be3-8870-d19fcda75f71"
+            "molpop_guid_ref": "f4ea3159-79e8-4e07-ab47-5930b5e674a7"
           }
         ],
         "number": 1,
@@ -313,7 +313,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "4151eda5-43ee-4be3-8870-d19fcda75f71",
+            "molpop_guid": "f4ea3159-79e8-4e07-ab47-5930b5e674a7",
             "molecule": {
               "renderLabel": "f81a4a0f-5229-478f-b196-abeeb321c418",
               "Name": "CXCL13",
@@ -328,7 +328,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": false,
               "mp_extended": 0,
-              "molpop_guid_ref": "4151eda5-43ee-4be3-8870-d19fcda75f71"
+              "molpop_guid_ref": "f4ea3159-79e8-4e07-ab47-5930b5e674a7"
             },
             "mp_distribution": {
               "$type": "Daphne.MolPopLinear, Daphne",

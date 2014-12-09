@@ -1,7 +1,7 @@
 {
   "experiment_name": "Experiment1",
   "experiment_reps": 1,
-  "experiment_guid": "df9d9fb6-bac8-4c27-b09d-8abc5df31a69",
+  "experiment_guid": "1654cc47-7d60-4ce4-816c-3d7ae1e490cf",
   "experiment_description": "chemotactic receptor/ligand binding",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
