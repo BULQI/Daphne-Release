@@ -45,6 +45,10 @@ namespace Daphne
         /// data file
         /// </summary>
         public static HDF5File hdf5file;
+        /// <summary>
+        /// currently handled experimentID
+        /// </summary>
+        public static int currentExperimentID = -1;
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -80,6 +84,22 @@ namespace Daphne
         }
 
         /// <summary>
+        /// extract the experiment id from a three part string XX_ID_XX
+        /// </summary>
+        /// <param name="exp">the experiment string</param>
+        /// <returns>-1 for error, id >= 0 otherwise</returns>
+        public static int extractExperimentId(string exp)
+        {
+            string[] parts = exp.Split('_');
+
+            if(parts.Length >= 2)
+            {
+                return Convert.ToInt32(parts[1]);
+            }
+            return -1;
+        }
+
+        /// <summary>
         /// find the highest experiment id; assumes it is the last entry
         /// </summary>
         /// <returns>the highest id or -1 if empty</returns>
@@ -89,13 +109,7 @@ namespace Daphne
 
             if (local.Count > 0)
             {
-                string last = local.Last();
-                string[] parts = last.Split('_');
-
-                if(parts.Length >= 2)
-                {
-                    return Convert.ToInt32(parts[1]);
-                }
+                return extractExperimentId(local.Last());
             }
             return -1;
         }

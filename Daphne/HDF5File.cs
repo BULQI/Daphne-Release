@@ -65,12 +65,14 @@ namespace Daphne
         /// <summary>
         /// open it for reading
         /// </summary>
-        public void openRead()
+        public bool openRead()
         {
-            if (filename != "" && fileId == null)
+            if (filename != "" && File.Exists(filename) == true && fileId == null)
             {
                 fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -135,11 +137,18 @@ namespace Daphne
         /// <param name="groupName"></param>
         public void openGroup(string groupName)
         {
-            H5LocId loc = findLocation();
-
-            if (loc != null)
+            try
             {
-                groupStack.Add(H5G.open(loc, groupName));
+                H5LocId loc = findLocation();
+
+                if (loc != null)
+                {
+                    groupStack.Add(H5G.open(loc, groupName));
+                }
+            }
+            catch
+            {
+                throw;
             }
         }
 
@@ -288,6 +297,49 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// write a string dataset
+        /// </summary>
+        /// <param name="name">dataset name</param>
+        /// <param name="data">the string to be written</param>
+        public void writeString(string name, string data)
+        {
+            long[] dims = new long[] { data.Length };
+
+            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+            H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
+            H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
+
+            H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
+            H5D.close(dset);
+            H5S.close(spaceId);
+        }
+
+        /// <summary>
+        /// read a string dataset
+        /// </summary>
+        /// <param name="name">dataset name</param>
+        /// <param name="data">data array</param>
+        public void readString(string name, ref string data)
+        {
+            H5DataSetId dset = H5D.open(groupStack.Last(), name);
+            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+            long size = H5D.getStorageSize(dset) / sizeof(char);
+
+            char[] tmp = new char[size];
+
+            H5D.read(dset, typeId, new H5Array<char>(tmp));
+            data = new string(tmp);
+            H5D.close(dset);
+        }
+
+        /// <summary>
+        /// just a helper to be able to use H5G.iterate
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="objectName"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
         private int groupCallback(H5GroupId id, string objectName, Object param)
         {
             subGroups.Add(objectName);
