@@ -143,7 +143,6 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" >
                     <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
-                    <!--<uc:DoublesBox x:Name="txtRate" Width="60" SliderEnabled="False" Number="1.0" />-->
                     <TextBox x:Name="txtRate" Width="60" Text="1.0">                    
                     </TextBox>
                 </StackPanel>
@@ -184,25 +183,16 @@
                         <Style x:Key="myListboxStyle">
                             <Style.Resources>
                                 <!-- Background of selected item when focussed -->
-                                <!--<SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="LightBlue" />-->
-                                <!-- Background of selected item when not focussed -->
                                 <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="LightBlue" />
                             </Style.Resources>
                         </Style>
                     </StackPanel.Resources>
-                    
-                    <!--<ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2" Margin="10, 2" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="1"                                                                                       
-                                    SelectedIndex="-1"
-                                    SelectionMode="Multiple"
-                                    Style="{StaticResource myListboxStyle}"
-                                    MaxHeight="150" Width="250">
-                    </ListBox>-->
-
+                   
                     <ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2"       
                             SelectedIndex="-1"
                             SelectionMode="Multiple"
                             Style="{StaticResource myListboxStyle}"
-                            MaxHeight="150" Width="250">
+                            MinHeight="100" MaxHeight="150" Width="250">
                     </ListBox>
                     
                 </StackPanel>
@@ -221,16 +211,7 @@
            
                         
             <Button x:Name="btnSave" Content="Save Reaction" Width="100" Height="24"  HorizontalAlignment="Right" Click="btnSave_Click"/>
-            <!--<TextBox Style="{StaticResource TextBoxStyle1}"/>-->
-            <!--<ListBox 
-                      Grid.Row="3" Margin="10,10,0,0"
-                      DataContext="{StaticResource WordList}" 
-                      ItemsSource="{Binding}" 
-                      SelectionMode="Multiple"
-                      Width="150"
-                      Height="150"
-                      HorizontalAlignment="Left" x:Name="lbMol2"
-                    />-->
+
         </StackPanel>
         
     </Grid>

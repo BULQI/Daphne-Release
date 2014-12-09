@@ -426,7 +426,7 @@
                                     <TextBlock Text="Membrane" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" 
+                                    <ListBox x:Name="MembReacListBox" MinHeight="20" 
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
@@ -444,14 +444,12 @@
                                         <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
                                     </StackPanel>
                                     <StackPanel>
-                                        <Expander x:Name="CellAddReacExpander"
-                                                                ExpandDirection="Down"
-                                                                IsExpanded="False"
-                                                                Header="Add a reaction"
-                                                                Margin="0,0,0,0" 
-                                                                Canvas.ZIndex="1"
-                                                                Expanded="CellAddReacExpander_Expanded"
-                                                                >
+                                        <Expander x:Name="CellAddReacExpander" ExpandDirection="Down"  IsExpanded="False"
+                                                    Header="Add a reaction"
+                                                    Margin="0,0,0,0" 
+                                                    Canvas.ZIndex="1"
+                                                    Expanded="CellAddReacExpander_Expanded"
+                                                    >
                                             <StackPanel Orientation="Vertical" Margin="10,0">
                                                 <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
                                                 <ListView x:Name="lvCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
@@ -511,14 +509,14 @@
                                             </StackPanel>
                                         </Expander>
                                         <Expander x:Name="MembCreateNewReaction"
-                                                                ExpandDirection="Down"
-                                                                IsExpanded="False"
-                                                                Header="Create New Reaction"                                                  
-                                                                Margin="0,0,0,0" 
-                                                                Canvas.ZIndex="1"
-                                                                >
+                                                    ExpandDirection="Down"
+                                                    IsExpanded="False"
+                                                    Header="Create New Reaction"                                                  
+                                                    Margin="0,0,0,0" 
+                                                    Canvas.ZIndex="1"
+                                                    >
                                             <Grid>
-                                                <local:AddReactionControl Margin="0,6"/>
+                                                <local:AddReactionControl Margin="0,6" Tag="membrane" />
                                             </Grid>
                                         </Expander>
 
@@ -532,7 +530,7 @@
                                     <TextBlock Text="Cytosol" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" 
+                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" 
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
@@ -553,20 +551,20 @@
                                     <StackPanel>
                      
                                         <Expander x:Name="CellAddReacExpander2" 
-                                                                  ExpandDirection="Down"
-                                                                    IsExpanded="False"
-                                                                    Header="Add a reaction"
-                                                                    Margin="0,0,0,0" 
-                                                                    Canvas.ZIndex="1"
-                                                                          Expanded="CellAddReacExpander2_Expanded"
-                                                                    >
+                                                    ExpandDirection="Down"
+                                                    IsExpanded="False"
+                                                    Header="Add a reaction"
+                                                    Margin="0,0,0,0" 
+                                                    Canvas.ZIndex="1"
+                                                            Expanded="CellAddReacExpander2_Expanded"
+                                                    >
                                             <StackPanel Orientation="Vertical" Margin="10,0">
                                                 <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
                                                 <ListView x:Name="lvCytosolAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
-                                                                            ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionsListView}}"
-                                                                            SelectedIndex="-1"
-                                                                            MinHeight="50" MaxHeight="150"
-                                                                            >
+                                                            ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionsListView}}"
+                                                            SelectedIndex="-1"
+                                                            MinHeight="50" MaxHeight="150"
+                                                            >
 
                                                     <ListView.View>
                                                         <GridView>
@@ -597,13 +595,13 @@
                                                                 <GridViewColumn.CellTemplate>
                                                                     <DataTemplate>
                                                                         <TextBlock Text="{Binding TotalReactionString}">
-                                                                                                    <TextBlock.Style>
-                                                                                                        <Style>
-                                                                                                            <Setter Property="TextBlock.Foreground" 
-                                                                                                                    Value="Black">
-                                                                                                            </Setter>
-                                                                                                        </Style>
-                                                                                                    </TextBlock.Style>
+                                                                                    <TextBlock.Style>
+                                                                                        <Style>
+                                                                                            <Setter Property="TextBlock.Foreground" 
+                                                                                                    Value="Black">
+                                                                                            </Setter>
+                                                                                        </Style>
+                                                                                    </TextBlock.Style>
                                                                         </TextBlock>
                                                                     </DataTemplate>
                                                                 </GridViewColumn.CellTemplate>
@@ -619,14 +617,14 @@
                                         </Expander>
 
                                         <Expander x:Name="CytoCreateNewReaction"
-                                                                ExpandDirection="Down"
-                                                                IsExpanded="False"
-                                                                Header="Create New Reaction"                                                  
-                                                                Margin="0,0,0,0" 
-                                                                Canvas.ZIndex="1"
-                                                        >
+                                                    ExpandDirection="Down"
+                                                    IsExpanded="False"
+                                                    Header="Create New Reaction"                                                  
+                                                    Margin="0,0,0,0" 
+                                                    Canvas.ZIndex="1"
+                                            >
                                             <Grid>
-                                                <local:AddReactionControl Margin="0,6"/>
+                                                <local:AddReactionControl Margin="0,6" Tag="cytosol" />
                                             </Grid>
                                         </Expander>
                                     </StackPanel>
