@@ -395,6 +395,15 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.entity_repository.reactions.Add(cr);
             }
 
+            if (reacEnvironment == "vatRC")
+            {
+                VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
+                ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
+                crc.AddReactionMolPops(cr, MainWindow.SOP.Protocol.entity_repository);
+                s.InitializeAllMols();
+                s.InitializeAllReacs();
+            }
+
             txtReac.Text = "";
             reacmolguids.Clear();
             txtProd.Text = "";
