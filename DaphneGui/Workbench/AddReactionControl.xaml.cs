@@ -378,7 +378,8 @@ namespace DaphneGui
                     }
                     break;
 
-                case "component":
+                case "component_reacs":
+                case "component_rc":
                     break;
 
                 default:
@@ -629,7 +630,7 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            populateCollection();
+            //populateCollection();
         }
 
         private void populateCollection()
@@ -697,16 +698,24 @@ namespace DaphneGui
                 case "vatRC":
                     ARCCell = null;
                     ARCComp = null;
-                    protocol = this.DataContext as Protocol;
-                    if (protocol != null)
+                    
+                    ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
+                    if (crc != null)
                     {
-                        ARCReactions = protocol.entity_repository.reactions ?? null;
+                        ARCReactions = crc.reactions;
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
+                    //protocol = this.DataContext as Protocol;
+                    //if (protocol != null)
+                    //{
+                    //    ARCReactions = protocol.entity_repository.reactions ?? null;
+                    //    cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+                    //    coll.Add(cc);
+                    //}
                     break;
 
-                case "component":
+                case "component_reacs":
                     ARCCell = null;
                     ARCComp = null;
                     protocol = this.DataContext as Protocol;
@@ -714,6 +723,19 @@ namespace DaphneGui
                     {
                         protocol = this.DataContext as Protocol;
                         ARCReactions = protocol.entity_repository.reactions;
+                        cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+                        coll.Add(cc);
+                    }
+                    break;
+
+                case "component_rc":
+                    ARCCell = null;
+                    ARCComp = null;
+                    
+                    crc = this.DataContext as ConfigReactionComplex;
+                    if (crc != null)
+                    {
+                        ARCReactions = crc.reactions;
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
@@ -774,6 +796,15 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// Must update dependency properties after data context change
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            populateCollection();
+        }
         
     }
 }

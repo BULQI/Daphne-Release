@@ -349,7 +349,7 @@
                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
                                     HorizontalAlignment="Left">
                             <Grid>
-                                <local:AddReactionControl Tag="component"/>
+                                <local:AddReactionControl Tag="component_reacs"/>
                             </Grid>
                         </Expander>
                     </StackPanel>
@@ -388,9 +388,31 @@
                     <StackPanel>
                         <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Collapsed"
                                               DataContext="{Binding Path=entity_repository, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <StackPanel >
+                        <Expander 
+                            Padding="5" ExpandDirection="Down"
+                            IsExpanded="False"
+                            Header="New Reaction"                                                  
+                            x:Name="AddNewReaction"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                                        
+                            Width="480"
+                            Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
+                            HorizontalAlignment="Left">
+                            <Grid>
+                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
+                            </Grid>
+                        </Expander>
                     </StackPanel>
+
+                </StackPanel>
+
                 
-                </Expander>
+            </Expander>
             </StackPanel>
         </ScrollViewer>
 

@@ -27,6 +27,20 @@ namespace DaphneGui
             Tag = ListBoxReactionComplexes.SelectedItem;
         }
 
+        private ConfigReactionComplex selRC;
+        public ConfigReactionComplex SelectedReactionComplex 
+        {
+            get
+            {
+                return selRC;
+            }
+            set
+            {
+                selRC = value;
+                OnPropertyChanged("SelectedReactionComplex");
+            }
+        }
+
         public ConfigReactionComplex GetSelectedReactionComplex()
         {
             if (ListBoxReactionComplexes.SelectedIndex < 0)
@@ -174,6 +188,18 @@ namespace DaphneGui
         {
             ReactionComplexControl rcc = d as ReactionComplexControl;
             rcc.ShowAddButton = (Visibility)(e.NewValue);
+        }
+
+        private void ListBoxReactionComplexes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb != null)
+            {
+                if (lb.SelectedIndex > -1)
+                {
+                    SelectedReactionComplex = (ConfigReactionComplex)lb.SelectedItem;
+                }
+            }
         }
     }
 }
