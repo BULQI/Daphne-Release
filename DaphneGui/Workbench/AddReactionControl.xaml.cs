@@ -219,7 +219,7 @@ namespace DaphneGui
             if (cr.reaction_template_guid_ref == "")
             {
                 string msg = string.Format("Unsupported reaction.");
-                MessageBox.Show(msg);
+                MessageBox.Show(msg, "Unsupported reaction", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             ConfigReactionTemplate crt = MainWindow.SOP.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
@@ -378,7 +378,8 @@ namespace DaphneGui
                     }
                     break;
 
-                case "component":
+                case "component_reacs":
+                case "component_rc":
                     break;
 
                 default:
@@ -392,6 +393,16 @@ namespace DaphneGui
             if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol) && wasAdded)
             {
                 MainWindow.SOP.Protocol.entity_repository.reactions.Add(cr);
+            }
+
+            //Need to update the mol pops for vatRC
+            if (reacEnvironment == "vatRC")
+            {
+                VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
+                ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
+                crc.AddReactionMolPops(cr, MainWindow.SOP.Protocol.entity_repository);
+                s.InitializeAllMols();
+                s.InitializeAllReacs();
             }
 
             txtReac.Text = "";
@@ -697,16 +708,18 @@ namespace DaphneGui
                 case "vatRC":
                     ARCCell = null;
                     ARCComp = null;
-                    protocol = this.DataContext as Protocol;
-                    if (protocol != null)
+                    
+                    ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
+                    if (crc != null)
                     {
-                        ARCReactions = protocol.entity_repository.reactions ?? null;
+                        ARCReactions = crc.reactions;
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
+                    
                     break;
 
-                case "component":
+                case "component_reacs":
                     ARCCell = null;
                     ARCComp = null;
                     protocol = this.DataContext as Protocol;
@@ -714,6 +727,19 @@ namespace DaphneGui
                     {
                         protocol = this.DataContext as Protocol;
                         ARCReactions = protocol.entity_repository.reactions;
+                        cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+                        coll.Add(cc);
+                    }
+                    break;
+
+                case "component_rc":
+                    ARCCell = null;
+                    ARCComp = null;
+                    
+                    crc = this.DataContext as ConfigReactionComplex;
+                    if (crc != null)
+                    {
+                        ARCReactions = crc.reactions;
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
@@ -774,6 +800,15 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// Must update dependency properties after data context change
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            populateCollection();
+        }
         
     }
 }

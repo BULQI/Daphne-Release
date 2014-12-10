@@ -5362,7 +5362,24 @@ namespace Daphne
 
     public class ConfigReactionComplex : ConfigEntity, IEquatable<ConfigReactionComplex>
     {
-        public string Name { get; set; }
+        private string rcName;
+        public string Name
+        {
+            get
+            {
+                return rcName;
+            }
+
+            set
+            {
+                if (rcName != value)
+                {
+                    rcName = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
+
         private ObservableCollection<ConfigReaction> _reactions;
         public ObservableCollection<ConfigReaction> reactions
         {
@@ -5512,9 +5529,7 @@ namespace Daphne
             if (identical == false)
             {
                 Guid id = Guid.NewGuid();
-
                 newrc.entity_guid = id.ToString();
-                newrc.Name = "NewRC";
             }
             return newrc;
         }
@@ -5574,9 +5589,61 @@ namespace Daphne
             return true;
         }
 
+        public void ValidateName(Protocol protocol)
+        {
+            bool found = false;
+            string tempRCName = Name;
+            foreach (ConfigReactionComplex crc in protocol.entity_repository.reaction_complexes)
+            {
+                if (crc.Name == tempRCName && crc.entity_guid != entity_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                Name = GenerateNewName(protocol, "_Copy");
+            }
+        }
+
         public override string GenerateNewName(Level level, string ending)
         {
-            throw new NotImplementedException();
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempRCName = OriginalName + suffix;
+            while (FindByName(level, TempRCName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempRCName = OriginalName + suffix;
+            }
+
+            return TempRCName;
+        }
+
+        public static bool FindByName(Level level, string name)
+        {
+            bool ret = false;
+            foreach (ConfigReactionComplex crc in level.entity_repository.reaction_complexes)
+            {
+                if (crc.Name == name)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
         }
 
         private bool HasMolecule(string guid)
@@ -5930,15 +5997,15 @@ namespace Daphne
 
             int nSuffix = 1;
             string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindCellByName(level, TempMolName) == true)
+            string TempCellName = OriginalName + suffix;
+            while (FindCellByName(level, TempCellName) == true)
             {
                 nSuffix++;
                 suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
+                TempCellName = OriginalName + suffix;
             }
 
-            return TempMolName;
+            return TempCellName;
         }
 
         public static bool FindCellByName(Protocol protocol, string cellName)

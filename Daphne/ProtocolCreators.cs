@@ -131,7 +131,7 @@ namespace Daphne
             return itemsLoaded;
         }
 
-        private static int LoadProtocolReactionsAndTemplates(Protocol protocol, string[] totalReactionString, Level userstore)
+        private static int LoadProtocolReactions(Protocol protocol, string[] totalReactionString, Level userstore)
         {
             int itemsLoaded = 0;
 
@@ -145,19 +145,6 @@ namespace Daphne
                     {
                         ConfigReaction newReac = configReaction.Clone(true);
                         protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
-
-                        // Add the reaction template associated with this reaction
-                        string reacTemplateGuid = newReac.reaction_template_guid_ref;
-                        // Check whether this reaction template is already added to the protocol ER. If not, add it.
-                        if (findReactionTemplateByGuid(reacTemplateGuid, protocol) == null)
-                        {
-                            ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
-                            if (configReacTemplate != null)
-                            {
-                                ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
-                                protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
-                            }
-                        }
                         itemsLoaded++;
                     }
                 }
@@ -166,24 +153,18 @@ namespace Daphne
             return itemsLoaded;
         }
 
-        private static int LoadProtocolReactionTemplates(Protocol protocol, string[] rtName, Level userstore)
+        private static int LoadProtocolReactionTemplates(Protocol protocol, Level userstore)
         {
             int itemsLoaded = 0;
 
-            for (int i = 0; i < rtName.Length; i++)
+            //Load all reaction templates instead of just the ones associated with reactions in a protocol
+            foreach (ConfigReactionTemplate crt in userstore.entity_repository.reaction_templates)
             {
-                foreach (ConfigReactionTemplate crt in userstore.entity_repository.reaction_templates)
-                {
-                    if (crt.name == rtName[i])
-                    {
-                        ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[crt.entity_guid];
-                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
-                        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
-                        itemsLoaded++;
-                   }
-                }
+                ConfigReactionTemplate copycrt = crt.Clone(true);
+                protocol.repositoryPush(copycrt, Level.PushStatus.PUSH_CREATE_ITEM);
+                itemsLoaded++;
             }
-
+            
             return itemsLoaded;
         }
 
@@ -260,6 +241,13 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
+
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // Experiment
@@ -274,11 +262,7 @@ namespace Daphne
             envHandle.extent_y = 200;
             envHandle.extent_z = 200;
             envHandle.gridstep = 10;
-
-            //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
-
+            
             // bulk molecules
             string[] item = new string[1] { "CXCL13" };
             int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
@@ -298,7 +282,7 @@ namespace Daphne
             // reactions
             item = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
                                   "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
-            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
@@ -418,6 +402,13 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
+
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // Experiment
@@ -432,11 +423,7 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.integrator_step = 0.001;
-
-            //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
-
+            
             //GENES
             string[] item = new string[1] { "gApop" };
             int itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
@@ -475,7 +462,7 @@ namespace Daphne
                                     "A* -> A",
                                     "gApop -> sApop + gApop",
                                     "sApop ->"};
-            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
@@ -600,6 +587,13 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            //Load needed entities from User Store 
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
+
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // Experiment
@@ -614,11 +608,7 @@ namespace Daphne
             envHandle.extent_y = 200;
             envHandle.extent_z = 200;
             envHandle.gridstep = 10;
-
-            //Load needed entities from User Store 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
-
+            
             //MOLECULES
             string[] item = new string[1] { "CXCL13" };
             int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
@@ -692,6 +682,10 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+            // Load reaction templates from userstore
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+            LoadProtocolReactionTemplates(protocol, userstore);
 
             // Experiment
             protocol.experiment_name = "Blank Tissue Simulation Scenario";
@@ -712,6 +706,12 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+            
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
 
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
@@ -731,6 +731,12 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
+
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
@@ -739,10 +745,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 0.02;
             protocol.scenario.time_config.sampling_interval = 0.02;
             protocol.scenario.time_config.integrator_step = 0.001;
-
-            //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
 
             // bulk molecules
             string[] item = new string[] { "CXCL13", "CXCR5", "CXCL13:CXCR5", "CXCL12", "CXCR4", "CXCL12:CXCR4" };
@@ -757,7 +759,7 @@ namespace Daphne
                                   "CXCL13:CXCR5 -> CXCL13 + CXCR5",
                                   "CXCL12 + CXCR4 -> CXCL12:CXCR4",
                                   "CXCL12:CXCR4 -> CXCL12 + CXCR4" };
-            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
@@ -862,6 +864,13 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates
+            LoadProtocolReactionTemplates(protocol, userstore);
+
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
@@ -874,25 +883,15 @@ namespace Daphne
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
-            //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
-
             // Add items to protocol ER
             //
 
-            string[] item = new string[] { "Association", "Dissociation", "Transformation"};
-            int itemsLoaded = LoadProtocolReactionTemplates(protocol, item, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol reaction templates.");
-            }
 
             // Create new molecules and add to the protocol ER
             // Don't want to make these more permanent by adding to the user store
             //
 
-            item = new string[] { "R1", "R2", "L", "C1", "C2" };
+            string[] item = new string[] { "R1", "R2", "L", "C1", "C2" };
             //string[] molguids = new string[item.Length];
             //int molcnt = 0;
             foreach (string s in item)
@@ -3254,7 +3253,7 @@ namespace Daphne
             return null;
         }
 
-        // given a reaction guid, return the ConfigReaction 
+        // given a reaction template guid, return the ConfigReactionTemplate
         public static ConfigReactionTemplate findReactionTemplateByGuid(string guid, Protocol protocol)
         {
             foreach (ConfigReactionTemplate crt in protocol.entity_repository.reaction_templates)
