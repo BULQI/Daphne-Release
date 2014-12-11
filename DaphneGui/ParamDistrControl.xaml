@@ -42,16 +42,7 @@
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
                                    Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                </StackPanel>
-                <!--<StackPanel Orientation="Horizontal">
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
-                    </StackPanel>
-                    <StackPanel>
-                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </StackPanel>-->                
+                </StackPanel>      
             </DataTemplate>
             
             <!-- distributed parameter type: Poisson -->
@@ -187,15 +178,7 @@
                         <!--</StackPanel>-->
                 </StackPanel>
             </DataTemplate>
-
-            <!--<local:ParameterDistributionTemplateSelector x:Name="pdts"  x:Key="ParameterDistributionTemplateSelector"
-                NoDistributionTemplate="{StaticResource noDistributionTemplate}" 
-                CategoricalDistributionTemplate="{StaticResource categoricalDistributionTemplate}" 
-                GammaDistributionTemplate="{StaticResource gammaDistributionTemplate}" 
-                PoissonDistributionTemplate="{StaticResource poissonDistributionTemplate}" 
-                UniformDistributionTemplate="{StaticResource uniformDistributionTemplate}"  
-            />-->
-
+            
             <Style x:Key="selectableContentTemplateStyle" TargetType="{x:Type ContentControl}">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="True">
@@ -206,19 +189,7 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-
-            <Style x:Key="selectableContentStyle" TargetType="{x:Type ContentControl}">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="True">
-                        <Setter Property="Content" Value="{Binding Path=ParamDistr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="False">
-                        <Setter Property="Content" Value="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-            
-
+           
         </Grid.Resources>
 
         <StackPanel Orientation="Vertical" x:Name="ParamDistrStackPanel">
@@ -231,56 +202,6 @@
                           >
                 </ComboBox>
             </StackPanel>
-
-            <!--<StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="True">
-                                <Setter Property="Visibility" Value="Hidden"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="False">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-
-                <ContentControl Name="NoDistributionDetailsTemplate"
-                                Content="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                ContentTemplate="{StaticResource noDistributionTemplate}" 
-                                Margin="6,2"/>
-            </StackPanel>-->
-
-            <!--<StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}, UpdateSourceTrigger=PropertyChanged}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}, UpdateSourceTrigger=PropertyChanged}" Value="False">
-                                <Setter Property="Visibility" Value="Hidden"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-
-                <ContentControl Name="ParamDistributionDetailsTemplate"
-                                Content="{Binding Path=ParamDistr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                ContentTemplate="{StaticResource ParamDistributionDetailsTemplate}" 
-                                Margin="6,2"/>
-            </StackPanel>-->
-
-
-        
-            <!--<StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
-                <ContentControl x:Name="ParamDistrDetails"
-                            Content="{StaticResource selectableContentStyle}"
-                            Style="{StaticResource selectableContentTemplateStyle}"
-                            Margin="6"/>
-            </StackPanel>-->
-
             
             <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
                 <ContentControl x:Name="ParamDistrDetails"
