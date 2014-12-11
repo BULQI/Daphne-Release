@@ -44,7 +44,7 @@ namespace DaphneGui
             }
 
             ParameterDistributionType selected_distr_type = (ParameterDistributionType)cbParamDistr.SelectedItem;
-            if (selected_distr_type == distr_parameter.ParamDistr.DistributionType)
+            if (selected_distr_type == distr_parameter.DistributionType)
             {
                 return;
             }
@@ -52,16 +52,7 @@ namespace DaphneGui
             switch (selected_distr_type)
             {
                 case ParameterDistributionType.CONSTANT:
-                    ConstantParameterDistribution new_constant_distr = new ConstantParameterDistribution();
-                     if (distr_parameter.ConstValue != 0.0 )
-                    {
-                        new_constant_distr.Value = distr_parameter.ConstValue;
-                    } 
-                    else
-                    {
-                        new_constant_distr.Value = 0.0;
-                    }
-                    distr_parameter.ParamDistr = new_constant_distr;
+                    distr_parameter = new DistributedParameter(0.0);
                     break;
 
                 case ParameterDistributionType.CATEGORICAL:
@@ -69,6 +60,7 @@ namespace DaphneGui
                     new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(distr_parameter.ConstValue, 0.5));
                     new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(distr_parameter.ConstValue + 1.0, 0.5));  
                     distr_parameter.ParamDistr = new_categorical_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.CATEGORICAL;
                     break;
 
                 case ParameterDistributionType.GAMMA:
@@ -84,6 +76,7 @@ namespace DaphneGui
                         new_gamma_distr.Rate = 1.0;
                     }
                     distr_parameter.ParamDistr = new_gamma_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.GAMMA;
                     break;
 
                 case ParameterDistributionType.POISSON:
@@ -97,6 +90,7 @@ namespace DaphneGui
                         new_poisson_distr.Mean = 1.0;
                     }
                     distr_parameter.ParamDistr = new_poisson_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.POISSON;
                     break;
 
                 case ParameterDistributionType.UNIFORM:
@@ -104,12 +98,16 @@ namespace DaphneGui
                     new_uniform_distr.MinValue = 0.0;
                     new_uniform_distr.MaxValue = 1.0;
                     distr_parameter.ParamDistr = new_uniform_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.UNIFORM;
                     break;
 
                 default:
                     break;
 
             }
+
+            
+            //ParamDistrDetails.ContentTemplateSelector = new ParameterDistributionTemplateSelector();
         }
 
         private void dgProbMass_KeyDown(object sender, KeyEventArgs e)
@@ -201,7 +199,6 @@ namespace DaphneGui
             }
         }
 
-
         private void menuProbMassNormalize_Click(object sender, RoutedEventArgs e)
         {
             DistributedParameter distrParam = (DistributedParameter)paramDistrControl.DataContext;
@@ -244,6 +241,37 @@ namespace DaphneGui
 
                 DataGrid dg = sender as DataGrid;
             }
+        }
+
+    }
+
+    public class ParameterDistributionTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate NoDistributionTemplate { get; set; }
+        public DataTemplate CategoricalDistributionTemplate { get; set; }
+        public DataTemplate GammaDistributionTemplate { get; set; }
+        public DataTemplate PoissonDistributionTemplate { get; set; }
+        public DataTemplate UniformDistributionTemplate { get; set; }
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            DistributedParameter dp = item as DistributedParameter;
+
+            if (dp != null)
+            {
+                if (dp.DistributionType == ParameterDistributionType.CATEGORICAL)
+                    return CategoricalDistributionTemplate;
+                else if (dp.DistributionType == ParameterDistributionType.CONSTANT)
+                    return NoDistributionTemplate;
+                else if (dp.DistributionType == ParameterDistributionType.GAMMA)
+                    return GammaDistributionTemplate;
+                else if (dp.DistributionType == ParameterDistributionType.POISSON)
+                    return PoissonDistributionTemplate;
+                else if (dp.DistributionType == ParameterDistributionType.UNIFORM)
+                    return UniformDistributionTemplate;
+            }
+
+            return NoDistributionTemplate;
         }
     }
 

@@ -15,79 +15,95 @@
     <Grid>
         <Grid.Resources>
 
+            <!--<CompositeCollection x:Key="DistrTypeCollection">
+                <daph:DistributedParameter Name="None" ParamDistr=""/>
+                <ComboBoxItem>None</ComboBoxItem>
+                <CollectionContainer
+                 Collection="{Binding Source={StaticResource moleculesListView}}" />
+            </CompositeCollection>-->
+
             <!-- parameterDistributionTypes -->
             <ObjectDataProvider x:Key="parameterDistributionTypes"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
                     <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="daph:ParameterDistributionType" />
-                </ObjectDataProvider.MethodParameters>
+                        <x:Type TypeName="daph:ParameterDistributionType" />
+                    </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
             <!-- DistrParameterDetailsTemplate -->
-            <DataTemplate x:Key="ParamDistributionDetailsTemplate">
+            <!--<DataTemplate x:Key="ParamDistributionDetailsTemplate">
                 <ContentControl Name="distr_parameter" 
                                 Grid.ColumnSpan="2" Grid.Row="0" 
                                 Margin="0,6" BorderBrush="DarkGray" BorderThickness="1"
                                 Content="{Binding Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"   />
-            </DataTemplate>
+            </DataTemplate>-->
 
-            <!-- distributed parameter type: Constant -->
-            <DataTemplate DataType="{x:Type daph:ConstantParameterDistribution}">
+            <!-- distributed parameter type: none -->
+            <DataTemplate x:Name ="NoDistribution" x:Key="noDistributionTemplate">
+                <!--<StackPanel Orientation="Horizontal">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                   Number="{Binding UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>-->
                 <StackPanel Orientation="Horizontal">
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
                     </StackPanel>
                     <StackPanel>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                   Number="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                </StackPanel>
+                </StackPanel>                
             </DataTemplate>
-
+            
             <!-- distributed parameter type: Poisson -->
-            <DataTemplate DataType="{x:Type daph:PoissonParameterDistribution}">
+            <DataTemplate x:Name="poissonDistributionTemplate" x:Key="poissonDistributionTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="mean" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                     <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                   Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
+                                   Number="{Binding Path=ParamDistr.Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
                 </StackPanel>
             </DataTemplate>
 
             <!-- distributed parameter type: Uniform -->
-            <DataTemplate DataType="{x:Type daph:UniformParameterDistribution}">
+            <DataTemplate x:Name="UniformParameterDistribution" x:Key="uniformDistributionTemplate">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="min." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                Number="{Binding Path=MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                Number="{Binding Path=ParamDistr.MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="max." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
-                                Number="{Binding Path=MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                Number="{Binding Path=ParamDistr.MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
 
             <!-- distributed parameter type: Gamma -->
-            <DataTemplate DataType="{x:Type daph:GammaParameterDistribution}">
+            <DataTemplate x:Name="GammaParameterDistribution" x:Key="gammaDistributionTemplate">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=ParamDistr.Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=ParamDistr.Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>  
             
             <!-- distributed parameter type: Categorical -->
-            <DataTemplate DataType="{x:Type daph:CategoricalParameterDistribution}">
+            <DataTemplate x:Name="CategoricalParameterDistribution" x:Key="categoricalDistributionTemplate">
                 <StackPanel Orientation="Vertical" Margin="0,0">
                             <!--<StackPanel  Margin="0,0,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">-->
                             <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Categorical</TextBlock>
@@ -180,6 +196,14 @@
                 </StackPanel>
             </DataTemplate>
 
+            <local:ParameterDistributionTemplateSelector x:Name="pdts"  x:Key="ParameterDistributionTemplateSelector"
+                NoDistributionTemplate="{StaticResource noDistributionTemplate}" 
+                CategoricalDistributionTemplate="{StaticResource categoricalDistributionTemplate}" 
+                GammaDistributionTemplate="{StaticResource gammaDistributionTemplate}" 
+                PoissonDistributionTemplate="{StaticResource poissonDistributionTemplate}" 
+                UniformDistributionTemplate="{StaticResource uniformDistributionTemplate}"  
+            />
+
         </Grid.Resources>
 
         <StackPanel Orientation="Vertical" x:Name="ParamDistrStackPanel">
@@ -188,19 +212,18 @@
                           ItemsSource="{Binding Source={StaticResource parameterDistributionTypes}}"
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
-                          SelectedValue="{Binding Path=ParamDistr.DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
                           >
                 </ComboBox>
             </StackPanel>
 
-            <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left">
-                <ContentControl Name="ParamDistributionDetailsTemplate"
-                                Content="{Binding Path=ParamDistr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                ContentTemplate="{StaticResource ParamDistributionDetailsTemplate}" 
-                                Margin="6,2"/>
+            <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
+                <ContentControl x:Name="ParamDistrDetails"
+                            Content="{Binding}"
+                            ContentTemplateSelector="{StaticResource ParameterDistributionTemplateSelector}"
+                            Margin="6"/>
             </StackPanel>
         </StackPanel>
-        
-        
+
     </Grid>
 </UserControl>
