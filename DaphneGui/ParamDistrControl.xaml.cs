@@ -105,9 +105,6 @@ namespace DaphneGui
                     break;
 
             }
-
-            
-            //ParamDistrDetails.ContentTemplateSelector = new ParameterDistributionTemplateSelector();
         }
 
         private void dgProbMass_KeyDown(object sender, KeyEventArgs e)
@@ -245,34 +242,34 @@ namespace DaphneGui
 
     }
 
-    public class ParameterDistributionTemplateSelector : DataTemplateSelector
-    {
-        public DataTemplate NoDistributionTemplate { get; set; }
-        public DataTemplate CategoricalDistributionTemplate { get; set; }
-        public DataTemplate GammaDistributionTemplate { get; set; }
-        public DataTemplate PoissonDistributionTemplate { get; set; }
-        public DataTemplate UniformDistributionTemplate { get; set; }
+    //public class ParameterDistributionTemplateSelector : DataTemplateSelector
+    //{
+    //    public DataTemplate NoDistributionTemplate { get; set; }
+    //    public DataTemplate CategoricalDistributionTemplate { get; set; }
+    //    public DataTemplate GammaDistributionTemplate { get; set; }
+    //    public DataTemplate PoissonDistributionTemplate { get; set; }
+    //    public DataTemplate UniformDistributionTemplate { get; set; }
 
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
-        {
-            DistributedParameter dp = item as DistributedParameter;
+    //    public override DataTemplate SelectTemplate(object item, DependencyObject container)
+    //    {
+    //        DistributedParameter dp = item as DistributedParameter;
 
-            if (dp != null)
-            {
-                if (dp.DistributionType == ParameterDistributionType.CATEGORICAL)
-                    return CategoricalDistributionTemplate;
-                else if (dp.DistributionType == ParameterDistributionType.CONSTANT)
-                    return NoDistributionTemplate;
-                else if (dp.DistributionType == ParameterDistributionType.GAMMA)
-                    return GammaDistributionTemplate;
-                else if (dp.DistributionType == ParameterDistributionType.POISSON)
-                    return PoissonDistributionTemplate;
-                else if (dp.DistributionType == ParameterDistributionType.UNIFORM)
-                    return UniformDistributionTemplate;
-            }
+    //        if (dp != null)
+    //        {
+    //            if (dp.DistributionType == ParameterDistributionType.CATEGORICAL)
+    //                return CategoricalDistributionTemplate;
+    //            else if (dp.DistributionType == ParameterDistributionType.CONSTANT)
+    //                return NoDistributionTemplate;
+    //            else if (dp.DistributionType == ParameterDistributionType.GAMMA)
+    //                return GammaDistributionTemplate;
+    //            else if (dp.DistributionType == ParameterDistributionType.POISSON)
+    //                return PoissonDistributionTemplate;
+    //            else if (dp.DistributionType == ParameterDistributionType.UNIFORM)
+    //                return UniformDistributionTemplate;
+    //        }
 
-            return NoDistributionTemplate;
-        }
-    }
+    //        return NoDistributionTemplate;
+    //    }
+    //}
 
 }
