@@ -1178,7 +1178,17 @@ namespace Daphne
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
 #endif
 
-            gc.DragCoefficient.ConstValue = 1.0;
+            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(0.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(0.0);
+
             store.entity_repository.cells.Add(gc);
 
             //////////////////////////////////////////////
@@ -1247,10 +1257,16 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.ConstValue = 1.0;
-
-            DistributedParameter distr_param = new DistributedParameter(100);
-            gc.TransductionConstant = distr_param;
+            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(100.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(0.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1328,8 +1344,16 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.ConstValue = 1.0;
-            gc.TransductionConstant.ConstValue = 1e2;
+            // Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(100.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(0.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1411,8 +1435,16 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.ConstValue = 1.0;
-            gc.TransductionConstant.ConstValue = 100;
+            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(100.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(0.0);
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
@@ -1513,8 +1545,16 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.ConstValue = 1.0;
-            gc.TransductionConstant.ConstValue = 100;
+            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(0.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(0.0);
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
@@ -1601,8 +1641,17 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.ConstValue = 1.0;
-            gc.TransductionConstant.ConstValue = 0.0;
+            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(0.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(0.0);
+
             store.entity_repository.cells.Add(gc);
 
             ////////////////////////////////
@@ -1670,8 +1719,17 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient.ConstValue = 1.0;
-            gc.TransductionConstant.ConstValue = 0.0;
+            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
+            //gc.DragCoefficient.ConstValue = 1.0;
+            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
+            //gc.TransductionConstant = new DistributedParameter(0.0);
+            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
+            //gc.Sigma = new DistributedParameter(0.0);
+            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(0.0);
+
             store.entity_repository.cells.Add(gc);
 
         }

@@ -983,7 +983,6 @@ namespace Daphne
                 }
 
                 Console.WriteLine("Transduction values");
-                double[] temp = new double[cp.number];
                 for (int i = 0; i < cp.number; i++)
                 {
                     // only report boundary reaction failures for the first cell of the population
@@ -1003,8 +1002,12 @@ namespace Daphne
                         // report if a reaction could not be inserted
                         boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
                     }
-                    temp[i] = dataBasket.Cells.Last().Value.Locomotor.TransductionConstant;
-                    Console.WriteLine("{0} {1}", dataBasket.Cells.Last().Value.Locomotor.TransductionConstant, temp[i]);
+
+                    if (dataBasket.Cells.Last().Value.Locomotor != null)
+                    {
+                        Console.WriteLine("{0}", dataBasket.Cells.Last().Value.Locomotor.TransductionConstant);
+                    }
+
                 }
             }
 

@@ -5629,10 +5629,17 @@ namespace Daphne
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
-            
+
             TransductionConstant = new DistributedParameter(0.0);
             DragCoefficient = new DistributedParameter(1.0);
             Sigma = new DistributedParameter(0.0);
+
+            //TransductionConstant = new DistributedParameter();
+            //TransductionConstant.ConstValue = 0.0;
+            //DragCoefficient = new DistributedParameter();
+            //DragCoefficient.ConstValue = 1.0;
+            //Sigma = new DistributedParameter();
+            //Sigma.ConstValue = 0.0;
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -9110,52 +9117,81 @@ namespace Daphne
             set
             {
                 constValue = value;
-                isInitialized = false;
+                OnPropertyChanged("ConstValue");
             }
         }
 
-        // Needed to detect when to default to the constant distribution.
-        // Then we need to initalize it with the ConstValue.
-        public bool isInitialized;
+        //// Needed to detect when to default to the constant distribution.
+        //// Then we need to initalize it with the ConstValue.
+        //[JsonIgnore]
+        //public bool isInitialized;
+
+        private ParameterDistributionType distributionType;
+        public ParameterDistributionType DistributionType
+        {
+            get
+            {
+                return distributionType;
+            }
+            set
+            {
+                distributionType = value;
+                OnPropertyChanged("DistributionType");
+            }
+        }
 
         public DistributedParameter()
         {
-            isInitialized = false;
+            //isInitialized = false;
+            DistributionType = ParameterDistributionType.CONSTANT;
         }
-
-        public DistributedParameter(double _constValue)
-        {
-            isInitialized = false;
-            ConstValue = _constValue;
-        }    
 
         /// <summary>
-        /// If no probabilistic distribution has been chosen, then we need to initalize the constant distribution
-        /// with ConstValue.
+        /// Caution if calling this constructor from another constructor.
         /// </summary>
-        public void Intialize()
+        /// <param name="_constValue"></param>
+        public DistributedParameter(double _constValue)
         {
-            if (ParamDistr == null)
-            {
-                ParamDistr = new ConstantParameterDistribution();
-            }
+            //isInitialized = false;
+            ConstValue = _constValue;
+            DistributionType = ParameterDistributionType.CONSTANT;
+            //ParamDistr = new ConstantParameterDistribution(ConstValue);
+        }    
 
-            if (ParamDistr.DistributionType == ParameterDistributionType.CONSTANT)
-            {
-                ((ConstantParameterDistribution)ParamDistr).Value = ConstValue;
-            }
+        ///// <summary>
+        ///// If no probabilistic distribution has been chosen, then we need to initalize the constant distribution
+        ///// with ConstValue.
+        ///// </summary>
+        //public void Intialize()
+        //{
+        //    if (ParamDistr == null)
+        //    {
+        //        ParamDistr = new ConstantParameterDistribution();
+        //    }
 
-            isInitialized = true;
-        }
+        //    if (ParamDistr.DistributionType == ParameterDistributionType.CONSTANT)
+        //    {
+        //        ((ConstantParameterDistribution)ParamDistr).Value = ConstValue;
+        //    }
+
+        //    isInitialized = true;
+        //}
 
         public double Sample()
         {
-            if (isInitialized == false)
-            {
-                Intialize();
-            }
+            //if (isInitialized == false)
+            //{
+            //    Intialize();
+            //}
 
-            return ParamDistr.Sample();
+            if (ParamDistr == null)
+            {
+                return ConstValue;
+            }
+            else
+            {
+                return ParamDistr.Sample();
+            }
         }
     }
 
@@ -9181,7 +9217,7 @@ namespace Daphne
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value as string == "") return "";
+            if (value as string == "") return "Constant";
             try
             {
                 return _param_dist_type_strings[(int)value];
@@ -9201,9 +9237,56 @@ namespace Daphne
     }
 
     /// <summary>
+    /// Convert:
+    ///     Converter to go between enum values and boolean for GUI
+    ///     If the parameter distribution type is CONSTANT, then return False.
+    ///     Return True for all other distribution types.
+    ///  ConvertBack: 
+    ///     Shouldn't be used. Return CONSTANT.
+    /// </summary>
+    [ValueConversion(typeof(ParameterDistributionType), typeof(string))]
+    public class ParameterDistributionTypeToBoolConverter : IValueConverter
+    {
+        
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ParameterDistributionType pdt;
+            try
+            {
+                pdt = (ParameterDistributionType)value;
+            }
+            catch
+            {
+                pdt = ParameterDistributionType.CONSTANT;
+            }
+
+            if (pdt == ParameterDistributionType.CONSTANT)
+            {
+                return false;
+
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // Shouldn't be using this, so simply default to constant 
+            return ParameterDistributionType.CONSTANT;
+            //if (value as string == "") return ParameterDistributionType.CONSTANT;
+            //if (value as string == "false") return ParameterDistributionType.CONSTANT;
+
+            //return ParameterDistributionType.UNIFORM;
+        }
+    }
+
+    /// <summary>
     /// Abstract class for probability distributions on parameters.
     /// </summary>
-    public abstract class ParameterDistribution :EntityModelBase
+    public abstract class ParameterDistribution : EntityModelBase
     {
         public ParameterDistributionType DistributionType { get; set; }
         [JsonIgnore]
@@ -9223,12 +9306,19 @@ namespace Daphne
     /// </summary>
     public class ConstantParameterDistribution : ParameterDistribution
     {
-        public double Value { get; set; }
+        //[JsonIgnore]
+        //public double Value { get; set; }
 
         public ConstantParameterDistribution()
             : base(ParameterDistributionType.CONSTANT)
         {
         }
+
+        //public ConstantParameterDistribution(double _Value)
+        //    : base(ParameterDistributionType.CONSTANT)
+        //{
+        //    Value = _Value;
+        //}
 
         public override void Initialize()
         {
@@ -9237,7 +9327,7 @@ namespace Daphne
 
         public override double Sample()
         {
-            return Value;
+            return 0.0;
         }
     }
 
