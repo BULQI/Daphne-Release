@@ -197,7 +197,7 @@ namespace DaphneGui
         private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex, null);
+            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, null);
             if (arc.ShowDialog() == true)
                 lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
@@ -209,7 +209,7 @@ namespace DaphneGui
             if (crc == null)
                 return;
 
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc, null);
+            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, null);
             arc.ShowDialog();
 
         }

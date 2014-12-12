@@ -1808,6 +1808,7 @@ namespace DaphneGui
                 double[] bounds = new double[6];
 
                 bounds = EnvironmentController.BoxActor.Prop.GetBounds();
+ 
                 rwc.RenderWindow.GetRenderers().GetFirstRenderer().ResetCamera(bounds[0],
                                                                                bounds[1],
                                                                                bounds[2],
@@ -1820,6 +1821,13 @@ namespace DaphneGui
                                                                                             bounds[3],
                                                                                             bounds[4],
                                                                                             bounds[5]);
+
+                var fp = rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().GetFocalPoint();
+                var p = rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().GetPosition();
+                var dist = Math.Sqrt((p[0] - fp[0]) * (p[0] - fp[0]) + (p[1] - fp[1]) * (p[1] - fp[1]) + (p[2] - fp[2]) * (p[2] - fp[2]));
+                rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().SetPosition(fp[0], fp[1], fp[2] + dist);
+                rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().SetViewUp(0.0, 1.0, 0.0);
+
             }
         }
 #if ALL_GRAPHICS

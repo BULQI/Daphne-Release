@@ -132,7 +132,7 @@ namespace DaphneGui
         /// </summary>
         public static byte CONTROL_NONE = 0,
                            CONTROL_FORCE_RESET = (1 << 0),
-                           CONTROL_DB_LOAD = (1 << 1),
+                           CONTROL_PAST_LOAD = (1 << 1),
                            CONTROL_ZERO_FORCE = (1 << 2),
                            CONTROL_NEW_RUN = (1 << 3),
                            CONTROL_UPDATE_GUI = (1 << 4),
@@ -255,6 +255,7 @@ namespace DaphneGui
                     vcrControl.ReleaseVCR();
                 }
                 DataBasket.hdf5file.clearFile();
+                DataBasket.currentExperimentID = -1;
                 System.Windows.MessageBox.Show("All file entries cleared!");
             }
         }
@@ -289,7 +290,6 @@ namespace DaphneGui
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
-
 
             this.ToolWinCellInfo.Close();
 
@@ -604,6 +604,8 @@ namespace DaphneGui
                     openLastScenarioMenu.IsChecked = false;
                 }
             }
+
+            vcrControl = new VCRControl();
 
             // hdf5
             bool proceedHDF5 = true;
@@ -1116,7 +1118,7 @@ namespace DaphneGui
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
         /// </summary>
         /// <param name="newFile">true to indicate we are loading a new file</param>
-        /// <param name="xmlConfigString">scenario as a string</param>
+        /// <param name="protocol">protocol object</param>
         private void lockAndResetSim(bool newFile, Protocol protocol)
         {
             // prevent when a fit is in progress
@@ -1134,7 +1136,7 @@ namespace DaphneGui
                 }
 
                 // after doing a full reset, don't require one immediately unless we did a db load
-                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
+                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_PAST_LOAD));
 
                 sim.reset();
                 // reset cell tracks and free memory
@@ -1151,24 +1153,93 @@ namespace DaphneGui
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            #region MyRegion
-            //esw = new ExpSelectWindow(-1);
-            //esw.Owner = this;
-            //esw.ShowDialog();
-            //if (esw.expselected)
-            //{
-            //    MainWindow.SetControlFlag(MainWindow.CONTROL_DB_LOAD, true);
-            //    lockAndResetSim(true, esw.SelectedXML);
-            //    if (loadSuccess == false)
-            //    {
-            //        return;
-            //    }
-            //    MainWindow.SetControlFlag(MainWindow.CONTROL_DB_LOAD, false);
-            //    sim.runStatSummary();
-            //    GUIUpdate(esw.SelectedExperiment, true);
-            //    displayTitle("DB experiment id " + esw.SelectedExperiment);
-            //} 
-            #endregion
+            // id the file is open we'll have to close it; ask the user if that's what they want
+            if (DataBasket.hdf5file.isOpen() == true)
+            {
+                // we may want this verbosity of warnings but perhaps it's a burden to click through so many dialogs; maybe get requirements from Tom and Grace
+                //if (MessageBox.Show("The HDF5 file is currently open. Do you want to proceed and close it?", "HDF5 open", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                //{
+                //    return;
+                //}
+                // close the file and all open groups
+                DataBasket.hdf5file.close(true);
+            }
+
+            if (DataBasket.hdf5file.openRead() == false)
+            {
+                MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
+                return;
+            }
+
+            // find the experiment names and with them the number of experiments
+            List<string> expNames = DataBasket.hdf5file.subGroupNames("/Experiments_VCR");
+            string selectedExp = "";
+
+            if (expNames.Count > 0)
+            {
+                // populate the dialog with expNames
+                // the dialog must allow the user to choose an experiment and press Ok (loads it) or cancel (exits)
+                // the dialog must return or otherwise somehow provide the chosen experiment
+
+                // for the purpose of this example I'll assume they pick the first experiment if it exists
+                // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
+                if (expNames.Count > 0)
+                {
+                    // the dialog must provide this
+                    selectedExp = expNames[0];
+                }
+
+                // now load it if there was a valid selection
+                if (selectedExp != "")
+                {
+                    string protocolString = null;
+
+                    DataBasket.currentExperimentID = DataBasket.extractExperimentId(selectedExp);
+                    // open the experiment parent group
+                    DataBasket.hdf5file.openGroup("/Experiments_VCR/" + selectedExp);
+                    // read the protocol string
+                    DataBasket.hdf5file.readString("Protocol", ref protocolString);
+                    // close the file and all groups
+                    DataBasket.hdf5file.close(true);
+
+                    // do the loading
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                    lockAndResetSim(true, ReadJson(protocolString));
+                    if (loadSuccess == false)
+                    {
+                        return;
+                    }
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+                    // this function does not exist currently, do we need this call?
+                    //sim.runStatSummary();
+                    GUIUpdate(DataBasket.currentExperimentID, true);
+                    displayTitle("Loaded past run " + selectedExp);
+                    return;
+                }
+            }
+
+            // if we get here the file is still open, close the file and all groups
+            DataBasket.hdf5file.close(true);
+
+// leaving this for legacy, remove when done
+#if OLD_LOADING_CODE
+            esw = new ExpSelectWindow(-1);
+            esw.Owner = this;
+            esw.ShowDialog();
+            if (esw.expselected)
+            {
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                lockAndResetSim(true, esw.SelectedXML);
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+                sim.runStatSummary();
+                GUIUpdate(esw.SelectedExperiment, true);
+                displayTitle("DB experiment id " + esw.SelectedExperiment);
+            } 
+#endif
         }
 
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
@@ -2225,6 +2296,14 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// utility to close output files, reporter, hdf5
+        /// </summary>
+        private void closeOutputFiles()
+        {
+            sim.Reporter.CloseReporter();
+            DataBasket.hdf5file.close(true);
+        }
 
         private void run()
         {
@@ -2290,12 +2369,8 @@ namespace DaphneGui
                                     // close the reporter
                                     if (Properties.Settings.Default.skipDataWrites == false)
                                     {
-                                        sim.Reporter.CloseReporter();
-                                        // this experiment sub-group
-                                        DataBasket.hdf5file.closeGroup();
-                                        // experiments group
-                                        DataBasket.hdf5file.closeGroup();
-                                        DataBasket.hdf5file.close();
+                                        // reporter and hdf5 close
+                                        closeOutputFiles();
                                     }
                                     // for profiling: close the application after a completed experiment
                                     if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
@@ -2305,7 +2380,7 @@ namespace DaphneGui
                                     }
 
                                     // update the gui; this is a non-issue if an application close just got requested, so may get skipped
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
                                 }
                             }
                         }
@@ -2314,12 +2389,8 @@ namespace DaphneGui
                     {
                         if (Properties.Settings.Default.skipDataWrites == false)
                         {
-                            sim.Reporter.CloseReporter();
-                            // this experiment sub-group
-                            DataBasket.hdf5file.closeGroup();
-                            // experiments group
-                            DataBasket.hdf5file.closeGroup();
-                            DataBasket.hdf5file.close();
+                            // reporter and hdf5 close
+                            closeOutputFiles();
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
@@ -2365,26 +2436,10 @@ namespace DaphneGui
             lockSaveStartSim(true);
         }
 
-        /// <summary>
-        /// create the vcr control if it has not been created yet, and load the current frame
-        /// </summary>
-        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
-        /// <param name="expID">experiment id</param>
-        /// <returns>true for success</returns>
-        private bool OpenVCR(bool lastFrame, int expID = -1)
-        {
-            // create the vcr control if needed, load the data, and set the last frame
-            if (vcrControl == null)
-            {
-                vcrControl = new VCRControl();
-            }
-            return vcrControl.OpenVCR(lastFrame, expID);
-        }
-
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED && skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            if (expID >= 0 && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR(true, expID) == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
@@ -2515,9 +2570,7 @@ namespace DaphneGui
         private void updateGraphicsAndGUI()
         {
             lockAndResetSim(false, ReadJson(""));
-            //also need to delete every for this experiment in database.
-            //DataBaseTools.DeleteExperiment(configurator.Protocol.experiment_db_id);
-            //SC.Protocol.experiment_db_id = -1;//reset
+            // disable the vcr by passing expId == -1, from this call we should never attempt to read an hdf5 file
             runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
@@ -2676,10 +2729,14 @@ namespace DaphneGui
                         DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
 
                         // for now pick a safe id, highest id + 1
-                        int id = DataBasket.findHighestExperimentId() + 1;
+                        DataBasket.currentExperimentID = DataBasket.findHighestExperimentId() + 1;
 
                         // group for this experiment
-                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", id));
+                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", DataBasket.currentExperimentID));
+                        // the protocol as string; needed to reload arbitrary past experiments
+                        DataBasket.hdf5file.writeString("Protocol", sop.Protocol.SerializeToString());
+                        // frames group
+                        DataBasket.hdf5file.createGroup("VCR_Frames");
                     }
 
                     runButton.Content = "Pause";

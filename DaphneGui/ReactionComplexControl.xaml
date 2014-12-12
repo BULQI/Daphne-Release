@@ -18,7 +18,7 @@
                             ItemsSource="{Binding reaction_complexes}"
                             DisplayMemberPath="Name"
                             IsSynchronizedWithCurrentItem="True"
-                            SelectedIndex="0">
+                            SelectionChanged="ListBoxReactionComplexes_SelectionChanged">
             </ListBox>
         </StackPanel>
 
@@ -26,7 +26,7 @@
         <StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
                 <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
-                <TextBox x:Name="TextBoxRCName" Width="150" HorizontalAlignment="Left" Text="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.Name}" ></TextBox>
+                <TextBox x:Name="TextBoxRCName" Width="150" HorizontalAlignment="Left" Text="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></TextBox>
                 <Button x:Name="ButtonEditComplex" Width="50" Click="ButtonEditComplex_Click">Edit</Button>
                 <Button x:Name="ButtonAddComplex" Width="50" Click="ButtonAddComplex_Click"
                         Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}">Add</Button>
@@ -36,49 +36,6 @@
             </StackPanel>
         </StackPanel>
 
-        <!--REACTIONS-->
-        <StackPanel Margin="0,10" >
-            <TextBlock Text="Reactions" />
-            <ListView x:Name="ListViewReacComplexReactions" MaxHeight="150"
-                    ItemsSource="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.reactions, Mode=TwoWay}"
-                    SelectedIndex="0" >
-                <ListView.View>
-                    <GridView>
-                        <GridView.ColumnHeaderContainerStyle>
-                            <Style TargetType="GridViewColumnHeader">
-                                <Setter Property="Height" Value="Auto"></Setter>
-                                <Setter Property="Background">
-                                    <Setter.Value>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Offset="0.0" Color="White" />
-                                            <GradientStop Offset="1.0" Color="Beige" />
-                                        </LinearGradientBrush>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GridView.ColumnHeaderContainerStyle>
-
-                        <GridViewColumn Width="80" Header="Rate constant">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-
-                        <GridViewColumn Width="300" Header="Reaction" >
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding TotalReactionString}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-        </StackPanel>
-        
         <!--MOLECULES-->
         <StackPanel Margin="0,10" DataContext="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem}" Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}" >
             <TextBlock Text="Initial Molecular concentrations" Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}" />
@@ -130,6 +87,50 @@
 
             </ListView>
         </StackPanel>
+
+        <!--REACTIONS-->
+        <StackPanel Margin="0,2" >
+            <TextBlock Text="Reactions" />
+            <ListView x:Name="ListViewReacComplexReactions" MaxHeight="150"
+                    ItemsSource="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.reactions, Mode=TwoWay}"
+                    SelectedIndex="0" >
+                <ListView.View>
+                    <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="GridViewColumnHeader">
+                                <Setter Property="Height" Value="Auto"></Setter>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+
+                        <GridViewColumn Width="80" Header="Rate constant">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Width="300" Header="Reaction" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TotalReactionString}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
+
     </StackPanel>
     
 </UserControl>
