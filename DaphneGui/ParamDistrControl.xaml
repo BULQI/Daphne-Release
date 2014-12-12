@@ -207,7 +207,7 @@
                 <ContentControl x:Name="ParamDistrDetails"
                             Content="{Binding}"
                             Style="{StaticResource selectableContentTemplateStyle}"
-                            Margin="6"/>
+                            />
             </StackPanel>
 
             
