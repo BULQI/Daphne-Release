@@ -297,26 +297,30 @@ namespace DaphneGui
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
             //DO NOT DELETE THIS
-            //This code is to create DaphneStore and UserStore.
-            //It should not be needed ever again! 
-            //Any editing of DaphneStore should be done through application (GUI).
-            try
+            //This code creates the DaphneStore and UserStore.
+            //This code also creates the predefined scenarios.
+            //Only run this code during development, since running it will invalidate any existing user scenarios.
+            //Once development is completed editing of the DaphneStore and UserStore should be done through application (GUI).
+            if (false)
             {
-                CreateDaphneAndUserStores();
-            }
-            catch (Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
-            }
+                try
+                {
+                    CreateDaphneAndUserStores();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
 
-            ////This code re-generates the scenarios - DO NOT DELETE
-            try
-            {
-                CreateAndSerializeDaphneProtocols();
-            }
-            catch (Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
+                //This code re-generates the scenarios - DO NOT DELETE
+                try
+                {
+                    CreateAndSerializeDaphneProtocols();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
             }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
