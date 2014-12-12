@@ -128,6 +128,9 @@
     <Reference Include="MathNet.Numerics">
       <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
+    <Reference Include="Meta.Numerics">
+      <HintPath>..\dependencies\Meta.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
     </Reference>
