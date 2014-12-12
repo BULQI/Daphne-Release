@@ -2607,7 +2607,7 @@ namespace Daphne
         }
     }
 
-    public class SimulationParams
+    public class SimulationParams : EntityModelBase
     {
         public SimulationParams()
         {
@@ -2621,7 +2621,21 @@ namespace Daphne
         public double phi2 { get; set; }
         public double deathConstant { get; set; }
         public int deathOrder { get; set; }
-        public int globalRandomSeed { get; set; }
+
+        private int randomSeed;
+        public int globalRandomSeed
+        {
+            get
+            {
+                return randomSeed;
+            }
+
+            set
+            {
+                randomSeed = value;
+                OnPropertyChanged("globalRandomSeed");
+            }
+        }
     }
 
     public class EntityRepository
@@ -4111,7 +4125,7 @@ namespace Daphne
     public class ConfigTransitionDriver : ConfigEntity, IEquatable<ConfigTransitionDriver>
     {
         public string Name { get; set; }
-        public int CurrentState { get; set; }
+        public DistributedParameter CurrentState { get; set; }
         public string StateName { get; set; }
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
@@ -4122,6 +4136,7 @@ namespace Daphne
         {
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
+            CurrentState = new DistributedParameter(0);
         }
 
         public ConfigTransitionDriver Clone(bool identical)
@@ -5634,13 +5649,6 @@ namespace Daphne
             DragCoefficient = new DistributedParameter(1.0);
             Sigma = new DistributedParameter(0.0);
 
-            //TransductionConstant = new DistributedParameter();
-            //TransductionConstant.ConstValue = 0.0;
-            //DragCoefficient = new DistributedParameter();
-            //DragCoefficient.ConstValue = 1.0;
-            //Sigma = new DistributedParameter();
-            //Sigma.ConstValue = 0.0;
-
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
@@ -6062,6 +6070,29 @@ namespace Daphne
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Force distributed parameters to reinitialize on the next Sample.
+        /// This is needed in order to get reproducible results for the same global seed value.
+        /// </summary>
+        public void ResetDistributedParameters()
+        {
+                TransductionConstant.Reset();
+                Sigma.Reset();
+                DragCoefficient.Reset();
+                if (death_driver != null)
+                {
+                    death_driver.CurrentState.Reset();
+                }
+                if (diff_scheme != null)
+                {
+                    diff_scheme.Driver.CurrentState.Reset();
+                }
+                if (div_scheme != null)
+                {
+                    div_scheme.Driver.CurrentState.Reset();
+                }
         }
     }
 
@@ -9087,11 +9118,12 @@ namespace Daphne
 
     /// <summary>
     /// Class to handle parameters whose values may be set by a probability distribution.
-    /// The default is a constant distribution - always returns the same value.
+    /// The default is a constant value.
+    /// If there is a distribution on the parameter, then ConstValue doesn't have any relevance to the value of the parameter.
+    /// In either case, the parameter value should be obtained using the Sample method.
     /// </summary>
     public class DistributedParameter : EntityModelBase
     {
-        // Then probabilistic distribution
         private ParameterDistribution paramDistr;
         public ParameterDistribution ParamDistr 
         {
@@ -9106,7 +9138,7 @@ namespace Daphne
             }
         }
 
-        // The default contant value
+        // Value of parameter when constant - no distribution.
         private double constValue;
         public double ConstValue 
         {
@@ -9120,11 +9152,6 @@ namespace Daphne
                 OnPropertyChanged("ConstValue");
             }
         }
-
-        //// Needed to detect when to default to the constant distribution.
-        //// Then we need to initalize it with the ConstValue.
-        //[JsonIgnore]
-        //public bool isInitialized;
 
         private ParameterDistributionType distributionType;
         public ParameterDistributionType DistributionType
@@ -9142,48 +9169,22 @@ namespace Daphne
 
         public DistributedParameter()
         {
-            //isInitialized = false;
             DistributionType = ParameterDistributionType.CONSTANT;
         }
 
         /// <summary>
         /// Caution if calling this constructor from another constructor.
+        /// May cause problems when deserializing json.
         /// </summary>
         /// <param name="_constValue"></param>
         public DistributedParameter(double _constValue)
         {
-            //isInitialized = false;
             ConstValue = _constValue;
             DistributionType = ParameterDistributionType.CONSTANT;
-            //ParamDistr = new ConstantParameterDistribution(ConstValue);
         }    
-
-        ///// <summary>
-        ///// If no probabilistic distribution has been chosen, then we need to initalize the constant distribution
-        ///// with ConstValue.
-        ///// </summary>
-        //public void Intialize()
-        //{
-        //    if (ParamDistr == null)
-        //    {
-        //        ParamDistr = new ConstantParameterDistribution();
-        //    }
-
-        //    if (ParamDistr.DistributionType == ParameterDistributionType.CONSTANT)
-        //    {
-        //        ((ConstantParameterDistribution)ParamDistr).Value = ConstValue;
-        //    }
-
-        //    isInitialized = true;
-        //}
 
         public double Sample()
         {
-            //if (isInitialized == false)
-            //{
-            //    Intialize();
-            //}
-
             if (ParamDistr == null)
             {
                 return ConstValue;
@@ -9191,6 +9192,14 @@ namespace Daphne
             else
             {
                 return ParamDistr.Sample();
+            }
+        }
+
+        public void Reset()
+        {
+            if (ParamDistr != null)
+            {
+                ParamDistr.isInitialized = false;
             }
         }
     }
@@ -9276,10 +9285,6 @@ namespace Daphne
         {
             // Shouldn't be using this, so simply default to constant 
             return ParameterDistributionType.CONSTANT;
-            //if (value as string == "") return ParameterDistributionType.CONSTANT;
-            //if (value as string == "false") return ParameterDistributionType.CONSTANT;
-
-            //return ParameterDistributionType.UNIFORM;
         }
     }
 
@@ -9299,36 +9304,6 @@ namespace Daphne
         }
         public abstract void Initialize();
         public abstract double Sample();
-    }
-
-    /// <summary>
-    /// Parameter value is constant.
-    /// </summary>
-    public class ConstantParameterDistribution : ParameterDistribution
-    {
-        //[JsonIgnore]
-        //public double Value { get; set; }
-
-        public ConstantParameterDistribution()
-            : base(ParameterDistributionType.CONSTANT)
-        {
-        }
-
-        //public ConstantParameterDistribution(double _Value)
-        //    : base(ParameterDistributionType.CONSTANT)
-        //{
-        //    Value = _Value;
-        //}
-
-        public override void Initialize()
-        {
-            isInitialized = true;
-        }
-
-        public override double Sample()
-        {
-            return 0.0;
-        }
     }
 
     /// <summary>
@@ -9449,6 +9424,10 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Class for categorical item for categorical distribution.
+    /// Contains the parameter value (CategoryValue) and it's probability (Prob)
+    /// </summary>
     public class CategoricalDistrItem : EntityModelBase
     {
         private double categoryValue;
@@ -9538,15 +9517,8 @@ namespace Daphne
                 probMass.Add(new CategoricalDistrItem(0.0, 0.5));
                 probMass.Add(new CategoricalDistrItem(1.0, 0.5));
             }
-            Console.WriteLine("Initialize:");
-            Console.WriteLine("\tbefore Normalize.");
-            Console.WriteLine("\t{0}\t{1}", Rand.NormalDist.Sample(), Rand.TroschuetzCUD.NextDouble());
             Normalize();
-            Console.WriteLine("\tafter Normalize.");
-            Console.WriteLine("\t{0}\t{1}", Rand.NormalDist.Sample(), Rand.TroschuetzCUD.NextDouble());
             CategoricalDist = new Categorical(ProbArray(), Rand.MersenneTwister);
-            Console.WriteLine("\tafter new categorical distribution");
-            Console.WriteLine("\t{0}\t{1}", Rand.NormalDist.Sample(), Rand.TroschuetzCUD.NextDouble());
             isInitialized = true;
         }
 
@@ -9575,7 +9547,6 @@ namespace Daphne
             return probMass[i].CategoryValue;
         }
     }
-
 
 
 }
