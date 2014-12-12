@@ -1083,8 +1083,7 @@ namespace Daphne
             double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
             double[,] beta = new double[,] { { 0, 0.002}, { 0, 0 } };
             LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
-            config_td.CurrentState = 0;
-            config_td.StateName = config_td.states[config_td.CurrentState];
+            config_td.StateName = config_td.states[(int)config_td.CurrentState.ConstValue];
             store.entity_repository.transition_drivers.Add(config_td);
             store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
 
@@ -1096,8 +1095,7 @@ namespace Daphne
             alpha = new double[,] { { 0, 0 }, { 0, 0 } };
             beta = new double[,] { { 0, 0.002 }, { 0, 0 } };
             LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
-            config_td.CurrentState = 0;
-            config_td.StateName = config_td.states[config_td.CurrentState];
+            config_td.StateName = config_td.states[(int)config_td.CurrentState.ConstValue];
             store.entity_repository.transition_drivers.Add(config_td);
             store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
 
@@ -1790,8 +1788,8 @@ namespace Daphne
             diffScheme.Name = "B cell 7 state";
             driver = new ConfigTransitionDriver();
             driver.Name = "B cell 7 state driver";
-            driver.CurrentState = 0;
-            driver.StateName = stateNames[driver.CurrentState];
+            driver.CurrentState = new DistributedParameter(0);
+            driver.StateName = stateNames[(int)driver.CurrentState.Sample()];
 
             // Attach transition driver to differentiation scheme
             diffScheme.Driver = driver;
@@ -1858,8 +1856,8 @@ namespace Daphne
             diffScheme.Name = "GC B cell";
             driver = new ConfigTransitionDriver();
             driver.Name = "GC B Cell driver";
-            driver.CurrentState = 0;
-            driver.StateName = stateNames[driver.CurrentState];
+            driver.CurrentState = new DistributedParameter(0);
+            driver.StateName = stateNames[(int)driver.CurrentState.Sample()];
 
             // Attach transition driver to differentiation scheme
             diffScheme.Driver = driver;
