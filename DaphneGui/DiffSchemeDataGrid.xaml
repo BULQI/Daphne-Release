@@ -78,10 +78,10 @@
                      Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
        
-        <!-- starting satate -->
+        <!-- starting state -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
-            <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="180" />
-            <TextBox Text="{Binding Path=Driver.CurrentState, Mode=TwoWay, FallbackValue=0, ValidatesOnExceptions=True}" Margin="0,2" Width="120" />
+            <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
+            <local:ParamDistrControl DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
         </StackPanel>
         
         <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
