@@ -254,6 +254,330 @@ namespace Daphne
             return "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputList"></param>
+        /// <returns></returns>
+        protected bool HasGene(Dictionary<string, int> inputList)
+        {
+            foreach (KeyValuePair<string, int> kvp in inputList)
+            {
+                string guid = findGeneGuidByName(kvp.Key);
+                if (guid != "")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Given a gene name, check if it exists in repository - return guid
+        /// </summary>
+        /// <param name="inputGeneName"></param>
+        /// <returns></returns>
+
+        public string findGeneGuidByName(string inputGeneName)
+        {
+            string guid = "";
+            foreach (ConfigGene cg in this.entity_repository.genes)
+            {
+                if (cg.Name == inputGeneName)
+                {
+                    guid = cg.entity_guid;
+                    break;
+                }
+            }
+            return guid;
+        }
+
+        /// <summary>
+        /// Find ConfigGene by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ConfigGene FindGene(string name)
+        {
+            ConfigGene cg = null;
+
+            foreach (ConfigGene g in entity_repository.genes)
+            {
+                if (g.Name == name)
+                {
+                    cg = g;
+                    break;
+                }
+            }
+            return cg;
+        }
+
+        /// <summary>
+        /// Given a gene name, find its guid
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="protocol"></param>
+        /// <returns></returns>
+        public string findGeneGuid(string name, Protocol protocol)
+        {
+            foreach (ConfigGene gene in protocol.entity_repository.genes)
+            {
+                if (gene.Name == name)
+                {
+                    return gene.entity_guid;
+                }
+            }
+            return "";
+        }
+
+        public string findMoleculeGuidByName(string inputMolName)
+        {
+            string guid = "";
+            foreach (ConfigMolecule cm in entity_repository.molecules)
+            {
+                if (cm.Name == inputMolName)
+                {
+                    guid = cm.entity_guid;
+                    break;
+                }
+            }
+            return guid;
+        }
+
+        public bool HasMoleculeType(Dictionary<string, int> inputList, MoleculeLocation molLoc)
+        {
+            foreach (KeyValuePair<string, int> kvp in inputList)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (entity_repository.molecules_dict[guid].molecule_location == molLoc)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
+        /// list of molecule strings on the left side, i.e. the reactants.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        protected List<string> getReacLeftSide(string total)
+        {
+            int len = total.Length;
+            int index = total.IndexOf("->");
+            string left = total.Substring(0, index);
+            left = left.Replace(" ", "");
+            char[] separator = { '+' };
+            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            List<string> listLeft = new List<string>(reactants);
+            listLeft.Sort();
+            return listLeft;
+        }
+
+        /// <summary>
+        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
+        /// list of molecule strings on the right side, i.e. the products.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        protected List<string> getReacRightSide(string total)
+        {
+            int len = total.Length;
+            int index = total.IndexOf("->");
+            string right = total.Substring(index + 2);
+            right = right.Replace(" ", "");
+            char[] separator = { '+' };
+            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            List<string> listRight = new List<string>(products);
+            listRight.Sort();
+            return listRight;
+        }
+
+        /// <summary>
+        /// Identifies reaction type given the input reactants, products and modifiers
+        /// </summary>
+        /// <param name="inputReactants"></param>
+        /// <param name="inputProducts"></param>
+        /// <param name="inputModifiers"></param>
+        /// <returns></returns>
+        public string IdentifyReactionType(Dictionary<string, int> inputReactants, Dictionary<string, int> inputProducts, Dictionary<string, int> inputModifiers)
+        {
+            string reaction_template_guid_ref = "";
+
+            int totalReacStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputReactants)
+            {
+                totalReacStoich += kvp.Value;
+            }
+
+            int totalProdStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputProducts)
+            {
+                totalProdStoich += kvp.Value;
+            }
+
+            int totalModStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputModifiers)
+            {
+                totalModStoich += kvp.Value;
+            }
+
+            if (HasGene(inputReactants) || HasGene(inputProducts))
+            {
+                // No reactions supported for genes as reactant or product
+                return reaction_template_guid_ref;
+            }
+
+            bool geneModifier = HasGene(inputModifiers);
+            bool boundProd = HasMoleculeType(inputProducts, MoleculeLocation.Boundary);
+
+            if (geneModifier)
+            {
+                if ((inputModifiers.Count > 1) || (inputProducts.Count != 1) || (inputReactants.Count != 0) || (totalModStoich > 1) || (totalProdStoich > 1) || (boundProd))
+                {
+                    // Gene transcription reaction does not support these possibilities
+                    return reaction_template_guid_ref;
+                }
+                else
+                {
+                    return findReactionTemplateGuid(ReactionType.Transcription);
+                }
+            }
+
+
+            bool bulkProd = HasMoleculeType(inputProducts, MoleculeLocation.Bulk);
+            bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
+            bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
+            bool boundMod = HasMoleculeType(inputModifiers, MoleculeLocation.Boundary);
+            bool bulkMod = HasMoleculeType(inputModifiers, MoleculeLocation.Bulk);
+
+            int bulkBoundVal = 1,
+                    modVal = 10,
+                    reacVal = 100,
+                    prodVal = 1000,
+                    reacStoichVal = 10000,
+                    prodStoichVal = 100000,
+                    modStoichVal = 1000000;
+
+            if (inputModifiers.Count > 9 || inputReactants.Count > 9 || inputProducts.Count > 9 || totalReacStoich > 9 || totalProdStoich > 9 || totalModStoich > 9)
+            {
+                throw new Exception("Unsupported reaction with current typing algorithm.\n");
+            }
+
+            int reacNum = inputModifiers.Count * modVal
+                            + inputReactants.Count * reacVal
+                            + inputProducts.Count * prodVal
+                            + totalReacStoich * reacStoichVal
+                            + totalProdStoich * prodStoichVal
+                            + totalModStoich * modStoichVal;
+
+            if ((boundReac || boundProd || boundMod) && (bulkReac || bulkProd || bulkMod))
+            {
+                reacNum += bulkBoundVal;
+            }
+
+            switch (reacNum)
+            {
+                // Interior
+                case 10100:
+                    return findReactionTemplateGuid(ReactionType.Annihilation);
+                case 121200:
+                    return findReactionTemplateGuid(ReactionType.Association);
+                case 121100:
+                    return findReactionTemplateGuid(ReactionType.Dimerization);
+                case 211100:
+                    return findReactionTemplateGuid(ReactionType.DimerDissociation);
+                case 212100:
+                    return findReactionTemplateGuid(ReactionType.Dissociation);
+                case 111100:
+                    return findReactionTemplateGuid(ReactionType.Transformation);
+                case 221200:
+                    return findReactionTemplateGuid(ReactionType.AutocatalyticTransformation);
+                // Interior Catalyzed (catalyst stoichiometry doesn't change)
+                case 1010110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+                case 1121210:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedAssociation);
+                case 1101010:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedCreation);
+                case 1121110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedDimerization);
+                case 1211110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedDimerDissociation);
+                case 1212110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedDissociation);
+                case 1111110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedTransformation);
+                // Bulk/Boundary reactions
+                case 121201:
+                    if ((boundProd) && (boundReac))
+                    {
+                        // The product and one of the reactants must be boundary molecules 
+                        return findReactionTemplateGuid(ReactionType.BoundaryAssociation);
+                    }
+                    else
+                    {
+                        return reaction_template_guid_ref;
+                    }
+                case 212101:
+                    if ((boundProd) && (boundReac))
+                    {
+                        // The reactant and one of the products must be boundary molecules 
+                        return findReactionTemplateGuid(ReactionType.BoundaryDissociation);
+                    }
+                    else
+                    {
+                        return reaction_template_guid_ref;
+                    }
+                case 111101:
+                    if (boundReac)
+                    {
+                        return findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+                    }
+                    else
+                    {
+                        return findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+                    }
+                // Catalyzed Bulk/Boundary reactions
+                case 1111111:
+                    if (boundMod)
+                    {
+                        return findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
+                    }
+                    else
+                    {
+                        return reaction_template_guid_ref;
+                    }
+                // Generalized reaction
+                default:
+                    // Not implemented yet
+                    return reaction_template_guid_ref;
+            }
+        }
+
+        /// <summary>
+        /// Find ConfigMolecule by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ConfigMolecule FindMolecule(string name)
+        {
+            ConfigMolecule gm = null;
+
+            foreach (ConfigMolecule g in entity_repository.molecules)
+            {
+                if (g.Name == name)
+                {
+                    gm = g;
+                    break;
+                }
+            }
+            return gm;
+        }
+
+
 
         /// <summary>
         /// enum for push status
@@ -1593,49 +1917,7 @@ namespace Daphne
             }
         }
 
-        public ConfigMolecule FindMolecule(string name)
-        {
-            ConfigMolecule gm = null;
-
-            foreach (ConfigMolecule g in entity_repository.molecules)
-            {
-                if (g.Name == name)
-                {
-                    gm = g;
-                    break;
-                }
-            }
-            return gm;
-        }
-
-        public ConfigGene FindGene(string name)
-        {
-            ConfigGene cg = null;
-
-            foreach (ConfigGene g in entity_repository.genes)
-            {
-                if (g.Name == name)
-                {
-                    cg = g;
-                    break;
-                }
-            }
-            return cg;
-        }
-
-        // given a gene name, find its guid
-        public string findGeneGuid(string name, Protocol protocol)
-        {
-            foreach (ConfigGene gene in protocol.entity_repository.genes)
-            {
-                if (gene.Name == name)
-                {
-                    return gene.entity_guid;
-                }
-            }
-            return "";
-        }
-
+        
         // given a total reaction string, find the ConfigCell object
         public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
         {
@@ -1671,46 +1953,7 @@ namespace Daphne
 
             return false;
         }
-
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the left side, i.e. the reactants.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacLeftSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string left = total.Substring(0, index);
-            left = left.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listLeft = new List<string>(reactants);
-            listLeft.Sort();
-            return listLeft;
-        }
-
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the right side, i.e. the products.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacRightSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string right = total.Substring(index + 2);
-            right = right.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listRight = new List<string>(products);
-            listRight.Sort();
-            return listRight;
-        }
-
-
+        
         /// <summary>
         /// Select transcription reactions in the compartment.
         /// </summary>
@@ -1780,221 +2023,6 @@ namespace Daphne
             return config_reacs.Values.ToList();
         }
 
-        public string findMoleculeGuidByName(string inputMolName)
-        {
-            string guid = "";
-            foreach (ConfigMolecule cm in entity_repository.molecules)
-            {
-                if (cm.Name == inputMolName)
-                {
-                    guid = cm.entity_guid;
-                    break;
-                }
-            }
-            return guid;
-        }
-
-        public bool HasMoleculeType(Dictionary<string, int> inputList, MoleculeLocation molLoc)
-        {
-            foreach (KeyValuePair<string, int> kvp in inputList)
-            {
-                string guid = findMoleculeGuidByName(kvp.Key);
-                if (entity_repository.molecules_dict[guid].molecule_location == molLoc)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private bool HasGene(Dictionary<string, int> inputList)
-        {
-            foreach (KeyValuePair<string, int> kvp in inputList)
-            {
-                string guid = findGeneGuidByName(kvp.Key);
-                if (guid != "")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
-        /// <summary>
-        /// Given a gene name, check if it exists in repository - return guid
-        /// </summary>
-        /// <param name="inputGeneName"></param>
-        /// <returns></returns>
-
-        public string findGeneGuidByName(string inputGeneName)
-        {
-            string guid = "";
-            foreach (ConfigGene cg in this.entity_repository.genes)
-            {
-                if (cg.Name == inputGeneName)
-                {
-                    guid = cg.entity_guid;
-                    break;
-                }
-            }
-            return guid;
-        }
-
-        public string IdentifyReactionType(Dictionary<string, int> inputReactants, Dictionary<string, int> inputProducts, Dictionary<string, int> inputModifiers)
-        {
-            string reaction_template_guid_ref = "";
-
-            int totalReacStoich = 0;
-            foreach (KeyValuePair<string, int> kvp in inputReactants)
-            {
-                totalReacStoich += kvp.Value;
-            }
-
-            int totalProdStoich = 0;
-            foreach (KeyValuePair<string, int> kvp in inputProducts)
-            {
-                totalProdStoich += kvp.Value;
-            }
-
-            int totalModStoich = 0;
-            foreach (KeyValuePair<string, int> kvp in inputModifiers)
-            {
-                totalModStoich += kvp.Value;
-            }
-
-            if (HasGene(inputReactants) || HasGene(inputProducts))
-            {
-                // No reactions supported for genes as reactant or product
-                return reaction_template_guid_ref;
-            }
-
-            bool geneModifier = HasGene(inputModifiers);
-            bool boundProd = HasMoleculeType(inputProducts, MoleculeLocation.Boundary);
-
-            if (geneModifier)
-            {
-                if ((inputModifiers.Count > 1) || (inputProducts.Count != 1) || (inputReactants.Count != 0) || (totalModStoich > 1) || (totalProdStoich > 1) || (boundProd))
-                {
-                    // Gene transcription reaction does not support these possibilities
-                    return reaction_template_guid_ref;
-                }
-                else
-                {
-                    return findReactionTemplateGuid(ReactionType.Transcription);
-                }
-            }
-
-
-            bool bulkProd = HasMoleculeType(inputProducts, MoleculeLocation.Bulk);
-            bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
-            bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
-            bool boundMod = HasMoleculeType(inputModifiers, MoleculeLocation.Boundary);
-            bool bulkMod = HasMoleculeType(inputModifiers, MoleculeLocation.Bulk);
-
-            int bulkBoundVal = 1,
-                    modVal = 10,
-                    reacVal = 100,
-                    prodVal = 1000,
-                    reacStoichVal = 10000,
-                    prodStoichVal = 100000,
-                    modStoichVal = 1000000;
-
-            if (inputModifiers.Count > 9 || inputReactants.Count > 9 || inputProducts.Count > 9 || totalReacStoich > 9 || totalProdStoich > 9 || totalModStoich > 9)
-            {
-                throw new Exception("Unsupported reaction with current typing algorithm.\n");
-            }
-
-            int reacNum = inputModifiers.Count * modVal
-                            + inputReactants.Count * reacVal
-                            + inputProducts.Count * prodVal
-                            + totalReacStoich * reacStoichVal
-                            + totalProdStoich * prodStoichVal
-                            + totalModStoich * modStoichVal;
-
-            if ((boundReac || boundProd || boundMod) && (bulkReac || bulkProd || bulkMod))
-            {
-                reacNum += bulkBoundVal;
-            }
-
-            switch (reacNum)
-            {
-                // Interior
-                case 10100:
-                    return findReactionTemplateGuid(ReactionType.Annihilation);
-                case 121200:
-                    return findReactionTemplateGuid(ReactionType.Association);
-                case 121100:
-                    return findReactionTemplateGuid(ReactionType.Dimerization);
-                case 211100:
-                    return findReactionTemplateGuid(ReactionType.DimerDissociation);
-                case 212100:
-                    return findReactionTemplateGuid(ReactionType.Dissociation);
-                case 111100:
-                    return findReactionTemplateGuid(ReactionType.Transformation);
-                case 221200:
-                    return findReactionTemplateGuid(ReactionType.AutocatalyticTransformation);
-                // Interior Catalyzed (catalyst stoichiometry doesn't change)
-                case 1010110:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
-                case 1121210:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedAssociation);
-                case 1101010:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedCreation);
-                case 1121110:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedDimerization);
-                case 1211110:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedDimerDissociation);
-                case 1212110:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedDissociation);
-                case 1111110:
-                    return findReactionTemplateGuid(ReactionType.CatalyzedTransformation);
-                // Bulk/Boundary reactions
-                case 121201:
-                    if ((boundProd) && (boundReac))
-                    {
-                        // The product and one of the reactants must be boundary molecules 
-                        return findReactionTemplateGuid(ReactionType.BoundaryAssociation);
-                    }
-                    else
-                    {
-                        return reaction_template_guid_ref;
-                    }
-                case 212101:
-                    if ((boundProd) && (boundReac))
-                    {
-                        // The reactant and one of the products must be boundary molecules 
-                        return findReactionTemplateGuid(ReactionType.BoundaryDissociation);
-                    }
-                    else
-                    {
-                        return reaction_template_guid_ref;
-                    }
-                case 111101:
-                    if (boundReac)
-                    {
-                        return findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
-                    }
-                    else
-                    {
-                        return findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
-                    }
-                // Catalyzed Bulk/Boundary reactions
-                case 1111111:
-                    if (boundMod)
-                    {
-                        return findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
-                    }
-                    else
-                    {
-                        return reaction_template_guid_ref;
-                    }
-                // Generalized reaction
-                default:
-                    // Not implemented yet
-                    return reaction_template_guid_ref;
-            }
-        }
     }
 
     // start at > 0 as zero seems to be the default for metadata when a property is not present

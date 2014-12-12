@@ -404,6 +404,7 @@ namespace DaphneGui
                 s.InitializeAllReacs();
             }
 
+
             txtReac.Text = "";
             reacmolguids.Clear();
             txtProd.Text = "";
@@ -639,7 +640,7 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            //populateCollection();
+            populateCollection();
         }
 
         private void populateCollection()
@@ -715,7 +716,7 @@ namespace DaphneGui
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
-                    //protocol = this.DataContext as Protocol;
+                    
                     //if (protocol != null)
                     //{
                     //    ARCReactions = protocol.entity_repository.reactions ?? null;

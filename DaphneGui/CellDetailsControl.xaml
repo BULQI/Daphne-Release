@@ -134,6 +134,7 @@
                                             ItemsSource="{Binding Path=membrane.molpops}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="0" 
+                                             SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"
                                                     />
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -245,6 +246,7 @@
                                                 ItemsSource="{Binding Path=cytosol.molpops}" 
                                                 DisplayMemberPath="Name"     
                                                 SelectedIndex="0"
+                                                SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"
                                                 />
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">

@@ -93,7 +93,20 @@ namespace DaphneGui
 
                 string new_mol_name = mol.Name;
                 if (curr_mol_guid != molpop.molecule.entity_guid)
+                {
                     molpop.Name = new_mol_name;
+
+                    //Must update molecules_dict
+                    ConfigCell cell = DataContext as ConfigCell;
+                    if (cell != null)
+                    {
+                        if (cell.membrane.molecules_dict.ContainsKey(curr_mol_guid))
+                        {
+                            cell.membrane.molecules_dict.Remove(curr_mol_guid);
+                        }
+                        cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                    }
+                }
             }
 
         }
@@ -271,12 +284,7 @@ namespace DaphneGui
             if (lvCellAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
         }
-
-        private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            txtGeneName.IsEnabled = false;
-        }
-
+        
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
@@ -527,7 +535,20 @@ namespace DaphneGui
 
                 string new_mol_name = mol.Name;
                 if (curr_mol_guid != molpop.molecule.entity_guid)
+                {
                     molpop.Name = new_mol_name;
+
+                    //Must update molecules_dict
+                    ConfigCell cell = DataContext as ConfigCell;
+                    if (cell != null)
+                    {
+                        if (cell.cytosol.molecules_dict.ContainsKey(curr_mol_guid)) 
+                        {
+                            cell.cytosol.molecules_dict.Remove(curr_mol_guid);
+                        }
+                        cell.cytosol.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                    }
+                }
             }
 
             var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
@@ -1320,7 +1341,7 @@ namespace DaphneGui
             }
 
             updateCollections(cell);
-            updateSelectedMoleculesAndGenes(cell);
+            //updateSelectedMoleculesAndGenes(cell);
         }
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -1375,7 +1396,7 @@ namespace DaphneGui
             //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
             //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
 
-            updateSelectedMoleculesAndGenes(cell);
+            //updateSelectedMoleculesAndGenes(cell);
         }
 
         public void updateCollections(ConfigCell cell)
@@ -1423,29 +1444,69 @@ namespace DaphneGui
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
         }
 
-        public void updateSelectedMoleculesAndGenes(ConfigCell cell)
+        //This is probably not needed any more but leaving here in case a problem occurs.
+        //To be deleted for next checkin.
+        //public void updateSelectedMoleculesAndGenes(ConfigCell cell)
+        //{
+        //    return;
+        //    // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
+        //    // so do it manually here.
+
+        //    CellMembraneMolPopsListBox.SelectedIndex = 0;
+        //    if (cell.membrane.molpops.Count > 0)
+        //    {
+        //        memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
+        //    }
+
+        //    CellCytosolMolPopsListBox.SelectedIndex = 0;
+        //    if (cell.cytosol.molpops.Count > 0)
+        //    {
+        //        cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+        //    }
+
+        //    CellNucleusGenesListBox.SelectedItem = 0;
+        //    if (cell.genes.Count > 0)
+        //    {
+        //        CellNucleusGenesListBox.SelectedItem = cell.genes.First();
+        //    }
+        //}
+
+        /// <summary>
+        /// This fixes the problem of selecting the 1st item in the mol pop list.
+        /// This shouldn't be a problem in the first place, but the data binding seems to occur before the list is populated
+        /// so the first item was not getting selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
-            // so do it manually here.
-
-            CellMembraneMolPopsListBox.SelectedIndex = 0;
-            if (cell.membrane.molpops.Count > 0)
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
             {
-                memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
-            }
-
-            CellCytosolMolPopsListBox.SelectedIndex = 0;
-            if (cell.cytosol.molpops.Count > 0)
-            {
-                cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
-            }
-
-            CellNucleusGenesListBox.SelectedItem = 0;
-            if (cell.genes.Count > 0)
-            {
-                CellNucleusGenesListBox.SelectedItem = cell.genes.First();
+                lb.SelectedIndex = 0;
             }
         }
+
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+
+        private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            txtGeneName.IsEnabled = false;
+
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+
 
     }
 
