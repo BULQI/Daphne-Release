@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Daphne
 {
@@ -19,13 +19,13 @@ namespace Daphne
         /// <param name="gridStep">extent of each grid cell (uniform in all directions)</param>
         public Grid(Vector gridSize, double gridStep)
         {
-            if (gridSize.Length != 3)
+            if (gridSize.Count != 3)
             {
                 throw new Exception("Grid must be three-dimensional.");
             }
 
             this.gridStep = gridStep;
-            this.gridSize = gridSize.Clone();
+            this.gridSize = (DenseVector)gridSize.Clone();
             // volumes
             volume = gridSize[0] * gridSize[1] * gridSize[2];
             volumeVoxel = gridStep * gridStep * gridStep;
@@ -66,9 +66,9 @@ namespace Daphne
         /// <returns>tuple with indices; negative for out of bounds</returns>
         public int[] findGridIndex(Vector pos)
         {
-            double[] tmp = new double[pos.Length];
+            double[] tmp = new double[pos.Count];
 
-            for (int i = 0; i < pos.Length; i++)
+            for (int i = 0; i < pos.Count; i++)
             {
                 // tmp[0] goes along x, tmp[1] along y
                 tmp[i] = pos[i] / gridStep;

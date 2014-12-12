@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
@@ -351,7 +351,8 @@ namespace Daphne
             // same state
             daughter.setState(spatialState);
             // but offset the daughter randomly
-            double[] delta = radius * Rand.RandomDirection(daughter.spatialState.X.Length);
+            //double[] delta = radius * Rand.RandomDirection(daughter.spatialState.X.Length);
+            double[] delta = Rand.RandomDirection(daughter.spatialState.X.Length).Multiply(radius).ToArray();
 
             for (int i = 0; i < delta.Length; i++)
             {
@@ -613,8 +614,7 @@ namespace Daphne
             if (dist != 0.0)
             {
                 double force = Pair.Phi1 * (1.0 / dist - 1.0 / radius);
-
-                addForce(normal * force);
+                addForce(normal.Multiply(force).ToArray());
             }
         }
 
@@ -632,36 +632,36 @@ namespace Daphne
                 // left
                 if ((dist = SpatialState.X[0]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 1, 0, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 1, 0, 0 }), dist);
                 }
                 // right
                 else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0) - SpatialState.X[0]) < radius)
                 {
-                    applyBoundaryForce(new double[] { -1, 0, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { -1, 0, 0 }), dist);
                 }
 
                 // Y
                 // bottom
                 if ((dist = SpatialState.X[1]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, 1, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, 1, 0 }), dist);
                 }
                 // top
                 else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1) - SpatialState.X[1]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, -1, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, -1, 0 }), dist);
                 }
 
                 // Z
                 // far
                 if ((dist = SpatialState.X[2]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, 0, 1 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, 0, 1 }), dist);
                 }
                 // near
                 else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2) - SpatialState.X[2]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, 0, -1 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, 0, -1 }), dist);
                 }
             }
         }

@@ -918,6 +918,14 @@
                                                               
                                                               >
                             </ComboBox>
+
+
+                            <!-- starting state -->
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" >
+                                <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
+                                <local:ParamDistrControl DataContext="{Binding death_driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            
                             <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
                             <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
                                                             Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
@@ -1014,8 +1022,6 @@
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-                    <!--<local:DiffSchemeDataGrid local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding div_scheme}" 
-                           Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />-->
 
                     <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid"
                             Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />

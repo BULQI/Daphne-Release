@@ -83,8 +83,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\ManifoldRing.dll</HintPath>
     </Reference>
-    <Reference Include="MathNet.Iridium">
-      <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>

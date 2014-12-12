@@ -399,7 +399,7 @@
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                                     <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Actual Cell Locations</TextBlock>
                                                     <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                    MinHeight="50" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                                                                    MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" RowHeaderWidth="0"
                                                                     VerticalContentAlignment="Center" CanUserAddRows="False" BorderThickness="1" BorderBrush="Black"
                                                                     KeyDown="dgLocations_KeyDown"
