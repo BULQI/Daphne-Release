@@ -31,6 +31,10 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
             userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
             userStore.SerializeToFile();
+            //update renderSkin
+            RenderSkin sk = new RenderSkin("default_skin", userStore.entity_repository);
+            sk.FileName ="Config\\RenderSkin\\default_skin.json";
+            sk.SerializeToFile();
         }
 
         public static void LoadDefaultGlobalParameters(Level store)
