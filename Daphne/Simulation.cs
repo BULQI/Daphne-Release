@@ -119,6 +119,29 @@ namespace Daphne
             }
         }
 
+        public void LoadTransitionScheme(ConfigTransitionScheme cds, Cell cell, ITransitionScheme trans_scheme, CellState cellState)
+        {
+            ConfigTransitionScheme config_Scheme = cds;
+            ConfigTransitionDriver config_td = config_Scheme.Driver;
+
+            trans_scheme.Initialize(config_Scheme.activationRows.Count, config_Scheme.genes.Count);
+            LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, trans_scheme.Behavior);
+
+            // Epigenetic information
+            for (int ii = 0; ii < trans_scheme.nGenes; ii++)
+            {
+                trans_scheme.AddGene(ii, config_Scheme.genes[ii]);
+
+                for (int j = 0; j < trans_scheme.nStates; j++)
+                {
+                    trans_scheme.AddActivity(j, ii, config_Scheme.activationRows[j].activations[ii]);
+                    trans_scheme.AddState(j, config_Scheme.Driver.states[j]);
+                }
+            }
+
+            cell.SetGeneActivities(cell.Differentiator);
+        }
+
         private void addCellMolpops(CellState cellState, ConfigCompartment[] configComp, Compartment[] simComp)
         {
             for (int comp = 0; comp < 2; comp++)
@@ -192,7 +215,6 @@ namespace Daphne
             if (simCell.Cytosol.Populations.ContainsKey(cell.locomotor_mol_guid_ref) == true)
             {
                 MolecularPopulation driver = simCell.Cytosol.Populations[cell.locomotor_mol_guid_ref];
-                //nextValue = cell.TransductionConstant.GetValue();
                 simCell.Locomotor = new Locomotor(driver, cell.TransductionConstant.Sample());
                 simCell.IsChemotactic = true;
             }
@@ -229,73 +251,62 @@ namespace Daphne
                 {
                     simCell.DeathBehavior.CurrentState = cellState.cbState.deathDriveState;
                 }
+                else
+                {
+                    simCell.DeathBehavior.CurrentState = (int)cell.death_driver.CurrentState.Sample();
+                }
                 ConfigTransitionDriver config_td = cell.death_driver;
                 LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
             }
 
-            // Division before differentiation
+            // Division 
             if (cell.div_scheme != null)
             {
-                ConfigTransitionScheme config_divScheme = cell.div_scheme;
-                ConfigTransitionDriver config_td = config_divScheme.Driver;
+                LoadTransitionScheme(cell.diff_scheme, simCell, simCell.Differentiator, cellState);
 
-                simCell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
-                LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.Divider.Behavior);
-
-                // Epigenetic information
-                for (int ii = 0; ii < simCell.Divider.nGenes; ii++)
+                // Set the cell division scheme driver state
+                if (cellState.cbState.divisionDriverState != -1)
                 {
-                    simCell.Divider.AddGene(ii, config_divScheme.genes[ii]);
-
-                    for (int j = 0; j < simCell.Divider.nStates; j++)
-                    {
-                        simCell.Divider.AddActivity(j, ii, config_divScheme.activationRows[j].activations[ii]);
-                        simCell.Divider.AddState(j, config_divScheme.Driver.states[j]);
-                    }
+                    simCell.Divider.Behavior.CurrentState = cellState.cbState.divisionDriverState;
+                }
+                else
+                {
+                    simCell.Divider.Behavior.CurrentState = (int)cell.div_scheme.Driver.CurrentState.Sample();
                 }
 
-                // Set cell state and corresponding gene activity levels
-                simCell.DividerState = simCell.Divider.CurrentState;
-                simCell.SetGeneActivities(simCell.Divider);
+                // Set cell division scheme state
+                simCell.DividerState = simCell.Divider.CurrentState = simCell.Divider.Behavior.CurrentState;
             }
 
             // Differentiation
             if (cell.diff_scheme != null)
             {
-                ConfigTransitionScheme config_diffScheme = cell.diff_scheme;
-                ConfigTransitionDriver config_td = config_diffScheme.Driver;
+                LoadTransitionScheme(cell.diff_scheme, simCell, simCell.Differentiator, cellState);
 
-                simCell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
-                LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.Differentiator.Behavior);
-
-                // Epigenetic information
-                for (int ii = 0; ii < simCell.Differentiator.nGenes; ii++)
-                {
-                    simCell.Differentiator.AddGene(ii, config_diffScheme.genes[ii]);
-
-                    for (int j = 0; j < simCell.Differentiator.nStates; j++)
-                    {
-                        simCell.Differentiator.AddActivity(j, ii, config_diffScheme.activationRows[j].activations[ii]);
-                        simCell.Differentiator.AddState(j, config_diffScheme.Driver.states[j]);
-                    }
-                }
-                // Set cell state and corresponding gene activity levels
+                // Set the cell differentiation driver state
                 if (cellState.cbState.differentiationDriverState != -1)
                 {
-                    simCell.Differentiator.CurrentState = cellState.cbState.differentiationDriverState;
-                }
-                simCell.DifferentiationState = simCell.Differentiator.CurrentState;
-                //saving from saved states
-                if (cellState.cgState.geneDict.Count > 0)
-                {
-                    simCell.SetGeneActivities(cellState.cgState.geneDict);
+                    // from saved state
+                    simCell.Differentiator.Behavior.CurrentState = cellState.cbState.differentiationDriverState;
                 }
                 else
                 {
-                    simCell.SetGeneActivities(simCell.Differentiator);
+                    // from distribution
+                    simCell.Differentiator.Behavior.CurrentState = (int)cell.diff_scheme.Driver.CurrentState.Sample();
                 }
+
+                // Set cell differentiation state
+                simCell.DifferentiationState = simCell.Differentiator.CurrentState = simCell.Differentiator.Behavior.CurrentState;
             }
-            //generaiton
+
+            if (cellState.cgState.geneDict.Count > 0)
+            {
+                // saved state
+                // overrides division or differentiation scheme initial settings
+                simCell.SetGeneActivities(cellState.cgState.geneDict);
+            }
+
+            //generation
             simCell.generation = cellState.CellGeneration;
 
             // add the cell
@@ -968,21 +979,10 @@ namespace Daphne
                     cp.renderLabel = cp.Cell.entity_guid;
                 }
 
-                // Force all cell distributed parameters to reinitialize otherwise we won't get reproducible results.
-                if (cp.Cell.TransductionConstant.ParamDistr != null)
-                {
-                    cp.Cell.TransductionConstant.ParamDistr.isInitialized = false;
-                }
-                if (cp.Cell.Sigma.ParamDistr != null)
-                {
-                    cp.Cell.Sigma.ParamDistr.isInitialized = false;
-                }
-                if (cp.Cell.DragCoefficient.ParamDistr != null)
-                {
-                    cp.Cell.DragCoefficient.ParamDistr.isInitialized = false;
-                }
+                // Force all cell distributed parameters to reinitialize.
+                // Otherwise we won't get reproducible results for the same global seed.
+                cp.Cell.ResetDistributedParameters();
 
-                Console.WriteLine("Transduction values");
                 for (int i = 0; i < cp.number; i++)
                 {
                     // only report boundary reaction failures for the first cell of the population
@@ -1002,12 +1002,6 @@ namespace Daphne
                         // report if a reaction could not be inserted
                         boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
                     }
-
-                    if (dataBasket.Cells.Last().Value.Locomotor != null)
-                    {
-                        Console.WriteLine("{0}", dataBasket.Cells.Last().Value.Locomotor.TransductionConstant);
-                    }
-
                 }
             }
 
