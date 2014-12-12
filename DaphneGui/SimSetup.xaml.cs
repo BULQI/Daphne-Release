@@ -10,11 +10,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-
 using System.Globalization;
 
 using Daphne;
 using DaphneUserControlLib;
+using MathNet.Numerics.Random;
 
 namespace DaphneGui
 {
@@ -140,6 +140,11 @@ namespace DaphneGui
 
         }
 
+        /// <summary>
+        /// Replace the global random seed with a new value specified by the user.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void global_random_seed_LostFocus(object sender, RoutedEventArgs e)
         {
             if (MainWindow.SOP == null)
@@ -147,8 +152,32 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol == null)
                 return;
 
-            int newSeed = Convert.ToInt32(global_random_seed.Text);
-            MainWindow.SOP.Protocol.sim_params.globalRandomSeed = newSeed;
+            int oldSeed = MainWindow.SOP.Protocol.sim_params.globalRandomSeed;
+
+            try
+            {
+                int newSeed = Convert.ToInt32(global_random_seed.Text);
+                MainWindow.SOP.Protocol.sim_params.globalRandomSeed = newSeed;
+            }
+            catch
+            {
+                MainWindow.SOP.Protocol.sim_params.globalRandomSeed = oldSeed;
+            }
+        }
+
+        /// <summary>
+        /// Reset the global random seed with a new random value.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnNewRandomSeed_Click(object sender, RoutedEventArgs e)
+        {
+             if (MainWindow.SOP == null)
+                return;
+            if (MainWindow.SOP.Protocol == null)
+                return;
+            
+            MainWindow.SOP.Protocol.sim_params.globalRandomSeed = RandomSeed.Robust();
         }
     }
 }
