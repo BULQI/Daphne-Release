@@ -49,33 +49,16 @@
                             <StackPanel>
                                 <local:ReactionComplexControl x:Name="RCControl" ShowMolecules="Visible" ShowAddButton="Visible"
                                           DataContext="{Binding Path=Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                                <StackPanel Margin="8,-10" >
-                                    <Expander 
-                                    Padding="5" ExpandDirection="Down"
-                                    IsExpanded="False"
-                                    Header="New Reaction"                                                  
-                                    x:Name="AddNewReaction"
-                                    Margin="0,4,0,0" 
-                                    Canvas.ZIndex="1"
-                                    BorderThickness="1"
-                                    BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                                        
-                                    Width="480"
-                                    Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
-                                    HorizontalAlignment="Left">
-                                        <Grid>
-                                            <local:AddReactionControl Tag="vatRC" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
-                                        </Grid>
-                                    </Expander>
-                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Margin="8,16">
+                            <StackPanel>
                                 <Button x:Name="ButtonSaveRCToProtocol"  Click="ButtonSaveRCToProtocol_Click" >Save Reaction Complex to Subcellular Components Library...</Button>
                             </StackPanel>
-
                         </StackPanel>
+                        
+                        
                     </Expander>
+
+
                 </StackPanel>
             </ScrollViewer>
         </TabItem>

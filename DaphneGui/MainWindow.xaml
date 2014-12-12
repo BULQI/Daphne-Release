@@ -114,7 +114,7 @@
                     <!--><Separator />
                     <MenuItem Header="Load 2P text file into database..." Name="parse2Ptext" Click="parse2Ptext_Click" />-->
                     <Separator />
-                    <MenuItem Header="Load past experiment" Name="loadExp" Click="OpenExpSelectWindow" />
+                    <MenuItem Header="Load past experiment" Name="loadExp" IsEnabled="False" Click="OpenExpSelectWindow" />
                     <local:RecentFileList x:Name="recentFileList" />
                     <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
                 </MenuItem>

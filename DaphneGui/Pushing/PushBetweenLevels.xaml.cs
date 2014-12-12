@@ -82,12 +82,7 @@ namespace DaphneGui.Pushing
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
-        {            
-            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
-            var desktopWorkingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-            this.Left = desktopWorkingArea.Left + 20;
-            this.Top = desktopWorkingArea.Top + 20;
-
+        {
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
         }
@@ -124,7 +119,9 @@ namespace DaphneGui.Pushing
             {
                 case PushLevelEntityType.Molecule:
                     LeftList = LevelA.entity_repository.molecules;
+                    MainWindow.ToolWin.PushMoleculeFilter(LeftList, LevelA);
                     RightList = LevelB.entity_repository.molecules;
+                    MainWindow.ToolWin.PushMoleculeFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.Gene:
                     LeftList = LevelA.entity_repository.genes;
@@ -174,9 +171,6 @@ namespace DaphneGui.Pushing
             LeftContent.DataContext = LeftList;  
             
             GetEqualEntities();
-
-            LeftContent.DataContext = null;
-            LeftContent.DataContext = LeftList;
 
         }
 

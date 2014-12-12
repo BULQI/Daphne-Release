@@ -9,7 +9,6 @@
              xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
              mc:Ignorable="d" 
              Loaded="UserControl_Loaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="407" d:DesignWidth="575">
     <UserControl.Resources>
 

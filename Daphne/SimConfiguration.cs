@@ -255,7 +255,7 @@ namespace Daphne
                     return crt.entity_guid;
                 }
             }
-            return null;
+            return "";
         }
 
 
@@ -1335,7 +1335,6 @@ namespace Daphne
         public enum ScenarioType { UNASSIGNED, TISSUE_SCENARIO, VAT_REACTION_COMPLEX };
 
         public static int SafeCellPopulationID = 0;
-        public int experiment_id { get; set; }
         public string experiment_name { get; set; }
         public int experiment_reps { get; set; }
         public string experiment_guid { get; set; }
@@ -1364,7 +1363,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             experiment_guid = id.ToString();
-            experiment_id = 0;
             experiment_name = "Experiment1";
             experiment_reps = 1;
             experiment_description = "Whole sim config description";
@@ -1643,14 +1641,14 @@ namespace Daphne
         }
 
         // given a total reaction string, find the ConfigCell object
-        public bool findReactionByTotalString(string total, Protocol protocol)
+        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
         {
             //Get left and right side molecules of new reaction
             List<string> newReactants = getReacLeftSide(total);
             List<string> newProducts = getReacRightSide(total);
 
             //Loop through all existing reactions
-            foreach (ConfigReaction reac in protocol.entity_repository.reactions)
+            foreach (ConfigReaction reac in Reacs)
             {
                 //Get left and right side molecules of each reaction in er
                 List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
@@ -1664,6 +1662,17 @@ namespace Daphne
                     return true;
                 }
             }
+            return false;
+        }
+
+        // given a total reaction string, find the ConfigCell object
+        public bool findReactionByTotalString(string total, Protocol protocol)
+        {
+            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -3038,54 +3047,53 @@ namespace Daphne
             return true;
         }
 
-        public bool ValidateReaction(ConfigReaction cr, TissueScenario scenario)
+        /// <summary>
+        /// Check for a valid ECS reaction. 
+        /// All bulk molecules must be present in the ECS.
+        /// All boundary molecules must be present, as a whole group, in the membrane of at least one cell type.
+        /// There must be at least one bulk molecule.
+        /// </summary>
+        /// <param name="cr"></param>
+        /// <param name="scenario"></param>
+        /// <returns></returns>
+        public bool ValidateReaction(ConfigReaction cr, Protocol protocol)
         {
-            bool bOK = false;
+            bool bBulkOK = false;
+            bool bBoundOK = false;
 
-            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            ObservableCollection<string> boundMols = new ObservableCollection<string>();
+            boundMols = cr.GetBoundaryMolecules(protocol.entity_repository);
+            if (boundMols.Count == 0)
             {
-                if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
-                {
-                    bOK = true;
-                }
-                else
-                {
-                    bOK = false;
-                    break;
-                }
+                bBoundOK = true;
             }
-            if (bOK)
+            else
             {
-                foreach (string molguid in cr.products_molecule_guid_ref)
+                foreach (CellPopulation cellpop in ((TissueScenario)protocol.scenario).cellpopulations)
                 {
-                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    if (cellpop.Cell.membrane.HasMolecules(boundMols) == true)
                     {
-                        bOK = true;
-                    }
-                    else
-                    {
-                        bOK = false;
-                        break;
-                    }
-                }
-            }
-            if (bOK)
-            {
-                foreach (string molguid in cr.modifiers_molecule_guid_ref)
-                {
-                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
-                    {
-                        bOK = true;
-                    }
-                    else
-                    {
-                        bOK = false;
+                        bBoundOK = true;
                         break;
                     }
                 }
             }
 
-            return bOK;
+            ObservableCollection<string> bulkMols = new ObservableCollection<string>();
+            bulkMols = cr.GetBulkMolecules(protocol.entity_repository);
+            if (bulkMols.Count > 0)
+            {
+                if (comp.HasMolecules(bulkMols) == true)
+                {
+                    bBulkOK = true;
+                }
+            }
+            else
+            {
+                bBulkOK = false;
+            }
+
+            return (bBoundOK & bBulkOK);
         }
     }
 
@@ -5230,8 +5238,7 @@ namespace Daphne
             }
 
             return false;
-        }
-        
+        }    
 
         public bool IsBoundaryReaction(EntityRepository repos)
         {
@@ -5263,6 +5270,59 @@ namespace Daphne
         public ObservableCollection<string> modifiers_molecule_guid_ref;
 
         public string TotalReactionString { get; set; }
+
+        public ObservableCollection<string> GetBulkMolecules(EntityRepository repos)
+        {
+            ObservableCollection<string> bulkMols = new ObservableCollection<string>();
+
+            foreach (string molguid in reactants_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                    bulkMols.Add(molguid);
+            }
+            foreach (string molguid in products_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                    bulkMols.Add(molguid);
+            }
+            foreach (string molguid in modifiers_molecule_guid_ref)
+            {
+                if (!repos.genes_dict.ContainsKey(molguid))
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                        bulkMols.Add(molguid);
+                }
+            }
+
+            return bulkMols;
+        }
+
+        public ObservableCollection<string> GetBoundaryMolecules(EntityRepository repos)
+        {
+            ObservableCollection<string> boundaryMols = new ObservableCollection<string>();
+
+            foreach (string molguid in reactants_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    boundaryMols.Add(molguid);
+            }
+            foreach (string molguid in products_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    boundaryMols.Add(molguid);
+            }
+            foreach (string molguid in modifiers_molecule_guid_ref)
+            {
+                if (!repos.genes_dict.ContainsKey(molguid))
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        boundaryMols.Add(molguid);
+                }
+            }
+            return boundaryMols;
+        }
+
+
     }
 
     public class ConfigReactionTemplate : ConfigEntity, IEquatable<ConfigReactionTemplate>
@@ -5323,7 +5383,24 @@ namespace Daphne
 
     public class ConfigReactionComplex : ConfigEntity, IEquatable<ConfigReactionComplex>
     {
-        public string Name { get; set; }
+        private string rcName;
+        public string Name
+        {
+            get
+            {
+                return rcName;
+            }
+
+            set
+            {
+                if (rcName != value)
+                {
+                    rcName = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
+
         private ObservableCollection<ConfigReaction> _reactions;
         public ObservableCollection<ConfigReaction> reactions
         {
@@ -5473,9 +5550,7 @@ namespace Daphne
             if (identical == false)
             {
                 Guid id = Guid.NewGuid();
-
                 newrc.entity_guid = id.ToString();
-                newrc.Name = "NewRC";
             }
             return newrc;
         }
@@ -5535,9 +5610,61 @@ namespace Daphne
             return true;
         }
 
+        public void ValidateName(Protocol protocol)
+        {
+            bool found = false;
+            string tempRCName = Name;
+            foreach (ConfigReactionComplex crc in protocol.entity_repository.reaction_complexes)
+            {
+                if (crc.Name == tempRCName && crc.entity_guid != entity_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                Name = GenerateNewName(protocol, "_Copy");
+            }
+        }
+
         public override string GenerateNewName(Level level, string ending)
         {
-            throw new NotImplementedException();
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempRCName = OriginalName + suffix;
+            while (FindByName(level, TempRCName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempRCName = OriginalName + suffix;
+            }
+
+            return TempRCName;
+        }
+
+        public static bool FindByName(Level level, string name)
+        {
+            bool ret = false;
+            foreach (ConfigReactionComplex crc in level.entity_repository.reaction_complexes)
+            {
+                if (crc.Name == name)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
         }
 
         private bool HasMolecule(string guid)
@@ -5892,15 +6019,15 @@ namespace Daphne
 
             int nSuffix = 1;
             string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindCellByName(level, TempMolName) == true)
+            string TempCellName = OriginalName + suffix;
+            while (FindCellByName(level, TempCellName) == true)
             {
                 nSuffix++;
                 suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
+                TempCellName = OriginalName + suffix;
             }
 
-            return TempMolName;
+            return TempCellName;
         }
 
         public static bool FindCellByName(Protocol protocol, string cellName)

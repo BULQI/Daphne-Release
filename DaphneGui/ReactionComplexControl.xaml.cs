@@ -27,20 +27,6 @@ namespace DaphneGui
             Tag = ListBoxReactionComplexes.SelectedItem;
         }
 
-        private ConfigReactionComplex selRC;
-        public ConfigReactionComplex SelectedReactionComplex 
-        {
-            get
-            {
-                return selRC;
-            }
-            set
-            {
-                selRC = value;
-                OnPropertyChanged("SelectedReactionComplex");
-            }
-        }
-
         public ConfigReactionComplex GetSelectedReactionComplex()
         {
             if (ListBoxReactionComplexes.SelectedIndex < 0)
@@ -62,7 +48,7 @@ namespace DaphneGui
             if (crc == null)
                 return;
 
-            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
             arc.ShowDialog();
         }
 
@@ -84,16 +70,11 @@ namespace DaphneGui
                 return;
             }
 
-            //Need to add rc to the compartment plus the entity repository
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)ListBoxReactionComplexes.SelectedItem;
-            ConfigReactionComplex crcCopy = crcCurr.Clone(false);
-            crcCopy.Name = crcCopy.GenerateNewName(MainWindow.SOP.Protocol, "_Copy");            
-            crcCopy.ValidateName(MainWindow.SOP.Protocol);
-            MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcCopy);
+            ConfigReactionComplex crcNew = crcCurr.Clone(false);
 
             ConfigCompartment cc = this.DataContext as ConfigCompartment;
-            ConfigReactionComplex crcLocal = crcCopy.Clone(true);
-            cc.reaction_complexes.Add(crcLocal);
+            cc.reaction_complexes.Add(crcNew);
 
             ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }
@@ -103,9 +84,8 @@ namespace DaphneGui
             // This data context should be a compartment
             // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
             // Will AddReacComplex need to access the ER for available reactions? 
-            NewEditReacComplex dlg = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, MainWindow.SOP.Protocol.scenario.environment.comp);
-
-            if (dlg.ShowDialog() == true)
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex, MainWindow.SOP.Protocol.scenario.environment.comp);
+            if (arc.ShowDialog() == true)
                 ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }
 
@@ -188,18 +168,6 @@ namespace DaphneGui
         {
             ReactionComplexControl rcc = d as ReactionComplexControl;
             rcc.ShowAddButton = (Visibility)(e.NewValue);
-        }
-
-        private void ListBoxReactionComplexes_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb != null)
-            {
-                if (lb.SelectedIndex > -1)
-                {
-                    SelectedReactionComplex = (ConfigReactionComplex)lb.SelectedItem;
-                }
-            }
         }
     }
 }

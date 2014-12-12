@@ -78,24 +78,17 @@ namespace DaphneGui
 #endif
 )
             {
-                if (DataBasket.hdf5file.openRead() == false)
-                {
-                    return false;
-                }
+                DataBasket.hdf5file.openRead();
                 frameNames.Clear();
-                // find the frame names and with them the number of frames
-                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR/VCR_Frames", expID));
+                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID < 0 ? MainWindow.SOP.Protocol.experiment_id : expID));
 
                 if (frameNames.Count == 0)
                 {
                     return false;
                 }
 
-                // open the parent group for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
-
-                // open the group that holds the frames for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("VCR_Frames", expID));
+                // open the parent group that holds the frames for this experiment
+                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID < 0 ? MainWindow.SOP.Protocol.experiment_id : expID));
 
                 // build the list of frames
                 frames = new List<int>();
@@ -113,10 +106,9 @@ namespace DaphneGui
                 {
                     CurrentFrame = 0;
                 }
-                SetInactive();
-                return true;
             }
-            return false;
+            SetInactive();
+            return true;
         }
 
         /// <summary>
@@ -170,7 +162,8 @@ namespace DaphneGui
         {
             if (DataBasket.hdf5file != null)
             {
-                DataBasket.hdf5file.close(true);
+                DataBasket.hdf5file.closeGroup();
+                DataBasket.hdf5file.close();
             }
 #if USE_DATACACHE
             if (dataCache != null)

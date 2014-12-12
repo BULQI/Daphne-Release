@@ -612,12 +612,12 @@
                     </StackPanel>
 
                     <Expander ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Add a reaction"
-                                x:Name="AddReacExpander"
-                                Margin="0,0,0,0" 
-                                Canvas.ZIndex="1"
-                                >
+                                              IsExpanded="False"
+                                              Header="Add a reaction"
+                                              x:Name="AddReacExpander"
+                                              Margin="0,0,0,0" 
+                                              Canvas.ZIndex="1"
+                                              >
                         <StackPanel Orientation="Vertical" Margin="10,0">
                             <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
                             <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
@@ -674,16 +674,18 @@
                         </StackPanel>
                     </Expander>
 
-                    <Expander  ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Create New Reaction"                                                  
-                                x:Name="CreateNewReaction"
-                                Margin="0,0,0,0" 
-                                Canvas.ZIndex="1"
-                                >
+                    <Expander 
+                                    ExpandDirection="Down"
+                                    IsExpanded="False"
+                                    Header="Create New Reaction"                                                  
+                                    x:Name="CreateNewReaction"
+                                    Margin="0,0,0,0" 
+                                    Canvas.ZIndex="1"
+                                    
+                                    >
 
                         <Grid>
-                            <local:AddReactionControl Tag="ecs" Margin="0,6" />
+                            <local:AddReactionControl Margin="0,6"/>
                         </Grid>
                     </Expander>
 

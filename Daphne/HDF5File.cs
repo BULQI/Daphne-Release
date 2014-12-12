@@ -53,11 +53,23 @@ namespace Daphne
             {
                 if (trunc == false && File.Exists(filename) == true)
                 {
-                    fileId = H5F.open(filename, H5F.OpenMode.ACC_RDWR);
+                    try
+                    {
+                        fileId = H5F.open(filename, H5F.OpenMode.ACC_RDWR);
+                    }
+                    catch
+                    {
+                    }
                 }
                 else
                 {
-                    fileId = H5F.create(filename, H5F.CreateMode.ACC_TRUNC);
+                    try
+                    {
+                        fileId = H5F.create(filename, H5F.CreateMode.ACC_TRUNC);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
         }
@@ -65,24 +77,45 @@ namespace Daphne
         /// <summary>
         /// open it for reading
         /// </summary>
-        public void openRead()
+        public bool openRead()
         {
-            if (filename != "" && fileId == null)
+            if (filename != "" && File.Exists(filename) == true && fileId == null)
             {
-                fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+                try
+                {
+                    fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+                }
+                catch
+                {
+                }
+                return true;
             }
+            return false;
         }
 
         /// <summary>
         ///  close it
         /// </summary>
-        public void close()
+        public void close(bool closeGroups)
         {
             if (fileId != null)
             {
+                if (closeGroups == true)
+                {
+                    closeAllGroups();
+                }
                 H5F.close(fileId);
                 fileId = null;
             }
+        }
+
+        /// <summary>
+        /// indicates if file is currently open
+        /// </summary>
+        /// <returns>true for open</returns>
+        public bool isOpen()
+        {
+            return fileId != null;
         }
 
         /// <summary>
@@ -90,7 +123,7 @@ namespace Daphne
         /// </summary>
         public void clearFile()
         {
-            close();
+            close(true);
             openWrite(true);
         }
 
@@ -175,6 +208,17 @@ namespace Daphne
             {
                 H5G.close(groupStack.Last());
                 groupStack.RemoveAt(groupStack.Count - 1);
+            }
+        }
+
+        /// <summary>
+        /// close all open groups
+        /// </summary>
+        public void closeAllGroups()
+        {
+            while (groupStack.Count > 0)
+            {
+                closeGroup();
             }
         }
 
