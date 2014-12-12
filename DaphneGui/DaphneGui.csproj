@@ -256,9 +256,6 @@
       <DependentUpon>ToolWinVatRC.xaml</DependentUpon>
     </Compile>
     <Compile Include="VTKDataBasket.cs" />
-    <Compile Include="Workbench\AddReacComplex.xaml.cs">
-      <DependentUpon>AddReacComplex.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Workbench\AddReactionControl.xaml.cs">
       <DependentUpon>AddReactionControl.xaml</DependentUpon>
     </Compile>
@@ -277,6 +274,9 @@
     </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
+    <Compile Include="Workbench\NewEditReacComplex.xaml.cs">
+      <DependentUpon>NewEditReacComplex.xaml</DependentUpon>
+    </Compile>
     <Page Include="About.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -373,10 +373,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Workbench\AddReacComplex.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Workbench\AddReactionControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -404,6 +400,10 @@
     <Page Include="SimConfigToolWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Workbench\NewEditReacComplex.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

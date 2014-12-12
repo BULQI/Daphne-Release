@@ -132,7 +132,7 @@ namespace DaphneGui
         /// </summary>
         public static byte CONTROL_NONE = 0,
                            CONTROL_FORCE_RESET = (1 << 0),
-                           CONTROL_DB_LOAD = (1 << 1),
+                           CONTROL_PAST_LOAD = (1 << 1),
                            CONTROL_ZERO_FORCE = (1 << 2),
                            CONTROL_NEW_RUN = (1 << 3),
                            CONTROL_UPDATE_GUI = (1 << 4),
@@ -310,14 +310,14 @@ namespace DaphneGui
             //}
 
             //////This code re-generates the scenarios - DO NOT DELETE
-            try
-            {
-                CreateAndSerializeDaphneProtocols();
-            }
-            catch (Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
-            }
+            //try
+            //{
+            //    CreateAndSerializeDaphneProtocols();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -1118,7 +1118,7 @@ namespace DaphneGui
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
         /// </summary>
         /// <param name="newFile">true to indicate we are loading a new file</param>
-        /// <param name="xmlConfigString">scenario as a string</param>
+        /// <param name="protocol">protocol object</param>
         private void lockAndResetSim(bool newFile, Protocol protocol)
         {
             // prevent when a fit is in progress
@@ -1136,7 +1136,7 @@ namespace DaphneGui
                 }
 
                 // after doing a full reset, don't require one immediately unless we did a db load
-                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
+                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_PAST_LOAD));
 
                 sim.reset();
                 // reset cell tracks and free memory
@@ -1153,24 +1153,93 @@ namespace DaphneGui
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            #region MyRegion
-            //esw = new ExpSelectWindow(-1);
-            //esw.Owner = this;
-            //esw.ShowDialog();
-            //if (esw.expselected)
-            //{
-            //    MainWindow.SetControlFlag(MainWindow.CONTROL_DB_LOAD, true);
-            //    lockAndResetSim(true, esw.SelectedXML);
-            //    if (loadSuccess == false)
-            //    {
-            //        return;
-            //    }
-            //    MainWindow.SetControlFlag(MainWindow.CONTROL_DB_LOAD, false);
-            //    sim.runStatSummary();
-            //    GUIUpdate(esw.SelectedExperiment, true);
-            //    displayTitle("DB experiment id " + esw.SelectedExperiment);
-            //} 
-            #endregion
+            // id the file is open we'll have to close it; ask the user if that's what they want
+            if (DataBasket.hdf5file.isOpen() == true)
+            {
+                // we may want this verbosity of warnings but perhaps it's a burden to click through so many dialogs; maybe get requirements from Tom and Grace
+                //if (MessageBox.Show("The HDF5 file is currently open. Do you want to proceed and close it?", "HDF5 open", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                //{
+                //    return;
+                //}
+                // close the file and all open groups
+                DataBasket.hdf5file.close(true);
+            }
+
+            if (DataBasket.hdf5file.openRead() == false)
+            {
+                MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
+                return;
+            }
+
+            // find the experiment names and with them the number of experiments
+            List<string> expNames = DataBasket.hdf5file.subGroupNames("/Experiments_VCR");
+            string selectedExp = "";
+
+            if (expNames.Count > 0)
+            {
+                // populate the dialog with expNames
+                // the dialog must allow the user to choose an experiment and press Ok (loads it) or cancel (exits)
+                // the dialog must return or otherwise somehow provide the chosen experiment
+
+                // for the purpose of this example I'll assume they pick the first experiment if it exists
+                // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
+                if (expNames.Count > 0)
+                {
+                    // the dialog must provide this
+                    selectedExp = expNames[0];
+                }
+
+                // now load it if there was a valid selection
+                if (selectedExp != "")
+                {
+                    string protocolString = null;
+
+                    DataBasket.currentExperimentID = DataBasket.extractExperimentId(selectedExp);
+                    // open the experiment parent group
+                    DataBasket.hdf5file.openGroup("/Experiments_VCR/" + selectedExp);
+                    // read the protocol string
+                    DataBasket.hdf5file.readString("Protocol", ref protocolString);
+                    // close the file and all groups
+                    DataBasket.hdf5file.close(true);
+
+                    // do the loading
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                    lockAndResetSim(true, ReadJson(protocolString));
+                    if (loadSuccess == false)
+                    {
+                        return;
+                    }
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+                    // this function does not exist currently, do we need this call?
+                    //sim.runStatSummary();
+                    GUIUpdate(DataBasket.currentExperimentID, true);
+                    displayTitle("Loaded past run " + selectedExp);
+                    return;
+                }
+            }
+
+            // if we get here the file is still open, close the file and all groups
+            DataBasket.hdf5file.close(true);
+
+// leaving this for legacy, remove when done
+#if OLD_LOADING_CODE
+            esw = new ExpSelectWindow(-1);
+            esw.Owner = this;
+            esw.ShowDialog();
+            if (esw.expselected)
+            {
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                lockAndResetSim(true, esw.SelectedXML);
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+                sim.runStatSummary();
+                GUIUpdate(esw.SelectedExperiment, true);
+                displayTitle("DB experiment id " + esw.SelectedExperiment);
+            } 
+#endif
         }
 
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
@@ -2227,6 +2296,14 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// utility to close output files, reporter, hdf5
+        /// </summary>
+        private void closeOutputFiles()
+        {
+            sim.Reporter.CloseReporter();
+            DataBasket.hdf5file.close(true);
+        }
 
         private void run()
         {
@@ -2292,12 +2369,8 @@ namespace DaphneGui
                                     // close the reporter
                                     if (Properties.Settings.Default.skipDataWrites == false)
                                     {
-                                        sim.Reporter.CloseReporter();
-                                        // this experiment sub-group
-                                        DataBasket.hdf5file.closeGroup();
-                                        // experiments group
-                                        DataBasket.hdf5file.closeGroup();
-                                        DataBasket.hdf5file.close();
+                                        // reporter and hdf5 close
+                                        closeOutputFiles();
                                     }
                                     // for profiling: close the application after a completed experiment
                                     if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
@@ -2316,12 +2389,8 @@ namespace DaphneGui
                     {
                         if (Properties.Settings.Default.skipDataWrites == false)
                         {
-                            sim.Reporter.CloseReporter();
-                            // this experiment sub-group
-                            DataBasket.hdf5file.closeGroup();
-                            // experiments group
-                            DataBasket.hdf5file.closeGroup();
-                            DataBasket.hdf5file.close();
+                            // reporter and hdf5 close
+                            closeOutputFiles();
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
@@ -2664,6 +2733,10 @@ namespace DaphneGui
 
                         // group for this experiment
                         DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", DataBasket.currentExperimentID));
+                        // the protocol as string; needed to reload arbitrary past experiments
+                        DataBasket.hdf5file.writeString("Protocol", sop.Protocol.SerializeToString());
+                        // frames group
+                        DataBasket.hdf5file.createGroup("VCR_Frames");
                     }
 
                     runButton.Content = "Pause";
