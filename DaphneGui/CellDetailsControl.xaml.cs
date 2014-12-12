@@ -834,8 +834,8 @@ namespace DaphneGui
                 double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
                 double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
                 ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                config_td.CurrentState = 0;
-                config_td.StateName = config_td.states[config_td.CurrentState];
+                config_td.CurrentState = new DistributedParameter(0);
+                config_td.StateName = config_td.states[(int)config_td.CurrentState.Sample()];
                 cell.death_driver = config_td;
             }
         }
