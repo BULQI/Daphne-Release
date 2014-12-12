@@ -10,6 +10,9 @@
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"  
         MinHeight="120"
+        x:Name="PushWindow"
+        Margin="10,10"
+        
         >
 
     <Window.Resources>
@@ -32,7 +35,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     
-                    <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                    <DataGrid x:Name="dgMols" AutoGenerateColumns="False" CanUserAddRows="False"
                               ItemsSource="{Binding}" 
                               LoadingRow="grid_LoadingRow"
                               >
@@ -153,7 +156,7 @@
         <DataTemplate x:Name="templReactions" x:Key="pushLevelReactionTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                    <DataGrid x:Name="dgReac" AutoGenerateColumns="False" CanUserAddRows="False"
                                 ItemsSource="{Binding}" 
                                LoadingRow="grid_LoadingRow">
                         
@@ -346,9 +349,9 @@
             />
         
     </Window.Resources>
-    
-    
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
         <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -370,11 +373,12 @@
                 </DataTemplate>
             </Grid.Resources>
 
-            <GroupBox x:Name="LeftGroup" Grid.Row="0" Grid.Column="0">
+            <!--Left Side-->
+            <GroupBox x:Name="LeftGroup" Grid.Row="0" Grid.Column="0" Margin="0,0,0,20"  >
                 <GroupBox.Header>
                     <TextBlock Text="From" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
-                <StackPanel>
+                <StackPanel Margin="0,0,0,0">
                     <ComboBox x:Name="LevelAComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
                           ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
@@ -389,6 +393,7 @@
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
+            <!--Button showing big right arrow-->
             <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel" VerticalAlignment="Center">
                 <Button x:Name="PushButtonArrow" Height="48" Width="48" 
                             HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center"
@@ -413,6 +418,7 @@
                 </Button>                    
             </StackPanel>
            
+            <!--Right Side-->
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
                 <GroupBox.Header>
                     <TextBlock Text="To" FontWeight="Bold" FontSize="16"/>
