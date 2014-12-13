@@ -5985,9 +5985,6 @@ namespace Daphne
             }
         }
 
-        // ConfigTransitionDriver contains ConfigTransitionDriverElement
-        // ConfigTransitionDriverElement contains information about 
-        //      signaling molecule that drives cell death and alphas and betas
         private ConfigTransitionDriver _death_driver;
         public ConfigTransitionDriver death_driver
         {
@@ -6149,13 +6146,13 @@ namespace Daphne
             if (this.CellRadius != cc.CellRadius)
                 return false;
 
-            if (this.DragCoefficient != cc.DragCoefficient)
+            if (this.DragCoefficient.Equals(cc.DragCoefficient) == false)
                 return false;
 
-            if (this.Sigma != cc.Sigma)
+            if (this.Sigma.Equals(cc.Sigma) == false)
                 return false;
 
-            if (this.TransductionConstant != cc.TransductionConstant)
+            if (this.TransductionConstant.Equals(cc.TransductionConstant) == false)
                 return false;
 
             if (this.locomotor_mol_guid_ref != cc.locomotor_mol_guid_ref)
@@ -9112,55 +9109,6 @@ namespace Daphne
         #endregion
     }
 
-
-    /*
-    [ValueConversion(typeof(RenderMethod), typeof(bool))]
-    public class CellRenderMethodConverter : IValueConverter
-    {
-        #region IValueConverter Members
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            if (Enum.IsDefined(value.GetType(), value) == false)
-                return DependencyProperty.UnsetValue;
-
-            object parameterValue = Enum.Parse(value.GetType(), parameterString);
-
-            bool ret = parameterValue.Equals(value);
-            return ret;
-
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            bool chk = (bool)value;
-
-            if (chk == false)
-            {
-                //types start with MP_ is for molpops in ECS
-                if (parameterString.StartsWith("MP_"))
-                {
-                    return RenderMethod.MP_TYPE;
-                }
-                else
-                {
-                    return RenderMethod.CELL_TYPE;
-                }
-            }
-            return Enum.Parse(targetType, parameterString);
-        }
-        #endregion
-    }
-
-    */
-
     public class RenderMethodItemValidConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -9316,7 +9264,7 @@ namespace Daphne
     /// If there is a distribution on the parameter, then ConstValue doesn't have any relevance to the value of the parameter.
     /// In either case, the parameter value should be obtained using the Sample method.
     /// </summary>
-    public class DistributedParameter : EntityModelBase
+    public class DistributedParameter : EntityModelBase, IEquatable<DistributedParameter>
     {
         private ParameterDistribution paramDistr;
         public ParameterDistribution ParamDistr 
@@ -9395,6 +9343,29 @@ namespace Daphne
             {
                 ParamDistr.isInitialized = false;
             }
+        }
+
+        public bool Equals(DistributedParameter dp)
+        {
+            if (this.constValue != dp.ConstValue) return false;
+            if (this.distributionType != dp.distributionType) return false;
+            if (this.paramDistr != null) 
+            {
+                if (dp.paramDistr != null)
+                {
+                    if (paramDistr.Equals(dp.paramDistr) == false) return false;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (this.paramDistr == null && dp.paramDistr != null)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 
@@ -9485,7 +9456,7 @@ namespace Daphne
     /// <summary>
     /// Abstract class for probability distributions on parameters.
     /// </summary>
-    public abstract class ParameterDistribution : EntityModelBase
+    public abstract class ParameterDistribution : EntityModelBase, IEquatable<ParameterDistribution>
     {
         public ParameterDistributionType DistributionType { get; set; }
         [JsonIgnore]
@@ -9498,6 +9469,7 @@ namespace Daphne
         }
         public abstract void Initialize();
         public abstract double Sample();
+        public abstract bool Equals(ParameterDistribution pd); 
     }
 
     /// <summary>
@@ -9537,6 +9509,16 @@ namespace Daphne
 
             return UniformDist.Sample();
         }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            UniformParameterDistribution d = pd as UniformParameterDistribution;
+
+            if (this.MinValue != d.MinValue) return false;
+            if (this.MaxValue != d.MaxValue) return false;
+
+            return true;
+        }
     }
 
     /// <summary>
@@ -9573,6 +9555,15 @@ namespace Daphne
             }
 
             return (double)PoissonDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            PoissonParameterDistribution d = pd as PoissonParameterDistribution;
+
+            if (this.Mean != d.Mean) return false;
+
+            return true;
         }
     }
 
@@ -9616,13 +9607,23 @@ namespace Daphne
 
             return GammaDist.Sample();
         }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            GammaParameterDistribution d = pd as GammaParameterDistribution;
+
+            if (this.Shape != d.Shape) return false;
+            if (this.Rate != d.Rate) return false;
+
+            return true;
+        }
     }
 
     /// <summary>
     /// Class for categorical item for categorical distribution.
     /// Contains the parameter value (CategoryValue) and it's probability (Prob)
     /// </summary>
-    public class CategoricalDistrItem : EntityModelBase
+    public class CategoricalDistrItem : EntityModelBase, IEquatable<CategoricalDistrItem>
     {
         private double categoryValue;
         public double CategoryValue
@@ -9658,6 +9659,14 @@ namespace Daphne
         {
             CategoryValue = _value;
             Prob = _prob;
+        }
+
+        public bool Equals(CategoricalDistrItem cdi)
+        {
+            if (prob != cdi.prob) return false;
+            if (categoryValue != cdi.categoryValue) return false;
+
+            return true;
         }
     }
 
@@ -9739,6 +9748,21 @@ namespace Daphne
             int i = (int)CategoricalDist.Sample();
 
             return probMass[i].CategoryValue;
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            CategoricalParameterDistribution d = pd as CategoricalParameterDistribution;
+
+            var c1 = this.probMass.OrderByDescending(x => x.CategoryValue);
+            var c2 = d.probMass.OrderByDescending(x => x.CategoryValue); 
+
+            for (int i = 0; i < c1.Count(); i++)
+            {
+                if (c1.ElementAt(i).Equals(c2.ElementAt(i)) == false) return false;
+            }
+
+            return true;
         }
     }
 
