@@ -395,7 +395,6 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.entity_repository.reactions.Add(cr);
             }
 
-            //Need to update the mol pops for vatRC
             if (reacEnvironment == "vatRC")
             {
                 VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
@@ -404,6 +403,7 @@ namespace DaphneGui
                 s.InitializeAllMols();
                 s.InitializeAllReacs();
             }
+
 
             txtReac.Text = "";
             reacmolguids.Clear();
@@ -717,6 +717,12 @@ namespace DaphneGui
                         coll.Add(cc);
                     }
                     
+                    //if (protocol != null)
+                    //{
+                    //    ARCReactions = protocol.entity_repository.reactions ?? null;
+                    //    cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+                    //    coll.Add(cc);
+                    //}
                     break;
 
                 case "component_reacs":
