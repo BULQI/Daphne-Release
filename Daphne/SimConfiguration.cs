@@ -9042,55 +9042,6 @@ namespace Daphne
         #endregion
     }
 
-
-    /*
-    [ValueConversion(typeof(RenderMethod), typeof(bool))]
-    public class CellRenderMethodConverter : IValueConverter
-    {
-        #region IValueConverter Members
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            if (Enum.IsDefined(value.GetType(), value) == false)
-                return DependencyProperty.UnsetValue;
-
-            object parameterValue = Enum.Parse(value.GetType(), parameterString);
-
-            bool ret = parameterValue.Equals(value);
-            return ret;
-
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            bool chk = (bool)value;
-
-            if (chk == false)
-            {
-                //types start with MP_ is for molpops in ECS
-                if (parameterString.StartsWith("MP_"))
-                {
-                    return RenderMethod.MP_TYPE;
-                }
-                else
-                {
-                    return RenderMethod.CELL_TYPE;
-                }
-            }
-            return Enum.Parse(targetType, parameterString);
-        }
-        #endregion
-    }
-
-    */
-
     public class RenderMethodItemValidConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -9736,11 +9687,8 @@ namespace Daphne
         {
             CategoricalParameterDistribution d = pd as CategoricalParameterDistribution;
 
-            var c1 = this.probMass.OrderByDescending(x => x.CategoryValue)
-                  .Select(x => x);
-
-            var c2 = d.probMass.OrderByDescending(x => x.CategoryValue)
-                  .Select(x => x);
+            var c1 = this.probMass.OrderByDescending(x => x.CategoryValue);
+            var c2 = d.probMass.OrderByDescending(x => x.CategoryValue); 
 
             for (int i = 0; i < c1.Count(); i++)
             {
