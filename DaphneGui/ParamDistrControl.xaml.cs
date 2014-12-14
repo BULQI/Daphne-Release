@@ -49,10 +49,35 @@ namespace DaphneGui
                 return;
             }
 
+            ParameterDistribution old_pd = distr_parameter.ParamDistr;
+
             switch (selected_distr_type)
             {
                 case ParameterDistributionType.CONSTANT:
-                    distr_parameter = new DistributedParameter(0.0);
+                    // assign the mean of the previous distribution
+                    switch (distr_parameter.DistributionType)
+                    {
+                        case ParameterDistributionType.GAMMA:
+                            distr_parameter = new DistributedParameter(((GammaParameterDistribution)old_pd).Shape);
+                            break;
+
+                        case ParameterDistributionType.POISSON:
+                            distr_parameter = new DistributedParameter(((PoissonParameterDistribution)old_pd).Mean);
+                            break;
+
+                        case ParameterDistributionType.UNIFORM:
+                            UniformParameterDistribution upd = old_pd as UniformParameterDistribution;
+                            distr_parameter = new DistributedParameter((upd.MaxValue - upd.MinValue)/2.0);
+                            break;
+
+                        case ParameterDistributionType.CATEGORICAL:
+                            distr_parameter = new DistributedParameter(((CategoricalParameterDistribution)old_pd).MeanCategoryValue());
+                            break;
+
+                        default:
+                            distr_parameter = new DistributedParameter();
+                            break;
+                    }
                     break;
 
                 case ParameterDistributionType.CATEGORICAL:
@@ -95,8 +120,16 @@ namespace DaphneGui
 
                 case ParameterDistributionType.UNIFORM:
                     UniformParameterDistribution new_uniform_distr = new UniformParameterDistribution();
-                    new_uniform_distr.MinValue = 0.0;
-                    new_uniform_distr.MaxValue = 1.0;
+                    if (distr_parameter.ConstValue != 0.0)
+                    {
+                        new_uniform_distr.MinValue = distr_parameter.ConstValue;
+                        new_uniform_distr.MaxValue = distr_parameter.ConstValue + 1.0;
+                    }
+                    else
+                    {
+                        new_uniform_distr.MinValue = 0.0;
+                        new_uniform_distr.MaxValue = 1.0;
+                    }
                     distr_parameter.ParamDistr = new_uniform_distr;
                     distr_parameter.DistributionType = ParameterDistributionType.UNIFORM;
                     break;
@@ -105,6 +138,8 @@ namespace DaphneGui
                     break;
 
             }
+
+            detailsStackPanel.DataContext = distr_parameter;
         }
 
         private void dgProbMass_KeyDown(object sender, KeyEventArgs e)
@@ -173,7 +208,7 @@ namespace DaphneGui
                 }
             }
 
-            //Refresh(distr.ProbMass);
+            //distr.Normalize();
         }
 
         private void menuProbMassDelete_Click(object sender, RoutedEventArgs e)

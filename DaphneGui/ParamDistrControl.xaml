@@ -203,7 +203,7 @@
                 </ComboBox>
             </StackPanel>
             
-            <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
+            <StackPanel x:Name="detailsStackPanel"   Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
                 <ContentControl x:Name="ParamDistrDetails"
                             Content="{Binding}"
                             Style="{StaticResource selectableContentTemplateStyle}"

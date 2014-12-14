@@ -139,7 +139,7 @@ namespace Daphne
                 }
             }
 
-            cell.SetGeneActivities(cell.Differentiator);
+            cell.SetGeneActivities(trans_scheme);
         }
 
         private void addCellMolpops(CellState cellState, ConfigCompartment[] configComp, Compartment[] simComp)
@@ -212,6 +212,9 @@ namespace Daphne
             AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs, result);
             AddCellTranscriptionReactions(simCell, protocol.entity_repository, transcription_reacs);
 
+            double nextValue;
+            int nextIntValue;
+
             if (simCell.Cytosol.Populations.ContainsKey(cell.locomotor_mol_guid_ref) == true)
             {
                 MolecularPopulation driver = simCell.Cytosol.Populations[cell.locomotor_mol_guid_ref];
@@ -223,7 +226,7 @@ namespace Daphne
                 simCell.IsChemotactic = false;
             }
             
-            double nextValue = cell.Sigma.Sample();
+            nextValue = cell.Sigma.Sample();
             if (nextValue > 0)
             {
                 simCell.IsStochastic = true;
@@ -253,7 +256,11 @@ namespace Daphne
                 }
                 else
                 {
-                    simCell.DeathBehavior.CurrentState = (int)cell.death_driver.CurrentState.Sample();
+                    nextIntValue = (int)cell.death_driver.CurrentState.Sample();
+                    if (nextIntValue >= 0 && nextIntValue <= cell.death_driver.states.Count())
+                    {
+                        simCell.DeathBehavior.CurrentState = nextIntValue;
+                    }
                 }
                 ConfigTransitionDriver config_td = cell.death_driver;
                 LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
@@ -262,7 +269,7 @@ namespace Daphne
             // Division 
             if (cell.div_scheme != null)
             {
-                LoadTransitionScheme(cell.diff_scheme, simCell, simCell.Differentiator, cellState);
+                LoadTransitionScheme(cell.div_scheme, simCell, simCell.Divider, cellState);
 
                 // Set the cell division scheme driver state
                 if (cellState.cbState.divisionDriverState != -1)
@@ -271,7 +278,12 @@ namespace Daphne
                 }
                 else
                 {
-                    simCell.Divider.Behavior.CurrentState = (int)cell.div_scheme.Driver.CurrentState.Sample();
+                    // from distribution
+                    nextIntValue = (int)cell.div_scheme.Driver.CurrentState.Sample();
+                    if (nextIntValue >= 0 && nextIntValue <= cell.div_scheme.Driver.states.Count())
+                    {
+                        simCell.Divider.Behavior.CurrentState = nextIntValue;
+                    }
                 }
 
                 // Set cell division scheme state
@@ -292,7 +304,11 @@ namespace Daphne
                 else
                 {
                     // from distribution
-                    simCell.Differentiator.Behavior.CurrentState = (int)cell.diff_scheme.Driver.CurrentState.Sample();
+                    nextIntValue = (int)cell.diff_scheme.Driver.CurrentState.Sample();
+                    if (nextIntValue >= 0 && nextIntValue <= cell.diff_scheme.Driver.states.Count())
+                    {
+                        simCell.Differentiator.Behavior.CurrentState = nextIntValue;
+                    }
                 }
 
                 // Set cell differentiation state
