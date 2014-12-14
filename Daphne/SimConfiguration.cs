@@ -9458,13 +9458,14 @@ namespace Daphne
     /// </summary>
     public abstract class ParameterDistribution : EntityModelBase, IEquatable<ParameterDistribution>
     {
-        public ParameterDistributionType DistributionType { get; set; }
+        //public ParameterDistributionType DistributionType { get; set; }
         [JsonIgnore]
         public bool isInitialized;
 
-        public ParameterDistribution(ParameterDistributionType _distributionType)
+        public ParameterDistribution()
+        //public ParameterDistribution(ParameterDistributionType _distributionType)
         {
-            DistributionType = _distributionType;
+            //DistributionType = _distributionType;
             isInitialized = false;
         }
         public abstract void Initialize();
@@ -9482,8 +9483,10 @@ namespace Daphne
         [JsonIgnore]
         private ContinuousUniform UniformDist;
 
+        //public UniformParameterDistribution()
+        //    : base(ParameterDistributionType.UNIFORM)
         public UniformParameterDistribution()
-            : base(ParameterDistributionType.UNIFORM)
+            : base()
         {
         }
 
@@ -9531,7 +9534,7 @@ namespace Daphne
         private Poisson PoissonDist;
 
         public PoissonParameterDistribution()
-            : base(ParameterDistributionType.POISSON)
+            : base()
         {
         }
 
@@ -9578,7 +9581,7 @@ namespace Daphne
         private Gamma GammaDist;
 
         public GammaParameterDistribution()
-            : base(ParameterDistributionType.GAMMA)
+            : base()
         {
         }
 
@@ -9694,7 +9697,7 @@ namespace Daphne
         public Categorical CategoricalDist;
 
         public CategoricalParameterDistribution()
-            : base(ParameterDistributionType.CATEGORICAL)
+            : base()
         {
             probMass = new ObservableCollection<CategoricalDistrItem>();
         }
@@ -9729,10 +9732,13 @@ namespace Daphne
         {
             double sum = 0;
             sum = ProbArray().Sum();
-            
-            for (int i = 0; i < ProbMass.Count; i++)
+
+            if (sum > 0)
             {
-                ProbMass[i].Prob /= sum;
+                for (int i = 0; i < ProbMass.Count; i++)
+                {
+                    ProbMass[i].Prob /= sum;
+                }
             }
 
             OnPropertyChanged("ProbMass");
@@ -9763,6 +9769,22 @@ namespace Daphne
             }
 
             return true;
+        }
+
+        public double MeanCategoryValue()
+        {
+            double mean = 0;
+
+            if (probMass.Count() > 0)
+            {
+                foreach (CategoricalDistrItem cdi in probMass)
+                {
+                    mean += cdi.CategoryValue;
+                }
+                mean /= probMass.Count();
+            }
+
+            return mean;
         }
     }
 

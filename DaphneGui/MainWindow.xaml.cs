@@ -298,9 +298,10 @@ namespace DaphneGui
 
             //DO NOT DELETE THIS
             //This code creates the DaphneStore and UserStore.
-            //This code also creates the predefined scenarios.
-            //Only run this code during development, since running it will invalidate any existing user scenarios.
+            //Only run this code during development.
             //Once development is completed editing of the DaphneStore and UserStore should be done through application (GUI).
+            //Running this after development will make all the entities in the Daphne and User stores appear
+            // to be different than the entities at the Protocol and Entity levels. 
             if (false)
             {
                 try
@@ -312,6 +313,12 @@ namespace DaphneGui
                     showExceptionBox(exceptionMessage(e));
                 }
 
+            }
+            //DO NOT DELETE THIS
+            //This code creates the predefined scenarios.
+            //Running this using the existing stores will not break user scenarios.
+            if (false)
+            {
                 //This code re-generates the scenarios - DO NOT DELETE
                 try
                 {
