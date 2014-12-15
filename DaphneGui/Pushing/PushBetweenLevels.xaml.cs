@@ -193,9 +193,6 @@ namespace DaphneGui.Pushing
             
             LeftContent.DataContext = null;
             LeftContent.DataContext = LeftList;
-
-            
-
         }
 
         /// <summary>
@@ -663,8 +660,9 @@ namespace DaphneGui.Pushing
                         }
                     }
                 }
+                ResetGrids();
             }
-            //ResetGrids();
+            
         }
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
