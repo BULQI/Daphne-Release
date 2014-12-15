@@ -4242,7 +4242,7 @@ namespace Daphne
         {
             if (this.entity_guid != ent.entity_guid)
                 return false;
-            if (this.CurrentState != ent.CurrentState)
+            if (this.CurrentState.Equals(ent.CurrentState) == false)
                 return false;
             if (this.StateName != ent.StateName)
                 return false;
