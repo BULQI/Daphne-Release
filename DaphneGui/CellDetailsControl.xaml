@@ -134,8 +134,8 @@
                                             ItemsSource="{Binding Path=membrane.molpops}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="0" 
-                                             SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"
-                                                    />
+                                            DataContextChanged="CellMembraneMolPopsListBox_DataContextChanged"
+                                            />
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
@@ -246,7 +246,7 @@
                                                 ItemsSource="{Binding Path=cytosol.molpops}" 
                                                 DisplayMemberPath="Name"     
                                                 SelectedIndex="0"
-                                                SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"
+                                                DataContextChanged="CellCytosolMolPopsListBox_DataContextChanged"
                                                 />
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -365,7 +365,8 @@
                                                 ItemsSource="{Binding Path=genes}" 
                                                 DisplayMemberPath="Name"                                                    
                                                 SelectedIndex="0"
-                                                SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
+                                                SelectionChanged="CellNucleusGenesListBox_SelectionChanged"
+                                                />
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click"/>
