@@ -1,8 +1,0 @@
-﻿<Window x:Class="DaphneOptim.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <Button Content="Run" Height="23" HorizontalAlignment="Left" Margin="192,141,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="Run_Click" />
-    </Grid>
-</Window>
