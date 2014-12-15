@@ -40,7 +40,7 @@ namespace DaphneGui
             SystemOfPersistence.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
  
             //clear the contents from last save
-            foreach (KeyValuePair<int, CellPopulation> item in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_id_cellpopulation_dict)
+            foreach (KeyValuePair<int, CellPopulation> item in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict)
             {
                 // item.Value.cell_list.Clear();
                 item.Value.CellStates.Clear();
@@ -100,7 +100,7 @@ namespace DaphneGui
                 cmp.mp_distribution = mpex;
             }
 
-            foreach (var kvp in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_id_cellpopulation_dict)
+            foreach (var kvp in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict)
             {
                 CellPopulation cp = kvp.Value;
                 cp.number = 0;
@@ -113,7 +113,7 @@ namespace DaphneGui
 
                 int cell_set_id = cell.Population_id;
 
-                CellPopulation target_cp = ((TissueScenario)ProtocolSaver.scenario).cellpopulation_id_cellpopulation_dict[cell.Population_id];
+                CellPopulation target_cp = ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict[cell.Population_id];
                 target_cp.number++;
 
                 CellState cell_state = new CellState();

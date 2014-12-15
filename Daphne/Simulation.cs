@@ -165,31 +165,66 @@ namespace Daphne
             }
         }
 
-        protected void instantiateCell(Protocol protocol, ConfigCell cell, int cellpop_id,
-                                       ConfigCompartment[] configComp, CellState cellState,
-                                       List<ConfigReaction>[] bulk_reacs,
-                                       List<ConfigReaction> boundary_reacs,
-                                       List<ConfigReaction> transcription_reacs,
-                                       bool[] result)
+        public void prepareCellInstantiation(CellPopulation cp,
+                                             ConfigCompartment[] configComp,
+                                             List<ConfigReaction>[] bulk_reacs,
+                                             ref List<ConfigReaction> boundary_reacs,
+                                             ref List<ConfigReaction> transcription_reacs)
         {
-            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
+            // if this is a new cell population, add it
+            dataBasket.AddPopulation(cp.cellpopulation_id);
 
-            simCell.renderLabel = cell.renderLabel ?? cell.entity_guid;
+            configComp[0] = cp.Cell.cytosol;
+            configComp[1] = cp.Cell.membrane;
+
+            bulk_reacs[0] = ProtocolHandle.GetReactions(configComp[0], false);
+            bulk_reacs[1] = ProtocolHandle.GetReactions(configComp[1], false);
+            boundary_reacs = ProtocolHandle.GetReactions(configComp[0], true);
+            transcription_reacs = ProtocolHandle.GetTranscriptionReactions(configComp[0]);
+            //need to figure out how to set the label
+            if (cp.renderLabel == null)
+            {
+                cp.renderLabel = cp.Cell.entity_guid;
+            }
+
+            // Force all cell distributed parameters to reinitialize.
+            // Otherwise we won't get reproducible results for the same global seed.
+            cp.Cell.ResetDistributedParameters();
+        }
+
+        public void instantiateCell(int id, CellPopulation cp,
+                                    ConfigCompartment[] configComp, CellState cellState,
+                                    List<ConfigReaction>[] bulk_reacs,
+                                    List<ConfigReaction> boundary_reacs,
+                                    List<ConfigReaction> transcription_reacs,
+                                    bool report)
+        {
+            bool[] result = null;
+
+            // only report on demand
+            if (report == true)
+            {
+                prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
+            }
+
+            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius), new ConstructorArgument("id", id));
+
+            simCell.renderLabel = cp.Cell.renderLabel ?? cp.Cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
 
             simComp[0] = simCell.Cytosol;
             simComp[1] = simCell.PlasmaMembrane;
 
             // cell population id
-            simCell.Population_id = cellpop_id;
+            simCell.Population_id = cp.cellpopulation_id;
             // state
-            simCell.setState(cellState.spState);
+            simCell.setSpatialState(cellState.spState);
 
             // modify molpop information before setting
             addCellMolpops(cellState, configComp, simComp);
 
             // cell genes
-            foreach (ConfigGene cg in cell.genes)
+            foreach (ConfigGene cg in cp.Cell.genes)
             {
                 //ConfigGene cg = protocol.entity_repository.genes_dict[s];
                 double geneActivationLevel = cg.ActivationLevel;
@@ -206,27 +241,27 @@ namespace Daphne
             }
 
             //CELL REACTIONS
-            AddCompartmentBulkReactions(simCell.Cytosol, protocol.entity_repository, bulk_reacs[0]);
-            AddCompartmentBulkReactions(simCell.PlasmaMembrane, protocol.entity_repository, bulk_reacs[1]);
+            AddCompartmentBulkReactions(simCell.Cytosol, ProtocolHandle.entity_repository, bulk_reacs[0]);
+            AddCompartmentBulkReactions(simCell.PlasmaMembrane, ProtocolHandle.entity_repository, bulk_reacs[1]);
             // membrane has no boundary
-            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs, result);
-            AddCellTranscriptionReactions(simCell, protocol.entity_repository, transcription_reacs);
+            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, ProtocolHandle.entity_repository, boundary_reacs, result);
+            AddCellTranscriptionReactions(simCell, ProtocolHandle.entity_repository, transcription_reacs);
 
             double nextValue;
             int nextIntValue;
 
-            if (simCell.Cytosol.Populations.ContainsKey(cell.locomotor_mol_guid_ref) == true)
+            if (simCell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
             {
-                MolecularPopulation driver = simCell.Cytosol.Populations[cell.locomotor_mol_guid_ref];
-                simCell.Locomotor = new Locomotor(driver, cell.TransductionConstant.Sample());
+                MolecularPopulation driver = simCell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
+                simCell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant.Sample());
                 simCell.IsChemotactic = true;
             }
             else
             {
                 simCell.IsChemotactic = false;
             }
-            
-            nextValue = cell.Sigma.Sample();
+
+            nextValue = cp.Cell.Sigma.Sample();
             if (nextValue > 0)
             {
                 simCell.IsStochastic = true;
@@ -239,7 +274,7 @@ namespace Daphne
             if (simCell.IsChemotactic || simCell.IsStochastic)
             {
                 simCell.IsMotile = true;
-                simCell.DragCoefficient = cell.DragCoefficient.Sample();
+                simCell.DragCoefficient = cp.Cell.DragCoefficient.Sample();
             }
             else
             {
@@ -248,7 +283,7 @@ namespace Daphne
 
             //TRANSITION DRIVERS
             // death behavior
-            if (cell.death_driver != null)
+            if (cp.Cell.death_driver != null)
             {
                 if (cellState.cbState.deathDriveState != -1)
                 {
@@ -256,20 +291,20 @@ namespace Daphne
                 }
                 else
                 {
-                    nextIntValue = (int)cell.death_driver.CurrentState.Sample();
-                    if (nextIntValue >= 0 && nextIntValue <= cell.death_driver.states.Count())
+                    nextIntValue = (int)cp.Cell.death_driver.CurrentState.Sample();
+                    if (nextIntValue >= 0 && nextIntValue <= cp.Cell.death_driver.states.Count())
                     {
                         simCell.DeathBehavior.CurrentState = nextIntValue;
                     }
                 }
-                ConfigTransitionDriver config_td = cell.death_driver;
+                ConfigTransitionDriver config_td = cp.Cell.death_driver;
                 LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
             }
 
             // Division 
-            if (cell.div_scheme != null)
+            if (cp.Cell.div_scheme != null)
             {
-                LoadTransitionScheme(cell.div_scheme, simCell, simCell.Divider, cellState);
+                LoadTransitionScheme(cp.Cell.div_scheme, simCell, simCell.Divider, cellState);
 
                 // Set the cell division scheme driver state
                 if (cellState.cbState.divisionDriverState != -1)
@@ -279,8 +314,8 @@ namespace Daphne
                 else
                 {
                     // from distribution
-                    nextIntValue = (int)cell.div_scheme.Driver.CurrentState.Sample();
-                    if (nextIntValue >= 0 && nextIntValue <= cell.div_scheme.Driver.states.Count())
+                    nextIntValue = (int)cp.Cell.div_scheme.Driver.CurrentState.Sample();
+                    if (nextIntValue >= 0 && nextIntValue <= cp.Cell.div_scheme.Driver.states.Count())
                     {
                         simCell.Divider.Behavior.CurrentState = nextIntValue;
                     }
@@ -291,9 +326,9 @@ namespace Daphne
             }
 
             // Differentiation
-            if (cell.diff_scheme != null)
+            if (cp.Cell.diff_scheme != null)
             {
-                LoadTransitionScheme(cell.diff_scheme, simCell, simCell.Differentiator, cellState);
+                LoadTransitionScheme(cp.Cell.diff_scheme, simCell, simCell.Differentiator, cellState);
 
                 // Set the cell differentiation driver state
                 if (cellState.cbState.differentiationDriverState != -1)
@@ -304,8 +339,8 @@ namespace Daphne
                 else
                 {
                     // from distribution
-                    nextIntValue = (int)cell.diff_scheme.Driver.CurrentState.Sample();
-                    if (nextIntValue >= 0 && nextIntValue <= cell.diff_scheme.Driver.states.Count())
+                    nextIntValue = (int)cp.Cell.diff_scheme.Driver.CurrentState.Sample();
+                    if (nextIntValue >= 0 && nextIntValue <= cp.Cell.diff_scheme.Driver.states.Count())
                     {
                         simCell.Differentiator.Behavior.CurrentState = nextIntValue;
                     }
@@ -327,6 +362,12 @@ namespace Daphne
 
             // add the cell
             AddCell(simCell);
+
+            if (report == true && result != null)
+            {
+                // report if a reaction could not be inserted
+                boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
+            }
         }
 
         /// <summary>
@@ -968,56 +1009,21 @@ namespace Daphne
                                              dataBasket.Environment.Comp.Interior.Extent(2) };
 
             // ADD CELLS            
-            double[] state = new double[CellSpatialState.Dim];
+            //double[] state = new double[CellSpatialState.Dim];
             // convenience arrays to reduce code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
-            bool[] result = null;
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenarioHandle.cellpopulations)
             {
-                // if this is a new cell population, add it
-                dataBasket.AddPopulation(cp.cellpopulation_id);
-
-                configComp[0] = cp.Cell.cytosol;
-                configComp[1] = cp.Cell.membrane;
-
-                bulk_reacs[0] = protocol.GetReactions(configComp[0], false);
-                bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
-                boundary_reacs = protocol.GetReactions(configComp[0], true);
-                transcription_reacs = protocol.GetTranscriptionReactions(configComp[0]);
-                //need to figure out how to set the label
-                if (cp.renderLabel == null)
-                {
-                    cp.renderLabel = cp.Cell.entity_guid;
-                }
-
-                // Force all cell distributed parameters to reinitialize.
-                // Otherwise we won't get reproducible results for the same global seed.
-                cp.Cell.ResetDistributedParameters();
+                prepareCellInstantiation(cp, configComp, bulk_reacs, ref boundary_reacs, ref transcription_reacs);
 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    // only report boundary reaction failures for the first cell of the population
-                    if (i == 0)
-                    {
-                        prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
-                    }
-                    else
-                    {
-                        result = null;
-                    }
-                    instantiateCell(protocol, cp.Cell, cp.cellpopulation_id, configComp,
-                                    cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs, result);
-                    // report if needed
-                    if (result != null)
-                    {
-                        // report if a reaction could not be inserted
-                        boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
-                    }
+                    instantiateCell(-1, cp, configComp, cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
                 }
             }
 
@@ -1058,6 +1064,7 @@ namespace Daphne
 
             //// ADD ECS REACTIONS
             List<ConfigReaction> reacs = new List<ConfigReaction>();
+            bool[] result = null;
 
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);

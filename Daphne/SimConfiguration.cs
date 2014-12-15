@@ -2276,7 +2276,7 @@ namespace Daphne
 
         // Convenience utility storage (not serialized)
         [JsonIgnore]
-        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;
+        public Dictionary<int, CellPopulation> cellpopulation_dict;
 
         private int gaussRetrieve, originCounter;
 
@@ -2294,7 +2294,7 @@ namespace Daphne
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
+            cellpopulation_dict = new Dictionary<int, CellPopulation>();
             // Set callback to update box specification extents when environment extents change
             environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
             RenderSkinName = "default";
@@ -2362,7 +2362,7 @@ namespace Daphne
                         cs.ecm_probe.Add(er);
                         cs.ecm_probe_dict.Add(mp.molpop_guid, er);
                     }
-                    cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+                    cellpopulation_dict.Add(cs.cellpopulation_id, cs);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -2371,17 +2371,17 @@ namespace Daphne
                 {
                     CellPopulation cs = dd as CellPopulation;
 
-                    cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
+                    cellpopulation_dict.Remove(cs.cellpopulation_id);
                 }
             }
         }
 
         public void InitCellPopulationIDCellPopulationDict()
         {
-            cellpopulation_id_cellpopulation_dict.Clear();
+            cellpopulation_dict.Clear();
             foreach (CellPopulation cs in cellpopulations)
             {
-                cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+                cellpopulation_dict.Add(cs.cellpopulation_id, cs);
 
                 if (cs.cellPopDist != null)
                 {
@@ -2406,9 +2406,9 @@ namespace Daphne
 
         public CellPopulation GetCellPopulation(int key)
         {
-            if (cellpopulation_id_cellpopulation_dict.ContainsKey(key) == true)
+            if (cellpopulation_dict.ContainsKey(key) == true)
             {
-                return cellpopulation_id_cellpopulation_dict[key];
+                return cellpopulation_dict[key];
             }
             else
             {
@@ -3783,7 +3783,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             entity_guid = id.ToString();
-            // initialize time_stamp
         }
 
         public abstract string GenerateNewName(Level level, string ending);
@@ -6725,7 +6724,7 @@ namespace Daphne
 
     public class CellMolPopState
     {
-        public Dictionary<String, double[]> molPopDict { get; set; }
+        public Dictionary<string, double[]> molPopDict { get; set; }
         public CellMolPopState()
         {
             molPopDict = new Dictionary<string, double[]>();
@@ -6750,7 +6749,7 @@ namespace Daphne
     public class CellGeneState
     {
         //double to save gene’s activity
-        public Dictionary<String, double> geneDict { get; set; }
+        public Dictionary<string, double> geneDict { get; set; }
         public CellGeneState()
         {
             geneDict = new Dictionary<string, double>();
@@ -8432,17 +8431,17 @@ namespace Daphne
         /// <summary>
         /// add render options for a population
         /// </summary>
-        /// <param name="lable"></param>
+        /// <param name="label"></param>
         /// <param name="isCell"></param>
-        public void AddRenderOptions(string lable, string name, bool isCell)
+        public void AddRenderOptions(string label, string name, bool isCell)
         {
             if (isCell)
             {
                 //add if not exist
-                bool entry_exist = cellPopOptions.Any(item => item.renderLabel == lable);
+                bool entry_exist = cellPopOptions.Any(item => item.renderLabel == label);
                 if (entry_exist) return;
                 RenderPop rp = new RenderPop();
-                rp.renderLabel = lable;
+                rp.renderLabel = label;
                 rp.name = name;
                 rp.renderOn = true;
                 rp.renderMethod = RenderMethod.CELL_TYPE;
@@ -8450,10 +8449,10 @@ namespace Daphne
             }
             else
             {
-                bool entry_exist = molPopOptions.Any(item => item.renderLabel == lable);
+                bool entry_exist = molPopOptions.Any(item => item.renderLabel == label);
                 if (entry_exist) return;
                 RenderPop rp = new RenderPop();
-                rp.renderLabel = lable;
+                rp.renderLabel = label;
                 rp.name = name;
                 rp.renderOn = false;
                 rp.renderMethod = RenderMethod.MP_CONC;
@@ -8461,11 +8460,11 @@ namespace Daphne
             }
         }
 
-        public void RemoveRenderOptions(string lable, bool isCell)
+        public void RemoveRenderOptions(string label, bool isCell)
         {
             if (isCell)
             {
-                RenderPop item = cellPopOptions.Where(x => x.renderLabel == lable).FirstOrDefault();
+                RenderPop item = cellPopOptions.Where(x => x.renderLabel == label).FirstOrDefault();
                 if (item != null)
                 {
                     cellPopOptions.Remove(item);
@@ -8473,7 +8472,7 @@ namespace Daphne
             }
             else
             {
-                RenderPop item = molPopOptions.Where(x => x.renderLabel == lable).FirstOrDefault();
+                RenderPop item = molPopOptions.Where(x => x.renderLabel == label).FirstOrDefault();
                 if (item != null)
                 {
                     molPopOptions.Remove(item);

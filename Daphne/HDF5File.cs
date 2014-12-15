@@ -420,7 +420,7 @@ namespace Daphne
     /// </summary>
     public class TissueSimulationFrameData : IFrameData
     {
-        private int[] cellIds;
+        private int[] cellIds, cellGens, cellPopIds;
         private double[] cellPos;
 
         public int[] CellIDs
@@ -428,6 +428,22 @@ namespace Daphne
             get
             {
                 return cellIds;
+            }
+        }
+
+        public int[] CellGens
+        {
+            get
+            {
+                return cellGens;
+            }
+        }
+
+        public int[] CellPopIDs
+        {
+            get
+            {
+                return cellPopIds;
             }
         }
 
@@ -448,9 +464,12 @@ namespace Daphne
         /// </summary>
         public void prepareData()
         {
+            // create the data arrays if needed
             if (cellPos == null || cellPos.GetLength(0) != SimulationBase.dataBasket.Cells.Count)
             {
                 cellPos = new double[SimulationBase.dataBasket.Cells.Count * CellSpatialState.SingleDim];
+                cellGens = new int[SimulationBase.dataBasket.Cells.Count];
+                cellPopIds = new int[SimulationBase.dataBasket.Cells.Count];
             }
 
             cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
@@ -459,10 +478,15 @@ namespace Daphne
 
             foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
             {
+                // position
                 for (int j = 0; j < CellSpatialState.SingleDim; j++)
                 {
                     cellPos[i * CellSpatialState.SingleDim + j] = c.SpatialState.X[j];
                 }
+                // generation
+                cellGens[i] = c.generation;
+                // population
+                cellPopIds[i] = c.Population_id;
                 i++;
             }
         }
@@ -488,7 +512,12 @@ namespace Daphne
             // write the cell ids
             long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
 
+            // ids
             DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
+            // generations
+            DataBasket.hdf5file.writeDSInt("CellGens", dims, new H5Array<int>(cellGens));
+            // population ids
+            DataBasket.hdf5file.writeDSInt("CellPopIDs", dims, new H5Array<int>(cellPopIds));
 
             // write the cell positions
             dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
@@ -518,7 +547,12 @@ namespace Daphne
             // read the cell ids
             long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
 
+            // ids
             DataBasket.hdf5file.readDSInt("CellIDs", ref cellIds);
+            // generations
+            DataBasket.hdf5file.readDSInt("CellGens", ref cellGens);
+            // population ids
+            DataBasket.hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
 
             // read the cell positions
             dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
