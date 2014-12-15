@@ -237,7 +237,7 @@ namespace Daphne
                 }
                 if (cp.reportStates.Division == true)
                 {
-                    if (cp.Cell.div_scheme.Driver.states.Count > 0)
+                    if (cp.Cell.div_scheme != null && cp.Cell.div_scheme.Driver.states.Count > 0)
                     {
                         header += "\tDivState";
                         create = true;
@@ -245,8 +245,11 @@ namespace Daphne
                 }
                 if (cp.reportStates.Death == true)
                 {
-                    header += "\tDeathState";
-                    create = true;
+                    if (cp.Cell.death_driver != null)
+                    {
+                        header += "\tDeathState";
+                        create = true;
+                    }
                 }
 
 
@@ -333,6 +336,19 @@ namespace Daphne
                         cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.SpatialState.F[0], c.SpatialState.F[1], c.SpatialState.F[2]);
                     }
 
+                    if (cp.reportStates.Differentiation == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Differentiator.CurrentState);
+                    }
+                    if (cp.reportStates.Division == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
+                    }
+                    if (cp.reportStates.Death == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.DeathBehavior.CurrentState);
+                    }
+
                     // cell molpop concentrations
                     for (int i = 0; i < 2; i++)
                     {
@@ -359,19 +375,6 @@ namespace Daphne
                                 }
                             }
                         }
-                    }
-
-                    if (cp.reportStates.Differentiation == true)
-                    {
-                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Differentiator.CurrentState);
-                    }
-                    //if (cp.reportStates.Division)
-                    //{
-                    //    cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
-                    //}
-                    if (cp.reportStates.Death)
-                    {
-                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.DeathBehavior.CurrentState);
                     }
 
                     // ecm probe concentrations
