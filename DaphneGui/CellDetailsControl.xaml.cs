@@ -888,6 +888,13 @@ namespace DaphneGui
             //delete driver
             cell.death_driver = null;
 
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+            if (cp != null)
+            {
+                cp.reportStates.Death = false;
+            }
+
         }
 
         /// <summary>
@@ -1051,13 +1058,24 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Division = false;
+                }
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Differentiation = false;
+                }
             }
         }
 
