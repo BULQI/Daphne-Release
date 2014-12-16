@@ -3788,12 +3788,14 @@ namespace Daphne
         public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
+
+        public abstract bool Equals(ConfigEntity entity);
     }
 
     /// <summary>
     /// config molecule
     /// </summary>
-    public class ConfigMolecule : ConfigEntity, IEquatable<ConfigMolecule>
+    public class ConfigMolecule : ConfigEntity
     {
         public string renderLabel { get; set; }        //label to color scheme
 
@@ -3936,8 +3938,10 @@ namespace Daphne
             return newmol;
         }
 
-        public bool Equals(ConfigMolecule mol)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigMolecule mol = entity as ConfigMolecule;
+
             if (this.entity_guid != mol.entity_guid)
                 return false;
             if (this.diffCoeff != mol.diffCoeff)
@@ -4014,7 +4018,7 @@ namespace Daphne
     /// <summary>
     /// Any molecule can be a gene
     /// </summary>
-    public class ConfigGene : ConfigEntity, IEquatable<ConfigGene>
+    public class ConfigGene : ConfigEntity
     {
         public string Name { get; set; }
 
@@ -4102,8 +4106,10 @@ namespace Daphne
             return TempMolName;
         }
 
-        public bool Equals(ConfigGene ent)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigGene ent = entity as ConfigGene;
+
             if (this.entity_guid != ent.entity_guid)
                 return false;
             if (this.activationLevel != ent.activationLevel)
@@ -4196,7 +4202,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigTransitionDriver : ConfigEntity, IEquatable<ConfigTransitionDriver>
+    public class ConfigTransitionDriver : ConfigEntity
     {
         public string Name { get; set; }
         public DistributedParameter CurrentState { get; set; }
@@ -4237,8 +4243,10 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
-        public bool Equals(ConfigTransitionDriver ent)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigTransitionDriver ent = entity as ConfigTransitionDriver;
+
             if (this.entity_guid != ent.entity_guid)
                 return false;
             if (this.CurrentState.Equals(ent.CurrentState) == false)
@@ -4269,7 +4277,7 @@ namespace Daphne
     //    Centrocyte        gsDiv          none       gsDif2        
     //    Plasmacyte        gsDif1        gsDif2       none   
 
-    public class ConfigTransitionScheme : ConfigEntity, IEquatable<ConfigTransitionScheme>
+    public class ConfigTransitionScheme : ConfigEntity
     {
         public string Name { get; set; }
 
@@ -4397,8 +4405,10 @@ namespace Daphne
             return new_cds;
         }
 
-        public bool Equals(ConfigTransitionScheme cts)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigTransitionScheme cts = entity as ConfigTransitionScheme;
+
             //name
             if (this.Name != cts.Name)
                 return false;
@@ -5087,7 +5097,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigReaction : ConfigEntity, IEquatable<ConfigReaction>
+    public class ConfigReaction : ConfigEntity
     {
         public ConfigReaction()
             : base()
@@ -5137,8 +5147,10 @@ namespace Daphne
             return newreaction;
         }
 
-        public bool Equals(ConfigReaction r)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigReaction r = entity as ConfigReaction;
+
             if (this.entity_guid != r.entity_guid)
                 return false;
             if (this.rate_const != r.rate_const)
@@ -5391,7 +5403,7 @@ namespace Daphne
 
     }
 
-    public class ConfigReactionTemplate : ConfigEntity, IEquatable<ConfigReactionTemplate>
+    public class ConfigReactionTemplate : ConfigEntity
     {
         public string name;
         // stoichiometric constants
@@ -5434,8 +5446,10 @@ namespace Daphne
             return newRT;
         }
 
-        public bool Equals(ConfigReactionTemplate crt)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigReactionTemplate crt = entity as ConfigReactionTemplate;
+
             if (this.entity_guid != crt.entity_guid)
                 return false;
 
@@ -5447,7 +5461,7 @@ namespace Daphne
 
     }
 
-    public class ConfigReactionComplex : ConfigEntity, IEquatable<ConfigReactionComplex>
+    public class ConfigReactionComplex : ConfigEntity
     {
         private string rcName;
         public string Name
@@ -5621,8 +5635,10 @@ namespace Daphne
             return newrc;
         }
 
-        public bool Equals(ConfigReactionComplex crc)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigReactionComplex crc = entity as ConfigReactionComplex;
+
             if (this.Name != crc.Name)
                 return false;
 
@@ -5828,7 +5844,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigCell : ConfigEntity, IEquatable<ConfigCell>
+    public class ConfigCell : ConfigEntity
     {
         public string renderLabel { get; set; }        //label to color scheme
 
@@ -6134,8 +6150,10 @@ namespace Daphne
             return null;
         }
 
-        public bool Equals(ConfigCell cc)
+        public override bool Equals(ConfigEntity entity)
         {
+            ConfigCell cc = entity as ConfigCell;
+
             if (this.entity_guid != cc.entity_guid)
                 return false;
 
@@ -6158,6 +6176,9 @@ namespace Daphne
                 return false;
 
             //Check cell genes
+            if (genes.Count != cc.genes.Count)
+                return false;
+
             foreach (ConfigGene gene in genes)
             {
                 if (cc.HasGene(gene.entity_guid) == false)
@@ -6173,6 +6194,9 @@ namespace Daphne
             }
 
             //Check cytosol molecules
+            if (cytosol.molpops.Count != cc.cytosol.molpops.Count)
+                return false;
+
             foreach (ConfigMolecule mol in cytosol.molecules_dict.Values)
             {
                 bool bFound = cc.cytosol.HasMolecule(mol);
@@ -6185,6 +6209,9 @@ namespace Daphne
             }
 
             //Check membrane molecules
+            if (membrane.molpops.Count != cc.membrane.molpops.Count)
+                return false;
+
             foreach (ConfigMolecule mol in membrane.molecules_dict.Values)
             {
                 bool bFound = cc.membrane.HasMolecule(mol);
@@ -6197,6 +6224,9 @@ namespace Daphne
             }
 
             //Check cytosol reactions
+            if (cytosol.Reactions.Count != cc.cytosol.Reactions.Count)
+                return false;
+
             foreach (ConfigReaction reac in cytosol.Reactions)
             {
                 if (cc.cytosol.reactions_dict.ContainsKey(reac.entity_guid) == false)
@@ -6212,6 +6242,9 @@ namespace Daphne
             }
 
             //Check membrane reactions
+            if (membrane.Reactions.Count != cc.membrane.Reactions.Count)
+                return false;
+
             foreach (ConfigReaction reac in membrane.Reactions)
             {
                 if (cc.membrane.reactions_dict.ContainsKey(reac.entity_guid) == false)
