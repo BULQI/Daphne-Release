@@ -1060,8 +1060,6 @@ namespace DaphneGui
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
-                    toolWin.LockSaveStartSim();
-
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
@@ -1071,6 +1069,8 @@ namespace DaphneGui
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     }
 
+                    // this needs to come after setting orig_content
+                    toolWin.LockSaveStartSim();
                     sim.restart();
                     UpdateGraphics();
 
