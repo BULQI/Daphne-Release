@@ -16,6 +16,10 @@ using System.Windows.Data;
 using System.Windows;
 using System.Windows.Markup;
 
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Random;
+
+
 namespace Daphne
 {
     /// <summary>
@@ -1955,6 +1959,45 @@ namespace Daphne
         }
         
         /// <summary>
+        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
+        /// list of molecule strings on the left side, i.e. the reactants.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        private List<string> getReacLeftSide(string total)
+        {
+            int len = total.Length;
+            int index = total.IndexOf("->");
+            string left = total.Substring(0, index);
+            left = left.Replace(" ", "");
+            char[] separator = { '+' };
+            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            List<string> listLeft = new List<string>(reactants);
+            listLeft.Sort();
+            return listLeft;
+        }
+
+        /// <summary>
+        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
+        /// list of molecule strings on the right side, i.e. the products.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        private List<string> getReacRightSide(string total)
+        {
+            int len = total.Length;
+            int index = total.IndexOf("->");
+            string right = total.Substring(index + 2);
+            right = right.Replace(" ", "");
+            char[] separator = { '+' };
+            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            List<string> listRight = new List<string>(products);
+            listRight.Sort();
+            return listRight;
+        }
+
+
+        /// <summary>
         /// Select transcription reactions in the compartment.
         /// </summary>
         /// <param name="configComp">the compartment</param>
@@ -2233,7 +2276,7 @@ namespace Daphne
 
         // Convenience utility storage (not serialized)
         [JsonIgnore]
-        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;
+        public Dictionary<int, CellPopulation> cellpopulation_dict;
 
         private int gaussRetrieve, originCounter;
 
@@ -2251,7 +2294,7 @@ namespace Daphne
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
+            cellpopulation_dict = new Dictionary<int, CellPopulation>();
             // Set callback to update box specification extents when environment extents change
             environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
             RenderSkinName = "default";
@@ -2319,7 +2362,7 @@ namespace Daphne
                         cs.ecm_probe.Add(er);
                         cs.ecm_probe_dict.Add(mp.molpop_guid, er);
                     }
-                    cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+                    cellpopulation_dict.Add(cs.cellpopulation_id, cs);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -2328,17 +2371,17 @@ namespace Daphne
                 {
                     CellPopulation cs = dd as CellPopulation;
 
-                    cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
+                    cellpopulation_dict.Remove(cs.cellpopulation_id);
                 }
             }
         }
 
         public void InitCellPopulationIDCellPopulationDict()
         {
-            cellpopulation_id_cellpopulation_dict.Clear();
+            cellpopulation_dict.Clear();
             foreach (CellPopulation cs in cellpopulations)
             {
-                cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+                cellpopulation_dict.Add(cs.cellpopulation_id, cs);
 
                 if (cs.cellPopDist != null)
                 {
@@ -2363,9 +2406,9 @@ namespace Daphne
 
         public CellPopulation GetCellPopulation(int key)
         {
-            if (cellpopulation_id_cellpopulation_dict.ContainsKey(key) == true)
+            if (cellpopulation_dict.ContainsKey(key) == true)
             {
-                return cellpopulation_id_cellpopulation_dict[key];
+                return cellpopulation_dict[key];
             }
             else
             {
@@ -2640,7 +2683,7 @@ namespace Daphne
         }
     }
 
-    public class SimulationParams
+    public class SimulationParams : EntityModelBase
     {
         public SimulationParams()
         {
@@ -2648,11 +2691,27 @@ namespace Daphne
             phi1 = 100;
             deathConstant = 1e-3;
             deathOrder = 1;
+            globalRandomSeed = RandomSeed.Robust();
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
         public double deathConstant { get; set; }
         public int deathOrder { get; set; }
+
+        private int randomSeed;
+        public int globalRandomSeed
+        {
+            get
+            {
+                return randomSeed;
+            }
+
+            set
+            {
+                randomSeed = value;
+                OnPropertyChanged("globalRandomSeed");
+            }
+        }
     }
 
     public class EntityRepository
@@ -3724,7 +3783,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             entity_guid = id.ToString();
-            // initialize time_stamp
         }
 
         public abstract string GenerateNewName(Level level, string ending);
@@ -4141,7 +4199,7 @@ namespace Daphne
     public class ConfigTransitionDriver : ConfigEntity, IEquatable<ConfigTransitionDriver>
     {
         public string Name { get; set; }
-        public int CurrentState { get; set; }
+        public DistributedParameter CurrentState { get; set; }
         public string StateName { get; set; }
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
@@ -4152,6 +4210,7 @@ namespace Daphne
         {
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
+            CurrentState = new DistributedParameter(0);
         }
 
         public ConfigTransitionDriver Clone(bool identical)
@@ -4182,7 +4241,7 @@ namespace Daphne
         {
             if (this.entity_guid != ent.entity_guid)
                 return false;
-            if (this.CurrentState != ent.CurrentState)
+            if (this.CurrentState.Equals(ent.CurrentState) == false)
                 return false;
             if (this.StateName != ent.StateName)
                 return false;
@@ -5778,9 +5837,10 @@ namespace Daphne
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
-            TransductionConstant = 0.0;
-            DragCoefficient = 1.0;
-            Sigma = 0.0;
+
+            TransductionConstant = new DistributedParameter(0.0);
+            DragCoefficient = new DistributedParameter(1.0);
+            Sigma = new DistributedParameter(0.0);
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -5859,8 +5919,8 @@ namespace Daphne
             }
         }
 
-        private double transductionConstant;
-        public double TransductionConstant
+        private DistributedParameter transductionConstant;
+        public DistributedParameter TransductionConstant
         {
             get
             {
@@ -5873,8 +5933,8 @@ namespace Daphne
             }
         }
 
-        private double dragCoefficient;
-        public double DragCoefficient
+        private DistributedParameter dragCoefficient;
+        public DistributedParameter DragCoefficient
         {
             get
             {
@@ -5890,8 +5950,8 @@ namespace Daphne
         /// <summary>
         /// Parameter for stochastic force
         /// </summary>
-        private double sigma;
-        public double Sigma
+        private DistributedParameter sigma;
+        public DistributedParameter Sigma
         {
             get
             {
@@ -5924,9 +5984,6 @@ namespace Daphne
             }
         }
 
-        // ConfigTransitionDriver contains ConfigTransitionDriverElement
-        // ConfigTransitionDriverElement contains information about 
-        //      signaling molecule that drives cell death and alphas and betas
         private ConfigTransitionDriver _death_driver;
         public ConfigTransitionDriver death_driver
         {
@@ -6088,13 +6145,13 @@ namespace Daphne
             if (this.CellRadius != cc.CellRadius)
                 return false;
 
-            if (this.DragCoefficient != cc.DragCoefficient)
+            if (this.DragCoefficient.Equals(cc.DragCoefficient) == false)
                 return false;
 
-            if (this.Sigma != cc.Sigma)
+            if (this.Sigma.Equals(cc.Sigma) == false)
                 return false;
 
-            if (this.TransductionConstant != cc.TransductionConstant)
+            if (this.TransductionConstant.Equals(cc.TransductionConstant) == false)
                 return false;
 
             if (this.locomotor_mol_guid_ref != cc.locomotor_mol_guid_ref)
@@ -6203,6 +6260,29 @@ namespace Daphne
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Force distributed parameters to reinitialize on the next Sample.
+        /// This is needed in order to get reproducible results for the same global seed value.
+        /// </summary>
+        public void ResetDistributedParameters()
+        {
+                TransductionConstant.Reset();
+                Sigma.Reset();
+                DragCoefficient.Reset();
+                if (death_driver != null)
+                {
+                    death_driver.CurrentState.Reset();
+                }
+                if (diff_scheme != null)
+                {
+                    diff_scheme.Driver.CurrentState.Reset();
+                }
+                if (div_scheme != null)
+                {
+                    div_scheme.Driver.CurrentState.Reset();
+                }
         }
     }
 
@@ -6491,9 +6571,9 @@ namespace Daphne
 
         public override double[] nextPosition()
         {
-            return new double[3] {  Extents[0] * Rand.UniformDist.NextDouble(), 
-                                    Extents[1] * Rand.UniformDist.NextDouble(), 
-                                    Extents[2] * Rand.UniformDist.NextDouble() };
+            return new double[3] {  Extents[0] * Rand.UniformDist.Sample(), 
+                                    Extents[1] * Rand.UniformDist.Sample(), 
+                                    Extents[2] * Rand.UniformDist.Sample() };
         }
 
         public override void Resize(double[] newExtents)
@@ -6520,9 +6600,9 @@ namespace Daphne
 
         public override double[] nextPosition()
         {
-            return new double[3] {  Extents[0] * Rand.UniformDist.NextDouble(), 
-                                    Extents[1] * Rand.UniformDist.NextDouble(), 
-                                    Extents[2] * Rand.UniformDist.NextDouble() };
+            return new double[3] {  Extents[0] * Rand.UniformDist.Sample(), 
+                                    Extents[1] * Rand.UniformDist.Sample(), 
+                                    Extents[2] * Rand.UniformDist.Sample() };
         }
 
         public override void Resize(double[] newExtents)
@@ -6624,9 +6704,9 @@ namespace Daphne
         {
             // Draw three random coordinates from normal distributions centered at the origin of the simulation coordinate system.
             // normal distribution centered at zero with specified sigmas
-            double[] pos = new double[3] {  sigma[0] * Rand.NormalDist.NextDouble(), 
-                                            sigma[1] * Rand.NormalDist.NextDouble(), 
-                                            sigma[2] * Rand.NormalDist.NextDouble() };
+            double[] pos = new double[3] {  sigma[0] * Rand.NormalDist.Sample(), 
+                                            sigma[1] * Rand.NormalDist.Sample(), 
+                                            sigma[2] * Rand.NormalDist.Sample() };
 
             // The new position rotated and translated  with the box coordinate system
             double[] posRotated = new double[3];
@@ -6644,7 +6724,7 @@ namespace Daphne
 
     public class CellMolPopState
     {
-        public Dictionary<String, double[]> molPopDict { get; set; }
+        public Dictionary<string, double[]> molPopDict { get; set; }
         public CellMolPopState()
         {
             molPopDict = new Dictionary<string, double[]>();
@@ -6669,7 +6749,7 @@ namespace Daphne
     public class CellGeneState
     {
         //double to save gene’s activity
-        public Dictionary<String, double> geneDict { get; set; }
+        public Dictionary<string, double> geneDict { get; set; }
         public CellGeneState()
         {
             geneDict = new Dictionary<string, double>();
@@ -8351,17 +8431,17 @@ namespace Daphne
         /// <summary>
         /// add render options for a population
         /// </summary>
-        /// <param name="lable"></param>
+        /// <param name="label"></param>
         /// <param name="isCell"></param>
-        public void AddRenderOptions(string lable, string name, bool isCell)
+        public void AddRenderOptions(string label, string name, bool isCell)
         {
             if (isCell)
             {
                 //add if not exist
-                bool entry_exist = cellPopOptions.Any(item => item.renderLabel == lable);
+                bool entry_exist = cellPopOptions.Any(item => item.renderLabel == label);
                 if (entry_exist) return;
                 RenderPop rp = new RenderPop();
-                rp.renderLabel = lable;
+                rp.renderLabel = label;
                 rp.name = name;
                 rp.renderOn = true;
                 rp.renderMethod = RenderMethod.CELL_TYPE;
@@ -8369,10 +8449,10 @@ namespace Daphne
             }
             else
             {
-                bool entry_exist = molPopOptions.Any(item => item.renderLabel == lable);
+                bool entry_exist = molPopOptions.Any(item => item.renderLabel == label);
                 if (entry_exist) return;
                 RenderPop rp = new RenderPop();
-                rp.renderLabel = lable;
+                rp.renderLabel = label;
                 rp.name = name;
                 rp.renderOn = false;
                 rp.renderMethod = RenderMethod.MP_CONC;
@@ -8380,11 +8460,11 @@ namespace Daphne
             }
         }
 
-        public void RemoveRenderOptions(string lable, bool isCell)
+        public void RemoveRenderOptions(string label, bool isCell)
         {
             if (isCell)
             {
-                RenderPop item = cellPopOptions.Where(x => x.renderLabel == lable).FirstOrDefault();
+                RenderPop item = cellPopOptions.Where(x => x.renderLabel == label).FirstOrDefault();
                 if (item != null)
                 {
                     cellPopOptions.Remove(item);
@@ -8392,7 +8472,7 @@ namespace Daphne
             }
             else
             {
-                RenderPop item = molPopOptions.Where(x => x.renderLabel == lable).FirstOrDefault();
+                RenderPop item = molPopOptions.Where(x => x.renderLabel == label).FirstOrDefault();
                 if (item != null)
                 {
                     molPopOptions.Remove(item);
@@ -9028,55 +9108,6 @@ namespace Daphne
         #endregion
     }
 
-
-    /*
-    [ValueConversion(typeof(RenderMethod), typeof(bool))]
-    public class CellRenderMethodConverter : IValueConverter
-    {
-        #region IValueConverter Members
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            if (Enum.IsDefined(value.GetType(), value) == false)
-                return DependencyProperty.UnsetValue;
-
-            object parameterValue = Enum.Parse(value.GetType(), parameterString);
-
-            bool ret = parameterValue.Equals(value);
-            return ret;
-
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            bool chk = (bool)value;
-
-            if (chk == false)
-            {
-                //types start with MP_ is for molpops in ECS
-                if (parameterString.StartsWith("MP_"))
-                {
-                    return RenderMethod.MP_TYPE;
-                }
-                else
-                {
-                    return RenderMethod.CELL_TYPE;
-                }
-            }
-            return Enum.Parse(targetType, parameterString);
-        }
-        #endregion
-    }
-
-    */
-
     public class RenderMethodItemValidConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -9225,5 +9256,536 @@ namespace Daphne
 
         #endregion // IDisposable Members
     }
+
+    /// <summary>
+    /// Class to handle parameters whose values may be set by a probability distribution.
+    /// The default is a constant value.
+    /// If there is a distribution on the parameter, then ConstValue doesn't have any relevance to the value of the parameter.
+    /// In either case, the parameter value should be obtained using the Sample method.
+    /// </summary>
+    public class DistributedParameter : EntityModelBase, IEquatable<DistributedParameter>
+    {
+        private ParameterDistribution paramDistr;
+        public ParameterDistribution ParamDistr 
+        {
+            get
+            {
+                return paramDistr;
+            }
+            set
+            {
+                paramDistr = value;
+                OnPropertyChanged("ParamDistr");
+            }
+        }
+
+        // Value of parameter when constant - no distribution.
+        private double constValue;
+        public double ConstValue 
+        {
+            get
+            {
+                return constValue;
+            }
+            set
+            {
+                constValue = value;
+                OnPropertyChanged("ConstValue");
+            }
+        }
+
+        private ParameterDistributionType distributionType;
+        public ParameterDistributionType DistributionType
+        {
+            get
+            {
+                return distributionType;
+            }
+            set
+            {
+                distributionType = value;
+                OnPropertyChanged("DistributionType");
+            }
+        }
+
+        public DistributedParameter()
+        {
+            DistributionType = ParameterDistributionType.CONSTANT;
+        }
+
+        /// <summary>
+        /// Caution if calling this constructor from another constructor.
+        /// May cause problems when deserializing json.
+        /// </summary>
+        /// <param name="_constValue"></param>
+        public DistributedParameter(double _constValue)
+        {
+            ConstValue = _constValue;
+            DistributionType = ParameterDistributionType.CONSTANT;
+        }    
+
+        public double Sample()
+        {
+            if (ParamDistr == null)
+            {
+                return ConstValue;
+            }
+            else
+            {
+                return ParamDistr.Sample();
+            }
+        }
+
+        public void Reset()
+        {
+            if (ParamDistr != null)
+            {
+                ParamDistr.isInitialized = false;
+            }
+        }
+
+        public bool Equals(DistributedParameter dp)
+        {
+            if (this.constValue != dp.ConstValue) return false;
+            if (this.distributionType != dp.distributionType) return false;
+            if (this.paramDistr != null) 
+            {
+                if (dp.paramDistr != null)
+                {
+                    if (paramDistr.Equals(dp.paramDistr) == false) return false;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (this.paramDistr == null && dp.paramDistr != null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Types of probability distributions for distributed parameters.
+    /// </summary>
+    public enum ParameterDistributionType { CONSTANT=0, POISSON, GAMMA, UNIFORM, CATEGORICAL };
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(ParameterDistributionType), typeof(string))]
+    public class ParameterDistributionTypeToStringConverter : IValueConverter
+    {
+        private List<string> _param_dist_type_strings = new List<string>()
+                                {
+                                    "Constant",
+                                    "Poisson",
+                                    "Gamma",
+                                    "Uniform",
+                                    "Categorical"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value as string == "") return "Constant";
+            try
+            {
+                return _param_dist_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _param_dist_type_strings.FindIndex(item => item == str);
+            return (ParameterDistributionType)Enum.ToObject(typeof(ParameterDistributionType), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Convert:
+    ///     Converter to go between enum values and boolean for GUI
+    ///     If the parameter distribution type is CONSTANT, then return False.
+    ///     Return True for all other distribution types.
+    ///  ConvertBack: 
+    ///     Shouldn't be used. Return CONSTANT.
+    /// </summary>
+    [ValueConversion(typeof(ParameterDistributionType), typeof(string))]
+    public class ParameterDistributionTypeToBoolConverter : IValueConverter
+    {
+        
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ParameterDistributionType pdt;
+            try
+            {
+                pdt = (ParameterDistributionType)value;
+            }
+            catch
+            {
+                pdt = ParameterDistributionType.CONSTANT;
+            }
+
+            if (pdt == ParameterDistributionType.CONSTANT)
+            {
+                return false;
+
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // Shouldn't be using this, so simply default to constant 
+            return ParameterDistributionType.CONSTANT;
+        }
+    }
+
+    /// <summary>
+    /// Abstract class for probability distributions on parameters.
+    /// </summary>
+    public abstract class ParameterDistribution : EntityModelBase, IEquatable<ParameterDistribution>
+    {
+        //public ParameterDistributionType DistributionType { get; set; }
+        [JsonIgnore]
+        public bool isInitialized;
+
+        public ParameterDistribution()
+        //public ParameterDistribution(ParameterDistributionType _distributionType)
+        {
+            //DistributionType = _distributionType;
+            isInitialized = false;
+        }
+        public abstract void Initialize();
+        public abstract double Sample();
+        public abstract bool Equals(ParameterDistribution pd); 
+    }
+
+    /// <summary>
+    /// Probability distribution for the parameter is uniform.
+    /// </summary>
+    public class UniformParameterDistribution : ParameterDistribution
+    {
+        public double MinValue { get; set; }
+        public double MaxValue { get; set; }
+        [JsonIgnore]
+        private ContinuousUniform UniformDist;
+
+        //public UniformParameterDistribution()
+        //    : base(ParameterDistributionType.UNIFORM)
+        public UniformParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (MaxValue <= MinValue)
+            {
+                MessageBox.Show("The max value must be greater than the min value in a Uniform distribution. The range has been set to (0,1)");
+                MinValue = 0.0;
+                MaxValue = 1.0;
+            }
+
+            UniformDist = new ContinuousUniform(MinValue, MaxValue, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return UniformDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            UniformParameterDistribution d = pd as UniformParameterDistribution;
+
+            if (this.MinValue != d.MinValue) return false;
+            if (this.MaxValue != d.MaxValue) return false;
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Probability distribution for the parameter is a Poisson distribution.
+    /// </summary>
+    public class PoissonParameterDistribution : ParameterDistribution
+    {
+        public double Mean { get; set; }
+        [JsonIgnore]
+        private Poisson PoissonDist;
+
+        public PoissonParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Mean <= 0)
+            {
+                MessageBox.Show("Lambda must be greater than zero in a Poisson distribution. Lambda has been set to 1.0.");
+                Mean = 1.0;
+            }
+
+            PoissonDist = new Poisson(Mean, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return (double)PoissonDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            PoissonParameterDistribution d = pd as PoissonParameterDistribution;
+
+            if (this.Mean != d.Mean) return false;
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Probability distribution for the parameter is a Gamma distribution.
+    /// </summary>
+    public class GammaParameterDistribution : ParameterDistribution
+    {
+        public double Shape { get; set; }
+        public double Rate { get; set; }
+        [JsonIgnore]
+        private Gamma GammaDist;
+
+        public GammaParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Rate <= 0)
+            {
+                MessageBox.Show("The rate parameter must be greater than zero in a Gamma distribution. The rate parameter has been set to 1.0.");
+                Rate = 1.0;
+            }
+            if (Shape <= 0)
+            {
+                MessageBox.Show("The shape parameter must be greater than zero in a Poisson distribution. The shape parameter has been set to 1.0.");
+            }
+
+            GammaDist = new Gamma(Shape, Rate, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return GammaDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            GammaParameterDistribution d = pd as GammaParameterDistribution;
+
+            if (this.Shape != d.Shape) return false;
+            if (this.Rate != d.Rate) return false;
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Class for categorical item for categorical distribution.
+    /// Contains the parameter value (CategoryValue) and it's probability (Prob)
+    /// </summary>
+    public class CategoricalDistrItem : EntityModelBase, IEquatable<CategoricalDistrItem>
+    {
+        private double categoryValue;
+        public double CategoryValue
+        {
+            get
+            {
+                return categoryValue;
+            }
+
+            set
+            {
+                categoryValue = value;
+                OnPropertyChanged("CategoryValue");
+            }
+        }
+
+        private double prob;
+        public double Prob
+        {
+            get
+            {
+                return prob;
+            }
+
+            set
+            {
+                prob = value;
+                OnPropertyChanged("Prob");
+            }
+        }
+
+        public CategoricalDistrItem(double _value, double _prob)
+        {
+            CategoryValue = _value;
+            Prob = _prob;
+        }
+
+        public bool Equals(CategoricalDistrItem cdi)
+        {
+            if (prob != cdi.prob) return false;
+            if (categoryValue != cdi.categoryValue) return false;
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Probability distribution for the parameter is a categorical distribution.
+    /// </summary>
+    public class CategoricalParameterDistribution : ParameterDistribution
+    {
+        private ObservableCollection<CategoricalDistrItem> probMass;
+        public ObservableCollection<CategoricalDistrItem> ProbMass
+        {
+            get
+            {
+                return probMass;
+            }
+
+            set
+            {
+                probMass = value;
+                OnPropertyChanged("ProbMass");
+            }
+        }
+
+        [JsonIgnore]
+        public Categorical CategoricalDist;
+
+        public CategoricalParameterDistribution()
+            : base()
+        {
+            probMass = new ObservableCollection<CategoricalDistrItem>();
+        }
+
+        public double[] ProbArray()
+        {
+            double[] probArray = new double[probMass.Count()];
+            int cnt = 0;
+
+            foreach (CategoricalDistrItem cdi in probMass)
+            {
+                probArray[cnt++] = cdi.Prob;
+            }
+
+            return probArray;
+        }
+
+        public override void Initialize()
+        {
+            if (ProbMass.Count == 0)
+            {
+                MessageBox.Show("Warning. No categories in the distribution. A distribution with binary categories of equal probability has been created. ");
+                probMass.Add(new CategoricalDistrItem(0.0, 0.5));
+                probMass.Add(new CategoricalDistrItem(1.0, 0.5));
+            }
+            Normalize();
+            CategoricalDist = new Categorical(ProbArray(), Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public void Normalize()
+        {
+            double sum = 0;
+            sum = ProbArray().Sum();
+
+            if (sum > 0)
+            {
+                for (int i = 0; i < ProbMass.Count; i++)
+                {
+                    ProbMass[i].Prob /= sum;
+                }
+            }
+
+            OnPropertyChanged("ProbMass");
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            int i = (int)CategoricalDist.Sample();
+
+            return probMass[i].CategoryValue;
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            CategoricalParameterDistribution d = pd as CategoricalParameterDistribution;
+
+            var c1 = this.probMass.OrderByDescending(x => x.CategoryValue);
+            var c2 = d.probMass.OrderByDescending(x => x.CategoryValue); 
+
+            for (int i = 0; i < c1.Count(); i++)
+            {
+                if (c1.ElementAt(i).Equals(c2.ElementAt(i)) == false) return false;
+            }
+
+            return true;
+        }
+
+        public double MeanCategoryValue()
+        {
+            double mean = 0;
+
+            if (probMass.Count() > 0)
+            {
+                foreach (CategoricalDistrItem cdi in probMass)
+                {
+                    mean += cdi.CategoryValue;
+                }
+                mean /= probMass.Count();
+            }
+
+            return mean;
+        }
+    }
+
 
 }

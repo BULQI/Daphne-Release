@@ -141,12 +141,18 @@ namespace DaphneGui
 
         public void SetXAxisLimits()
         {
-                ChartAreas.First().AxisX.Minimum = getMin_Time();
-                ChartAreas.First().AxisX.Maximum = getMax_Time() * 1.1;
+            if (ChartAreas == null || ChartAreas.Count == 0)
+                return;
+
+            ChartAreas.First().AxisX.Minimum = getMin_Time();
+            ChartAreas.First().AxisX.Maximum = getMax_Time() * 1.1;
         }
 
         public void SetYAxisLimits()
         {
+            if (ChartAreas == null || ChartAreas.Count == 0)
+                return;
+
             ChartAreas.First().AxisY.Minimum = getMin_Series(DictConcs);
             ChartAreas.First().AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
         }
@@ -593,6 +599,10 @@ namespace DaphneGui
             }
 
             //Add any series that are in DictConcs but not in this.Series
+
+            if (this.ChartAreas == null || this.ChartAreas.Count == 0)
+                return;
+
             foreach (string guid in DictConcs.Keys)
             {
                 string molname = ConvertMolGuidToMolName(guid);

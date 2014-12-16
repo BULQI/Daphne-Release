@@ -1,0 +1,216 @@
+﻿<UserControl x:Class="DaphneGui.ParamDistrControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:local="clr-namespace:DaphneGui"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             x:Name="paramDistrControl"
+             >
+ 
+    <Grid>
+        <Grid.Resources>
+
+            <!-- parameterDistributionTypes -->
+            <ObjectDataProvider x:Key="parameterDistributionTypes"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+                    <ObjectDataProvider.MethodParameters>
+                        <x:Type TypeName="daph:ParameterDistributionType" />
+                    </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <!-- DistrParameterDetailsTemplate -->
+            <DataTemplate x:Key="ParamDistributionDetailsTemplate">
+                <ContentControl Name="distr_parameter" 
+                                Grid.ColumnSpan="2" Grid.Row="0" 
+                                Margin="0,6" BorderBrush="DarkGray" BorderThickness="1"
+                                Content="{Binding Path=ParamDistr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"   />
+            </DataTemplate>
+
+            <!-- distributed parameter type: none -->
+            <DataTemplate x:Name ="NoDistribution" x:Key="noDistributionTemplate">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>      
+            </DataTemplate>
+            
+            <!-- distributed parameter type: Poisson -->
+            <DataTemplate DataType="{x:Type daph:PoissonParameterDistribution}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="mean" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                   Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
+                </StackPanel>
+            </DataTemplate>
+
+            <!-- distributed parameter type: Uniform -->
+            <DataTemplate DataType="{x:Type daph:UniformParameterDistribution}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="min." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                Number="{Binding Path=MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="max." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
+                                Number="{Binding Path=MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+            <!-- distributed parameter type: Gamma -->
+            <DataTemplate DataType="{x:Type daph:GammaParameterDistribution}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                       Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>  
+            
+            <!-- distributed parameter type: Categorical -->
+            <DataTemplate DataType="{x:Type daph:CategoricalParameterDistribution}">
+                <StackPanel Orientation="Vertical" Margin="0,0">
+                            <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Categorical</TextBlock>
+                            <DataGrid x:Name="dgCategorical" AutoGenerateColumns="False" 
+                                        ItemsSource="{Binding Path=ProbMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        MinHeight="50" MinRowHeight="20" MinColumnWidth="50" RowHeaderWidth="0"
+                                        CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" 
+                                        CanUserDeleteRows="False"  CanUserAddRows="True"                            
+                                        VerticalContentAlignment="Center" BorderThickness="1" BorderBrush="Black"
+                                        KeyDown="dgProbMass_KeyDown"
+                                        LostFocus="dgProbMass_Check"
+                                        SelectionMode="Extended"                 
+                                        SelectionUnit="FullRow"
+                                        VirtualizingStackPanel.VirtualizationMode="Standard"
+                                        IsReadOnly="False"    
+                                        >
+                                
+                            <DataGrid.ContextMenu>
+                                    <ContextMenu >
+                                        <MenuItem Header="Add" Name="menuProbMassAdd" Click="menuProbMassAdd_Click"></MenuItem>
+                                        <MenuItem Header="Delete" Name="menuProbMassDelete" Click="menuProbMassDelete_Click"
+                                                  CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
+                                        <MenuItem Header="Normalize" Name="menuProbMassNormalize" Click="menuProbMassNormalize_Click"></MenuItem>
+                                        <MenuItem Header="Refresh" Name="menuProbMassRefresh" Click="menuProbMassRefresh_Click"></MenuItem>
+                                    </ContextMenu>
+                                </DataGrid.ContextMenu>
+
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" >
+                                        <Setter Property="FontSize" Value="12" />
+                                        <Setter Property="Height" Value="24" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Offset="0.0" Color="White" />
+                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn x:Name="dgCategoricalValues" Header="Value" MaxWidth="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <uc:DoublesBox x:Name="dblValues" HorizontalAlignment="Left" Margin="4,0"
+                                                    SignificantDigits="3"             
+                                                    Number="{Binding Path=CategoryValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                                    RangeFactor="1"
+                                                    SNLowerThreshold="0.001"
+                                                    SNUpperThreshold="1000" 
+                                                    SliderEnabled="False"
+                                                    TextFieldWidth="50"
+                                                    >
+                                                    </uc:DoublesBox>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn x:Name="dgCategoricalProbs" Header="Probability" MaxWidth="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <uc:DoublesBox x:Name="dblProbs" HorizontalAlignment="Left" Margin="4,0"
+                                                    SignificantDigits="3"             
+                                                    Number="{Binding Path=Prob, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                                    RangeFactor="1"
+                                                    SNLowerThreshold="0.001"
+                                                    SNUpperThreshold="1000" 
+                                                    SliderEnabled="False"
+                                                    TextFieldWidth="50"
+                                                   >
+                                                    </uc:DoublesBox>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                   
+                                </DataGrid.Columns>
+
+                            </DataGrid>
+                        <!--</StackPanel>-->
+                </StackPanel>
+            </DataTemplate>
+            
+            <Style x:Key="selectableContentTemplateStyle" TargetType="{x:Type ContentControl}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="True">
+                        <Setter Property="ContentTemplate" Value="{StaticResource ParamDistributionDetailsTemplate}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeBoolConv}}" Value="False">
+                        <Setter Property="ContentTemplate" Value="{StaticResource noDistributionTemplate}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+           
+        </Grid.Resources>
+
+        <StackPanel Orientation="Vertical" x:Name="ParamDistrStackPanel">
+            <StackPanel>
+                <ComboBox x:Name="cbParamDistr" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" Height="24"
+                          ItemsSource="{Binding Source={StaticResource parameterDistributionTypes}}"
+                          ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
+                          SelectionChanged="cbParamDistr_SelectionChanged"
+                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                          >
+                </ComboBox>
+            </StackPanel>
+            
+            <StackPanel x:Name="detailsStackPanel"   Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" >
+                <ContentControl x:Name="ParamDistrDetails"
+                            Content="{Binding}"
+                            Style="{StaticResource selectableContentTemplateStyle}"
+                            />
+            </StackPanel>
+
+            
+        </StackPanel>
+    </Grid>
+</UserControl>

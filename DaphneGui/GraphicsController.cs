@@ -8,8 +8,8 @@ using System.Threading;
 using System.Windows.Data;
 using System.Windows.Forms.Integration;
 
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.Distributions;
+//using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
 using Kitware.VTK;
 

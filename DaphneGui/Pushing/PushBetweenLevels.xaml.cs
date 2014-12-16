@@ -48,7 +48,9 @@ namespace DaphneGui.Pushing
             RightList = null;
             equalGuids = new List<string>();
             InitializeComponent();
-            Tag = GridHeight;
+
+            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
+            GridHeight = MaxHeight * 0.85;
 
             if (type == PushLevelEntityType.Molecule)
             {
@@ -86,22 +88,21 @@ namespace DaphneGui.Pushing
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {            
-            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
+            //MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
             var desktopWorkingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
             this.Left = desktopWorkingArea.Left + 20;
             this.Top = desktopWorkingArea.Top + 20;
 
-            GridHeight = MaxHeight - 100;
-            Tag = GridHeight;
+            
 
-            //Get the datagrids and set their max heights
+            ////Get the datagrids and set their max heights
+            //DOES NOT WORK
             //List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);
             //var grid = grids[0];
             //for (int i = 0; i < grids.Count; i++)
             //{
-            //    grids[i].MaxHeight = this.MaxHeight - 100;
+            //    grids[i].MaxHeight = this.MaxHeight - 400;
             //}
-
 
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
@@ -192,9 +193,6 @@ namespace DaphneGui.Pushing
             
             LeftContent.DataContext = null;
             LeftContent.DataContext = LeftList;
-
-            
-
         }
 
         /// <summary>
@@ -275,7 +273,7 @@ namespace DaphneGui.Pushing
                         {
                             if (reac.Equals(reac2))
                             {
-                                equalGuids.Add(reac.entity_guid);
+                                //equalGuids.Add(reac.entity_guid);
                             }
                         }
                     }
@@ -608,10 +606,7 @@ namespace DaphneGui.Pushing
                         e.CanExecute = true;
                 }
             }
-            else
-            {
-                e.CanExecute = false;
-            }
+            
         }
 
         public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -644,7 +639,10 @@ namespace DaphneGui.Pushing
                 //Push items
                 foreach (ConfigEntity ent in grid.SelectedItems)
                 {
-                    GenericPusher(ent, LevelA, LevelB);
+                    if (equalGuids.Contains(ent.entity_guid) == false)
+                    {
+                        GenericPusher(ent, LevelA, LevelB);
+                    }
                 }
 
                 //Disable pushed items
@@ -657,13 +655,14 @@ namespace DaphneGui.Pushing
                         {
                             Color col = Color.FromRgb(228, 228, 228);
                             row.Background = new SolidColorBrush(col);
-                            //row.IsEnabled = false;
+                            row.IsEnabled = false;
                             row.IsSelected = false;
                         }
                     }
                 }
+                ResetGrids();
             }
-            //ResetGrids();
+            
         }
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
@@ -719,6 +718,8 @@ namespace DaphneGui.Pushing
         private void grid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             ConfigEntity entity = e.Row.Item as ConfigEntity;
+            e.Row.IsEnabled = true;
+
             if (equalGuids.Contains(entity.entity_guid))
             {
                 // Access cell values values if needed like this...
@@ -728,7 +729,7 @@ namespace DaphneGui.Pushing
                 // Set the background color of the DataGrid row based on whatever data you like from the row.
                 Color col = Color.FromRgb(228, 228, 228);
                 e.Row.Background = new SolidColorBrush(col);                    //Brushes.LightGray;
-                //e.Row.IsEnabled = false;
+                e.Row.IsEnabled = false;
             }
             else
             {
@@ -754,11 +755,12 @@ namespace DaphneGui.Pushing
 
         private void datagrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DataGrid grid = sender as DataGrid;
+            ////This does not have any effect because of the command binding stuff
+            //DataGrid grid = sender as DataGrid;
             
-            PushButtonArrow.IsEnabled = true;
-            if (grid.SelectedItems.Count <= 0)
-                PushButtonArrow.IsEnabled = false;
+            //PushButtonArrow.IsEnabled = true;
+            //if (grid.SelectedItems.Count <= 0)
+            //    PushButtonArrow.IsEnabled = false;
         }
 
     }  //End of PushBetweenLevels class

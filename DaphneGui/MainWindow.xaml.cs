@@ -296,28 +296,39 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            ////DO NOT DELETE THIS
-            ////This code is to create DaphneStore and UserStore.
-            ////It should not be needed ever again! 
-            ////Any editing of DaphneStore should be done through application (GUI).
-            //try
-            //{
-            //    CreateDaphneAndUserStores();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            //DO NOT DELETE THIS
+            //This code creates the DaphneStore and UserStore.
+            //Only run this code during development.
+            //Once development is completed editing of the DaphneStore and UserStore should be done through application (GUI).
+            //Running this after development will make all the entities in the Daphne and User stores appear
+            // to be different than the entities at the Protocol and Entity levels. 
+            if (false)
+            {
+                try
+                {
+                    CreateDaphneAndUserStores();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
 
-            //////This code re-generates the scenarios - DO NOT DELETE
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            }
+            //DO NOT DELETE THIS
+            //This code creates the predefined scenarios.
+            //Running this using the existing stores will not break user scenarios.
+            if (false)
+            {
+                //This code re-generates the scenarios - DO NOT DELETE
+                try
+                {
+                    CreateAndSerializeDaphneProtocols();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
