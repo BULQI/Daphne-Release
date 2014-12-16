@@ -249,7 +249,6 @@ namespace Daphne
             activity = new double[nStates, nGenes];
             gene_id = new string[nGenes];
             State = new string[nStates];
-
         }
 
         public override void AddActivity(int _state, int _gene, double _activity)
@@ -280,5 +279,123 @@ namespace Daphne
             }
         }
     }
+
+    ///// <summary>
+    ///// currently used for all transitions
+    ///// </summary>
+    //public class DistrTransitionDriver : ITransitionDriver
+    //{
+    //    private Dictionary<int, Dictionary<int, DistrTransitionDriverElement>> drivers;
+    //    private double clock;
+
+    //    /// <summary>
+    //    /// Constructor
+    //    /// </summary>
+    //    public DistrTransitionDriver()
+    //    {
+    //        drivers = new Dictionary<int, Dictionary<int, DistrTransitionDriverElement>>();
+    //        TransitionOccurred = false;
+    //        CurrentState = 0;
+    //        PreviousState = 0;
+    //        FinalState = 0;
+    //    }
+
+    //    /// <summary>
+    //    /// add a new driver element
+    //    /// </summary>
+    //    /// <param name="origin">origin state</param>
+    //    /// <param name="destination">destination state</param>
+    //    /// <param name="driverElement">driver element with alpha, beta, signaling molpop</param>
+    //    public override void AddDriverElement(int origin, int destination, DistrTransitionDriverElement driverElement)
+    //    {
+    //        if (!drivers.ContainsKey(origin))
+    //        {
+    //            drivers.Add(origin, new Dictionary<int, DistrTransitionDriverElement>());
+    //        }
+    //        if (drivers[origin].ContainsKey(destination))
+    //        {
+    //            drivers.Remove(destination);
+    //        }
+    //        drivers[origin].Add(destination, driverElement);
+    //        if (origin > FinalState)
+    //        {
+    //            FinalState = origin;
+    //        }
+    //        if (destination > FinalState)
+    //        {
+    //            FinalState = destination;
+    //        }
+    //    }
+
+    //    /// <summary>
+    //    /// accessor for drivers
+    //    /// </summary>
+    //    public override Dictionary<int, Dictionary<int, DistrTransitionDriverElement>> Drivers
+    //    {
+    //        get { return drivers; }
+    //    }
+
+    //    /// <summary>
+    //    /// Executes a step of the stochastic dynamics for the Transition
+    //    /// </summary>
+    //    /// <param name="dt">The time interval for the evolution (double).</param>
+    //    public override void Step(double dt)
+    //    {
+    //        if ((drivers.Count == 0) || (!drivers.ContainsKey(CurrentState)))
+    //        {
+    //            return;
+    //        }
+
+    //        clock += dt;
+
+    //        foreach (KeyValuePair<int, DistrTransitionDriverElement> kvp in drivers[CurrentState])
+    //        {
+    //            if (kvp.Value.Transition(clock) == true)
+    //            {
+    //                PreviousState = CurrentState;
+    //                CurrentState = kvp.Key;
+    //                InitializeThisState();
+    //                TransitionOccurred = true;
+    //                clock = 0;
+    //            }
+    //        }
+    //    }
+
+    //    // run after transitioning into a new state
+    //    public void InitializeThisState()
+    //    {
+    //        foreach (KeyValuePair<int, DistrTransitionDriverElement> kvp in drivers[CurrentState])
+    //        {
+    //            kvp.Value.prob_distr.Reset(); 
+    //        }
+    //    }
+    //}
+
+    ///// <summary>
+    ///// the distribution transition driver will hold a matrix of elements of this type
+    ///// </summary>
+    //public class DistrTransitionDriverElement
+    //{
+    //    public DistributedParameter prob_distr { get; set; }
+    //    private double timeToNextEvent;
+
+    //    public DistrTransitionDriverElement()
+    //    {
+    //        prob_distr = new DistributedParameter();
+    //    }
+
+    //    public void Reset()
+    //    {
+    //        timeToNextEvent = prob_distr.Sample();
+    //    }
+
+    //    public bool Transition(double _clock)
+    //    {
+    //        if (timeToNextEvent >= _clock) return true;
+
+    //        return false;
+    //    }
+    //}
+
 
 }
