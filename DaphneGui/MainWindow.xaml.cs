@@ -2114,6 +2114,7 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                this.ReacComplexChartWindow.DataContext = sop.Protocol;
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
