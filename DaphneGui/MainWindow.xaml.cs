@@ -3008,6 +3008,12 @@ namespace DaphneGui
                 simThread.Abort();
             }
 
+            if (Properties.Settings.Default.skipDataWrites == false)
+            {
+                // reporter and hdf5 close
+                closeOutputFiles();
+            }
+
             // clear the vcr cache
             if (vcrControl != null)
             {
