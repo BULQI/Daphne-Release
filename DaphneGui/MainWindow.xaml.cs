@@ -1198,6 +1198,22 @@ namespace DaphneGui
                 {
                     // the dialog must provide this
                     selectedExp = expNames[0];
+
+                    PastExperiments past = new PastExperiments(expNames);
+
+                    if (past.ShowDialog() == true)
+                    {
+                        int index = past.SelectedExperiment;
+                        if (index > -1)
+                        {
+                            selectedExp = expNames[index];
+                        }
+                    }
+                    else
+                    {
+                        selectedExp = "";
+                    }
+
                 }
 
                 // now load it if there was a valid selection
@@ -1210,6 +1226,15 @@ namespace DaphneGui
                     DataBasket.hdf5file.openGroup("/Experiments_VCR/" + selectedExp);
                     // read the protocol string
                     DataBasket.hdf5file.readString("Protocol", ref protocolString);
+
+
+
+                    //experimenting
+                    //string descripString = null;
+                    //DataBasket.hdf5file.readString("Description", ref descripString);
+
+
+
                     // close the file and all groups
                     DataBasket.hdf5file.close(true);
 
