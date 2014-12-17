@@ -69,7 +69,9 @@
                 </GroupBox>
 
                 <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right">
-                    <Button Content="Overwrite Entity in Subcellular Components Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click"/>
+                    <Button Content="Overwrite Entity in Subcellular Components Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSave" 
+                            VerticalAlignment="Top" Click="btnSave_Click"
+                            ToolTip="If the two entities are equal, this button is disabled." ToolTipService.ShowOnDisabled="True"/>
                     <Button Content="Save Entity as new" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSaveAsNew" VerticalAlignment="Top" Click="btnSave_Click_1" />
                     <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="20,20" Name="btnCancel" VerticalAlignment="Top" Click="btnCancel_Click" />
                 </StackPanel>

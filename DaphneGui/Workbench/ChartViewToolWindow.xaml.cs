@@ -60,6 +60,9 @@ namespace Workbench
             RC = Tag as VatReactionComplex;       
             protocol = DataContext as Protocol;
 
+            if (protocol == null)
+                return;
+
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
@@ -91,7 +94,7 @@ namespace Workbench
         {
             if (Chart != null) {
                 Chart.Clear();
-            }
+            }            
         }
         
         /// <summary>
