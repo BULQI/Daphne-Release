@@ -5784,15 +5784,7 @@ namespace Daphne
             {               
                 molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
             }
-            molpops = newmolpops;
-
-            //recreate molecules_dict
-            molecules_dict.Clear();
-            foreach (ConfigMolecularPopulation molpop in molpops)
-            {
-                molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
-            }
-
+            
         }
 
         /// <summary>
