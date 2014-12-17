@@ -289,11 +289,11 @@ namespace DaphneGui
         {
             txtGeneName.IsEnabled = false;
 
-            //ListBox lb = sender as ListBox;
-            //if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
-            //{
-            //    lb.SelectedIndex = 0;
-            //}
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
         }
         
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
@@ -888,6 +888,13 @@ namespace DaphneGui
             //delete driver
             cell.death_driver = null;
 
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+            if (cp != null)
+            {
+                cp.reportStates.Death = false;
+            }
+
         }
 
         /// <summary>
@@ -1051,13 +1058,24 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Division = false;
+                }
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Differentiation = false;
+                }
             }
         }
 
@@ -1352,110 +1370,87 @@ namespace DaphneGui
             }
 
             updateCollections(cell);
+            updateSelectedMoleculesAndGenes(cell);
         }
 
-        /// <summary>
-        /// Delegates for doing processing AFTER the DataContextChanged 
-        /// and AFTER all related controls have been refreshed.
-        /// Select the 1st item in membrane/cytosol mol pops lists and genes list.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
-            EventHandler membraneEventHandler = null;
-            EventHandler cytosolEventHandler = null;
-            EventHandler nucleusEventHandler = null;
-
-            membraneEventHandler = new EventHandler(delegate
-            {
-                if (CellMembraneMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-                {
-                    if (cell != null)
-                    {
-                        updateMembMolCollection();
-                        CellMembraneMolPopsListBox.SelectedIndex = 0;
-                        //memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
-                    }
-
-                    CellMembraneMolPopsListBox.ItemContainerGenerator.StatusChanged -= membraneEventHandler;
-                }
-            });
-
-            cytosolEventHandler = new EventHandler(delegate
-            {
-                if (CellCytosolMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-                {
-                    if (cell != null)
-                    {                        
-                        CellCytosolMolPopsListBox.SelectedIndex = 0;
-                        updateCytoMolCollection();
-                        //cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
-                    }
-
-                    CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged -= cytosolEventHandler;
-                }
-            });
-
-            nucleusEventHandler = new EventHandler(delegate
-            {
-                if (CellNucleusGenesListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-                {
-                    if (cell != null)
-                    {
-                        CellNucleusGenesListBox.SelectedIndex = 0;
-                    }
-
-                    CellNucleusGenesListBox.ItemContainerGenerator.StatusChanged -= nucleusEventHandler;
-                }
-            });
-
-            CellMembraneMolPopsListBox.ItemContainerGenerator.StatusChanged += membraneEventHandler;
-            CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged += cytosolEventHandler;
-            CellNucleusGenesListBox.ItemContainerGenerator.StatusChanged += nucleusEventHandler;
-
-        }
-
-        private void updateMembMolCollection()
-        {
-            CollectionViewSource cvs;
-
-            // memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
-            cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
-            cvs.Source = new ObservableCollection<ConfigMolecule>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-        }
-
-        private void updateCytoMolCollection()
-        {
-            CollectionViewSource cvs;
-
-            // cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
-            cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
-            cvs.Source = new ObservableCollection<ConfigMolecule>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-
-            // list of cytosol molecules for use by division and differentitiation schemes
-            ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
-                return;
-
-            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            cvs.Source = new ObservableCollection<ConfigMolecule>();
-            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
-                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+                return;
             }
+
+            updateCollections(cell);
+
+            //CollectionViewSource cvs;
+
+            //// MOLECULES
+
+            //// cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
+            //cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
+            //cvs.Source = new ObservableCollection<ConfigMolecule>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            
+            //// memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
+            //cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
+            //cvs.Source = new ObservableCollection<ConfigMolecule>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+
+            //// list of cytosol molecules for use by division and differentitiation schemes
+            //cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            //cvs.Source = new ObservableCollection<ConfigMolecule>();
+            //foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            //{
+            //    ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+            //}
+
+            //// REACTIONS
+
+            //// lvCellAvailableReacs
+            //cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
+            //cvs.Source = new ObservableCollection<ConfigReaction>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+
+            //// lvCytosolAvailableReacs
+            //cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            //cvs.Source = new ObservableCollection<ConfigReaction>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+
+            //cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
+            //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+
+            //cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
+            //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+
+            updateSelectedMoleculesAndGenes(cell);
         }
 
         public void updateCollections(ConfigCell cell)
         {
             CollectionViewSource cvs;
 
-            ////// MOLECULES
-            updateMembMolCollection();
-            updateCytoMolCollection();
+            // MOLECULES
+
+            // cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
+            cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+
+            // memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
+            cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+
+            // list of cytosol molecules for use by division and differentitiation schemes
+            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            {
+                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+            }
 
             // REACTIONS
 
@@ -1476,52 +1471,59 @@ namespace DaphneGui
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
             cvs.Source = new ObservableCollection<ConfigReactionComplex>();
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
-
         }
 
+        //This is probably not needed any more but leaving here in case a problem occurs.
+        //To be deleted for next checkin.
+        public void updateSelectedMoleculesAndGenes(ConfigCell cell)
+        {
+            // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
+            // so do it manually here.
+
+            CellMembraneMolPopsListBox.SelectedIndex = 0;
+            //if (cell.membrane.molpops.Count > 0)
+            //{
+            //    memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
+            //}
+
+            CellCytosolMolPopsListBox.SelectedIndex = 0;
+            //if (cell.cytosol.molpops.Count > 0)
+            //{
+            //    cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+            //}
+
+            CellNucleusGenesListBox.SelectedItem = 0;
+            //if (cell.genes.Count > 0)
+            //{
+            //    CellNucleusGenesListBox.SelectedItem = cell.genes.First();
+            //}
+        }
 
         /// <summary>
-        /// When cell cytosol mol pops list box datacontext changes, and the process is complete, then initialize molecule combo box
+        /// This fixes the problem of selecting the 1st item in the mol pop list.
+        /// This shouldn't be a problem in the first place, but the data binding seems to occur before the list is populated
+        /// so the first item was not getting selected.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CellCytosolMolPopsListBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            EventHandler cytoDetailEventHandler = null;
-            cytoDetailEventHandler = new EventHandler(delegate
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
             {
-                if (CellCytosolMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-                {
-                    cyto_molecule_combo_box.SelectedIndex = 0;
-                    CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged -= cytoDetailEventHandler;
-                }
-            });
-
-            CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged += cytoDetailEventHandler;
-
+                lb.SelectedIndex = 0;
+            }
         }
 
-        /// <summary>
-        /// When cell membrane mol pops list box datacontext changes, and the process is complete, then initialize molecule combo box
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CellMembraneMolPopsListBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            EventHandler membDetailEventHandler = null;
-            membDetailEventHandler = new EventHandler(delegate
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
             {
-                if (CellMembraneMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-                {
-                    memb_molecule_combo_box.SelectedIndex = 0;
-                    CellMembraneMolPopsListBox.ItemContainerGenerator.StatusChanged -= membDetailEventHandler;
-                }
-
-            });
-
-            CellMembraneMolPopsListBox.ItemContainerGenerator.StatusChanged += membDetailEventHandler;
-
+                lb.SelectedIndex = 0;
+            }
         }
+
 
     }
 

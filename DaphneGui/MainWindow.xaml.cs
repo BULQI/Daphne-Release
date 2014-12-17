@@ -1060,8 +1060,6 @@ namespace DaphneGui
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
-                    toolWin.LockSaveStartSim();
-
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
@@ -1071,6 +1069,8 @@ namespace DaphneGui
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     }
 
+                    // this needs to come after setting orig_content
+                    toolWin.LockSaveStartSim();
                     sim.restart();
                     UpdateGraphics();
 
@@ -1226,15 +1226,6 @@ namespace DaphneGui
                     DataBasket.hdf5file.openGroup("/Experiments_VCR/" + selectedExp);
                     // read the protocol string
                     DataBasket.hdf5file.readString("Protocol", ref protocolString);
-
-
-
-                    //experimenting
-                    //string descripString = null;
-                    //DataBasket.hdf5file.readString("Description", ref descripString);
-
-
-
                     // close the file and all groups
                     DataBasket.hdf5file.close(true);
 
@@ -3032,6 +3023,12 @@ namespace DaphneGui
             if (simThread != null && simThread.IsAlive)
             {
                 simThread.Abort();
+            }
+
+            if (Properties.Settings.Default.skipDataWrites == false)
+            {
+                // reporter and hdf5 close
+                closeOutputFiles();
             }
 
             // clear the vcr cache

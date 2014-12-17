@@ -2277,12 +2277,9 @@ namespace Daphne
         // Convenience utility storage (not serialized)
         [JsonIgnore]
         public Dictionary<int, CellPopulation> cellpopulation_dict;
-
+        [JsonIgnore]
         private int gaussRetrieve, originCounter;
-
-
         public string RenderSkinName { get; set; }
-
         public RenderPopOptions popOptions { get; set; }
 
         public TissueScenario()
@@ -5803,15 +5800,7 @@ namespace Daphne
             {               
                 molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
             }
-            molpops = newmolpops;
-
-            //recreate molecules_dict
-            molecules_dict.Clear();
-            foreach (ConfigMolecularPopulation molpop in molpops)
-            {
-                molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
-            }
-
+            
         }
 
         /// <summary>
@@ -6729,8 +6718,12 @@ namespace Daphne
         public void CellPopGaussChanged(object sender, PropertyChangedEventArgs e)
         {
             BoxSpecification box = (BoxSpecification)sender;
-            ParamReset(box);
-            Reset();
+
+            if (e.PropertyName.Equals("box_visibility") == false)
+            {
+                ParamReset(box);
+                Reset();
+            }
         }
 
         public override double[] nextPosition()

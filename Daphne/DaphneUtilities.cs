@@ -44,13 +44,6 @@ namespace Daphne
             MT19937gen = new Troschuetz.Random.MT19937Generator(seed);
             TroschuetzCUD = new Troschuetz.Random.ContinuousUniformDistribution(Rand.MT19937gen);
             //SystemRandom = new SystemRandomSource(seed);
-
-            Console.WriteLine("Reseed with value {0}", seed);
-            for (int i = 0; i < 1; i++)
-            {
-                Console.WriteLine("\t{0}\t{1}", NormalDist.Sample(), TroschuetzCUD.NextDouble());
-            }
-
         }
 
         public static void ReseedNormalDist(int seed)

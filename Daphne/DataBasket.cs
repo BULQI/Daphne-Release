@@ -100,18 +100,24 @@ namespace Daphne
         }
 
         /// <summary>
-        /// find the highest experiment id; assumes it is the last entry
+        /// find the highest experiment id
         /// </summary>
         /// <returns>the highest id or -1 if empty</returns>
         public static int findHighestExperimentId()
         {
             List<string> local = hdf5file.subGroupNames("/Experiments_VCR");
+            int max = -1;
 
-            if (local.Count > 0)
+            foreach (string s in local)
             {
-                return extractExperimentId(local.Last());
+                int tmp = extractExperimentId(s);
+
+                if (tmp > max)
+                {
+                    max = tmp;
+                }
             }
-            return -1;
+            return max;
         }
 
         /// <summary>
