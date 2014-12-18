@@ -2248,14 +2248,9 @@ namespace DaphneGui
                 }
             }
 
-            //////////VCR_Toolbar.IsEnabled = false;
+            VCR_Toolbar.IsEnabled = false;
             //////////gc.ToolsToolbar_IsEnabled = true;
             //////////gc.DisablePickingButtons();
-
-#if LANGEVIN_TIMING
-            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
-#endif
-            //}
 
             loadSuccess = true;
         }
