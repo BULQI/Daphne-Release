@@ -1162,6 +1162,19 @@ namespace DaphneGui
             }
         }
 
+        private string uniqueFilename(string s)
+        {
+            string tmp = orig_path + @"\" + s + ".json";
+            int i = 0;
+
+            while (File.Exists(tmp) == true)
+            {
+                tmp = orig_path + @"\" + s + "_" + i + ".json";
+                i++;
+            }
+            return tmp;
+        }
+
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
             // id the file is open we'll have to close it; ask the user if that's what they want
@@ -1196,9 +1209,6 @@ namespace DaphneGui
                 // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
                 if (expNames.Count > 0)
                 {
-                    // the dialog must provide this
-                    selectedExp = expNames[0];
-
                     PastExperiments past = new PastExperiments(expNames);
 
                     if (past.ShowDialog() == true)
@@ -1209,11 +1219,6 @@ namespace DaphneGui
                             selectedExp = expNames[index];
                         }
                     }
-                    else
-                    {
-                        selectedExp = "";
-                    }
-
                 }
 
                 // now load it if there was a valid selection
@@ -1232,6 +1237,8 @@ namespace DaphneGui
                     // do the loading
                     MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
                     lockAndResetSim(true, ReadJson(protocolString));
+                    // need to set a filename
+                    sop.Protocol.FileName = uniqueFilename(selectedExp);
                     if (loadSuccess == false)
                     {
                         return;
@@ -2803,9 +2810,6 @@ namespace DaphneGui
             }
 
         }
-
-
-
 
         public MessageBoxResult saveDialog()
         {
