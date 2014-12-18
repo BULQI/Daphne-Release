@@ -3208,7 +3208,7 @@ namespace DaphneGui
                 if (erMol != null)
                 {                    
                     pm.ComponentLevelDetails.DataContext = erMol;
-                    newEntity = ((ConfigMolecule)source).Clone(null);
+                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3228,7 +3228,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
                     pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    newEntity = ((ConfigReaction)source).Clone(true);
+                    newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pr.ShowDialog() == false)
@@ -3245,7 +3245,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
                     pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    newEntity = ((ConfigCell)source).Clone(true);
+                    newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pcell.ShowDialog() == false)
@@ -3265,7 +3265,7 @@ namespace DaphneGui
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
-                    newEntity = ((ConfigGene)source).Clone(null);
+                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3288,7 +3288,7 @@ namespace DaphneGui
                 {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
-                    newEntity = ((ConfigReactionComplex)source).Clone(true);
+                    newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog

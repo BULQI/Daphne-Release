@@ -48,6 +48,9 @@ namespace Workbench
             windowsFormsHost1.Width = Chart.Width;
             windowsFormsHost1.Height = Chart.Height;
             Chart.MouseUp += new System.Windows.Forms.MouseEventHandler(Chart_MouseUp);
+
+            Chart.Clear();
+            Chart.Draw();
         }
 
         /// <summary>
@@ -162,8 +165,9 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runSim();
-                //MW.runButton_Click(null, null);
+                if (MW != null) {
+                    MW.runSim();
+                }
             }
         }
 
@@ -221,8 +225,10 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runSim();
-                //MW.runButton_Click(null, null);
+                if (MW != null)
+                {
+                    MW.runSim();
+                }
             }
         }
 
