@@ -217,7 +217,7 @@ namespace Daphne
 
             // cell population id
             simCell.Population_id = cp.cellpopulation_id;
-            // state
+            // spatial state
             simCell.setSpatialState(cellState.spState);
 
             // modify molpop information before setting
@@ -285,9 +285,9 @@ namespace Daphne
             // death behavior
             if (cp.Cell.death_driver != null)
             {
-                if (cellState.cbState.deathDriveState != -1)
+                if (cellState.cbState.deathDriverState != -1)
                 {
-                    simCell.DeathBehavior.CurrentState = cellState.cbState.deathDriveState;
+                    simCell.DeathBehavior.CurrentState = cellState.cbState.deathDriverState;
                 }
                 else
                 {

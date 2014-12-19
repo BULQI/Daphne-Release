@@ -6818,13 +6818,13 @@ namespace Daphne
     public class CellBehaviorState
     {
         //saving current state of each driver
-        public int deathDriveState;
+        public int deathDriverState;
         public int divisionDriverState;
         public int differentiationDriverState;
 
         public CellBehaviorState()
         {
-            deathDriveState = -1;
+            deathDriverState = -1;
             divisionDriverState = -1;
             differentiationDriverState = -1;
         }
@@ -6904,12 +6904,12 @@ namespace Daphne
 
         public void setDeathDriverState(int state)
         {
-            cbState.deathDriveState = state;
+            cbState.deathDriverState = state;
         }
 
         public void setDivisonDriverState(int state)
         {
-            cbState.deathDriveState = state;
+            cbState.divisionDriverState = state;
         }
 
         public void setDifferentiationDriverState(int state)
