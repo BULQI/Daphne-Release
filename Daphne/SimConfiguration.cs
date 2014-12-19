@@ -5530,6 +5530,9 @@ namespace Daphne
             reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
             molecules_dict = new Dictionary<string, ConfigMolecule>();
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
+            genes = new ObservableCollection<ConfigGene>();
+            genes_dict = new Dictionary<string, ConfigGene>();
+            genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
         }
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -5586,6 +5589,34 @@ namespace Daphne
                     }
                 }
             }
+        }
+
+        private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigGene gene = nn as ConfigGene;
+                    if (genes_dict.ContainsKey(gene.entity_guid) == false)
+                    {
+                        genes_dict.Add(gene.entity_guid, gene);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigGene gene = dd as ConfigGene;
+
+                    if (genes_dict.ContainsKey(gene.entity_guid) == true)
+                    {
+                        genes_dict.Remove(gene.entity_guid);
+                    }
+                }
+            }
+
         }
 
         /// <summary>
