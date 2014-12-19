@@ -297,7 +297,11 @@ namespace Daphne
                         simCell.DeathBehavior.CurrentState = nextIntValue;
                     }
                 }
+                // set the alive flag
+                simCell.Alive = simCell.DeathBehavior.CurrentState == 0;
+
                 ConfigTransitionDriver config_td = cp.Cell.death_driver;
+
                 LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
             }
 
