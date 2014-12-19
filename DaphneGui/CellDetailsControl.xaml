@@ -134,8 +134,9 @@
                                             ItemsSource="{Binding Path=membrane.molpops}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="0" 
-                                             SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"
-                                                    />
+                                            SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"
+                                            IsSynchronizedWithCurrentItem="True"
+                                            />
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
@@ -247,6 +248,7 @@
                                                 DisplayMemberPath="Name"     
                                                 SelectedIndex="0"
                                                 SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"
+                                                IsSynchronizedWithCurrentItem="True"
                                                 />
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -385,7 +387,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left"/>
+                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left"/>
                                             <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click"/>
                                         </StackPanel>
                                     </StackPanel>

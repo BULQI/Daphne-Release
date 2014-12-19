@@ -157,7 +157,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
                 <TextBox Width="80" Margin="20,0" Text="{Binding Path=CopyNumber, Mode=TwoWay}"></TextBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Margin="20,0" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Margin="20,0" Number="{Binding Path=ActivationLevel, Mode=TwoWay}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
