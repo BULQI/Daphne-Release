@@ -409,8 +409,11 @@ namespace DaphneGui
                 colorCount++;
             }
 
-            SetXAxisLimits();
-            SetYAxisLimits();
+            if (Series.Count > 0)
+            {
+                SetXAxisLimits();
+                SetYAxisLimits();
+            }
 
             LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
@@ -465,8 +468,11 @@ namespace DaphneGui
             // Set chart control location
             Location = new System.Drawing.Point(1, 8);
 
-            SetXAxisLimits();
-            SetYAxisLimits();
+            if (Series.Count > 0)
+            {
+                SetXAxisLimits();
+                SetYAxisLimits();
+            }
             
             //// For debugging
             //Console.WriteLine("Draw() final: {0}, {1}\t {2}, {3}", ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, 
@@ -678,8 +684,11 @@ namespace DaphneGui
             }
 
             //HAVE TO UPDATE X AXIS MAX TOO
-            SetXAxisLimits();
-            SetYAxisLimits();
+            if (Series.Count > 0)
+            {
+                SetXAxisLimits();
+                SetYAxisLimits();
+            }
 
             // For debugging
             ////Console.WriteLine("RedrawSeries(): {0}, {1}\t {2}, {3}",

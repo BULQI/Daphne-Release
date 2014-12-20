@@ -159,11 +159,13 @@ namespace Workbench
         /// <param name="e"></param>
         private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (MW == null || RC == null || lTimes.Count == 0 || dictConcs.Count == 0)
+                return;
+
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
                 MW.runSim();
-                //MW.runButton_Click(null, null);
             }
         }
 
@@ -218,11 +220,13 @@ namespace Workbench
         /// <param name="e"></param>
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (MW == null || RC == null || lTimes.Count == 0 || dictConcs.Count == 0)
+                return;
+
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
                 MW.runSim();
-                //MW.runButton_Click(null, null);
             }
         }
 
