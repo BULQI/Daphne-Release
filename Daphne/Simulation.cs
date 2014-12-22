@@ -217,7 +217,7 @@ namespace Daphne
 
             // cell population id
             simCell.Population_id = cp.cellpopulation_id;
-            // state
+            // spatial state
             simCell.setSpatialState(cellState.spState);
 
             // modify molpop information before setting
@@ -285,9 +285,9 @@ namespace Daphne
             // death behavior
             if (cp.Cell.death_driver != null)
             {
-                if (cellState.cbState.deathDriveState != -1)
+                if (cellState.cbState.deathDriverState != -1)
                 {
-                    simCell.DeathBehavior.CurrentState = cellState.cbState.deathDriveState;
+                    simCell.DeathBehavior.CurrentState = cellState.cbState.deathDriverState;
                 }
                 else
                 {
@@ -297,7 +297,11 @@ namespace Daphne
                         simCell.DeathBehavior.CurrentState = nextIntValue;
                     }
                 }
+                // set the alive flag
+                simCell.Alive = simCell.DeathBehavior.CurrentState == 0;
+
                 ConfigTransitionDriver config_td = cp.Cell.death_driver;
+
                 LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
             }
 

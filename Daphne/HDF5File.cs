@@ -420,8 +420,13 @@ namespace Daphne
     /// </summary>
     public class TissueSimulationFrameData : IFrameData
     {
+        // linear numbering for behavior bookkeeping, b_count must indicate the number of behaviors
+        private int B_DEATH = 0,
+                    B_DIV = 1,
+                    B_DIFF = 2,
+                    B_COUNT = 3;
         private int cellCount;
-        private int[] cellIds, cellGens, cellPopIds;
+        private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
         private double[] cellPos;
 
         public int CellCount
@@ -456,6 +461,14 @@ namespace Daphne
             }
         }
 
+        public int[] CellBehaviors
+        {
+            get
+            {
+                return cellBehaviors;
+            }
+        }
+
         public double[] CellPos
         {
             get
@@ -487,6 +500,7 @@ namespace Daphne
                 cellPos = new double[cellCount * CellSpatialState.SingleDim];
                 cellGens = new int[cellCount];
                 cellPopIds = new int[cellCount];
+                cellBehaviors = new int[cellCount * B_COUNT];
             }
 
             cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
@@ -504,9 +518,38 @@ namespace Daphne
                 cellGens[i] = c.generation;
                 // population
                 cellPopIds[i] = c.Population_id;
+                // death
+                cellBehaviors[i * B_COUNT + B_DEATH] = c.Alive == true ? 0 : 1;
+                // division
+                cellBehaviors[i * B_COUNT + B_DIV] = c.DividerState;
+                // differentiation
+                cellBehaviors[i * B_COUNT + B_DIFF] = c.DifferentiationState;
+
                 i++;
             }
             return true;
+        }
+
+        /// <summary>
+        /// get the state for a cell by index and write it into the CellState parameter
+        /// </summary>
+        /// <param name="idx">cell index</param>
+        /// <param name="state"></param>
+        public void applyStateByIndex(int idx, ref CellState state)
+        {
+            // set the position
+            for (int i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                state.spState.X[i] = cellPos[idx * CellSpatialState.SingleDim + i];
+            }
+            // set the generation
+            state.setCellGeneration(cellGens[idx]);
+            // death
+            state.cbState.deathDriverState = cellBehaviors[idx * B_COUNT + B_DEATH];
+            // division
+            state.cbState.divisionDriverState = cellBehaviors[idx * B_COUNT + B_DIV];
+            // differentiation
+            state.cbState.differentiationDriverState = cellBehaviors[idx * B_COUNT + B_DIFF];
         }
 
         private void writeInt(int val, string name)
@@ -545,7 +588,7 @@ namespace Daphne
             if (prepareData() == true)
             {
                 // write the cell ids
-                long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
+                long[] dims = new long[] { cellCount };
 
                 // ids
                 DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
@@ -554,8 +597,12 @@ namespace Daphne
                 // population ids
                 DataBasket.hdf5file.writeDSInt("CellPopIDs", dims, new H5Array<int>(cellPopIds));
 
+                // behaviors
+                dims = new long[] { cellCount, B_COUNT };
+                DataBasket.hdf5file.writeDSInt("CellBehaviors", dims, new H5Array<int>(cellBehaviors));
+
                 // write the cell positions
-                dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
+                dims = new long[] { cellCount, CellSpatialState.SingleDim };
                 DataBasket.hdf5file.writeDSDouble("Position", dims, new H5Array<double>(cellPos));
             }
 
@@ -589,6 +636,9 @@ namespace Daphne
                 DataBasket.hdf5file.readDSInt("CellGens", ref cellGens);
                 // population ids
                 DataBasket.hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
+
+                // behaviors
+                DataBasket.hdf5file.readDSInt("CellBehaviors", ref cellBehaviors);
 
                 // read the cell positions
                 DataBasket.hdf5file.readDSDouble("Position", ref cellPos);

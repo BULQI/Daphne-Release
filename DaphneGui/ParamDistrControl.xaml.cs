@@ -58,26 +58,30 @@ namespace DaphneGui
                     switch (distr_parameter.DistributionType)
                     {
                         case ParameterDistributionType.GAMMA:
-                            distr_parameter = new DistributedParameter(((GammaParameterDistribution)old_pd).Shape);
+                            distr_parameter.ConstValue = ((GammaParameterDistribution)old_pd).Shape;
+
                             break;
 
                         case ParameterDistributionType.POISSON:
-                            distr_parameter = new DistributedParameter(((PoissonParameterDistribution)old_pd).Mean);
+                            distr_parameter.ConstValue = ((PoissonParameterDistribution)old_pd).Mean;
                             break;
 
                         case ParameterDistributionType.UNIFORM:
                             UniformParameterDistribution upd = old_pd as UniformParameterDistribution;
-                            distr_parameter = new DistributedParameter((upd.MaxValue - upd.MinValue)/2.0);
+                            distr_parameter.ConstValue = (upd.MaxValue - upd.MinValue) / 2.0;
                             break;
 
                         case ParameterDistributionType.CATEGORICAL:
-                            distr_parameter = new DistributedParameter(((CategoricalParameterDistribution)old_pd).MeanCategoryValue());
+                            distr_parameter.ConstValue = ((CategoricalParameterDistribution)old_pd).MeanCategoryValue();
                             break;
 
                         default:
-                            distr_parameter = new DistributedParameter();
+                            distr_parameter.ConstValue = 0.0;
                             break;
                     }
+                    distr_parameter.ParamDistr = null;
+                    distr_parameter.DistributionType = ParameterDistributionType.CONSTANT;
+
                     break;
 
                 case ParameterDistributionType.CATEGORICAL:
