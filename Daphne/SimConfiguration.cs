@@ -5494,10 +5494,26 @@ namespace Daphne
 
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
 
+        private ObservableCollection<ConfigGene> _genes;
+        public ObservableCollection<ConfigGene> genes
+        {
+            get
+            {
+                return _genes;
+            }
+            set
+            {
+                _genes = value;
+                OnPropertyChanged("genes");
+            }
+        }
+
         [JsonIgnore]
         public Dictionary<string, ConfigReaction> reactions_dict;
         [JsonIgnore]
         public Dictionary<string, ConfigMolecule> molecules_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigGene> genes_dict;
 
         public ConfigReactionComplex()
             : this("NewRC")
@@ -5514,6 +5530,9 @@ namespace Daphne
             reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
             molecules_dict = new Dictionary<string, ConfigMolecule>();
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
+            genes = new ObservableCollection<ConfigGene>();
+            genes_dict = new Dictionary<string, ConfigGene>();
+            genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
         }
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -5570,6 +5589,34 @@ namespace Daphne
                     }
                 }
             }
+        }
+
+        private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigGene gene = nn as ConfigGene;
+                    if (genes_dict.ContainsKey(gene.entity_guid) == false)
+                    {
+                        genes_dict.Add(gene.entity_guid, gene);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigGene gene = dd as ConfigGene;
+
+                    if (genes_dict.ContainsKey(gene.entity_guid) == true)
+                    {
+                        genes_dict.Remove(gene.entity_guid);
+                    }
+                }
+            }
+
         }
 
         /// <summary>
@@ -5757,20 +5804,31 @@ namespace Daphne
             {
                 if (molecules_dict.ContainsKey(molguid) == false)
                 {
-                    ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                    //ConfigMolecule configMolecule = molecules_dict[molguid];                 
-                    if (configMolecule != null)
+                    //If a molecule
+                    if (er.molecules_dict.ContainsKey(molguid))
                     {
-                        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                        configMolPop.molecule = configMolecule.Clone(null);
-                        configMolPop.molecule.entity_guid = configMolecule.entity_guid;
-                        configMolPop.Name = configMolecule.Name;
+                        ConfigMolecule configMolecule = er.molecules_dict[molguid];
+                        //ConfigMolecule configMolecule = molecules_dict[molguid];                 
+                        if (configMolecule != null)
+                        {
+                            ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                            configMolPop.molecule = configMolecule.Clone(null);
+                            configMolPop.molecule.entity_guid = configMolecule.entity_guid;
+                            configMolPop.Name = configMolecule.Name;
 
-                        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                            MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
-                        hl.concentration = 0;
-                        configMolPop.mp_distribution = hl;
-                        molpops.Add(configMolPop);
+                            hl.concentration = 0;
+                            configMolPop.mp_distribution = hl;
+                            molpops.Add(configMolPop);
+                        }
+                    }
+                    //Could be a gene also
+                    else if (er.genes_dict.ContainsKey(molguid))
+                    {
+                        ConfigGene erGene = er.genes_dict[molguid];
+                        ConfigGene newGene = erGene.Clone(null);
+                        genes.Add(newGene);
                     }
                 }
             }

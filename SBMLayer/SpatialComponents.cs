@@ -98,22 +98,16 @@ namespace SBMLayer
         public void AddBackgroundGeometry()
         {
 		    CSGObject backgroundObject = csGeometry.createCsgObject();
-		    CSGTranslation translation = backgroundObject.createCsgTranslation();
-            translation.setId("translation_background");
             backgroundObject.setOrdinal(ordinalBackground);
-		
-            // Defines the location of the simulation space
-            translation.setTranslateX((xmin+xmax)/2.0);
-		    translation.setTranslateY((ymin+ymax)/2.0);
-		    translation.setTranslateZ((zmin+zmax)/2.0);
-		    CSGScale scale = translation.createCsgScale();
+		    
+            CSGScale scale = backgroundObject.createCsgScale();
             scale.setId("scale_background");
 		    scale.setScaleX(xmax-xmin);
 		    scale.setScaleY(ymax-ymin);
 		    scale.setScaleZ(zmax-zmin);
 
             //Geometrical definition of simulation space as a cube
-		    CSGPrimitive cube = scale.createCsgPrimitive();
+            CSGPrimitive cube = scale.createCsgPrimitive();
             cube.setId("solid_background");
 		    cube.setPrimitiveType("cube");
 		    backgroundObject.setDomainType(backgroundDomainType.getId());
@@ -129,22 +123,21 @@ namespace SBMLayer
         {
             //Instantiate a DomainType for a given cell type
             DomainType domainType = geometry.createDomainType();
+            domainType.setId("DomainType_" + comp.getId());
+
             if (isMembrane)
-            {
-                domainType.setId("cellType_" + comp.getId());
+            { 
                 domainType.setSpatialDimensions(2);
             }
             else
             {
-                domainType.setId("cellType_" + comp.getId());
                 domainType.setSpatialDimensions(3);
             }
      
-
             //Add a CompartmentMapping element to link DomainType with Cell compartment
             SpatialCompartmentPlugin cplug = (SpatialCompartmentPlugin)comp.getPlugin(packageName);
             CompartmentMapping map = cplug.createCompartmentMapping();
-            map.setId("mapping_" + domainType.getId() + "_" + comp.getId());         
+            map.setId("mapping_" + domainType.getId());         
             map.setDomainType(domainType.getId());
             map.setUnitSize(1.0);
 
@@ -360,7 +353,6 @@ namespace SBMLayer
             //Defining a coordinate system
             SpatialModelPlugin plugin = (SpatialModelPlugin)model.getPlugin(packageName);
             geometry = plugin.createGeometry();
-            int temp = geometry.getCoordinateSystem();
             geometry.setCoordinateSystem("cartesian");
             geometry.setId("Geometry");            
             string coordUnit = model.getLengthUnits();

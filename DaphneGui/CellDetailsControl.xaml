@@ -438,8 +438,8 @@
 
                                         <ListBox.ContextMenu>
                                             <ContextMenu >
-                                                <MenuItem Header="Push to Protocol level" Name="menuPushToProto"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menuPullFromProto" ></MenuItem>
+                                                <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
+                                                <MenuItem Header="Pull from Potocol level" Name="menuMembPullReacFromProto" Click="menuMembPullReacFromProto_Click"></MenuItem>
                                             </ContextMenu>
                                         </ListBox.ContextMenu>
                                     </ListBox>
@@ -543,7 +543,7 @@
                                         <ListBox.ContextMenu>
                                             <ContextMenu >
                                                 <MenuItem Header="Push to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" ></MenuItem>
+                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
                                             </ContextMenu>
                                         </ListBox.ContextMenu>
 

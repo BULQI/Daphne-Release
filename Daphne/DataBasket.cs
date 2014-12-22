@@ -564,7 +564,7 @@ namespace Daphne
                 removalList.Add(key);
             }
 
-            for (int c = 0; c < frame.CellIDs.Length; c++)
+            for (int c = 0; c < frame.CellCount; c++)
             {
                 int cell_id = frame.CellIDs[c];
 
@@ -606,7 +606,7 @@ namespace Daphne
                     // db implementation, but we need some mechanism to set the entire state
                     ObjectLoader.LoadValues(cells[cell_id], kvpc.Value.state);
 #else
-                    for(int i = 0; i < CellSpatialState.SingleDim; i++)
+                    for (int i = 0; i < CellSpatialState.SingleDim; i++)
                     {
                         cells[cell_id].SpatialState.X[i] = frame.CellPos[c * CellSpatialState.SingleDim + i];
                     }

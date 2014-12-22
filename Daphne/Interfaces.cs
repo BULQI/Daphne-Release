@@ -29,7 +29,7 @@ namespace Daphne
 
     public interface IFrameData
     {
-        void prepareData();
+        bool prepareData();
         void writeData(int i);
         void writeData(string groupName);
         void readData(int i);

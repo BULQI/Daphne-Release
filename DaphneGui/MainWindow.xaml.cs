@@ -938,8 +938,8 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
-            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
-            //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
+            //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
             dlg.FileName = "SBMLModel";
 
             // Show open  file dialog box
@@ -1162,6 +1162,19 @@ namespace DaphneGui
             }
         }
 
+        private string uniqueFilename(string s)
+        {
+            string tmp = orig_path + @"\" + s + ".json";
+            int i = 0;
+
+            while (File.Exists(tmp) == true)
+            {
+                tmp = orig_path + @"\" + s + "_" + i + ".json";
+                i++;
+            }
+            return tmp;
+        }
+
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
             // id the file is open we'll have to close it; ask the user if that's what they want
@@ -1196,9 +1209,6 @@ namespace DaphneGui
                 // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
                 if (expNames.Count > 0)
                 {
-                    // the dialog must provide this
-                    selectedExp = expNames[0];
-
                     PastExperiments past = new PastExperiments(expNames);
 
                     if (past.ShowDialog() == true)
@@ -1209,11 +1219,6 @@ namespace DaphneGui
                             selectedExp = expNames[index];
                         }
                     }
-                    else
-                    {
-                        selectedExp = "";
-                    }
-
                 }
 
                 // now load it if there was a valid selection
@@ -1232,6 +1237,8 @@ namespace DaphneGui
                     // do the loading
                     MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
                     lockAndResetSim(true, ReadJson(protocolString));
+                    // need to set a filename
+                    sop.Protocol.FileName = uniqueFilename(selectedExp);
                     if (loadSuccess == false)
                     {
                         return;
@@ -2130,7 +2137,7 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                this.ReacComplexChartWindow.DataContext = sop.Protocol;
+                //this.ReacComplexChartWindow.DataContext = sop.Protocol;   //was causing a problem in chart page
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
@@ -2248,14 +2255,9 @@ namespace DaphneGui
                 }
             }
 
-            //////////VCR_Toolbar.IsEnabled = false;
+            VCR_Toolbar.IsEnabled = false;
             //////////gc.ToolsToolbar_IsEnabled = true;
             //////////gc.DisablePickingButtons();
-
-#if LANGEVIN_TIMING
-            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
-#endif
-            //}
 
             loadSuccess = true;
         }
@@ -2809,9 +2811,6 @@ namespace DaphneGui
 
         }
 
-
-
-
         public MessageBoxResult saveDialog()
         {
             // Configure the message box to be displayed
@@ -3209,7 +3208,7 @@ namespace DaphneGui
                 if (erMol != null)
                 {                    
                     pm.ComponentLevelDetails.DataContext = erMol;
-                    newEntity = ((ConfigMolecule)source).Clone(null);
+                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3229,7 +3228,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
                     pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    newEntity = ((ConfigReaction)source).Clone(true);
+                    newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pr.ShowDialog() == false)
@@ -3246,7 +3245,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
                     pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    newEntity = ((ConfigCell)source).Clone(true);
+                    newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pcell.ShowDialog() == false)
@@ -3266,7 +3265,7 @@ namespace DaphneGui
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
-                    newEntity = ((ConfigGene)source).Clone(null);
+                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3289,7 +3288,7 @@ namespace DaphneGui
                 {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
-                    newEntity = ((ConfigReactionComplex)source).Clone(true);
+                    newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
