@@ -3349,7 +3349,7 @@ namespace Daphne
                 driver.states.Add(stateName[i]);
                 for (int j = 0; j < signal.GetLength(1); j++)
                 {
-                    ConfigTransitionDriverElement driverElement = new ConfigTransitionDriverElement();
+                    ConfigMolTransitionDriverElement driverElement = new ConfigMolTransitionDriverElement();
 
                     driverElement.CurrentState = i;
                     driverElement.DestState = j;

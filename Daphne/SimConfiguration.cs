@@ -4163,25 +4163,154 @@ namespace Daphne
 
     }
 
-    public class ConfigTransitionDriverElement
+    public abstract class ConfigTransitionDriverElement : EntityModelBase
     {
-        //public string driver_element_guid { get; set; }
-        public double Alpha { get; set; }
-        public double Beta { get; set; }
-        public string driver_mol_guid_ref { get; set; }
-
         public int CurrentState { get; set; }
         public string CurrentStateName { get; set; }
         public int DestState { get; set; }
         public string DestStateName { get; set; }
+        public TransitionDriverElementType Type { get; set; }
 
         public ConfigTransitionDriverElement()
         {
-            //Guid id = Guid.NewGuid();
-            //driver_element_guid = id.ToString();
-            driver_mol_guid_ref = "";
         }
     }
+
+    public class ConfigMolTransitionDriverElement : ConfigTransitionDriverElement
+    {
+        public double Alpha { get; set; }
+        public double Beta { get; set; }
+        public string driver_mol_guid_ref { get; set; }
+
+        public ConfigMolTransitionDriverElement()
+        {
+            driver_mol_guid_ref = "";
+            Type = TransitionDriverElementType.MOLECULAR;
+        }
+    }
+
+    public class ConfigDistrTransitionDriverElement : ConfigTransitionDriverElement
+    {
+        public DistributedParameter distr { get; set; }
+
+        public ConfigDistrTransitionDriverElement()
+        {
+            distr = new DistributedParameter();
+            Type = TransitionDriverElementType.DISTRIBUTION;
+        }
+    }
+
+
+    /// <summary>
+    /// Types of TransitionDriverElements
+    /// </summary>
+    public enum TransitionDriverElementType { NONE = 0, MOLECULAR, DISTRIBUTION };
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(TransitionDriverElementType), typeof(string))]
+    public class TransitionDriverElementTypeToStringConverter : IValueConverter
+    {
+        private List<string> _trans_driver_element_type_strings = new List<string>()
+                                {
+                                    "None",
+                                    "Molecular",
+                                    "Distribution"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value as string == "") return "None";
+            try
+            {
+                return _trans_driver_element_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _trans_driver_element_type_strings.FindIndex(item => item == str);
+            return (TransitionDriverElementType)Enum.ToObject(typeof(TransitionDriverElementType), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Convert:
+    ///     Converter to go between enum values and boolean for GUI
+    ///     If the TransitionDriverElementType is NONE then return false.
+    ///     Return True for all other distribution types.
+    ///  ConvertBack: 
+    ///     Shouldn't be used. Return NONE.
+    /// </summary>
+    [ValueConversion(typeof(TransitionDriverElement), typeof(string))]
+    public class TransitionDriverElementTypeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null) return "NONE";
+            if (value.GetType() == typeof(ConfigMolTransitionDriverElement))
+            {
+                return "MOLECULE";
+            }
+            else if (value.GetType() == typeof(ConfigDistrTransitionDriverElement))
+            {
+                return "DISTRIBUTION";
+            }
+            else
+            {
+                return "NONE";
+            }
+        }
+
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // Shouldn't be using this, so simply default to constant 
+            return null;
+        }
+    }
+
+
+    ///// <summary>
+    ///// Convert:
+    /////     Converter to go between enum values and boolean for GUI
+    /////     If the TransitionDriverElementType is NONE then return false.
+    /////     Return True for all other distribution types.
+    /////  ConvertBack: 
+    /////     Shouldn't be used. Return NONE.
+    ///// </summary>
+    //[ValueConversion(typeof(ConfigCell), typeof(string))]
+    //public class TransitionDriverElementTypeToBoolConverter : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    //    {
+    //        ConfigCell cell = value as ConfigCell;
+    //        if (cell == null) return "NONE";
+    //        if (cell.death_driver == null) return "NONE";
+
+    //        if (cell.death_driver. == TransitionDriverElementType.MOLECULAR)
+    //        {
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            return false;
+    //        }
+    //    }
+
+
+    //    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    //    {
+    //        // Shouldn't be using this, so simply default to constant 
+    //        return TransitionDriverElementType.NONE;
+    //    }
+    //}
 
     public class ConfigTransitionDriverRow
     {
@@ -4344,7 +4473,7 @@ namespace Daphne
             for (int k = 0; k < Driver.states.Count - 1; k++)
             {
                 trow = Driver.DriverElements[k];
-                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
                 e.driver_mol_guid_ref = "";
@@ -4359,7 +4488,7 @@ namespace Daphne
             trow = new ConfigTransitionDriverRow();
             for (int j = 0; j < Driver.states.Count; j++)
             {
-                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
                 e.driver_mol_guid_ref = "";

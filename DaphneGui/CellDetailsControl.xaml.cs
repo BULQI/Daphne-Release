@@ -1524,9 +1524,341 @@ namespace DaphneGui
             }
         }
 
+        private void cbTransDriverElement_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //// Only want to respond to purposeful user interaction, not just population and depopulation
+            //// of parameter distribution type
+            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            //{
+            //    return;
+            //}
+
+            //ConfigCell cell = DataContext as ConfigCell;
+            //if (cell == null)  return;
+
+            //TransitionDriverElementType type = (TransitionDriverElementType)cbTransDistrType.SelectedItem;
+            //if (type == TransitionDriverElementType.NONE)
+            //{
+            //    cell.death_driver = null;
+            //    return;
+            //}
+
+            //string[] stateName = new string[] { "alive", "dead" };
+
+            //ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+            //config_td.Name = "generic apoptosis";
+            //config_td.CurrentState = new DistributedParameter(0);
+            //config_td.StateName = stateName[0];
+
+            //ConfigTransitionDriverRow row;
+            //config_td.DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
+            //config_td.states = new ObservableCollection<string>();
+
+            //for (int i = 0; i < stateName.Count(); i++)
+            //{
+            //    row = new ConfigTransitionDriverRow();
+            //    row.elements = new ObservableCollection<ConfigTransitionDriverElement>();
+            //    config_td.states.Add(stateName[i]);
+
+            //    for (int j = 0; j < stateName.Count(); j++)
+            //    {
+            //        ConfigTransitionDriverElement driverElement;
+
+            //        if (type == TransitionDriverElementType.MOLECULAR)
+            //        {
+            //            driverElement = new ConfigMolTransitionDriverElement();
+            //        }
+            //        else
+            //        {
+            //            driverElement = new ConfigDistrTransitionDriverElement();
+            //            ((ConfigDistrTransitionDriverElement)driverElement).distr.ParamDistr = new PoissonParameterDistribution();
+            //        }
+
+            //        driverElement.CurrentState = i;
+            //        driverElement.DestState = j;
+            //        driverElement.CurrentStateName = stateName[i];
+            //        driverElement.DestStateName = stateName[j];
+            //    }
+
+            //    config_td.DriverElements.Add(row);
+            //}
+                
+            //cell.death_driver = config_td;
+
+            //spTransitionDriverElementDetails.DataContext = cell;
+        }
+
+        private void cbTransDriverElementDistr_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //// Only want to respond to purposeful user interaction, not just population and depopulation
+            //// of parameter distribution type
+            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            //{
+            //    return;
+            //}
+
+            //DistributedParameter distr_parameter = DataContext as DistributedParameter;
+            //if (distr_parameter == null)
+            //{
+            //    return;
+            //}
+
+            //ParameterDistributionType selected_distr_type = (ParameterDistributionType)cbTransDistrType.SelectedItem;
+            //if (selected_distr_type == distr_parameter.DistributionType)
+            //{
+            //    return;
+            //}
+
+            //ParameterDistribution old_pd = distr_parameter.ParamDistr;
+
+            //switch (selected_distr_type)
+            //{
+            //    case ParameterDistributionType.CONSTANT:
+            //        // assign the mean of the previous distribution
+            //        switch (distr_parameter.DistributionType)
+            //        {
+            //            case ParameterDistributionType.GAMMA:
+            //                distr_parameter = new DistributedParameter(((GammaParameterDistribution)old_pd).Shape);
+            //                break;
+
+            //            case ParameterDistributionType.POISSON:
+            //                distr_parameter = new DistributedParameter(((PoissonParameterDistribution)old_pd).Mean);
+            //                break;
+
+            //            case ParameterDistributionType.UNIFORM:
+            //                UniformParameterDistribution upd = old_pd as UniformParameterDistribution;
+            //                distr_parameter = new DistributedParameter((upd.MaxValue - upd.MinValue) / 2.0);
+            //                break;
+
+            //            case ParameterDistributionType.CATEGORICAL:
+            //                distr_parameter = new DistributedParameter(((CategoricalParameterDistribution)old_pd).MeanCategoryValue());
+            //                break;
+
+            //            default:
+            //                distr_parameter = new DistributedParameter();
+            //                break;
+            //        }
+            //        break;
+
+            //    case ParameterDistributionType.CATEGORICAL:
+            //        CategoricalParameterDistribution new_categorical_distr = new CategoricalParameterDistribution();
+            //        new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(distr_parameter.ConstValue, 0.5));
+            //        new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(distr_parameter.ConstValue + 1.0, 0.5));
+            //        distr_parameter.ParamDistr = new_categorical_distr;
+            //        distr_parameter.DistributionType = ParameterDistributionType.CATEGORICAL;
+            //        break;
+
+            //    case ParameterDistributionType.GAMMA:
+            //        GammaParameterDistribution new_gamma_distr = new GammaParameterDistribution();
+            //        if (distr_parameter.ConstValue != 0.0)
+            //        {
+            //            new_gamma_distr.Shape = distr_parameter.ConstValue;
+            //            new_gamma_distr.Rate = 1.0;
+            //        }
+            //        else
+            //        {
+            //            new_gamma_distr.Shape = 1.0;
+            //            new_gamma_distr.Rate = 1.0;
+            //        }
+            //        distr_parameter.ParamDistr = new_gamma_distr;
+            //        distr_parameter.DistributionType = ParameterDistributionType.GAMMA;
+            //        break;
+
+            //    case ParameterDistributionType.POISSON:
+            //        PoissonParameterDistribution new_poisson_distr = new PoissonParameterDistribution();
+            //        if (distr_parameter.ConstValue != 0.0)
+            //        {
+            //            new_poisson_distr.Mean = distr_parameter.ConstValue;
+            //        }
+            //        else
+            //        {
+            //            new_poisson_distr.Mean = 1.0;
+            //        }
+            //        distr_parameter.ParamDistr = new_poisson_distr;
+            //        distr_parameter.DistributionType = ParameterDistributionType.POISSON;
+            //        break;
+
+            //    case ParameterDistributionType.UNIFORM:
+            //        UniformParameterDistribution new_uniform_distr = new UniformParameterDistribution();
+            //        if (distr_parameter.ConstValue != 0.0)
+            //        {
+            //            new_uniform_distr.MinValue = distr_parameter.ConstValue;
+            //            new_uniform_distr.MaxValue = distr_parameter.ConstValue + 1.0;
+            //        }
+            //        else
+            //        {
+            //            new_uniform_distr.MinValue = 0.0;
+            //            new_uniform_distr.MaxValue = 1.0;
+            //        }
+            //        distr_parameter.ParamDistr = new_uniform_distr;
+            //        distr_parameter.DistributionType = ParameterDistributionType.UNIFORM;
+            //        break;
+
+            //    default:
+            //        break;
+
+            //}
+            ////spTransitionDriverElementDetails.DataContext = distr_parameter;
+        }
+
+        private void ChangeType_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null) return;
+
+            if (cell.death_driver == null)
+            {
+                return;
+            }
+
+            if (cell.death_driver.DriverElements == null)
+            {
+                return;
+            }
+
+            TransitionDriverElementType type= TransitionDriverElementType.NONE;
+            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.MOLECULAR)
+            {
+                type = TransitionDriverElementType.DISTRIBUTION;
+            }
+            else if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
+            {
+                type = TransitionDriverElementType.MOLECULAR;
+            }
+
+            string[] stateName = new string[] { "alive", "dead" };
+
+            ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+            config_td.Name = "generic apoptosis";
+            config_td.CurrentState = new DistributedParameter(0);
+            config_td.StateName = stateName[0];
+
+            ConfigTransitionDriverRow row;
+            config_td.DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
+            config_td.states = new ObservableCollection<string>();
+
+            for (int i = 0; i < stateName.Count(); i++)
+            {
+                row = new ConfigTransitionDriverRow();
+                row.elements = new ObservableCollection<ConfigTransitionDriverElement>();
+                config_td.states.Add(stateName[i]);
+
+                for (int j = 0; j < stateName.Count(); j++)
+                {
+                    ConfigTransitionDriverElement driverElement;
+
+                    if (type == TransitionDriverElementType.MOLECULAR)
+                    {
+                        driverElement = new ConfigMolTransitionDriverElement();
+                    }
+                    else
+                    {
+                        driverElement = new ConfigDistrTransitionDriverElement();
+                        ((ConfigDistrTransitionDriverElement)driverElement).distr.ParamDistr = new PoissonParameterDistribution();
+                        ((ConfigDistrTransitionDriverElement)driverElement).distr.DistributionType = ParameterDistributionType.POISSON;
+                    }
+
+                    driverElement.CurrentState = i;
+                    driverElement.DestState = j;
+                    driverElement.CurrentStateName = stateName[i];
+                    driverElement.DestStateName = stateName[j];
+
+                    row.elements.Add(driverElement);
+                }
+
+                config_td.DriverElements.Add(row);
+            }
+
+            cell.death_driver = config_td;
+
+        }
+
+        private void ChangeType_Click2(object sender, RoutedEventArgs e)
+        { 
+            Button button = sender as Button;
+            var stack_panel = FindVisualParent<StackPanel>(button);
+            var content_presenter = FindVisualParent<ContentPresenter>(stack_panel);
+            //var stack_panel2 = FindVisualParent<StackPanel>(expander);
+
+            ConfigTransitionDriverElement tde = stack_panel.DataContext as ConfigTransitionDriverElement;
+            //ConfigTransitionDriverElement tde = button.DataContext as ConfigTransitionDriverElement;
+            TransitionDriverElementType type = tde.Type;
+
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde == null) return;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            {
+                tde = new ConfigDistrTransitionDriverElement();
+                ((ConfigDistrTransitionDriverElement)tde).distr.ParamDistr = new PoissonParameterDistribution();
+                ((ConfigDistrTransitionDriverElement)tde).distr.DistributionType = ParameterDistributionType.POISSON;
+            }
+            else if (tde.Type == TransitionDriverElementType.DISTRIBUTION)
+            {
+                tde = new ConfigMolTransitionDriverElement();
+            }
+
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
+
+            // force reset of contents
+            button.DataContext = tde;
+            stack_panel.DataContext = tde;
+            content_presenter.DataContext = tde;
+          }
+
+         public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindVisualParent<T>(parentObject);
+            }
+        }
+
+        public static T FindLogicalParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = LogicalTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindLogicalParent<T>(parentObject);
+            }
+        }
 
     }
 
 }
+
+
 
         

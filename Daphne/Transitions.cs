@@ -27,9 +27,41 @@ namespace Daphne
     /// </summary>
     public class TransitionDriverElement
     {
+        public virtual bool TransitionOccurred(double clock)
+        {
+            return false;
+        }
+
+        public virtual void Initialize()
+        {
+        }
+
+        public virtual void Reset()
+        {
+        }
+
+        public virtual void SetParams(TransitionDriverElement tde)
+        {
+        }
+
+    }
+
+    public class MolTransitionDriverElement : TransitionDriverElement
+    {
         public double Alpha { get; set; }
         public double Beta { get; set; }
         public MolecularPopulation DriverPop { get; set; }
+
+        public MolTransitionDriverElement()
+        {
+        }
+
+        public MolTransitionDriverElement(double _alpha, double _beta, MolecularPopulation molpop)
+        {
+            Alpha = _alpha;
+            Beta = _beta;
+            DriverPop = molpop;
+        }
 
         public double RateConstant()
         {
@@ -39,65 +71,73 @@ namespace Daphne
             }
             return Alpha + Beta * DriverPop.Conc.MeanValue();
         }
+
+        public override bool TransitionOccurred(double clock)
+        {
+            // this transition driver does not use clock
+            if (Rand.TroschuetzCUD.NextDouble() < RateConstant())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public override void SetParams(TransitionDriverElement tde)
+        {
+            if (tde.GetType() != typeof(MolTransitionDriverElement))
+            {
+                throw new Exception("Incompatible transition driver element.");
+            }
+
+            this.Alpha = ((MolTransitionDriverElement)tde).Alpha;
+            this.Beta = ((MolTransitionDriverElement)tde).Beta;
+            this.DriverPop = ((MolTransitionDriverElement)tde).DriverPop;
+        }
     }
 
-    public class PMF<T>
+    /// <summary>
+    /// the distribution transition driver will hold a matrix of elements of this type
+    /// </summary>
+    public class DistrTransitionDriverElement : TransitionDriverElement
     {
-        private T[] keys;
-        private double[] cumulatives;
-        private Dictionary<T, double> probability;
+        public DistributedParameter prob_distr { get; set; }
+        private double timeToNextEvent;
 
-        static PMF()
+        public DistrTransitionDriverElement()
         {
         }
 
-        public PMF()
+        public DistrTransitionDriverElement(DistributedParameter _distr_param)
         {
-            probability = new Dictionary<T, double>();
+            prob_distr = new DistributedParameter();
+            prob_distr.ParamDistr = _distr_param.ParamDistr;
         }
 
-        public void Initialize(T[] _keys, double[] _probabilities)
+        public override void Reset()
         {
-            if (_keys.Length != _probabilities.Length)
-            {
-                throw new ArgumentException("Argument lengths are not the same.");
-            }
-            if (_keys.Length == 0)
-            {
-                throw new ArgumentException("Attempting to use zero length arrays.");
-            }
-
-            probability.Clear();
-            for (int i = 0; i < _probabilities.Length; i++)
-            {
-                probability.Add(_keys[i], _probabilities[i]);
-            }
-
-            keys = (T[])_keys.Clone();
-            Array.Sort(keys);
-            Array.Reverse(keys);
-
-            cumulatives = new double[probability.Count];
-
-            cumulatives[0] = probability[keys[0]];
-            for (int i = 1; i < cumulatives.Length; i++)
-            {
-                cumulatives[i] = cumulatives[i - 1] + probability[keys[i]];
-            }
+            timeToNextEvent = prob_distr.Sample();
         }
 
-        public T Next()
+        public override void Initialize()
         {
-            double u = Rand.TroschuetzCUD.NextDouble();
 
-            for (int i = 0; i < cumulatives.Length; i++)
+        }
+
+        public override bool TransitionOccurred(double clock)
+        {
+            if (timeToNextEvent >= clock) return true;
+
+            return false;
+        }
+
+        public override void SetParams(TransitionDriverElement tde)
+        {
+            if (tde.GetType() != typeof(DistrTransitionDriverElement))
             {
-                if (u <= cumulatives[i])
-                {
-                    return keys[i];
-                }
+                throw new Exception("Incompatible transition driver element.");
             }
-            return keys.Last();
+
+            this.prob_distr = ((DistrTransitionDriverElement)tde).prob_distr;
         }
     }
 
@@ -107,7 +147,8 @@ namespace Daphne
     public class TransitionDriver : ITransitionDriver
     {
         private Dictionary<int, Dictionary<int, TransitionDriverElement>> drivers;
-        private PMF<int> destinationPMF;
+        private double clock;
+        private List<int> events;
 
         /// <summary>
         /// Constructor
@@ -119,7 +160,7 @@ namespace Daphne
             CurrentState = 0;
             PreviousState = 0;
             FinalState = 0;
-            destinationPMF = new PMF<int>();
+            events = new List<int>();
         }
 
         /// <summary>
@@ -168,32 +209,59 @@ namespace Daphne
                 return;
             }
 
-            double TotalRate = 0,
-                   u = Rand.TroschuetzCUD.NextDouble();
+            clock += dt;
 
             foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
             {
-                TotalRate += kvp.Value.RateConstant();
-            }
-            if (u < TotalRate * dt)
-            {
-                TransitionOccurred = true;
-                PreviousState = CurrentState;
-
-                double[] probabilities = new double[drivers[CurrentState].Count];
-                int[] destinations = new int[drivers[CurrentState].Count];
-                int iDest = 0;
-
-                foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+                if (kvp.Value.TransitionOccurred(clock) == true)
                 {
-                    probabilities[iDest] = kvp.Value.RateConstant() / TotalRate;
-                    destinations[iDest] = kvp.Key;
-                    iDest++;
+                    events.Add(kvp.Key);
                 }
-                destinationPMF.Initialize(destinations, probabilities);
-                CurrentState = destinationPMF.Next();
+            }
+
+            if (events.Count > 0)
+            {
+                int newState = 0;
+
+                if (events.Count > 1)
+                {
+                    // randomly choose one of the transition events
+                    double d = events.Count * Rand.UniformDist.Sample();
+                    for (int j = 0; j < events.Count; j++)
+                    {
+                        if (d <= j + 1)
+                        {
+                            newState = j;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    newState = events.First();
+                }
+
+                PreviousState = CurrentState;
+                CurrentState = newState;
+                TransitionOccurred = true;
+                events.Clear();
+                clock = 0;
+                InitializeState();
             }
         }
+
+        /// <summary>
+        /// Causes clock-drivent events to select a new time-to-next-event
+        /// </summary>
+        public void InitializeState()
+        {
+            foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+            {
+                kvp.Value.Reset();
+            }
+        }
+
+
     }
 
     /// <summary>
@@ -370,32 +438,5 @@ namespace Daphne
     //        }
     //    }
     //}
-
-    ///// <summary>
-    ///// the distribution transition driver will hold a matrix of elements of this type
-    ///// </summary>
-    //public class DistrTransitionDriverElement
-    //{
-    //    public DistributedParameter prob_distr { get; set; }
-    //    private double timeToNextEvent;
-
-    //    public DistrTransitionDriverElement()
-    //    {
-    //        prob_distr = new DistributedParameter();
-    //    }
-
-    //    public void Reset()
-    //    {
-    //        timeToNextEvent = prob_distr.Sample();
-    //    }
-
-    //    public bool Transition(double _clock)
-    //    {
-    //        if (timeToNextEvent >= _clock) return true;
-
-    //        return false;
-    //    }
-    //}
-
 
 }

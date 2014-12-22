@@ -107,12 +107,22 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (population.ContainsKey(config_tde.driver_mol_guid_ref) == true)
+                    if (config_tde.GetType() == typeof(ConfigTransitionDriver))
                     {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-                        tde.Alpha = config_tde.Alpha;
-                        tde.Beta = config_tde.Beta;
-                        tde.DriverPop = population[config_tde.driver_mol_guid_ref];
+
+                        if (population.ContainsKey(((ConfigMolTransitionDriverElement)config_tde).driver_mol_guid_ref) == true)
+                        {
+                            MolTransitionDriverElement tde = new MolTransitionDriverElement();
+                            tde.Alpha = ((ConfigMolTransitionDriverElement)config_tde).Alpha;
+                            tde.Beta = ((ConfigMolTransitionDriverElement)config_tde).Beta;
+                            tde.DriverPop = population[((ConfigMolTransitionDriverElement)config_tde).driver_mol_guid_ref];
+                            behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
+                        }
+                    }
+                    else if (config_tde.GetType() == typeof(ConfigDistrTransitionDriverElement))
+                    {
+                        DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
+                        tde.prob_distr = ((ConfigDistrTransitionDriverElement)config_tde).distr;
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                     }
                 }
