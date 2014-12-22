@@ -1776,20 +1776,18 @@ namespace DaphneGui
         private void ChangeType_Click2(object sender, RoutedEventArgs e)
         { 
             Button button = sender as Button;
+
             var stack_panel = FindVisualParent<StackPanel>(button);
-            var content_presenter = FindVisualParent<ContentPresenter>(stack_panel);
-            //var stack_panel2 = FindVisualParent<StackPanel>(expander);
+            if (stack_panel == null) return;
 
             ConfigTransitionDriverElement tde = stack_panel.DataContext as ConfigTransitionDriverElement;
-            //ConfigTransitionDriverElement tde = button.DataContext as ConfigTransitionDriverElement;
+            if (tde == null) return;
+    
             TransitionDriverElementType type = tde.Type;
-
             int CurrentState = tde.CurrentState,
                 DestState = tde.DestState;
-            string CurrentStateName = tde.CurrentStateName,
+            string  CurrentStateName = tde.CurrentStateName,
                     DestStateName = tde.DestStateName;
-
-            if (tde == null) return;
 
             if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
@@ -1797,20 +1795,23 @@ namespace DaphneGui
                 ((ConfigDistrTransitionDriverElement)tde).distr.ParamDistr = new PoissonParameterDistribution();
                 ((ConfigDistrTransitionDriverElement)tde).distr.DistributionType = ParameterDistributionType.POISSON;
             }
-            else if (tde.Type == TransitionDriverElementType.DISTRIBUTION)
+            else 
             {
                 tde = new ConfigMolTransitionDriverElement();
             }
-
             tde.CurrentStateName = CurrentStateName;
             tde.DestStateName = DestStateName;
             tde.CurrentState = CurrentState;
             tde.DestState = DestState;
 
-            // force reset of contents
-            button.DataContext = tde;
-            stack_panel.DataContext = tde;
-            content_presenter.DataContext = tde;
+            // update the transition scheme
+            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
+            if (dataGrid == null) return;
+            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            if (scheme != null)
+            {
+                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+            }
           }
 
          public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject

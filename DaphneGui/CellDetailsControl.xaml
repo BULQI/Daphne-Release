@@ -139,7 +139,7 @@
         <!-- Distribution transition driver Template -->
         <DataTemplate x:Key="DistrTransitionDriverElementDetailsTemplate">
             <StackPanel Orientation="Vertical">
-                <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
+                <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
                 <local:ParamDistrControl HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].distr, UpdateSourceTrigger=PropertyChanged}" />
               </StackPanel>
@@ -148,7 +148,7 @@
         <!-- Distribution transition driver Template for DataGrid -->
         <DataTemplate x:Key="dgDistrTransitionDriverElementDetailsTemplate">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
+                <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
                 <local:ParamDistrControl HorizontalAlignment="Left"
                                          DataContext="{Binding Path=distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
@@ -184,9 +184,6 @@
                 <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
                     <Setter Property="ContentTemplate" Value="{StaticResource dgDistrTransitionDriverElementDetailsTemplate}"/>
                 </DataTrigger>
-                <!--<DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="NONE">
-                    <Setter Property="ContentTemplate" Value="{StaticResource nullTemplate}"/>
-                </DataTrigger>-->
             </Style.Triggers>
         </Style>
         
@@ -264,26 +261,22 @@
 
         <!-- Template for transitions schemes. Called from the code-behind -->
         <DataTemplate x:Key="DiffRegCellEditingTemplate" DataType="daph:ConfigTransitionDriverElement">
-            <StackPanel Name="CellEditStackPanel" Orientation="Vertical">
-
-                <Expander IsExpanded="True"  ExpandDirection="Down" >
-                <!--<ContentControl x:Name="DiffRegCC"
-                                Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                                ContentTemplate="{StaticResource MolTransitionDriverElementMini}"
-                                />-->
-                <StackPanel Orientation="Vertical" Name="spTransitionDriverElementDetailsContentControl2" HorizontalAlignment="Left">
-                    <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200" MinWidth="100" MinHeight="20"
-                            Click="ChangeType_Click2" 
-                            DataContext="{Binding}"
-                            Style="{StaticResource selectableButtonContent2}"
-                            />
+            <StackPanel Name="TransitionSchemeStackPanel" Orientation="Vertical">
+                <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinHeight="20"
+                        FontSize="10"
+                        Click="ChangeType_Click2" 
+                        DataContext="{Binding}"
+                        Style="{StaticResource selectableButtonContent2}"
+                        />
+ 
+                <!--<StackPanel Orientation="Vertical" Name="spTransitionDriverElementDetailsContentControl2" HorizontalAlignment="Left">-->
+                    
                     <ContentControl x:Name="TransitionDriverElementDetails2"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectableContentTemplateStyle3}"
                                     />
-                </StackPanel>
+                <!--</StackPanel>-->
                     
-                </Expander>
 
             </StackPanel>
         </DataTemplate>
@@ -1096,7 +1089,8 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                 <!--Expanded="DivSchemeExpander_Expanded"-->
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
+                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
+                            x:Name="spDivScheme">
                     <StackPanel>
                         <Grid >
                             <Grid.Resources>
@@ -1166,7 +1160,8 @@
                     </StackPanel>
 
                     <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid"
-                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
+                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}"
+                                        Tag="div"/>
                     
                     
                 </StackPanel>
