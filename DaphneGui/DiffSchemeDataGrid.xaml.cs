@@ -221,7 +221,7 @@ namespace DaphneGui
                     col.CanUserSort = false;
                     Binding b = new Binding(string.Format("elements[{0}]", count));
 
-                    var cellTemplate = cdc.FindResource("DiffRegCellTemplate");
+                    var cellTemplate = cdc.FindResource("DataGridCell_TDE_NonEditing_Template");
                     FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
                     factory.SetValue(ContentPresenter.ContentTemplateProperty, cellTemplate);
                     factory.SetBinding(ContentPresenter.ContentProperty, b);
@@ -232,7 +232,7 @@ namespace DaphneGui
                     b2.Mode = BindingMode.TwoWay;
                     b2.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
 
-                    var cellEditingTemplate = cdc.FindResource("DiffRegCellEditingTemplate");
+                    var cellEditingTemplate = cdc.FindResource("DataGridCell_TDE_Editing_Template");
                     FrameworkElementFactory factory2 = new FrameworkElementFactory(typeof(ContentPresenter));
                     factory2.SetValue(ContentPresenter.ContentTemplateProperty, cellEditingTemplate);
                     factory2.SetBinding(ContentPresenter.ContentProperty, b2);
