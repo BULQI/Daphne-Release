@@ -93,12 +93,11 @@
             </StackPanel>
         </DataTemplate>
         
-        <!-- Template for signal molecules in transitions schemes. Called from the code-behind -->
-        <DataTemplate x:Key="DiffRegCellTemplate" DataType="daph:ConfigTransitionDriverElement">
+        <!-- Template for signal molecules in transitions schemes. Non-editing template. Called from the code-behind -->
+        <DataTemplate x:Key="MolTransitionDriverElementMini_NonEditing" DataType="daph:ConfigTransitionDriverElement">
             <TextBlock Name="textblock"  Text="{Binding Path=driver_mol_guid_ref, Converter={StaticResource MolGUIDtoMolNameConverter},
-                ConverterParameter={StaticResource moleculesListView}}" />
+                        ConverterParameter={StaticResource moleculesListView}}" />
         </DataTemplate>
-        
 
         <!-- TransitionDriverElementDetailsTemplate -->
         <DataTemplate x:Key="TransisitionDriverElementDetailsTemplate">
@@ -108,7 +107,6 @@
                                 Content="{Binding Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"   />
         </DataTemplate>
        
-
         <!-- ConfigMolTransitionDriverElement Template -->
         <DataTemplate x:Key="MolTransitionDriverElementDetailsTemplate">
             <StackPanel x:Name="spConfigMolTransitionDriverTemplate" Orientation="Vertical">
@@ -144,6 +142,14 @@
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].distr, UpdateSourceTrigger=PropertyChanged}" />
               </StackPanel>
         </DataTemplate>
+
+        <DataTemplate x:Key="dgDistrTransitionDriverElementDetailsTemplate_NonEditing">
+            <TextBlock Text="{Binding Type}" />
+            <!--<TextBlock Text="Foo" />-->
+            <!--<local:ParamDistrControl HorizontalAlignment="Left"
+                                         DataContext="{Binding death_driver.DriverElements[0].elements[1].distr, UpdateSourceTrigger=PropertyChanged}" />-->
+        </DataTemplate>
+        
 
         <!-- Distribution transition driver Template for DataGrid -->
         <DataTemplate x:Key="dgDistrTransitionDriverElementDetailsTemplate">
@@ -186,6 +192,18 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="selectableContentTemplateStyle4" TargetType="{x:Type ContentControl}">
+            <Setter Property="ContentTemplate" Value="{StaticResource nullTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="MOLECULE">
+                    <Setter Property="ContentTemplate" Value="{StaticResource MolTransitionDriverElementMini_NonEditing}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
+                    <Setter Property="ContentTemplate" Value="{StaticResource dgDistrTransitionDriverElementDetailsTemplate_NonEditing}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         
         <Style x:Key="selectableButtonContent" TargetType="{x:Type Button}">
             <Style.Triggers>
@@ -211,9 +229,9 @@
                 <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
                     <Setter Property="Content" Value="Distribution" />
                 </DataTrigger>
-                <!--<DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="NONE">
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="NONE">
                     <Setter Property="Content" Value="None"/>
-                </DataTrigger>-->
+                </DataTrigger>
             </Style.Triggers>
         </Style>
         
@@ -259,24 +277,30 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Template for transitions schemes. Called from the code-behind -->
+        <!-- Template for transition driver elements in transition schemes. Non-editing template. Called from the code-behind -->
+        <DataTemplate x:Key="DiffRegCellTemplate" DataType="daph:ConfigTransitionDriverElement">
+            <ContentControl x:Name="TransitionDriverElementDetails_NonEditing"
+                                    Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                    Style="{StaticResource selectableContentTemplateStyle4}"
+                                    />
+            
+        </DataTemplate>
+
+        <!-- Template for transition driver elements in transition schemes. Editing version version. Called from the code-behind -->
         <DataTemplate x:Key="DiffRegCellEditingTemplate" DataType="daph:ConfigTransitionDriverElement">
+            
             <StackPanel Name="TransitionSchemeStackPanel" Orientation="Vertical">
-                <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinHeight="20"
+                <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinWidth="20" MinHeight="20"
                         FontSize="10"
                         Click="ChangeType_Click2" 
                         DataContext="{Binding}"
                         Style="{StaticResource selectableButtonContent2}"
                         />
- 
-                <!--<StackPanel Orientation="Vertical" Name="spTransitionDriverElementDetailsContentControl2" HorizontalAlignment="Left">-->
-                    
-                    <ContentControl x:Name="TransitionDriverElementDetails2"
+
+                <ContentControl x:Name="TransitionDriverElementDetails2"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectableContentTemplateStyle3}"
                                     />
-                <!--</StackPanel>-->
-                    
 
             </StackPanel>
         </DataTemplate>
