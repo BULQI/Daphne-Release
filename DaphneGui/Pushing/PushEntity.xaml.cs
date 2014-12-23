@@ -59,7 +59,15 @@ namespace DaphneGui.Pushing
                 IsReaction = true;
                 btnSaveAsNew.IsEnabled = false;
             }
+
+            btnSave.IsEnabled = true;           
+            if (left.Equals(right) == true)
+            {
+                btnSave.IsEnabled = false;
+            }
+            
         }
+
     }
 
     public class EntityTemplateSelector : DataTemplateSelector

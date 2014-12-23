@@ -79,7 +79,7 @@
 
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="transduction constant" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap" />
-                                <local:ParamDistrControl DataContext="{Binding TransductionConstant, UpdateSourceTrigger=PropertyChanged}" Tag="TransductionConstant"/>
+                                <local:ParamDistrControl DataContext="{Binding TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                         </StackPanel>
 

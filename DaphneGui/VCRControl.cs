@@ -95,7 +95,7 @@ namespace DaphneGui
                 DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
 
                 // open the group that holds the frames for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("VCR_Frames", expID));
+                DataBasket.hdf5file.openGroup("VCR_Frames");
 
                 // build the list of frames
                 frames = new List<int>();

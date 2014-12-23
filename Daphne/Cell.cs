@@ -223,6 +223,22 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// set the state as used in rendering; does not set the state for simulation purposes
+        /// </summary>
+        /// <param name="state"></param>
+        public void SetRenderState(CellState state)
+        {
+            // spatial
+            setSpatialState(state.spState);
+            // generation
+            generation = state.CellGeneration;
+            // behaviors
+            Alive = state.cbState.deathDriverState == 0;
+            DividerState = state.cbState.divisionDriverState;
+            DifferentiationState = state.cbState.differentiationDriverState;
+        }
+
         public void setSpatialState(CellSpatialState s)
         {
             int i;

@@ -333,8 +333,9 @@
                                             ItemsSource="{Binding Path=membrane.molpops}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="0" 
-                                             SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"
-                                                    />
+                                            SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"
+                                            IsSynchronizedWithCurrentItem="True"
+                                            />
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
@@ -446,6 +447,7 @@
                                                 DisplayMemberPath="Name"     
                                                 SelectedIndex="0"
                                                 SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"
+                                                IsSynchronizedWithCurrentItem="True"
                                                 />
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -635,8 +637,8 @@
 
                                         <ListBox.ContextMenu>
                                             <ContextMenu >
-                                                <MenuItem Header="Push to Protocol level" Name="menuPushToProto"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menuPullFromProto" ></MenuItem>
+                                                <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
+                                                <MenuItem Header="Pull from Potocol level" Name="menuMembPullReacFromProto" Click="menuMembPullReacFromProto_Click"></MenuItem>
                                             </ContextMenu>
                                         </ListBox.ContextMenu>
                                     </ListBox>
@@ -740,7 +742,7 @@
                                         <ListBox.ContextMenu>
                                             <ContextMenu >
                                                 <MenuItem Header="Push to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" ></MenuItem>
+                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
                                             </ContextMenu>
                                         </ListBox.ContextMenu>
 

@@ -221,6 +221,9 @@
     <Compile Include="ParamDistrControl.xaml.cs">
       <DependentUpon>ParamDistrControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PastExperiments.xaml.cs">
+      <DependentUpon>PastExperiments.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
@@ -340,6 +343,10 @@
     <Page Include="ParamDistrControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PastExperiments.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pushing\PushBetweenLevels.xaml">
       <SubType>Designer</SubType>

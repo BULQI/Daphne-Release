@@ -558,18 +558,21 @@ namespace Daphne
         public void UpdateCells(TissueSimulationFrameData frame)
         {
             List<int> removalList = new List<int>();
+            CellState state = new CellState();
 
             foreach (int key in cells.Keys)
             {
                 removalList.Add(key);
             }
 
-            for (int c = 0; c < frame.CellIDs.Length; c++)
+            for (int i = 0; i < frame.CellCount; i++)
             {
-                int cell_id = frame.CellIDs[c];
+                int cell_id = frame.CellIDs[i];
 
                 // take off the removal list
                 removalList.Remove(cell_id);
+
+                frame.applyStateByIndex(i, ref state);
 
                 // if the cell doesn't exist, create it
                 if (cells.ContainsKey(cell_id) == false)
@@ -578,7 +581,7 @@ namespace Daphne
                     List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
                     List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
                     List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
-                    int cellPopId = frame.CellPopIDs[c];
+                    int cellPopId = frame.CellPopIDs[i];
 
                     if (((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict.ContainsKey(cellPopId) == false)
                     {
@@ -586,18 +589,10 @@ namespace Daphne
                     }
 
                     CellPopulation cp = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[cellPopId];
-                    CellState state = new CellState();
 
-                    // set the position
-                    for (int i = 0; i < CellSpatialState.SingleDim; i++)
-                    {
-                        state.spState.X[i] = frame.CellPos[c * CellSpatialState.SingleDim + i];
-                    }
-                    // set the generation
-                    state.setCellGeneration(frame.CellGens[c]);
+                    // create the cell
                     hSim.prepareCellInstantiation(cp, configComp, bulk_reacs, ref boundary_reacs, ref transcription_reacs);
                     hSim.instantiateCell(cell_id, cp, configComp, state, bulk_reacs, boundary_reacs, transcription_reacs, false);
-                    cells[cell_id].Population_id = cellPopId;
                 }
                 else // it exists, update it
                 {
@@ -606,10 +601,8 @@ namespace Daphne
                     // db implementation, but we need some mechanism to set the entire state
                     ObjectLoader.LoadValues(cells[cell_id], kvpc.Value.state);
 #else
-                    for(int i = 0; i < CellSpatialState.SingleDim; i++)
-                    {
-                        cells[cell_id].SpatialState.X[i] = frame.CellPos[c * CellSpatialState.SingleDim + i];
-                    }
+                    // apply the state
+                    cells[cell_id].SetRenderState(state);
 #endif
                 }
 #if CELL_CREATE_OLD

@@ -841,12 +841,16 @@ namespace DaphneGui
         }
 
         private void menu2PushToProto_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb.SelectedItems.Count == 0)
+        {            
+            if (CytosolReacListBox.SelectedIndex < 0)
             {
-                MessageBox.Show("No reactions selected");
+                MessageBox.Show("Please select a reaction.");
+                return;
             }
+
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
 
         private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
@@ -1426,6 +1430,26 @@ namespace DaphneGui
             //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
 
             updateSelectedMoleculesAndGenes(cell);
+
+            ////EventHandler cytosolEventHandler = null;
+            ////cytosolEventHandler = new EventHandler(delegate
+            ////{
+            ////    if (CellCytosolMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            ////    {
+            ////        ConfigCell currcell = DataContext as ConfigCell;
+            ////        if (currcell != null)
+            ////        {
+            ////            CellCytosolMolPopsListBox.SelectedIndex = 0;
+            ////            //updateCytoMolCollection();
+            ////            //cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+            ////        }
+
+            ////        CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged -= cytosolEventHandler;
+            ////    }
+            ////});
+
+            ////CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged += cytosolEventHandler;
+
         }
 
         public void updateCollections(ConfigCell cell)
@@ -1679,7 +1703,48 @@ namespace DaphneGui
                 return FindLogicalParent<T>(parentObject);
             }
         }
+        private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction newreac = protReaction.Clone(true);
 
+                ConfigCell cell = DataContext as ConfigCell;
+                cell.cytosol.Reactions.Remove(reac);
+                cell.cytosol.Reactions.Add(newreac);
+            }
+        }
+
+        private void menuMembPushReacToProto_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
+        }
+
+        private void menuMembPullReacFromProto_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+
+            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction newreac = protReaction.Clone(true);
+
+                ConfigCell cell = DataContext as ConfigCell;
+                cell.membrane.Reactions.Remove(reac);
+                cell.membrane.Reactions.Add(newreac);
+            }
+        }
+        
     }
 
 }
