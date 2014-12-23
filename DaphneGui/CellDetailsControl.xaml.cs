@@ -862,7 +862,8 @@ namespace DaphneGui
 
             if (cell.death_driver == null)
             {
-                //I think this is what we want
+                // The transition driver elements should default to ConfigMolTransitionDriverElement.
+                // If we use ConfigDistrDriverElement as the default we won't be able to distinguish between meaningful and empty TDEs. 
                 ConfigTransitionDriver config_td = new ConfigTransitionDriver();
                 config_td.Name = "generic apoptosis";
                 string[] stateName = new string[] { "alive", "dead" };
@@ -940,7 +941,6 @@ namespace DaphneGui
 
             return editor_col;
         }
-
 
         /// <summary>
         /// This handler gets called when user selects a gene in the "add genes" 
@@ -1563,61 +1563,33 @@ namespace DaphneGui
                 return;
             }
 
-            TransitionDriverElementType type= TransitionDriverElementType.NONE;
-            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.MOLECULAR)
+            ConfigTransitionDriverElement tde = cell.death_driver.DriverElements[0].elements[1];
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
-                type = TransitionDriverElementType.DISTRIBUTION;
+                // Switch to Distribution-driven
+                tde = new ConfigDistrTransitionDriverElement();
+
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).distr.DistributionType = ParameterDistributionType.POISSON;
             }
-            else if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
+            else
             {
-                type = TransitionDriverElementType.MOLECULAR;
+                // Switch to Molecule-driven
+                tde = new ConfigMolTransitionDriverElement();
             }
-
-            string[] stateName = new string[] { "alive", "dead" };
-
-            ConfigTransitionDriver config_td = new ConfigTransitionDriver();
-            config_td.Name = "generic apoptosis";
-            config_td.CurrentState = new DistributedParameter(0);
-            config_td.StateName = stateName[0];
-
-            ConfigTransitionDriverRow row;
-            config_td.DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
-            config_td.states = new ObservableCollection<string>();
-
-            for (int i = 0; i < stateName.Count(); i++)
-            {
-                row = new ConfigTransitionDriverRow();
-                row.elements = new ObservableCollection<ConfigTransitionDriverElement>();
-                config_td.states.Add(stateName[i]);
-
-                for (int j = 0; j < stateName.Count(); j++)
-                {
-                    ConfigTransitionDriverElement driverElement;
-
-                    if (type == TransitionDriverElementType.MOLECULAR)
-                    {
-                        driverElement = new ConfigMolTransitionDriverElement();
-                    }
-                    else
-                    {
-                        driverElement = new ConfigDistrTransitionDriverElement();
-                        ((ConfigDistrTransitionDriverElement)driverElement).distr.ParamDistr = new PoissonParameterDistribution();
-                        ((ConfigDistrTransitionDriverElement)driverElement).distr.DistributionType = ParameterDistributionType.POISSON;
-                    }
-
-                    driverElement.CurrentState = i;
-                    driverElement.DestState = j;
-                    driverElement.CurrentStateName = stateName[i];
-                    driverElement.DestStateName = stateName[j];
-
-                    row.elements.Add(driverElement);
-                }
-
-                config_td.DriverElements.Add(row);
-            }
-
-            cell.death_driver = config_td;
-
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
+           
+            cell.death_driver.DriverElements[0].elements[1] = tde;
         }
 
         private void ChangeDataGridTDEType_Click(object sender, RoutedEventArgs e)
@@ -1633,7 +1605,7 @@ namespace DaphneGui
             TransitionDriverElementType type = tde.Type;
             int CurrentState = tde.CurrentState,
                 DestState = tde.DestState;
-            string  CurrentStateName = tde.CurrentStateName,
+            string CurrentStateName = tde.CurrentStateName,
                     DestStateName = tde.DestStateName;
 
             if (tde.Type == TransitionDriverElementType.MOLECULAR)
@@ -1641,9 +1613,9 @@ namespace DaphneGui
                 tde = new ConfigDistrTransitionDriverElement();
                 ((ConfigDistrTransitionDriverElement)tde).distr.ParamDistr = new PoissonParameterDistribution();
                 ((ConfigDistrTransitionDriverElement)tde).distr.DistributionType = ParameterDistributionType.POISSON;
-                stack_panel.DataContext = tde;
+                //stack_panel.DataContext = tde;
             }
-            else 
+            else
             {
                 tde = new ConfigMolTransitionDriverElement();
             }
@@ -1660,9 +1632,9 @@ namespace DaphneGui
             {
                 scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
             }
-          }
+        }
 
-         public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
         {
             // get parent item
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
