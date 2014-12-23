@@ -230,7 +230,9 @@
         <!-- Death_TDE_Type_SwitchTemplate: Switchable template for death TDE details. -->
         <DataTemplate x:Key="Death_TDE_Type_SwitchTemplate">
             <StackPanel Orientation="Vertical">
-                                
+
+                <Button x:Name="btnDelDeathDriver" Click="btnDelDeathDriver_Click">Delete Death Driver</Button>
+                
                 <!-- starting state -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,5">
                     <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" />
@@ -1089,8 +1091,7 @@
                                             Style="{StaticResource Death_NewButton_or_TDE_details_SelectableStyle}"
                                             />
                         </StackPanel>
-                        
-                       
+                                             
                     </StackPanel>
                 </StackPanel>
             </Expander>
