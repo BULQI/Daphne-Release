@@ -107,7 +107,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (config_tde.GetType() == typeof(ConfigTransitionDriver))
+                    if (config_tde.GetType() == typeof(ConfigMolTransitionDriverElement))
                     {
 
                         if (population.ContainsKey(((ConfigMolTransitionDriverElement)config_tde).driver_mol_guid_ref) == true)
