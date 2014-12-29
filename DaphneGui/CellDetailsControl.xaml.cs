@@ -1548,6 +1548,11 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// Switch between molecule-driven and distribution-driven transition driver elements for cell death.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ChangeDeathTDEType_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
