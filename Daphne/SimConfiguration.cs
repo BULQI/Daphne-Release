@@ -4282,42 +4282,6 @@ namespace Daphne
         }
     }
 
-
-    ///// <summary>
-    ///// Convert:
-    /////     Converter to go between enum values and boolean for GUI
-    /////     If the TransitionDriverElementType is NONE then return false.
-    /////     Return True for all other distribution types.
-    /////  ConvertBack: 
-    /////     Shouldn't be used. Return NONE.
-    ///// </summary>
-    //[ValueConversion(typeof(ConfigCell), typeof(string))]
-    //public class TransitionDriverElementTypeToBoolConverter : IValueConverter
-    //{
-    //    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    //    {
-    //        ConfigCell cell = value as ConfigCell;
-    //        if (cell == null) return "NONE";
-    //        if (cell.death_driver == null) return "NONE";
-
-    //        if (cell.death_driver. == TransitionDriverElementType.MOLECULAR)
-    //        {
-    //            return true;
-    //        }
-    //        else
-    //        {
-    //            return false;
-    //        }
-    //    }
-
-
-    //    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    //    {
-    //        // Shouldn't be using this, so simply default to constant 
-    //        return TransitionDriverElementType.NONE;
-    //    }
-    //}
-
     public class ConfigTransitionDriverRow
     {
         public ObservableCollection<ConfigTransitionDriverElement> elements { get; set; }
