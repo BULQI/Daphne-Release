@@ -116,13 +116,15 @@ namespace Daphne
                             tde.Alpha = ((ConfigMolTransitionDriverElement)config_tde).Alpha;
                             tde.Beta = ((ConfigMolTransitionDriverElement)config_tde).Beta;
                             tde.DriverPop = population[((ConfigMolTransitionDriverElement)config_tde).driver_mol_guid_ref];
+                            tde.Initialize();
                             behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                         }
                     }
                     else if (config_tde.GetType() == typeof(ConfigDistrTransitionDriverElement))
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
-                        tde.prob_distr = ((ConfigDistrTransitionDriverElement)config_tde).distr;
+                        tde.pd = ((ConfigDistrTransitionDriverElement)config_tde).distr.ParamDistr;
+                        tde.Initialize();
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                     }
                 }
@@ -524,8 +526,6 @@ namespace Daphne
             integratorStep = protocol.scenario.time_config.integrator_step;
             // make sure the simulation does not start to run immediately
             RunStatus = RUNSTAT_OFF;
-
-            //Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
 
             // exit if no reset required
             if (completeReset == false)
