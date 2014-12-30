@@ -39,11 +39,6 @@ namespace Daphne
         public virtual void Reset()
         {
         }
-
-        public virtual void SetParams(TransitionDriverElement tde)
-        {
-        }
-
     }
 
     public class MolTransitionDriverElement : TransitionDriverElement
@@ -75,23 +70,11 @@ namespace Daphne
         public override bool TransitionOccurred(double clock)
         {
             // this transition driver does not use clock
-            if (Rand.TroschuetzCUD.NextDouble() < RateConstant())
+            if (Rand.UniformDist.Sample() < RateConstant())
             {
                 return true;
             }
             return false;
-        }
-
-        public override void SetParams(TransitionDriverElement tde)
-        {
-            if (tde.GetType() != typeof(MolTransitionDriverElement))
-            {
-                throw new Exception("Incompatible transition driver element.");
-            }
-
-            this.Alpha = ((MolTransitionDriverElement)tde).Alpha;
-            this.Beta = ((MolTransitionDriverElement)tde).Beta;
-            this.DriverPop = ((MolTransitionDriverElement)tde).DriverPop;
         }
     }
 
@@ -100,44 +83,27 @@ namespace Daphne
     /// </summary>
     public class DistrTransitionDriverElement : TransitionDriverElement
     {
-        public DistributedParameter prob_distr { get; set; }
-        private double timeToNextEvent;
+        public ParameterDistribution distr { get; set; }
+
+        public double timeToNextEvent;
 
         public DistrTransitionDriverElement()
         {
         }
 
-        public DistrTransitionDriverElement(DistributedParameter _distr_param)
-        {
-            prob_distr = new DistributedParameter();
-            prob_distr.ParamDistr = _distr_param.ParamDistr;
-        }
-
-        public override void Reset()
-        {
-            timeToNextEvent = prob_distr.Sample();
-        }
-
         public override void Initialize()
         {
-
+            timeToNextEvent = distr.Sample();
         }
 
         public override bool TransitionOccurred(double clock)
         {
-            if (timeToNextEvent >= clock) return true;
-
-            return false;
-        }
-
-        public override void SetParams(TransitionDriverElement tde)
-        {
-            if (tde.GetType() != typeof(DistrTransitionDriverElement))
+            if (timeToNextEvent <= clock)
             {
-                throw new Exception("Incompatible transition driver element.");
+                return true;
             }
 
-            this.prob_distr = ((DistrTransitionDriverElement)tde).prob_distr;
+            return false;
         }
     }
 
@@ -255,13 +221,14 @@ namespace Daphne
         /// </summary>
         public void InitializeState()
         {
-            foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+            if (drivers.ContainsKey(CurrentState))
             {
-                kvp.Value.Reset();
+                foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+                {
+                    kvp.Value.Initialize();
+                }
             }
         }
-
-
     }
 
     /// <summary>
@@ -347,96 +314,4 @@ namespace Daphne
             }
         }
     }
-
-    ///// <summary>
-    ///// currently used for all transitions
-    ///// </summary>
-    //public class DistrTransitionDriver : ITransitionDriver
-    //{
-    //    private Dictionary<int, Dictionary<int, DistrTransitionDriverElement>> drivers;
-    //    private double clock;
-
-    //    /// <summary>
-    //    /// Constructor
-    //    /// </summary>
-    //    public DistrTransitionDriver()
-    //    {
-    //        drivers = new Dictionary<int, Dictionary<int, DistrTransitionDriverElement>>();
-    //        TransitionOccurred = false;
-    //        CurrentState = 0;
-    //        PreviousState = 0;
-    //        FinalState = 0;
-    //    }
-
-    //    /// <summary>
-    //    /// add a new driver element
-    //    /// </summary>
-    //    /// <param name="origin">origin state</param>
-    //    /// <param name="destination">destination state</param>
-    //    /// <param name="driverElement">driver element with alpha, beta, signaling molpop</param>
-    //    public override void AddDriverElement(int origin, int destination, DistrTransitionDriverElement driverElement)
-    //    {
-    //        if (!drivers.ContainsKey(origin))
-    //        {
-    //            drivers.Add(origin, new Dictionary<int, DistrTransitionDriverElement>());
-    //        }
-    //        if (drivers[origin].ContainsKey(destination))
-    //        {
-    //            drivers.Remove(destination);
-    //        }
-    //        drivers[origin].Add(destination, driverElement);
-    //        if (origin > FinalState)
-    //        {
-    //            FinalState = origin;
-    //        }
-    //        if (destination > FinalState)
-    //        {
-    //            FinalState = destination;
-    //        }
-    //    }
-
-    //    /// <summary>
-    //    /// accessor for drivers
-    //    /// </summary>
-    //    public override Dictionary<int, Dictionary<int, DistrTransitionDriverElement>> Drivers
-    //    {
-    //        get { return drivers; }
-    //    }
-
-    //    /// <summary>
-    //    /// Executes a step of the stochastic dynamics for the Transition
-    //    /// </summary>
-    //    /// <param name="dt">The time interval for the evolution (double).</param>
-    //    public override void Step(double dt)
-    //    {
-    //        if ((drivers.Count == 0) || (!drivers.ContainsKey(CurrentState)))
-    //        {
-    //            return;
-    //        }
-
-    //        clock += dt;
-
-    //        foreach (KeyValuePair<int, DistrTransitionDriverElement> kvp in drivers[CurrentState])
-    //        {
-    //            if (kvp.Value.Transition(clock) == true)
-    //            {
-    //                PreviousState = CurrentState;
-    //                CurrentState = kvp.Key;
-    //                InitializeThisState();
-    //                TransitionOccurred = true;
-    //                clock = 0;
-    //            }
-    //        }
-    //    }
-
-    //    // run after transitioning into a new state
-    //    public void InitializeThisState()
-    //    {
-    //        foreach (KeyValuePair<int, DistrTransitionDriverElement> kvp in drivers[CurrentState])
-    //        {
-    //            kvp.Value.prob_distr.Reset(); 
-    //        }
-    //    }
-    //}
-
 }
