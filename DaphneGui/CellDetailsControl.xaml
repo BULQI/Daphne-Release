@@ -109,7 +109,7 @@
             <StackPanel Orientation="Vertical">
                 <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
                 <local:ParamDistrControl HorizontalAlignment="Left"
-                                         DataContext="{Binding Path=distr, UpdateSourceTrigger=PropertyChanged}" />
+                                         DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </DataTemplate>
 
@@ -143,7 +143,7 @@
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
                 <local:ParamDistrControl HorizontalAlignment="Left"
-                                         DataContext="{Binding death_driver.DriverElements[0].elements[1].distr, UpdateSourceTrigger=PropertyChanged}" />
+                                         DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </DataTemplate>
         
