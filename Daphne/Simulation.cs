@@ -13,6 +13,8 @@ using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
 
+using System.Diagnostics;
+
 namespace Daphne
 {
     public abstract class SimulationBase : EntityModelBase, IDynamic
@@ -123,7 +125,7 @@ namespace Daphne
                     else if (config_tde.GetType() == typeof(ConfigDistrTransitionDriverElement))
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
-                        tde.pd = ((ConfigDistrTransitionDriverElement)config_tde).distr.ParamDistr;
+                        tde.distr = ((ConfigDistrTransitionDriverElement)config_tde).Distr.ParamDistr.Clone();
                         tde.Initialize();
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                     }
@@ -1023,7 +1025,6 @@ namespace Daphne
                                              dataBasket.Environment.Comp.Interior.Extent(2) };
 
             // ADD CELLS            
-            //double[] state = new double[CellSpatialState.Dim];
             // convenience arrays to reduce code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
@@ -1096,9 +1097,8 @@ namespace Daphne
             Pair.Phi1 = protocol.sim_params.phi1;
             Pair.Phi2 = protocol.sim_params.phi2;
 
-            cellManager.deathTimeConstant = 1.0 / protocol.sim_params.deathConstant;
-            cellManager.deathOrder = (int)protocol.sim_params.deathOrder;
-            cellManager.deathFactor = (cellManager.deathOrder + 1) * cellManager.deathTimeConstant;
+            // distribution governing time-to-removal for apoptotic cells
+            cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();
         }
 
         public override void Step(double dt)
