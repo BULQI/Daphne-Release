@@ -2682,6 +2682,20 @@ namespace Daphne
 
     public class SimulationParams : EntityModelBase
     {
+        private DistributedParameter phagocytosis = null;
+        public DistributedParameter Phagocytosis
+        {
+            get
+            {
+                return phagocytosis;
+            }
+            set
+            {
+                phagocytosis = value;
+                OnPropertyChanged("Phagocytosis");
+            }
+        }
+
         public SimulationParams()
         {
             // default value
@@ -2689,6 +2703,10 @@ namespace Daphne
             deathConstant = 1e-3;
             deathOrder = 1;
             globalRandomSeed = RandomSeed.Robust();
+
+            // Default is Constant parameter distribution with ConstValue = 0
+            // Instantaneous removal
+            Phagocytosis = new DistributedParameter();
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
@@ -4197,11 +4215,23 @@ namespace Daphne
 
     public class ConfigDistrTransitionDriverElement : ConfigTransitionDriverElement
     {
-        public DistributedParameter distr { get; set; }
+        private DistributedParameter distr;
+        public DistributedParameter Distr
+        {
+            get
+            {
+                return distr;
+            }
+            set
+            {
+                distr = value;
+                OnPropertyChanged("Distr");
+            }
+        }
 
         public ConfigDistrTransitionDriverElement()
         {
-            distr = new DistributedParameter();
+            Distr = new DistributedParameter();
             Type = TransitionDriverElementType.DISTRIBUTION;
         }
     }
@@ -9543,12 +9573,23 @@ namespace Daphne
 
             return true;
         }
+
+        public DistributedParameter Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            DistributedParameter newDistrParam = JsonConvert.DeserializeObject<DistributedParameter>(jsonSpec, Settings);
+
+            return newDistrParam;
+        }
     }
 
     /// <summary>
     /// Types of probability distributions for distributed parameters.
     /// </summary>
-    public enum ParameterDistributionType { CONSTANT=0, POISSON, GAMMA, UNIFORM, CATEGORICAL };
+    public enum ParameterDistributionType { CONSTANT=0, POISSON, GAMMA, UNIFORM, CATEGORICAL, WEIBULL, NEG_EXP };
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -9562,7 +9603,9 @@ namespace Daphne
                                     "Poisson",
                                     "Gamma",
                                     "Uniform",
-                                    "Categorical"
+                                    "Categorical",
+                                    "Weibull",
+                                    "Negative Exp"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -9634,33 +9677,69 @@ namespace Daphne
     /// </summary>
     public abstract class ParameterDistribution : EntityModelBase, IEquatable<ParameterDistribution>
     {
-        //public ParameterDistributionType DistributionType { get; set; }
         [JsonIgnore]
         public bool isInitialized;
 
         public ParameterDistribution()
-        //public ParameterDistribution(ParameterDistributionType _distributionType)
         {
-            //DistributionType = _distributionType;
             isInitialized = false;
         }
         public abstract void Initialize();
         public abstract double Sample();
-        public abstract bool Equals(ParameterDistribution pd); 
+        public abstract bool Equals(ParameterDistribution pd);
+        public abstract ParameterDistribution Clone();
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is uniform.
+    /// Probability distribution when the parameter is uniform.
     /// </summary>
     public class UniformParameterDistribution : ParameterDistribution
     {
-        public double MinValue { get; set; }
-        public double MaxValue { get; set; }
+        private double minValue;
+        public double MinValue
+        {
+            get
+            {
+                return minValue;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    minValue = value;
+                }
+                else
+                {
+                    minValue = 0.0;
+                }
+                OnPropertyChanged("MinValue");
+            }
+        }
+
+        private double maxValue;
+        public double MaxValue 
+        {
+            get
+            {
+                return maxValue;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    maxValue = value;
+                }
+                else
+                {
+                    maxValue = minValue + 1.0;
+                }
+                OnPropertyChanged("MaxValue");
+            }
+        }
+
         [JsonIgnore]
         private ContinuousUniform UniformDist;
 
-        //public UniformParameterDistribution()
-        //    : base(ParameterDistributionType.UNIFORM)
         public UniformParameterDistribution()
             : base()
         {
@@ -9698,14 +9777,46 @@ namespace Daphne
 
             return true;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<UniformParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is a Poisson distribution.
+    /// Probability distribution when the parameter is a Poisson distribution.
     /// </summary>
     public class PoissonParameterDistribution : ParameterDistribution
     {
-        public double Mean { get; set; }
+        private double mean;
+        public double Mean 
+        {
+            get
+            {
+                return mean;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    mean = value;
+                }
+                else
+                {
+                    mean = 1.0;
+                }
+                OnPropertyChanged("Mean");
+            }
+        }
+
         [JsonIgnore]
         private Poisson PoissonDist;
 
@@ -9744,15 +9855,67 @@ namespace Daphne
 
             return true;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<PoissonParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is a Gamma distribution.
+    /// Probability distribution when the parameter is a Gamma distribution.
     /// </summary>
     public class GammaParameterDistribution : ParameterDistribution
     {
-        public double Shape { get; set; }
-        public double Rate { get; set; }
+        private double shape;
+        public double Shape
+        {
+            get
+            {
+                return shape;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    shape = value;
+                }
+                else
+                {
+                    shape = 1.0;
+                }
+                OnPropertyChanged("Shape");
+            }
+        }
+
+        private double rate;
+        public double Rate
+        {
+            get
+            {
+                return rate;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    rate = value;
+                }
+                else
+                {
+                    rate = 1.0;
+                }
+                OnPropertyChanged("Rate");
+            }
+        }
+
         [JsonIgnore]
         private Gamma GammaDist;
 
@@ -9770,7 +9933,8 @@ namespace Daphne
             }
             if (Shape <= 0)
             {
-                MessageBox.Show("The shape parameter must be greater than zero in a Poisson distribution. The shape parameter has been set to 1.0.");
+                MessageBox.Show("The shape parameter must be greater than zero in a Gamma distribution. The shape parameter has been set to 1.0.");
+                Shape = 1.0;
             }
 
             GammaDist = new Gamma(Shape, Rate, Rand.MersenneTwister);
@@ -9796,6 +9960,18 @@ namespace Daphne
 
             return true;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<GammaParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
     /// <summary>
@@ -9850,7 +10026,7 @@ namespace Daphne
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is a categorical distribution.
+    /// Probability distribution when the parameter is a categorical distribution.
     /// </summary>
     public class CategoricalParameterDistribution : ParameterDistribution
     {
@@ -9962,7 +10138,200 @@ namespace Daphne
 
             return mean;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<CategoricalParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
+    /// <summary>
+    /// Probability distribution when the parameter is a Weibull distribution.
+    /// </summary>
+    public class WeibullParameterDistribution : ParameterDistribution
+    {
+        private double shape;
+        public double Shape
+        {
+            get
+            {
+                return shape;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    shape = value;
+                }
+                else
+                {
+                    shape = 1.0;
+                }
+                OnPropertyChanged("Shape");
+            }
+        }
+
+        private double scale;
+        public double Scale
+        {
+            get
+            {
+                return scale;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    scale = value;
+                }
+                else
+                {
+                    scale = 1.0;
+                }
+                OnPropertyChanged("Scale");
+            }
+        }
+
+        [JsonIgnore]
+        private Weibull WeibulllDist;
+
+        public WeibullParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Scale <= 0)
+            {
+                MessageBox.Show("The scale parameter must be greater than zero in a Weibull distribution. The scale parameter has been set to 1.0.");
+                Scale = 1.0;
+            }
+            if (Shape <= 0)
+            {
+                MessageBox.Show("The shape parameter must be greater than zero in a Weibull distribution. The shape parameter has been set to 1.0.");
+                Shape = 1.0;
+            }
+
+            WeibulllDist = new Weibull(Shape, Scale, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return WeibulllDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            WeibullParameterDistribution d = pd as WeibullParameterDistribution;
+
+            if (this.Shape != d.Shape) return false;
+            if (this.Scale != d.Scale) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            WeibullParameterDistribution newDistr = JsonConvert.DeserializeObject<WeibullParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+    }
+
+    /// <summary>
+    /// Probability distribution when the parameter is a Weibull distribution.
+    /// </summary>
+    public class NegExpParameterDistribution : ParameterDistribution
+    {
+        private double rate;
+        public double Rate
+        {
+            get
+            {
+                return rate;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    rate = value;
+                }
+                else
+                {
+                    rate = 1.0;
+                }
+                OnPropertyChanged("Rate");
+            }
+        }
+
+        [JsonIgnore]
+        private Exponential ExplDist;
+
+        public NegExpParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Rate < 0)
+            {
+                MessageBox.Show("The rate parameter must be greater than or equal to zero in a Negative Exponential distribution. The rate parameter has been set to 1.0.");
+                Rate = 1.0;
+            }
+
+            ExplDist = new Exponential(Rate, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return ExplDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            NegExpParameterDistribution d = pd as NegExpParameterDistribution;
+
+            if (this.Rate != d.Rate) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            NegExpParameterDistribution newDistr = JsonConvert.DeserializeObject<NegExpParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
+    }
 
 }
