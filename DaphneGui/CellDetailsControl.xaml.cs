@@ -1581,8 +1581,8 @@ namespace DaphneGui
 
                 PoissonParameterDistribution poisson = new PoissonParameterDistribution();
                 poisson.Mean = 1.0;
-                ((ConfigDistrTransitionDriverElement)tde).distr.ParamDistr = poisson;
-                ((ConfigDistrTransitionDriverElement)tde).distr.DistributionType = ParameterDistributionType.POISSON;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
             }
             else
             {
@@ -1616,8 +1616,8 @@ namespace DaphneGui
             if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
                 tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).distr.ParamDistr = new PoissonParameterDistribution();
-                ((ConfigDistrTransitionDriverElement)tde).distr.DistributionType = ParameterDistributionType.POISSON;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = new PoissonParameterDistribution();
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
                 //stack_panel.DataContext = tde;
             }
             else
