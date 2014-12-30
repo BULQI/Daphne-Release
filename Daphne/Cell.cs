@@ -479,38 +479,12 @@ namespace Daphne
 
             // death
             LoadTransitionDriverElements(daughter, daughter.DeathBehavior);
-            //foreach(KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DeathBehavior.Drivers)
-            //{
-            //    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-            //    {
-            //        TransitionDriverElement tde = new TransitionDriverElement();
-
-            //        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-            //        tde.Alpha = kvp_inner.Value.Alpha;
-            //        tde.Beta = kvp_inner.Value.Beta;
-            //        // add it to the daughter
-            //        daughter.DeathBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-            //    }
-            //}
 
             // division
             if (Divider.nStates > 1)
             {
                 daughter.Divider.Initialize(Divider.nStates, Divider.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Divider.Behavior);
-                //foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Divider.Behavior.Drivers)
-                //{
-                //    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                //    {
-                //        TransitionDriverElement tde = new TransitionDriverElement();
-
-                //        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                //        tde.Alpha = kvp_inner.Value.Alpha;
-                //        tde.Beta = kvp_inner.Value.Beta;
-                //        // add it to the daughter
-                //        daughter.Divider.Behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                //    }
-                //}
                 Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
                 Array.Copy(Divider.gene_id, daughter.Divider.gene_id, Divider.gene_id.Length);
                 Array.Copy(Divider.activity, daughter.Divider.activity, Divider.activity.Length);
@@ -524,19 +498,6 @@ namespace Daphne
             {
                 daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Differentiator.Behavior);
-                //foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.Behavior.Drivers)
-                //{
-                //    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                //    {
-                //        TransitionDriverElement tde = new TransitionDriverElement();
-
-                //        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                //        tde.Alpha = kvp_inner.Value.Alpha;
-                //        tde.Beta = kvp_inner.Value.Beta;
-                //        // add it to the daughter
-                //        daughter.Differentiator.Behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                //    }
-                //}
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
                 Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
@@ -557,11 +518,6 @@ namespace Daphne
                 {
                     if (kvp_inner.Value.GetType() == typeof(MolTransitionDriverElement))
                     {
-                        //MolTransitionDriverElement tde = new MolTransitionDriverElement(((MolTransitionDriverElement)kvp_inner.Value).Alpha,
-                        //                                     ((MolTransitionDriverElement)kvp_inner.Value).Beta,
-                        //                                     daughter.Cytosol.Populations[((MolTransitionDriverElement)kvp_inner.Value).DriverPop.MoleculeKey]);
-                        ////tde.SetParams(kvp_inner.Value);
-
                         MolTransitionDriverElement tde = new MolTransitionDriverElement();
                         tde.Alpha = ((MolTransitionDriverElement)kvp_inner.Value).Alpha;
                         tde.Alpha = ((MolTransitionDriverElement)kvp_inner.Value).Beta;
@@ -572,18 +528,12 @@ namespace Daphne
                     }
                     else
                     {
-                        //DistrTransitionDriverElement tde = new DistrTransitionDriverElement(((DistrTransitionDriverElement)kvp_inner.Value).prob_distr);
-                        ////tde.SetParams(kvp_inner.Value);
-
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
-                        tde.prob_distr = ((DistrTransitionDriverElement)kvp_inner.Value).prob_distr;
+                        tde.distr = ((DistrTransitionDriverElement)kvp_inner.Value).distr;
 
                         // add it to the daughter
                         behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                     }
-
-                    // add it to the daughter
-                    //behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                 }
             }
         }
