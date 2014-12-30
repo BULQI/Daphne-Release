@@ -8,15 +8,13 @@ namespace Daphne
 {
     public class CellManager : IDynamic
     {
-        Dictionary<int, double> deadDict = null;
+        Dictionary<int, double[]> deadDict = null;
         int[] tempDeadKeys = null;
-        public double deathTimeConstant;
-        public int deathOrder;
-        public double deathFactor;
+        public DistributedParameter Phagocytosis;
 
         public CellManager()
         {
-            deadDict = new Dictionary<int, double>();
+            deadDict = new Dictionary<int, double[]>();
         }
 
         public void Step(double dt)
@@ -75,7 +73,8 @@ namespace Daphne
                 {
                     if (!deadDict.ContainsKey(kvp.Value.Cell_id))
                     {
-                        deadDict.Add(kvp.Value.Cell_id, 0);
+                        // start clock at 0 and sample the distribution for the time of removal
+                        deadDict.Add(kvp.Value.Cell_id, new double[] {0.0, Phagocytosis.Sample()});
                     }
                 }
                 
@@ -110,8 +109,10 @@ namespace Daphne
                 foreach(int key in tempDeadKeys)
                 {
                     // increment elapsed time since death
-                    deadDict[key] = deadDict[key] + dt;
-                    if (Rand.TroschuetzCUD.NextDouble() < deathFactor * Math.Pow(deadDict[key] * deathTimeConstant, deathOrder) * dt)
+                    double[] d = deadDict[key];
+                    d[0] += dt;
+
+                    if (d[0] >= d[1])
                     {
                         SimulationBase.dataBasket.RemoveCell(key);
                         deadDict.Remove(key);
