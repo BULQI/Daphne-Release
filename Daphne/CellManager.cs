@@ -90,6 +90,7 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
+                    SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id);
                 }
            }
 
@@ -98,6 +99,7 @@ namespace Daphne
             {
                 foreach (int key in removalList)
                 {
+                    SimulationBase.dataBasket.ExitEvent(key);
                     SimulationBase.dataBasket.RemoveCell(key);
                 }
             }
@@ -114,6 +116,7 @@ namespace Daphne
 
                     if (d[0] >= d[1])
                     {
+                        SimulationBase.dataBasket.DeathEvent(key);
                         SimulationBase.dataBasket.RemoveCell(key);
                         deadDict.Remove(key);
                     }

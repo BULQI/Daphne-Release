@@ -467,6 +467,16 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
+                                <DataGridCheckBoxColumn Header="Exiting" Width="85"                
+                                    Binding="{Binding Path=reportStates.Exit, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding reportStates.Exit}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                                
                             </DataGrid.Columns>
                         </DataGrid>
                     </Expander>

@@ -7074,6 +7074,7 @@ namespace Daphne
         public bool Death { get; set; }
         public bool Division { get; set; }
         public bool Differentiation { get; set; }
+        public bool Exit { get; set; }
     }
 
     public class CellPopulation : EntityModelBase
