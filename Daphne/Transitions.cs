@@ -20,6 +20,7 @@ namespace Daphne
         public abstract void AddDriverElement(int origin, int destination, TransitionDriverElement driverElement);
         public abstract Dictionary<int, Dictionary<int, TransitionDriverElement>> Drivers { get; }
         public abstract void Step(double dt);
+        public abstract void InitializeState();
     }
 
     /// <summary>
@@ -207,10 +208,9 @@ namespace Daphne
                     newState = events.First();
                 }
 
-                PreviousState = CurrentState;
-                CurrentState = newState;
                 TransitionOccurred = true;
-                events.Clear();
+                PreviousState = CurrentState;
+                CurrentState = newState; events.Clear();
                 clock = 0;
                 InitializeState();
             }
@@ -219,7 +219,7 @@ namespace Daphne
         /// <summary>
         /// Causes clock-drivent events to select a new time-to-next-event
         /// </summary>
-        public void InitializeState()
+        public override void InitializeState()
         {
             if (drivers.ContainsKey(CurrentState))
             {
