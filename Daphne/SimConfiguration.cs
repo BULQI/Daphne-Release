@@ -6721,9 +6721,12 @@ namespace Daphne
         // Needed if Gaussian/Box parameters change.
         public void Reset()
         {
-            int number = cellPop.CellStates.Count;
-            cellPop.CellStates.Clear();
-            AddByDistr(number);
+            if (cellPop != null)
+            {
+                int number = cellPop.CellStates.Count;
+                cellPop.CellStates.Clear();
+                AddByDistr(number);
+            }
         }
 
         // <summary>
@@ -6738,24 +6741,27 @@ namespace Daphne
         /// </summary>
         public void CheckPositions()
         {
-            double[] pos;
-            int number = cellPop.CellStates.Count;
-
-            // Remove out-of-bounds cells
-            for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
+            if (cellPop != null)
             {
-                pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                if (!inBounds(pos))
+                double[] pos;
+                int number = cellPop.CellStates.Count;
+
+                // Remove out-of-bounds cells
+                for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
-                    cellPop.CellStates.RemoveAt(i);
+                    pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
+                    if (!inBounds(pos))
+                    {
+                        cellPop.CellStates.RemoveAt(i);
+                    }
                 }
-            }
 
-            // Replace removed cells
-            int cellsToAdd = number - cellPop.CellStates.Count;
-            if (cellsToAdd > 0)
-            {
-                AddByDistr(cellsToAdd);
+                // Replace removed cells
+                int cellsToAdd = number - cellPop.CellStates.Count;
+                if (cellsToAdd > 0)
+                {
+                    AddByDistr(cellsToAdd);
+                }
             }
         }
     }
@@ -10222,6 +10228,10 @@ namespace Daphne
             }
 
             WeibulllDist = new Weibull(Shape, Scale, Rand.MersenneTwister);
+
+            //// The implementation in the next line does not give reproducible results
+            //WeibulllDist = new Weibull(Shape, Scale, new MersenneTwister(RandomSeed.Robust()));
+
             isInitialized = true;
         }
 
@@ -10231,6 +10241,11 @@ namespace Daphne
             {
                 Initialize();
             }
+
+            //// for debugging
+            //double val = WeibulllDist.Sample();
+            //Debug.WriteLine(val);
+            //return val;
 
             return WeibulllDist.Sample();
         }
