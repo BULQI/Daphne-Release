@@ -118,7 +118,6 @@ namespace Daphne
                             tde.Alpha = ((ConfigMolTransitionDriverElement)config_tde).Alpha;
                             tde.Beta = ((ConfigMolTransitionDriverElement)config_tde).Beta;
                             tde.DriverPop = population[((ConfigMolTransitionDriverElement)config_tde).driver_mol_guid_ref];
-                            tde.Initialize();
                             behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                         }
                     }
@@ -126,7 +125,6 @@ namespace Daphne
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
                         tde.distr = ((ConfigDistrTransitionDriverElement)config_tde).Distr.ParamDistr.Clone();
-                        tde.Initialize();
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                     }
                 }
@@ -295,7 +293,7 @@ namespace Daphne
                 simCell.IsMotile = false;
             }
 
-            //TRANSITION DRIVERS
+            //TRANSITIONS
             // death behavior
             if (cp.Cell.death_driver != null)
             {
@@ -317,6 +315,7 @@ namespace Daphne
                 ConfigTransitionDriver config_td = cp.Cell.death_driver;
 
                 LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
+                simCell.DeathBehavior.InitializeState();
             }
 
             // Division 
@@ -338,6 +337,8 @@ namespace Daphne
                         simCell.Divider.Behavior.CurrentState = nextIntValue;
                     }
                 }
+
+                simCell.Divider.Behavior.InitializeState();
 
                 // Set cell division scheme state
                 simCell.DividerState = simCell.Divider.CurrentState = simCell.Divider.Behavior.CurrentState;
@@ -363,6 +364,8 @@ namespace Daphne
                         simCell.Differentiator.Behavior.CurrentState = nextIntValue;
                     }
                 }
+
+                simCell.Differentiator.Behavior.InitializeState();
 
                 // Set cell differentiation state
                 simCell.DifferentiationState = simCell.Differentiator.CurrentState = simCell.Differentiator.Behavior.CurrentState;
@@ -617,18 +620,6 @@ namespace Daphne
         /// <param name="result">result array, null when no reporting needed</param>
         public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs, bool[] result)
         {
-            //foreach (string rcguid in configComp.reaction_complexes_guid_ref)
-            //{
-            //    ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
-            //    foreach (string rguid in crc.reactions_guid_ref)
-            //    {
-            //        if (reac_guids.Contains(rguid) == false)
-            //        {
-            //            reac_guids.Add(rguid);
-            //        }
-            //    }
-            //}
-
             // NOTES: 
             // ConfigCreator.PredefinedReactionsCreator() and ProtocolToolWindow.btnSave_Click() 
             // add bulk molecules then boundary molecules to the reactant, product, and modifier lists.
@@ -1105,22 +1096,38 @@ namespace Daphne
         {
             double t = 0, localStep;
 
+            //while (t < dt)
+            //{
+            //    localStep = Math.Min(integratorStep, dt - t);
+            //    dataBasket.Environment.Comp.Step(localStep);
+            //    // zero all cell forces; needs to happen first
+            //    cellManager.ResetCellForces();
+            //    // handle collisions
+            //    if (collisionManager != null)
+            //    {
+            //        collisionManager.Step(localStep);
+            //    }
+            //    // cell force reset happens in cell manager at the end of the cell update
+            //    cellManager.Step(localStep);
+            //    t += localStep;
+            //}
+            //accumulatedTime += dt;
             while (t < dt)
             {
-                localStep = Math.Min(integratorStep, dt - t);
-                dataBasket.Environment.Comp.Step(localStep);
+                dataBasket.Environment.Comp.Step(integratorStep);
                 // zero all cell forces; needs to happen first
                 cellManager.ResetCellForces();
                 // handle collisions
                 if (collisionManager != null)
                 {
-                    collisionManager.Step(localStep);
+                    collisionManager.Step(integratorStep);
                 }
                 // cell force reset happens in cell manager at the end of the cell update
-                cellManager.Step(localStep);
-                t += localStep;
+                cellManager.Step(integratorStep);
+                t += integratorStep;
+                accumulatedTime += integratorStep;
             }
-            accumulatedTime += dt;
+            //accumulatedTime += dt;
             if (accumulatedTime >= duration)
             {
                 RunStatus = RUNSTAT_FINISHED;
