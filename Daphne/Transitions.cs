@@ -28,16 +28,12 @@ namespace Daphne
     /// </summary>
     public class TransitionDriverElement
     {
-        public virtual bool TransitionOccurred(double clock)
+        public virtual bool TransitionOccurred(double dt)
         {
             return false;
         }
 
         public virtual void Initialize()
-        {
-        }
-
-        public virtual void Reset()
         {
         }
     }
@@ -59,19 +55,18 @@ namespace Daphne
             DriverPop = molpop;
         }
 
-        public double RateConstant()
+        public double RateConstant(double dt)
         {
             if (DriverPop == null)
             {
                 return 0;
             }
-            return Alpha + Beta * DriverPop.Conc.MeanValue();
+            return Alpha + Beta * DriverPop.Conc.MeanValue()*dt;
         }
 
-        public override bool TransitionOccurred(double clock)
+        public override bool TransitionOccurred(double dt)
         {
-            // this transition driver does not use clock
-            if (Rand.UniformDist.Sample() < RateConstant())
+            if (Rand.UniformDist.Sample() < RateConstant(dt))
             {
                 return true;
             }
@@ -85,8 +80,8 @@ namespace Daphne
     public class DistrTransitionDriverElement : TransitionDriverElement
     {
         public ParameterDistribution distr { get; set; }
-
-        public double timeToNextEvent;
+        public double timeToNextEvent { get; set; }
+        private double clock;
 
         public DistrTransitionDriverElement()
         {
@@ -95,15 +90,16 @@ namespace Daphne
         public override void Initialize()
         {
             timeToNextEvent = distr.Sample();
+            clock = 0;
         }
 
-        public override bool TransitionOccurred(double clock)
+        public override bool TransitionOccurred(double dt)
         {
+            clock += dt;
             if (timeToNextEvent <= clock)
             {
                 return true;
             }
-
             return false;
         }
     }
@@ -114,7 +110,6 @@ namespace Daphne
     public class TransitionDriver : ITransitionDriver
     {
         private Dictionary<int, Dictionary<int, TransitionDriverElement>> drivers;
-        private double clock;
         private List<int> events;
 
         /// <summary>
@@ -176,11 +171,9 @@ namespace Daphne
                 return;
             }
 
-            clock += dt;
-
             foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
             {
-                if (kvp.Value.TransitionOccurred(clock) == true)
+                if (kvp.Value.TransitionOccurred(dt) == true)
                 {
                     events.Add(kvp.Key);
                 }
@@ -211,7 +204,6 @@ namespace Daphne
                 TransitionOccurred = true;
                 PreviousState = CurrentState;
                 CurrentState = newState; events.Clear();
-                clock = 0;
                 InitializeState();
             }
         }
