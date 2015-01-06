@@ -186,15 +186,14 @@ namespace Daphne
                 if (events.Count > 1)
                 {
                     // randomly choose one of the transition events
-                    double d = events.Count * Rand.UniformDist.Sample();
+                    // Create a categorical probability distribution where the transition have equal probability.
+                    // Normalization is taken care of by the Categorical classes.
+                    CategoricalParameterDistribution cpd = new CategoricalParameterDistribution();
                     for (int j = 0; j < events.Count; j++)
                     {
-                        if (d <= j + 1)
-                        {
-                            newState = j;
-                            break;
-                        }
+                        cpd.ProbMass.Add(new CategoricalDistrItem(events[j], 1.0));
                     }
+                    newState = (int)cpd.Sample();
                 }
                 else
                 {
