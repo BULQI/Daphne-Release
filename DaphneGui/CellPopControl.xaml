@@ -399,7 +399,7 @@
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                                     <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Actual Cell Locations</TextBlock>
                                                     <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                    MinHeight="50" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                                                                    MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" RowHeaderWidth="0"
                                                                     VerticalContentAlignment="Center" CanUserAddRows="False" BorderThickness="1" BorderBrush="Black"
                                                                     KeyDown="dgLocations_KeyDown"
@@ -489,18 +489,18 @@
                     >
 
                 <StackPanel>
-                <!-- CELL POPULATIONS -->
-                <ListBox x:Name="CellPopsListBox"  
-                        ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
-                        ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
-                        SelectedIndex="-1"
-                        SelectionChanged="cellPopsListBoxSelChanged"
-                        MinHeight="20"
-                                             />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                    <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
-                    <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
-                </StackPanel>
+                    <!-- CELL POPULATIONS -->
+                    <ListBox x:Name="CellPopsListBox"  
+                            ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
+                            ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
+                            SelectedIndex="-1"
+                            SelectionChanged="cellPopsListBoxSelChanged"
+                            MinHeight="20"
+                                                 />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                        <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
+                        <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
+                    </StackPanel>
                 
                     <!-- Cell populations details -->
                     <Expander ExpandDirection="Down" Padding="6"
@@ -511,172 +511,18 @@
                                     Canvas.ZIndex="1"
                                     >
 
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel HorizontalAlignment="Left">
-                            <ContentControl Name="CellPopDetails"
-                                            Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
-                                            ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
-                                            Margin="6,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel HorizontalAlignment="Left">
+                                <ContentControl Name="CellPopDetails"
+                                                Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
+                                                Margin="6,0"/>
+                            </StackPanel>
+
                         </StackPanel>
-
-                    </StackPanel>
-                </Expander>
-
-                    <!-- Cell Properties (Move to ToolWinTissure) -->
-                    <Expander  Padding="0"
-                                ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Cell Properties"                                              
-                                x:Name="CellPropertiesExpander"
-                                Margin="6, 0,0,0" 
-                                >
-
-                        <local:DaphneStackPanel x:Name="CellPropertiesPanel">
-                        
-                        <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
-                            <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
-                                            Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
-                                            DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
-                            <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." Click="EcsPushCellButton_Click"/>
-                        </StackPanel>
-
-                        <StackPanel Margin="10,0">
-                            <local:CellDetailsControl x:Name="ucCellPopCellDetails" 
-                                                      Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
-                                                      DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
-                        </StackPanel>
-                    </local:DaphneStackPanel>
-
-                </Expander>
-             
+                    </Expander>
                 </StackPanel>
-            </Expander>
-
-            <!-- CELL DEATH PARAMETERS  (Move to ToolWinTissure) -->
-            <Expander
-                            Padding="5" 
-                            ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Cell Death Parameters"                                              
-                                x:Name="CellDeathParamsExpander"
-                                Margin="0,5,0,0" 
-                                Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
-                <StackPanel>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Left" VerticalAlignment="Center"
-                                    TextAlignment="Left"
-                                    Width="Auto"
-                                    />
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="time constant" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-                        <editors:DoubleEditBox x:Name="deathConstant_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="E2"
-                                                StepValue="0.1"
-                                                Width="100" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="order parameter" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="3"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-
-                        <editors:DoubleEditBox x:Name="deathOrder_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="F0"
-                                                StepValue="0.1"
-                                                Width="100" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-
-            </Expander>
-
-            <!-- Cell Interaction Parameters  (Move to ToolWinTissure) -->
-            <Expander
-                    Padding="5" 
-                    ExpandDirection="Down"
-                    IsExpanded="False"
-                    Header="Cell Interaction Parameters"                                              
-                    x:Name="CellParamsExpander"
-                    Margin="0,5,0,0" 
-                    Canvas.ZIndex="1"
-                    BorderThickness="1"
-                    BorderBrush="Black"
-                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
-                <StackPanel>
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="penetration resistance" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-                        <editors:DoubleEditBox x:Name="phi1_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="F2"
-                                                StepValue="100"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="phi2" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="3"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-
-                        <editors:DoubleEditBox x:Name="phi2_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="N2"
-                                                StepValue="0.1"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-
+                
             </Expander>
 
         </StackPanel>

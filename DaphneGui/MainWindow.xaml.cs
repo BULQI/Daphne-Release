@@ -82,7 +82,7 @@ namespace DaphneGui
                 SetValue(ToolWinTypeProperty, value);
             }
         }
-        
+
         /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
@@ -113,6 +113,7 @@ namespace DaphneGui
         private static bool argDev = false, argBatch = false, argSave = false;
         private string argScenarioFile = "";
         private bool mutex = false;
+        public ManualResetEvent runFinishedEvent = new ManualResetEvent(true);
 
         /// <summary>
         /// uri for the scenario file
@@ -131,12 +132,12 @@ namespace DaphneGui
         /// </summary>
         public static byte CONTROL_NONE = 0,
                            CONTROL_FORCE_RESET = (1 << 0),
-                           CONTROL_DB_LOAD = (1 << 1),
+                           CONTROL_PAST_LOAD = (1 << 1),
                            CONTROL_ZERO_FORCE = (1 << 2),
                            CONTROL_NEW_RUN = (1 << 3),
                            CONTROL_UPDATE_GUI = (1 << 4),
                            CONTROL_MOUSE_DRAG = (1 << 5);
-                           
+
 
         public static byte controlFlags = CONTROL_NONE;
 
@@ -227,17 +228,17 @@ namespace DaphneGui
         /// <summary>
         /// custom routed command for delete db
         /// </summary>
-        public static RoutedCommand DeleteDBCommand = new RoutedCommand();
+        public static RoutedCommand ClearVCRDataCommand = new RoutedCommand();
 
         /// <summary>
-        /// executed command handler for delete db
+        /// executed command handler for clear vcr data
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void CommandBindingDeleteDB_Executed(object sender, ExecutedRoutedEventArgs e)
+        public void CommandBindingClearVCRData_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            string messageBoxText = "Are you sure you want to clear the database?";
-            string caption = "Clear database";
+            string messageBoxText = "Are you sure you want to clear the vcr data file?";
+            string caption = "Clear vcr data file";
             MessageBoxButton button = MessageBoxButton.YesNo;
             MessageBoxImage icon = MessageBoxImage.Warning;
 
@@ -247,22 +248,24 @@ namespace DaphneGui
             // Process message box results
             if (result == MessageBoxResult.Yes)
             {
-                //////////DataBaseTools.DeleteDataBase();
-                System.Windows.MessageBox.Show("All records deleted!");
-                VCR_Toolbar.IsEnabled = false; //Make sure that playback of half-deleted datasets is impossible.
+                // prevent playback of half-finished simulation
+                VCR_Toolbar.IsEnabled = false;
                 if (vcrControl != null)
                 {
                     vcrControl.ReleaseVCR();
                 }
+                DataBasket.hdf5file.clearFile();
+                DataBasket.currentExperimentID = -1;
+                System.Windows.MessageBox.Show("All file entries cleared!");
             }
         }
 
         /// <summary>
-        /// can execute command handler for delete db
+        /// can execute command handler for clear vcr data
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void CommandBindingDeleteDB_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        public void CommandBindingClearVCRData_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
@@ -288,33 +291,43 @@ namespace DaphneGui
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
 
-
             this.ToolWinCellInfo.Close();
 
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            ////DO NOT DELETE THIS
-            ////This code is to create DaphneStore and UserStore.
-            ////It should not be needed ever again! 
-            ////Any editing of DaphneStore should be done through application (GUI).
-            //try
-            //{
-            //    CreateDaphneAndUserStores();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            //DO NOT DELETE THIS
+            //This code creates the DaphneStore and UserStore.
+            //Only run this code during development.
+            //Once development is completed editing of the DaphneStore and UserStore should be done through application (GUI).
+            //Running this after development will make all the entities in the Daphne and User stores appear
+            // to be different than the entities at the Protocol and Entity levels. 
+            if (false)
+            {
+                try
+                {
+                    CreateDaphneAndUserStores();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
 
-            //////This code re-generates the scenarios - DO NOT DELETE
-            try
-            {
-                CreateAndSerializeDaphneProtocols();
             }
-            catch (Exception e)
+            //DO NOT DELETE THIS
+            //This code creates the predefined scenarios.
+            //Running this using the existing stores will not break user scenarios.
+            if (false)
             {
-                showExceptionBox(exceptionMessage(e));
+                //This code re-generates the scenarios - DO NOT DELETE
+                try
+                {
+                    CreateAndSerializeDaphneProtocols();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
             }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
@@ -449,7 +462,7 @@ namespace DaphneGui
 
             autoZoomFitMenu.IsChecked = Properties.Settings.Default.autoZoomFit;
             openLastScenarioMenu.IsChecked = Properties.Settings.Default.lastOpenScenario != "";
-            skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataBaseWrites;
+            skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataWrites;
             // TEMP_SUMMARY
             writeCellSummariesMenu.IsChecked = Properties.Settings.Default.writeCellsummaries;
 
@@ -603,18 +616,29 @@ namespace DaphneGui
                 }
             }
 
+            vcrControl = new VCRControl();
+
             // hdf5
+            bool proceedHDF5 = true;
+
             if (sim == null || SimulationBase.dataBasket == null)
             {
                 MessageBox.Show("Need valid simulation and databasket object prior to initializing the hdf5 object.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+                proceedHDF5 = false;
             }
             else
-            // this must come from some gui selection (which file do you want to open or create...?)
+            // this may have to come from some gui selection (which file do you want to open or create...?)
             // and likely we need to do this in a different place, i.e. with a handler
             // the file must get openend before a run or else the simulation will crash
             if (DataBasket.hdf5file.initialize("framedata.hd5") == false)
             {
                 MessageBox.Show("File might be currently open or disk cannot be accessed.", "Error creating HDF5 file", MessageBoxButton.OK, MessageBoxImage.Error);
+                proceedHDF5 = false;
+            }
+
+            if (proceedHDF5 == false)
+            {
+                clearVCRdata.IsEnabled = false;
             }
 
             //setup render skin 
@@ -819,7 +843,7 @@ namespace DaphneGui
                 applyTempFilesAndSave(true);
             }
 
-            Protocol protocol = new Protocol();
+            Protocol protocol = new Protocol("", "", Protocol.ScenarioType.TISSUE_SCENARIO);
 
             //Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -847,8 +871,6 @@ namespace DaphneGui
                         LoadProtocolFromSBML(protocol);
                     }
                 }
-                //Obtain filled out configurator and store in tempConfigurator
-                //SBMLToProtocol();
             }
         }
 
@@ -861,28 +883,29 @@ namespace DaphneGui
         {
             //ReactionComplex that was added
             ConfigReactionComplex crc = protocol.entity_repository.reaction_complexes.Last();
-
-            //Add reaction complex
-            // prevent when a fit is in progress
+                        // prevent when a fit is in progress
             lock (cellFitLock)
             {
-                sop.Protocol.entity_repository.reaction_complexes.Add(crc);
-            }
+                    sop.Protocol.entity_repository.reaction_complexes.Add(crc);
+            
+                //Add reaction complex
+                foreach (ConfigMolecule cm in crc.molecules_dict.Values)
+                {
+                    sop.Protocol.entity_repository.molecules.Add(cm.Clone(null));
+                }
 
-            foreach (ConfigMolecule cm in crc.molecules_dict.Values)
-            {
-                sop.Protocol.entity_repository.molecules.Add(cm.Clone(null));
+                //Reactions in the reaction complex
+                foreach (ConfigReaction cr in crc.reactions)
+                {
+                    if (!sop.Protocol.entity_repository.reaction_templates_dict.ContainsKey(cr.reaction_template_guid_ref))
+                    {
+                        sop.Protocol.entity_repository.reaction_templates.Add(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);      
+                    }
+                    int index = sop.Protocol.entity_repository.reaction_templates.IndexOf(sop.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);           
+                    cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
+                    sop.Protocol.entity_repository.reactions.Add(cr);
+                }
             }
-
-            //Reactions in the reaction complex
-            foreach (ConfigReaction cr in crc.reactions)
-            {
-                int index = protocol.entity_repository.reaction_templates.IndexOf(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
-
-                cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
-                sop.Protocol.entity_repository.reactions.Add(cr);
-            }
-            ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
         }
 
         /// <summary>
@@ -892,7 +915,7 @@ namespace DaphneGui
         private void LoadProtocolFromSBML(Protocol protocol)
         {
             protocol.InitializeStorageClasses();
-
+            
             //SetPaths
             protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
             protocol.TempFile = orig_path + @"\temp_scenario.json";
@@ -915,8 +938,8 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
-            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
-            //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
+            //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
             dlg.FileName = "SBMLModel";
 
             // Show open  file dialog box
@@ -1037,8 +1060,6 @@ namespace DaphneGui
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
-                    toolWin.LockSaveStartSim();
-
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
@@ -1047,7 +1068,9 @@ namespace DaphneGui
                     {
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     }
-                    
+
+                    // this needs to come after setting orig_content
+                    toolWin.LockSaveStartSim();
                     sim.restart();
                     UpdateGraphics();
 
@@ -1106,7 +1129,7 @@ namespace DaphneGui
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
         /// </summary>
         /// <param name="newFile">true to indicate we are loading a new file</param>
-        /// <param name="xmlConfigString">scenario as a string</param>
+        /// <param name="protocol">protocol object</param>
         private void lockAndResetSim(bool newFile, Protocol protocol)
         {
             // prevent when a fit is in progress
@@ -1124,7 +1147,7 @@ namespace DaphneGui
                 }
 
                 // after doing a full reset, don't require one immediately unless we did a db load
-                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
+                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_PAST_LOAD));
 
                 sim.reset();
                 // reset cell tracks and free memory
@@ -1139,26 +1162,118 @@ namespace DaphneGui
             }
         }
 
+        private string uniqueFilename(string s)
+        {
+            string tmp = orig_path + @"\" + s + ".json";
+            int i = 0;
+
+            while (File.Exists(tmp) == true)
+            {
+                tmp = orig_path + @"\" + s + "_" + i + ".json";
+                i++;
+            }
+            return tmp;
+        }
+
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            #region MyRegion
-            //esw = new ExpSelectWindow(-1);
-            //esw.Owner = this;
-            //esw.ShowDialog();
-            //if (esw.expselected)
-            //{
-            //    MainWindow.SetControlFlag(MainWindow.CONTROL_DB_LOAD, true);
-            //    lockAndResetSim(true, esw.SelectedXML);
-            //    if (loadSuccess == false)
-            //    {
-            //        return;
-            //    }
-            //    MainWindow.SetControlFlag(MainWindow.CONTROL_DB_LOAD, false);
-            //    sim.runStatSummary();
-            //    GUIUpdate(esw.SelectedExperiment, true);
-            //    displayTitle("DB experiment id " + esw.SelectedExperiment);
-            //} 
-            #endregion
+            // id the file is open we'll have to close it; ask the user if that's what they want
+            if (DataBasket.hdf5file.isOpen() == true)
+            {
+                // we may want this verbosity of warnings but perhaps it's a burden to click through so many dialogs; maybe get requirements from Tom and Grace
+                //if (MessageBox.Show("The HDF5 file is currently open. Do you want to proceed and close it?", "HDF5 open", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                //{
+                //    return;
+                //}
+                // close the file and all open groups
+                DataBasket.hdf5file.close(true);
+            }
+
+            if (DataBasket.hdf5file.openRead() == false)
+            {
+                MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
+                return;
+            }
+
+            // find the experiment names and with them the number of experiments
+            List<string> expNames = DataBasket.hdf5file.subGroupNames("/Experiments_VCR");
+            string selectedExp = "";
+
+            if (expNames.Count > 0)
+            {
+                // populate the dialog with expNames
+                // the dialog must allow the user to choose an experiment and press Ok (loads it) or cancel (exits)
+                // the dialog must return or otherwise somehow provide the chosen experiment
+
+                // for the purpose of this example I'll assume they pick the first experiment if it exists
+                // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
+                if (expNames.Count > 0)
+                {
+                    PastExperiments past = new PastExperiments(expNames);
+
+                    if (past.ShowDialog() == true)
+                    {
+                        int index = past.SelectedExperiment;
+                        if (index > -1)
+                        {
+                            selectedExp = expNames[index];
+                        }
+                    }
+                }
+
+                // now load it if there was a valid selection
+                if (selectedExp != "")
+                {
+                    string protocolString = null;
+
+                    DataBasket.currentExperimentID = DataBasket.extractExperimentId(selectedExp);
+                    // open the experiment parent group
+                    DataBasket.hdf5file.openGroup("/Experiments_VCR/" + selectedExp);
+                    // read the protocol string
+                    DataBasket.hdf5file.readString("Protocol", ref protocolString);
+                    // close the file and all groups
+                    DataBasket.hdf5file.close(true);
+
+                    // do the loading
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                    lockAndResetSim(true, ReadJson(protocolString));
+                    // need to set a filename
+                    sop.Protocol.FileName = uniqueFilename(selectedExp);
+                    if (loadSuccess == false)
+                    {
+                        return;
+                    }
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+                    // this function does not exist currently, do we need this call?
+                    //sim.runStatSummary();
+                    GUIUpdate(DataBasket.currentExperimentID, true);
+                    displayTitle("Loaded past run " + selectedExp);
+                    return;
+                }
+            }
+
+            // if we get here the file is still open, close the file and all groups
+            DataBasket.hdf5file.close(true);
+
+// leaving this for legacy, remove when done
+#if OLD_LOADING_CODE
+            esw = new ExpSelectWindow(-1);
+            esw.Owner = this;
+            esw.ShowDialog();
+            if (esw.expselected)
+            {
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                lockAndResetSim(true, esw.SelectedXML);
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+                sim.runStatSummary();
+                GUIUpdate(esw.SelectedExperiment, true);
+                displayTitle("DB experiment id " + esw.SelectedExperiment);
+            } 
+#endif
         }
 
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
@@ -1232,13 +1347,13 @@ namespace DaphneGui
 
         private void VCRbutton_Play_Checked(object sender, RoutedEventArgs e)
         {
-            DataBaseMenu.IsEnabled = false;
+            DataStorageMenu.IsEnabled = false;
             vcrControl.SetPlaybackState(VCRControlState.VCR_PLAY);
         }
 
         private void VCRbutton_Play_Unchecked(object sender, RoutedEventArgs e)
         {
-            DataBaseMenu.IsEnabled = true;
+            DataStorageMenu.IsEnabled = true;
             vcrControl.SetInactive();
         }
 
@@ -1332,9 +1447,9 @@ namespace DaphneGui
             Properties.Settings.Default.suggestExpNameChange = uniqueNamesMenu.IsChecked;
         }
 
-        private void skipDataBase_Click(object sender, RoutedEventArgs e)
+        private void skipDataWrite_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.skipDataBaseWrites = skipDataWriteMenu.IsChecked;
+            Properties.Settings.Default.skipDataWrites = skipDataWriteMenu.IsChecked;
 
             // these options aren't feasible without the database output being enabled
             if (skipDataWriteMenu.IsChecked)
@@ -1367,19 +1482,6 @@ namespace DaphneGui
             {
                 sim.Reporter.ReportFolder = appPath;
             }
-        }
-
-        private void bufferDatabaseWriteMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if (bufferDatabaseWriteMenu.IsChecked)
-            {
-                Properties.Settings.Default.bufferDataBaseWriting = true;
-            }
-            else
-            {
-                Properties.Settings.Default.bufferDataBaseWriting = false;
-            }
-
         }
 
         /// <summary>
@@ -1705,28 +1807,13 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void runButton_Click(object sender, RoutedEventArgs e)
         {
-            //skg - For VatRC
-            //If user clicked Run button, this code will set the redraw_flag to false to signal the reac complex chart be refreshed.
-            //If ChartViewToolWindow called this method, i.e, the user changed values in the reac complex graph, then redraw_flag is true and we don't override it.
-            //Although this is relevant only for VatRC scenario type, I don't think we really need to check the scenario type because
-            //it doesn't have any effect on the other scenario types.
-            ChartViewToolWindow ch = sender as ChartViewToolWindow;
-            if (ch == null)
-            {
-                if (ReacComplexChartWindow != null)
-                {
-                    ReacComplexChartWindow.redraw_flag = false;
-                }
-            }
-            //end skg
-
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
 
             runSim();
         }
-       
+
         /// <summary>
         /// save when simulation is paused state
         /// </summary>
@@ -2003,8 +2090,9 @@ namespace DaphneGui
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                
+
                 if (newFile == true)
                 {
                     if (ToolWinType != ToolWindowType.Tissue)
@@ -2044,11 +2132,12 @@ namespace DaphneGui
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
                     gc = new VTKFullGraphicsController(this);
-                 }
+                }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                this.ReacComplexChartWindow.DataContext = sop.Protocol;   //was causing a problem in chart page
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
@@ -2074,7 +2163,7 @@ namespace DaphneGui
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
                 }
- 
+
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
@@ -2166,14 +2255,9 @@ namespace DaphneGui
                 }
             }
 
-            //////////VCR_Toolbar.IsEnabled = false;
+            VCR_Toolbar.IsEnabled = false;
             //////////gc.ToolsToolbar_IsEnabled = true;
             //////////gc.DisablePickingButtons();
-
-#if LANGEVIN_TIMING
-            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
-#endif
-            //}
 
             loadSuccess = true;
         }
@@ -2242,7 +2326,15 @@ namespace DaphneGui
             }
         }
 
-        
+        /// <summary>
+        /// utility to close output files, reporter, hdf5
+        /// </summary>
+        private void closeOutputFiles()
+        {
+            sim.Reporter.CloseReporter();
+            DataBasket.hdf5file.close(true);
+        }
+
         private void run()
         {
             while (true)
@@ -2274,13 +2366,16 @@ namespace DaphneGui
                             // check for flags and execute applicable task(s)
                             if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
                             {
-                                if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                if (Properties.Settings.Default.skipDataWrites == false)
                                 {
-                                    sim.FrameData.writeData(sim.FrameNumber - 1);
+                                    if (sim.FrameData != null)
+                                    {
+                                        sim.FrameData.writeData(sim.FrameNumber - 1);
+                                    }
                                 }
                                 UpdateGraphics();
                             }
-                            if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
+                            if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataWrites == false)
                             {
                                 sim.Reporter.AppendReporter();
                             }
@@ -2294,20 +2389,18 @@ namespace DaphneGui
                                 }
                                 else if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
                                 {
+                                    //signal run finished if any one is waiting
+                                    runFinishedEvent.Set();
                                     // autosave the state
                                     if (argSave == true)
                                     {
                                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
                                     }
                                     // close the reporter
-                                    if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                    if (Properties.Settings.Default.skipDataWrites == false)
                                     {
-                                        sim.Reporter.CloseReporter();
-                                        // this experiment sub-group
-                                        DataBasket.hdf5file.closeGroup();
-                                        // experiments group
-                                        DataBasket.hdf5file.closeGroup();
-                                        DataBasket.hdf5file.close();
+                                        // reporter and hdf5 close
+                                        closeOutputFiles();
                                     }
                                     // for profiling: close the application after a completed experiment
                                     if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
@@ -2317,21 +2410,17 @@ namespace DaphneGui
                                     }
 
                                     // update the gui; this is a non-issue if an application close just got requested, so may get skipped
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
                                 }
                             }
                         }
                     }
                     else if (sim.RunStatus == SimulationBase.RUNSTAT_ABORT)
                     {
-                        if (Properties.Settings.Default.skipDataBaseWrites == false)
+                        if (Properties.Settings.Default.skipDataWrites == false)
                         {
-                            sim.Reporter.CloseReporter();
-                            // this experiment sub-group
-                            DataBasket.hdf5file.closeGroup();
-                            // experiments group
-                            DataBasket.hdf5file.closeGroup();
-                            DataBasket.hdf5file.close();
+                            // reporter and hdf5 close
+                            closeOutputFiles();
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
@@ -2377,26 +2466,10 @@ namespace DaphneGui
             lockSaveStartSim(true);
         }
 
-        /// <summary>
-        /// create the vcr control if it has not been created yet, and load the current frame
-        /// </summary>
-        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
-        /// <param name="expID">experiment id</param>
-        /// <returns>true for success</returns>
-        private bool OpenVCR(bool lastFrame, int expID = -1)
-        {
-            // create the vcr control if needed, load the data, and set the last frame
-            if (vcrControl == null)
-            {
-                vcrControl = new VCRControl();
-            }
-            return vcrControl.OpenVCR(lastFrame, expID);
-        }
-
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            if (expID >= 0 && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR(true, expID) == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
@@ -2527,9 +2600,7 @@ namespace DaphneGui
         private void updateGraphicsAndGUI()
         {
             lockAndResetSim(false, ReadJson(""));
-            //also need to delete every for this experiment in database.
-            //DataBaseTools.DeleteExperiment(configurator.Protocol.experiment_db_id);
-            //SC.Protocol.experiment_db_id = -1;//reset
+            // disable the vcr by passing expId == -1, from this call we should never attempt to read an hdf5 file
             runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
@@ -2542,36 +2613,44 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        private void runSim()
+        internal void runSim()
         {
 
-            if (ToolWinType == ToolWindowType.Tissue)
+            switch (ToolWinType)
             {
-                VTKDisplayDocWindow.Activate();
+                case ToolWindowType.Tissue:
+                    runSim_Tissue();
+                    break;
+                case ToolWindowType.VatRC:
+                    runSim_VatRc();
+                    break;
+                default:
+                    break;
             }
+        }
 
+        private void runSim_Tissue()
+        {
+            VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
-                if (ToolWinType == ToolWindowType.Tissue)
+
+                abortButton.IsEnabled = true;
+                sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
+
+                //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
+                //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
+
+                //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
+                if (gc is VTKFullGraphicsController == true)
                 {
-                    abortButton.IsEnabled = true;
-                    sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
-
-                    //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
-                    //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
-
-                    //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
-                    if (gc is VTKFullGraphicsController == true)
-                    {
-                        ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
-                    }
-
-                    runButton.Content = "Continue";
-                    statusBarMessagePanel.Content = "Paused...";
-                    runButton.ToolTip = "Continue the Simulation.";
+                    ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
                 }
-                else if (ToolWinType == ToolWindowType.VatRC)
-                { }
+
+                runButton.Content = "Continue";
+                statusBarMessagePanel.Content = "Paused...";
+                runButton.ToolTip = "Continue the Simulation.";
+
             }
             else if (sim.RunStatus == SimulationBase.RUNSTAT_PAUSE)
             {
@@ -2626,8 +2705,7 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
-                if (mouseDrag == false && tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
                     // initiating a run starts always at repetition 1
                     repetition = 1;
@@ -2647,7 +2725,7 @@ namespace DaphneGui
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(!mouseDrag);
+                            lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
@@ -2655,14 +2733,14 @@ namespace DaphneGui
                             {
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
-                                lockSaveStartSim(!mouseDrag);
+                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
                             // initiating a run starts always at repetition 1
                             repetition = 1;
-                            lockSaveStartSim(!mouseDrag);
+                            lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.Cancel:
@@ -2673,29 +2751,64 @@ namespace DaphneGui
 
                 if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
                 {
-                    if (Properties.Settings.Default.skipDataBaseWrites == false)
+                    if (Properties.Settings.Default.skipDataWrites == false)
                     {
                         sim.Reporter.StartReporter(sim);
-                        DataBasket.hdf5file.openWrite();
+                        DataBasket.hdf5file.openWrite(false);
                         // super-group containing all experiments
                         DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
 
                         // for now pick a safe id, highest id + 1
-                        int id = DataBasket.findHighestExperimentId() + 1;
+                        DataBasket.currentExperimentID = DataBasket.findHighestExperimentId() + 1;
 
                         // group for this experiment
-                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", id));
+                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", DataBasket.currentExperimentID));
+                        // the protocol as string; needed to reload arbitrary past experiments
+                        DataBasket.hdf5file.writeString("Protocol", sop.Protocol.SerializeToString());
+                        // frames group
+                        DataBasket.hdf5file.createGroup("VCR_Frames");
                     }
-                    if (!mouseDrag)
-                    {
-                        runButton.Content = "Pause";
-                        runButton.ToolTip = "Pause the Simulation.";
-                        statusBarMessagePanel.Content = "Running...";
-                        abortButton.IsEnabled = true;
-                    }
+
+                    runButton.Content = "Pause";
+                    runButton.ToolTip = "Pause the Simulation.";
+                    statusBarMessagePanel.Content = "Running...";
+                    abortButton.IsEnabled = true;
+
+                    runFinishedEvent.Reset();
                     sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 }
             }
+        }
+
+        /// <summary>
+        /// Initiate a simulation run
+        /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
+        /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
+        /// </summary>
+        private void runSim_VatRc()
+        {
+
+            if (sim.RunStatus == SimulationBase.RUNSTAT_RUN) return;
+
+            if (vcrControl != null)
+            {
+                vcrControl.SetInactive();
+            }
+
+            bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
+            repetition = 1;
+            lockSaveStartSim(!mouseDrag);
+
+            if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
+            {
+                if (Properties.Settings.Default.skipDataWrites == false)
+                {
+                    sim.Reporter.StartReporter(sim);
+                }
+                runFinishedEvent.Reset();
+                sim.RunStatus = SimulationBase.RUNSTAT_RUN;
+            }
+
         }
 
         public MessageBoxResult saveDialog()
@@ -2911,6 +3024,12 @@ namespace DaphneGui
                 simThread.Abort();
             }
 
+            if (Properties.Settings.Default.skipDataWrites == false)
+            {
+                // reporter and hdf5 close
+                closeOutputFiles();
+            }
+
             // clear the vcr cache
             if (vcrControl != null)
             {
@@ -3029,15 +3148,15 @@ namespace DaphneGui
                 {
                     VTKDisplayDocWindow.Activate();
                 }
-            	else if (ToolWinType == ToolWindowType.VatRC)
-            	{
+                else if (ToolWinType == ToolWindowType.VatRC)
+                {
                     ReacComplexChartWindow.Activate();
-            	}
+                }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 toolWin.Activate();
-            }            
+            }
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -3060,7 +3179,7 @@ namespace DaphneGui
             About about = new About();
             about.ShowDialog();
         }
-        
+
         /// <summary>
         /// This GenericPush method is called for pushing entities into the Protocol level.
         ///
@@ -3087,9 +3206,9 @@ namespace DaphneGui
 
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
-                {
+                {                    
                     pm.ComponentLevelDetails.DataContext = erMol;
-                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);
+                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3109,9 +3228,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
                     pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    newEntity = ((ConfigReaction)source).Clone(false);
-                    ConfigReaction tempReac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    //((ConfigReaction)newEntity).Name = tempReac.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pr.ShowDialog() == false)
@@ -3128,9 +3245,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
                     pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    newEntity = ((ConfigCell)source).Clone(false);
-                    ConfigCell tempCell = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    //((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pcell.ShowDialog() == false)
@@ -3150,8 +3265,7 @@ namespace DaphneGui
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
-                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);
-                    //((ConfigGene)newEntity).Name = newEntity.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3161,7 +3275,7 @@ namespace DaphneGui
                 }
 
                 UserWantsNewEntity = pm.UserWantsNewEntity;
-                
+
             }
             else if (source is ConfigReactionComplex)
             {
@@ -3170,10 +3284,11 @@ namespace DaphneGui
                 pm.EntityLevelDetails.DataContext = source;
                 pm.ComponentLevelDetails.DataContext = null;
 
-                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid)) {
+                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid))
+                {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
-                    newEntity = ((ConfigReactionComplex)source).Clone(true);
+                    newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3349,7 +3464,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
             //load the stores only as needed

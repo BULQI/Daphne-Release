@@ -34,7 +34,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="230" >
                     <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
-                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     </uc:DoublesBox>
                 </StackPanel>
 
@@ -77,11 +77,9 @@
 
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"/>
-                                <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                    Number="{Binding Path=TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
-
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="transduction constant" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap" />
+                                <local:ParamDistrControl DataContext="{Binding TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                         </StackPanel>
 
@@ -92,16 +90,14 @@
             
             <StackPanel Orientation="Vertical" Margin="16,0">
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="drag coefficient" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                    <uc:DoublesBox Margin="0,2" TextFieldWidth="100" SliderEnabled="False"
-                                Number="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="drag coefficient" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <local:ParamDistrControl DataContext="{Binding DragCoefficient, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="stochastic force parameter" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap"/>
-                    <uc:DoublesBox Margin="0,2" TextFieldWidth="100" SliderEnabled="False"
-                                Number="{Binding Path=Sigma, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="stochastic force parameter" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    <local:ParamDistrControl DataContext="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 
             </StackPanel>

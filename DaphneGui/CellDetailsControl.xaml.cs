@@ -93,7 +93,20 @@ namespace DaphneGui
 
                 string new_mol_name = mol.Name;
                 if (curr_mol_guid != molpop.molecule.entity_guid)
+                {
                     molpop.Name = new_mol_name;
+
+                    //Must update molecules_dict
+                    ConfigCell cell = DataContext as ConfigCell;
+                    if (cell != null)
+                    {
+                        if (cell.membrane.molecules_dict.ContainsKey(curr_mol_guid))
+                        {
+                            cell.membrane.molecules_dict.Remove(curr_mol_guid);
+                        }
+                        cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                    }
+                }
             }
 
         }
@@ -275,8 +288,14 @@ namespace DaphneGui
         private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             txtGeneName.IsEnabled = false;
-        }
 
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+        
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
@@ -527,7 +546,20 @@ namespace DaphneGui
 
                 string new_mol_name = mol.Name;
                 if (curr_mol_guid != molpop.molecule.entity_guid)
+                {
                     molpop.Name = new_mol_name;
+
+                    //Must update molecules_dict
+                    ConfigCell cell = DataContext as ConfigCell;
+                    if (cell != null)
+                    {
+                        if (cell.cytosol.molecules_dict.ContainsKey(curr_mol_guid)) 
+                        {
+                            cell.cytosol.molecules_dict.Remove(curr_mol_guid);
+                        }
+                        cell.cytosol.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                    }
+                }
             }
 
             var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
@@ -809,12 +841,16 @@ namespace DaphneGui
         }
 
         private void menu2PushToProto_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb.SelectedItems.Count == 0)
+        {            
+            if (CytosolReacListBox.SelectedIndex < 0)
             {
-                MessageBox.Show("No reactions selected");
+                MessageBox.Show("Please select a reaction.");
+                return;
             }
+
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
 
         private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
@@ -834,8 +870,8 @@ namespace DaphneGui
                 double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
                 double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
                 ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                config_td.CurrentState = 0;
-                config_td.StateName = config_td.states[config_td.CurrentState];
+                config_td.CurrentState = new DistributedParameter(0);
+                config_td.StateName = config_td.states[(int)config_td.CurrentState.Sample()];
                 cell.death_driver = config_td;
             }
         }
@@ -855,6 +891,13 @@ namespace DaphneGui
 
             //delete driver
             cell.death_driver = null;
+
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+            if (cp != null)
+            {
+                cp.reportStates.Death = false;
+            }
 
         }
 
@@ -1019,13 +1062,24 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Division = false;
+                }
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Differentiation = false;
+                }
             }
         }
 
@@ -1312,11 +1366,6 @@ namespace DaphneGui
             // memb_molecule_combo_box
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BoundaryMolecules_Filter;
-        }
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            CollectionViewSource cvs;
 
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
@@ -1324,34 +1373,104 @@ namespace DaphneGui
                 return;
             }
 
+            updateCollections(cell);
+            updateSelectedMoleculesAndGenes(cell);
+        }
+
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+            {
+                return;
+            }
+
+            updateCollections(cell);
+
+            //CollectionViewSource cvs;
+
+            //// MOLECULES
+
+            //// cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
+            //cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
+            //cvs.Source = new ObservableCollection<ConfigMolecule>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            
+            //// memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
+            //cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
+            //cvs.Source = new ObservableCollection<ConfigMolecule>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+
+            //// list of cytosol molecules for use by division and differentitiation schemes
+            //cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            //cvs.Source = new ObservableCollection<ConfigMolecule>();
+            //foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            //{
+            //    ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+            //}
+
+            //// REACTIONS
+
+            //// lvCellAvailableReacs
+            //cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
+            //cvs.Source = new ObservableCollection<ConfigReaction>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+
+            //// lvCytosolAvailableReacs
+            //cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            //cvs.Source = new ObservableCollection<ConfigReaction>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+
+            //cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
+            //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+
+            //cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
+            //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+
+            updateSelectedMoleculesAndGenes(cell);
+
+            ////EventHandler cytosolEventHandler = null;
+            ////cytosolEventHandler = new EventHandler(delegate
+            ////{
+            ////    if (CellCytosolMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            ////    {
+            ////        ConfigCell currcell = DataContext as ConfigCell;
+            ////        if (currcell != null)
+            ////        {
+            ////            CellCytosolMolPopsListBox.SelectedIndex = 0;
+            ////            //updateCytoMolCollection();
+            ////            //cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+            ////        }
+
+            ////        CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged -= cytosolEventHandler;
+            ////    }
+            ////});
+
+            ////CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged += cytosolEventHandler;
+
+        }
+
+        public void updateCollections(ConfigCell cell)
+        {
+            CollectionViewSource cvs;
+
             // MOLECULES
 
             // cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
             cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
-            if (cvs.Source == null)
-            {
-                cvs.Source = new ObservableCollection<ConfigMolecule>();
-            }
-            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-            
+
             // memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
-            if (cvs.Source == null)
-            {
-                cvs.Source = new ObservableCollection<ConfigMolecule>();
-            }
-            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
 
             // list of cytosol molecules for use by division and differentitiation schemes
             cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            if (cvs.Source == null)
-            {
-                cvs.Source = new ObservableCollection<ConfigMolecule>();
-            }
-            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
-            //foreach (ConfigMolecularPopulation configMolpop in cellpop.Cell.cytosol.molpops)
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
             foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
@@ -1361,40 +1480,116 @@ namespace DaphneGui
 
             // lvCellAvailableReacs
             cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
-            if (cvs.Source == null)
-            {
-                cvs.Source = new ObservableCollection<ConfigReaction>();
-            }
-            ((ObservableCollection<ConfigReaction>)cvs.Source).Clear();
-            cvs.Source = cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            cvs.Source = new ObservableCollection<ConfigReaction>();
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
 
             // lvCytosolAvailableReacs
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
-            if (cvs.Source == null)
-            {
-                cvs.Source = new ObservableCollection<ConfigReaction>();
-            }
-            ((ObservableCollection<ConfigReaction>)cvs.Source).Clear();
+            cvs.Source = new ObservableCollection<ConfigReaction>();
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
 
             cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
-            if (cvs.Source != null)
-            {
-                cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            }
+            cvs.Source = new ObservableCollection<ConfigReactionComplex>();
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
 
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
-            if (cvs.Source != null)
-            {
-                cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            }
+            cvs.Source = new ObservableCollection<ConfigReactionComplex>();
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
-
         }
 
+        //This is probably not needed any more but leaving here in case a problem occurs.
+        //To be deleted for next checkin.
+        public void updateSelectedMoleculesAndGenes(ConfigCell cell)
+        {
+            // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
+            // so do it manually here.
 
+            CellMembraneMolPopsListBox.SelectedIndex = 0;
+            //if (cell.membrane.molpops.Count > 0)
+            //{
+            //    memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
+            //}
 
+            CellCytosolMolPopsListBox.SelectedIndex = 0;
+            //if (cell.cytosol.molpops.Count > 0)
+            //{
+            //    cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+            //}
+
+            CellNucleusGenesListBox.SelectedItem = 0;
+            //if (cell.genes.Count > 0)
+            //{
+            //    CellNucleusGenesListBox.SelectedItem = cell.genes.First();
+            //}
+        }
+
+        /// <summary>
+        /// This fixes the problem of selecting the 1st item in the mol pop list.
+        /// This shouldn't be a problem in the first place, but the data binding seems to occur before the list is populated
+        /// so the first item was not getting selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+
+        private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction newreac = protReaction.Clone(true);
+
+                ConfigCell cell = DataContext as ConfigCell;
+                cell.cytosol.Reactions.Remove(reac);
+                cell.cytosol.Reactions.Add(newreac);
+            }
+        }
+
+        private void menuMembPushReacToProto_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
+        }
+
+        private void menuMembPullReacFromProto_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+
+            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction newreac = protReaction.Clone(true);
+
+                ConfigCell cell = DataContext as ConfigCell;
+                cell.membrane.Reactions.Remove(reac);
+                cell.membrane.Reactions.Add(newreac);
+            }
+        }
+        
     }
 
 }

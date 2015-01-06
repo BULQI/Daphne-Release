@@ -8,8 +8,8 @@ using System.Threading;
 using System.Windows.Data;
 using System.Windows.Forms.Integration;
 
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.Distributions;
+//using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
 using Kitware.VTK;
 
@@ -806,6 +806,23 @@ namespace DaphneGui
 
     public class VTKNullGraphicsController : EntityModelBase, IVTKGraphicsController
     {
+        // Public accessors for toolbar button binding w/property changed notification
+        public bool WhArrowToolButton_IsEnabled {get; set;}
+        public bool WhArrowToolButton_IsChecked {get; set;}
+        public bool HandToolButton_IsEnabled {get; set; }
+        public bool HandToolButton_IsChecked { get; set; }
+        public bool PreviewButton_IsEnabled {get; set; }
+        public bool PreviewButton_IsChecked { get; set; }
+        public bool ToolsToolbar_IsEnabled {get; set; }
+        public System.Windows.Visibility ColorScaleSlider_IsEnabled { get; set; }
+        public double ColorScaleMaxFactor {get; set; }
+        public ObservableCollection<string> ECSRenderingMethodNames { get; set; }
+        public bool OrientationMarker_IsChecked { get; set; }
+        public bool ResetCamera_IsChecked {get; set; }
+        public bool ScalarBarMarker_IsChecked { get; set; }
+        public string ECSRenderingMethod { get; set; }
+        public WindowsFormsHost Wfh {get; set;}
+
         public VTKNullGraphicsController()
         {
         }
@@ -1791,6 +1808,7 @@ namespace DaphneGui
                 double[] bounds = new double[6];
 
                 bounds = EnvironmentController.BoxActor.Prop.GetBounds();
+ 
                 rwc.RenderWindow.GetRenderers().GetFirstRenderer().ResetCamera(bounds[0],
                                                                                bounds[1],
                                                                                bounds[2],
@@ -1803,6 +1821,13 @@ namespace DaphneGui
                                                                                             bounds[3],
                                                                                             bounds[4],
                                                                                             bounds[5]);
+
+                var fp = rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().GetFocalPoint();
+                var p = rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().GetPosition();
+                var dist = Math.Sqrt((p[0] - fp[0]) * (p[0] - fp[0]) + (p[1] - fp[1]) * (p[1] - fp[1]) + (p[2] - fp[2]) * (p[2] - fp[2]));
+                rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().SetPosition(fp[0], fp[1], fp[2] + dist);
+                rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().SetViewUp(0.0, 1.0, 0.0);
+
             }
         }
 #if ALL_GRAPHICS

@@ -141,12 +141,18 @@ namespace DaphneGui
 
         public void SetXAxisLimits()
         {
-                ChartAreas.First().AxisX.Minimum = getMin_Time();
-                ChartAreas.First().AxisX.Maximum = getMax_Time() * 1.1;
+            if (ChartAreas == null || ChartAreas.Count == 0)
+                return;
+
+            ChartAreas.First().AxisX.Minimum = getMin_Time();
+            ChartAreas.First().AxisX.Maximum = getMax_Time() * 1.1;
         }
 
         public void SetYAxisLimits()
         {
+            if (ChartAreas == null || ChartAreas.Count == 0)
+                return;
+
             ChartAreas.First().AxisY.Minimum = getMin_Series(DictConcs);
             ChartAreas.First().AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
         }
@@ -300,7 +306,6 @@ namespace DaphneGui
         private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             bDrag = false;
-            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
             //Circle was red during drag so change it back to gold
             if (SeriesToDrag != null)
             {
@@ -377,6 +382,54 @@ namespace DaphneGui
             Titles.Clear();
             
         }
+        public void DrawBlank()
+        {
+            Clear();
+            ChartArea chartAreaBlank = new ChartArea("Blank Chart Area");
+            ChartAreas.Add(chartAreaBlank);
+
+            LabelX = "Time";
+            LabelY = "Concentration";
+            TitleXY = "Time Trajectory of Molecular Concentrations";
+
+            chartAreaBlank.AxisX.Title = LabelX;
+            chartAreaBlank.AxisY.Title = LabelY;
+
+            Titles.Add("Title_1");
+            BackColor = Color.White;
+
+            Titles[0].Text = TitleXY;
+
+            ChartAreas.First().AxisX.Minimum = 0;
+            ChartAreas.First().AxisX.Maximum = 8;
+            ChartAreas.First().AxisY.Minimum = 0;
+            ChartAreas.First().AxisY.Maximum = 5;
+
+            LabelX = "Time (linear)";
+            LabelY = "Concentration (linear)";
+            chartAreaBlank.AxisX.Title = LabelX;
+            chartAreaBlank.AxisY.Title = LabelY;
+
+            Location = new System.Drawing.Point(1, 8);
+
+            double[] x;
+            double[] y;
+
+            List<double> tempX = new List<double>();
+            List<double> tempY = new List<double>();
+            tempX.Add(0);
+            tempX.Add(0.00000000001); //tempX.Add(1);
+            tempY.Add(0); //tempY.Add(1);
+            tempY.Add(0.00000000001);
+            x = tempX.ToArray();
+            y = tempY.ToArray();
+            drawSeries(x, y, chartAreaBlank, TitleXY, "Blank", 0);
+
+            Focus();
+            Invalidate();
+
+            panelRC.Controls.Add(this);
+        }
 
         /// <summary>
         /// This function creates and draws the entire graph.  It uses ListTimes and DictConcs to draw all the series in the graph.
@@ -404,8 +457,11 @@ namespace DaphneGui
                 colorCount++;
             }
 
-            SetXAxisLimits();
-            SetYAxisLimits();
+            if (Series.Count > 0)
+            {
+                SetXAxisLimits();
+                SetYAxisLimits();
+            }
 
             LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
@@ -460,8 +516,11 @@ namespace DaphneGui
             // Set chart control location
             Location = new System.Drawing.Point(1, 8);
 
-            SetXAxisLimits();
-            SetYAxisLimits();
+            if (Series.Count > 0)
+            {
+                SetXAxisLimits();
+                SetYAxisLimits();
+            }
             
             //// For debugging
             //Console.WriteLine("Draw() final: {0}, {1}\t {2}, {3}", ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, 
@@ -491,6 +550,7 @@ namespace DaphneGui
                 //no points to draw, return
                 return;
             }
+
             //draw points first
             int n = x.Count() <= y.Count() ? x.Count() : y.Count();
             Series s = new Series(seriesName);
@@ -594,6 +654,10 @@ namespace DaphneGui
             }
 
             //Add any series that are in DictConcs but not in this.Series
+
+            if (this.ChartAreas == null || this.ChartAreas.Count == 0)
+                return;
+
             foreach (string guid in DictConcs.Keys)
             {
                 string molname = ConvertMolGuidToMolName(guid);
@@ -669,14 +733,17 @@ namespace DaphneGui
             }
 
             //HAVE TO UPDATE X AXIS MAX TOO
-            SetXAxisLimits();
-            SetYAxisLimits();
+            if (Series.Count > 0)
+            {
+                SetXAxisLimits();
+                SetYAxisLimits();
+            }
 
             // For debugging
             ////Console.WriteLine("RedrawSeries(): {0}, {1}\t {2}, {3}",
             //    ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, ChartAreas.First().AxisY.Minimum, ChartAreas.First().AxisY.Maximum);
 
-            Focus();
+            //Focus();
             Invalidate();
         }
 

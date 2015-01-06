@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
@@ -100,7 +100,7 @@ namespace Daphne
             genes.Add(gene_guid, gene);
         }
 
-        public Cell(double radius)
+        public Cell(double radius, int id)
         {
             if (radius <= 0)
             {
@@ -116,7 +116,20 @@ namespace Daphne
             spatialState.V = new double[CellSpatialState.SingleDim];
             spatialState.F = new double[CellSpatialState.SingleDim];
 
-            Cell_id = SafeCell_id++;
+            // the safe id must be larger than the largest one in use
+            // if the passed id is legitimate, use it
+            if (id > -1)
+            {
+                Cell_id = id;
+                if (id >= SafeCell_id)
+                {
+                    SafeCell_id = id + 1;
+                }
+            }
+            else
+            {
+                Cell_id = SafeCell_id++;
+            }
         }
 
         [Inject]
@@ -184,7 +197,7 @@ namespace Daphne
             Cytosol.BoundaryTransforms.Add(PlasmaMembrane.Interior.Id, new Transform(false));
         }
 
-        public void setState(double[] s)
+        public void setSpatialState(double[] s)
         {
             if(s.Length != CellSpatialState.Dim)
             {
@@ -210,7 +223,23 @@ namespace Daphne
             }
         }
 
-        public void setState(CellSpatialState s)
+        /// <summary>
+        /// set the state as used in rendering; does not set the state for simulation purposes
+        /// </summary>
+        /// <param name="state"></param>
+        public void SetRenderState(CellState state)
+        {
+            // spatial
+            setSpatialState(state.spState);
+            // generation
+            generation = state.CellGeneration;
+            // behaviors
+            Alive = state.cbState.deathDriverState == 0;
+            DividerState = state.cbState.divisionDriverState;
+            DifferentiationState = state.cbState.differentiationDriverState;
+        }
+
+        public void setSpatialState(CellSpatialState s)
         {
             int i;
 
@@ -342,16 +371,17 @@ namespace Daphne
             }
 
             // create daughter
-            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
+            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius), new ConstructorArgument("id", -1));
             // same population id
             daughter.Population_id = Population_id;
             daughter.renderLabel = renderLabel;
             this.generation++;
             daughter.generation = generation;
             // same state
-            daughter.setState(spatialState);
+            daughter.setSpatialState(spatialState);
             // but offset the daughter randomly
-            double[] delta = radius * Rand.RandomDirection(daughter.spatialState.X.Length);
+            //double[] delta = radius * Rand.RandomDirection(daughter.spatialState.X.Length);
+            double[] delta = Rand.RandomDirection(daughter.spatialState.X.Length).Multiply(radius).ToArray();
 
             for (int i = 0; i < delta.Length; i++)
             {
@@ -613,8 +643,7 @@ namespace Daphne
             if (dist != 0.0)
             {
                 double force = Pair.Phi1 * (1.0 / dist - 1.0 / radius);
-
-                addForce(normal * force);
+                addForce(normal.Multiply(force).ToArray());
             }
         }
 
@@ -632,36 +661,36 @@ namespace Daphne
                 // left
                 if ((dist = SpatialState.X[0]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 1, 0, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 1, 0, 0 }), dist);
                 }
                 // right
                 else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0) - SpatialState.X[0]) < radius)
                 {
-                    applyBoundaryForce(new double[] { -1, 0, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { -1, 0, 0 }), dist);
                 }
 
                 // Y
                 // bottom
                 if ((dist = SpatialState.X[1]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, 1, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, 1, 0 }), dist);
                 }
                 // top
                 else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1) - SpatialState.X[1]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, -1, 0 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, -1, 0 }), dist);
                 }
 
                 // Z
                 // far
                 if ((dist = SpatialState.X[2]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, 0, 1 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, 0, 1 }), dist);
                 }
                 // near
                 else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2) - SpatialState.X[2]) < radius)
                 {
-                    applyBoundaryForce(new double[] { 0, 0, -1 }, dist);
+                    applyBoundaryForce(new DenseVector(new double[] { 0, 0, -1 }), dist);
                 }
             }
         }

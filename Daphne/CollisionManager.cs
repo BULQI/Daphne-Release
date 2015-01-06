@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Daphne
 {
@@ -216,7 +216,8 @@ namespace Daphne
                 foreach (KeyValuePair<int, Pair> kvp in pairs)
                 {
                     // recalculate the distance for pairs
-                    kvp.Value.distance(gridSize);
+                    //kvp.Value.distance(gridSize);
+                    kvp.Value.distance(gridSize.ToArray());
                 }
             }
         }
@@ -266,7 +267,8 @@ namespace Daphne
                     else
                     {
                         // recalculate the distance for pairs that stay
-                        kvp.Value.distance(gridSize);
+                        //kvp.Value.distance(gridSize);
+                        kvp.Value.distance(gridSize.ToArray());
                     }
                 }
                 if (removalPairKeys != null)
@@ -281,7 +283,8 @@ namespace Daphne
             // look at all cells to see if they changed in the grid
             foreach (KeyValuePair<int, Cell> kvpc in SimulationBase.dataBasket.Cells)
             {
-                int[] idx = findGridIndex(kvpc.Value.SpatialState.X);
+                //int[] idx = findGridIndex(kvpc.Value.SpatialState.X);
+                int[] idx = findGridIndex(new DenseVector(kvpc.Value.SpatialState.X));
 
                 // if the grid index changed we have to:
                 // -put it in its new one
@@ -457,7 +460,8 @@ namespace Daphne
 #endif
 
                                             // calculate the distance
-                                            p.distance(gridSize);
+                                            //p.distance(gridSize);
+                                            p.distance(gridSize.ToArray());
                                             // insert the pair
                                             pairs.Add(hash, p);
                                         }

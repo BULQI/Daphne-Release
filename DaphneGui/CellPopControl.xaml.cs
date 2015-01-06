@@ -14,17 +14,46 @@ using System.Windows.Shapes;
 
 using Daphne;
 using DaphneUserControlLib;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
     /// <summary>
     /// Interaction logic for CellPopControl.xaml
     /// </summary>
-    public partial class CellPopControl : UserControl
+    public partial class CellPopControl : UserControl, INotifyPropertyChanged
     {
+        private ConfigCell selectedCell;
+        public ConfigCell SelectedCell
+        {
+            get
+            {
+                return selectedCell;
+            }
+            set
+            {
+                selectedCell = value;
+                OnPropertyChanged("SelectedCell");
+            }
+        }
+
         public CellPopControl()
         {
             InitializeComponent();
+        }
+
+        ///
+        //Notification handling
+        /// 
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
+            {
+                var e = new PropertyChangedEventArgs(propertyName);
+                handler(this, e);
+            }
         }
 
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
@@ -334,6 +363,15 @@ namespace DaphneGui
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
         {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex < 0)
+            {
+                SelectedCell = null;
+                return;
+            }
+            
+            CellPopulation cp = (CellPopulation)(lb.SelectedItem);
+            SelectedCell = cp.Cell;
         }
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
@@ -434,7 +472,8 @@ namespace DaphneGui
                 string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
                 cp.CellStates.Clear();
-                for (int i = 0; i < paste.Length; i += 3)
+                int n = 3 * (int)Math.Floor(paste.Length / 3.0);
+                for (int i = 0; i < n; i += 3)
                 {
                     cp.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
                 }
@@ -501,21 +540,6 @@ namespace DaphneGui
             cp.number = cp.CellStates.Count;
         }
 
-
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
-
-            //Error case
-            if (cellpop == null)
-                return;
-
-            //Push cell
-            ConfigCell cell = cellpop.Cell;
-            ConfigCell newcell = cell.Clone(true);
-            MainWindow.GenericPush(newcell);
-        }
-
         //This method is called when the user clicks the Remove Cell button
         private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {
@@ -553,6 +577,15 @@ namespace DaphneGui
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CellPopsListBox.SelectedIndex = 0;
+            CellPopulation cp = (CellPopulation)(CellPopsListBox.SelectedItem);
+            if (cp == null)
+            {
+                SelectedCell = null;
+            }
+            else
+            {
+                SelectedCell = cp.Cell;
+            }
         }
 
 

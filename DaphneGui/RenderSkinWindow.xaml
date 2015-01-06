@@ -211,11 +211,11 @@
 
                     <StackPanel Orientation="Horizontal" Width="220" >
 
-                        <StackPanel.Resources>
+                        <!--<StackPanel.Resources>
                             <local:diffSchemeValueConverter x:Key="diffSchemeValueConverter" />
-                        </StackPanel.Resources>
+                        </StackPanel.Resources>-->
 
-                        <Expander 
+                        <!--<Expander 
                                 Header="select another differentiator"   
                                 ExpandDirection="Down" 
                                 Padding="6" 
@@ -236,7 +236,7 @@
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>
                             </ComboBox>
-                        </Expander>
+                        </Expander>-->
 
                     </StackPanel>
                 </StackPanel>
@@ -287,20 +287,20 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                             <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
-                                    Number="{Binding Path=TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                                    Number="{Binding Path=TransductionConstant.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
 
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="drag coefficient" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                             <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
-                                    Number="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                                    Number="{Binding Path=DragCoefficient.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="stochastic force parameter" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"/>
                             <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
-                                    Number="{Binding Path=Sigma, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                                    Number="{Binding Path=Sigma.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                         </StackPanel>
 
                     </StackPanel>

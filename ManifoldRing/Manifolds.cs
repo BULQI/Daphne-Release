@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace ManifoldRing
 {
@@ -178,7 +178,7 @@ namespace ManifoldRing
         {
             ArraySize = 4;
             PrincipalPoints = new Vector[1];
-            PrincipalPoints[0] = new Vector(3, 0.0);
+            PrincipalPoints[0] = new DenseVector(3);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation;
+            double[] pos = t.Translation.ToArray();
             double[] grad = from.M.Grad(pos, from);
 
             to.array[0] = from.Value(pos);
@@ -415,9 +415,9 @@ namespace ManifoldRing
         /// <returns>gradient vector</returns>
         public override double[] Grad(double[] x, ScalarField sf)
         {
-            Vector u = new Vector(x);
+            Vector u = new DenseVector(x);
 
-            u = u.Normalize();
+            u = (DenseVector)u.Normalize(2.0);
 
             double d = u[0] * sf.array[1] + u[1] * sf.array[2] + u[2] * sf.array[3];
 
@@ -709,7 +709,8 @@ namespace ManifoldRing
             PrincipalPoints = new Vector[ArraySize];
             for (int i = 0; i < ArraySize; i++)
             {
-                PrincipalPoints[i] = linearIndexToLocal(i);
+                //PrincipalPoints[i] = linearIndexToLocal(i);
+                PrincipalPoints[i] = new DenseVector(linearIndexToLocal(i));
             }
 
             // initialize interpolator
@@ -792,6 +793,7 @@ namespace ManifoldRing
         /// <param name="x">local point</param>
         /// <returns>index array</returns>
         public int[] localToIndexArray(Vector x)
+        //public int[] localToIndexArray(double[] x)
         {
             int[] tmp = new int[Dim];
 
@@ -810,7 +812,7 @@ namespace ManifoldRing
         /// <returns>local point</returns>
         public Vector indexArrayToLocal(int[] idx)
         {
-            Vector tmp = new Vector(Transform.Dim);
+            Vector tmp = new DenseVector(Transform.Dim);
 
             for (int i = 0; i < Dim; i++)
             {
@@ -883,9 +885,11 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="lin">linear index</param>
         /// <returns>local point</returns>
-        public Vector linearIndexToLocal(int lin)
+        //public Vector linearIndexToLocal(int lin)
+        public double[] linearIndexToLocal(int lin)
         {
-            return indexArrayToLocal(linearIndexToIndexArray(lin));
+            //return indexArrayToLocal(linearIndexToIndexArray(lin));
+            return indexArrayToLocal(linearIndexToIndexArray(lin)).ToArray();
         }
 
         /// <summary>
@@ -975,15 +979,19 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation;
-            Vector x;
+            double[] pos = t.Translation.ToArray();
+            Vector x = new DenseVector(new double[3]);
 
             for (int i = 0; i < ArraySize; i++)
             {
                 // the coordinates of this interpolation point in this boundary manifold
-                x = this.linearIndexToLocal(i);
+                //x = this.linearIndexToLocal(i);
+                x = new DenseVector(this.linearIndexToLocal(i));
                 // x+pos are the coordinates of this interpolation point in the interior manifold
-                to.array[i] = from.M.Value(x+pos, from);
+                //to.array[i] = from.M.Value(x + pos, from);                
+                Vector y = new DenseVector(pos);
+                y = (DenseVector)(x + y);
+                to.array[i] = from.M.Value(y.ToArray(), from);
             }
             return to;
         }
@@ -1251,8 +1259,8 @@ namespace ManifoldRing
             : base(0)
         {
             ArraySize = 1;
-            PrincipalPoints = new Vector[1];
-            PrincipalPoints[0] = new Vector(3, 0.0);
+            PrincipalPoints = new DenseVector[1];
+            PrincipalPoints[0] = new DenseVector(3);
         }
 
         /// <summary>
@@ -1445,7 +1453,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-                double[] pos = t.Translation;
+                double[] pos = t.Translation.ToArray();
                 to.array[0] = from.Value(pos);
 
                 return to;
