@@ -8,8 +8,8 @@ namespace Daphne
 {
     public class CellManager : IDynamic
     {
-        Dictionary<int, double[]> deadDict = null;
-        int[] tempDeadKeys = null;
+        private Dictionary<int, double[]> deadDict = null;
+        private int[] tempDeadKeys = null;
         public DistributedParameter Phagocytosis;
 
         public CellManager()
