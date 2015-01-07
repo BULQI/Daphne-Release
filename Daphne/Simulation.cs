@@ -1096,38 +1096,23 @@ namespace Daphne
         {
             double t = 0, localStep;
 
-            //while (t < dt)
-            //{
-            //    localStep = Math.Min(integratorStep, dt - t);
-            //    dataBasket.Environment.Comp.Step(localStep);
-            //    // zero all cell forces; needs to happen first
-            //    cellManager.ResetCellForces();
-            //    // handle collisions
-            //    if (collisionManager != null)
-            //    {
-            //        collisionManager.Step(localStep);
-            //    }
-            //    // cell force reset happens in cell manager at the end of the cell update
-            //    cellManager.Step(localStep);
-            //    t += localStep;
-            //}
-            //accumulatedTime += dt;
             while (t < dt)
             {
-                dataBasket.Environment.Comp.Step(integratorStep);
+                localStep = Math.Min(integratorStep, dt - t);
+                dataBasket.Environment.Comp.Step(localStep);
                 // zero all cell forces; needs to happen first
                 cellManager.ResetCellForces();
                 // handle collisions
                 if (collisionManager != null)
                 {
-                    collisionManager.Step(integratorStep);
+                    collisionManager.Step(localStep);
                 }
                 // cell force reset happens in cell manager at the end of the cell update
-                cellManager.Step(integratorStep);
-                t += integratorStep;
-                accumulatedTime += integratorStep;
+                cellManager.Step(localStep);
+                t += localStep;
             }
-            //accumulatedTime += dt;
+            accumulatedTime += dt;
+
             if (accumulatedTime >= duration)
             {
                 RunStatus = RUNSTAT_FINISHED;
