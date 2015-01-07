@@ -10228,10 +10228,6 @@ namespace Daphne
             }
 
             WeibulllDist = new Weibull(Shape, Scale, Rand.MersenneTwister);
-
-            //// The implementation in the next line does not give reproducible results
-            //WeibulllDist = new Weibull(Shape, Scale, new MersenneTwister(RandomSeed.Robust()));
-
             isInitialized = true;
         }
 
@@ -10241,12 +10237,6 @@ namespace Daphne
             {
                 Initialize();
             }
-
-            //// for debugging
-            //double val = WeibulllDist.Sample();
-            //Debug.WriteLine(val);
-            //return val;
-
             return WeibulllDist.Sample();
         }
 
