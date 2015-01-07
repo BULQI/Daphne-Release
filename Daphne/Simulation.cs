@@ -123,6 +123,10 @@ namespace Daphne
                     }
                     else if (config_tde.GetType() == typeof(ConfigDistrTransitionDriverElement))
                     {
+                        if (((ConfigDistrTransitionDriverElement)config_tde).Distr.DistributionType == ParameterDistributionType.CONSTANT)
+                        {
+                            continue;
+                        }
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
                         tde.distr = ((ConfigDistrTransitionDriverElement)config_tde).Distr.ParamDistr.Clone();
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
