@@ -51,6 +51,13 @@ namespace DaphneGui
                 }
             }
 
+            //NEED TO UPDATE THE LIST OF AVAILABLE GENES IN THE COMBO BOX
+            //Easiest to create a new updated 'Add a gene' column and replace old one with the new one
+            DataGridTextColumn dgtc = dataGrid.Columns.Last() as DataGridTextColumn;
+            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            DataGridTextColumn dgtc_new = cdc.CreateUnusedGenesColumn();
+            dataGrid.Columns.Remove(dgtc);
+            dataGrid.Columns.Add(dgtc_new);
         }
 
         private void ContextMenuDeleteStates_Click(object sender, RoutedEventArgs e)
