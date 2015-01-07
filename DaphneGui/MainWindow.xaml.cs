@@ -2137,7 +2137,7 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                //this.ReacComplexChartWindow.DataContext = sop.Protocol;   //was causing a problem in chart page
+                this.ReacComplexChartWindow.DataContext = sop.Protocol;   //was causing a problem in chart page
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
@@ -3132,6 +3132,12 @@ namespace DaphneGui
 
         private void prepareProtocol(Protocol protocol)
         {
+            // prevent further loading if the protocol is invalid
+            if (protocol == null)
+            {
+                return;
+            }
+
             // show the inital state
             lockAndResetSim(true, protocol);
             if (loadSuccess == false)

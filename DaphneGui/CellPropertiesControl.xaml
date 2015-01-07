@@ -66,11 +66,13 @@
                                             SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=OneWay}"
                                             SelectionChanged="cbLocoDriver_SelectionChanged"
                                             SelectedValuePath="entity_guid"
-                                            IsSynchronizedWithCurrentItem="True">
+                                            IsSynchronizedWithCurrentItem="True"
+                                            PreviewMouseDown="cbLocomotorDriver1_PreviewMouseDown">
 
                                     <ComboBox.ItemsSource>
                                         <CompositeCollection>
                                             <CollectionContainer  Collection="{Binding Source={StaticResource moleculesListView}}" />
+                                            <daph:ConfigMolecule Name="None" entity_guid=""/>
                                         </CompositeCollection>
                                     </ComboBox.ItemsSource>
                                 </ComboBox>
