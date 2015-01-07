@@ -121,55 +121,15 @@
                             BorderBrush="Black"
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                        <StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Left" VerticalAlignment="Center"
-                                    TextAlignment="Left"
-                                    Width="Auto"
-                                    />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="time constant" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-                                <editors:DoubleEditBox x:Name="deathConstant_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="E2"
-                                                StepValue="0.1"
-                                                Width="100" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="order parameter" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="3"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-
-                                <editors:DoubleEditBox x:Name="deathOrder_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="F0"
-                                                StepValue="0.1"
-                                                Width="100" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                                <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                            </StackPanel>
+                        <StackPanel Orientation="Vertical" >
+                            <StackPanel.ToolTip>
+                                <StackPanel Width="400" >
+                                    <TextBlock Text="The Constant distribution with a value of zero results in instantaneous removal."></TextBlock>
+                                </StackPanel>
+                            </StackPanel.ToolTip>
+                            
+                            <TextBlock Text="Distribution for the rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" />
+                            <local:ParamDistrControl DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </Expander>
@@ -507,6 +467,16 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
+                                <DataGridCheckBoxColumn Header="Exiting" Width="85"                
+                                    Binding="{Binding Path=reportStates.Exit, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding reportStates.Exit}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                                
                             </DataGrid.Columns>
                         </DataGrid>
                     </Expander>

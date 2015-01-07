@@ -58,8 +58,8 @@ namespace DaphneGui
                     switch (distr_parameter.DistributionType)
                     {
                         case ParameterDistributionType.GAMMA:
-                            distr_parameter.ConstValue = ((GammaParameterDistribution)old_pd).Shape;
-
+                            GammaParameterDistribution gpd = old_pd as GammaParameterDistribution;
+                            distr_parameter.ConstValue = gpd.Shape / gpd.Rate;
                             break;
 
                         case ParameterDistributionType.POISSON:
@@ -73,6 +73,15 @@ namespace DaphneGui
 
                         case ParameterDistributionType.CATEGORICAL:
                             distr_parameter.ConstValue = ((CategoricalParameterDistribution)old_pd).MeanCategoryValue();
+                            break;
+
+                        case ParameterDistributionType.WEIBULL:
+                            WeibullParameterDistribution wpd = old_pd as WeibullParameterDistribution;
+                            distr_parameter.ConstValue = wpd.Scale * MathNet.Numerics.SpecialFunctions.Gamma(1.0 + 1.0 / wpd.Shape);
+                            break;
+
+                        case ParameterDistributionType.NEG_EXP:
+                            distr_parameter.ConstValue = 1.0 / ((NegExpParameterDistribution)old_pd).Rate;
                             break;
 
                         default:
@@ -108,6 +117,20 @@ namespace DaphneGui
                     distr_parameter.DistributionType = ParameterDistributionType.GAMMA;
                     break;
 
+                case ParameterDistributionType.NEG_EXP:
+                    NegExpParameterDistribution new_neg_exp_distr = new NegExpParameterDistribution();
+                    if (distr_parameter.ConstValue != 0.0)
+                    {
+                        new_neg_exp_distr.Rate = 1.0 / distr_parameter.ConstValue;
+                    }
+                    else
+                    {
+                        new_neg_exp_distr.Rate= 1.0;
+                    }
+                    distr_parameter.ParamDistr = new_neg_exp_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.NEG_EXP;
+                    break;
+
                 case ParameterDistributionType.POISSON:
                     PoissonParameterDistribution new_poisson_distr = new PoissonParameterDistribution();
                     if (distr_parameter.ConstValue != 0.0)
@@ -137,6 +160,23 @@ namespace DaphneGui
                     distr_parameter.ParamDistr = new_uniform_distr;
                     distr_parameter.DistributionType = ParameterDistributionType.UNIFORM;
                     break;
+
+                case ParameterDistributionType.WEIBULL:
+                    WeibullParameterDistribution new_weibull_distr = new WeibullParameterDistribution();
+                    if (distr_parameter.ConstValue != 0.0)
+                    {
+                        new_weibull_distr.Shape = 1.0;
+                        new_weibull_distr.Scale = distr_parameter.ConstValue / MathNet.Numerics.SpecialFunctions.Gamma(2.0);
+                    }
+                    else
+                    {
+                        new_weibull_distr.Shape = 1.0;
+                        new_weibull_distr.Scale = 1.0;
+                    }
+                    distr_parameter.ParamDistr = new_weibull_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.WEIBULL;
+                    break;
+
 
                 default:
                     break;

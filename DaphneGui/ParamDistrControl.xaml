@@ -84,7 +84,32 @@
                                        Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>
-            </DataTemplate>  
+            </DataTemplate>
+
+            <!-- distributed parameter type: Weibull -->
+            <DataTemplate DataType="{x:Type daph:WeibullParameterDistribution}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="scale" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                       Number="{Binding Path=Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+            <!-- distributed parameter type: Negative Exponential -->
+            <DataTemplate DataType="{x:Type daph:NegExpParameterDistribution}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                   Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </DataTemplate>
             
             <!-- distributed parameter type: Categorical -->
             <DataTemplate DataType="{x:Type daph:CategoricalParameterDistribution}">

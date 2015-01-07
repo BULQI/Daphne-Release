@@ -20,6 +20,7 @@ namespace Daphne
         public abstract void AddDriverElement(int origin, int destination, TransitionDriverElement driverElement);
         public abstract Dictionary<int, Dictionary<int, TransitionDriverElement>> Drivers { get; }
         public abstract void Step(double dt);
+        public abstract void InitializeState();
     }
 
     /// <summary>
@@ -27,77 +28,79 @@ namespace Daphne
     /// </summary>
     public class TransitionDriverElement
     {
+        public virtual bool TransitionOccurred(double dt)
+        {
+            return false;
+        }
+
+        public virtual void Initialize()
+        {
+        }
+    }
+
+    public class MolTransitionDriverElement : TransitionDriverElement
+    {
         public double Alpha { get; set; }
         public double Beta { get; set; }
         public MolecularPopulation DriverPop { get; set; }
 
-        public double RateConstant()
+        public MolTransitionDriverElement()
+        {
+        }
+
+        public MolTransitionDriverElement(double _alpha, double _beta, MolecularPopulation molpop)
+        {
+            Alpha = _alpha;
+            Beta = _beta;
+            DriverPop = molpop;
+        }
+
+        public double RateConstant(double dt)
         {
             if (DriverPop == null)
             {
                 return 0;
             }
-            return Alpha + Beta * DriverPop.Conc.MeanValue();
+            return Alpha + Beta * DriverPop.Conc.MeanValue()*dt;
+        }
+
+        public override bool TransitionOccurred(double dt)
+        {
+            if (Rand.UniformDist.Sample() < RateConstant(dt))
+            {
+                return true;
+            }
+            return false;
         }
     }
 
-    public class PMF<T>
+    /// <summary>
+    /// the distribution transition driver will hold a matrix of elements of this type
+    /// </summary>
+    public class DistrTransitionDriverElement : TransitionDriverElement
     {
-        private T[] keys;
-        private double[] cumulatives;
-        private Dictionary<T, double> probability;
+        public ParameterDistribution distr { get; set; }
+        public double timeToNextEvent { get; set; }
+        private double clock;
 
-        static PMF()
+        public DistrTransitionDriverElement()
         {
         }
 
-        public PMF()
+        public override void Initialize()
         {
-            probability = new Dictionary<T, double>();
+            timeToNextEvent = distr.Sample();
+            clock = 0;
         }
 
-        public void Initialize(T[] _keys, double[] _probabilities)
+        public override bool TransitionOccurred(double dt)
         {
-            if (_keys.Length != _probabilities.Length)
+            clock += dt;
+            if (timeToNextEvent <= clock)
             {
-                throw new ArgumentException("Argument lengths are not the same.");
+                return true;
             }
-            if (_keys.Length == 0)
-            {
-                throw new ArgumentException("Attempting to use zero length arrays.");
-            }
-
-            probability.Clear();
-            for (int i = 0; i < _probabilities.Length; i++)
-            {
-                probability.Add(_keys[i], _probabilities[i]);
-            }
-
-            keys = (T[])_keys.Clone();
-            Array.Sort(keys);
-            Array.Reverse(keys);
-
-            cumulatives = new double[probability.Count];
-
-            cumulatives[0] = probability[keys[0]];
-            for (int i = 1; i < cumulatives.Length; i++)
-            {
-                cumulatives[i] = cumulatives[i - 1] + probability[keys[i]];
-            }
-        }
-
-        public T Next()
-        {
-            double u = Rand.TroschuetzCUD.NextDouble();
-
-            for (int i = 0; i < cumulatives.Length; i++)
-            {
-                if (u <= cumulatives[i])
-                {
-                    return keys[i];
-                }
-            }
-            return keys.Last();
+            return false;
         }
     }
 
@@ -107,7 +110,7 @@ namespace Daphne
     public class TransitionDriver : ITransitionDriver
     {
         private Dictionary<int, Dictionary<int, TransitionDriverElement>> drivers;
-        private PMF<int> destinationPMF;
+        private List<int> events;
 
         /// <summary>
         /// Constructor
@@ -119,7 +122,7 @@ namespace Daphne
             CurrentState = 0;
             PreviousState = 0;
             FinalState = 0;
-            destinationPMF = new PMF<int>();
+            events = new List<int>();
         }
 
         /// <summary>
@@ -168,30 +171,53 @@ namespace Daphne
                 return;
             }
 
-            double TotalRate = 0,
-                   u = Rand.TroschuetzCUD.NextDouble();
-
             foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
             {
-                TotalRate += kvp.Value.RateConstant();
+                if (kvp.Value.TransitionOccurred(dt) == true)
+                {
+                    events.Add(kvp.Key);
+                }
             }
-            if (u < TotalRate * dt)
+
+            if (events.Count > 0)
             {
+                int newState = 0;
+
+                if (events.Count > 1)
+                {
+                    // randomly choose one of the transition events
+                    // Create a categorical probability distribution where the transition have equal probability.
+                    // Normalization is taken care of by the Categorical classes.
+                    CategoricalParameterDistribution cpd = new CategoricalParameterDistribution();
+                    for (int j = 0; j < events.Count; j++)
+                    {
+                        cpd.ProbMass.Add(new CategoricalDistrItem(events[j], 1.0));
+                    }
+                    newState = (int)cpd.Sample();
+                }
+                else
+                {
+                    newState = events.First();
+                }
+
                 TransitionOccurred = true;
                 PreviousState = CurrentState;
+                CurrentState = newState; events.Clear();
+                InitializeState();
+            }
+        }
 
-                double[] probabilities = new double[drivers[CurrentState].Count];
-                int[] destinations = new int[drivers[CurrentState].Count];
-                int iDest = 0;
-
+        /// <summary>
+        /// Causes clock-drivent events to select a new time-to-next-event
+        /// </summary>
+        public override void InitializeState()
+        {
+            if (drivers.ContainsKey(CurrentState))
+            {
                 foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
                 {
-                    probabilities[iDest] = kvp.Value.RateConstant() / TotalRate;
-                    destinations[iDest] = kvp.Key;
-                    iDest++;
+                    kvp.Value.Initialize();
                 }
-                destinationPMF.Initialize(destinations, probabilities);
-                CurrentState = destinationPMF.Next();
             }
         }
     }
@@ -279,5 +305,4 @@ namespace Daphne
             }
         }
     }
-
 }

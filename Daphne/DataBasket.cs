@@ -690,6 +690,29 @@ namespace Daphne
                 RemoveCell(key);
             }
         }
+
+        public void DeathEvent(int key)
+        {
+            if (cells.ContainsKey(key) == true)
+            {
+                Cell cell = cells[key];
+                hSim.Reporter.AppendDeathEvent(cell.Cell_id, cell.Population_id);
+            }
+        }
+
+        public void DivisionEvent(int mother_id, int pop_id, int daughter_id)
+        {
+            hSim.Reporter.AppendDivisionEvent(mother_id, pop_id, daughter_id);
+        }
+
+        public void ExitEvent(int key)
+        {
+            if (cells.ContainsKey(key) == true)
+            {
+                Cell cell = cells[key];
+                hSim.Reporter.AppendExitEvent(cell.Cell_id, cell.Population_id);
+            }
+        }
     }
 
 #if ALL_DATA

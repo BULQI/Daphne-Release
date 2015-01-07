@@ -49,10 +49,7 @@ namespace Daphne
         public virtual void distance(double[] gridSize)
         {
             Vector tmp = new DenseVector(a.SpatialState.X);
-
-            //tmp -= b.SpatialState.X;
-            //tmp = (Vector)tmp.Subtract(tmp, new DenseVector(b.SpatialState.X));
-            ((Vector)tmp).Subtract(tmp, new DenseVector(b.SpatialState.X) );
+            tmp = (DenseVector)tmp.Subtract(new DenseVector(b.SpatialState.X));
 
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
