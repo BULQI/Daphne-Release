@@ -143,6 +143,12 @@ namespace Daphne
             trans_scheme.Initialize(config_Scheme.activationRows.Count, config_Scheme.genes.Count);
             LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, trans_scheme.Behavior);
 
+            // Load state names
+            for (int j = 0; j < trans_scheme.nStates; j++)
+            {
+                trans_scheme.AddState(j, config_Scheme.Driver.states[j]);
+            }
+
             // Epigenetic information
             for (int ii = 0; ii < trans_scheme.nGenes; ii++)
             {
@@ -151,7 +157,6 @@ namespace Daphne
                 for (int j = 0; j < trans_scheme.nStates; j++)
                 {
                     trans_scheme.AddActivity(j, ii, config_Scheme.activationRows[j].activations[ii]);
-                    trans_scheme.AddState(j, config_Scheme.Driver.states[j]);
                 }
             }
         }
