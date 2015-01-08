@@ -1957,45 +1957,6 @@ namespace Daphne
 
             return false;
         }
-        
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the left side, i.e. the reactants.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacLeftSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string left = total.Substring(0, index);
-            left = left.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listLeft = new List<string>(reactants);
-            listLeft.Sort();
-            return listLeft;
-        }
-
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the right side, i.e. the products.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacRightSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string right = total.Substring(index + 2);
-            right = right.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listRight = new List<string>(products);
-            listRight.Sort();
-            return listRight;
-        }
-
 
         /// <summary>
         /// Select transcription reactions in the compartment.

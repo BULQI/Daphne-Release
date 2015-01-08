@@ -333,6 +333,7 @@ namespace DaphneGui
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
             }
+
         }
 
         public static void update_datagrid_rowheaders(DataGrid datagrid)
@@ -396,6 +397,18 @@ namespace DaphneGui
         }
 
         #endregion
+
+        private void EpigeneticMapGridDiv_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //DataGrid dg = sender as DataGrid;
+
+            //object o = e.AddedItems[0];
+
+            //dg.SelectedItem = o;
+
+            //DataGridRow drg = new DataGridRow();
+
+        }
     }
 
 

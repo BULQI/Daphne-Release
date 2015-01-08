@@ -100,9 +100,10 @@
             SelectionMode="Extended"                  
             SelectionUnit="FullRow"
             VirtualizingStackPanel.VirtualizationMode="Standard"
-            VirtualizingStackPanel.IsVirtualizing="False" 
+            VirtualizingStackPanel.IsVirtualizing="True" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
+            IsSynchronizedWithCurrentItem="True"
             >
             
             <DataGrid.ContextMenu>
@@ -179,6 +180,7 @@
                     </Style.Triggers>
                 </Style>
             </DataGrid.RowHeaderStyle>
+            
             <DataGrid.RowHeaderTemplate>
                 <DataTemplate>
                     <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" />
