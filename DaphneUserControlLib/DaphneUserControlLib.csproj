@@ -127,6 +127,12 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Daphne\Daphne.csproj">
+      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
+      <Name>Daphne</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)dependencies"</PostBuildEvent>

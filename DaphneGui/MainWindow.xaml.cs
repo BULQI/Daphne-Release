@@ -296,28 +296,39 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            ////DO NOT DELETE THIS
-            ////This code is to create DaphneStore and UserStore.
-            ////It should not be needed ever again! 
-            ////Any editing of DaphneStore should be done through application (GUI).
-            //try
-            //{
-            //    CreateDaphneAndUserStores();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            //DO NOT DELETE THIS
+            //This code creates the DaphneStore and UserStore.
+            //Only run this code during development.
+            //Once development is completed editing of the DaphneStore and UserStore should be done through application (GUI).
+            //Running this after development will make all the entities in the Daphne and User stores appear
+            // to be different than the entities at the Protocol and Entity levels. 
+            if (false)
+            {
+                try
+                {
+                    CreateDaphneAndUserStores();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
 
-            //////This code re-generates the scenarios - DO NOT DELETE
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            }
+            //DO NOT DELETE THIS
+            //This code creates the predefined scenarios.
+            //Running this using the existing stores will not break user scenarios.
+            if (false)
+            {
+                //This code re-generates the scenarios - DO NOT DELETE
+                try
+                {
+                    CreateAndSerializeDaphneProtocols();
+                }
+                catch (Exception e)
+                {
+                    showExceptionBox(exceptionMessage(e));
+                }
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -927,8 +938,8 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
-            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
-            //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
+            //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
             dlg.FileName = "SBMLModel";
 
             // Show open  file dialog box
@@ -1049,8 +1060,6 @@ namespace DaphneGui
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
-                    toolWin.LockSaveStartSim();
-
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
@@ -1060,6 +1069,8 @@ namespace DaphneGui
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     }
 
+                    // this needs to come after setting orig_content
+                    toolWin.LockSaveStartSim();
                     sim.restart();
                     UpdateGraphics();
 
@@ -1151,6 +1162,19 @@ namespace DaphneGui
             }
         }
 
+        private string uniqueFilename(string s)
+        {
+            string tmp = orig_path + @"\" + s + ".json";
+            int i = 0;
+
+            while (File.Exists(tmp) == true)
+            {
+                tmp = orig_path + @"\" + s + "_" + i + ".json";
+                i++;
+            }
+            return tmp;
+        }
+
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
             // id the file is open we'll have to close it; ask the user if that's what they want
@@ -1185,8 +1209,16 @@ namespace DaphneGui
                 // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
                 if (expNames.Count > 0)
                 {
-                    // the dialog must provide this
-                    selectedExp = expNames[0];
+                    PastExperiments past = new PastExperiments(expNames);
+
+                    if (past.ShowDialog() == true)
+                    {
+                        int index = past.SelectedExperiment;
+                        if (index > -1)
+                        {
+                            selectedExp = expNames[index];
+                        }
+                    }
                 }
 
                 // now load it if there was a valid selection
@@ -1205,6 +1237,8 @@ namespace DaphneGui
                     // do the loading
                     MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
                     lockAndResetSim(true, ReadJson(protocolString));
+                    // need to set a filename
+                    sop.Protocol.FileName = uniqueFilename(selectedExp);
                     if (loadSuccess == false)
                     {
                         return;
@@ -2103,6 +2137,7 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                this.ReacComplexChartWindow.DataContext = sop.Protocol;   //was causing a problem in chart page
                 if (newFile == true)
                 {
                     ReacComplexChartWindow.Reset();
@@ -2220,14 +2255,9 @@ namespace DaphneGui
                 }
             }
 
-            //////////VCR_Toolbar.IsEnabled = false;
+            VCR_Toolbar.IsEnabled = false;
             //////////gc.ToolsToolbar_IsEnabled = true;
             //////////gc.DisablePickingButtons();
-
-#if LANGEVIN_TIMING
-            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
-#endif
-            //}
 
             loadSuccess = true;
         }
@@ -2781,9 +2811,6 @@ namespace DaphneGui
 
         }
 
-
-
-
         public MessageBoxResult saveDialog()
         {
             // Configure the message box to be displayed
@@ -2997,6 +3024,12 @@ namespace DaphneGui
                 simThread.Abort();
             }
 
+            if (Properties.Settings.Default.skipDataWrites == false)
+            {
+                // reporter and hdf5 close
+                closeOutputFiles();
+            }
+
             // clear the vcr cache
             if (vcrControl != null)
             {
@@ -3099,6 +3132,12 @@ namespace DaphneGui
 
         private void prepareProtocol(Protocol protocol)
         {
+            // prevent further loading if the protocol is invalid
+            if (protocol == null)
+            {
+                return;
+            }
+
             // show the inital state
             lockAndResetSim(true, protocol);
             if (loadSuccess == false)
@@ -3173,9 +3212,9 @@ namespace DaphneGui
 
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
-                {
+                {                    
                     pm.ComponentLevelDetails.DataContext = erMol;
-                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);
+                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3195,9 +3234,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
                     pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    newEntity = ((ConfigReaction)source).Clone(false);
-                    ConfigReaction tempReac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    //((ConfigReaction)newEntity).Name = tempReac.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pr.ShowDialog() == false)
@@ -3214,9 +3251,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
                     pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    newEntity = ((ConfigCell)source).Clone(false);
-                    ConfigCell tempCell = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    //((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 if (pcell.ShowDialog() == false)
@@ -3236,8 +3271,7 @@ namespace DaphneGui
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
-                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);
-                    //((ConfigGene)newEntity).Name = newEntity.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog
@@ -3260,7 +3294,7 @@ namespace DaphneGui
                 {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
-                    newEntity = ((ConfigReactionComplex)source).Clone(true);
+                    newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
 
                 //Show the confirmation dialog

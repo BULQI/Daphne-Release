@@ -78,6 +78,7 @@
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
             
+            <!-- Rendering -->
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="rendering interval" Margin="6,0"
                                             Grid.Column="0" Grid.Row="3"  
@@ -111,6 +112,7 @@
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
             
+            <!-- Sampling -->
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="sampling interval" Margin="6,0"
                             Grid.Column="0" Grid.Row="4"  
@@ -144,6 +146,7 @@
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
+            <!-- Integration step -->
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="integrator step" Margin="6,0"
                             Grid.Column="0" Grid.Row="4"  
@@ -177,6 +180,7 @@
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
+            <!-- Repetitions -->
             <StackPanel Orientation="Horizontal" Visibility="{Binding Path=SimRepetitionVisibility}">
                 <TextBlock Text="repetitions" Margin="6,0"
                                             Grid.Column="0" Grid.Row="5"  
@@ -206,7 +210,22 @@
                                         />
                 <TextBlock Text="times" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
+            
+            <!-- global random seed -->
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                <TextBlock Text="global random seed" Margin="6,0"
+                            Grid.Column="0" Grid.Row="5"  
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            TextAlignment="Right"
+                            Width="120"
+                            />
+                <TextBox Text="{Binding Path=Protocol.sim_params.globalRandomSeed, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                         x:Name="global_random_seed"
+                         LostFocus="global_random_seed_LostFocus" Width="90"/>
+                <Button x:Name="btnNewRandomSeed" Click="btnNewRandomSeed_Click" Margin="6,0">New random seed</Button>
+            </StackPanel>
 
+            <!-- Toroidal BC selection -->
             <StackPanel Orientation="Horizontal" Visibility="{Binding Path=ToroidalVisibility}">
                 <StackPanel.Resources>
                     <ControlTemplate x:Key="ToroidalComboBoxTemplate">

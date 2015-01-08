@@ -100,18 +100,24 @@ namespace Daphne
         }
 
         /// <summary>
-        /// find the highest experiment id; assumes it is the last entry
+        /// find the highest experiment id
         /// </summary>
         /// <returns>the highest id or -1 if empty</returns>
         public static int findHighestExperimentId()
         {
             List<string> local = hdf5file.subGroupNames("/Experiments_VCR");
+            int max = -1;
 
-            if (local.Count > 0)
+            foreach (string s in local)
             {
-                return extractExperimentId(local.Last());
+                int tmp = extractExperimentId(s);
+
+                if (tmp > max)
+                {
+                    max = tmp;
+                }
             }
-            return -1;
+            return max;
         }
 
         /// <summary>
@@ -552,32 +558,54 @@ namespace Daphne
         public void UpdateCells(TissueSimulationFrameData frame)
         {
             List<int> removalList = new List<int>();
+            CellState state = new CellState();
 
             foreach (int key in cells.Keys)
             {
                 removalList.Add(key);
             }
 
-            foreach (int cell_id in frame.CellIDs)
+            for (int i = 0; i < frame.CellCount; i++)
             {
+                int cell_id = frame.CellIDs[i];
+
                 // take off the removal list
                 removalList.Remove(cell_id);
 
-                // if the cell exists update it
-                if (cells.ContainsKey(cell_id))
+                frame.applyStateByIndex(i, ref state);
+
+                // if the cell doesn't exist, create it
+                if (cells.ContainsKey(cell_id) == false)
                 {
-#if CELL_CREATE
+                    ConfigCompartment[] configComp = new ConfigCompartment[2];
+                    List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
+                    List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
+                    List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+                    int cellPopId = frame.CellPopIDs[i];
+
+                    if (((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict.ContainsKey(cellPopId) == false)
+                    {
+                        throw new Exception("Cell population id invalid.");
+                    }
+
+                    CellPopulation cp = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[cellPopId];
+
+                    // create the cell
+                    hSim.prepareCellInstantiation(cp, configComp, bulk_reacs, ref boundary_reacs, ref transcription_reacs);
+                    hSim.instantiateCell(cell_id, cp, configComp, state, bulk_reacs, boundary_reacs, transcription_reacs, false);
+                }
+                else // it exists, update it
+                {
+#if CELL_CREATE_OLD
                     // Note: we may not need this again; it's a leftover from the old
                     // db implementation, but we need some mechanism to set the entire state
                     ObjectLoader.LoadValues(cells[cell_id], kvpc.Value.state);
 #else
-                    for(int i = 0; i < CellSpatialState.SingleDim; i++)
-                    {
-                        cells[cell_id].SpatialState.X[i] = frame.CellPos[cell_id * CellSpatialState.SingleDim + i];
-                    }
+                    // apply the state
+                    cells[cell_id].SetRenderState(state);
 #endif
                 }
-#if CELL_CREATE
+#if CELL_CREATE_OLD
                 // create a new cell
                 else
                 {
@@ -660,6 +688,29 @@ namespace Daphne
             foreach (int key in removalList)
             {
                 RemoveCell(key);
+            }
+        }
+
+        public void DeathEvent(int key)
+        {
+            if (cells.ContainsKey(key) == true)
+            {
+                Cell cell = cells[key];
+                hSim.Reporter.AppendDeathEvent(cell.Cell_id, cell.Population_id);
+            }
+        }
+
+        public void DivisionEvent(int mother_id, int pop_id, int daughter_id)
+        {
+            hSim.Reporter.AppendDivisionEvent(mother_id, pop_id, daughter_id);
+        }
+
+        public void ExitEvent(int key)
+        {
+            if (cells.ContainsKey(key) == true)
+            {
+                Cell cell = cells[key];
+                hSim.Reporter.AppendExitEvent(cell.Cell_id, cell.Population_id);
             }
         }
     }

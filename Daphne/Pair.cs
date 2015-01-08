@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Daphne
 {
@@ -48,9 +48,8 @@ namespace Daphne
         /// </summary>
         public virtual void distance(double[] gridSize)
         {
-            Vector tmp = new Vector(a.SpatialState.X);
-
-            tmp -= b.SpatialState.X;
+            Vector tmp = new DenseVector(a.SpatialState.X);
+            tmp = (DenseVector)tmp.Subtract(new DenseVector(b.SpatialState.X));
 
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
@@ -72,7 +71,8 @@ namespace Daphne
                     tmp[2] = gridSize[2] - dz;
                 }
             }
-            dist = tmp.Norm();
+            //dist = tmp.Norm();
+            dist = tmp.Norm(2);
         }
 
         /// <summary>
@@ -155,16 +155,18 @@ namespace Daphne
 
                 if (force != 0.0)
                 {
-                    Vector normal = new Vector(b.SpatialState.X);
+                    DenseVector normal = new DenseVector(b.SpatialState.X);
 
                     normal -= a.SpatialState.X;
-                    normal = normal.Normalize();
+                    normal = (DenseVector)normal.Normalize(2.0);
 
                     //Console.WriteLine(String.Format("Distance: {2:N}, Force: {0:N}, B: {1:N}", force, b_ij, dist));
 
                     // F_a = -F_b
-                    a.addForce(normal * -force);
-                    b.addForce(normal * force);
+                    //a.addForce(normal * -force);
+                    //b.addForce(normal * force);
+                    a.addForce(normal.Multiply(-force).ToArray());
+                    b.addForce(normal.Multiply(force).ToArray());
                 }
             }
         }
@@ -428,7 +430,7 @@ namespace Daphne
             // initial contact formation, create synapse if the condition is met
             if (b_ij == 0)
             {
-                if (synapse == null && FDC().AvailableArea > FDC().SynapseArea && Kappa * effectiveSurfaceArea() * dt > Utilities.SystemRandom.NextDouble())
+                if (synapse == null && FDC().AvailableArea > FDC().SynapseArea && Kappa * effectiveSurfaceArea() * dt > Utilities.SystemRandom.Sample())
                 {
                     {
                         b_ij = 1;

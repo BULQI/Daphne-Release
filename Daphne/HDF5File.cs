@@ -420,14 +420,52 @@ namespace Daphne
     /// </summary>
     public class TissueSimulationFrameData : IFrameData
     {
-        private int[] cellIds;
+        // linear numbering for behavior bookkeeping, b_count must indicate the number of behaviors
+        private int B_DEATH = 0,
+                    B_DIV = 1,
+                    B_DIFF = 2,
+                    B_COUNT = 3;
+        private int cellCount;
+        private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
         private double[] cellPos;
+
+        public int CellCount
+        {
+            get
+            {
+                return cellCount;
+            }
+        }
 
         public int[] CellIDs
         {
             get
             {
                 return cellIds;
+            }
+        }
+
+        public int[] CellGens
+        {
+            get
+            {
+                return cellGens;
+            }
+        }
+
+        public int[] CellPopIDs
+        {
+            get
+            {
+                return cellPopIds;
+            }
+        }
+
+        public int[] CellBehaviors
+        {
+            get
+            {
+                return cellBehaviors;
             }
         }
 
@@ -446,11 +484,23 @@ namespace Daphne
         /// <summary>
         /// prepare the data from the cells (transfer to the frame) for writing
         /// </summary>
-        public void prepareData()
+        public bool prepareData()
         {
-            if (cellPos == null || cellPos.GetLength(0) != SimulationBase.dataBasket.Cells.Count)
+            cellCount = SimulationBase.dataBasket.Cells.Count;
+            // write the cell count at any rate
+            writeInt(cellCount, "CellCount");
+            if (cellCount < 1)
             {
-                cellPos = new double[SimulationBase.dataBasket.Cells.Count * CellSpatialState.SingleDim];
+                return false;
+            }
+
+            // create the data arrays if needed
+            if (cellPos == null || cellPos.GetLength(0) != cellCount)
+            {
+                cellPos = new double[cellCount * CellSpatialState.SingleDim];
+                cellGens = new int[cellCount];
+                cellPopIds = new int[cellCount];
+                cellBehaviors = new int[cellCount * B_COUNT];
             }
 
             cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
@@ -459,12 +509,63 @@ namespace Daphne
 
             foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
             {
+                // position
                 for (int j = 0; j < CellSpatialState.SingleDim; j++)
                 {
                     cellPos[i * CellSpatialState.SingleDim + j] = c.SpatialState.X[j];
                 }
+                // generation
+                cellGens[i] = c.generation;
+                // population
+                cellPopIds[i] = c.Population_id;
+                // death
+                cellBehaviors[i * B_COUNT + B_DEATH] = c.Alive == true ? 0 : 1;
+                // division
+                cellBehaviors[i * B_COUNT + B_DIV] = c.DividerState;
+                // differentiation
+                cellBehaviors[i * B_COUNT + B_DIFF] = c.DifferentiationState;
+
                 i++;
             }
+            return true;
+        }
+
+        /// <summary>
+        /// get the state for a cell by index and write it into the CellState parameter
+        /// </summary>
+        /// <param name="idx">cell index</param>
+        /// <param name="state"></param>
+        public void applyStateByIndex(int idx, ref CellState state)
+        {
+            // set the position
+            for (int i = 0; i < CellSpatialState.SingleDim; i++)
+            {
+                state.spState.X[i] = cellPos[idx * CellSpatialState.SingleDim + i];
+            }
+            // set the generation
+            state.setCellGeneration(cellGens[idx]);
+            // death
+            state.cbState.deathDriverState = cellBehaviors[idx * B_COUNT + B_DEATH];
+            // division
+            state.cbState.divisionDriverState = cellBehaviors[idx * B_COUNT + B_DIV];
+            // differentiation
+            state.cbState.differentiationDriverState = cellBehaviors[idx * B_COUNT + B_DIFF];
+        }
+
+        private void writeInt(int val, string name)
+        {
+            long[] dim = new long[] { 1 };
+            int[] data = new int[] { val };
+
+            DataBasket.hdf5file.writeDSInt(name, dim, new H5Array<int>(data));
+        }
+
+        private int readInt(string name)
+        {
+            int[] data = null;
+
+            DataBasket.hdf5file.readDSInt(name, ref data);
+            return data[0];
         }
 
         /// <summary>
@@ -482,17 +583,28 @@ namespace Daphne
         /// <param name="groupName">group name in the HDF5 file</param>
         public void writeData(string groupName)
         {
-            prepareData();
             DataBasket.hdf5file.createGroup(groupName);
 
-            // write the cell ids
-            long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
+            if (prepareData() == true)
+            {
+                // write the cell ids
+                long[] dims = new long[] { cellCount };
 
-            DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
+                // ids
+                DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
+                // generations
+                DataBasket.hdf5file.writeDSInt("CellGens", dims, new H5Array<int>(cellGens));
+                // population ids
+                DataBasket.hdf5file.writeDSInt("CellPopIDs", dims, new H5Array<int>(cellPopIds));
 
-            // write the cell positions
-            dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
-            DataBasket.hdf5file.writeDSDouble("Position", dims, new H5Array<double>(cellPos));
+                // behaviors
+                dims = new long[] { cellCount, B_COUNT };
+                DataBasket.hdf5file.writeDSInt("CellBehaviors", dims, new H5Array<int>(cellBehaviors));
+
+                // write the cell positions
+                dims = new long[] { cellCount, CellSpatialState.SingleDim };
+                DataBasket.hdf5file.writeDSDouble("Position", dims, new H5Array<double>(cellPos));
+            }
 
             // close the group
             DataBasket.hdf5file.closeGroup();
@@ -515,14 +627,22 @@ namespace Daphne
         {
             DataBasket.hdf5file.openGroup(groupName);
 
-            // read the cell ids
-            long[] dims = new long[] { SimulationBase.dataBasket.Cells.Count };
+            cellCount = readInt("CellCount");
+            if (cellCount > 0)
+            {
+                // ids
+                DataBasket.hdf5file.readDSInt("CellIDs", ref cellIds);
+                // generations
+                DataBasket.hdf5file.readDSInt("CellGens", ref cellGens);
+                // population ids
+                DataBasket.hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
 
-            DataBasket.hdf5file.readDSInt("CellIDs", ref cellIds);
+                // behaviors
+                DataBasket.hdf5file.readDSInt("CellBehaviors", ref cellBehaviors);
 
-            // read the cell positions
-            dims = new long[] { SimulationBase.dataBasket.Cells.Count, CellSpatialState.SingleDim };
-            DataBasket.hdf5file.readDSDouble("Position", ref cellPos);
+                // read the cell positions
+                DataBasket.hdf5file.readDSDouble("Position", ref cellPos);
+            }
 
             // close the group
             DataBasket.hdf5file.closeGroup();

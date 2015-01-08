@@ -124,14 +124,26 @@ namespace DaphneGui
 
                 int index = ListBoxReactionComplexes.SelectedIndex;
 
-                ConfigCompartment cc = this.DataContext as ConfigCompartment;
-
+                
                 foreach (ConfigReaction reac in crc.reactions.ToList())
                 {
                     crc.RemoveReaction(reac);
                 }
-                cc.reaction_complexes.Remove(crc);
 
+                ConfigCompartment cc = this.DataContext as ConfigCompartment;
+                if (cc != null)
+                {
+                    cc.reaction_complexes.Remove(crc);                    
+                }
+                else
+                {
+                    EntityRepository er = this.DataContext as EntityRepository;
+                    if (er != null)
+                    {
+                        er.reaction_complexes.Remove(crc);
+                    }
+                }
+                
                 ListBoxReactionComplexes.SelectedIndex = index;
 
                 if (index >= ListBoxReactionComplexes.Items.Count)

@@ -60,6 +60,9 @@ namespace Workbench
             RC = Tag as VatReactionComplex;       
             protocol = DataContext as Protocol;
 
+            if (protocol == null)
+                return;
+
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
@@ -89,9 +92,12 @@ namespace Workbench
 
         public void Reset()
         {
+            lTimes.Clear();
+            dictConcs.Clear();
             if (Chart != null) {
-                Chart.Clear();
-            }
+                //Chart.Clear();
+                Chart.DrawBlank();
+            }            
         }
         
         /// <summary>
@@ -156,11 +162,24 @@ namespace Workbench
         /// <param name="e"></param>
         private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (MW == null || RC == null || lTimes.Count == 0 || dictConcs.Count == 0)
+                return;
+
             if (e.PropertyName == "Number")
             {
-                redraw_flag = true;
-                MW.runSim();
-                //MW.runButton_Click(null, null);
+                if (lTimes.Count > 1)
+                {
+                    if (Chart.Legends.Count > 0)    //this means graph is already created
+                    {
+                        redraw_flag = true;
+                        MW.runSim();
+                    }
+                }
+                else
+                {
+                    redraw_flag = false;
+                    MW.runButton_Click(null, null);
+                }
             }
         }
 
@@ -215,11 +234,24 @@ namespace Workbench
         /// <param name="e"></param>
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (MW == null || RC == null || lTimes.Count == 0 || dictConcs.Count == 0)
+                return;
+
             if (e.PropertyName == "Number")
             {
-                redraw_flag = true;
-                MW.runSim();
-                //MW.runButton_Click(null, null);
+                if (lTimes.Count > 1)
+                {
+                    if (Chart.Legends.Count > 0)    //this means graph is already created
+                    {
+                        redraw_flag = true;
+                        MW.runSim();
+                    }
+                }
+                else
+                {
+                    redraw_flag = false;
+                    MW.runButton_Click(null, null);
+                }
             }
         }
 

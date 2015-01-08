@@ -93,7 +93,20 @@ namespace DaphneGui
 
                 string new_mol_name = mol.Name;
                 if (curr_mol_guid != molpop.molecule.entity_guid)
+                {
                     molpop.Name = new_mol_name;
+
+                    //Must update molecules_dict
+                    ConfigCell cell = DataContext as ConfigCell;
+                    if (cell != null)
+                    {
+                        if (cell.membrane.molecules_dict.ContainsKey(curr_mol_guid))
+                        {
+                            cell.membrane.molecules_dict.Remove(curr_mol_guid);
+                        }
+                        cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                    }
+                }
             }
 
         }
@@ -275,8 +288,14 @@ namespace DaphneGui
         private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             txtGeneName.IsEnabled = false;
-        }
 
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+        
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
@@ -527,7 +546,20 @@ namespace DaphneGui
 
                 string new_mol_name = mol.Name;
                 if (curr_mol_guid != molpop.molecule.entity_guid)
+                {
                     molpop.Name = new_mol_name;
+
+                    //Must update molecules_dict
+                    ConfigCell cell = DataContext as ConfigCell;
+                    if (cell != null)
+                    {
+                        if (cell.cytosol.molecules_dict.ContainsKey(curr_mol_guid)) 
+                        {
+                            cell.cytosol.molecules_dict.Remove(curr_mol_guid);
+                        }
+                        cell.cytosol.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                    }
+                }
             }
 
             var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
@@ -809,12 +841,16 @@ namespace DaphneGui
         }
 
         private void menu2PushToProto_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb.SelectedItems.Count == 0)
+        {            
+            if (CytosolReacListBox.SelectedIndex < 0)
             {
-                MessageBox.Show("No reactions selected");
+                MessageBox.Show("Please select a reaction.");
+                return;
             }
+
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
 
         private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
@@ -826,7 +862,8 @@ namespace DaphneGui
 
             if (cell.death_driver == null)
             {
-                //I think this is what we want
+                // The transition driver elements should default to ConfigMolTransitionDriverElement.
+                // If we use ConfigDistrDriverElement as the default we won't be able to distinguish between meaningful and empty TDEs. 
                 ConfigTransitionDriver config_td = new ConfigTransitionDriver();
                 config_td.Name = "generic apoptosis";
                 string[] stateName = new string[] { "alive", "dead" };
@@ -834,8 +871,8 @@ namespace DaphneGui
                 double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
                 double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
                 ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                config_td.CurrentState = 0;
-                config_td.StateName = config_td.states[config_td.CurrentState];
+                config_td.CurrentState = new DistributedParameter(0);
+                config_td.StateName = config_td.states[(int)config_td.CurrentState.Sample()];
                 cell.death_driver = config_td;
             }
         }
@@ -855,6 +892,13 @@ namespace DaphneGui
 
             //delete driver
             cell.death_driver = null;
+
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+            if (cp != null)
+            {
+                cp.reportStates.Death = false;
+            }
 
         }
 
@@ -897,7 +941,6 @@ namespace DaphneGui
 
             return editor_col;
         }
-
 
         /// <summary>
         /// This handler gets called when user selects a gene in the "add genes" 
@@ -1019,13 +1062,24 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            ToolWinTissue twt = Tag as ToolWinTissue;
+            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
+
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Division = false;
+                }
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
+                if (cp != null)
+                {
+                    cp.reportStates.Differentiation = false;
+                }
             }
         }
 
@@ -1376,6 +1430,26 @@ namespace DaphneGui
             //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
 
             updateSelectedMoleculesAndGenes(cell);
+
+            ////EventHandler cytosolEventHandler = null;
+            ////cytosolEventHandler = new EventHandler(delegate
+            ////{
+            ////    if (CellCytosolMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            ////    {
+            ////        ConfigCell currcell = DataContext as ConfigCell;
+            ////        if (currcell != null)
+            ////        {
+            ////            CellCytosolMolPopsListBox.SelectedIndex = 0;
+            ////            //updateCytoMolCollection();
+            ////            //cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+            ////        }
+
+            ////        CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged -= cytosolEventHandler;
+            ////    }
+            ////});
+
+            ////CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged += cytosolEventHandler;
+
         }
 
         public void updateCollections(ConfigCell cell)
@@ -1423,32 +1497,235 @@ namespace DaphneGui
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
         }
 
+        //This is probably not needed any more but leaving here in case a problem occurs.
+        //To be deleted for next checkin.
         public void updateSelectedMoleculesAndGenes(ConfigCell cell)
         {
             // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
             // so do it manually here.
 
             CellMembraneMolPopsListBox.SelectedIndex = 0;
-            if (cell.membrane.molpops.Count > 0)
-            {
-                memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
-            }
+            //if (cell.membrane.molpops.Count > 0)
+            //{
+            //    memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
+            //}
 
             CellCytosolMolPopsListBox.SelectedIndex = 0;
-            if (cell.cytosol.molpops.Count > 0)
-            {
-                cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
-            }
+            //if (cell.cytosol.molpops.Count > 0)
+            //{
+            //    cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
+            //}
 
             CellNucleusGenesListBox.SelectedItem = 0;
-            if (cell.genes.Count > 0)
+            //if (cell.genes.Count > 0)
+            //{
+            //    CellNucleusGenesListBox.SelectedItem = cell.genes.First();
+            //}
+        }
+
+        /// <summary>
+        /// This fixes the problem of selecting the 1st item in the mol pop list.
+        /// This shouldn't be a problem in the first place, but the data binding seems to occur before the list is populated
+        /// so the first item was not getting selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
             {
-                CellNucleusGenesListBox.SelectedItem = cell.genes.First();
+                lb.SelectedIndex = 0;
             }
         }
 
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            {
+                lb.SelectedIndex = 0;
+            }
+        }
+
+        /// <summary>
+        /// Switch between molecule-driven and distribution-driven transition driver elements for cell death.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ChangeDeathTDEType_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null) return;
+
+            if (cell.death_driver == null)
+            {
+                return;
+            }
+
+            if (cell.death_driver.DriverElements == null)
+            {
+                return;
+            }
+
+            ConfigTransitionDriverElement tde = cell.death_driver.DriverElements[0].elements[1];
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            {
+                // Switch to Distribution-driven
+                tde = new ConfigDistrTransitionDriverElement();
+
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+            }
+            else
+            {
+                // Switch to Molecule-driven
+                tde = new ConfigMolTransitionDriverElement();
+            }
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
+           
+            cell.death_driver.DriverElements[0].elements[1] = tde;
+        }
+
+        private void ChangeDataGridTDEType_Click(object sender, RoutedEventArgs e)
+        { 
+            Button button = sender as Button;
+
+            var stack_panel = FindVisualParent<StackPanel>(button);
+            if (stack_panel == null) return;
+
+            ConfigTransitionDriverElement tde = stack_panel.DataContext as ConfigTransitionDriverElement;
+            if (tde == null) return;
+    
+            TransitionDriverElementType type = tde.Type;
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            {
+                tde = new ConfigDistrTransitionDriverElement();
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = new PoissonParameterDistribution();
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                //stack_panel.DataContext = tde;
+            }
+            else
+            {
+                tde = new ConfigMolTransitionDriverElement();
+            }
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
+
+            // update the transition scheme
+            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
+            if (dataGrid == null) return;
+            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            if (scheme != null)
+            {
+                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+            }
+        }
+
+        public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindVisualParent<T>(parentObject);
+            }
+        }
+
+        public static T FindLogicalParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = LogicalTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindLogicalParent<T>(parentObject);
+            }
+        }
+        private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction newreac = protReaction.Clone(true);
+
+                ConfigCell cell = DataContext as ConfigCell;
+                cell.cytosol.Reactions.Remove(reac);
+                cell.cytosol.Reactions.Add(newreac);
+            }
+        }
+
+        private void menuMembPushReacToProto_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
+        }
+
+        private void menuMembPullReacFromProto_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+
+            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction newreac = protReaction.Clone(true);
+
+                ConfigCell cell = DataContext as ConfigCell;
+                cell.membrane.Reactions.Remove(reac);
+                cell.membrane.Reactions.Add(newreac);
+            }
+        }
+        
     }
 
 }
+
+
 
         

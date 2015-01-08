@@ -125,8 +125,8 @@
     <Reference Include="ManifoldRing">
       <HintPath>..\dependencies\ManifoldRing.dll</HintPath>
     </Reference>
-    <Reference Include="MathNet.Iridium">
-      <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
@@ -218,6 +218,12 @@
     <Compile Include="ECMMolpopControl.xaml.cs">
       <DependentUpon>ECMMolpopControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ParamDistrControl.xaml.cs">
+      <DependentUpon>ParamDistrControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PastExperiments.xaml.cs">
+      <DependentUpon>PastExperiments.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
@@ -269,9 +275,6 @@
     </Compile>
     <Compile Include="GuiExtension.cs" />
     <Compile Include="RecentFileList.cs" />
-    <Compile Include="SimConfigToolWindow.xaml.cs">
-      <DependentUpon>SimConfigToolWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
     <Compile Include="Workbench\NewEditReacComplex.xaml.cs">
@@ -337,6 +340,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ParamDistrControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PastExperiments.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pushing\PushBetweenLevels.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -397,10 +408,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SimConfigToolWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Workbench\NewEditReacComplex.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

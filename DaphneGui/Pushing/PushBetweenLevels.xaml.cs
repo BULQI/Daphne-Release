@@ -36,6 +36,9 @@ namespace DaphneGui.Pushing
         public object RightList { get; set; }
         public List<string> equalGuids { get; set; }
 
+        private Point mouseLocation;
+        public double GridHeight { get; set; }
+
         public PushBetweenLevels(PushLevelEntityType type)
         {
             PushEntityType = type;
@@ -45,7 +48,9 @@ namespace DaphneGui.Pushing
             RightList = null;
             equalGuids = new List<string>();
             InitializeComponent();
-            Tag = this;
+
+            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
+            GridHeight = MaxHeight * 0.85;
 
             if (type == PushLevelEntityType.Molecule)
             {
@@ -83,10 +88,21 @@ namespace DaphneGui.Pushing
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {            
-            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
+            //MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
             var desktopWorkingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
             this.Left = desktopWorkingArea.Left + 20;
             this.Top = desktopWorkingArea.Top + 20;
+
+            
+
+            ////Get the datagrids and set their max heights
+            //DOES NOT WORK
+            //List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);
+            //var grid = grids[0];
+            //for (int i = 0; i < grids.Count; i++)
+            //{
+            //    grids[i].MaxHeight = this.MaxHeight - 400;
+            //}
 
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
@@ -168,16 +184,15 @@ namespace DaphneGui.Pushing
                 return;
             }
 
+            GetEqualEntities();
+
             RightGroup.DataContext = LevelB.entity_repository;
             RightContent.DataContext = RightList;   //must do this first (??)
             LeftGroup.DataContext = LevelA.entity_repository;
-            LeftContent.DataContext = LeftList;  
+            //LeftContent.DataContext = LeftList;  
             
-            GetEqualEntities();
-
             LeftContent.DataContext = null;
             LeftContent.DataContext = LeftList;
-
         }
 
         /// <summary>
@@ -258,7 +273,7 @@ namespace DaphneGui.Pushing
                         {
                             if (reac.Equals(reac2))
                             {
-                                equalGuids.Add(reac.entity_guid);
+                                //equalGuids.Add(reac.entity_guid);
                             }
                         }
                     }
@@ -558,36 +573,7 @@ namespace DaphneGui.Pushing
             ResetGrids();
         }
 
-        public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (PushLevelA == PushLevelB) {
-                MessageBox.Show("The target library must be different from the source library");
-                return;
-            }
-
-            string messageBoxText = "Are you sure you want to save the selected entities to the target library?";
-            string caption = "Save Entities";
-            MessageBoxButton button = MessageBoxButton.YesNo;
-            MessageBoxImage icon = MessageBoxImage.Question;
-
-            // Display message box
-            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-
-            // Process message box results
-            if (result == MessageBoxResult.Yes)
-            {
-                //Get the datagrid
-                //Push each item that is in SelectedItems list
-                List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);                
-                var grid = grids[0];
-                foreach (ConfigEntity ent in grid.SelectedItems)
-                {
-                    GenericPusher(ent, LevelA, LevelB);
-                }
-            }
-            ResetGrids();
-        }
-
+        
         /// <summary>
         /// can execute command handler for delete db - enables/disables the Push button
         /// </summary>
@@ -620,10 +606,63 @@ namespace DaphneGui.Pushing
                         e.CanExecute = true;
                 }
             }
-            else
+            
+        }
+
+        public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            PushDialog(sender as DataGrid);
+        }
+
+        private void PushDialog(DataGrid grid)
+        {
+            if (grid == null)
+                return;
+
+            if (PushLevelA == PushLevelB)
             {
-                e.CanExecute = false;
+                MessageBox.Show("The target library must be different from the source library");
+                return;
             }
+
+            string messageBoxText = "Are you sure you want to save the selected entities to the target library?";
+            string caption = "Save Entities";
+            MessageBoxButton button = MessageBoxButton.YesNo;
+            MessageBoxImage icon = MessageBoxImage.Question;
+
+            // Display message box
+            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+            // Process message box results
+            if (result == MessageBoxResult.Yes)
+            {
+                //Push items
+                foreach (ConfigEntity ent in grid.SelectedItems)
+                {
+                    if (equalGuids.Contains(ent.entity_guid) == false)
+                    {
+                        GenericPusher(ent, LevelA, LevelB);
+                    }
+                }
+
+                //Disable pushed items
+                for (int i = 0; i < grid.Items.Count; i++)
+                {
+                    DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(i);
+                    if (row != null)
+                    {
+                        if (row.IsSelected)
+                        {
+                            Color col = Color.FromRgb(228, 228, 228);
+                            row.Background = new SolidColorBrush(col);
+                            row.IsEnabled = false;
+                            row.IsSelected = false;
+                        }
+                    }
+                }
+                ResetGrids();
+            }
+            
         }
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
@@ -641,75 +680,32 @@ namespace DaphneGui.Pushing
             switch (PushEntityType)
             {
                 case PushLevelEntityType.Molecule:
-                    ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
-                    //Level.PushStatus status = levelB.pushStatus(newmol);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
+                    ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);                    
                     levelB.repositoryPush(newmol, status);
                     MainWindow.SOP.SelectedRenderSkin.AddRenderMol(newmol.renderLabel, newmol.Name);
                     break;
                 case PushLevelEntityType.Gene:
                     ConfigGene newgene = ((ConfigGene)entity).Clone(null);
-                    //status = levelB.pushStatus(newgene);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
                     levelB.repositoryPush(newgene, status);
                     break;
                 case PushLevelEntityType.Reaction:
                     ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
-                    //status = levelB.pushStatus(newreac);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
                     levelB.repositoryPush(newreac, status, levelA, true);
                     break;
                 case PushLevelEntityType.Cell:
                     ConfigCell newcell = ((ConfigCell)entity).Clone(true);
-                    //status = levelB.pushStatus(newcell);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
                     levelB.repositoryPush(newcell, status, levelA, true);
                     MainWindow.SOP.SelectedRenderSkin.AddRenderCell(newcell.renderLabel, newcell.CellName);
                     break;
                 case PushLevelEntityType.DiffScheme:
-                    //status = levelB.pushStatus(entity);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                            
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
                     ConfigTransitionScheme newscheme = ((ConfigTransitionScheme)entity).Clone(true);
                     levelB.repositoryPush(newscheme, status, levelA, true);
                     break;
                 case PushLevelEntityType.ReactionTemplate:
-                    //status = levelB.pushStatus(entity);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
                     ConfigReactionTemplate newreactemp = ((ConfigReactionTemplate)entity).Clone(true);
                     levelB.repositoryPush(newreactemp, status, levelA, true);
                     break;
                 case PushLevelEntityType.ReactionComplex:
-                    //status = levelB.pushStatus(entity);
-                    //if (status == Level.PushStatus.PUSH_INVALID)
-                    //{
-                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                    //    return;
-                    //}
                     ConfigReactionComplex newrc = ((ConfigReactionComplex)entity).Clone(true);
                     levelB.repositoryPush(newrc, status, levelA, true);
                     break;
@@ -717,23 +713,13 @@ namespace DaphneGui.Pushing
                     break;
             }
 
-
-            //else // the item exists; could be newer or older
-            //{
-            //    if (UserWantsNewEntity == false)
-            //    {
-            //        levelB.repositoryPush(entity, status); // push into B - overwrites existing entity's properties
-            //    }
-            //    else //push as new
-            //    {
-            //        //levelB.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
-            //    }
-            //}
         }
 
         private void grid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             ConfigEntity entity = e.Row.Item as ConfigEntity;
+            e.Row.IsEnabled = true;
+
             if (equalGuids.Contains(entity.entity_guid))
             {
                 // Access cell values values if needed like this...
@@ -749,6 +735,32 @@ namespace DaphneGui.Pushing
             {
                 e.Row.Background = Brushes.White;
             }
+        }
+
+        /// <summary>
+        /// On double click on an item in left grid, push it to right grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LeftGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid grid = sender as DataGrid;
+            ConfigEntity entity = (ConfigEntity)grid.CurrentItem;
+            if (entity == null)
+                return;
+
+            PushDialog(grid);
+
+        }
+
+        private void datagrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ////This does not have any effect because of the command binding stuff
+            //DataGrid grid = sender as DataGrid;
+            
+            //PushButtonArrow.IsEnabled = true;
+            //if (grid.SelectedItems.Count <= 0)
+            //    PushButtonArrow.IsEnabled = false;
         }
 
     }  //End of PushBetweenLevels class

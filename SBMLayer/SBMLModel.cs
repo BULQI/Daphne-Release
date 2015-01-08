@@ -605,23 +605,22 @@ namespace SBMLayer
         /// </summary>
         /// <param name="cellPop"></param>
         private void SetCompartmentAnnotation(CellPopulation cellPop, libsbmlcs.Compartment compartment, ConfigCell configCell = null)
-        {
-            //double dragCoeff=0, double transductionConst=0, string locomotor=""
+        {            
             XMLAttributes attr = new XMLAttributes();
             attr.add("cellPop", Convert.ToString(cellPop.cellpopulation_name), annotNamespace, annotprefix);
 
             //Only add when compartment has 3 dimensions, i.e., when it's the cytosol compartment
             if (compartment.getSpatialDimensions() == 3)
             {
-                attr.add("dragCoeff", Convert.ToString(cellPop.Cell.DragCoefficient), annotNamespace, annotprefix);
-                attr.add("transdConst", Convert.ToString(cellPop.Cell.TransductionConstant), annotNamespace, annotprefix);
-                attr.add("stochForce", Convert.ToString(cellPop.Cell.Sigma), annotNamespace, annotprefix);
+                attr.add("dragCoeff", Convert.ToString(cellPop.Cell.DragCoefficient.ConstValue), annotNamespace, annotprefix);
+                attr.add("transdConst", Convert.ToString(cellPop.Cell.TransductionConstant.ConstValue), annotNamespace, annotprefix);
+                attr.add("stochForce", Convert.ToString(cellPop.Cell.Sigma.ConstValue), annotNamespace, annotprefix);
                 if (!isSpatialModel) { attr.add("cell_radius", Convert.ToString(cellPop.Cell.CellRadius), annotNamespace, annotprefix); }
                 attr.add("number", Convert.ToString(cellPop.number), annotNamespace, annotprefix);
 
-                if (!configCell.locomotor_mol_guid_ref.Equals(string.Empty))
+                if (!cellPop.Cell.locomotor_mol_guid_ref.Equals(string.Empty))
                 {
-                    attr.add("locomotor", CleanIds(protocol.entity_repository.molecules_dict[configCell.locomotor_mol_guid_ref].Name) + "_" + compartment.getId(), annotNamespace, annotprefix);
+                    attr.add("locomotor", CleanIds(protocol.entity_repository.molecules_dict[cellPop.Cell.locomotor_mol_guid_ref].Name)+ "_" + compartment.getId(), annotNamespace, annotprefix);
                 }
             }
             XMLNamespaces names = new XMLNamespaces();
@@ -685,6 +684,7 @@ namespace SBMLayer
             //Species specific params
             XMLAttributes attr = new XMLAttributes();
             attr.add("copy_num", Convert.ToString(confGenePop.CopyNumber), annotNamespace, annotprefix);
+            attr.add("activation_level", Convert.ToString(confGenePop.ActivationLevel), annotNamespace, annotprefix);
            
             XMLNamespaces names = new XMLNamespaces();
             names.add(annotNamespace, annotprefix);
@@ -772,15 +772,17 @@ namespace SBMLayer
             {
                 backgDomain= spatialComponents.AddBackground(backgComp);
             }
+
             //adds species in the ECS
             BoxSpecification spec;
             string confMolPopName = string.Empty;
             Species species = null;
             foreach (ConfigMolecularPopulation confMolPop in protocol.scenario.environment.comp.molpops)
             {
-                //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                //confMolPopName = protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
-                confMolPopName = confMolPop.Name;
+                //SBML species are created with the type of the molecular population and not with the name as the latter is user defined.                
+                confMolPopName = confMolPop.molecule.Name;
+
+                //Add the respective annotation depending on the distribution of each species
                 if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     spec = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
@@ -805,13 +807,12 @@ namespace SBMLayer
                         //MessageBox.Show("Model could not be saved into SBML as linear gradient values could not be found", "Linear Gradient Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
-
                 }
                 SetSpeciesAnnotation(confMolPop, species);
 
                 if (isSpatialModel)
                 {
-                    spatialComponents.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[confMolPop.molecule.entity_guid].DiffusionCoefficient);
+                    spatialComponents.AddDiffusionCoefficient(species, confMolPop.molecule.DiffusionCoefficient);
                     //All boundary conditions are no flux if they don't specify a linear distribution- all others are not supported by SBML spatial
                     spatialComponents.SetBoxBoundaryCondition(species);
                 } 
@@ -830,7 +831,6 @@ namespace SBMLayer
             string cellMembraneId, cytosolId = string.Empty;
             TinySphere sphere;
             TinyBall ball;
-            ConfigCompartment[] configComp;
             ConfigCell configCell = new ConfigCell();
             libsbmlcs.Compartment compartment;
             int ordinal = 1;
@@ -838,9 +838,10 @@ namespace SBMLayer
             DomainType membraneDomainType=null, cytoDomainType=null;
             foreach (CellPopulation cellPop in scenario.cellpopulations)
             {
-                //Name added to compartment includes cell type
-                //Membrane
-                configCell = protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid];
+                //Cell in scenario
+                configCell = cellPop.Cell;
+
+                //Add cell membrane compartment
                 cellMembraneId = string.Concat("Membrane_", configCell.CellName);
                 double radius = cellPop.Cell.CellRadius;
                 sphere = new TinySphere();
@@ -848,6 +849,7 @@ namespace SBMLayer
                 compartment = AddCompartment(cellMembraneId, cellMembraneId, true, sphere.Area(), sphere.Dim, "");
                 SetCompartmentAnnotation(cellPop, compartment);
                 string [] membraneNames=new string[cellPop.number];
+                
                 //Adds Domains and DomainTypes of every cell membrane
                 if (isSpatialModel)
                 {
@@ -861,9 +863,7 @@ namespace SBMLayer
                     }
                 }
 
-                //Only add a cytosol compartment if there are any molecular populations in the cytosol 
-                //if (configComp[0].molpops.Count > 0)
-                //{
+                //Add cell cytosol compartment
                 cytosolId = string.Concat("Cytosol_", configCell.CellName);
                 ball = new TinyBall();
                 ball.Initialize(new double[] { radius });
@@ -885,58 +885,38 @@ namespace SBMLayer
                     ordinal = ordinal + 1;
                 }
 
-                //Setup necessary to extract molecular populations from each compartment (cytosol/membrane)
-                configComp = new ConfigCompartment[2];
-                configComp[0] = configCell.cytosol;
-                configComp[1] = configCell.membrane;
-
-                //ConfigGene configGene;
-                //}
-
-                for (int comp = 0; comp < 2; comp++)
+                //Encode molecules in cytosol 
+                foreach (ConfigMolecularPopulation cmp in configCell.cytosol.molpops)
                 {
-                    //0 cytosol, 1 membrane (both assume uniform distribution of molecular populations
-                    foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
+                    //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
+                    confMolPopName = cmp.molecule.Name;                                        
+                    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
+                    SetSpeciesAnnotation(cmp, species);
+                    
+                    if (isSpatialModel)
                     {
-                        //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                        confMolPopName = protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].Name;
-                        if (comp == 0)
-                        {
-                            //Add cytosol molecular species
-                            species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
-                            SetSpeciesAnnotation(cmp, species);
-                            
-                            //SetRequiredElements(species);
-
-                            // protocol.entity_repository.cells[0].locomotor_mol_guid_ref
-                        }
-                        else
-                        {
-                            //Add membrane molecular species
-                            species = AddSpecies(confMolPopName.TrimEnd('|') + "_" + cellMembraneId, confMolPopName, cellMembraneId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
-                            SetSpeciesAnnotation(cmp, species);
-
-                        }
-
-                        if (isSpatialModel)
-	                    {
-                            spatialComponents.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].DiffusionCoefficient);
-                            //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
-                            spatialComponents.SetDomainTypeBoundaryCondition(species,comp==0?cytoDomainType:membraneDomainType); 
-	                    }
-                    }
+                        spatialComponents.AddDiffusionCoefficient(species, cmp.molecule.DiffusionCoefficient);
+                        //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
+                        spatialComponents.SetDomainTypeBoundaryCondition(species, cytoDomainType);
+                    }  
                 }
 
-                //add genes
-                ////for (int i = 0; i < configCell.genes_guid_ref.Count; i++)
-                ////{
-                ////    configGene= protocol.entity_repository.genes_dict[configCell.genes_guid_ref[i]];
-                ////    confMolPopName = configGene.Name;
-                ////    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false,configGene.ActivationLevel, "");
-                ////    SetGeneAnnotation(configGene, species);
+                //Encode molecules in membrane 
+                foreach (ConfigMolecularPopulation cmp in configCell.membrane.molpops)
+                {     
+                    confMolPopName = cmp.molecule.Name;  
+                    species = AddSpecies(confMolPopName.TrimEnd('|') + "_" + cellMembraneId, confMolPopName, cellMembraneId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
+                    SetSpeciesAnnotation(cmp, species);
 
-                ////    //No diffusion coefficients or Boundary Conditions are needed here
-                ////}
+                    if (isSpatialModel)
+                    {
+                        spatialComponents.AddDiffusionCoefficient(species, cmp.molecule.DiffusionCoefficient);
+                        //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
+                        spatialComponents.SetDomainTypeBoundaryCondition(species, membraneDomainType);
+                    }  
+                }                          
+
+                //Encode genes in the nucleus
                 foreach (ConfigGene configGene in configCell.genes)
                 {
                     confMolPopName = configGene.Name;
@@ -1064,16 +1044,7 @@ namespace SBMLayer
                     }
                 }  
             }
-            ////else if (configGenes != null)
-            ////{
-            ////    foreach (string cng in configGenes)
-            ////    {
-            ////        if (protocol.entity_repository.genes_dict[cng].Name.Equals(molecule))
-            ////        {
-            ////            return true;
-            ////        }
-            ////    }
-            ////}
+    
             else if (cGenes != null)
             {
                 foreach (ConfigGene cg in cGenes)
@@ -1680,15 +1651,36 @@ namespace SBMLayer
             if (isSpatialModel)
             {
                 spatialModelPlugin = (SpatialModelPlugin)model.getPlugin(spatialPackageName);
-                geometry = spatialModelPlugin.getGeometry();                
-                //Assumes there only active geometry definition is CsG
-                 GeometryDefinition b= geometry.getListOfGeometryDefinitions().get(0);
-                csgGeometry=(CSGeometry)spatialModelPlugin.getElementBySId(b.getId());
-                //TODO HOW DO WE EXACTRACT A CSG Geometry
-                string a = csgGeometry.getId();
+                geometry = spatialModelPlugin.getGeometry();
+                if (geometry==null)
+                {
+                    MessageBox.Show("No geometry set. All SBML spatial models must contain a Geometry object");
+                    return null;
+                }
+
+                if(geometry.getNumCoordinateComponents()!=3)
+                {
+                    MessageBox.Show("There are fewer than 3 coordinate components in the geometry. All spatial SBML models supported must define 3 coordinate components");
+                    return null;
+                }
+
+                //Assumes the only one present in CSG - if more present, only pics CSG
+                for (int i = 0; i < geometry.getNumGeometryDefinitions(); ++i)
+                {
+                    if (geometry.getGeometryDefinition(i).isCSGeometry())
+                    {
+                        csgGeometry = geometry.getGeometryDefinition(i) as CSGeometry; 
+                    }
+
+                    if (csgGeometry==null)
+                    {
+                        MessageBox.Show("Geometry definition not supported. Only Constructive Solid Geometry (CSG) is supported");
+                        return null;
+                    }
+                }  
             }
             //Extracts all model components from the read SBML model and populates the Sim Configuration object
-            PopulateProtocol();
+            PopulateProtocol();             
             return protocol;
         }
 
@@ -1760,7 +1752,7 @@ namespace SBMLayer
             annotation = annotation.getChild("daphnecomps");
             attributes = annotation.getAttributes();
 
-            return new double[] { Convert.ToDouble(attributes.getValue(attributes.getIndex("dragCoeff"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("transdConst"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("number"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("stochForce"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("cell_radius"))) };
+            return new double[] { Convert.ToDouble(attributes.getValue(attributes.getIndex("dragCoeff"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("transdConst"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("number"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("stochForce"))), isSpatialModel?CalculateCellRadius(cytosol.getSize(), false):Convert.ToDouble(attributes.getValue(attributes.getIndex("cell_radius"))) };
         }
 
         /// <summary>
@@ -1865,25 +1857,25 @@ namespace SBMLayer
         /// <returns></returns>
         private ConfigGene PrepareGenes(Species specGene) 
         {
-            int copy_num = GetCopyNum(specGene);
-            ConfigGene cg= new ConfigGene(specGene.getId(), copy_num, specGene.getInitialConcentration());
+            double[] geneAttributes= GetGeneAttributes(specGene);
+            ConfigGene cg = new ConfigGene(specGene.getId(), (Int32)geneAttributes[0], geneAttributes[1]);
             protocol.entity_repository.genes.Add(cg);
             protocol.entity_repository.genes_dict.Add(cg.entity_guid, cg);
             return cg;
         }
 
         /// <summary>
-        /// Returns copy number variation for a given gene
+        /// Returns copy number variation and activation level for a given gene
         /// </summary>
         /// <param name="specGene"></param>
         /// <returns></returns>
-        private int GetCopyNum(Species specGene)
+        private double[] GetGeneAttributes(Species specGene)
         {
             XMLNode annotation = specGene.getAnnotation();
             annotation = annotation.getChild("daphnespecies");
             //Model description
             XMLAttributes attributes = annotation.getAttributes();
-            return Convert.ToInt32(attributes.getValue("copy_num"));
+            return new double[]{Convert.ToInt32(attributes.getValue("copy_num")),Convert.ToInt32(attributes.getValue("activation_level"))};
         }
 
         public Boolean ContainsReactionComplex() {
@@ -1894,19 +1886,67 @@ namespace SBMLayer
         /// Extracts the size of the simulation container from Spatial components
         /// </summary>
         private void SetBoxExtents() {
-            ListOfCSGObjects csgObjects = csgGeometry.getListOfCsgObjects();
-            CSGScale csgScale;
-            for (int i = 0; i < csgObjects.size(); i++)
-			{
-                if (csgObjects.get(i).getOrdinal()==0)
-	            {
-                    csgScale = (CSGScale)csgObjects.get(i).getCsgNode();
-                    envHandle.extent_x= (Int32)csgScale.getScaleX();
-                    envHandle.extent_y = (Int32)csgScale.getScaleY();
-                    envHandle.extent_z = (Int32)csgScale.getScaleZ();
-	            }     
-			}
+            //If the SBML validator didn't throw an error there exists an X,Y and Z coordinate
+            ListOfCoordinateComponents comps = geometry.getListOfCoordinateComponents();
+            if (comps.get(0) != null)
+            {
+                envHandle.extent_x = (Int32)comps.get(0).getBoundaryMax().getValue();
+            }            
+            //Missing coordinates are left set to Dahpne's default = 200
+            if (geometry.getNumCoordinateComponents() >= 2 && comps.get(1) != null)
+            {
+                envHandle.extent_y = (Int32)comps.get(1).getBoundaryMax().getValue();
+            }
 
+            if (geometry.getNumCoordinateComponents() == 3 && comps.get(2) != null)
+            {
+                envHandle.extent_z = (Int32)comps.get(2).getBoundaryMax().getValue();
+            }
+        }
+
+        /// <summary>
+        /// Fetches the spatial location of a cell from it's domain's first interior point
+        /// </summary>
+        /// <param name="cellPop"></param>
+        /// <returns></returns>
+        private double[,] GetDomainDomainPositions(CellPopulation cellPop, Dictionary<string, List<libsbmlcs.Compartment>> cellTypes)
+        {
+            string cellDomainType=null;
+            double [,] positions=new double[cellPop.number,3]; //for x,y and z position components
+            foreach (KeyValuePair<string, List<libsbmlcs.Compartment>> cellTypeComp in cellTypes)
+            {
+                if (cellTypeComp.Key.Equals(cellPop.cellpopulation_name))
+                {            
+                    foreach (libsbmlcs.Compartment comp in cellTypeComp.Value)
+                    {
+                        if (comp.getSpatialDimensions()==3)
+                        {
+                            cellDomainType=((SpatialCompartmentPlugin)comp.getPlugin(spatialPackageName)).getCompartmentMapping().getDomainType();                            
+                        }
+                    }
+                }
+            }
+
+            ListOfDomains domains = geometry.getListOfDomains();
+            Domain tempDomain;
+            int counter = 0;
+            for (int j = 0; j < domains.size(); j++)
+            {
+                tempDomain=domains.get(j);
+                if (tempDomain.getDomainType().Equals(cellDomainType))
+	            {
+                    ListOfInteriorPoints cellLocation = tempDomain.getListOfInteriorPoints();
+                    if (cellLocation.size()>=1)
+                    {
+                        positions[counter, 0] = cellLocation.get(0).getCoord1();
+                        positions[counter, 1] = cellLocation.get(0).getCoord2();
+                        positions[counter, 2] = cellLocation.get(0).getCoord3();
+                        counter++;
+                    }
+	            }  
+            }
+
+            return positions;
         }
 
         /// <summary>
@@ -1915,7 +1955,6 @@ namespace SBMLayer
         /// <param name="sc"></param>
         private void PopulateProtocol()
         {
-
             //Set up predefined molecules, reactionTemplates, reactions, cells and reaction complexes
             ProtocolCreators.LoadDefaultGlobalParameters(protocol);
 
@@ -2061,9 +2100,9 @@ namespace SBMLayer
                         {
                             cytosol = comp;
                             compartAttributes = GetCellAttributes(cytosol);
-                            gc.DragCoefficient = compartAttributes[0];
-                            gc.TransductionConstant = compartAttributes[1];
-                            gc.Sigma= compartAttributes[3];
+                            gc.DragCoefficient.ConstValue = compartAttributes[0];
+                            gc.TransductionConstant.ConstValue = compartAttributes[1];
+                            gc.Sigma.ConstValue = compartAttributes[3];
                             //Pull all cytosol species
                             for (int i = 0; i < speciesList.size(); i++)
                             {
@@ -2078,8 +2117,7 @@ namespace SBMLayer
                                             gc.locomotor_mol_guid_ref = ProtocolCreators.findMoleculeGuid(tempSpecies.getId(), MoleculeLocation.Bulk, protocol);
                                         }
                                     }
-                                    else {
-                                        //gc.genes_guid_ref.Add(PrepareGenes(tempSpecies).entity_guid);
+                                    else {                                       
                                         gc.genes.Add(PrepareGenes(tempSpecies));
                                     }
                                 }
@@ -2135,10 +2173,18 @@ namespace SBMLayer
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
                     // Don't start the cell on a lattice point, until gradient interpolation method improves.
                     cellPop.cellPopDist.Initialize();
-                    cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * gc.CellRadius - envHandle.gridstep / 2,
-                                                          envHandle.extent_y / 2 - envHandle.gridstep / 2,
-                                                          envHandle.extent_z / 2 - envHandle.gridstep / 2);
-
+ 
+                    //Fetch cell locations from SBML Geometry
+                    if (isSpatialModel)
+                    {
+                        //Assumes the interior point for a cell domain marks it's center of mass                            
+                        double[,] location = GetDomainDomainPositions(cellPop, cellTypes);
+                        for (int i = 0; i < cellPop.CellStates.Count; i++)
+                        {
+                            cellPop.CellStates[i] = new CellState(location[i, 0], location[i, 1], location[i, 2]);
+                        }
+                    }
+                    
                     //cellPop.cellpopulation_color = Syste/m.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
 
                     if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
@@ -2371,6 +2417,29 @@ namespace SBMLayer
             return value;
         }
 
+        /// <summary>
+        /// Retrieves the diffusion coefficient for a given species
+        /// </summary>
+        /// <param name="species"></param>
+        /// <returns></returns>
+        public double GetSpeciesDiffusionCoefficient(Species species) {
+            SpatialParameterPlugin paramPlug;
+            ListOfParameters paramList=model.getListOfParameters();
+            for (int i = 0; i < paramList.size(); i++)
+            {
+                paramPlug = (SpatialParameterPlugin)paramList.get(i).getPlugin(spatialPackageName);
+                if (paramPlug!=null && paramPlug.getDiffusionCoefficient()!=null)
+                {
+                    if (paramPlug.getDiffusionCoefficient().getVariable().Equals(species.getId()))
+	                {
+                        return paramList.get(i).getValue();
+	                }      
+                }
+
+            }
+            return 0;
+        }
+
 
         /// <summary>
         /// Calculates the radius of a cell from the area or volume provided
@@ -2410,7 +2479,15 @@ namespace SBMLayer
                 annotation = annotation.getChild("daphnespecies");
                 //Species description
                 XMLAttributes attributes = annotation.getAttributes();
-                diffusion = Convert.ToDouble(attributes.getValue(attributes.getIndex("diff_coeff")));
+                if (isSpatialModel)
+                {
+                    diffusion = GetSpeciesDiffusionCoefficient(species);
+                }
+                else
+                {
+                    diffusion = Convert.ToDouble(attributes.getValue(attributes.getIndex("diff_coeff")));
+                }
+                
                 weight = Convert.ToDouble(attributes.getValue(attributes.getIndex("mol_weight")));
                 complex = Convert.ToBoolean(attributes.getValue(attributes.getIndex("complex")));
                 radius = Convert.ToDouble(attributes.getValue(attributes.getIndex("mol_radius")));
@@ -2561,6 +2638,7 @@ namespace SBMLayer
                 uniformDistribution.concentration = species.getInitialConcentration();
                 configMolPop.mp_distribution = uniformDistribution;
             }
+
         }
 
         /// <summary>

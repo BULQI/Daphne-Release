@@ -24,7 +24,7 @@ namespace DaphneGui
     public partial class CellPopControl : UserControl, INotifyPropertyChanged
     {
         private ConfigCell selectedCell;
-        public ConfigCell SelectedCell 
+        public ConfigCell SelectedCell
         {
             get
             {
@@ -366,10 +366,10 @@ namespace DaphneGui
             ListBox lb = sender as ListBox;
             if (lb.SelectedIndex < 0)
             {
-                selectedCell = null;
+                SelectedCell = null;
                 return;
             }
-
+            
             CellPopulation cp = (CellPopulation)(lb.SelectedItem);
             SelectedCell = cp.Cell;
         }
@@ -472,7 +472,8 @@ namespace DaphneGui
                 string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
                 cp.CellStates.Clear();
-                for (int i = 0; i < paste.Length; i += 3)
+                int n = 3 * (int)Math.Floor(paste.Length / 3.0);
+                for (int i = 0; i < n; i += 3)
                 {
                     cp.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
                 }
