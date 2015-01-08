@@ -2912,7 +2912,7 @@ namespace DaphneGui
                 ObservableCollection<CellGeneInfo> gene_activations = new ObservableCollection<CellGeneInfo>();
                 txtCellState.Text = selectedCell.Differentiator.State[nDiffState];
                 ObservableCollection<double> activities = new ObservableCollection<double>();
-                int len = selectedCell.Differentiator.activity.GetLength(0);
+                int len = selectedCell.Differentiator.activity.GetLength(1);
                 for (int i = 0; i < len; i++)
                 {
                     CellGeneInfo cgi = new CellGeneInfo();
