@@ -51,6 +51,13 @@ namespace DaphneGui
                 }
             }
 
+            //NEED TO UPDATE THE LIST OF AVAILABLE GENES IN THE COMBO BOX
+            //Easiest to create a new updated 'Add a gene' column and replace old one with the new one
+            DataGridTextColumn dgtc = dataGrid.Columns.Last() as DataGridTextColumn;
+            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            DataGridTextColumn dgtc_new = cdc.CreateUnusedGenesColumn();
+            dataGrid.Columns.Remove(dgtc);
+            dataGrid.Columns.Add(dgtc_new);
         }
 
         private void ContextMenuDeleteStates_Click(object sender, RoutedEventArgs e)
@@ -101,6 +108,42 @@ namespace DaphneGui
             DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, diff_scheme);
             DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
             DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);         
+        }
+
+        private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // TODO: Add event handler implementation here.
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            // iteratively traverse the visual tree
+            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader) && !(dep is DataGridRowHeader))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+                return;
+
+            else if (dep is DataGridColumnHeader)
+            {
+                DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
+                // do something
+                DataGridBehavior.SetHighlightColumn(columnHeader.Column, true);
+            }
+
+            else if (dep is DataGridRowHeader)
+            {
+            }
+
+            else if (dep is DataGridCell)
+            {
+                DataGridCell cell = dep as DataGridCell;
+                // do something                
+            }
+        }
+
+        private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
         }
 
         #endregion

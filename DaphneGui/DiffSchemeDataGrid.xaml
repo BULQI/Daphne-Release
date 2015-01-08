@@ -100,7 +100,9 @@
             SelectionMode="Extended"                  
             SelectionUnit="FullRow"
             VirtualizingStackPanel.VirtualizationMode="Standard"
-            VirtualizingStackPanel.IsVirtualizing="False"            
+            VirtualizingStackPanel.IsVirtualizing="False" 
+            PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
+            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
             >
             
             <DataGrid.ContextMenu>
