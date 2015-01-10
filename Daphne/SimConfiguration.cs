@@ -4216,6 +4216,7 @@ namespace Daphne
 
             return true;
         }
+
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -4342,6 +4343,14 @@ namespace Daphne
             Driver.DriverElements.Add(trow);
 
             OnPropertyChanged("Driver");
+        }
+
+
+        public void RemoveState(int index)
+        {
+            activationRows.RemoveAt(index);
+            Driver.states.RemoveAt(index);
+            Driver.DriverElements.RemoveAt(index);
         }
 
         public ConfigTransitionScheme Clone(bool identical)

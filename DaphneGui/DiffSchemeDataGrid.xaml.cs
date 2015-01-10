@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Daphne;
+using System.Reflection;
 
 namespace DaphneGui
 {
@@ -67,21 +68,22 @@ namespace DaphneGui
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (diff_scheme == null) return;
 
-            foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
+            List<int> rowsToDelete = new List<int>();   //will contain a list of row indices to delete (ascending order)
+            foreach (var n in dataGrid.SelectedItems)
             {
-                if (dataGrid.SelectedItems.Contains(diffrow))
-                {
-                    int index = diff_scheme.activationRows.IndexOf(diffrow);
-                    string stateToDelete = diff_scheme.Driver.states[index];
-
-                    //this deletes the column from the differentiation regulators grid
-                    //to do below.....
-                    //DeleteDiffRegGridColumn(stateToDelete);
-
-                    //this removes the activation row from the differentiation scheme
-                    diff_scheme.RemoveActivationRow(diffrow);
-                }
+                var currentRowIndex = dataGrid.Items.IndexOf(n);
+                rowsToDelete.Add(currentRowIndex);
             }
+
+            //Reverse the order to make it easy to delete states from diff_scheme
+            rowsToDelete.Reverse();
+
+            foreach (int i in rowsToDelete)
+            {
+                //Delete state from diff_scheme - the order of rows matches the order in diff_scheme
+                diff_scheme.RemoveState(i);
+            }
+
 
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
             //update the reg grid
@@ -435,4 +437,50 @@ namespace DaphneGui
     }
 
     #endregion
+
+    public static class DataGridHelper
+    {
+        public static DataGridCell GetCell(DataGridCellInfo dataGridCellInfo)
+        {
+            if (!dataGridCellInfo.IsValid)
+            {
+                return null;
+            }
+
+            var cellContent = dataGridCellInfo.Column.GetCellContent(dataGridCellInfo.Item);
+            if (cellContent != null)
+            {
+                return (DataGridCell)cellContent.Parent;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public static int GetRowIndex(DataGridCell dataGridCell)
+        {
+            // Use reflection to get DataGridCell.RowDataItem property value.
+            PropertyInfo rowDataItemProperty = dataGridCell.GetType().GetProperty("RowDataItem", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            DataGrid dataGrid = GetDataGridFromChild(dataGridCell);
+
+            return dataGrid.Items.IndexOf(rowDataItemProperty.GetValue(dataGridCell, null));
+        }
+        public static DataGrid GetDataGridFromChild(DependencyObject dataGridPart)
+        {
+            if (VisualTreeHelper.GetParent(dataGridPart) == null)
+            {
+                throw new NullReferenceException("Control is null.");
+            }
+            if (VisualTreeHelper.GetParent(dataGridPart) is DataGrid)
+            {
+                return (DataGrid)VisualTreeHelper.GetParent(dataGridPart);
+            }
+            else
+            {
+                return GetDataGridFromChild(VisualTreeHelper.GetParent(dataGridPart));
+            }
+        }
+    }
+
 }
