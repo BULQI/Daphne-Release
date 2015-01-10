@@ -358,6 +358,12 @@ namespace DaphneGui
                         cp.cellpopulation_name = new_cell_name;
                     }
                 }
+
+                //This forces the cell population to be reloaded and updates all details in GUI underneath
+                int index = CellPopsListBox.SelectedIndex;
+                CellPopsListBox.SelectedIndex = -1;
+                CellPopsListBox.SelectedIndex = index;
+
             }
         }
 
