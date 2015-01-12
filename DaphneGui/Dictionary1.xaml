@@ -35,8 +35,19 @@
     <daph:ParameterDistributionTypeToBoolConverter x:Key="ParamDistTypeBoolConv" />
 
 
+    <daph:TransitionDriverElementTypeToStringConverter x:Key="TransitionDriverElementTypeEnumConv" />
+    <daph:TransitionDriverElementTypeConverter x:Key="TransitionDriverElementTypeConv" />
+
+
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
+    <!-- transitionDriverElementTypeTemplate -->
+    <DataTemplate x:Key="transitionDriverElementTypeTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Converter={StaticResource TransitionDriverElementTypeEnumConv}}"/>
+        </StackPanel>
+    </DataTemplate>
+    
     <!-- parameterDistributionTypeTemplate -->
     <DataTemplate x:Key="parameterDistributionTypeTemplate">
         <StackPanel Orientation="Horizontal">

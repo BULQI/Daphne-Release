@@ -266,7 +266,7 @@ namespace DaphneGui
                     col.CanUserSort = false;
                     Binding b = new Binding(string.Format("elements[{0}]", count));
 
-                    var cellTemplate = cdc.FindResource("DiffRegCellTemplate");
+                    var cellTemplate = cdc.FindResource("DataGridCell_TDE_NonEditing_Template");
                     FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
                     factory.SetValue(ContentPresenter.ContentTemplateProperty, cellTemplate);
                     factory.SetBinding(ContentPresenter.ContentProperty, b);
@@ -277,7 +277,7 @@ namespace DaphneGui
                     b2.Mode = BindingMode.TwoWay;
                     b2.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
 
-                    var cellEditingTemplate = cdc.FindResource("DiffRegCellEditingTemplate");
+                    var cellEditingTemplate = cdc.FindResource("DataGridCell_TDE_Editing_Template");
                     FrameworkElementFactory factory2 = new FrameworkElementFactory(typeof(ContentPresenter));
                     factory2.SetValue(ContentPresenter.ContentTemplateProperty, cellEditingTemplate);
                     factory2.SetBinding(ContentPresenter.ContentProperty, b2);
@@ -399,18 +399,6 @@ namespace DaphneGui
         }
 
         #endregion
-
-        private void EpigeneticMapGridDiv_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //DataGrid dg = sender as DataGrid;
-
-            //object o = e.AddedItems[0];
-
-            //dg.SelectedItem = o;
-
-            //DataGridRow drg = new DataGridRow();
-
-        }
     }
 
 
@@ -437,50 +425,4 @@ namespace DaphneGui
     }
 
     #endregion
-
-    public static class DataGridHelper
-    {
-        public static DataGridCell GetCell(DataGridCellInfo dataGridCellInfo)
-        {
-            if (!dataGridCellInfo.IsValid)
-            {
-                return null;
-            }
-
-            var cellContent = dataGridCellInfo.Column.GetCellContent(dataGridCellInfo.Item);
-            if (cellContent != null)
-            {
-                return (DataGridCell)cellContent.Parent;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        public static int GetRowIndex(DataGridCell dataGridCell)
-        {
-            // Use reflection to get DataGridCell.RowDataItem property value.
-            PropertyInfo rowDataItemProperty = dataGridCell.GetType().GetProperty("RowDataItem", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            DataGrid dataGrid = GetDataGridFromChild(dataGridCell);
-
-            return dataGrid.Items.IndexOf(rowDataItemProperty.GetValue(dataGridCell, null));
-        }
-        public static DataGrid GetDataGridFromChild(DependencyObject dataGridPart)
-        {
-            if (VisualTreeHelper.GetParent(dataGridPart) == null)
-            {
-                throw new NullReferenceException("Control is null.");
-            }
-            if (VisualTreeHelper.GetParent(dataGridPart) is DataGrid)
-            {
-                return (DataGrid)VisualTreeHelper.GetParent(dataGridPart);
-            }
-            else
-            {
-                return GetDataGridFromChild(VisualTreeHelper.GetParent(dataGridPart));
-            }
-        }
-    }
-
 }

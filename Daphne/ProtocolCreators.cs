@@ -491,9 +491,13 @@ namespace Daphne
             for (int i = 0; i < item.Length; i++)
             {
                 ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+
+                    // set the diffusion coefficient to zero for the locomotion protocol only
+                    configMolecule.DiffusionCoefficient = 0.0;
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
 
@@ -3349,7 +3353,7 @@ namespace Daphne
                 driver.states.Add(stateName[i]);
                 for (int j = 0; j < signal.GetLength(1); j++)
                 {
-                    ConfigTransitionDriverElement driverElement = new ConfigTransitionDriverElement();
+                    ConfigMolTransitionDriverElement driverElement = new ConfigMolTransitionDriverElement();
 
                     driverElement.CurrentState = i;
                     driverElement.DestState = j;

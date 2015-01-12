@@ -862,7 +862,8 @@ namespace DaphneGui
 
             if (cell.death_driver == null)
             {
-                //I think this is what we want
+                // The transition driver elements should default to ConfigMolTransitionDriverElement.
+                // If we use ConfigDistrDriverElement as the default we won't be able to distinguish between meaningful and empty TDEs. 
                 ConfigTransitionDriver config_td = new ConfigTransitionDriver();
                 config_td.Name = "generic apoptosis";
                 string[] stateName = new string[] { "alive", "dead" };
@@ -940,7 +941,6 @@ namespace DaphneGui
 
             return editor_col;
         }
-
 
         /// <summary>
         /// This handler gets called when user selects a gene in the "add genes" 
@@ -1548,6 +1548,138 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        /// Switch between molecule-driven and distribution-driven transition driver elements for cell death.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ChangeDeathTDEType_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null) return;
+
+            if (cell.death_driver == null)
+            {
+                return;
+            }
+
+            if (cell.death_driver.DriverElements == null)
+            {
+                return;
+            }
+
+            ConfigTransitionDriverElement tde = cell.death_driver.DriverElements[0].elements[1];
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            {
+                // Switch to Distribution-driven
+                tde = new ConfigDistrTransitionDriverElement();
+
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+            }
+            else
+            {
+                // Switch to Molecule-driven
+                tde = new ConfigMolTransitionDriverElement();
+            }
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
+           
+            cell.death_driver.DriverElements[0].elements[1] = tde;
+        }
+
+        private void ChangeDataGridTDEType_Click(object sender, RoutedEventArgs e)
+        { 
+            Button button = sender as Button;
+
+            var stack_panel = FindVisualParent<StackPanel>(button);
+            if (stack_panel == null) return;
+
+            ConfigTransitionDriverElement tde = stack_panel.DataContext as ConfigTransitionDriverElement;
+            if (tde == null) return;
+    
+            TransitionDriverElementType type = tde.Type;
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            {
+                tde = new ConfigDistrTransitionDriverElement();
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = new PoissonParameterDistribution();
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                //stack_panel.DataContext = tde;
+            }
+            else
+            {
+                tde = new ConfigMolTransitionDriverElement();
+            }
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
+
+            // update the transition scheme
+            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
+            if (dataGrid == null) return;
+            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            if (scheme != null)
+            {
+                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+            }
+        }
+
+        public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindVisualParent<T>(parentObject);
+            }
+        }
+
+        public static T FindLogicalParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = LogicalTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindLogicalParent<T>(parentObject);
+            }
+        }
         private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
@@ -1593,5 +1725,7 @@ namespace DaphneGui
     }
 
 }
+
+
 
         
