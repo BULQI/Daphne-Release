@@ -29,7 +29,6 @@ namespace Daphne
 
     public interface IFrameData
     {
-        bool prepareData();
         void applyStateByIndex(int idx, ref CellState state);
         void writeData(int i);
         void writeData(string groupName);

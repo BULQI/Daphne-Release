@@ -226,7 +226,7 @@ namespace DaphneGui
         public ObservableCollection<CellMolecularInfo> currentConcs { get; set; }
 
         /// <summary>
-        /// custom routed command for delete db
+        /// custom routed command for delete vcr data
         /// </summary>
         public static RoutedCommand ClearVCRDataCommand = new RoutedCommand();
 
@@ -1177,7 +1177,7 @@ namespace DaphneGui
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            // id the file is open we'll have to close it; ask the user if that's what they want
+            // if the file is open we'll have to close it; ask the user if that's what they want
             if (DataBasket.hdf5file.isOpen() == true)
             {
                 // we may want this verbosity of warnings but perhaps it's a burden to click through so many dialogs; maybe get requirements from Tom and Grace
@@ -1202,22 +1202,15 @@ namespace DaphneGui
             if (expNames.Count > 0)
             {
                 // populate the dialog with expNames
-                // the dialog must allow the user to choose an experiment and press Ok (loads it) or cancel (exits)
-                // the dialog must return or otherwise somehow provide the chosen experiment
+                PastExperiments past = new PastExperiments(expNames);
 
-                // for the purpose of this example I'll assume they pick the first experiment if it exists
-                // in place of this if-statement, run the dialog and have it provide the chosen experiment name (empty string "" when cancel was pressed)
-                if (expNames.Count > 0)
+                if (past.ShowDialog() == true)
                 {
-                    PastExperiments past = new PastExperiments(expNames);
+                    int index = past.SelectedExperiment;
 
-                    if (past.ShowDialog() == true)
+                    if (index > -1)
                     {
-                        int index = past.SelectedExperiment;
-                        if (index > -1)
-                        {
-                            selectedExp = expNames[index];
-                        }
+                        selectedExp = expNames[index];
                     }
                 }
 
@@ -1239,6 +1232,7 @@ namespace DaphneGui
                     lockAndResetSim(true, ReadJson(protocolString));
                     // need to set a filename
                     sop.Protocol.FileName = uniqueFilename(selectedExp);
+                    setScenarioPaths(sop.Protocol.FileName);
                     if (loadSuccess == false)
                     {
                         return;
@@ -1254,26 +1248,6 @@ namespace DaphneGui
 
             // if we get here the file is still open, close the file and all groups
             DataBasket.hdf5file.close(true);
-
-// leaving this for legacy, remove when done
-#if OLD_LOADING_CODE
-            esw = new ExpSelectWindow(-1);
-            esw.Owner = this;
-            esw.ShowDialog();
-            if (esw.expselected)
-            {
-                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
-                lockAndResetSim(true, esw.SelectedXML);
-                if (loadSuccess == false)
-                {
-                    return;
-                }
-                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
-                sim.runStatSummary();
-                GUIUpdate(esw.SelectedExperiment, true);
-                displayTitle("DB experiment id " + esw.SelectedExperiment);
-            } 
-#endif
         }
 
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
