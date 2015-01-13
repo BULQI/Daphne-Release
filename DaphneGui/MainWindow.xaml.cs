@@ -2574,8 +2574,8 @@ namespace DaphneGui
         private void updateGraphicsAndGUI()
         {
             lockAndResetSim(false, ReadJson(""));
-            // disable the vcr by passing expId == -1, from this call we should never attempt to read an hdf5 file
-            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+            // pass current experiment id to allow vcr playback even for partial runs
+            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
             this.VTKDisplayDocWindow.Open();
