@@ -755,6 +755,13 @@ namespace DaphneGui
             //serialize to json
             protocol.SerializeToFile();
 
+            //GC SCENARIO
+            protocol = new Protocol("Config\\daphne_gc_cycling_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+
+            ProtocolCreators.CreateGCProtocol(protocol);
+            //serialize to json
+            protocol.SerializeToFile();
+
             // BLANK VAT-REACTION-COMPLEX SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
@@ -772,6 +779,11 @@ namespace DaphneGui
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
             // serialize
             protocol.SerializeToFile();
+
+
+
+
+
 
         }
 
