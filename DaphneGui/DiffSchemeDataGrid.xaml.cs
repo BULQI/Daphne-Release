@@ -76,7 +76,9 @@ namespace DaphneGui
             }
 
             //Reverse the order to make it easy to delete states from diff_scheme
+            rowsToDelete.Sort();
             rowsToDelete.Reverse();
+            
 
             foreach (int i in rowsToDelete)
             {

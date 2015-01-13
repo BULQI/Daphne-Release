@@ -4474,6 +4474,33 @@ namespace Daphne
             activationRows.RemoveAt(index);
             Driver.states.RemoveAt(index);
             Driver.DriverElements.RemoveAt(index);
+
+            //NOW LOOP THRU ALL REMAINING DRIVERELEMENTS
+            //IF DESTSTATE > INDEX, DECREMENT IT
+            //IF CURRENTSTATE > INDEX, DECREMENT IT
+
+            //Deletes the appropriate column from the Division Regulators grid
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                var elem = Driver.DriverElements[i].elements;
+                elem.RemoveAt(index);
+            }
+
+            //Updates the CurrentState and DestState values appropriately depending on which state was deleted
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                foreach (var v in Driver.DriverElements[i].elements)
+                {
+                    if (v.CurrentState > index)
+                    {
+                        v.CurrentState--;
+                    }
+                    if (v.DestState > index)
+                    {
+                        v.DestState--;
+                    }
+                }
+            }
         }
 
         public ConfigTransitionScheme Clone(bool identical)
