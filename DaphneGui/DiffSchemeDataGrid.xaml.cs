@@ -47,17 +47,19 @@ namespace DaphneGui
                     //diff_scheme.genes.Remove(guid);
                     //dataGrid.Columns.Remove(col);
                     diff_scheme.DeleteGene(guid);
+
+                    //NEED TO UPDATE THE LIST OF AVAILABLE GENES IN THE COMBO BOX
+                    //Easiest to create a new updated 'Add a gene' column and replace old one with the new one
+                    DataGridTextColumn dgtc = dataGrid.Columns.Last() as DataGridTextColumn;
+                    CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+                    DataGridTextColumn dgtc_new = cdc.CreateUnusedGenesColumn();
+                    dataGrid.Columns.Remove(dgtc);
+                    dataGrid.Columns.Add(dgtc_new);
                     
                 }
             }
 
-            //NEED TO UPDATE THE LIST OF AVAILABLE GENES IN THE COMBO BOX
-            //Easiest to create a new updated 'Add a gene' column and replace old one with the new one
-            DataGridTextColumn dgtc = dataGrid.Columns.Last() as DataGridTextColumn;
-            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
-            DataGridTextColumn dgtc_new = cdc.CreateUnusedGenesColumn();
-            dataGrid.Columns.Remove(dgtc);
-            dataGrid.Columns.Add(dgtc_new);
+            
 
             //force update of the epigenetic map grid
             DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
