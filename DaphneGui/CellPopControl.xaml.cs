@@ -108,6 +108,9 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
             cp.cellPopDist.Initialize();
+            // Causes a new random seed for the random source
+            // Otherwise we will get the same values every time if this is followed by Apply()
+            cp.cellPopDist.Reset();
 
             //add rendering options to scenario
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
