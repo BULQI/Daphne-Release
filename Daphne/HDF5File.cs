@@ -504,10 +504,17 @@ namespace Daphne
 
         private void createECSData()
         {
-            // ECS, create the data space, size equal to number of molpops, each molpop same size, pick the first one
-            ConfigMolecularPopulation first = SimulationBase.ProtocolHandle.scenario.environment.comp.molpops.First();
-            int mpSize = SimulationBase.dataBasket.Environment.Comp.Populations[first.molecule.entity_guid].Conc.M.ArraySize,
+            // ECS, create the data space, size equal to number of molpops
+            int mpSize = 0,
                 length = SimulationBase.ProtocolHandle.scenario.environment.comp.molpops.Count;
+
+            // if needed, find the molpop size; each molpop same size, pick the first one
+            if (length > 0)
+            {
+                ConfigMolecularPopulation first = SimulationBase.ProtocolHandle.scenario.environment.comp.molpops.First();
+
+                mpSize = SimulationBase.dataBasket.Environment.Comp.Populations[first.molecule.entity_guid].Conc.M.ArraySize;
+            }
 
             // create the outer array
             if (ecsMolpops == null || ecsMolpops.Length != length)
