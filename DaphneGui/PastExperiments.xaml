@@ -44,10 +44,10 @@
             </Grid>
         </ScrollViewer>
 
-        <Button x:Name="ButtonDelete" Content="Delete" Width="100" Margin="6" 
+        <!--<Button x:Name="ButtonDelete" Content="Delete" Width="100" Margin="6" 
                 Grid.Row="1"
                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                Click="ButtonDelete_Click" />
+                Click="ButtonDelete_Click" />-->
 
         <Button x:Name="ButtonOpen" Content="Open" Width="100" Margin="6"
                 Grid.Row="1"
