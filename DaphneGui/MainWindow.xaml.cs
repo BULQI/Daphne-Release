@@ -1219,6 +1219,17 @@ namespace DaphneGui
                             selectedExp = expNames[index];
                         }
                     }
+                    else
+                    {
+                        int index = past.SelectedExperiment;
+                        if (index > -1)
+                        {
+                            selectedExp = expNames[index];
+                            //HERE MUST DELETE THE SELECTED EXPERIMENT
+                            //HOW?
+                        }
+                        return;
+                    }
                 }
 
                 // now load it if there was a valid selection

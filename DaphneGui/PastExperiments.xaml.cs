@@ -33,35 +33,8 @@ namespace DaphneGui
             }
 
             SelectedExperiment = -1;
-            SetUpExpComboBox();
             DataContext = this;
         }
-
-        private void SetUpExpComboBox()
-        {
-            //Exps = DataBaseTools.GetExperiments();
-            //ExpName_CB.IsEnabled = true;
-            //ExpName_CB.IsEditable = true;
-            //ExpName_CB.Items.Clear();
-            //Exps.Sort((x, y) => string.Compare(x.ExpName, y.ExpName));
-            //for (int i = 0; i < Exps.Count; i++)
-            //{
-            //    ExpName_CB.Items.Add(i.ToString() + ") " + Exps[i].ExpName);
-            //}
-            //ExpName_CB.Text = "select experiment";
-            //ExpName_CB.SelectedIndex = -1;
-            //Description_TB.Text = "";
-            //for (int i = 0; i < Exps.Count; i++)
-            //{
-            //    if (Exps[i].ExpId == selectedexperiment)
-            //    {
-            //        selectedexperimentname = Exps[i].ExpName;
-            //        ExpName_CB.SelectedIndex = i;
-            //        Description_TB.Text = Exps[i].ExpDesc;
-            //    }
-            //}
-        }
-
 
         private void ButtonOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -71,27 +44,25 @@ namespace DaphneGui
 
         private void ButtonDelete_Click(object sender, RoutedEventArgs e)
         {
-            if (ExpName_CB.SelectedIndex != -1)
-            {
-                //selectedexperiment = Exps[ExpName_CB.SelectedIndex].ExpId;
-                //selectedexperimentname = Exps[ExpName_CB.SelectedIndex].ExpName;
-                //if (System.Windows.Forms.MessageBox.Show("Really delete " + selectedexperimentname + "?", "Confirm delete", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                //{
-                //    DataBaseTools.DeleteExperiment(selectedexperiment);
-                //    selectedexperiment = -1;
-                //    SetUpExpComboBox();
-                //}
+            SelectedExperiment = ExpName_CB.SelectedIndex;
+            if (SelectedExperiment != -1) {
+                string SelExpName = ExpNames[SelectedExperiment];
+                MessageBoxResult result = MessageBox.Show("Really delete " + SelExpName + "?", "Confirm delete", MessageBoxButton.YesNo,MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes) {
+                    DialogResult = false;
+                }
             }
         }
 
         private void ExpName_CB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
         {
+            SelectedExperiment = -1;
             DialogResult = false;
         }
     }
+
 }

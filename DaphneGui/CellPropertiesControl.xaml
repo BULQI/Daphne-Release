@@ -32,12 +32,13 @@
                     <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="200" LostFocus="CellTextBox_LostFocus" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="230" Margin="0,24">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="230" Margin="0,2">
                     <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
-                    <!--<uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                    </uc:DoublesBox>-->
+                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    </uc:DoublesBox>
 
-                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" >
+                    <!--This code is test code for using Validator-->
+                    <!--<uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="0,0" HorizontalAlignment="Left" >
                         <uc:DoublesBox.Number>
                             <Binding Path="CellRadius" Mode="TwoWay" UpdateSourceTrigger="LostFocus" NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
@@ -45,7 +46,7 @@
                                 </Binding.ValidationRules>
                             </Binding>
                         </uc:DoublesBox.Number>
-                    </uc:DoublesBox>
+                    </uc:DoublesBox>-->
 
                     <!--<TextBox x:Name="txtRad" Width="60" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" >
                         <TextBox.Text>

@@ -31,10 +31,7 @@ namespace DaphneGui
         #region context_menus
         private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
         {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
-
             var dx = dataGrid.DataContext;
 
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
@@ -47,8 +44,10 @@ namespace DaphneGui
                 string guid = MainWindow.SOP.Protocol.findGeneGuid(gene_name, MainWindow.SOP.Protocol);
                 if (isSelected && guid != null && guid.Length > 0)
                 {
-                    diff_scheme.genes.Remove(guid);
-                    dataGrid.Columns.Remove(col);
+                    //diff_scheme.genes.Remove(guid);
+                    //dataGrid.Columns.Remove(col);
+                    diff_scheme.DeleteGene(guid);
+                    
                 }
             }
 
@@ -59,6 +58,10 @@ namespace DaphneGui
             DataGridTextColumn dgtc_new = cdc.CreateUnusedGenesColumn();
             dataGrid.Columns.Remove(dgtc);
             dataGrid.Columns.Add(dgtc_new);
+
+            //force update of the epigenetic map grid
+            DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
+            DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, diff_scheme);
         }
 
         private void ContextMenuDeleteStates_Click(object sender, RoutedEventArgs e)

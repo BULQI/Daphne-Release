@@ -960,7 +960,6 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-
             DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(combo);
             if (dataGrid == null) return;
             ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
@@ -981,11 +980,14 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.genes.Add(gene1.entity_guid);
-                foreach (ConfigActivationRow row in scheme.activationRows)
-                {
-                    row.activations.Add(1.0);
-                }
+                scheme.AddGene(gene1.entity_guid);
+                //scheme.genes.Add(gene1.entity_guid);
+                //foreach (ConfigActivationRow row in scheme.activationRows)
+                //{
+                //    row.activations.Add(1.0);
+                //}
+
+
                 //force refresh
                 DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
                 DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, scheme);

@@ -4416,6 +4416,26 @@ namespace Daphne
             }
         }
 
+        public void AddGene(string gguid)
+        {
+            genes.Add(gguid);
+            foreach (ConfigActivationRow row in activationRows)
+            {
+                row.activations.Add(1.0);
+            }
+        }
+
+        public void DeleteGene(string gguid)
+        {
+            int index = genes.IndexOf(gguid);
+            genes.Remove(gguid);
+
+            foreach (var v in activationRows)
+            {
+                v.activations.RemoveAt(index);
+            }
+        }
+
         public void AddState(string sname)
         {
             //Add a row in Epigenetic Table
@@ -4608,8 +4628,8 @@ namespace Daphne
             if (this.activations.Count != car.activations.Count)
                 return false;
 
-            //Note that each double value here applies to a gene. 
-            //We are expecting them to be in the right order.
+            // Note that each double value here applies to a gene. 
+            // We are expecting them to be in the right order.
             for (int i = 0; i < activations.Count; i++)
             {
                 if (activations[i] != car.activations[i])
