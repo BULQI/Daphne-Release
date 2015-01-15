@@ -80,9 +80,6 @@ namespace Daphne
 
             foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
             {
-                // Update boundary concentrations - moved to upper level
-                //molpop.Value.UpdateBoundary();
-
                 // Apply Laplacian, note: boundary fluxes moved to upper level
                 if (molpop.Value.IsDiffusing == true)
                 {
@@ -90,27 +87,6 @@ namespace Daphne
                 }
             }
         }
-
-        /// <summary>
-        /// testing 
-        /// </summary>
-        /// <param name="dt"></param>
-        public void diff_Step(double dt)
-        {
-            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
-            {
-                // Update boundary concentrations - moved to upper level
-                //molpop.Value.UpdateBoundary();
-
-                // Apply Laplacian, note: boundary fluxes moved to upper level
-                if (molpop.Value.IsDiffusing == true)
-                {
-                    molpop.Value.Step(dt);
-                }
-            }
-        }
-
-
 
         public void AddBoundaryReaction(int key, Reaction r)
         {
