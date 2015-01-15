@@ -63,6 +63,12 @@ namespace Daphne
             set { concentration = value; }
         }
 
+        public Compartment Comp
+        {
+            get { return compartment; }
+            set { compartment = value; }
+        }
+
         public Dictionary<int, ScalarField> BoundaryFluxes
         {
             get { return boundaryFluxes; }
@@ -193,11 +199,20 @@ namespace Daphne
         /// boundaryConc is the representation of the (bulk) concentration at the boundary surface.
         /// bouncaryConcs are used in bulk/boundary reactions.
         /// </summary>
-        public void UpdateBoundary()
+        public void UpdateECSMembraneBoundary()
         {
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
             {
                 kvp.Value.Restrict(concentration, compartment.BoundaryTransforms[kvp.Key]);
+            }
+        }
+
+        public void UpdateCytosolMembraneBoundary()
+        {
+            foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
+            {
+                //simple copy
+                kvp.Value.reset(concentration);
             }
         }
 
@@ -212,25 +227,25 @@ namespace Daphne
             concentration.Add(concentration.Laplacian().Multiply(dt * Molecule.DiffusionCoefficient));
 
             // Boundary fluxes
-            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
-            {
-                concentration.Add(concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]).Multiply(-dt));
-                kvp.Value.reset(0);
-            }
+            //foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
+            //{
+            //    concentration.Add(concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]).Multiply(-dt));
+            //    kvp.Value.reset(0);
+            //}
 
             // Natural boundary conditions
             // NOTE: we should be able to incorporate these into Laplacian()
-            foreach (KeyValuePair<int, MolBoundaryType> bc in boundaryCondition)
-            {
-                if (bc.Value == MolBoundaryType.Dirichlet)
-                {
-                    concentration = concentration.DirichletBC(NaturalBoundaryConcs[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]);
-                }
-                else
-                {
-                    concentration.Add(concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]).Multiply(-dt / Molecule.DiffusionCoefficient));
-                }
-            }
+            //foreach (KeyValuePair<int, MolBoundaryType> bc in boundaryCondition)
+            //{
+            //    if (bc.Value == MolBoundaryType.Dirichlet)
+            //    {
+            //        concentration = concentration.DirichletBC(NaturalBoundaryConcs[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]);
+            //    }
+            //    else
+            //    {
+            //        concentration.Add(concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]).Multiply(-dt / Molecule.DiffusionCoefficient));
+            //    }
+            //}
         }
     }
 }
