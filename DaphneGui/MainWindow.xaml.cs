@@ -1438,11 +1438,7 @@ namespace DaphneGui
             dlg.SelectedPath = appPath;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                sim.Reporter.ReportFolder = dlg.SelectedPath;
-            }
-            else
-            {
-                sim.Reporter.ReportFolder = appPath;
+                sim.Reporter.AppPath = dlg.SelectedPath;
             }
         }
 
@@ -2089,7 +2085,7 @@ namespace DaphneGui
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
-                    sim.Reporter.AppPath = orig_path + @"\";
+                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     // vtk data basket to hold vtk data for entities with graphical representation
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
@@ -2132,9 +2128,7 @@ namespace DaphneGui
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
-                    sim.Reporter.AppPath = orig_path + @"\";
-                    //// no graphics for the VatRC
-                    //vtkDataBasket = new VTKNullDataBasket();
+                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     vtkDataBasket = new VTKVatRCDataBasket();
                     gc = new VTKNullGraphicsController();
                 }

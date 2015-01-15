@@ -14,18 +14,11 @@ namespace Daphne
     public abstract class ReporterBase
     {
         protected DateTime startTime;
-        protected string reportFolder, fileName;
+        protected string fileName;
         public string AppPath { get; set; } // non uri
 
         public ReporterBase()
         {
-            reportFolder = "";
-        }
-
-        public string ReportFolder
-        {
-            get { return reportFolder; }
-            set { reportFolder = value; }
         }
 
         public string FileName
@@ -37,14 +30,9 @@ namespace Daphne
         protected StreamWriter createStreamWriter(string file, string extension)
         {
             int version = 1;
-            string rootPath = reportFolder,
-                   nameStart,
+            string nameStart,
                    fullPath;
 
-            if (rootPath != "")
-            {
-                rootPath += @"\";
-            }
             if (fileName == "")
             {
                 nameStart = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
@@ -65,9 +53,9 @@ namespace Daphne
                 }
                 else
                 {
-                    if (rootPath != "" && Directory.Exists(rootPath) == false)
+                    if (AppPath != "" && Directory.Exists(AppPath) == false)
                     {
-                        Directory.CreateDirectory(rootPath);
+                        Directory.CreateDirectory(AppPath);
                     }
                     return File.CreateText(fullPath);
                 }
