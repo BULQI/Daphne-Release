@@ -6723,6 +6723,9 @@ namespace Daphne
         {
             if (cellPop != null)
             {
+                // Reset the random number generator so we don't get the same values again.
+                // This shouldn't affect the reproducibility of the simulations.
+                Rand.ReseedAll(RandomSeed.Robust());
                 int number = cellPop.CellStates.Count;
                 cellPop.CellStates.Clear();
                 AddByDistr(number);
