@@ -27,7 +27,7 @@
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
         
         <local:SimSetupControl x:Key="simSetupControl"/>
-        <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
+        <local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />
 
         <ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
@@ -36,7 +36,16 @@
                 <x:Type TypeName="daph:RenderMethod" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        
+
+        <!-- CellShapeEnum-->
+        <ObjectDataProvider x:Key="cellRenderMethodEnum"
+                            MethodName="GetValues" 
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:CellRenderMethod" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
             <Grid>
@@ -53,7 +62,7 @@
 
         <DataTemplate x:Key="cellRenderMethodTemplate">
             <StackPanel Orientation="Horizontal">
-                <!--<TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>-->
+                <TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>
             </StackPanel>
         </DataTemplate>
         
@@ -493,6 +502,12 @@
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
 
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell Shape</Label>
+
+                                                <ComboBox ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
+                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
+                                                          SelectedValue="{Binding Path=CellRenderMethod}" MinWidth="60"/>
+                                                
                                                 <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
                                                 <ComboBox Name="CellSelectionToolCB" Width="160"
                                                           ItemsSource="{Binding Path=CellSelectionToolModes}"
