@@ -1106,10 +1106,10 @@ namespace DaphneGui
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
             loadExp.IsEnabled = enable;
-            recentFileList.IsEnabled = enable;
+            //recentFileList.IsEnabled = enable;
             newScenario.IsEnabled = enable;
             ImportSBML.IsEnabled = enable;
-
+            ExportSBML.IsEnabled = enable;
         }
 
         /// <summary>
@@ -1119,11 +1119,14 @@ namespace DaphneGui
         private void enableCritical(bool enable)
         {
             runButton.IsEnabled = enable;
+            applyButton.IsEnabled = enable;
+            saveButton.IsEnabled = enable;
+            abortButton.IsEnabled = false;
             analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
             ImportSBML.IsEnabled = enable;
-            abortButton.IsEnabled = false;
+            ExportSBML.IsEnabled = enable;
         }
         /// <summary>
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
@@ -1160,19 +1163,6 @@ namespace DaphneGui
                 hideFit();
                 ExportMenu.IsEnabled = false;
             }
-        }
-
-        private string uniqueFilename(string s)
-        {
-            string tmp = orig_path + @"\" + s + ".json";
-            int i = 0;
-
-            while (File.Exists(tmp) == true)
-            {
-                tmp = orig_path + @"\" + s + "_" + i + ".json";
-                i++;
-            }
-            return tmp;
         }
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
@@ -1230,9 +1220,6 @@ namespace DaphneGui
                     // do the loading
                     MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
                     lockAndResetSim(true, ReadJson(protocolString));
-                    // need to set a filename
-                    sop.Protocol.FileName = uniqueFilename(selectedExp);
-                    setScenarioPaths(sop.Protocol.FileName);
                     if (loadSuccess == false)
                     {
                         return;
@@ -1240,6 +1227,7 @@ namespace DaphneGui
                     MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
                     // this function does not exist currently, do we need this call?
                     //sim.runStatSummary();
+                    vcrControl.LastFrame = false;
                     GUIUpdate(DataBasket.currentExperimentID, true);
                     displayTitle("Loaded past run " + selectedExp);
                     return;
@@ -1450,11 +1438,7 @@ namespace DaphneGui
             dlg.SelectedPath = appPath;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                sim.Reporter.ReportFolder = dlg.SelectedPath;
-            }
-            else
-            {
-                sim.Reporter.ReportFolder = appPath;
+                sim.Reporter.AppPath = dlg.SelectedPath;
             }
         }
 
@@ -2101,7 +2085,7 @@ namespace DaphneGui
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
-                    sim.Reporter.AppPath = orig_path + @"\";
+                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     // vtk data basket to hold vtk data for entities with graphical representation
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
@@ -2144,9 +2128,7 @@ namespace DaphneGui
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
-                    sim.Reporter.AppPath = orig_path + @"\";
-                    //// no graphics for the VatRC
-                    //vtkDataBasket = new VTKNullDataBasket();
+                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     vtkDataBasket = new VTKVatRCDataBasket();
                     gc = new VTKNullGraphicsController();
                 }
@@ -2384,6 +2366,7 @@ namespace DaphneGui
                                     }
 
                                     // update the gui; this is a non-issue if an application close just got requested, so may get skipped
+                                    vcrControl.LastFrame = true;
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
                                 }
                             }
@@ -2443,7 +2426,7 @@ namespace DaphneGui
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(int expID, bool force)
         {
-            if (expID >= 0 && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR(true, expID) == true)
+            if (expID >= 0 && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR(expID) == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
@@ -2473,12 +2456,29 @@ namespace DaphneGui
             }
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
-            applyButton.IsEnabled = true;
+            if (vcrControl.LastFrame == false && VCR_Toolbar.IsEnabled == true)
+            {
+                applyButton.IsEnabled = false;
+                saveButton.IsEnabled = false;
+                runButton.IsEnabled = false;
+                loadScenario.IsEnabled = true;
+                saveScenario.IsEnabled = false;
+                saveScenarioAs.IsEnabled = false;
+                loadExp.IsEnabled = true;
+                //recentFileList.IsEnabled = true;
+                newScenario.IsEnabled = true;
+                ImportSBML.IsEnabled = false;
+                ExportSBML.IsEnabled = false;
+            }
+            else
+            {
+                applyButton.IsEnabled = true;
+                saveButton.IsEnabled = true;
+                enableFileMenu(true);
+            }
             abortButton.IsEnabled = false;
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready:  Protocol";
-            enableFileMenu(true);
-            saveButton.IsEnabled = true;
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
 
@@ -2575,6 +2575,7 @@ namespace DaphneGui
         {
             lockAndResetSim(false, ReadJson(""));
             // pass current experiment id to allow vcr playback even for partial runs
+            vcrControl.LastFrame = true;
             runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
@@ -3147,11 +3148,12 @@ namespace DaphneGui
             {
                 sim.RunStatus = SimulationBase.RUNSTAT_ABORT;
             }
-            else
-            {
-                saveTempFiles();
-                updateGraphicsAndGUI();
-            }
+            // 1/14/15: this code seems to be legacy and no longer in use; remove in the future if no problems arise or reenable otherwise
+            //else
+            //{
+            //    saveTempFiles();
+            //    updateGraphicsAndGUI();
+            //}
         }
 
         private void helpAbout_Click(object sender, RoutedEventArgs e)

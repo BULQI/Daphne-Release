@@ -39,6 +39,7 @@ namespace DaphneGui
 #endif
         private VCRControlState playbackState, savedState;
         private long lastFramePlayed;
+        public bool LastFrame { get; set; }
         // frame time in milliseconds; currently 30fps
         private const long E_DT = 1000 / 30;
         /// <summary>
@@ -58,15 +59,15 @@ namespace DaphneGui
             frame = -1;
             SetInactive();
             frameNames = new List<string>();
+            LastFrame = true;
         }
 
         /// <summary>
         /// create a data reader object
         /// </summary>
-        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
         /// <param name="expID">experiment id</param>
         /// <returns>false for failure or empty simulation</returns>
-        public bool OpenVCR(bool lastFrame, int expID)
+        public bool OpenVCR(int expID)
         {
 #if USE_DATACACHE
             dataCache = new Dictionary<int, List<DBRow>>();
@@ -105,7 +106,7 @@ namespace DaphneGui
                     frames.Add(i);
                 }
 
-                if (lastFrame == true)
+                if (LastFrame == true)
                 {
                     CurrentFrame = frames.Count - 1;
                 }

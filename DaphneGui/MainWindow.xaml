@@ -105,8 +105,8 @@
                     <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
                     <Separator />
-                    <MenuItem Header="Export in SBML">
-                        <MenuItem Header="Simulation Model" Name="ExportSBML" Click="ExportSBML_Click" />
+                    <MenuItem Header="Export in SBML" Name="ExportSBML">
+                        <MenuItem Header="Simulation Model" Name="ExportModelSBML" Click="ExportSBML_Click" />
                         <MenuItem Header="Reaction Complex" Name="ExportComplexSBML" Click="ExportReactionComplexSBML_Click" />
                     </MenuItem>
                     <MenuItem Header="Import from SBML" Name="ImportSBML" Click="ImportSBML_Click" />
