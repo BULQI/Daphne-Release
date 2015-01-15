@@ -143,6 +143,12 @@ namespace Daphne
             trans_scheme.Initialize(config_Scheme.activationRows.Count, config_Scheme.genes.Count);
             LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, trans_scheme.Behavior);
 
+            // Load state names
+            for (int j = 0; j < trans_scheme.nStates; j++)
+            {
+                trans_scheme.AddState(j, config_Scheme.Driver.states[j]);
+            }
+
             // Epigenetic information
             for (int ii = 0; ii < trans_scheme.nGenes; ii++)
             {
@@ -151,11 +157,8 @@ namespace Daphne
                 for (int j = 0; j < trans_scheme.nStates; j++)
                 {
                     trans_scheme.AddActivity(j, ii, config_Scheme.activationRows[j].activations[ii]);
-                    trans_scheme.AddState(j, config_Scheme.Driver.states[j]);
                 }
             }
-
-            cell.SetGeneActivities(trans_scheme);
         }
 
         private void addCellMolpops(CellState cellState, ConfigCompartment[] configComp, Compartment[] simComp)
@@ -341,11 +344,11 @@ namespace Daphne
                         simCell.Divider.Behavior.CurrentState = nextIntValue;
                     }
                 }
-
                 simCell.Divider.Behavior.InitializeState();
-
                 // Set cell division scheme state
                 simCell.DividerState = simCell.Divider.CurrentState = simCell.Divider.Behavior.CurrentState;
+                // Set gene activity levels now that the current state is set
+                simCell.SetGeneActivities(simCell.Divider);
             }
 
             // Differentiation
@@ -368,11 +371,11 @@ namespace Daphne
                         simCell.Differentiator.Behavior.CurrentState = nextIntValue;
                     }
                 }
-
                 simCell.Differentiator.Behavior.InitializeState();
-
                 // Set cell differentiation state
                 simCell.DifferentiationState = simCell.Differentiator.CurrentState = simCell.Differentiator.Behavior.CurrentState;
+                // Set gene activity levels now that the current state is set
+                simCell.SetGeneActivities(simCell.Differentiator);
             }
 
             if (cellState.cgState.geneDict.Count > 0)

@@ -250,7 +250,6 @@
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SimConfigToolWinFilters.cs" />
     <Compile Include="SimSetup.xaml.cs">
       <DependentUpon>SimSetup.xaml</DependentUpon>
     </Compile>

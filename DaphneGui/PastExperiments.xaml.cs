@@ -69,20 +69,20 @@ namespace DaphneGui
             DialogResult = true;
         }
 
-        private void ButtonDelete_Click(object sender, RoutedEventArgs e)
-        {
-            if (ExpName_CB.SelectedIndex != -1)
-            {
-                //selectedexperiment = Exps[ExpName_CB.SelectedIndex].ExpId;
-                //selectedexperimentname = Exps[ExpName_CB.SelectedIndex].ExpName;
-                //if (System.Windows.Forms.MessageBox.Show("Really delete " + selectedexperimentname + "?", "Confirm delete", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                //{
-                //    DataBaseTools.DeleteExperiment(selectedexperiment);
-                //    selectedexperiment = -1;
-                //    SetUpExpComboBox();
-                //}
-            }
-        }
+        //private void ButtonDelete_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (ExpName_CB.SelectedIndex != -1)
+        //    {
+        //        //selectedexperiment = Exps[ExpName_CB.SelectedIndex].ExpId;
+        //        //selectedexperimentname = Exps[ExpName_CB.SelectedIndex].ExpName;
+        //        //if (System.Windows.Forms.MessageBox.Show("Really delete " + selectedexperimentname + "?", "Confirm delete", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+        //        //{
+        //        //    DataBaseTools.DeleteExperiment(selectedexperiment);
+        //        //    selectedexperiment = -1;
+        //        //    SetUpExpComboBox();
+        //        //}
+        //    }
+        //}
 
         private void ExpName_CB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

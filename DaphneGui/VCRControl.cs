@@ -204,7 +204,10 @@ namespace DaphneGui
                 // synch vtk to the current frame
                 if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                 {
-                    SimulationBase.dataBasket.UpdateCells((TissueSimulationFrameData)CurrentFrameData());
+                    TissueSimulationFrameData fdata = (TissueSimulationFrameData)CurrentFrameData();
+
+                    SimulationBase.dataBasket.UpdateCells(fdata);
+                    SimulationBase.dataBasket.UpdateECSMolpops(fdata);
                     MainWindow.VTKBasket.UpdateData();
                     MainWindow.GC.DrawFrame(GetPlaybackPercent());
                 }

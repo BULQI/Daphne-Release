@@ -91,6 +91,27 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// testing 
+        /// </summary>
+        /// <param name="dt"></param>
+        public void diff_Step(double dt)
+        {
+            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
+            {
+                // Update boundary concentrations - moved to upper level
+                //molpop.Value.UpdateBoundary();
+
+                // Apply Laplacian, note: boundary fluxes moved to upper level
+                if (molpop.Value.IsDiffusing == true)
+                {
+                    molpop.Value.Step(dt);
+                }
+            }
+        }
+
+
+
         public void AddBoundaryReaction(int key, Reaction r)
         {
             // create the list if it doesn't exist
@@ -347,44 +368,41 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            //update ECS/Memrante boundary
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
-            {
-                kvp.Value.UpdateECSMembraneBoundary();
-            }
-
             this.Comp.Step(dt);
 
-            //apply ECS/membrane boundary flux - specific to ECS/Membrane
+            //apply ECS/membrane boundary flux - specific to ECS/Membran
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
                 MolecularPopulation molpop = kvp.Value;
+                if (molpop.IsDiffusing == false) continue;
                 ScalarField conc = molpop.Conc;
+
+                //apply ECS/membrane boundary flux
                 foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
                 {
                     conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
                     item.Value.reset(0);
                 }
-            }
 
-            // Apply natural boundary condition
-            // Natural boundary conditions
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
-            {
-                MolecularPopulation molpop = kvp.Value;
-                ScalarField concentration = molpop.Conc;
-
+                // Apply natural boundary condition
                 foreach (KeyValuePair<int, MolBoundaryType> bc in molpop.boundaryCondition)
                 {
                     if (bc.Value == MolBoundaryType.Dirichlet)
                     {
-                        concentration = concentration.DirichletBC(molpop.NaturalBoundaryConcs[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key]);
+                        conc = conc.DirichletBC(molpop.NaturalBoundaryConcs[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key]);
                     }
                     else
                     {
-                        concentration.DiffusionFluxTerm(molpop.NaturalBoundaryFluxes[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key], dt / molpop.Molecule.DiffusionCoefficient);
+                        conc.DiffusionFluxTerm(molpop.NaturalBoundaryFluxes[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key], dt / molpop.Molecule.DiffusionCoefficient);
                     }
                 }
+
+            }
+
+            //update ECS/Memrante boundary
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            {
+                kvp.Value.UpdateECSMembraneBoundary();
             }
         }
     }

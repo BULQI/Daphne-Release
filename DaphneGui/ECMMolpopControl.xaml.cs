@@ -171,10 +171,8 @@ namespace DaphneGui
         /// Delete a Gaussian specification.
         /// </summary>
         /// <param name="dist"></param>
-        private void DeleteGaussianSpecification(MolPopDistribution dist)
+        private void DeleteGaussianSpecification(MolPopGaussian mpg)
         {
-            MolPopGaussian mpg = dist as MolPopGaussian;
-
             if (mpg.gauss_spec == null || mpg.gauss_spec.box_spec == null)
             {
                 return;
@@ -470,8 +468,8 @@ namespace DaphneGui
                 {
                     if (new_dist_type != MolPopDistributionType.Gaussian && current_mol.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                     {
-                        DeleteGaussianSpecification(current_mol.mp_distribution);
                         MolPopGaussian mpg = current_mol.mp_distribution as MolPopGaussian;
+                        DeleteGaussianSpecification(mpg);
                         mpg.gauss_spec = null;
                         ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                     }
@@ -580,14 +578,19 @@ namespace DaphneGui
                 //Delete the gaussian box if any
                 if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    DeleteGaussianSpecification(cmp.mp_distribution);
                     MolPopGaussian mpg = cmp.mp_distribution as MolPopGaussian;
+                    // Delete the molecular population before removing the Gaussian spec from VTK
+                    MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
+                    // Delete the Gaussian spec 
+                    DeleteGaussianSpecification(mpg);
                     mpg.gauss_spec = null;
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
-
-                //Delete the molecular population
-                MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
+                else
+                {
+                    //Delete the molecular population
+                    MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
+                }
             }
 
             lbEcsMolPops.SelectedIndex = index;

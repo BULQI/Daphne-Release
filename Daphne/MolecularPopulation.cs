@@ -226,26 +226,6 @@ namespace Daphne
             // Laplacian
             concentration.Add(concentration.Laplacian().Multiply(dt * Molecule.DiffusionCoefficient));
 
-            // Boundary fluxes
-            //foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
-            //{
-            //    concentration.Add(concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]).Multiply(-dt));
-            //    kvp.Value.reset(0);
-            //}
-
-            // Natural boundary conditions
-            // NOTE: we should be able to incorporate these into Laplacian()
-            //foreach (KeyValuePair<int, MolBoundaryType> bc in boundaryCondition)
-            //{
-            //    if (bc.Value == MolBoundaryType.Dirichlet)
-            //    {
-            //        concentration = concentration.DirichletBC(NaturalBoundaryConcs[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]);
-            //    }
-            //    else
-            //    {
-            //        concentration.Add(concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]).Multiply(-dt / Molecule.DiffusionCoefficient));
-            //    }
-            //}
         }
     }
 }

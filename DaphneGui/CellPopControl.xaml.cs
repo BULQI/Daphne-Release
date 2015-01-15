@@ -108,18 +108,9 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
             cp.cellPopDist.Initialize();
-
-
-            cp.CellStates[0] = new CellState(envHandle.extent_x - 2 * cp.Cell.CellRadius - envHandle.gridstep / 2,
-                                                  envHandle.extent_y / 2 - envHandle.gridstep / 2,
-                                                  envHandle.extent_z / 2 - envHandle.gridstep / 2);
-
-           
-
-            
-            //if about rendering...
-            //for now, use name as label
-            //cp.renderLabel = cp.Cell.entity_guid;
+            // Causes a new random seed for the random source
+            // Otherwise we will get the same values every time if this is followed by Apply()
+            cp.cellPopDist.Reset();
 
             //add rendering options to scenario
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
@@ -170,9 +161,8 @@ namespace DaphneGui
             if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform)
             {
                 current_dist.Reset();
-                // gmk - fix
                 MainWindow.ToolWin.Apply();
-                //applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                //MainWindow  applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
 
@@ -572,6 +562,9 @@ namespace DaphneGui
 
             if (CellPopsListBox.Items.Count == 0)
                 CellPopsListBox.SelectedIndex = -1;
+
+            // gmk - Remove this cell population from the render skin editor?
+
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

@@ -2045,7 +2045,7 @@ namespace Daphne
             // Compartment reactions
             foreach (ConfigReaction cr in configComp.Reactions)
             {
-                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false) && (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type != ReactionType.Transcription))
                 {
                     config_reacs.Add(cr.entity_guid, cr);
                 }
@@ -2056,7 +2056,7 @@ namespace Daphne
             {
                 foreach (ConfigReaction cr in crc.reactions)
                 {
-                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false) && (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type != ReactionType.Transcription))
                     {
                         config_reacs.Add(cr.entity_guid, cr);
                     }
@@ -6723,6 +6723,9 @@ namespace Daphne
         {
             if (cellPop != null)
             {
+                // Reset the random number generator so we don't get the same values again.
+                // This shouldn't affect the reproducibility of the simulations.
+                Rand.ReseedAll(RandomSeed.Robust());
                 int number = cellPop.CellStates.Count;
                 cellPop.CellStates.Clear();
                 AddByDistr(number);
