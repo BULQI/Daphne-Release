@@ -17,7 +17,7 @@ namespace ManifoldRing
         double Integration(ScalarField sf);
         double[] Gradient(double[] x, ScalarField sf);
         ScalarField Laplacian(ScalarField sf);
-        ScalarField DiffusionFlux(ScalarField flux, Transform t);
+        ScalarField DiffusionFlux(ScalarField flux, Transform t, ScalarField dst, double dt);
         ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to);
     }
 
@@ -132,9 +132,9 @@ namespace ManifoldRing
         /// <param name="flux">Flux from the surface element of the volume</param>
         /// <param name="t">Transform information about embedding of surface in volume </param>
         /// <returns></returns>
-        public ScalarField DiffusionFlux(ScalarField flux, Transform t)
+        public ScalarField DiffusionFlux(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
-            ScalarField temp = new ScalarField(m);
+            //ScalarField temp = new ScalarField(m);
             int[] indices = new int[3];
             int n;
             double volFactor;
@@ -147,36 +147,39 @@ namespace ManifoldRing
             for (int i = 0; i < flux.M.PrincipalPoints.Length; i++)
             {
                 // The concentration source term
-                double concAdd = flux.M.Area() * flux.array[i] / m.VoxelVolume();
+                double concAdd = flux.M.Area() * flux.array[i] * (-dt)/ m.VoxelVolume();
 
                 // Indices of nodes surround source and proportions for dividing the concentration source among them
                 LocalMatrix[] lm = interpolationMatrix(t.toContaining(flux.M.PrincipalPoints[i]).ToArray());
 
                 // Find the node in this manifold that is closest to the principal point
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(flux.M.PrincipalPoints[i])));
-
+                int nps0 = m.NodesPerSide(0)-1;
+                int nps1 = m.NodesPerSide(1)-1;
+                int nps2 = m.NodesPerSide(2)-1;
                 for (int k = 0; k < lm.Length; k++)
                 {
                     // Boundary nodes don't have the full voxel volume. Correct accordingly.
                     volFactor = 1;
                     indices = m.linearIndexToIndexArray(lm[k].Index);
-                    if ((indices[0] == 0) || (indices[0] == m.NodesPerSide(0) - 1))
+                    //if ((indices[0] == 0) || (indices[0] == m.NodesPerSide(0) - 1))
+                    if ((indices[0] == 0) || (indices[0] == nps0))
                     {
                         volFactor *= 2;
                     }
-                    if ((indices[1] == 0) || (indices[1] == m.NodesPerSide(1) - 1))
+                    if ((indices[1] == 0) || (indices[1] == nps1))
                     {
                         volFactor *= 2;
-                    } if ((indices[2] == 0) || (indices[2] == m.NodesPerSide(2) - 1))
+                    } if ((indices[2] == 0) || (indices[2] == nps2))
                     {
                         volFactor *= 2;
                     }
-
-                    temp.array[lm[k].Index] += volFactor * lm[k].Coefficient * concAdd;
+                    //temp.array[lm[k].Index] += volFactor * lm[k].Coefficient * concAdd;
+                    dst.array[lm[k].Index] += (volFactor * lm[k].Coefficient * concAdd);
                 }
             }
 
-            return temp;
+            return dst;
         }
 
          /// <summary>

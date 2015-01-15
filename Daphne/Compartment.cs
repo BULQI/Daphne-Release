@@ -55,6 +55,7 @@ namespace Daphne
                 // NOTE: presumably, we need to also add the boundaries here
             }
         }
+
         /// <summary>
         /// Carries out the dynamics in-place for its molecular populations over time interval dt.
         /// </summary>
@@ -68,34 +69,53 @@ namespace Daphne
                 r.Step(dt);
             }
 
-            if (!(this.Interior is PointManifold))
+            //if (!(this.Interior is PointManifold))
+            foreach (List<Reaction> rlist in BoundaryReactions.Values)
             {
-                foreach (List<Reaction> rlist in BoundaryReactions.Values)
+                foreach (Reaction r in rlist)
                 {
-                    foreach (Reaction r in rlist)
-                    {
-                        r.Step(dt);
-                    }
+                    r.Step(dt);
                 }
+            }
 
-                foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
+            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
+            {
+                // Update boundary concentrations - moved to upper level
+                //molpop.Value.UpdateBoundary();
+
+                // Apply Laplacian, note: boundary fluxes moved to upper level
+                if (molpop.Value.IsDiffusing == true)
                 {
-                    // Update boundary concentrations
-                    molpop.Value.UpdateBoundary();
-
-                    // Apply Laplacian and boundary fluxes
-                    if (molpop.Value.IsDiffusing == true)
-                    {
-                        molpop.Value.Step(dt);
-                    }
+                    molpop.Value.Step(dt);
                 }
             }
         }
 
+        /// <summary>
+        /// testing 
+        /// </summary>
+        /// <param name="dt"></param>
+        public void diff_Step(double dt)
+        {
+            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
+            {
+                // Update boundary concentrations - moved to upper level
+                //molpop.Value.UpdateBoundary();
+
+                // Apply Laplacian, note: boundary fluxes moved to upper level
+                if (molpop.Value.IsDiffusing == true)
+                {
+                    molpop.Value.Step(dt);
+                }
+            }
+        }
+
+
+
         public void AddBoundaryReaction(int key, Reaction r)
         {
             // create the list if it doesn't exist
-            if(BoundaryReactions.ContainsKey(key) == false)
+            if (BoundaryReactions.ContainsKey(key) == false)
             {
                 BoundaryReactions.Add(key, new List<Reaction>());
             }
@@ -126,16 +146,25 @@ namespace Daphne
         {
             get { return comp; }
         }
+
+        public virtual void Step(double dt)
+        { }
     }
 
     public class PointEnvironment : EnvironmentBase
     {
- 	    public PointEnvironment()
-	    {
-            PointManifold p = SimulationModule.kernel.Get <PointManifold>();
+        public PointEnvironment()
+        {
+            PointManifold p = SimulationModule.kernel.Get<PointManifold>();
 
-		    comp = new Compartment(p);
+            comp = new Compartment(p);
         }
+
+        public override void Step(double dt)
+        {
+            this.comp.Step(dt);
+        }
+
     }
 
     public class RectEnvironment : EnvironmentBase
@@ -249,7 +278,7 @@ namespace Daphne
             //double[] axis = new double[Transform.Dim];
             DenseVector axis = new DenseVector(Transform.Dim);
 
-            data = new double[comp.Interior.Dim+1];
+            data = new double[comp.Interior.Dim + 1];
             // front: no rotation, translate +z
             data[0] = comp.Interior.NodesPerSide(0);
             data[1] = comp.Interior.NodesPerSide(1);
@@ -334,6 +363,46 @@ namespace Daphne
             foreach (MolecularPopulation mp in comp.Populations.Values)
             {
                 mp.AddBoundaryFluxConc(m.Id, m);
+            }
+        }
+
+        public override void Step(double dt)
+        {
+            this.Comp.Step(dt);
+
+            //apply ECS/membrane boundary flux - specific to ECS/Membran
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            {
+                MolecularPopulation molpop = kvp.Value;
+                if (molpop.IsDiffusing == false) continue;
+                ScalarField conc = molpop.Conc;
+
+                //apply ECS/membrane boundary flux
+                foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
+                {
+                    conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
+                    item.Value.reset(0);
+                }
+
+                // Apply natural boundary condition
+                foreach (KeyValuePair<int, MolBoundaryType> bc in molpop.boundaryCondition)
+                {
+                    if (bc.Value == MolBoundaryType.Dirichlet)
+                    {
+                        conc = conc.DirichletBC(molpop.NaturalBoundaryConcs[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key]);
+                    }
+                    else
+                    {
+                        conc.DiffusionFluxTerm(molpop.NaturalBoundaryFluxes[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key], dt / molpop.Molecule.DiffusionCoefficient);
+                    }
+                }
+
+            }
+
+            //update ECS/Memrante boundary
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            {
+                kvp.Value.UpdateECSMembraneBoundary();
             }
         }
     }

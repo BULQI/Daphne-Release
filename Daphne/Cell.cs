@@ -271,7 +271,28 @@ namespace Daphne
         {
             // we are using the simplest kind of integrator here. It should be made more sophisticated at some point.
             Cytosol.Step(dt);
+
+            //apply cytosol/membrane boundary flux - specific to cytosol/Membrane
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                MolecularPopulation molpop = kvp.Value;
+                ScalarField conc = molpop.Conc;
+                foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
+                {
+                    conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
+                    item.Value.reset(0);
+                }
+            }
+
+            //update cytosol/membrane boundary
+            foreach (KeyValuePair<string, MolecularPopulation> molpop in Cytosol.Populations)
+            {
+                molpop.Value.UpdateCytosolMembraneBoundary();
+            }
+
+
             PlasmaMembrane.Step(dt);
+
 
             // step the cell behaviors
 
