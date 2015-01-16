@@ -530,7 +530,7 @@
                         <!-- Cell populations details -->
                         <Expander ExpandDirection="Down" Padding="6"
                                     IsExpanded="False"
-                                    Header="Cell Population Details"
+                                    Header="Population Details"
                                     x:Name="CellPopsDetailsExpander"
                                     Margin="0,-15,0,0" 
                                     Canvas.ZIndex="1"

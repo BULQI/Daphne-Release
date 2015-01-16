@@ -104,7 +104,10 @@ namespace DaphneGui
                         {
                             cell.membrane.molecules_dict.Remove(curr_mol_guid);
                         }
-                        cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                        if (cell.membrane.molecules_dict.ContainsKey(molpop.molecule.entity_guid) == false)
+                        {
+                            cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                        }
                     }
                 }
             }
