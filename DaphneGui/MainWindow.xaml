@@ -77,9 +77,6 @@
                         CanExecute="CommandBindingSave_CanExecute" 
                         Executed="CommandBindingSave_Executed" />
 
-        <CommandBinding Command="{x:Static local:MainWindow.ClearVCRDataCommand}" 
-                        CanExecute="CommandBindingClearVCRData_CanExecute"
-                        Executed="CommandBindingClearVCRData_Executed" />
     </Window.CommandBindings>
 
     <Window.InputBindings>
@@ -95,9 +92,6 @@
                     Modifiers="Control" 
                     Command="ApplicationCommands.Save" />
 
-        <KeyBinding Key="D"
-                    Modifiers="Control" 
-                    Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
     </Window.InputBindings>
 
     
@@ -140,7 +134,6 @@
                         <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" />
                     </MenuItem>
                     <MenuItem Header="Data storage" Name = "DataStorageMenu">
-                        <MenuItem Header="Clear VCR data file" Name="clearVCRdata" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
                         <MenuItem Header="Skip data writes" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataWrite_Click" />
                         <Separator />
                         <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
