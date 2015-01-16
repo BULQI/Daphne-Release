@@ -71,6 +71,12 @@
         <CommandBinding Command="{x:Static local:MainWindow.ClearVCRDataCommand}" 
                         CanExecute="CommandBindingClearVCRData_CanExecute"
                         Executed="CommandBindingClearVCRData_Executed" />
+        
+        <CommandBinding Command="{x:Static local:MainWindow.SelectReportFolderCommand}" 
+                        CanExecute="CommandBindingSelectReportFolder_CanExecute"
+                        Executed="CommandBindingSelectReportFolder_Executed" />
+        
+        
     </Window.CommandBindings>
 
     <Window.InputBindings>
@@ -134,7 +140,7 @@
                         <MenuItem Header="Clear VCR data file" Name="clearVCRdata" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
                         <MenuItem Header="Skip data writes" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataWrite_Click" />
                         <Separator />
-                        <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
+                        <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Command="{x:Static local:MainWindow.SelectReportFolderCommand}"/>
                     </MenuItem>
                     <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
                         <MenuItem Header="Cells..." Name="cellColorsMenu" />

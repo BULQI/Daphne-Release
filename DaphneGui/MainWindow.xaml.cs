@@ -229,6 +229,7 @@ namespace DaphneGui
         /// custom routed command for delete db
         /// </summary>
         public static RoutedCommand ClearVCRDataCommand = new RoutedCommand();
+        public static RoutedCommand SelectReportFolderCommand = new RoutedCommand();
 
         /// <summary>
         /// executed command handler for clear vcr data
@@ -1478,8 +1479,23 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
         }
+        
+        /// <summary>
+        /// CanExecute method for select report folder command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CommandBindingSelectReportFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
 
-        private void setReporterFolder_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Execute method for select report folder command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CommandBindingSelectReportFolder_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
 
