@@ -225,6 +225,7 @@ namespace DaphneGui
         public CellInfo SelectedCellInfo { get; set; }
         public ObservableCollection<CellMolecularInfo> currentConcs { get; set; }
 
+        public static RoutedCommand SelectReportFolderCommand = new RoutedCommand();
         public static DocumentWindow ST_VTKDisplayDocWindow;
         public static CellStudioToolWindow ST_CellStudioToolWindow;
         public static ComponentsToolWindow ST_ComponentsToolWindow;
@@ -1342,8 +1343,23 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
         }
+        
+        /// <summary>
+        /// CanExecute method for select report folder command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CommandBindingSelectReportFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
 
-        private void setReporterFolder_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Execute method for select report folder command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CommandBindingSelectReportFolder_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
 
@@ -1352,6 +1368,9 @@ namespace DaphneGui
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 sim.Reporter.AppPath = dlg.SelectedPath;
+                if (sim.Reporter.AppPath.Substring(sim.Reporter.AppPath.Length - 1, 1) != @"\") {
+                    sim.Reporter.AppPath += @"\";
+                }
             }
         }
 
@@ -2715,14 +2734,25 @@ namespace DaphneGui
 
         public void DisplayCellInfo(int cellID)
         {
+            if (cellID >= SimulationBase.dataBasket.Cells.Count)
+            {
+                MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            else if (cellID < 0)
+            {
+                MessageBox.Show("Please enter a cell ID greater than 0.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
             Cell selectedCell = SimulationBase.dataBasket.Cells[cellID];
             List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
-            txtCellId.Content = cellID.ToString();
+            txtCellIdent.Text = cellID.ToString();
 
             //enhancement - get cell location, velocity, force
             //double cellConc = selectedCell.
-            tbCellConc.Text = "Cell Id: " + cellID; // +", Concentration = " + cellConc;
+            tbMolConcs.Text = "Cell Id: " + cellID;
 
             SelectedCellInfo.ciList.Clear();
             currentConcs.Clear();
@@ -2814,6 +2844,26 @@ namespace DaphneGui
                 }
                 //lvCellDiff.ItemsSource = activities;
                 lvCellDiff.ItemsSource = gene_activations;
+            }
+
+            int nDivState = selectedCell.DividerState;
+            if (selectedCell.Divider.State != null)
+            {
+                ObservableCollection<CellGeneInfo> gene_activations2 = new ObservableCollection<CellGeneInfo>();
+                txtDivCellState.Text = selectedCell.Divider.State[nDivState];
+                ObservableCollection<double> activities = new ObservableCollection<double>();
+                int len = selectedCell.Divider.activity.GetLength(1);
+                for (int i = 0; i < len; i++)
+                {
+                    CellGeneInfo cgi = new CellGeneInfo();
+                    if (i > len - 1)
+                        break;
+
+                    cgi.Name = selectedCell.Genes[selectedCell.Divider.gene_id[i]].Name;
+                    cgi.Activation = selectedCell.Divider.activity[nDivState, i];
+                    gene_activations2.Add(cgi);
+                }
+                lvCellDiv.ItemsSource = gene_activations2;
             }
 
             ToolWinCellInfo.Open();
@@ -3412,6 +3462,13 @@ namespace DaphneGui
             gc.CreatePipelines();
             UpdateGraphics();
             (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+
+        private void btnShowCellInfoById_Click(object sender, RoutedEventArgs e)
+        {
+            int cellid;
+            bool result = int.TryParse(txtCellIdent.Text, out cellid);
+            DisplayCellInfo(cellid);
         }
     }
 
