@@ -4428,7 +4428,7 @@ namespace Daphne
             : base()
         {
             genes = new ObservableCollection<string>();
-            Name = "New diff scheme";
+            Name = "New scheme";
             Driver = new ConfigTransitionDriver();
             activationRows = new ObservableCollection<ConfigActivationRow>();
         }
@@ -4441,6 +4441,15 @@ namespace Daphne
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
+        }
+
+        public void AddGene(string gguid)
+        {
+            genes.Add(gguid);
+            foreach (ConfigActivationRow row in activationRows)
+            {
+                row.activations.Add(1.0);
+            }
         }
 
         public void RemoveActivationRow(ConfigActivationRow row)

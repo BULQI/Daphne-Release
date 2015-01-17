@@ -104,7 +104,10 @@ namespace DaphneGui
                         {
                             cell.membrane.molecules_dict.Remove(curr_mol_guid);
                         }
-                        cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                        if (cell.membrane.molecules_dict.ContainsKey(molpop.molecule.entity_guid) == false)
+                        {
+                            cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                        }
                     }
                 }
             }
@@ -981,11 +984,14 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.genes.Add(gene1.entity_guid);
-                foreach (ConfigActivationRow row in scheme.activationRows)
-                {
-                    row.activations.Add(1.0);
-                }
+                scheme.AddGene(gene1.entity_guid);
+                //scheme.genes.Add(gene1.entity_guid);
+                //foreach (ConfigActivationRow row in scheme.activationRows)
+                //{
+                //    row.activations.Add(1.0);
+                //}
+
+
                 //force refresh
                 DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
                 DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, scheme);

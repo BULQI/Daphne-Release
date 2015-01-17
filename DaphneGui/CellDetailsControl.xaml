@@ -310,7 +310,7 @@
             <Expander   Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Cell Molecules and Genes"                                              
+                        Header="Molecules and Genes"                                              
                         x:Name="CellMolPopsExpander"
                         Margin="0,10,0,0" 
                         Canvas.ZIndex="1"
@@ -604,7 +604,7 @@
             <Expander   Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Cell Reactions"                                              
+                        Header="Reactions"                                              
                         x:Name="CellReacExpander"
                         Margin="0,5,0,0" 
                         Canvas.ZIndex="1"
@@ -847,7 +847,7 @@
                         Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Cell Reaction Complexes"                                            
+                        Header="Reaction Complexes"                                            
                         x:Name="ReacCompExpander"
                         Margin="0,5,0,0" 
                         Canvas.ZIndex="1"
@@ -1078,7 +1078,7 @@
             </Expander>
 
             <!-- Cell Death -->
-            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Cell Death" x:Name="CellDeathExpander" 
+            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
                                                 Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
                 <StackPanel>
@@ -1096,7 +1096,7 @@
                 </StackPanel>
             </Expander>
             <!-- Division -->
-            <Expander   Header="Division Scheme"
+            <Expander   Header="Division"
                         Padding="5" ExpandDirection="Down"
                         IsExpanded="False"                                                  
                         x:Name="DivSchemeExpander"
@@ -1188,7 +1188,7 @@
             <Expander   
                     Padding="5" ExpandDirection="Down"
                     IsExpanded="False"
-                    Header="Differentiation Scheme"                                                  
+                    Header="Differentiation"                                                  
                     x:Name="DiffSchemeExpander"
                     Margin="0,4,0,0" 
                     Canvas.ZIndex="1"
