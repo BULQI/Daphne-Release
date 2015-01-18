@@ -1106,7 +1106,11 @@ namespace Daphne
             while (t < dt)
             {
                 localStep = Math.Min(integratorStep, dt - t);
-                dataBasket.Environment.Comp.Step(localStep);
+
+                //dataBasket.Environment.Comp.Step(localStep);
+                dataBasket.Environment.Step(localStep);
+                
+
                 // zero all cell forces; needs to happen first
                 cellManager.ResetCellForces();
                 // handle collisions
@@ -1209,7 +1213,8 @@ namespace Daphne
             while (t < dt)
             {
                 localStep = Math.Min(integratorStep, dt - t);
-                dataBasket.Environment.Comp.Step(localStep);
+                //dataBasket.Environment.Comp.Step(localStep);
+                dataBasket.Environment.Step(localStep);
                 t += localStep;
             }
             accumulatedTime += dt;

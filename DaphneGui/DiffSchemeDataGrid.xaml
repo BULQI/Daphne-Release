@@ -186,8 +186,8 @@
             </DataGrid.RowHeaderTemplate>
         </DataGrid>
 
-        <!-- This is the Division Regulators datagrid -->
-        <TextBlock Text="Division Regulators" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+        <!-- This is the Transition Regulators datagrid -->
+        <TextBlock Text="Transition Regulators" Grid.Column="0" Grid.Row="2" Width="130" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
 
         <DataGrid x:Name="DivRegGrid" 
                 local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"

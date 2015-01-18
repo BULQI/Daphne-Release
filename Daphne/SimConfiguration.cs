@@ -1922,7 +1922,14 @@ namespace Daphne
         }
 
         
-        // given a total reaction string, find the ConfigCell object
+        
+        /// <summary>
+        /// Given a total reaction string, find it in the reactions list.
+        /// Return true if found, false otherwise.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="Reacs"></param>
+        /// <returns></returns>
         public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
         {
             //Get left and right side molecules of new reaction
@@ -1958,45 +1965,6 @@ namespace Daphne
             return false;
         }
         
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the left side, i.e. the reactants.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacLeftSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string left = total.Substring(0, index);
-            left = left.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listLeft = new List<string>(reactants);
-            listLeft.Sort();
-            return listLeft;
-        }
-
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the right side, i.e. the products.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacRightSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string right = total.Substring(index + 2);
-            right = right.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listRight = new List<string>(products);
-            listRight.Sort();
-            return listRight;
-        }
-
-
         /// <summary>
         /// Select transcription reactions in the compartment.
         /// </summary>
@@ -4428,7 +4396,7 @@ namespace Daphne
             : base()
         {
             genes = new ObservableCollection<string>();
-            Name = "New diff scheme";
+            Name = "New scheme";
             Driver = new ConfigTransitionDriver();
             activationRows = new ObservableCollection<ConfigActivationRow>();
         }
@@ -4441,6 +4409,26 @@ namespace Daphne
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
+        }
+
+        public void AddGene(string gguid)
+        {
+            genes.Add(gguid);
+            foreach (ConfigActivationRow row in activationRows)
+            {
+                row.activations.Add(1.0);
+            }
+        }
+
+        public void DeleteGene(string gguid)
+        {
+            int index = genes.IndexOf(gguid);
+            genes.Remove(gguid);
+
+            foreach (var v in activationRows)
+            {
+                v.activations.RemoveAt(index);
+            }
         }
 
         public void RemoveActivationRow(ConfigActivationRow row)

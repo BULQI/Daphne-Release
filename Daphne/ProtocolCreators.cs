@@ -1183,8 +1183,8 @@ namespace Daphne
 #endif
 
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100);
+            gc.Sigma = new DistributedParameter(1.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1256,7 +1256,7 @@ namespace Daphne
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1335,8 +1335,8 @@ namespace Daphne
             }
 
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1419,8 +1419,8 @@ namespace Daphne
             }
 
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
@@ -1522,8 +1522,8 @@ namespace Daphne
             }
 
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
@@ -3656,9 +3656,9 @@ namespace Daphne
             protocol.scenario.time_config.integrator_step = 0.001;
             protocol.reporter_file_name = "gc_cycling";
 
-            envHandle.extent_x = 100;
-            envHandle.extent_y = 100;
-            envHandle.extent_z = 100;
+            envHandle.extent_x = 260;
+            envHandle.extent_y = 260;
+            envHandle.extent_z = 260;
             envHandle.gridstep = 10;
 
             //ECS MOLECULES
@@ -3731,8 +3731,15 @@ namespace Daphne
             }
 
             //ECS
-            double[,] box_trans = new double[,] { {50, 50, 50}, { 75, 75, 75 }} ;
-            double[,] box_scale = new double[,] { {200, 200, 200}, {100, 100, 100} };
+            double sep = 130;
+            double d = sep * Math.Cos(Math.PI/4.0);
+            double[] c = new double[] { envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2 };
+            double  lz_sigma = 400,
+                    dz_sigma = 100;
+            double[,] box_trans = new double[,] { { c[0], c[1], c[2] }, 
+                                                  { c[0] + d, c[1] + d, c[2] + d} };
+            double[,] box_scale = new double[,] { { lz_sigma, lz_sigma, lz_sigma }, { dz_sigma, dz_sigma, dz_sigma } };
+
             System.Windows.Media.Color[] box_color = new System.Windows.Media.Color[] { System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.0f, 0.3f), 
                                                                                         System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 1.0f, 0.0f) };
             ConfigMolecularPopulation configMolPop = null;

@@ -349,6 +349,11 @@ namespace DaphneGui
                     }
                 }
             }
+
+            //This forces the cell population to be reloaded and updates all details in GUI underneath
+            int index = CellPopsListBox.SelectedIndex;
+            CellPopsListBox.SelectedIndex = -1;
+            CellPopsListBox.SelectedIndex = index;
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
@@ -554,6 +559,14 @@ namespace DaphneGui
 
             //Remove the cell population
             scenario.cellpopulations.Remove(current_item);
+
+            //remove rendering option if no other refernece
+            string label = current_item.renderLabel;
+            bool safe_to_remove = (MainWindow.SOP.Protocol.scenario as TissueScenario).RenderPopReferenceCount(label, true) == 0;
+            if (safe_to_remove)
+            {
+                (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(label, true);
+            }
 
             CellPopsListBox.SelectedIndex = index;
 
