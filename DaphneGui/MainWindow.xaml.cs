@@ -1364,13 +1364,10 @@ namespace DaphneGui
             System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
 
             dlg.Description = "Select report output folder";
-            dlg.SelectedPath = appPath;
+            dlg.SelectedPath = sim.Reporter.AppPath;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                sim.Reporter.AppPath = dlg.SelectedPath;
-                if (sim.Reporter.AppPath.Substring(sim.Reporter.AppPath.Length - 1, 1) != @"\") {
-                    sim.Reporter.AppPath += @"\";
-                }
+                sim.Reporter.AppPath = dlg.SelectedPath + @"\";
             }
         }
 
