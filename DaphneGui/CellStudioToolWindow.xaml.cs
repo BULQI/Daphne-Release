@@ -162,7 +162,6 @@ namespace DaphneGui
 
         private void CellStudio_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            CellsListBox.SelectedIndex = 0;
         }
     }
 }
