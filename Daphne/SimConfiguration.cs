@@ -4579,7 +4579,7 @@ namespace Daphne
 
             for (int i = 0; i < this.activationRows.Count; i++)
             {
-                if (this.activationRows[i].Equals(cts.activationRows[i]) == false)
+                if (this.activationRows[i].Equals(cts.activationRows[i], this.Driver.states[i], cts.Driver.states[i]) == false)
                     return false;
             }
 
@@ -4588,7 +4588,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigActivationRow : EntityModelBase, IEquatable<ConfigActivationRow>
+    public class ConfigActivationRow : EntityModelBase
     {
         private ObservableCollection<double> _activations;
         public ObservableCollection<double> activations
@@ -4615,8 +4615,11 @@ namespace Daphne
             OnPropertyChanged("activations");
         }
 
-        public bool Equals(ConfigActivationRow car)
+        public bool Equals(ConfigActivationRow car, string state1, string state2)
         {
+            if (state1.Equals(state2) == false)
+                return false;
+
             if (this.activations.Count != car.activations.Count)
                 return false;
 
