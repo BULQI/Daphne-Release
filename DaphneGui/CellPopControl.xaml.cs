@@ -378,6 +378,9 @@ namespace DaphneGui
             
             CellPopulation cp = (CellPopulation)(lb.SelectedItem);
             SelectedCell = cp.Cell;
+            //ToolWinTissue twt = DataContext as ToolWinTissue;
+            //twt.ucCellPopCellDetails.DataContext = SelectedCell;
+            //twt.ucCellPopCellDetails.DiffSchemeGrid.ResetDiffScheme();
         }
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
@@ -582,7 +585,6 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            CellPopsListBox.SelectedIndex = 0;
             CellPopulation cp = (CellPopulation)(CellPopsListBox.SelectedItem);
             if (cp == null)
             {
