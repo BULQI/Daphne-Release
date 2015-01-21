@@ -10,7 +10,8 @@
              xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
              xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContextChanged="UserControl_DataContextChanged">
 
     <!-- this handles the two datagrids for a diffscheme -->
     <!-- the context of this control will be a differentiation/division scheme-->
@@ -81,7 +82,7 @@
         <!-- starting state -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
             <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
-            <local:ParamDistrControl DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
+            <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
         </StackPanel>
         
         <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
@@ -203,7 +204,9 @@
                 SelectionMode="Single"
                 SelectionUnit="Cell"
                 PresentationTraceSources.TraceLevel="High"
-                HorizontalGridLinesBrush="DarkBlue"                      
+                HorizontalGridLinesBrush="DarkBlue"    
+                IsSynchronizedWithCurrentItem="True"
+                
                 >
             <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
             <DataGrid.Resources>

@@ -27,7 +27,6 @@ namespace DaphneGui
             InitializeComponent();
         }
 
-
         #region context_menus
         private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
         {
@@ -88,11 +87,13 @@ namespace DaphneGui
             foreach (int i in rowsToDelete)
             {
                 //Delete state from diff_scheme - the order of rows matches the order in diff_scheme
-                diff_scheme.RemoveState(i);
+                diff_scheme.DeleteState(i);
             }
 
-
+            //Update row headers in both grids
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
+            DiffSchemeDataGrid.update_datagrid_rowheaders(DivRegGrid);
+
             //update the reg grid
             DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
             DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
@@ -207,7 +208,6 @@ namespace DaphneGui
         private static void OnDiffSchemeChanged(DependencyObject d,
             DependencyPropertyChangedEventArgs e)
         {
-
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
             DataGrid dataGrid = d as DataGrid;
@@ -406,6 +406,19 @@ namespace DaphneGui
         }
 
         #endregion
+
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
+            int x = 0;
+            x++;
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, null);
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, diff_scheme);
+
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
+            //DataContext = diff_scheme;
+        }
     }
 
 
