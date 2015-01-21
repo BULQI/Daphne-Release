@@ -13,7 +13,7 @@ namespace Daphne
     /// </summary>
     public class HDF5File
     {
-        private string filename;
+        private string fullPath, fileName;
         private H5FileId fileId;
         // groups can be nested, so maintain a stack of open ones
         // note that this will only work for exclusive reads or writes, not mixed mode
@@ -23,9 +23,21 @@ namespace Daphne
 
         public HDF5File()
         {
-            filename = "";
+            fullPath = "";
+            fileName = "";
             groupStack = new List<H5GroupId>();
             subGroups = new List<string>();
+        }
+
+        /// <summary>
+        /// access the file name
+        /// </summary>
+        public string FileName
+        {
+            get
+            {
+                return fileName;
+            }
         }
 
         /// <summary>
@@ -37,10 +49,34 @@ namespace Daphne
         {
             if (fileId == null)
             {
-                filename = fn;
+                fullPath = fn;
+                // extract the last part, file name alone
+                fileName = System.IO.Path.GetFileName(fullPath);
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// assemble the full path given it's parts; unique upon demand
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="userDef"></param>
+        /// <param name="extension"></param>
+        /// <returns></returns>
+        public bool assembleFullPath(string path, string name, string userDef, string extension, bool unique)
+        {
+            string buildPath = path + name + "_" + userDef + extension;
+            int version = 1;
+
+            // unique name
+            while(unique == true && File.Exists(buildPath) == true)
+            {
+                buildPath = path + name + "_" + userDef + "(" + version + ")" + extension;
+                version++;
+            }
+            return initialize(buildPath);
         }
 
         /// <summary>
@@ -49,13 +85,13 @@ namespace Daphne
         /// </summary>
         public void openWrite(bool trunc)
         {
-            if (filename != "" && fileId == null)
+            if (fullPath != "" && fileId == null)
             {
-                if (trunc == false && File.Exists(filename) == true)
+                if (trunc == false && File.Exists(fullPath) == true)
                 {
                     try
                     {
-                        fileId = H5F.open(filename, H5F.OpenMode.ACC_RDWR);
+                        fileId = H5F.open(fullPath, H5F.OpenMode.ACC_RDWR);
                     }
                     catch
                     {
@@ -65,7 +101,7 @@ namespace Daphne
                 {
                     try
                     {
-                        fileId = H5F.create(filename, H5F.CreateMode.ACC_TRUNC);
+                        fileId = H5F.create(fullPath, H5F.CreateMode.ACC_TRUNC);
                     }
                     catch
                     {
@@ -79,11 +115,11 @@ namespace Daphne
         /// </summary>
         public bool openRead()
         {
-            if (filename != "" && File.Exists(filename) == true && fileId == null)
+            if (fullPath != "" && File.Exists(fullPath) == true && fileId == null)
             {
                 try
                 {
-                    fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+                    fileId = H5F.open(fullPath, H5F.OpenMode.ACC_RDONLY);
                 }
                 catch
                 {
@@ -255,7 +291,10 @@ namespace Daphne
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
                 long size = H5D.getStorageSize(dset) / sizeof(int);
 
-                data = new int[size];
+                if (data == null || data.Length != size)
+                {
+                    data = new int[size];
+                }
                 H5D.read(dset, typeId, new H5Array<int>(data));
                 H5D.close(dset);
             }
@@ -294,7 +333,10 @@ namespace Daphne
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
                 long size = H5D.getStorageSize(dset) / sizeof(long);
 
-                data = new long[size];
+                if (data == null || data.Length != size)
+                {
+                    data = new long[size];
+                }
                 H5D.read(dset, typeId, new H5Array<long>(data));
                 H5D.close(dset);
             }
@@ -333,7 +375,10 @@ namespace Daphne
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
                 long size = H5D.getStorageSize(dset) / sizeof(double);
 
-                data = new double[size];
+                if (data == null || data.Length != size)
+                {
+                    data = new double[size];
+                }
                 H5D.read(dset, typeId, new H5Array<double>(data));
                 H5D.close(dset);
             }
@@ -346,15 +391,18 @@ namespace Daphne
         /// <param name="data">the string to be written</param>
         public void writeString(string name, string data)
         {
-            long[] dims = new long[] { data.Length };
+            if (groupStack.Count > 0)
+            {
+                long[] dims = new long[] { data.Length };
 
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
-            H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
-            H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+                H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
+                H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
 
-            H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
-            H5D.close(dset);
-            H5S.close(spaceId);
+                H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
+                H5D.close(dset);
+                H5S.close(spaceId);
+            }
         }
 
         /// <summary>
@@ -364,15 +412,18 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void readString(string name, ref string data)
         {
-            H5DataSetId dset = H5D.open(groupStack.Last(), name);
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
-            long size = H5D.getStorageSize(dset) / sizeof(char);
+            if (groupStack.Count > 0)
+            {
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+                long size = H5D.getStorageSize(dset) / sizeof(char);
 
-            char[] tmp = new char[size];
+                char[] tmp = new char[size];
 
-            H5D.read(dset, typeId, new H5Array<char>(tmp));
-            data = new string(tmp);
-            H5D.close(dset);
+                H5D.read(dset, typeId, new H5Array<char>(tmp));
+                data = new string(tmp);
+                H5D.close(dset);
+            }
         }
 
         /// <summary>
@@ -424,10 +475,14 @@ namespace Daphne
         private int B_DEATH = 0,
                     B_DIV = 1,
                     B_DIFF = 2,
-                    B_COUNT = 3;
+                    B_COUNT = 3,
+                    S_POS = 0,
+                    S_VEL = 1,
+                    S_FORCE = 2;
         private int cellCount;
         private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
-        private double[] cellPos;
+        private double[] cellStateSpatial;
+        private double[][] ecsMolpops;
 
         public int CellCount
         {
@@ -469,11 +524,19 @@ namespace Daphne
             }
         }
 
-        public double[] CellPos
+        public double[] CellStateSpatial
         {
             get
             {
-                return cellPos;
+                return cellStateSpatial;
+            }
+        }
+
+        public double[][] ECSMolPops
+        {
+            get
+            {
+                return ecsMolpops;
             }
         }
 
@@ -481,53 +544,95 @@ namespace Daphne
         {
         }
 
+        private void createECSData()
+        {
+            // ECS, create the data space, size equal to number of molpops
+            int mpSize = 0,
+                length = SimulationBase.ProtocolHandle.scenario.environment.comp.molpops.Count;
+
+            // if needed, find the molpop size; each molpop same size, pick the first one
+            if (length > 0)
+            {
+                ConfigMolecularPopulation first = SimulationBase.ProtocolHandle.scenario.environment.comp.molpops.First();
+
+                mpSize = SimulationBase.dataBasket.Environment.Comp.Populations[first.molecule.entity_guid].Conc.M.ArraySize;
+            }
+
+            // create the outer array
+            if (ecsMolpops == null || ecsMolpops.Length != length)
+            {
+                ecsMolpops = new double[length][];
+            }
+            // create the inner arrays, one per molpop
+            for (int i = 0; i < length; i++)
+            {
+                if (ecsMolpops[i] == null || ecsMolpops[i].Length != mpSize)
+                {
+                    ecsMolpops[i] = new double[mpSize];
+                }
+            }
+        }
+
         /// <summary>
         /// prepare the data from the cells (transfer to the frame) for writing
         /// </summary>
-        public bool prepareData()
+        private void prepareData()
         {
+            int i;
+
             cellCount = SimulationBase.dataBasket.Cells.Count;
             // write the cell count at any rate
             writeInt(cellCount, "CellCount");
-            if (cellCount < 1)
+
+            if (cellCount > 0)
             {
-                return false;
-            }
-
-            // create the data arrays if needed
-            if (cellPos == null || cellPos.GetLength(0) != cellCount)
-            {
-                cellPos = new double[cellCount * CellSpatialState.SingleDim];
-                cellGens = new int[cellCount];
-                cellPopIds = new int[cellCount];
-                cellBehaviors = new int[cellCount * B_COUNT];
-            }
-
-            cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
-
-            int i = 0;
-
-            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
-            {
-                // position
-                for (int j = 0; j < CellSpatialState.SingleDim; j++)
+                // create the data arrays if needed
+                if (cellStateSpatial == null || cellStateSpatial.Length != cellCount * CellSpatialState.Dim)
                 {
-                    cellPos[i * CellSpatialState.SingleDim + j] = c.SpatialState.X[j];
+                    cellStateSpatial = new double[cellCount * CellSpatialState.Dim];
+                    cellGens = new int[cellCount];
+                    cellPopIds = new int[cellCount];
+                    cellBehaviors = new int[cellCount * B_COUNT];
                 }
-                // generation
-                cellGens[i] = c.generation;
-                // population
-                cellPopIds[i] = c.Population_id;
-                // death
-                cellBehaviors[i * B_COUNT + B_DEATH] = c.Alive == true ? 0 : 1;
-                // division
-                cellBehaviors[i * B_COUNT + B_DIV] = c.DividerState;
-                // differentiation
-                cellBehaviors[i * B_COUNT + B_DIFF] = c.DifferentiationState;
 
-                i++;
+                cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
+
+                i = 0;
+                foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+                {
+                    // spatial state
+                    for (int j = 0; j < CellSpatialState.SingleDim; j++)
+                    {
+                        cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_POS + j] = c.SpatialState.X[j];
+                        cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + j] = c.SpatialState.V[j];
+                        cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_FORCE + j] = c.SpatialState.F[j];
+                    }
+                    // generation
+                    cellGens[i] = c.generation;
+                    // population
+                    cellPopIds[i] = c.Population_id;
+                    // death
+                    cellBehaviors[i * B_COUNT + B_DEATH] = c.Alive == true ? 0 : 1;
+                    // division
+                    cellBehaviors[i * B_COUNT + B_DIV] = c.DividerState;
+                    // differentiation
+                    cellBehaviors[i * B_COUNT + B_DIFF] = c.DifferentiationState;
+
+                    i++;
+                }
             }
-            return true;
+
+            // ECS, create space
+            createECSData();
+
+            // ECS, fill the data space
+            i = 0;
+            foreach (ConfigMolecularPopulation cmp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
+            {
+                MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
+
+                cur_mp.Conc.CopyArray(ecsMolpops[i]);
+            }
         }
 
         /// <summary>
@@ -537,10 +642,12 @@ namespace Daphne
         /// <param name="state"></param>
         public void applyStateByIndex(int idx, ref CellState state)
         {
-            // set the position
+            // set the spatial state
             for (int i = 0; i < CellSpatialState.SingleDim; i++)
             {
-                state.spState.X[i] = cellPos[idx * CellSpatialState.SingleDim + i];
+                state.spState.X[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_POS + i];
+                state.spState.V[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + i];
+                state.spState.F[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_FORCE + i];
             }
             // set the generation
             state.setCellGeneration(cellGens[idx]);
@@ -583,12 +690,15 @@ namespace Daphne
         /// <param name="groupName">group name in the HDF5 file</param>
         public void writeData(string groupName)
         {
+            long[] dims = null;
+
             DataBasket.hdf5file.createGroup(groupName);
 
-            if (prepareData() == true)
+            prepareData();
+            if (cellCount > 0)
             {
                 // write the cell ids
-                long[] dims = new long[] { cellCount };
+                dims = new long[] { cellCount };
 
                 // ids
                 DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
@@ -601,9 +711,21 @@ namespace Daphne
                 dims = new long[] { cellCount, B_COUNT };
                 DataBasket.hdf5file.writeDSInt("CellBehaviors", dims, new H5Array<int>(cellBehaviors));
 
-                // write the cell positions
-                dims = new long[] { cellCount, CellSpatialState.SingleDim };
-                DataBasket.hdf5file.writeDSDouble("Position", dims, new H5Array<double>(cellPos));
+                // write the cell spatial states
+                dims = new long[] { cellCount, CellSpatialState.Dim };
+                DataBasket.hdf5file.writeDSDouble("SpatialState", dims, new H5Array<double>(cellStateSpatial));
+            }
+
+            // ecs
+            createECSData();
+            for (int i = 0; i < ecsMolpops.Length; i++)
+            {
+                if (i == 0)
+                {
+                    // index 0 is guaranteed to exist because of the loop over i
+                    dims = new long[] { ecsMolpops[0].Length };
+                }
+                DataBasket.hdf5file.writeDSDouble("ECS" + i, dims, new H5Array<double>(ecsMolpops[i]));
             }
 
             // close the group
@@ -640,8 +762,15 @@ namespace Daphne
                 // behaviors
                 DataBasket.hdf5file.readDSInt("CellBehaviors", ref cellBehaviors);
 
-                // read the cell positions
-                DataBasket.hdf5file.readDSDouble("Position", ref cellPos);
+                // read the cell spatial states
+                DataBasket.hdf5file.readDSDouble("SpatialState", ref cellStateSpatial);
+            }
+
+            // ecs
+            createECSData();
+            for (int i = 0; i < ecsMolpops.Length; i++)
+            {
+                DataBasket.hdf5file.readDSDouble("ECS" + i, ref ecsMolpops[i]);
             }
 
             // close the group

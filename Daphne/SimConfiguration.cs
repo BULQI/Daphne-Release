@@ -1922,7 +1922,14 @@ namespace Daphne
         }
 
         
-        // given a total reaction string, find the ConfigCell object
+        
+        /// <summary>
+        /// Given a total reaction string, find it in the reactions list.
+        /// Return true if found, false otherwise.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="Reacs"></param>
+        /// <returns></returns>
         public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
         {
             //Get left and right side molecules of new reaction
@@ -4390,7 +4397,7 @@ namespace Daphne
             : base()
         {
             genes = new ObservableCollection<string>();
-            Name = "New diff scheme";
+            Name = "New scheme";
             Driver = new ConfigTransitionDriver();
             activationRows = new ObservableCollection<ConfigActivationRow>();
         }
@@ -6735,6 +6742,9 @@ namespace Daphne
         {
             if (cellPop != null)
             {
+                // Reset the random number generator so we don't get the same values again.
+                // This shouldn't affect the reproducibility of the simulations.
+                Rand.ReseedAll(RandomSeed.Robust());
                 int number = cellPop.CellStates.Count;
                 cellPop.CellStates.Clear();
                 AddByDistr(number);

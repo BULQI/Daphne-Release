@@ -42,17 +42,6 @@ namespace DaphneGui
             DialogResult = true;
         }
 
-        private void ButtonDelete_Click(object sender, RoutedEventArgs e)
-        {
-            SelectedExperiment = ExpName_CB.SelectedIndex;
-            if (SelectedExperiment != -1) {
-                string SelExpName = ExpNames[SelectedExperiment];
-                MessageBoxResult result = MessageBox.Show("Really delete " + SelExpName + "?", "Confirm delete", MessageBoxButton.YesNo,MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes) {
-                    DialogResult = false;
-                }
-            }
-        }
 
         private void ExpName_CB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -60,7 +49,6 @@ namespace DaphneGui
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
         {
-            SelectedExperiment = -1;
             DialogResult = false;
         }
     }

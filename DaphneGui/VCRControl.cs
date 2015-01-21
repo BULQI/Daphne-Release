@@ -39,6 +39,7 @@ namespace DaphneGui
 #endif
         private VCRControlState playbackState, savedState;
         private long lastFramePlayed;
+        public bool LastFrame { get; set; }
         // frame time in milliseconds; currently 30fps
         private const long E_DT = 1000 / 30;
         /// <summary>
@@ -58,15 +59,14 @@ namespace DaphneGui
             frame = -1;
             SetInactive();
             frameNames = new List<string>();
+            LastFrame = true;
         }
 
         /// <summary>
         /// create a data reader object
         /// </summary>
-        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
-        /// <param name="expID">experiment id</param>
         /// <returns>false for failure or empty simulation</returns>
-        public bool OpenVCR(bool lastFrame, int expID)
+        public bool OpenVCR()
         {
 #if USE_DATACACHE
             dataCache = new Dictionary<int, List<DBRow>>();
@@ -84,7 +84,7 @@ namespace DaphneGui
                 }
                 frameNames.Clear();
                 // find the frame names and with them the number of frames
-                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR/VCR_Frames", expID));
+                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiment_VCR/VCR_Frames"));
 
                 if (frameNames.Count == 0)
                 {
@@ -92,7 +92,7 @@ namespace DaphneGui
                 }
 
                 // open the parent group for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
+                DataBasket.hdf5file.openGroup(String.Format("/Experiment_VCR"));
 
                 // open the group that holds the frames for this experiment
                 DataBasket.hdf5file.openGroup("VCR_Frames");
@@ -105,7 +105,7 @@ namespace DaphneGui
                     frames.Add(i);
                 }
 
-                if (lastFrame == true)
+                if (LastFrame == true)
                 {
                     CurrentFrame = frames.Count - 1;
                 }
@@ -204,7 +204,10 @@ namespace DaphneGui
                 // synch vtk to the current frame
                 if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                 {
-                    SimulationBase.dataBasket.UpdateCells((TissueSimulationFrameData)CurrentFrameData());
+                    TissueSimulationFrameData fdata = (TissueSimulationFrameData)CurrentFrameData();
+
+                    SimulationBase.dataBasket.UpdateCells(fdata);
+                    SimulationBase.dataBasket.UpdateECSMolpops(fdata);
                     MainWindow.VTKBasket.UpdateData();
                     MainWindow.GC.DrawFrame(GetPlaybackPercent());
                 }

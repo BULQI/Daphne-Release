@@ -45,10 +45,6 @@ namespace Daphne
         /// data file
         /// </summary>
         public static HDF5File hdf5file;
-        /// <summary>
-        /// currently handled experimentID
-        /// </summary>
-        public static int currentExperimentID = -1;
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -81,43 +77,6 @@ namespace Daphne
 #if ALL_DATA
             ResetTrackData();
 #endif
-        }
-
-        /// <summary>
-        /// extract the experiment id from a three part string XX_ID_XX
-        /// </summary>
-        /// <param name="exp">the experiment string</param>
-        /// <returns>-1 for error, id >= 0 otherwise</returns>
-        public static int extractExperimentId(string exp)
-        {
-            string[] parts = exp.Split('_');
-
-            if(parts.Length >= 2)
-            {
-                return Convert.ToInt32(parts[1]);
-            }
-            return -1;
-        }
-
-        /// <summary>
-        /// find the highest experiment id
-        /// </summary>
-        /// <returns>the highest id or -1 if empty</returns>
-        public static int findHighestExperimentId()
-        {
-            List<string> local = hdf5file.subGroupNames("/Experiments_VCR");
-            int max = -1;
-
-            foreach (string s in local)
-            {
-                int tmp = extractExperimentId(s);
-
-                if (tmp > max)
-                {
-                    max = tmp;
-                }
-            }
-            return max;
         }
 
         /// <summary>
@@ -596,98 +555,32 @@ namespace Daphne
                 }
                 else // it exists, update it
                 {
-#if CELL_CREATE_OLD
-                    // Note: we may not need this again; it's a leftover from the old
-                    // db implementation, but we need some mechanism to set the entire state
-                    ObjectLoader.LoadValues(cells[cell_id], kvpc.Value.state);
-#else
                     // apply the state
                     cells[cell_id].SetRenderState(state);
-#endif
                 }
-#if CELL_CREATE_OLD
-                // create a new cell
-                else
-                {
-                    // make sure the type exists
-                    //ADD THE CODE TO CREATE A NEW CELL
-                    if (dr.Cells[kvpc.Value.cell_id].ContainsKey("CellSetId"))
-                    {
-                        if (MainWindow.VTKBasket.CellController.ColorMap.ContainsKey((int)dr.Cells[kvpc.Value.cell_id]["CellSetId"]) == true)
-                        {
-                            CellSubset ct = null;
-                            int cellSetID = MainWindow.VTKBasket.CellController.ColorMap[(int)dr.Cells[kvpc.Value.cell_id]["CellSetId"]];
-
-                            // find cell type
-                            for (int j = 0; j < MainWindow.SOP.Protocol.entity_repository.cell_subsets.Count; j++)
-                            {
-                                if (MainWindow.SOP.Protocol.entity_repository.cell_subsets[j].cell_subset_guid.CompareTo(MainWindow.SOP.Protocol.scenario.cellpopulations[cellSetID].cell_subset_guid_ref) == 0)
-                                {
-                                    ct = MainWindow.SOP.Protocol.entity_repository.cell_subsets[j];
-                                    break;
-                                }
-                            }
-
-                            // cell type not found, don't create this cell
-                            if (ct == null)
-                            {
-                                System.Windows.MessageBox.Show("Cell set '" + MainWindow.SOP.Protocol.scenario.cellpopulations[kvpc.Value.cell_id].cellpopulation_name +
-                                                               "' could not be extracted from the repository!");
-                                continue;
-                            }
-
-                            int loco_idx = -1;
-
-                            for (int j = 0; j < MainWindow.SOP.Protocol.global_parameters.Count && loco_idx == -1; j++)
-                            {
-                                if (MainWindow.SOP.Protocol.global_parameters[j].global_parameter_type == GlobalParameterType.LocomotorParams)
-                                {
-                                    loco_idx = j;
-                                }
-                            }
-
-                            // if the locomotor parameter could not be found, don't create this cell
-                            if (loco_idx == -1)
-                            {
-                                System.Windows.MessageBox.Show("Invalid global parameters specified for locomotor params! Skipping creation of cell.");
-                                continue;
-                            }
-                            //skg 6/1/12 changed
-                            BaseCell cell;
-
-                            if (ct.cell_subset_type.baseCellType == CellBaseTypeLabel.BCell)
-                            {
-                                cell = CreateCell(ct.cell_subset_type.baseCellType, ((BCellSubsetType)ct.cell_subset_type).cell_subset_type_receptor_params, 0, 0, false);
-                            }
-                            else if (ct.cell_subset_type.baseCellType == CellBaseTypeLabel.TCell)
-                            {
-                                cell = CreateCell(ct.cell_subset_type.baseCellType, ((TCellSubsetType)ct.cell_subset_type).cell_subset_type_receptor_params, 0, 0, false);
-                            }
-                            else
-                            {
-                                // for now ignore everything but B and T cells
-                                continue;
-                            }
-                            //end skg
-
-                            cell.LM.SetParametersFromConfigFile((LocomotorParams)MainWindow.SOP.Protocol.global_parameters[loco_idx]);
-
-                            ObjectLoader.LoadValues(cell, kvpc.Value.state);
-                            ObjectLoader.LoadValues(cell, dr.Cells[kvpc.Value.cell_id]);
-#if FENG_DIVISION
-                            cell.CellDivides = true;
-#endif
-                            AddCell(cell);
-                        }
-                    }
-                }
-#endif
             }
 
             // remove cells
             foreach (int key in removalList)
             {
                 RemoveCell(key);
+            }
+        }
+
+        /// <summary>
+        /// update all ecs molpop concentrations
+        /// </summary>
+        /// <param name="frame">the frame object containing the data</param>
+        public void UpdateECSMolpops(TissueSimulationFrameData frame)
+        {
+            int i = 0;
+
+            foreach (ConfigMolecularPopulation cmp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
+            {
+                MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
+
+                cur_mp.Initialize("explicit", frame.ECSMolPops[i]);
+                i++;
             }
         }
 

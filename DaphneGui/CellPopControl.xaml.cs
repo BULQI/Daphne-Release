@@ -108,18 +108,9 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
             cp.cellPopDist.Initialize();
-
-
-            cp.CellStates[0] = new CellState(envHandle.extent_x - 2 * cp.Cell.CellRadius - envHandle.gridstep / 2,
-                                                  envHandle.extent_y / 2 - envHandle.gridstep / 2,
-                                                  envHandle.extent_z / 2 - envHandle.gridstep / 2);
-
-           
-
-            
-            //if about rendering...
-            //for now, use name as label
-            //cp.renderLabel = cp.Cell.entity_guid;
+            // Causes a new random seed for the random source
+            // Otherwise we will get the same values every time if this is followed by Apply()
+            cp.cellPopDist.Reset();
 
             //add rendering options to scenario
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
@@ -170,9 +161,8 @@ namespace DaphneGui
             if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform)
             {
                 current_dist.Reset();
-                // gmk - fix
                 MainWindow.ToolWin.Apply();
-                //applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                //MainWindow  applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
 
@@ -358,13 +348,12 @@ namespace DaphneGui
                         cp.cellpopulation_name = new_cell_name;
                     }
                 }
-
-                //This forces the cell population to be reloaded and updates all details in GUI underneath
-                int index = CellPopsListBox.SelectedIndex;
-                CellPopsListBox.SelectedIndex = -1;
-                CellPopsListBox.SelectedIndex = index;
-
             }
+
+            //This forces the cell population to be reloaded and updates all details in GUI underneath
+            int index = CellPopsListBox.SelectedIndex;
+            CellPopsListBox.SelectedIndex = -1;
+            CellPopsListBox.SelectedIndex = index;
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
@@ -378,9 +367,6 @@ namespace DaphneGui
             
             CellPopulation cp = (CellPopulation)(lb.SelectedItem);
             SelectedCell = cp.Cell;
-            //ToolWinTissue twt = DataContext as ToolWinTissue;
-            //twt.ucCellPopCellDetails.DataContext = SelectedCell;
-            //twt.ucCellPopCellDetails.DiffSchemeGrid.ResetDiffScheme();
         }
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
@@ -574,6 +560,14 @@ namespace DaphneGui
             //Remove the cell population
             scenario.cellpopulations.Remove(current_item);
 
+            //remove rendering option if no other refernece
+            string label = current_item.renderLabel;
+            bool safe_to_remove = (MainWindow.SOP.Protocol.scenario as TissueScenario).RenderPopReferenceCount(label, true) == 0;
+            if (safe_to_remove)
+            {
+                (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(label, true);
+            }
+
             CellPopsListBox.SelectedIndex = index;
 
             if (index >= CellPopsListBox.Items.Count)
@@ -581,6 +575,9 @@ namespace DaphneGui
 
             if (CellPopsListBox.Items.Count == 0)
                 CellPopsListBox.SelectedIndex = -1;
+
+            // gmk - Remove this cell population from the render skin editor?
+
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -588,7 +585,17 @@ namespace DaphneGui
             CellPopulation cp = (CellPopulation)(CellPopsListBox.SelectedItem);
             if (cp == null)
             {
-                SelectedCell = null;
+                if (CellPopsListBox.Items.Count > 0)
+                {
+                    cp = (CellPopulation)CellPopsListBox.Items[0];
+                    SelectedCell = cp.Cell;
+                    CellPopsListBox.SelectedIndex = 0;
+                    CellPopsListBox.SelectedItem = cp;
+                }
+                else
+                {
+                    SelectedCell = null;
+                }
             }
             else
             {

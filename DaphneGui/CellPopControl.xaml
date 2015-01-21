@@ -128,7 +128,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_spec.box_visibility}"                                      
+                                        IsChecked="{Binding Path=box_spec.current_box_visibility}"                                      
                                         />
                         </Grid>
                         <Grid VerticalAlignment="Center">
@@ -143,7 +143,7 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=gaussian_region_visibility}"                        
+                                    IsChecked="{Binding Path=current_gaussian_region_visibility}"                        
                                       CommandParameter="{Binding}"
                                     />
                         </Grid>
@@ -504,7 +504,7 @@
             
             <Expander ExpandDirection="Down" Padding="5" MaxHeight="600"
                     IsExpanded="True"
-                    Header="Cell Populations"
+                    Header="Populations"
                     x:Name="CellPopsExpander"
                     Margin="0,4,0,0" 
                     Canvas.ZIndex="1"

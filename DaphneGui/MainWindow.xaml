@@ -27,7 +27,7 @@
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
         
         <local:SimSetupControl x:Key="simSetupControl"/>
-        <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
+        <local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />
 
         <ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
@@ -36,7 +36,16 @@
                 <x:Type TypeName="daph:RenderMethod" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        
+
+        <!-- CellShapeEnum-->
+        <ObjectDataProvider x:Key="cellRenderMethodEnum"
+                            MethodName="GetValues" 
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:CellRenderMethod" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
             <Grid>
@@ -53,7 +62,7 @@
 
         <DataTemplate x:Key="cellRenderMethodTemplate">
             <StackPanel Orientation="Horizontal">
-                <!--<TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>-->
+                <TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>
             </StackPanel>
         </DataTemplate>
         
@@ -68,9 +77,6 @@
                         CanExecute="CommandBindingSave_CanExecute" 
                         Executed="CommandBindingSave_Executed" />
 
-        <CommandBinding Command="{x:Static local:MainWindow.ClearVCRDataCommand}" 
-                        CanExecute="CommandBindingClearVCRData_CanExecute"
-                        Executed="CommandBindingClearVCRData_Executed" />
         
         <CommandBinding Command="{x:Static local:MainWindow.SelectReportFolderCommand}" 
                         CanExecute="CommandBindingSelectReportFolder_CanExecute"
@@ -92,9 +98,6 @@
                     Modifiers="Control" 
                     Command="ApplicationCommands.Save" />
 
-        <KeyBinding Key="D"
-                    Modifiers="Control" 
-                    Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
     </Window.InputBindings>
 
     
@@ -111,8 +114,8 @@
                     <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
                     <Separator />
-                    <MenuItem Header="Export in SBML">
-                        <MenuItem Header="Simulation Model" Name="ExportSBML" Click="ExportSBML_Click" />
+                    <MenuItem Header="Export in SBML" Name="ExportSBML">
+                        <MenuItem Header="Simulation Model" Name="ExportModelSBML" Click="ExportSBML_Click" />
                         <MenuItem Header="Reaction Complex" Name="ExportComplexSBML" Click="ExportReactionComplexSBML_Click" />
                     </MenuItem>
                     <MenuItem Header="Import from SBML" Name="ImportSBML" Click="ImportSBML_Click" />
@@ -137,7 +140,6 @@
                         <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" />
                     </MenuItem>
                     <MenuItem Header="Data storage" Name = "DataStorageMenu">
-                        <MenuItem Header="Clear VCR data file" Name="clearVCRdata" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.ClearVCRDataCommand}" />
                         <MenuItem Header="Skip data writes" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataWrite_Click" />
                         <Separator />
                         <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Command="{x:Static local:MainWindow.SelectReportFolderCommand}"/>
@@ -499,6 +501,12 @@
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
 
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell Shape</Label>
+
+                                                <ComboBox ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
+                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
+                                                          SelectedValue="{Binding Path=CellRenderMethod}" MinWidth="60"/>
+                                                
                                                 <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
                                                 <ComboBox Name="CellSelectionToolCB" Width="160"
                                                           ItemsSource="{Binding Path=CellSelectionToolModes}"
