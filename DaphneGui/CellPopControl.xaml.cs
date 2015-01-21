@@ -585,7 +585,17 @@ namespace DaphneGui
             CellPopulation cp = (CellPopulation)(CellPopsListBox.SelectedItem);
             if (cp == null)
             {
-                SelectedCell = null;
+                if (CellPopsListBox.Items.Count > 0)
+                {
+                    cp = (CellPopulation)CellPopsListBox.Items[0];
+                    SelectedCell = cp.Cell;
+                    CellPopsListBox.SelectedIndex = 0;
+                    CellPopsListBox.SelectedItem = cp;
+                }
+                else
+                {
+                    SelectedCell = null;
+                }
             }
             else
             {
