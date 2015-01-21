@@ -4405,17 +4405,6 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
-        public void RemoveActivationRow(ConfigActivationRow row)
-        {
-            int index = activationRows.IndexOf(row);
-            if (index > -1 && index < activationRows.Count)
-            {
-                activationRows.Remove(row);
-                Driver.states.RemoveAt(index);
-                Driver.DriverElements.RemoveAt(index);
-            }
-        }
-
         public void AddGene(string gguid)
         {
             genes.Add(gguid);
@@ -4488,8 +4477,7 @@ namespace Daphne
             OnPropertyChanged("Driver");
         }
 
-
-        public void RemoveState(int index)
+        public void DeleteState(int index)
         {
             activationRows.RemoveAt(index);
             Driver.states.RemoveAt(index);
@@ -4506,6 +4494,8 @@ namespace Daphne
                 elem.RemoveAt(index);
             }
 
+            OnPropertyChanged("activationRows");
+
             //Updates the CurrentState and DestState values appropriately depending on which state was deleted
             for (int i = 0; i < Driver.DriverElements.Count; i++)
             {
@@ -4521,6 +4511,8 @@ namespace Daphne
                     }
                 }
             }
+
+            OnPropertyChanged("Driver");
         }
 
         public ConfigTransitionScheme Clone(bool identical)
