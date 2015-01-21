@@ -408,13 +408,6 @@
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
 
-                                                <StackPanel Grid.Column="0" Grid.Row="0">
-                                                    <ContentControl Name="cellPopDistrib"
-                                                        Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
-                                                        ContentTemplate="{StaticResource cellPopDistributionDetailsTemplate}" 
-                                                        Margin="6,2"/>
-                                                </StackPanel>
-
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                                     <Expander ExpandDirection="Down" Padding="6" IsExpanded="False" Margin="0,-10,0,0"  Canvas.ZIndex="1"  
                                                         Header="Actual Cell Locations"
