@@ -518,7 +518,6 @@
                         <ListBox x:Name="CellPopsListBox"  
                             ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
                             ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
-                            SelectedIndex="-1"
                             SelectionChanged="cellPopsListBoxSelChanged"
                             MinHeight="20"
                                                  />
