@@ -229,13 +229,13 @@
             <!-- cellpop distribution type: CellPopUniform -->
             <DataTemplate DataType="{x:Type daph:CellPopUniform}">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <!--<StackPanel Orientation="Horizontal">
                         <TextBlock>Number of cells:</TextBlock>
                         <TextBox IsReadOnly="True" IsEnabled="False" Width="50" Margin="8,-2" Text="{Binding ElementName=numberBox, Path=Value}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock>These cells will be evenly distributed.</TextBlock>
-                    </StackPanel>
+                    </StackPanel>-->
                 </StackPanel>
             </DataTemplate>
             
@@ -364,7 +364,7 @@
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
-                                                SelectionChanged="cbCellLocationType_SelectionChanged">
+                                                SelectionChanged="cbCellLocationType_SelectionChanged">                                               
                                             </ComboBox>
 
                                             <Button x:Name="btnRegenerateCellPositions" Height="22" Margin="8,0" Click="btnRegenerateCellPositions_Click" Content="Reset">
@@ -518,7 +518,6 @@
                         <ListBox x:Name="CellPopsListBox"  
                             ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
                             ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
-                            SelectedIndex="-1"
                             SelectionChanged="cellPopsListBoxSelChanged"
                             MinHeight="20"
                                                  />

@@ -27,7 +27,7 @@ namespace DaphneGui
         {
             InitializeComponent();
         }
-
+        
         private void cbParamDistr_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
@@ -214,7 +214,7 @@ namespace DaphneGui
         }
 
         private void dgProbMass_Check(object sender, RoutedEventArgs e)
-        {
+        {           
             DistributedParameter distrParam = (DistributedParameter)paramDistrControl.DataContext;
             if (distrParam == null)
             {
@@ -319,5 +319,93 @@ namespace DaphneGui
             }
         }
 
+        private void cbParamDistr_Loaded(object sender, RoutedEventArgs e)
+        {
+            string sTag = Tag as string;
+            var comboBox = sender as ComboBox;
+            ObservableCollection<ParameterDistributionType> coll = new ObservableCollection<ParameterDistributionType>();
+
+            DistributedParameter dp = DataContext as DistributedParameter;
+            ParameterDistributionType dtype = ParameterDistributionType.CONSTANT;
+
+            if (dp != null)
+            {
+                dtype = dp.DistributionType;
+            }
+
+            switch (sTag)
+            {
+                case "DISCRETE":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.POISSON);
+                    coll.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.GAMMA);
+                    coll.Add(ParameterDistributionType.NEG_EXP);
+                    coll.Add(ParameterDistributionType.UNIFORM);
+                    coll.Add(ParameterDistributionType.WEIBULL); 
+                    break;
+                default:
+                    break;
+            }
+
+            if (coll.Count > 0 && dp != null)
+            {
+                comboBox.ItemsSource = coll;
+                comboBox.SelectedItem = dtype;
+            }
+
+        }
     }
+
+
+
+#if ODP_METHOD_WORKS
+    /// <summary>
+    /// This class implements a custom method for ObjectDataProvider so that we can 
+    /// retrieve different subsets of the Enum depending on who called this control.
+    /// But it is not working. Tag is not set yet.
+    /// </summary>
+    public class CDataAccess
+    {
+        ObservableCollection<ParameterDistributionType> _DistCollection;
+
+        public ObservableCollection<ParameterDistributionType> DistCollection
+        {
+            get { return _DistCollection; }
+            set { _DistCollection = value; }
+        }
+
+        public CDataAccess()
+        {
+            _DistCollection = new ObservableCollection<ParameterDistributionType>();
+        }
+
+        public ObservableCollection<ParameterDistributionType> GetDistributions(string Tag)
+        {
+            switch (Tag)
+            {
+                case "DISCRETE":
+                    DistCollection.Add(ParameterDistributionType.CONSTANT);
+                    DistCollection.Add(ParameterDistributionType.POISSON);
+                    DistCollection.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    DistCollection.Add(ParameterDistributionType.CONSTANT);
+                    DistCollection.Add(ParameterDistributionType.GAMMA);
+                    DistCollection.Add(ParameterDistributionType.NEG_EXP);
+                    DistCollection.Add(ParameterDistributionType.UNIFORM);
+                    DistCollection.Add(ParameterDistributionType.WEIBULL); 
+                    break;
+                default:
+                    break;
+            }
+
+            return DistCollection;
+        }
+    }
+#endif
+
 }

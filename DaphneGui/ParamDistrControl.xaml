@@ -12,16 +12,27 @@
              x:Name="paramDistrControl"
              >
  
+    <UserControl.Resources>
+            <!--To load distribution types based on who called this user control - does not work-->
+            <!--<ObjectDataProvider x:Name="objDistTypes" x:Key="paramDistributionTypes"
+                ObjectType="{x:Type local:CDataAccess}"
+                MethodName="GetDistributions" >
+                <ObjectDataProvider.MethodParameters>
+                    <sys:String>Tag</sys:String>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>-->
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.Resources>
 
             <!-- parameterDistributionTypes -->
             <ObjectDataProvider x:Key="parameterDistributionTypes"
-                    MethodName="GetValues" 
-                    ObjectType="{x:Type sys:Enum}">
-                    <ObjectDataProvider.MethodParameters>
-                        <x:Type TypeName="daph:ParameterDistributionType" />
-                    </ObjectDataProvider.MethodParameters>
+                MethodName="GetValues" 
+                ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="daph:ParameterDistributionType" />
+                </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
             <!-- DistrParameterDetailsTemplate -->
@@ -219,11 +230,15 @@
 
         <StackPanel Orientation="Vertical" x:Name="ParamDistrStackPanel">
             <StackPanel>
+                
+                <!--Replaced ItemsSource with code behind to populate the combo box-->
+                <!-- ItemsSource="{Binding Source={StaticResource parameterDistributionTypes}}" -->
+                
                 <ComboBox x:Name="cbParamDistr" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" Height="24"
-                          ItemsSource="{Binding Source={StaticResource parameterDistributionTypes}}"
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
-                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
+                          Loaded="cbParamDistr_Loaded"                          
                           >
                 </ComboBox>
             </StackPanel>

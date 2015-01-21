@@ -3321,28 +3321,6 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.Protocol;
         }
 
-        public bool IsUserAdministrator()
-        {
-            //bool value to hold our return value
-            bool isAdmin;
-            try
-            {
-                //get the currently logged in user
-                WindowsIdentity user = WindowsIdentity.GetCurrent();
-                WindowsPrincipal principal = new WindowsPrincipal(user);
-                isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                isAdmin = false;
-            }
-            catch (Exception ex)
-            {
-                isAdmin = false;
-            }
-            return isAdmin;
-        }
-
         private void readStores()
         {
             //Code to retrieve userstore and daphnestore - deserialize from files

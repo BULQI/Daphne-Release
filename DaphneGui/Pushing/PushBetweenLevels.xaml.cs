@@ -36,7 +36,6 @@ namespace DaphneGui.Pushing
         public object RightList { get; set; }
         public List<string> equalGuids { get; set; }
 
-        private Point mouseLocation;
         public double GridHeight { get; set; }
 
         public PushBetweenLevels(PushLevelEntityType type)
