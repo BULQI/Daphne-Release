@@ -65,7 +65,7 @@
         </TabItem>
 
         <!-- CELL POPULATIONS -->
-        <TabItem x:Name="tabCellPop" Header="Cell Populations" Loaded="CellPopTabItem_Loaded" AutomationProperties.AutomationId="DaphneCellPopsTab">
+        <TabItem x:Name="tabCellPop" Header="Cells" Loaded="CellPopTabItem_Loaded" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <TabItem.Resources>
             </TabItem.Resources>
 
@@ -77,7 +77,7 @@
                     <Expander  Padding="5"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
-                                Header="Cell Properties"                                              
+                                Header="Properties"                                              
                                 x:Name="CellPropertiesExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
