@@ -631,7 +631,7 @@
                                     <TextBlock Text="Membrane" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="MembReacListBox" MinHeight="20" 
+                                    <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
@@ -735,7 +735,7 @@
                                     <TextBlock Text="Cytosol" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" 
+                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
