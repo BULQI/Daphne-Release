@@ -108,7 +108,7 @@
         <DataTemplate x:Key="Distr_TDE_dgCell_Editing">
             <StackPanel Orientation="Vertical">
                 <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
-                <local:ParamDistrControl HorizontalAlignment="Left"
+                <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </DataTemplate>
@@ -142,7 +142,7 @@
         <DataTemplate x:Key="Distr_Death_TDE_Template">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
-                <local:ParamDistrControl HorizontalAlignment="Left"
+                <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </DataTemplate>
@@ -236,7 +236,7 @@
                 <!-- starting state -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,5">
                     <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" />
-                    <local:ParamDistrControl DataContext="{Binding death_driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" 
+                    <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding death_driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" 
                                              HorizontalAlignment="Right" VerticalAlignment="Top"/>
                 </StackPanel>
 
@@ -631,7 +631,7 @@
                                     <TextBlock Text="Membrane" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="MembReacListBox" MinHeight="20" 
+                                    <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
@@ -735,7 +735,7 @@
                                     <TextBlock Text="Cytosol" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" 
+                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"

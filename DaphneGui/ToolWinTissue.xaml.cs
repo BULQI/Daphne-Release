@@ -269,7 +269,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         protected virtual void CellPopTabItem_Loaded(object sender, RoutedEventArgs e)
         {
-            CellPopControl.CellPopsListBox.SelectedIndex = 0;
         }
 
         /// <summary>

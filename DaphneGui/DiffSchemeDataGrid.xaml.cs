@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Daphne;
 using System.Collections.Specialized;
+using System.Reflection;
 using System.Collections.ObjectModel;
 
 namespace DaphneGui
@@ -27,7 +28,6 @@ namespace DaphneGui
         {
             InitializeComponent();
         }
-
 
         #region context_menus
         private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
@@ -45,9 +45,11 @@ namespace DaphneGui
                 string guid = MainWindow.SOP.Protocol.findGeneGuid(gene_name, MainWindow.SOP.Protocol);
                 if (isSelected && guid != null && guid.Length > 0)
                 {
-                    diff_scheme.genes.Remove(guid);
+                    //diff_scheme.genes.Remove(guid);
+                    diff_scheme.DeleteGene(guid);
                 }
-            }
+          }
+                    
         }
 
         private void ContextMenuDeleteStates_Click(object sender, RoutedEventArgs e)
@@ -57,24 +59,28 @@ namespace DaphneGui
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (diff_scheme == null) return;
 
-            foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
+            List<int> rowsToDelete = new List<int>();   //will contain a list of row indices to delete (ascending order)
+            foreach (var n in dataGrid.SelectedItems)
             {
-                if (dataGrid.SelectedItems.Contains(diffrow))
-                {
-                    int index = diff_scheme.activationRows.IndexOf(diffrow);
-                    string stateToDelete = diff_scheme.Driver.states[index];
-
-                    //this deletes the column from the differentiation regulators grid
-                    //to do below.....
-                    //DeleteDiffRegGridColumn(stateToDelete);
-
-                    //this removes the activation row from the differentiation scheme
-                    diff_scheme.RemoveActivationRow(diffrow);
-                }
+                var currentRowIndex = dataGrid.Items.IndexOf(n);
+                rowsToDelete.Add(currentRowIndex);
             }
 
+            //Reverse the order to make it easy to delete states from diff_scheme
+            rowsToDelete.Sort();
+            rowsToDelete.Reverse();
+            
+
+            foreach (int i in rowsToDelete)
+            {
+                //Delete state from diff_scheme - the order of rows matches the order in diff_scheme
+                diff_scheme.DeleteState(i);
+            }
+
+            //Update row headers in both grids
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
             DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
+
         }
 
         private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
@@ -407,6 +413,7 @@ namespace DaphneGui
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
             }
+
         }
 
         public static void update_datagrid_rowheaders(DataGrid datagrid)
@@ -419,7 +426,7 @@ namespace DaphneGui
                 DataGridRow row = (DataGridRow)datagrid.ItemContainerGenerator.ContainerFromIndex(i);
                 if (row == null) continue;
                 DataGridRowHeader dgr = new DataGridRowHeader();
-                dgr.Content = diffScheme.Driver.states[i];
+                //dgr.Content = diffScheme.Driver.states[i];
 
                 dgr.DataContext = diffScheme.Driver;
                 Binding binding = new Binding(string.Format("states[{0}]", i));
@@ -476,13 +483,17 @@ namespace DaphneGui
 
         #endregion
 
-        private void EpigeneticMapGridDiv_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var tmp = sender as DataGrid;
-            if (tmp == null) return;
-            var index = tmp.SelectedIndex;
-            var t1 = tmp.SelectedItem;
+            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
+            int x = 0;
+            x++;
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, null);
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, diff_scheme);
 
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
+            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
+            //DataContext = diff_scheme;
         }
     }
 

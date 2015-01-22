@@ -81,7 +81,7 @@
         <!-- starting state -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
             <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
-            <local:ParamDistrControl DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
+            <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
         </StackPanel>
         
         <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
@@ -104,7 +104,7 @@
             VirtualizingStackPanel.IsVirtualizing="False" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
-            SelectionChanged="EpigeneticMapGridDiv_SelectionChanged"
+            
             ItemsSource="{Binding activationRows}"
             >
             
@@ -182,6 +182,7 @@
                     </Style.Triggers>
                 </Style>
             </DataGrid.RowHeaderStyle>
+            
             <DataGrid.RowHeaderTemplate>
                 <DataTemplate>
                     <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" />

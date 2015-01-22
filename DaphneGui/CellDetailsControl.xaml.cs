@@ -963,7 +963,6 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-
             DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(combo);
             if (dataGrid == null) return;
             ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
