@@ -225,51 +225,7 @@ namespace DaphneGui
         public CellInfo SelectedCellInfo { get; set; }
         public ObservableCollection<CellMolecularInfo> currentConcs { get; set; }
 
-        /// <summary>
-        /// custom routed command for delete vcr data
-        /// </summary>
-        public static RoutedCommand ClearVCRDataCommand = new RoutedCommand();
-
-        /// <summary>
-        /// executed command handler for clear vcr data
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void CommandBindingClearVCRData_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            string messageBoxText = "Are you sure you want to clear the vcr data file?";
-            string caption = "Clear vcr data file";
-            MessageBoxButton button = MessageBoxButton.YesNo;
-            MessageBoxImage icon = MessageBoxImage.Warning;
-
-            // Display message box
-            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-
-            // Process message box results
-            if (result == MessageBoxResult.Yes)
-            {
-                // prevent playback of half-finished simulation
-                VCR_Toolbar.IsEnabled = false;
-                if (vcrControl != null)
-                {
-                    vcrControl.ReleaseVCR();
-                }
-                DataBasket.hdf5file.clearFile();
-                DataBasket.currentExperimentID = -1;
-                System.Windows.MessageBox.Show("All file entries cleared!");
-            }
-        }
-
-        /// <summary>
-        /// can execute command handler for clear vcr data
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void CommandBindingClearVCRData_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
-
+        public static RoutedCommand SelectReportFolderCommand = new RoutedCommand();
         public static DocumentWindow ST_VTKDisplayDocWindow;
         public static CellStudioToolWindow ST_CellStudioToolWindow;
         public static ComponentsToolWindow ST_ComponentsToolWindow;
@@ -617,29 +573,6 @@ namespace DaphneGui
             }
 
             vcrControl = new VCRControl();
-
-            // hdf5
-            bool proceedHDF5 = true;
-
-            if (sim == null || SimulationBase.dataBasket == null)
-            {
-                MessageBox.Show("Need valid simulation and databasket object prior to initializing the hdf5 object.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
-                proceedHDF5 = false;
-            }
-            else
-            // this may have to come from some gui selection (which file do you want to open or create...?)
-            // and likely we need to do this in a different place, i.e. with a handler
-            // the file must get openend before a run or else the simulation will crash
-            if (DataBasket.hdf5file.initialize("framedata.hd5") == false)
-            {
-                MessageBox.Show("File might be currently open or disk cannot be accessed.", "Error creating HDF5 file", MessageBoxButton.OK, MessageBoxImage.Error);
-                proceedHDF5 = false;
-            }
-
-            if (proceedHDF5 == false)
-            {
-                clearVCRdata.IsEnabled = false;
-            }
 
             //setup render skin 
             /*
@@ -1167,16 +1100,26 @@ namespace DaphneGui
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            // if the file is open we'll have to close it; ask the user if that's what they want
+            // if the file is open we'll have to close it
             if (DataBasket.hdf5file.isOpen() == true)
             {
-                // we may want this verbosity of warnings but perhaps it's a burden to click through so many dialogs; maybe get requirements from Tom and Grace
-                //if (MessageBox.Show("The HDF5 file is currently open. Do you want to proceed and close it?", "HDF5 open", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                //{
-                //    return;
-                //}
                 // close the file and all open groups
                 DataBasket.hdf5file.close(true);
+            }
+
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            dlg.InitialDirectory = sim.Reporter.AppPath;
+            dlg.DefaultExt = ".hdf5";
+            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5"; 
+
+            // Show open file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process open file dialog box results
+            if (result == true)
+            {
+                DataBasket.hdf5file.initialize(dlg.FileName);
             }
 
             if (DataBasket.hdf5file.openRead() == false)
@@ -1185,57 +1128,28 @@ namespace DaphneGui
                 return;
             }
 
-            // find the experiment names and with them the number of experiments
-            List<string> expNames = DataBasket.hdf5file.subGroupNames("/Experiments_VCR");
-            string selectedExp = "";
+            string protocolString = null;
 
-            if (expNames.Count > 0)
-            {
-                // populate the dialog with expNames
-                PastExperiments past = new PastExperiments(expNames);
-
-                if (past.ShowDialog() == true)
-                {
-                    int index = past.SelectedExperiment;
-
-                    if (index > -1)
-                    {
-                        selectedExp = expNames[index];
-                    }
-                }
-
-                // now load it if there was a valid selection
-                if (selectedExp != "")
-                {
-                    string protocolString = null;
-
-                    DataBasket.currentExperimentID = DataBasket.extractExperimentId(selectedExp);
-                    // open the experiment parent group
-                    DataBasket.hdf5file.openGroup("/Experiments_VCR/" + selectedExp);
-                    // read the protocol string
-                    DataBasket.hdf5file.readString("Protocol", ref protocolString);
-                    // close the file and all groups
-                    DataBasket.hdf5file.close(true);
-
-                    // do the loading
-                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
-                    lockAndResetSim(true, ReadJson(protocolString));
-                    if (loadSuccess == false)
-                    {
-                        return;
-                    }
-                    MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
-                    // this function does not exist currently, do we need this call?
-                    //sim.runStatSummary();
-                    vcrControl.LastFrame = false;
-                    GUIUpdate(DataBasket.currentExperimentID, true);
-                    displayTitle("Loaded past run " + selectedExp);
-                    return;
-                }
-            }
-
-            // if we get here the file is still open, close the file and all groups
+            // open the experiment parent group
+            DataBasket.hdf5file.openGroup("/Experiment_VCR/");
+            // read the protocol string
+            DataBasket.hdf5file.readString("Protocol", ref protocolString);
+            // close the file and all groups
             DataBasket.hdf5file.close(true);
+
+            // do the loading
+            MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+            lockAndResetSim(true, ReadJson(protocolString));
+            if (loadSuccess == false)
+            {
+                return;
+            }
+            MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+            // this function does not exist currently, do we need this call?
+            //sim.runStatSummary();
+            vcrControl.LastFrame = false;
+            GUIUpdate(true, true);
+            displayTitle("Loaded past run " + DataBasket.hdf5file.FileName);
         }
 
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
@@ -1429,8 +1343,23 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
         }
+        
+        /// <summary>
+        /// CanExecute method for select report folder command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CommandBindingSelectReportFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
 
-        private void setReporterFolder_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Execute method for select report folder command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CommandBindingSelectReportFolder_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
 
@@ -1439,6 +1368,9 @@ namespace DaphneGui
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 sim.Reporter.AppPath = dlg.SelectedPath;
+                if (sim.Reporter.AppPath.Substring(sim.Reporter.AppPath.Length - 1, 1) != @"\") {
+                    sim.Reporter.AppPath += @"\";
+                }
             }
         }
 
@@ -1754,7 +1686,8 @@ namespace DaphneGui
             mutex = true;
 
             saveTempFiles();
-            updateGraphicsAndGUI();
+            // don't handle the vcr
+            updateGraphicsAndGUI(false);
         }
 
 
@@ -2367,7 +2300,7 @@ namespace DaphneGui
 
                                     // update the gui; this is a non-issue if an application close just got requested, so may get skipped
                                     vcrControl.LastFrame = true;
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), true, false);
                                 }
                             }
                         }
@@ -2379,7 +2312,7 @@ namespace DaphneGui
                             // reporter and hdf5 close
                             closeOutputFiles();
                         }
-                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
+                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateOneArg(updateGraphicsAndGUI), true);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
                     else if (vcrControl != null && vcrControl.IsActive() == true)
@@ -2407,7 +2340,8 @@ namespace DaphneGui
 
         // gui update delegate; needed because we can't access the gui elements directly; they are part of a different thread
         private delegate void GUIDelegateNoArgs();
-        private delegate void GUIDelegateTwoArgs(int iArg, bool bArg);
+        private delegate void GUIDelegateOneArg(bool bArg);
+        private delegate void GUIDelegateTwoArgs(bool bArg1, bool bArg2);
 
         // close the application
         private void CloseApp()
@@ -2424,9 +2358,9 @@ namespace DaphneGui
         }
 
         // re-enable the gui elements that got disabled during a simulation run
-        private void GUIUpdate(int expID, bool force)
+        private void GUIUpdate(bool handleVCR, bool force)
         {
-            if (expID >= 0 && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR(expID) == true)
+            if (handleVCR == true && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR() == true)
             {
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
@@ -2571,12 +2505,12 @@ namespace DaphneGui
             return true;
         }
 
-        private void updateGraphicsAndGUI()
+        private void updateGraphicsAndGUI(bool handleVCR)
         {
             lockAndResetSim(false, ReadJson(""));
             // pass current experiment id to allow vcr playback even for partial runs
             vcrControl.LastFrame = true;
-            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), DataBasket.currentExperimentID, false);
+            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), handleVCR, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
             this.VTKDisplayDocWindow.Open();
@@ -2729,15 +2663,15 @@ namespace DaphneGui
                     if (Properties.Settings.Default.skipDataWrites == false)
                     {
                         sim.Reporter.StartReporter(sim);
-                        DataBasket.hdf5file.openWrite(false);
-                        // super-group containing all experiments
-                        DataBasket.hdf5file.openCreateGroup("/Experiments_VCR");
 
-                        // for now pick a safe id, highest id + 1
-                        DataBasket.currentExperimentID = DataBasket.findHighestExperimentId() + 1;
-
+                        if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.AppPath, sim.Reporter.FileName, "vcr", ".hdf5", true) == false)
+                        {
+                            MessageBox.Show("Error creating HDF5 file. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        DataBasket.hdf5file.openWrite(true);
                         // group for this experiment
-                        DataBasket.hdf5file.createGroup(String.Format("Experiment_{0}_VCR", DataBasket.currentExperimentID));
+                        DataBasket.hdf5file.createGroup("/Experiment_VCR");
+
                         // the protocol as string; needed to reload arbitrary past experiments
                         DataBasket.hdf5file.writeString("Protocol", sop.Protocol.SerializeToString());
                         // frames group
@@ -2800,14 +2734,25 @@ namespace DaphneGui
 
         public void DisplayCellInfo(int cellID)
         {
+            if (cellID >= SimulationBase.dataBasket.Cells.Count)
+            {
+                MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            else if (cellID < 0)
+            {
+                MessageBox.Show("Please enter a cell ID greater than 0.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
             Cell selectedCell = SimulationBase.dataBasket.Cells[cellID];
             List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
-            txtCellId.Content = cellID.ToString();
+            txtCellIdent.Text = cellID.ToString();
 
             //enhancement - get cell location, velocity, force
             //double cellConc = selectedCell.
-            tbCellConc.Text = "Cell Id: " + cellID; // +", Concentration = " + cellConc;
+            tbMolConcs.Text = "Cell Id: " + cellID;
 
             SelectedCellInfo.ciList.Clear();
             currentConcs.Clear();
@@ -2899,6 +2844,26 @@ namespace DaphneGui
                 }
                 //lvCellDiff.ItemsSource = activities;
                 lvCellDiff.ItemsSource = gene_activations;
+            }
+
+            int nDivState = selectedCell.DividerState;
+            if (selectedCell.Divider.State != null)
+            {
+                ObservableCollection<CellGeneInfo> gene_activations2 = new ObservableCollection<CellGeneInfo>();
+                txtDivCellState.Text = selectedCell.Divider.State[nDivState];
+                ObservableCollection<double> activities = new ObservableCollection<double>();
+                int len = selectedCell.Divider.activity.GetLength(1);
+                for (int i = 0; i < len; i++)
+                {
+                    CellGeneInfo cgi = new CellGeneInfo();
+                    if (i > len - 1)
+                        break;
+
+                    cgi.Name = selectedCell.Genes[selectedCell.Divider.gene_id[i]].Name;
+                    cgi.Activation = selectedCell.Divider.activity[nDivState, i];
+                    gene_activations2.Add(cgi);
+                }
+                lvCellDiv.ItemsSource = gene_activations2;
             }
 
             ToolWinCellInfo.Open();
@@ -3497,6 +3462,13 @@ namespace DaphneGui
             gc.CreatePipelines();
             UpdateGraphics();
             (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+
+        private void btnShowCellInfoById_Click(object sender, RoutedEventArgs e)
+        {
+            int cellid;
+            bool result = int.TryParse(txtCellIdent.Text, out cellid);
+            DisplayCellInfo(cellid);
         }
     }
 

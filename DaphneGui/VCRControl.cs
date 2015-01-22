@@ -65,9 +65,8 @@ namespace DaphneGui
         /// <summary>
         /// create a data reader object
         /// </summary>
-        /// <param name="expID">experiment id</param>
         /// <returns>false for failure or empty simulation</returns>
-        public bool OpenVCR(int expID)
+        public bool OpenVCR()
         {
 #if USE_DATACACHE
             dataCache = new Dictionary<int, List<DBRow>>();
@@ -85,7 +84,7 @@ namespace DaphneGui
                 }
                 frameNames.Clear();
                 // find the frame names and with them the number of frames
-                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR/VCR_Frames", expID));
+                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiment_VCR/VCR_Frames"));
 
                 if (frameNames.Count == 0)
                 {
@@ -93,7 +92,7 @@ namespace DaphneGui
                 }
 
                 // open the parent group for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
+                DataBasket.hdf5file.openGroup(String.Format("/Experiment_VCR"));
 
                 // open the group that holds the frames for this experiment
                 DataBasket.hdf5file.openGroup("VCR_Frames");

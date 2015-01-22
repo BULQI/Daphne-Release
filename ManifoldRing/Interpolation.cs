@@ -270,6 +270,11 @@ namespace ManifoldRing
     /// </summary>
     public class Trilinear3D : NodeInterpolator
     {
+        //added to improve performce
+        int NodePerSide0;
+        int NodePerSide1;
+        int NodePerSide2;
+
         public Trilinear3D() : base()
         {
             interpolationOperator = new LocalMatrix[8];
@@ -282,6 +287,10 @@ namespace ManifoldRing
             {
                 gradientOperator[i] = new LocalMatrix[24];
             }
+            
+            NodePerSide0 = m.NodesPerSide(0);
+            NodePerSide1 = m.NodesPerSide(1);
+            NodePerSide2 = m.NodesPerSide(2);
         }
 
         // Don't need to account for toroidal BCs with this low-order scheme. 
@@ -332,15 +341,21 @@ namespace ManifoldRing
         // Gradient operators indices could be created and stored once when the NodeInterpolator is instantiated, similar to Laplacian. 
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
-            // int[] idx = m.localToIndexArray(x);
-            int[] idx = m.localToIndexArray(new DenseVector(x));
 
-            int nps0 = m.NodesPerSide(0);
-            int nps1 = m.NodesPerSide(1);
-            int nps2 = m.NodesPerSide(2);
-            int nps01 = nps0 * nps1;
+            //int[] idx = m.localToIndexArray(new DenseVector(x));
+
+            int[] idx = new int[3];
             double StepSize = m.StepSize();
+            idx[0] = (int)(x[0] / StepSize);
+            idx[1] = (int)(x[1] / StepSize);
+            idx[2] = (int)(x[2] / StepSize);
 
+            int nps0 = NodePerSide0;
+            int nps1 = NodePerSide1;
+            int nps2 = NodePerSide2;
+            int nps01 = nps0 * nps1;
+            //tmp variable to precompute for perfomanc
+            int index_j, index_k, index_jk;
 
             if (idx[0] == nps0 - 1)
             {
@@ -360,32 +375,29 @@ namespace ManifoldRing
                    dz = x[2] / StepSize - idx[2],
                    dxmult, dymult, dzmult,
                    coeff;
-
             int n = 0;
-            //LocalMatrix[] gradientOperatorD;
             for (int di = 0; di < 2; di++)
             {
-                dxmult = di == 0 ? (1 - dx) : dx;
-                coeff = dxmult / (2 * StepSize);
-
+                dxmult = (di == 0 ? (1 - dx) : dx)/(2 *StepSize);
                 for (int dj = 0; dj < 2; dj++)
                 {
-                    dymult = dj == 0 ? (1 - dy) : dy;
-                    coeff *= dymult;
+                    dymult = dxmult *(dj == 0 ? (1 - dy) : dy);
+                    index_j = (idx[1] + dj) * nps0;
+                    index_jk = index_j + (idx[1] + dj) * nps0;
                     for (int dk = 0; dk < 2; dk++)
                     {
                         dzmult = dk == 0 ? (1 - dz) : dz;
-                        coeff *= dzmult;
-
+                        coeff = dymult * dzmult;
+                        index_k = (idx[2] + dk) * nps01;
+                        index_jk = index_j + index_k;
                         // 0th element:
                         if (idx[0] + di == nps0 - 1)
                         {
                             if (toroidal)
                             {
-                                gradientOperator[0][n].Index = (1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[0][n].Index = index_jk + 1; //=(1) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
                                 gradientOperator[0][n].Coefficient = coeff;
-                                //gradientOperator[0][n + 1].Index = (idx[0] + di - 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
-                                gradientOperator[0][n + 1].Index = gradientOperator[0][n].Index - 1 + (idx[0] + di - 1); // +(idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[0][n + 1].Index = (idx[0] + di - 1) + index_jk; //=(idx[0] + di - 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n + 1].Coefficient = - coeff;
                                 //gradientOperator[0][n + 2].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n + 2].Index = 0;
@@ -393,7 +405,7 @@ namespace ManifoldRing
                             }
                             else
                             {
-                                gradientOperator[0][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[0][n].Index = (idx[0] + di) + index_jk; // (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n].Coefficient = 3 * coeff;
                                 gradientOperator[0][n + 1].Index = gradientOperator[0][n].Index - 1; // (idx[0] + di - 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n + 1].Coefficient = -4 * coeff;
@@ -405,16 +417,16 @@ namespace ManifoldRing
                         {
                             if (toroidal)
                             {
-                                gradientOperator[0][n].Index = (idx[0] + di + 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[0][n].Index = (idx[0] + di + 1) + index_jk; // (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n].Coefficient = coeff;
-                                gradientOperator[0][n + 1].Index = (nps0 - 2) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[0][n + 1].Index = (nps0 - 2) + index_jk;
                                 gradientOperator[0][n + 1].Coefficient = -coeff;
                                 gradientOperator[0][n + 2].Index = 0; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n + 2].Coefficient = 0.0;
                             }
                             else
                             {
-                                gradientOperator[0][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[0][n].Index = (idx[0] + di) + index_jk;
                                 gradientOperator[0][n].Coefficient = -3 * coeff;
                                 gradientOperator[0][n + 1].Index = gradientOperator[0][n].Index + 1; // (idx[0] + di + 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[0][n + 1].Coefficient = 4 * coeff;
@@ -424,7 +436,7 @@ namespace ManifoldRing
                         }
                         else
                         {
-                            gradientOperator[0][n].Index = (idx[0] + di + 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                            gradientOperator[0][n].Index = (idx[0] + di + 1) + index_jk;
                             gradientOperator[0][n].Coefficient = coeff;
                             gradientOperator[0][n + 1].Index = gradientOperator[0][n].Index - 2; // (idx[0] + di - 1) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                             gradientOperator[0][n + 1].Coefficient = -coeff;
@@ -437,16 +449,16 @@ namespace ManifoldRing
                         {
                             if (toroidal)
                             {
-                                gradientOperator[1][n].Index = (idx[0] + di) + nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[1][n].Index = (idx[0] + di) + nps0 + index_k;
                                 gradientOperator[1][n].Coefficient = coeff;
-                                gradientOperator[1][n + 1].Index = (idx[0] + di) + (idx[1] + dj - 1) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[1][n + 1].Index = (idx[0] + di) + index_jk - nps0;
                                 gradientOperator[1][n + 1].Coefficient = -coeff;
                                 gradientOperator[1][n + 2].Index = 0; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[1][n + 2].Coefficient = 0.0;
                             }
                             else
                             {
-                                gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[1][n].Index = (idx[0] + di) + index_jk;
                                 gradientOperator[1][n].Coefficient = 3 * coeff;
                                 gradientOperator[1][n + 1].Index = gradientOperator[1][n].Index - nps0; // (idx[0] + di) + (idx[1] + dj - 1) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[1][n + 1].Coefficient = -4 * coeff;
@@ -458,16 +470,16 @@ namespace ManifoldRing
                         {
                             if (toroidal)
                             {
-                                gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj + 1) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[1][n].Index = (idx[0] + di) + index_jk + nps0;
                                 gradientOperator[1][n].Coefficient = coeff;
-                                gradientOperator[1][n + 1].Index = (idx[0] + di) + (nps1 - 2) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[1][n + 1].Index = (idx[0] + di) + (nps1 - 2) * nps0 + index_k;
                                 gradientOperator[1][n + 1].Coefficient = -coeff;
                                 gradientOperator[1][n + 2].Index = 0; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[1][n + 2].Coefficient = 0.0;
                             }
                             else
                             {
-                                gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[1][n].Index = (idx[0] + di) + index_jk;
                                 gradientOperator[1][n].Coefficient = -3 * coeff;
                                 gradientOperator[1][n + 1].Index = gradientOperator[1][n].Index + nps0; // (idx[0] + di) + (idx[1] + dj + 1) * nps0 + (idx[2] + dk) * nps01;
                                 gradientOperator[1][n + 1].Coefficient = 4 * coeff;
@@ -477,7 +489,7 @@ namespace ManifoldRing
                         }
                         else
                         {
-                            gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj + 1) * nps0 + (idx[2] + dk) * nps01;
+                            gradientOperator[1][n].Index = (idx[0] + di) + index_jk + nps0;
                             gradientOperator[1][n].Coefficient = coeff;
                             //gradientOperator[1][n + 1].Index = (idx[0] + di) + (idx[1] + dj - 1) * nps0 + (idx[2] + dk) * nps01;
                             gradientOperator[1][n + 1].Index = gradientOperator[1][n].Index - 2 * nps0;
@@ -491,16 +503,16 @@ namespace ManifoldRing
                         {
                             if (toroidal)
                             {
-                                gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (1) * nps01;
+                                gradientOperator[2][n].Index = (idx[0] + di) + index_j + nps01;
                                 gradientOperator[2][n].Coefficient = coeff;
-                                gradientOperator[2][n + 1].Index = gradientOperator[2][n].Index + (idx[2] + dk - 2) * nps01; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk - 1) * nps01;
+                                gradientOperator[2][n + 1].Index = (idx[0] + di) + index_jk - nps01;
                                 gradientOperator[2][n + 1].Coefficient = -coeff;
-                                gradientOperator[2][n + 2].Index = 0; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[2][n + 2].Index = 0;
                                 gradientOperator[2][n + 2].Coefficient = 0.0;
                             }
                             else
                             {
-                                gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[2][n].Index = (idx[0] + di) + index_jk;
                                 gradientOperator[2][n].Coefficient = 3 * coeff;
                                 gradientOperator[2][n + 1].Index = gradientOperator[2][n].Index - nps01; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk - 1) * nps01;
                                 gradientOperator[2][n + 1].Coefficient = -4 * coeff;
@@ -512,16 +524,16 @@ namespace ManifoldRing
                         {
                             if (toroidal)
                             {
-                                gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk + 1) * nps01;
+                                gradientOperator[2][n].Index = (idx[0] + di) + index_jk + nps01; // (idx[1] + dj) * nps0 + (idx[2] + dk + 1) * nps01;
                                 gradientOperator[2][n].Coefficient = coeff;
-                                gradientOperator[2][n + 1].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (nps2 - 2) * nps01;
+                                gradientOperator[2][n + 1].Index = (idx[0] + di) + index_j + (nps2 - 2) * nps01;
                                 gradientOperator[2][n + 1].Coefficient = -coeff;
-                                gradientOperator[2][n + 2].Index = 0; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[2][n + 2].Index = 0;
                                 gradientOperator[2][n + 2].Coefficient = 0.0;
                             }
                             else
                             {
-                                gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                                gradientOperator[2][n].Index = (idx[0] + di) + index_jk;
                                 gradientOperator[2][n].Coefficient = -3 * coeff;
                                 gradientOperator[2][n + 1].Index = gradientOperator[2][n].Index + nps01; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk + 1) * nps01;
                                 gradientOperator[2][n + 1].Coefficient = 4 * coeff;
@@ -531,12 +543,11 @@ namespace ManifoldRing
                         }
                         else
                         {
-                            gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk + 1) * nps01;
+                            gradientOperator[2][n].Index = (idx[0] + di) + index_jk + nps01; // (idx[1] + dj) * nps0 + (idx[2] + dk + 1) * nps01;
                             gradientOperator[2][n].Coefficient = coeff;
-                            // gradientOperator[2][n + 1].Index = (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk - 1) * nps01;
-                            gradientOperator[2][n + 1].Index = gradientOperator[2][n].Index - 2 * nps01; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk - 1) * nps01;
+                            gradientOperator[2][n + 1].Index = gradientOperator[2][n].Index - 2 * nps01;
                             gradientOperator[2][n + 1].Coefficient = -coeff;
-                            gradientOperator[2][n + 2].Index = 0; // (idx[0] + di) + (idx[1] + dj) * nps0 + (idx[2] + dk) * nps01;
+                            gradientOperator[2][n + 2].Index = 0;
                             gradientOperator[2][n + 2].Coefficient = 0.0;
                         }                     
                         n+=3;
@@ -544,25 +555,42 @@ namespace ManifoldRing
                 }
             }
 
-            //for (int i=0; i<3; i++)
-            //{
-            //    var tmp = gradientOperator[i];
-            //    List<LocalMatrix> lmlist = new List<LocalMatrix>();
-            //    for (int j = 0; j< tmp.Length; j++)
-            //    {
-            //        //Console.WriteLine(string.Format("i={0} j={1} index={2}", i, j, tmp[j].Index));
-            //        lmlist.Add(tmp[j]);
-            //    }
-            //    //sort lmlist
-            //    var output = lmlist.OrderBy(xx => xx.Index);
+            //compare old and new methods
+            LocalMatrix[][] savedMatrx = new LocalMatrix[m.Dim][];
+            for (int i = 0; i < 3; i++)
+            {
+                savedMatrx[i] = new LocalMatrix[24];
+                for (int j = 0; j < 24; j++)
+                {
+                    savedMatrx[i][j].Index = gradientOperator[i][j].Index;
+                    savedMatrx[i][j].Coefficient = gradientOperator[i][j].Coefficient;
+                }
+            }
 
-            //    foreach(var item in output)
-            //    {
-            //        Console.WriteLine("index={0} coeff={1}", item.Index, item.Coefficient);
-            //    }
+            gradientMatrix_original(x);
 
-            //    Console.WriteLine("====");
-            //}
+            //compare
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 24; j++)
+                {
+                    LocalMatrix lm1 = savedMatrx[i][j];
+                    LocalMatrix lm2 = gradientOperator[i][j];
+                    if (lm1.Coefficient != lm2.Coefficient)
+                    {
+                        double xx = Math.Abs(lm1.Coefficient - lm2.Coefficient);
+                        if (xx > 0.000000000000001)
+                        {
+                            Console.WriteLine("Error: value differ");
+                        }
+                    }
+                    if (lm1.Coefficient == 0) continue;
+                    if (lm1.Index != lm2.Index)
+                    {
+                        Console.WriteLine("Error: index differ");
+                    }
+                }
+            }
             return gradientOperator;
         }
 

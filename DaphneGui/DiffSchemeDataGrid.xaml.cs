@@ -13,6 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Daphne;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace DaphneGui
 {
@@ -33,9 +35,6 @@ namespace DaphneGui
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
-
-            var dx = dataGrid.DataContext;
-
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (diff_scheme == null) return;
 
@@ -47,17 +46,8 @@ namespace DaphneGui
                 if (isSelected && guid != null && guid.Length > 0)
                 {
                     diff_scheme.genes.Remove(guid);
-                    dataGrid.Columns.Remove(col);
                 }
             }
-
-            //NEED TO UPDATE THE LIST OF AVAILABLE GENES IN THE COMBO BOX
-            //Easiest to create a new updated 'Add a gene' column and replace old one with the new one
-            DataGridTextColumn dgtc = dataGrid.Columns.Last() as DataGridTextColumn;
-            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
-            DataGridTextColumn dgtc_new = cdc.CreateUnusedGenesColumn();
-            dataGrid.Columns.Remove(dgtc);
-            dataGrid.Columns.Add(dgtc_new);
         }
 
         private void ContextMenuDeleteStates_Click(object sender, RoutedEventArgs e)
@@ -84,10 +74,7 @@ namespace DaphneGui
             }
 
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
-            //update the reg grid
-            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
-            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
-
+            DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
         }
 
         private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
@@ -102,12 +89,7 @@ namespace DaphneGui
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (diff_scheme == null) return;
 
-            diff_scheme.AddState(ads.StateName);
-
-            DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
-            DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, diff_scheme);
-            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
-            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);         
+            diff_scheme.AddState(ads.StateName);            
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -166,6 +148,18 @@ namespace DaphneGui
             new FrameworkPropertyMetadata(null,
             null));
 
+        public static readonly DependencyProperty GeneListProperty =
+            DependencyProperty.RegisterAttached("GeneList",
+            typeof(ObservableCollection<string>), typeof(DiffSchemeDataGrid),
+                new FrameworkPropertyMetadata(null,
+                new PropertyChangedCallback(OnGeneListChanged)));
+
+        public static readonly DependencyProperty StateListProperty =
+            DependencyProperty.RegisterAttached("StateList",
+            typeof(ObservableCollection<string>), typeof(DiffSchemeDataGrid),
+            new FrameworkPropertyMetadata(null,
+            new PropertyChangedCallback(OnStateListChanged)));
+
         /// <summary>
         /// Gets the DiffScheme property.  
         /// </summary>
@@ -192,6 +186,156 @@ namespace DaphneGui
             d.SetValue(DiffSchemeTargetProperty, value);
         }
 
+
+        public static ObservableCollection<string> GetGeneList(DependencyObject d)
+        {
+            return (ObservableCollection<string>)d.GetValue(GeneListProperty);
+        }
+
+        public static void SetGeneList(DependencyObject d, ObservableCollection<string> value)
+        {
+            d.SetValue(GeneListProperty, value);
+        }
+
+        public static ObservableCollection<string> GetStateList(DependencyObject d)
+        {
+            return (ObservableCollection<string>)d.GetValue(StateListProperty);
+        }
+
+        public static void SetStateList(DependencyObject d, ObservableCollection<string> value)
+        {
+            d.SetValue(StateListProperty, value);
+        }
+
+        private static void CreateGeneColumns(DataGrid dataGrid, ObservableCollection<string> genes)
+        {
+            //foreach (var item in dataGrid.Columns)
+            //{
+            //    var col = item as DataGridTextColumn;
+            //    if (col != null) col.Binding = null;
+            //}
+            dataGrid.Columns.Clear();
+            if (genes == null)return;
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            //create columns
+            int count = 0;
+            foreach (var gene_guid in genes)
+            {
+                if (!er.genes_dict.ContainsKey(gene_guid))
+                    continue;
+                ConfigGene gene = er.genes_dict[gene_guid];
+
+                DataGridTextColumn col = new DataGridTextColumn();
+                col.Header = gene.Name;
+                col.CanUserSort = false;
+                Binding b = new Binding(string.Format("activations[{0}]", count));
+                b.Mode = BindingMode.TwoWay;
+                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                col.Binding = b;
+                dataGrid.Columns.Add(col);
+                count++;
+            }
+            DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn();
+            dataGrid.Columns.Add(combobox_col);
+        }
+
+        private static void CreateStateColumns(DataGrid dataGrid, ObservableCollection<string> states)
+        {
+            foreach (var item in dataGrid.Columns)
+            {
+                var col = item as DataGridTemplateColumn;
+                if (col == null)continue;
+                var dt = col.HeaderTemplate as DataTemplate;
+                if (dt != null)
+                {
+                    var textBlock = dt.VisualTree;
+                    
+                }
+
+            }
+
+            dataGrid.Columns.Clear();
+            if (states == null || states.Count == 0) return;
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+
+            int count = 0;
+            ConfigTransitionScheme diffScheme = GetDiffSchemeSource(dataGrid);
+            if (diffScheme == null) return;
+            foreach (string s in states)
+            {
+                DataGridTemplateColumn col = new DataGridTemplateColumn();
+                //column header binding
+                //Binding hb = new Binding(string.Format("states[{0}]", count));
+                //hb.Mode = BindingMode.OneWay;
+                //hb.Source = diffScheme.Driver;
+                //FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
+                //txtStateName.SetValue(TextBlock.StyleProperty, null);
+                ////txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
+                //txtStateName.SetBinding(TextBlock.TextProperty, hb);
+                //col.HeaderTemplate = new DataTemplate() { VisualTree = txtStateName };
+
+                col.Header = states[count];
+
+
+                col.CanUserSort = false;
+                Binding b = new Binding(string.Format("elements[{0}]", count));
+
+                var cellTemplate = cdc.FindResource("DataGridCell_TDE_NonEditing_Template");
+                FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
+                factory.SetValue(ContentPresenter.ContentTemplateProperty, cellTemplate);
+                factory.SetBinding(ContentPresenter.ContentProperty, b);
+                col.CellTemplate = new DataTemplate { VisualTree = factory };
+
+                //editing template
+                Binding b2 = new Binding(string.Format("elements[{0}]", count));
+                b2.Mode = BindingMode.TwoWay;
+                b2.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+
+                var cellEditingTemplate = cdc.FindResource("DataGridCell_TDE_Editing_Template");
+                FrameworkElementFactory factory2 = new FrameworkElementFactory(typeof(ContentPresenter));
+                factory2.SetValue(ContentPresenter.ContentTemplateProperty, cellEditingTemplate);
+                factory2.SetBinding(ContentPresenter.ContentProperty, b2);
+                col.CellEditingTemplate = new DataTemplate { VisualTree = factory2 };
+
+                dataGrid.Columns.Add(col);
+                count++;
+            }
+        }
+
+        private static void OnGeneListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            DataGrid dataGrid = d as DataGrid;
+            ObservableCollection<string> genes = e.NewValue as ObservableCollection<string>;
+
+            dataGrid.Columns.Clear();
+            if (genes == null) return;
+
+            CreateGeneColumns(dataGrid, genes);
+            genes.CollectionChanged += (sender, e2) =>
+            {
+                genes = sender as ObservableCollection<string>;
+                CreateGeneColumns(dataGrid, genes);
+            };
+        }
+
+        private static void OnStateListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            DataGrid dataGrid = d as DataGrid;
+            ObservableCollection<string> states = e.NewValue as ObservableCollection<string>;
+
+            dataGrid.Columns.Clear();
+            if (states == null) return;
+
+            CreateStateColumns(dataGrid, states);
+            states.CollectionChanged += (sender, e2) =>
+            {
+                states = sender as ObservableCollection<string>;
+                CreateStateColumns(dataGrid, states);
+            };
+        }
+
         /// <summary>
         /// Handles changes to the MatrixSource property.
         /// </summary>
@@ -199,92 +343,21 @@ namespace DaphneGui
             DependencyPropertyChangedEventArgs e)
         {
 
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
             DataGrid dataGrid = d as DataGrid;
+            string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
+
             ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
 
-            string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
-
-            //var tmp = FindLogicalParent<CellDetailsControl>(dataGrid);
-
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
             if (DiffSchemeTarget == "EpigeneticMap")
             {
-                Binding b1 = new Binding("activationRows") { Source = diffScheme };
-                b1.Mode = BindingMode.TwoWay;
-                dataGrid.SetBinding(DataGrid.ItemsSourceProperty, b1);
-
-                //dataGrid.ItemsSource = diffScheme.activationRows;
-
-                int count = 0;
-                dataGrid.Columns.Clear();
-                foreach (var gene_guid in diffScheme.genes)
-                {
-                    if (!er.genes_dict.ContainsKey(gene_guid))
-                        continue;
-
-                    ConfigGene gene = er.genes_dict[gene_guid];
-
-                    DataGridTextColumn col = new DataGridTextColumn();
-                    col.Header = gene.Name;
-                    col.CanUserSort = false;
-                    Binding b = new Binding(string.Format("activations[{0}]", count));
-                    b.Mode = BindingMode.TwoWay;
-                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                    col.Binding = b;
-                    dataGrid.Columns.Add(col);
-                    count++;
-                }
-
-                DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn();
-                dataGrid.Columns.Add(combobox_col);
+                //CreateGeneColumns(dataGrid, diffScheme.genes);
             }
             else
             {
-                dataGrid.ItemsSource = diffScheme.Driver.DriverElements;
-                int count = 0;
-                dataGrid.Columns.Clear();
-
-                foreach (string s in diffScheme.Driver.states)
-                {
-                    DataGridTemplateColumn col = new DataGridTemplateColumn();
-
-                    //column header binding
-                    Binding hb = new Binding(string.Format("states[{0}]", count));
-                    hb.Mode = BindingMode.OneWay;
-                    hb.Source = diffScheme.Driver;
-                    FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
-                    txtStateName.SetValue(TextBlock.StyleProperty, null);
-                    //txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
-                    txtStateName.SetBinding(TextBlock.TextProperty, hb);
-                    col.HeaderTemplate = new DataTemplate() { VisualTree = txtStateName };
-
-                    col.CanUserSort = false;
-                    Binding b = new Binding(string.Format("elements[{0}]", count));
-
-                    var cellTemplate = cdc.FindResource("DataGridCell_TDE_NonEditing_Template");
-                    FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
-                    factory.SetValue(ContentPresenter.ContentTemplateProperty, cellTemplate);
-                    factory.SetBinding(ContentPresenter.ContentProperty, b);
-                    col.CellTemplate = new DataTemplate { VisualTree = factory };
-
-                    //editing template
-                    Binding b2 = new Binding(string.Format("elements[{0}]", count));
-                    b2.Mode = BindingMode.TwoWay;
-                    b2.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-
-                    var cellEditingTemplate = cdc.FindResource("DataGridCell_TDE_Editing_Template");
-                    FrameworkElementFactory factory2 = new FrameworkElementFactory(typeof(ContentPresenter));
-                    factory2.SetValue(ContentPresenter.ContentTemplateProperty, cellEditingTemplate);
-                    factory2.SetBinding(ContentPresenter.ContentProperty, b2);
-                    col.CellEditingTemplate = new DataTemplate { VisualTree = factory2 };
-
-                    dataGrid.Columns.Add(col);
-                    count++;
-                }
-
+                //CreateStateColumns(dataGrid, diffScheme.Driver.states);
                 dataGrid.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
                 dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
             }
@@ -319,6 +392,7 @@ namespace DaphneGui
 
             DataGrid dataGrid = sender as DataGrid;
             var diffScheme = GetDiffSchemeSource(dataGrid);
+            string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
             if (diffScheme == null) return;
             int index = e.Row.GetIndex();
             if (index < diffScheme.Driver.states.Count)
@@ -338,17 +412,22 @@ namespace DaphneGui
         public static void update_datagrid_rowheaders(DataGrid datagrid)
         {
             var diffScheme = GetDiffSchemeSource(datagrid);
+            string DiffSchemeTarget = GetDiffSchemeTarget(datagrid);
+
             for (int i = 0; i < diffScheme.Driver.states.Count; i++)
             {
                 DataGridRow row = (DataGridRow)datagrid.ItemContainerGenerator.ContainerFromIndex(i);
                 if (row == null) continue;
                 DataGridRowHeader dgr = new DataGridRowHeader();
+                dgr.Content = diffScheme.Driver.states[i];
+
                 dgr.DataContext = diffScheme.Driver;
                 Binding binding = new Binding(string.Format("states[{0}]", i));
                 binding.NotifyOnTargetUpdated = true;
                 binding.Mode = BindingMode.TwoWay;
                 binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
+
                 row.Header = dgr;
             }
         }
@@ -396,6 +475,15 @@ namespace DaphneGui
         }
 
         #endregion
+
+        private void EpigeneticMapGridDiv_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var tmp = sender as DataGrid;
+            if (tmp == null) return;
+            var index = tmp.SelectedIndex;
+            var t1 = tmp.SelectedItem;
+
+        }
     }
 
 

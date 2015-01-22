@@ -13,7 +13,7 @@ namespace Daphne
     /// </summary>
     public class HDF5File
     {
-        private string filename;
+        private string fullPath, fileName;
         private H5FileId fileId;
         // groups can be nested, so maintain a stack of open ones
         // note that this will only work for exclusive reads or writes, not mixed mode
@@ -23,9 +23,21 @@ namespace Daphne
 
         public HDF5File()
         {
-            filename = "";
+            fullPath = "";
+            fileName = "";
             groupStack = new List<H5GroupId>();
             subGroups = new List<string>();
+        }
+
+        /// <summary>
+        /// access the file name
+        /// </summary>
+        public string FileName
+        {
+            get
+            {
+                return fileName;
+            }
         }
 
         /// <summary>
@@ -37,10 +49,34 @@ namespace Daphne
         {
             if (fileId == null)
             {
-                filename = fn;
+                fullPath = fn;
+                // extract the last part, file name alone
+                fileName = System.IO.Path.GetFileName(fullPath);
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// assemble the full path given it's parts; unique upon demand
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="userDef"></param>
+        /// <param name="extension"></param>
+        /// <returns></returns>
+        public bool assembleFullPath(string path, string name, string userDef, string extension, bool unique)
+        {
+            string buildPath = path + name + "_" + userDef + extension;
+            int version = 1;
+
+            // unique name
+            while(unique == true && File.Exists(buildPath) == true)
+            {
+                buildPath = path + name + "_" + userDef + "(" + version + ")" + extension;
+                version++;
+            }
+            return initialize(buildPath);
         }
 
         /// <summary>
@@ -49,13 +85,13 @@ namespace Daphne
         /// </summary>
         public void openWrite(bool trunc)
         {
-            if (filename != "" && fileId == null)
+            if (fullPath != "" && fileId == null)
             {
-                if (trunc == false && File.Exists(filename) == true)
+                if (trunc == false && File.Exists(fullPath) == true)
                 {
                     try
                     {
-                        fileId = H5F.open(filename, H5F.OpenMode.ACC_RDWR);
+                        fileId = H5F.open(fullPath, H5F.OpenMode.ACC_RDWR);
                     }
                     catch
                     {
@@ -65,7 +101,7 @@ namespace Daphne
                 {
                     try
                     {
-                        fileId = H5F.create(filename, H5F.CreateMode.ACC_TRUNC);
+                        fileId = H5F.create(fullPath, H5F.CreateMode.ACC_TRUNC);
                     }
                     catch
                     {
@@ -79,11 +115,11 @@ namespace Daphne
         /// </summary>
         public bool openRead()
         {
-            if (filename != "" && File.Exists(filename) == true && fileId == null)
+            if (fullPath != "" && File.Exists(fullPath) == true && fileId == null)
             {
                 try
                 {
-                    fileId = H5F.open(filename, H5F.OpenMode.ACC_RDONLY);
+                    fileId = H5F.open(fullPath, H5F.OpenMode.ACC_RDONLY);
                 }
                 catch
                 {
@@ -355,15 +391,18 @@ namespace Daphne
         /// <param name="data">the string to be written</param>
         public void writeString(string name, string data)
         {
-            long[] dims = new long[] { data.Length };
+            if (groupStack.Count > 0)
+            {
+                long[] dims = new long[] { data.Length };
 
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
-            H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
-            H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+                H5DataSpaceId spaceId = H5S.create_simple(dims.Length, dims);
+                H5DataSetId dset = H5D.create(groupStack.Last(), name, typeId, spaceId);
 
-            H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
-            H5D.close(dset);
-            H5S.close(spaceId);
+                H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
+                H5D.close(dset);
+                H5S.close(spaceId);
+            }
         }
 
         /// <summary>
@@ -373,15 +412,18 @@ namespace Daphne
         /// <param name="data">data array</param>
         public void readString(string name, ref string data)
         {
-            H5DataSetId dset = H5D.open(groupStack.Last(), name);
-            H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
-            long size = H5D.getStorageSize(dset) / sizeof(char);
+            if (groupStack.Count > 0)
+            {
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
+                H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+                long size = H5D.getStorageSize(dset) / sizeof(char);
 
-            char[] tmp = new char[size];
+                char[] tmp = new char[size];
 
-            H5D.read(dset, typeId, new H5Array<char>(tmp));
-            data = new string(tmp);
-            H5D.close(dset);
+                H5D.read(dset, typeId, new H5Array<char>(tmp));
+                data = new string(tmp);
+                H5D.close(dset);
+            }
         }
 
         /// <summary>
