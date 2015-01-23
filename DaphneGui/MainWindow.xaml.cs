@@ -3469,7 +3469,8 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void CellsColorByCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            //react only to replace, so that delete/add cellpop wont cause refresh
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0) return;
             //reset display
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();

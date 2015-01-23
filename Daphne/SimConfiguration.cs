@@ -7076,6 +7076,18 @@ namespace Daphne
             }
         }
 
+        public void setGeneState(string key, double activation)
+        {
+            if (cgState.geneDict.ContainsKey(key) == false)
+            {
+                cgState.geneDict.Add(key, activation);
+            }
+            else
+            {
+                cgState.geneDict[key] = activation;
+            }
+        }
+
         public void setCellGeneration(int generation)
         {
             CellGeneration = generation;
