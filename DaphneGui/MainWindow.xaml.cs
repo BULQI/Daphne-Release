@@ -3483,6 +3483,16 @@ namespace DaphneGui
             bool result = int.TryParse(txtCellIdent.Text, out cellid);
             DisplayCellInfo(cellid);
         }
+
+        private void CellOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //CellOptionsExpander.IsExpanded = false;
+        }
+
+        private void ECMOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //ECMOptionsExpander.IsExpanded = false;
+        }
     }
 
 
