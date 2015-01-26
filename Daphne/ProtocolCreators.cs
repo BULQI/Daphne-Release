@@ -1927,23 +1927,35 @@ namespace Daphne
             store.entity_repository.diff_schemes.Add(diffScheme);
             store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
 
-            ////////////////////////////
+            ////////////////////////////////////////
             // cycling cb-cc cell differentiatior 
-            ////////////////////////////
+            ////////////////////////////////////////
 
             stateNames = new string[] { "centroblast", "centrocyte" };
             geneNames = new string[] { "gCXCR4", "gCXCR5" };
             activations = new double[,]  { { 1,     0  },  // centroblast
                                            { 0,     1 },   // centrocyte
                                          };
-
+            
+            // centrocyte/centroblast transition
+            // [Allen2007].
+            // Our estimate that GC B cells spend only several hours in the light zone ...
+            // Gamma distribution with rate=15 and shape=8 has mean value of 120 minutes
+            // pdf(60) = 1.1e-4, pdf(180) = 7.1e-4
+            //
+            // centroblast/centrocyte transition 
+            // Assume new centroblasts undergo 6 rounds of division at 12 hours per division.
+            // GC B cells can divide after differentiating to centrocytes (Allen 2007), but have the bulk of division in the DZ.
+            // Then make the mean transition time of centrocyte/centroblast transition ~4320 minutes.
+            // Weibull distribution with s=4312 and shape=6 gives a broad distribution with mean 4000 minutes.
+            //
             ParameterDistribution pd01 = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)pd01).Scale = 400;
-            ((WeibullParameterDistribution)pd01).Shape = 2.0;
+            ((WeibullParameterDistribution)pd01).Scale = 4000;
+            ((WeibullParameterDistribution)pd01).Shape = 6.0;
 
             ParameterDistribution pd10 = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)pd10).Scale = 400;
-            ((WeibullParameterDistribution)pd10).Shape = 2.0;
+            ((WeibullParameterDistribution)pd10).Scale = 15;
+            ((WeibullParameterDistribution)pd10).Shape = 8.0;
 
             diffScheme = new ConfigTransitionScheme();
             diffScheme.Name = "cycling cb-cc diff scheme";
@@ -2328,16 +2340,13 @@ namespace Daphne
             // Barroso, Munoz, et al.
             // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
             // The FASEB Journal vol. 26 no. 12 4841-485
-            // CXCL13/CXCR5 binding affinity:  KD = 5.05e-8 M  = (50.5e-9)*(1e-18)*(6.022e23) molec/um^3 = 0.0304 molec/um^3
-            //
-            // KD = k_reverse / k_forward
-            // Use k_reverse from CXCL12/CXCR4| binding/unbinding.
-            // Vega2011 k_off = 8.24e-3/s = 0.494/min
-            // Use same for CXCL13:CXCR5| unbinding k_reverse = 0.494 min^{-1}
-            // k_forward = k_reverse / 0.0304 um^3/(molec-min) = 1.625 um^3/(molec-min)
-            //
-            kr = 0.494;
-            kf = 16.25;
+            // (measured) CXCL13/CXCR5 binding affinity:  KD = 30.4 molec/um^3
+            // (measured) K_on = 7.7e-3 um^3/#-min
+            // (measured) K_off = 0.21 1/min
+            // calculated K_off/K_on = 27.3 #/um^3
+            // revised:  1/19/2015
+            kr = 0.21;
+            kf = 7.7e-3;
             //
             // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
             cr = new ConfigReaction();
@@ -2429,25 +2438,16 @@ namespace Daphne
             ///////////////////////////////////////////////////////////////////////////////////
             // CXCL12 + CXCR4| -> CXCL12:CXCR4|
             //
-            ////// Crump, M. P., Gong, J. H., Loetscher, et al., (1997) EMBO J. 16, 6996–7007.
-            ////// CXCL12/CXCR4 binding affinity:  KD = 3.6e-9 M  = (3.6e-9)*(1e-18)*(6.022e23) molec/um^3 = 2.2e-3 molec/um^3
-            //////
-            ////// KD = k_reverse / k_forward
-            ////// Arbitrarily, choose k_reverse = 1/0.1   min^{-1} = 10 min^{-1}
-            ////// k_forward = k_reverse / 2.2e-3 um^3/(molec-min) = 455 um^3/(molec-min)
-            //////
-            ///////////////////////////////////////////////////////////////////////////////////
             // Vega et al., Technical Advance: Surface plasmon resonance-based analysis of CXCL12 binding 
             // using immobilized lentiviral particles. Journal of Leukocyte Biology Vol 90, 1-10, 2011. 
             // 
-            // CXCL12/CXCR4 binding affinity:  KD = 2.09e-2 molec/um^3
-            // k_reverse (k_off) = 0.494/min
-            //
-            // KD = k_reverse / k_forward
-            // k_forward = k_reverse / KD = 0.494 / 2.09e-2  um^3/(molec-min) = 23.6 um^3/(molec-min)
-            //
+            // (measured) XCL12/CXCR4 binding affinity:  KD = 20.9 molec/um^3
+            // (measured) k_off = 0.494/min
+            // (measured) k_on = 4.2e-2 um^3/#-min
+            // calculated K_off/K_on = 12 #/um^3
+            // revised:  1/19/2015
             kr = 0.494;
-            kf = 23.6;
+            kf = 4.2e-2;
             //
             // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
             cr = new ConfigReaction();
@@ -2604,11 +2604,15 @@ namespace Daphne
 
             // Transcription
 
+            // Revised 1/19/2015
             // Schwanhausser et al, Nature 2011 (473), 337-342
-            // average mRNAs per hour:  ~ 2
-            // average proteins per mRNA per hour: ~ 100
+            // median 17 mRNAs per cell
+            // 140 protein copies/(mRNA copy - hr)
             // Default: 2 gene copies per cell
-            kf = 2 * 100.0 / (2 * 60);
+            // Cell volume = V
+            // V = 524 um3 for a 10 um diameter cell
+            // kf = 17 * 140 / (2 * 60 * V)  copies/(gene-min-um3)
+            kf = 0.4;
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
