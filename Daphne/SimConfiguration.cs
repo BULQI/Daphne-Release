@@ -1964,7 +1964,7 @@ namespace Daphne
 
             return false;
         }
-        
+
         /// <summary>
         /// Select transcription reactions in the compartment.
         /// </summary>
@@ -4346,6 +4346,7 @@ namespace Daphne
 
             return true;
         }
+
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -4431,17 +4432,6 @@ namespace Daphne
             }
         }
 
-        public void RemoveActivationRow(ConfigActivationRow row)
-        {
-            int index = activationRows.IndexOf(row);
-            if (index > -1 && index < activationRows.Count)
-            {
-                activationRows.Remove(row);
-                Driver.states.RemoveAt(index);
-                Driver.DriverElements.RemoveAt(index);
-            }
-        }
-
         public void AddState(string sname)
         {
             //Add a row in Epigenetic Table
@@ -4490,6 +4480,44 @@ namespace Daphne
             }
 
             Driver.DriverElements.Add(trow);
+
+            OnPropertyChanged("Driver");
+        }
+
+        public void DeleteState(int index)
+        {
+            activationRows.RemoveAt(index);
+            Driver.states.RemoveAt(index);
+            Driver.DriverElements.RemoveAt(index);
+
+            //NOW LOOP THRU ALL REMAINING DRIVERELEMENTS
+            //IF DESTSTATE > INDEX, DECREMENT IT
+            //IF CURRENTSTATE > INDEX, DECREMENT IT
+
+            //Deletes the appropriate column from the Division Regulators grid
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                var elem = Driver.DriverElements[i].elements;
+                elem.RemoveAt(index);
+            }
+
+            OnPropertyChanged("activationRows");
+
+            //Updates the CurrentState and DestState values appropriately depending on which state was deleted
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                foreach (var v in Driver.DriverElements[i].elements)
+                {
+                    if (v.CurrentState > index)
+                    {
+                        v.CurrentState--;
+                    }
+                    if (v.DestState > index)
+                    {
+                        v.DestState--;
+                    }
+                }
+            }
 
             OnPropertyChanged("Driver");
         }
@@ -4558,7 +4586,7 @@ namespace Daphne
 
             for (int i = 0; i < this.activationRows.Count; i++)
             {
-                if (this.activationRows[i].Equals(cts.activationRows[i]) == false)
+                if (this.activationRows[i].Equals(cts.activationRows[i], this.Driver.states[i], cts.Driver.states[i]) == false)
                     return false;
             }
 
@@ -4567,7 +4595,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigActivationRow : EntityModelBase, IEquatable<ConfigActivationRow>
+    public class ConfigActivationRow : EntityModelBase
     {
         private ObservableCollection<double> _activations;
         public ObservableCollection<double> activations
@@ -4594,13 +4622,16 @@ namespace Daphne
             OnPropertyChanged("activations");
         }
 
-        public bool Equals(ConfigActivationRow car)
+        public bool Equals(ConfigActivationRow car, string state1, string state2)
         {
+            if (state1.Equals(state2) == false)
+                return false;
+
             if (this.activations.Count != car.activations.Count)
                 return false;
 
-            //Note that each double value here applies to a gene. 
-            //We are expecting them to be in the right order.
+            // Note that each double value here applies to a gene. 
+            // We are expecting them to be in the right order.
             for (int i = 0; i < activations.Count; i++)
             {
                 if (activations[i] != car.activations[i])
@@ -7042,6 +7073,18 @@ namespace Daphne
             foreach (var item in genes)
             {
                 cgState.geneDict.Add(item.Key, item.Value.ActivationLevel);
+            }
+        }
+
+        public void setGeneState(string key, double activation)
+        {
+            if (cgState.geneDict.ContainsKey(key) == false)
+            {
+                cgState.geneDict.Add(key, activation);
+            }
+            else
+            {
+                cgState.geneDict[key] = activation;
             }
         }
 

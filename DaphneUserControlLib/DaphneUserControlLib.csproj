@@ -91,6 +91,7 @@
       <DependentUpon>DaphneColorDlg.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControlExtensions.cs" />
+    <Compile Include="Validator.cs" />
     <Page Include="DaphneColorDlg.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

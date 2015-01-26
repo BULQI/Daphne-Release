@@ -556,7 +556,7 @@ namespace Daphne
                 else // it exists, update it
                 {
                     // apply the state
-                    cells[cell_id].SetRenderState(state);
+                    cells[cell_id].SetStateForVCR(state);
                 }
             }
 

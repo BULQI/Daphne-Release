@@ -81,7 +81,7 @@
         <!-- starting state -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
             <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
-            <local:ParamDistrControl DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
+            <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
         </StackPanel>
         
         <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
@@ -90,6 +90,7 @@
         <DataGrid x:Name="EpigeneticMapGridDiv" 
             local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"               
             local:DiffSchemeDataGrid.DiffSchemeTarget ="EpigeneticMap" 
+            local:DiffSchemeDataGrid.GeneList ="{Binding genes}"
             MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
             AutoGenerateColumns="False"
             IsReadOnly="False"
@@ -103,6 +104,8 @@
             VirtualizingStackPanel.IsVirtualizing="False" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
+            
+            ItemsSource="{Binding activationRows}"
             >
             
             <DataGrid.ContextMenu>
@@ -179,6 +182,7 @@
                     </Style.Triggers>
                 </Style>
             </DataGrid.RowHeaderStyle>
+            
             <DataGrid.RowHeaderTemplate>
                 <DataTemplate>
                     <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" />
@@ -190,8 +194,9 @@
         <TextBlock Text="Transition Regulators" Grid.Column="0" Grid.Row="2" Width="130" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
 
         <DataGrid x:Name="DivRegGrid" 
-                local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"
                 local:DiffSchemeDataGrid.DiffSchemeTarget ="Regulator"
+                local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"
+                local:DiffSchemeDataGrid.StateList ="{Binding Driver.states}"
                 MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
                 AutoGenerateColumns="False"
                 IsReadOnly="False"
@@ -201,7 +206,10 @@
                 SelectionMode="Single"
                 SelectionUnit="Cell"
                 PresentationTraceSources.TraceLevel="High"
-                HorizontalGridLinesBrush="DarkBlue"                      
+                HorizontalGridLinesBrush="DarkBlue"
+                VirtualizingStackPanel.VirtualizationMode="Standard"
+                VirtualizingStackPanel.IsVirtualizing="False" 
+                  ItemsSource="{Binding Driver.DriverElements}"
                 >
             <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
             <DataGrid.Resources>

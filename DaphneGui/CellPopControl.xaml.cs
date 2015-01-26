@@ -582,11 +582,20 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            CellPopsListBox.SelectedIndex = 0;
             CellPopulation cp = (CellPopulation)(CellPopsListBox.SelectedItem);
             if (cp == null)
             {
-                SelectedCell = null;
+                if (CellPopsListBox.Items.Count > 0)
+                {
+                    cp = (CellPopulation)CellPopsListBox.Items[0];
+                    SelectedCell = cp.Cell;
+                    CellPopsListBox.SelectedIndex = 0;
+                    CellPopsListBox.SelectedItem = cp;
+                }
+                else
+                {
+                    SelectedCell = null;
+                }
             }
             else
             {

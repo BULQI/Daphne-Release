@@ -31,16 +31,7 @@ namespace DaphneGui
         }
 
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //ListBox lb = sender as ListBox;
-            //if (lb.SelectedItem != null)
-            //{
-            //    ConfigCell cell = lb.SelectedItem as ConfigCell;
-            //    if (cell != null)
-            //    {
-            //        ucCellDetails.updateSelectedMoleculesAndGenes(cell);
-            //    }
-            //}
+        {           
         }
 
         private void AddLibCellButton_Click(object sender, RoutedEventArgs e)
@@ -162,7 +153,6 @@ namespace DaphneGui
 
         private void CellStudio_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            CellsListBox.SelectedIndex = 0;
         }
     }
 }

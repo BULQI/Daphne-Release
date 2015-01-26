@@ -211,8 +211,21 @@ namespace Daphne
             cp.Cell.ResetDistributedParameters();
         }
 
-        public void instantiateCell(int id, CellPopulation cp,
-                                    ConfigCompartment[] configComp, CellState cellState,
+        /// <summary>
+        /// instantiate a cell based on given values
+        /// </summary>
+        /// <param name="id">cell id</param>
+        /// <param name="cp">the population this cell is part of</param>
+        /// <param name="configComp">the two cell compartments (cytosol, membrane)</param>
+        /// <param name="cellState">state, spatial, behaviors, genes, generation</param>
+        /// <param name="bulk_reacs">bulk reactions (cytosol, membrane)</param>
+        /// <param name="boundary_reacs">boundary reactions</param>
+        /// <param name="transcription_reacs">transcription reactions</param>
+        /// <param name="report">when true, prepare boundary reaction report</param>
+        public void instantiateCell(int id,
+                                    CellPopulation cp,
+                                    ConfigCompartment[] configComp,
+                                    CellState cellState,
                                     List<ConfigReaction>[] bulk_reacs,
                                     List<ConfigReaction> boundary_reacs,
                                     List<ConfigReaction> transcription_reacs,
@@ -254,8 +267,8 @@ namespace Daphne
                 }
 
                 Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
-                                             new ConstructorArgument("copyNumber", cg.CopyNumber),
-                                             new ConstructorArgument("actLevel", geneActivationLevel));
+                                                              new ConstructorArgument("copyNumber", cg.CopyNumber),
+                                                              new ConstructorArgument("actLevel", geneActivationLevel));
                 simCell.AddGene(cg.entity_guid, gene);
             }
 

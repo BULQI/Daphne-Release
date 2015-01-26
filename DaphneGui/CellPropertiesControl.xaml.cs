@@ -112,4 +112,30 @@ namespace DaphneGui
         }
         
     }
+
+    public class RadiusValidator : ValidationRule
+    {
+        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        {
+            if (value == null)
+                return new ValidationResult(false, "Radius value cannot be empty.");
+            else
+            {                
+                string strValue = value.ToString();
+                strValue = strValue.Trim();
+                if (strValue.Length <= 0)
+                    return new ValidationResult(false, "Radius value cannot be blank.");
+
+                double dValue;
+                bool result = double.TryParse(strValue, out dValue);
+                if (result == false)
+                    return new ValidationResult(false, "Invalid Radius value entered.");
+
+                //dValue = (double)value;
+                if (dValue <= 0)
+                    return new ValidationResult(false, "Radius must be greater than 0.");
+            }
+            return ValidationResult.ValidResult;
+        }
+    }
 }

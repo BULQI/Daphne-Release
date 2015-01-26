@@ -482,7 +482,7 @@ namespace Daphne
         private int cellCount;
         private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
         private double[] cellStateSpatial;
-        private double[][] ecsMolpops;
+        private double[][] ecsMolpops, cellStateGenes;
 
         public int CellCount
         {
@@ -532,6 +532,14 @@ namespace Daphne
             }
         }
 
+        public double[][] CellStateGenes
+        {
+            get
+            {
+                return cellStateGenes;
+            }
+        }
+
         public double[][] ECSMolPops
         {
             get
@@ -544,6 +552,9 @@ namespace Daphne
         {
         }
 
+        /// <summary>
+        /// create ecs data array
+        /// </summary>
         private void createECSData()
         {
             // ECS, create the data space, size equal to number of molpops
@@ -574,6 +585,30 @@ namespace Daphne
         }
 
         /// <summary>
+        /// create the genes data array
+        /// </summary>
+        private void createGenesData()
+        {
+            if (cellStateGenes == null || cellStateGenes.Length != cellCount)
+            {
+                cellStateGenes = new double[cellCount][];
+            }
+
+            int i = 0;
+
+            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+            {
+                CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+
+                if (cellStateGenes[i] == null || cellStateGenes[i].Length != cellPop.Cell.genes.Count)
+                {
+                    cellStateGenes[i] = new double[cellPop.Cell.genes.Count];
+                }
+                i++;
+            }
+        }
+
+        /// <summary>
         /// prepare the data from the cells (transfer to the frame) for writing
         /// </summary>
         private void prepareData()
@@ -594,14 +629,20 @@ namespace Daphne
                     cellPopIds = new int[cellCount];
                     cellBehaviors = new int[cellCount * B_COUNT];
                 }
+                // need to do this regardless whether the cell number changed; it could be the same if the same number of cells died and got born, but
+                // depending on cell type we could have different gene numbers
+                createGenesData();
 
+                // fill the data arrays
                 cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
 
                 i = 0;
                 foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
                 {
+                    int j;
+
                     // spatial state
-                    for (int j = 0; j < CellSpatialState.SingleDim; j++)
+                    for (j = 0; j < CellSpatialState.SingleDim; j++)
                     {
                         cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_POS + j] = c.SpatialState.X[j];
                         cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + j] = c.SpatialState.V[j];
@@ -617,6 +658,16 @@ namespace Daphne
                     cellBehaviors[i * B_COUNT + B_DIV] = c.DividerState;
                     // differentiation
                     cellBehaviors[i * B_COUNT + B_DIFF] = c.DifferentiationState;
+
+                    // genes
+                    CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+
+                    j = 0;
+                    foreach (ConfigGene gene in cellPop.Cell.genes)
+                    {
+                        cellStateGenes[i][j] = c.Genes[gene.entity_guid].ActivationLevel;
+                        j++;
+                    }
 
                     i++;
                 }
@@ -642,8 +693,10 @@ namespace Daphne
         /// <param name="state"></param>
         public void applyStateByIndex(int idx, ref CellState state)
         {
+            int i;
+
             // set the spatial state
-            for (int i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < CellSpatialState.SingleDim; i++)
             {
                 state.spState.X[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_POS + i];
                 state.spState.V[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + i];
@@ -652,11 +705,22 @@ namespace Daphne
             // set the generation
             state.setCellGeneration(cellGens[idx]);
             // death
-            state.cbState.deathDriverState = cellBehaviors[idx * B_COUNT + B_DEATH];
+            state.setDeathDriverState(cellBehaviors[idx * B_COUNT + B_DEATH]);
             // division
-            state.cbState.divisionDriverState = cellBehaviors[idx * B_COUNT + B_DIV];
+            state.setDivisonDriverState(cellBehaviors[idx * B_COUNT + B_DIV]);
             // differentiation
-            state.cbState.differentiationDriverState = cellBehaviors[idx * B_COUNT + B_DIFF];
+            state.setDifferentiationDriverState(cellBehaviors[idx * B_COUNT + B_DIFF]);
+
+            // genes
+            CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(CellPopIDs[idx]);
+
+            state.cgState.geneDict.Clear();
+            i = 0;
+            foreach (ConfigGene gene in cellPop.Cell.genes)
+            {
+                state.setGeneState(gene.entity_guid, cellStateGenes[idx][i]);
+                i++;
+            }
         }
 
         private void writeInt(int val, string name)
@@ -707,17 +771,27 @@ namespace Daphne
                 // population ids
                 DataBasket.hdf5file.writeDSInt("CellPopIDs", dims, new H5Array<int>(cellPopIds));
 
+                // gene activations
+                for (int i = 0; i < cellStateGenes.Length; i++)
+                {
+                    if (cellStateGenes[i].Length > 0)
+                    {
+                        dims[0] = cellStateGenes[i].Length;
+                        DataBasket.hdf5file.writeDSDouble("GeneState" + i, dims, new H5Array<double>(cellStateGenes[i]));
+                    }
+                }
+
                 // behaviors
                 dims = new long[] { cellCount, B_COUNT };
                 DataBasket.hdf5file.writeDSInt("CellBehaviors", dims, new H5Array<int>(cellBehaviors));
 
                 // write the cell spatial states
-                dims = new long[] { cellCount, CellSpatialState.Dim };
+                dims[0] = cellCount;
+                dims[1] = CellSpatialState.Dim;
                 DataBasket.hdf5file.writeDSDouble("SpatialState", dims, new H5Array<double>(cellStateSpatial));
             }
 
             // ecs
-            createECSData();
             for (int i = 0; i < ecsMolpops.Length; i++)
             {
                 if (i == 0)
@@ -758,6 +832,16 @@ namespace Daphne
                 DataBasket.hdf5file.readDSInt("CellGens", ref cellGens);
                 // population ids
                 DataBasket.hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
+
+                // gene activations
+                createGenesData();
+                for (int i = 0; i < cellStateGenes.Length; i++)
+                {
+                    if (cellStateGenes[i].Length > 0)
+                    {
+                        DataBasket.hdf5file.readDSDouble("GeneState" + i, ref cellStateGenes[i]);
+                    }
+                }
 
                 // behaviors
                 DataBasket.hdf5file.readDSInt("CellBehaviors", ref cellBehaviors);
