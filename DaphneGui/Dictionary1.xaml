@@ -33,6 +33,7 @@
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
     <daph:ParameterDistributionTypeToStringConverter x:Key="ParamDistTypeEnumConv" />
     <daph:ParameterDistributionTypeToBoolConverter x:Key="ParamDistTypeBoolConv" />
+    <local:CellPopDistTypeTooltipConverter x:Key="CellPopDistTypeTooltipConv" />
 
 
     <daph:TransitionDriverElementTypeToStringConverter x:Key="TransitionDriverElementTypeEnumConv" />

@@ -606,4 +606,41 @@ namespace DaphneGui
 
     }
 
+
+    public class CellPopDistTypeTooltipConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        private List<string> tooltip_strings = new List<string>()
+        {
+            "Specify: User can assign specific cell locations.",
+            "Uniform: Cells will be evenly distributed.",
+            "Gaussian: Uses a Gaussian algorithm to place the cells."
+        };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value as string == "") return value;
+            if (value == null) 
+                return value as string;
+
+            try
+            {
+                int n = (int)value;
+                return tooltip_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = tooltip_strings.FindIndex(item => item == str);
+            return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
+        }
+    }
+
 }

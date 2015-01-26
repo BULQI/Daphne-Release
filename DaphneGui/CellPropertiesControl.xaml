@@ -21,6 +21,7 @@
 
     <UserControl.Resources>
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        <local:TransductionConstantVisibilityConverter x:Key="TransductionConstantVisibilityConv" />
         <CollectionViewSource x:Key="moleculesListView"/>
     </UserControl.Resources>
 
@@ -73,7 +74,7 @@
                     </Grid.RowDefinitions>
                     
                     <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
-                        <GroupBox>
+                        <GroupBox >
                             <Expander                                            
                                 Padding="6" ExpandDirection="Down"
                                 IsExpanded="True"
@@ -112,9 +113,11 @@
 
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Vertical" Margin="50,0">
-                                        <TextBlock Text="transduction constant" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap" />
-                                        <local:ParamDistrControl Margin="6,0"  Tag="CONTINUOUS"  DataContext="{Binding TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <StackPanel Orientation="Vertical" Margin="50,0" 
+                                                Visibility="{Binding locomotor_mol_guid_ref, Converter={StaticResource TransductionConstantVisibilityConv}}">
+                                        <TextBlock Text="transduction constant" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"  />
+                                        <local:ParamDistrControl Margin="6,0"  Tag="CONTINUOUS"  
+                                                                 DataContext="{Binding TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                             </StackPanel>
 

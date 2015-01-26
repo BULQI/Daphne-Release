@@ -45,7 +45,15 @@
             <!-- cellPopDistributionTypeTemplate -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Converter={StaticResource CellPopDistTypeEnumConv}}"/>
+                    <TextBlock Text="{Binding Converter={StaticResource CellPopDistTypeEnumConv}}">
+                        <TextBlock.ToolTip>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" 
+                                           Text="{Binding Converter={StaticResource CellPopDistTypeTooltipConv}}">
+                                </TextBlock>                                
+                            </StackPanel>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
                 </StackPanel>
             </DataTemplate>
 
@@ -372,7 +380,7 @@
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
                                                 SelectionChanged="cbCellLocationType_SelectionChanged">    
                                                 
-                                                <ComboBox.ToolTip>
+                                                <!--<ComboBox.ToolTip>
                                                     <StackPanel Orientation="Vertical">
                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="300">
                                                                     Specify: User can assign specific cell locations.
@@ -386,7 +394,7 @@
                                                         </TextBlock>
                                                         
                                                     </StackPanel>
-                                                </ComboBox.ToolTip>
+                                                </ComboBox.ToolTip>-->
                                                 
                                             </ComboBox>
 

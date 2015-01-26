@@ -6121,6 +6121,7 @@ namespace Daphne
                 {
                     _locomotor_mol_guid_ref = value;
                 }
+                OnPropertyChanged("locomotor_mol_guid_ref");
             }
         }
 
