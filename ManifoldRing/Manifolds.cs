@@ -222,7 +222,8 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation.ToArray();
+            //double[] pos = t.Translation.ToArray();
+            double[] pos = t.PosArray;
             double[] grad = from.M.Grad(pos, from);
 
             to.array[0] = from.Value(pos);

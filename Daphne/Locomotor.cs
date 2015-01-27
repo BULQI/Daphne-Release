@@ -58,9 +58,11 @@ namespace Daphne
 
         public double[] Force(double dt)
         {
+            double tmp = Sigma / Math.Sqrt(dt);
             for (int i = 0; i < force.Length; i++)
             {
-                force[i] = Sigma * Rand.NormalDist.Sample() / Math.Sqrt(dt);
+                //force[i] = Sigma * Rand.NormalDist.Sample() / Math.Sqrt(dt);
+                force[i] = Rand.NormalDist.Sample() * tmp;
             }
 
             return force;

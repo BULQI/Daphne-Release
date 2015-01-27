@@ -44,6 +44,7 @@ namespace Daphne
                     // apply stochastic force
                     if (kvp.Value.IsStochastic)
                     {
+                        //kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
                         kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
                     }
 
