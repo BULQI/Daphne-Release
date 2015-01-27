@@ -2509,9 +2509,8 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
             //
-            // Assume that internalization of the unactivated receptor is slower than internalization of bound(activated) receptor
-            // Arbitrarily choose a factor of 10. This seems to work better in the simulations.
-            f2 = 1;
+            // See the calibration document.
+            //f2 = 0.1;
             //
             // BoundaryTransportFrom: CXCR5| -> CXCR5
             cr = new ConfigReaction();
@@ -2520,7 +2519,7 @@ namespace Daphne
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = f2 * k1_CXCL13_CXCR5;
+            cr.rate_const = 0.06;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
             //
@@ -2531,15 +2530,16 @@ namespace Daphne
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = f2 * k1_CXCL12_CXCR4;
+            cr.rate_const = 0.054;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
             // 
             // BoundaryTransport from cytosol to membrane
-
-            // this seems to work better in the simulations
-            f2 = 10;
+            // These values are chosen to get the desired receptor concentration at equilibrium
+            // and a short time-to-equilibrium for the membrane receptor concentration.
+            // See the calibration document.
+            //f2 = 10;
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
@@ -2547,7 +2547,7 @@ namespace Daphne
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
-            cr.rate_const = f2 * k1_CXCL13_CXCR5;
+            cr.rate_const = 3.3;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
@@ -2558,7 +2558,7 @@ namespace Daphne
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
-            cr.rate_const = f2 * k1_CXCL12_CXCR4;
+            cr.rate_const = 3.0;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
