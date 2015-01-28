@@ -2464,16 +2464,14 @@ namespace DaphneGui
             if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
                 sop.DaphneStore.SerializeToFile(false);
+                orig_daphne_store_content = sop.DaphneStore.SerializeToString();
             }
 
             if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
                 sop.UserStore.SerializeToFile(false);
+                orig_user_store_content = sop.UserStore.SerializeToString();
             }
-
-            sop.DaphneStore.entity_repository = new EntityRepository();
-            sop.UserStore.entity_repository = new EntityRepository();
-
         }
 
         private bool applyTempFilesAndSave(bool discard)
