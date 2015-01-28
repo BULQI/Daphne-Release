@@ -4520,6 +4520,21 @@ namespace Daphne
             }
 
             OnPropertyChanged("Driver");
+
+
+            //IS THIS NEEDED??
+            //////Update the Driver's CurrentState
+            ////if (Driver.CurrentState.DistributionType == ParameterDistributionType.CONSTANT)
+            ////{
+            ////    if (Driver.CurrentState.ConstValue > index)
+            ////    {
+            ////        Driver.CurrentState.ConstValue--;
+            ////    }
+            ////}
+            ////else
+            ////{
+            ////}
+
         }
 
         public ConfigTransitionScheme Clone(bool identical)
