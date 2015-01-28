@@ -683,6 +683,7 @@ namespace Daphne
                 MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
 
                 cur_mp.Conc.CopyArray(ecsMolpops[i]);
+                i++;
             }
         }
 
