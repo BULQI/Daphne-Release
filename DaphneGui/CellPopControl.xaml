@@ -157,6 +157,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"     
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -167,6 +168,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -179,6 +181,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -190,6 +193,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -202,6 +206,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -212,6 +217,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
