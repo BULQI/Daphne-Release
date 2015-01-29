@@ -40,8 +40,9 @@ namespace DaphneGui
         private VCRControlState playbackState, savedState;
         private long lastFramePlayed;
         public bool LastFrame { get; set; }
-        // frame time in milliseconds; currently 30fps
-        private const long E_DT = 1000 / 30;
+        // reference frame time in milliseconds, 30fps
+        private const double E_DT = 1000 / 30;
+        private double speedFactor;
         /// <summary>
         /// property changed event to handle the updating of our vcr control
         /// </summary>
@@ -114,6 +115,7 @@ namespace DaphneGui
                     CurrentFrame = 0;
                 }
                 SetInactive();
+                speedFactor = 1.0;
                 return true;
             }
             return false;
@@ -126,6 +128,26 @@ namespace DaphneGui
         public void SetPlaybackState(VCRControlState state)
         {
             playbackState = state;
+        }
+
+        /// <summary>
+        /// set the speed factor for playback; will set to normal speed if value is not greater than zero
+        /// </summary>
+        /// <param name="factor">factor's new value</param>
+        public double SpeedFactor
+        {
+            set
+            {
+                if (value <= 0.0)
+                {
+                    speedFactor = 1.0;
+                }
+                else
+                {
+                    speedFactor = value;
+                }
+            }
+            get { return speedFactor; }
         }
 
         /// <summary>
@@ -343,11 +365,12 @@ namespace DaphneGui
         private void Delay()
         {
             long currentTime = DateTime.UtcNow.Ticks,
-                 msDelta = (currentTime - lastFramePlayed) / TimeSpan.TicksPerMillisecond;
+                 msDelta = (currentTime - lastFramePlayed) / TimeSpan.TicksPerMillisecond,
+                 target = (long)(1.0 / speedFactor * E_DT);
 
-            if (msDelta < E_DT)
+            if (msDelta < target)
             {
-                int delay = (int)(E_DT - msDelta);
+                int delay = (int)(target - msDelta);
 
                 if (delay > 0)
                 {
