@@ -238,7 +238,8 @@
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
                           SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
-                          Loaded="cbParamDistr_Loaded"                          
+                          Loaded="cbParamDistr_Loaded"   
+                          DataContextChanged="cbParamDistr_DataContextChanged"
                           >
                 </ComboBox>
             </StackPanel>
