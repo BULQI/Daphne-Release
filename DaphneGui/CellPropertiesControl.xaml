@@ -117,7 +117,7 @@
                                                 Visibility="{Binding locomotor_mol_guid_ref, Converter={StaticResource TransductionConstantVisibilityConv}}">
                                         <TextBlock Text="transduction constant" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"  />
                                         <local:ParamDistrControl Margin="6,0"  Tag="CONTINUOUS"  
-                                                                 DataContext="{Binding TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                 DataContext="{Binding TransductionConstant, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                             </StackPanel>
 
