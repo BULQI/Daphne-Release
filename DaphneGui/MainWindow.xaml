@@ -468,20 +468,7 @@
                                                 </ToggleButton>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
                                                 
-                                                <!--Experimenting-->
-                                                <!--<Grid>
-                                                    <ToggleButton x:Name="MainButton" Content="Show popup" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-                                                    <Popup PlacementTarget="{Binding ElementName=MainButton}" Placement="Bottom" AllowsTransparency="True" IsOpen="{Binding ElementName=MainButton, Path=IsChecked}">
-                                                        <Grid>
-                                                            <Border BorderBrush="Orange" BorderThickness="1" Background="Yellow"/>
-                                                            <TextBlock Text="Lorem Ipsum is simply dummy text of the printing and typesetting industry"/>
-                                                        </Grid>
-                                                    </Popup>
-                                                </Grid>-->
-
                                                 <Grid>
-                                                    <!--<ToggleButton RenderTransform="1,0,0,1,0,2"  x:Name="MainButton" Content="Cell Options" VerticalAlignment="Top" HorizontalAlignment="Right"/>-->
-
                                                     <Expander x:Name="CellOptionsExpander" 
                                                               ExpandDirection="Down" 
                                                               MinWidth="150"
@@ -495,7 +482,6 @@
                                                               
                                                                 >
                                                     </Expander>
-                                                    <!--PlacementRectangle="0,0,300,200"-->
                                                     <Popup x:Name="CellOptionsPopup"  AllowsTransparency="True" PopupAnimation="Fade" 
                                                            PlacementTarget="{Binding ElementName=CellOptionsExpander}" Placement="Bottom" 
                                                            IsOpen="{Binding ElementName=CellOptionsExpander, Path=IsExpanded}"
@@ -503,10 +489,9 @@
                                                            CheckBox.Checked="CellRenderOnOffChanged"
                                                            CheckBox.Unchecked="CellRenderOnOffChanged"
                                                            >
-                                                           
                                                         <StackPanel Orientation="Vertical">
                                                             <local:CellOptions DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
-                                                                               Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>                                                                
+                                                                               Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
                                                         </StackPanel>
                                                     </Popup>
                                                 </Grid>
@@ -536,56 +521,6 @@
                                                     </Popup>
                                                 </Grid>
 
-
-
-
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cells</Label>-->
-                                                <ComboBox Name="CellRenderMethodCB" Width="100" Visibility="Collapsed"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
-                                                          ItemsSource="{Binding Converter={StaticResource CellRenderPopFromProtocolConverter}}"
-                                                          IsSynchronizedWithCurrentItem="True"
-                                                          DisplayMemberPath="name"
-                                                          />
-                                                
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>-->
-                                                <ComboBox x:Name="CellsColorByCB" Width="100" Visibility="Collapsed"
-                                                          ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
-                                                          SelectedItem="{Binding ElementName=CellRenderMethodCB, Path=SelectedItem.renderMethod, UpdateSourceTrigger=PropertyChanged}"
-                                                          SelectionChanged="CellsColorByCB_SelectionChanged"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Choose cell render method">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                    <ComboBox.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
-                                                        </DataTemplate>
-                                                    </ComboBox.ItemTemplate>
-                                                </ComboBox>
-
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell Shape</Label>
-
-                                                <ComboBox ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
-                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
-                                                          SelectedValue="{Binding Path=CellRenderMethod}" MinWidth="60"/>-->
-                                                
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
-                                                <ComboBox Name="CellSelectionToolCB" Width="160"
-                                                          ItemsSource="{Binding Path=CellSelectionToolModes}"
-                                                          SelectedValue="{Binding Path=CellSelectionToolMode}"
-                                                          SelectionChanged="CellSelectionToolCB_SelectionChanged"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded"  ToolTip="Select the function the cell selection tool should perform"
-                                                          />-->
-
                                                 <Slider x:Name="ColorMapScaleFactorSlider"
                                                         Visibility="{Binding ColorScaleSlider_IsEnabled}"
                                                         Value="{Binding ColorScaleMaxFactor}"
@@ -605,19 +540,8 @@
                                                             Visibility="{Binding ColorScaleSlider_IsEnabled}"
                                                             Text="{Binding ColorScaleMaxFactor, StringFormat={}{0:F2}, Mode=OneWay}"
                                                             />
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Extracellular medium</Label>-->
-                                                <ComboBox x:Name="SolfacRenderingCB" Width="120" Visibility="Collapsed"
-                                                            ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
-                                                            SelectedValue="{Binding Path=ECSRenderingMethod}"
-                                                            BorderBrush="LightGray" 
-                                                            ToolBar.OverflowMode="AsNeeded" ToolTip="Extracellular medium rendering style">
-                                                </ComboBox>
-                                                <ToggleButton x:Name="ScalarBarMarkerButton" 
-                                                        IsChecked="{Binding ScalarBarMarker_IsChecked}" 
-                                                        ToolTip="Show scalar color bar" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
-                                                <ToggleButton Name="OrientationMarkerButton" 
+                                               
+                                                <ToggleButton Name="OrientationMarkerButton" Margin="6,0"
                                                         IsChecked="{Binding OrientationMarker_IsChecked}" 
                                                         ToolTip="Show orientation axes marker" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />

@@ -1372,10 +1372,8 @@ namespace DaphneGui
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = false;
-            MW.ScalarBarMarkerButton.IsEnabled = false;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = false;
             MW.ResetCameraButton.IsEnabled = false;
             MW.save3DView.IsEnabled = false;
@@ -1384,14 +1382,12 @@ namespace DaphneGui
         public void ToolsToolbarEnableAllIcons()
         {
             ToolsToolbar_IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = true;
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.ScalarBarMarkerButton.IsEnabled = true;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = true;
             MW.ResetCameraButton.IsEnabled = true;
             MW.save3DView.IsEnabled = true;

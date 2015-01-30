@@ -70,7 +70,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ComboBox ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
-                                                        SelectedItem="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}" >
+                                      SelectedItem="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}" 
+                                      >
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">
                                         <Style.Triggers>
@@ -99,6 +100,7 @@
         <ComboBox Margin="100,0,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black" Background="#FFF5F2DF" HorizontalAlignment="Left" Height="24"
                   ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}" 
                   ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
-                  SelectedValue="{Binding ElementName=CellOptionsControl, Path=Tag.CellRenderMethod}" MinWidth="150" />
+                  SelectedValue="{Binding ElementName=CellOptionsControl, Path=Tag.CellRenderMethod}" MinWidth="150"
+                  />
     </Grid>
 </UserControl>
