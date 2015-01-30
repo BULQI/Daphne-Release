@@ -3469,8 +3469,16 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void CellsColorByCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            //if (e.OriginalSource is ComboBox == false) return;
             //reset display
+            vtkDataBasket.SetupVTKData(sop.Protocol);
+            gc.CreatePipelines();
+            UpdateGraphics();
+            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+
+        private void CellRenderOnOffChanged(object sender, RoutedEventArgs e)
+        {
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();

@@ -492,12 +492,16 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              
                                                                 >
                                                     </Expander>
                                                     <!--PlacementRectangle="0,0,300,200"-->
                                                     <Popup x:Name="CellOptionsPopup"  AllowsTransparency="True" PopupAnimation="Fade" 
                                                            PlacementTarget="{Binding ElementName=CellOptionsExpander}" Placement="Bottom" 
                                                            IsOpen="{Binding ElementName=CellOptionsExpander, Path=IsExpanded}"
+                                                           ComboBox.SelectionChanged="CellsColorByCB_SelectionChanged"
+                                                           CheckBox.Checked="CellRenderOnOffChanged"
+                                                           CheckBox.Unchecked="CellRenderOnOffChanged"
                                                            >
                                                            
                                                         <StackPanel Orientation="Vertical">
