@@ -42,7 +42,7 @@ namespace DaphneGui
         public bool LastFrame { get; set; }
         // reference frame time in milliseconds, 30fps
         private const double E_DT = 1000 / 30;
-        private double speedFactor;
+        private double speedFactor, speedFactorExp;
         /// <summary>
         /// property changed event to handle the updating of our vcr control
         /// </summary>
@@ -116,6 +116,7 @@ namespace DaphneGui
                 }
                 SetInactive();
                 speedFactor = 1.0;
+                speedFactorExp = 0.0;
                 return true;
             }
             return false;
@@ -133,7 +134,6 @@ namespace DaphneGui
         /// <summary>
         /// set the speed factor for playback; will set to normal speed if value is not greater than zero
         /// </summary>
-        /// <param name="factor">factor's new value</param>
         public double SpeedFactor
         {
             set
@@ -148,6 +148,19 @@ namespace DaphneGui
                 }
             }
             get { return speedFactor; }
+        }
+
+        /// <summary>
+        /// set the speed factor exponent and speed factor implicitly; normal speed for exponent = 0
+        /// </summary>
+        public double SpeedFactorExponent
+        {
+            set
+            {
+                speedFactorExp = value;
+                speedFactor = Math.Pow(2.0, speedFactorExp);
+            }
+            get { return speedFactorExp; }
         }
 
         /// <summary>
