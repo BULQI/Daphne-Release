@@ -3483,15 +3483,6 @@ namespace DaphneGui
             (gc as VTKFullGraphicsController).Rwc.Invalidate();
         }
 
-        private void CellRenderOnOffChanged(object sender, RoutedEventArgs e)
-        {
-            vtkDataBasket.SetupVTKData(sop.Protocol);
-            gc.CreatePipelines();
-            UpdateGraphics();
-            (gc as VTKFullGraphicsController).Rwc.Invalidate();
-        }
-
-
         private void btnShowCellInfoById_Click(object sender, RoutedEventArgs e)
         {
             int cellid;
