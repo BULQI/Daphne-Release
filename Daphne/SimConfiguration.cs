@@ -4520,21 +4520,6 @@ namespace Daphne
             }
 
             OnPropertyChanged("Driver");
-
-
-            //IS THIS NEEDED??
-            //////Update the Driver's CurrentState
-            ////if (Driver.CurrentState.DistributionType == ParameterDistributionType.CONSTANT)
-            ////{
-            ////    if (Driver.CurrentState.ConstValue > index)
-            ////    {
-            ////        Driver.CurrentState.ConstValue--;
-            ////    }
-            ////}
-            ////else
-            ////{
-            ////}
-
         }
 
         public ConfigTransitionScheme Clone(bool identical)
@@ -6136,7 +6121,6 @@ namespace Daphne
                 {
                     _locomotor_mol_guid_ref = value;
                 }
-                OnPropertyChanged("locomotor_mol_guid_ref");
             }
         }
 
@@ -7089,6 +7073,18 @@ namespace Daphne
             foreach (var item in genes)
             {
                 cgState.geneDict.Add(item.Key, item.Value.ActivationLevel);
+            }
+        }
+
+        public void setGeneState(string key, double activation)
+        {
+            if (cgState.geneDict.ContainsKey(key) == false)
+            {
+                cgState.geneDict.Add(key, activation);
+            }
+            else
+            {
+                cgState.geneDict[key] = activation;
             }
         }
 

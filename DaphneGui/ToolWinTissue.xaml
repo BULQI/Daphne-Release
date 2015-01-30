@@ -130,7 +130,7 @@
                             </StackPanel.ToolTip>
                             
                             <TextBlock Text="Distribution for the rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" />
-                            <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </Expander>

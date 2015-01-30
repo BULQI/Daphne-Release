@@ -358,7 +358,7 @@ namespace DaphneGui
             }
 
         }
-        
+
         //Needed this to update the selected distribution's details
         private void cbParamDistr_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

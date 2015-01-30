@@ -379,23 +379,6 @@
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
                                                 SelectionChanged="cbCellLocationType_SelectionChanged">    
-                                                
-                                                <!--<ComboBox.ToolTip>
-                                                    <StackPanel Orientation="Vertical">
-                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="300">
-                                                                    Specify: User can assign specific cell locations.
-                                                        </TextBlock>
-                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Top" Padding="5" Width="300">
-                                                                    Uniform: Cells will be evenly distributed.
-                                                        </TextBlock>
-                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="300">
-                                                                    Gaussian: Uses a Gaussian algorithm to place the cells.
-                                                        </TextBlock>
-                                                        
-                                                    </StackPanel>
-                                                </ComboBox.ToolTip>-->
-                                                
                                             </ComboBox>
 
                                             <Button x:Name="btnRegenerateCellPositions" Height="22" Margin="8,0" Click="btnRegenerateCellPositions_Click" Content="Reset">
