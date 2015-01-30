@@ -364,6 +364,7 @@ namespace DaphneGui
         {
             ParamDistrDetails.DataContext = e.NewValue;
         }
+
     }
 
 

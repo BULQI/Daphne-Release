@@ -189,6 +189,9 @@
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellOptions.xaml.cs">
+      <DependentUpon>CellOptions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
@@ -207,6 +210,9 @@
     </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ECMMolecules.xaml.cs">
+      <DependentUpon>ECMMolecules.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentExtents.xaml.cs">
       <DependentUpon>EnvironmentExtents.xaml</DependentUpon>
@@ -296,6 +302,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CellOptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -323,6 +333,10 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ECMMolecules.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentExtents.xaml">
       <SubType>Designer</SubType>

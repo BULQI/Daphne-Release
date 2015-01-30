@@ -2119,7 +2119,8 @@ namespace DaphneGui
             //this cannot be set before databaseket get updated from loading the new scenario
             if (gc is VTKFullGraphicsController)
             {
-                CellRenderMethodCB.DataContext = sop.Protocol;
+                //CellRenderMethodCB.DataContext = sop.Protocol;
+                CellOptionsExpander.DataContext = sop.Protocol;
             }
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
@@ -3467,9 +3468,16 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void CellsColorByCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //react only to replace, so that delete/add cellpop wont cause refresh
-            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0) return;
+            //if (e.OriginalSource is ComboBox == false) return;
             //reset display
+            vtkDataBasket.SetupVTKData(sop.Protocol);
+            gc.CreatePipelines();
+            UpdateGraphics();
+            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+
+        private void CellRenderOnOffChanged(object sender, RoutedEventArgs e)
+        {
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
@@ -3481,6 +3489,16 @@ namespace DaphneGui
             int cellid;
             bool result = int.TryParse(txtCellIdent.Text, out cellid);
             DisplayCellInfo(cellid);
+        }
+
+        private void CellOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //CellOptionsExpander.IsExpanded = false;
+        }
+
+        private void ECMOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //ECMOptionsExpander.IsExpanded = false;
         }
     }
 
