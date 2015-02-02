@@ -1780,36 +1780,28 @@ namespace DaphneGui
         {
             double[] rgb = { 1, 1, 1 };
 
-            // Create a new save file dialog
-            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-
-            // Sets the current file name filter string, which determines 
-            // the choices that appear in the "Save as file type" or 
-            // "Files of type" box in the dialog box.
-            saveFileDialog1.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif";
-            saveFileDialog1.FilterIndex = 2;
-            saveFileDialog1.RestoreDirectory = true;
+            Save3DView dialog = new Save3DView();
 
             // Set image file format
-            if (saveFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (dialog.ShowDialog() == true)
             {
                 vtkImageWriter writer;
-                if (saveFileDialog1.FileName.EndsWith("bmp"))
+                if (dialog.FileName.EndsWith("bmp"))
                 {
                     writer = new vtkBMPWriter();
                 }
-                else if (saveFileDialog1.FileName.EndsWith("jpg"))
+                else if (dialog.FileName.EndsWith("jpg"))
                 {
                     writer = new vtkJPEGWriter();
                     vtkJPEGWriter jw = (vtkJPEGWriter)writer;
                     jw.SetQuality(100);
                     jw.SetProgressive(0);
                 }
-                else if (saveFileDialog1.FileName.EndsWith("png"))
+                else if (dialog.FileName.EndsWith("png"))
                 {
                     writer = new vtkPNGWriter();
                 }
-                else if (saveFileDialog1.FileName.EndsWith("tif"))
+                else if (dialog.FileName.EndsWith("tif"))
                 {
                     writer = new vtkTIFFWriter();
                 }
@@ -1818,7 +1810,15 @@ namespace DaphneGui
                     writer = new vtkBMPWriter();
                 }
 
-                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(saveFileDialog1.FileName, writer, rgb);
+                //Get selected color
+                Color c = dialog.ActualColor;
+                rgb[0] = c.R;
+                rgb[1] = c.G;
+                rgb[2] = c.B;
+
+                //Call SaveToFile - Doesn't seem to support all colors, just the basic ones
+                //Should probably remove the Custom option
+                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, writer, rgb);
             }
         }
 

@@ -1,0 +1,107 @@
+﻿<Window x:Class="DaphneGui.Save3DView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+        xmlns:local="clr-namespace:DaphneGui"
+        Title="Save3DView" Width="500" Height="250">
+    
+    <Window.Resources>
+        <local:ColorListToIntConverter x:Key="ColorListToIntConv" />
+        <!--<local:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />-->
+        <local:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
+
+        <!--<Setter Property="Fill" Value="{Binding ElementName=cbBackColor, Path=SelectedItem, Converter={StaticResource ColorListToBrushConv}}"/>-->
+        
+        <DataTemplate x:Key="colorItemTemplate">
+            <StackPanel Orientation="Horizontal">
+
+                <Rectangle Width="10" Height="10" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="6">
+                                    <Setter Property="Fill" Value="{Binding Path=CustomColor}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+
+                </Rectangle>
+                <TextBlock Width="40" Text="{Binding}" Margin="5,0,0,0"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <ObjectDataProvider x:Key="colorList"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:OutputColorList" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+    </Window.Resources>
+    
+    
+    <Grid Margin="10,10">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Background Color:" Margin="0,0" Grid.Column="0" Grid.Row="0" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <ComboBox x:Name="cbBackColor"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0" Margin="0,2"
+                        ItemsSource="{Binding Source={StaticResource colorList}}"
+                        ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
+                        SelectedIndex="{Binding Path=PredefColorIndex, Converter={StaticResource ColorListToIntConv}}"       
+                        SelectionChanged="cbBackColor_SelectionChanged"
+                        >
+        </ComboBox>
+
+        <StackPanel Grid.Column="1" Grid.Row="1" >
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=cbBackColor, Path=SelectedIndex}" Value="6">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <editors:ColorEditBox x:Name="cellColorEditBox" 
+                                    CheckBoxVisibility="Collapsed"
+                                    SpinnerVisibility="Collapsed"
+                                    Width="140"
+                                    HorizontalAlignment="Left" 
+                                    Format="a r g b"
+                                    Value="{Binding Path=CustomColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,2" >
+
+            </editors:ColorEditBox>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3">
+            <TextBlock Text="Select output folder:" FontWeight="Bold" Margin="0,12,0,0" />
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Browse..." Height="24" Margin="0,12,0,0" Name="btnFolderBrowse" VerticalAlignment="Top" Width="75" Click="btnFolderBrowse_Click"/>
+                <TextBox x:Name="txtOutputFolder" Width="350" FontWeight="Bold" Margin="10,12,0,0" />
+            </StackPanel>
+        </StackPanel>
+        
+    </Grid>
+</Window>

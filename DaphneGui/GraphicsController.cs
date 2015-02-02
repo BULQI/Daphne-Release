@@ -2110,6 +2110,7 @@ namespace DaphneGui
             myRWC = rwc;
             vtkRenderWindow myRW = rwc.RenderWindow;
             vtkRenderer ren = myRW.GetRenderers().GetFirstRenderer();
+            vtkWindow currWindow = ren.GetVTKWindow();
 
             // remember the current color
             double[] currentColor = ren.GetBackground(); 
@@ -2126,6 +2127,8 @@ namespace DaphneGui
 
             // reset background to original color
             ren.SetBackground(currentColor[0], currentColor[1], currentColor[2]);
+            currWindow.Render();
+
         }
     }
 }
