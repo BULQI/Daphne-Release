@@ -232,6 +232,8 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
+        
+
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -1772,8 +1774,12 @@ namespace DaphneGui
             return mouseLeftState == state;
         }
 
+        //public enum ColorList { Red, Orange, Yellow, Green, Blue, Indigo, Violet, Custom }
+
         private void save3DView_Click(object sender, RoutedEventArgs e)
         {
+            double[] rgb = { 1, 1, 1 };
+
             // Create a new save file dialog
             System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 
@@ -1812,7 +1818,7 @@ namespace DaphneGui
                     writer = new vtkBMPWriter();
                 }
 
-                //gc.SaveToFile(saveFileDialog1.FileName, writer);
+                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(saveFileDialog1.FileName, writer, rgb);
             }
         }
 

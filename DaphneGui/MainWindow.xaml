@@ -360,6 +360,8 @@
                                                 
                                                 />
                     <TextBlock VerticalAlignment="Center" Text="min" />
+                    <uc:DoublesBox AutoRange="false" AbsMinimum="-5" AbsMaximum="5"  Margin="10,0"
+                                   Number="{Binding Path=SpeedFactorExponent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                 </ToolBar>
             </ToolBarTray>
         </shared:PixelSnapper>
