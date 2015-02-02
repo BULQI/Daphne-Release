@@ -1016,7 +1016,8 @@ namespace DaphneGui
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
-                    optionsMenu.IsEnabled = false;
+                    optionsMenu.IsEnabled = false;                    
+
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
@@ -1702,6 +1703,8 @@ namespace DaphneGui
         {
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
             mutex = true;
 
             runSim();
@@ -3497,14 +3500,14 @@ namespace DaphneGui
             DisplayCellInfo(cellid);
         }
 
-        private void CellOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        private void CellOptionsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            //CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
         }
 
-        private void ECMOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        private void ECMOptionsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            //ECMOptionsExpander.IsExpanded = false;
+            CellOptionsExpander.IsExpanded = false;
         }
     }
 
