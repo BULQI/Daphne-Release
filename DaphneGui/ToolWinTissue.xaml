@@ -495,6 +495,7 @@
                         <StackPanel>
                             <ListBox x:Name="lbRptCellPops"
                                 ItemsSource="{Binding Path=Protocol.scenario.cellpopulations}" 
+                                SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
                             />
 
@@ -517,7 +518,7 @@
                                         VerticalContentAlignment="Center"
                                         CanUserAddRows="False"
                                         BorderThickness="1"
-                                        BorderBrush="Black"
+                                        BorderBrush="Black"                                        
                                         >
 
                                         <DataGrid.ColumnHeaderStyle>
