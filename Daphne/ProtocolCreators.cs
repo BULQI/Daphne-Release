@@ -1954,7 +1954,7 @@ namespace Daphne
             ((WeibullParameterDistribution)pd01).Shape = 6.0;
 
             ParameterDistribution pd10 = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)pd10).Scale = 15;
+            ((WeibullParameterDistribution)pd10).Scale = 1000;
             ((WeibullParameterDistribution)pd10).Shape = 8.0;
 
             diffScheme = new ConfigTransitionScheme();
@@ -2476,10 +2476,13 @@ namespace Daphne
 
             // Internalization of bound receptor
             // 
-            // Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
-            // heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
-            // Fit of fig. S3b:
-            //          k = 0.010 min(-1)
+            //// Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
+            //// heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
+            //// Fit of fig. S3b:
+            ////          k = 0.010 min(-1)
+            //double k1_CXCL13_CXCR5 = 0.010;
+            // This works better and is closer to the CXCL12:CXCR4 fitted internalization rate. 
+            // Also, the fitted value of 0.01 is probably too small.
             double k1_CXCL13_CXCR5 = 0.010;
             //
             // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
@@ -3655,8 +3658,8 @@ namespace Daphne
             protocol.experiment_name = "Simple GC cycling Scenario";
             protocol.experiment_description = "CXCL12 Gaussian distribution (LZ), CXCL13 Gaussian distribution (DZ), cb-cc cells";
             protocol.scenario.time_config.duration = 6000.0;
-            protocol.scenario.time_config.rendering_interval = 1.0;
-            protocol.scenario.time_config.sampling_interval = 1.0;
+            protocol.scenario.time_config.rendering_interval = 6.0;
+            protocol.scenario.time_config.sampling_interval = 6.0;
             protocol.scenario.time_config.integrator_step = 0.001;
             protocol.reporter_file_name = "gc_cycling";
 
@@ -3739,7 +3742,7 @@ namespace Daphne
             double d = sep * Math.Cos(Math.PI/4.0);
             double[] c = new double[] { envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2 };
             double  lz_sigma = 400,
-                    dz_sigma = 100;
+                    dz_sigma = 200;
             double[,] box_trans = new double[,] { { c[0], c[1], c[2] }, 
                                                   { c[0] + d, c[1] + d, c[2] + d} };
             double[,] box_scale = new double[,] { { lz_sigma, lz_sigma, lz_sigma }, { dz_sigma, dz_sigma, dz_sigma } };
@@ -3779,7 +3782,7 @@ namespace Daphne
                     gaussSpec.box_spec.box_visibility = false;
 
                     MolPopGaussian molPopGaussian = new MolPopGaussian();
-                    molPopGaussian.peak_concentration = 0.1;
+                    molPopGaussian.peak_concentration = 500;
                     molPopGaussian.gauss_spec = gaussSpec;
 
                     configMolPop.mp_distribution = molPopGaussian;
