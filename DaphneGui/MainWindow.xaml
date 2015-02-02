@@ -145,7 +145,7 @@
                         <Separator />
                         <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Command="{x:Static local:MainWindow.SelectReportFolderCommand}"/>
                     </MenuItem>
-                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
+                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu"  IsEnabled="False">
                         <MenuItem Header="Cells..." Name="cellColorsMenu" />
                         <MenuItem Header="Molecules..." Name="molColorsMenu" />
                         <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" />
@@ -167,7 +167,7 @@
                     <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
                     <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
                     
@@ -206,7 +206,7 @@
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
-                    <MenuItem Header="Tech help" Name="techHelp">
+                    <MenuItem Header="Tech help" Name="techHelp"  IsEnabled="False">
                         <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
                         <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
                         <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
@@ -360,7 +360,7 @@
                                                 
                                                 />
                     <TextBlock VerticalAlignment="Center" Text="min" />
-                    <uc:DoublesBox AutoRange="false" AbsMinimum="-5" AbsMaximum="5"  Margin="10,0"
+                    <uc:DoublesBox AutoRange="false" AbsMinimum="-5" AbsMaximum="5"  Margin="10,0" SNLowerThreshold="-10"
                                    Number="{Binding Path=SpeedFactorExponent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                 </ToolBar>
             </ToolBarTray>
@@ -481,7 +481,7 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                              
+                                                              Expanded="CellOptionsExpander_Expanded"
                                                                 >
                                                     </Expander>
                                                     <Popup x:Name="CellOptionsPopup"  AllowsTransparency="True" PopupAnimation="Fade" 
@@ -509,12 +509,15 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              Expanded="ECMOptionsExpander_Expanded"
                                                             >
                                                     </Expander>
                                                     <Popup x:Name="ECMOptionsPopup"  AllowsTransparency="False" 
                                                            PlacementTarget="{Binding ElementName=ECMOptionsExpander}" 
                                                            Placement="Bottom" 
                                                            IsOpen="{Binding ElementName=ECMOptionsExpander, Path=IsExpanded}"
+                                                           CheckBox.Checked="MolPopRenderOnOffChanged"
+                                                           CheckBox.Unchecked="MolPopRenderOnOffChanged"
                                                            >
                                                         <StackPanel Orientation="Vertical">
                                                             <local:ECMMolecules DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 

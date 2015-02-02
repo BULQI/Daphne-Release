@@ -232,6 +232,8 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
+        
+
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -1014,7 +1016,8 @@ namespace DaphneGui
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
-                    optionsMenu.IsEnabled = false;
+                    optionsMenu.IsEnabled = false;                    
+
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
@@ -1700,6 +1703,8 @@ namespace DaphneGui
         {
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
             mutex = true;
 
             runSim();
@@ -1772,38 +1777,34 @@ namespace DaphneGui
             return mouseLeftState == state;
         }
 
+        //public enum ColorList { Red, Orange, Yellow, Green, Blue, Indigo, Violet, Custom }
+
         private void save3DView_Click(object sender, RoutedEventArgs e)
         {
-            // Create a new save file dialog
-            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            double[] rgb = { 1, 1, 1 };     //Values are between 0 and 1
 
-            // Sets the current file name filter string, which determines 
-            // the choices that appear in the "Save as file type" or 
-            // "Files of type" box in the dialog box.
-            saveFileDialog1.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif";
-            saveFileDialog1.FilterIndex = 2;
-            saveFileDialog1.RestoreDirectory = true;
+            Save3DView dialog = new Save3DView();
 
             // Set image file format
-            if (saveFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (dialog.ShowDialog() == true)
             {
                 vtkImageWriter writer;
-                if (saveFileDialog1.FileName.EndsWith("bmp"))
+                if (dialog.FileName.EndsWith("bmp"))
                 {
                     writer = new vtkBMPWriter();
                 }
-                else if (saveFileDialog1.FileName.EndsWith("jpg"))
+                else if (dialog.FileName.EndsWith("jpg"))
                 {
                     writer = new vtkJPEGWriter();
                     vtkJPEGWriter jw = (vtkJPEGWriter)writer;
                     jw.SetQuality(100);
                     jw.SetProgressive(0);
                 }
-                else if (saveFileDialog1.FileName.EndsWith("png"))
+                else if (dialog.FileName.EndsWith("png"))
                 {
                     writer = new vtkPNGWriter();
                 }
-                else if (saveFileDialog1.FileName.EndsWith("tif"))
+                else if (dialog.FileName.EndsWith("tif"))
                 {
                     writer = new vtkTIFFWriter();
                 }
@@ -1812,7 +1813,15 @@ namespace DaphneGui
                     writer = new vtkBMPWriter();
                 }
 
-                //gc.SaveToFile(saveFileDialog1.FileName, writer);
+                //Get selected color
+                Color c = dialog.ActualColor;
+
+                //Values need to be between 0 and 1
+                rgb[0] = c.R / (double)255;
+                rgb[1] = c.G / (double)255;
+                rgb[2] = c.B / (double)255;
+
+                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, writer, rgb);
             }
         }
 
@@ -3491,15 +3500,24 @@ namespace DaphneGui
             DisplayCellInfo(cellid);
         }
 
-        private void CellOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        private void CellOptionsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            //CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
         }
 
-        private void ECMOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        private void ECMOptionsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            //ECMOptionsExpander.IsExpanded = false;
+            CellOptionsExpander.IsExpanded = false;
         }
+
+        private void MolPopRenderOnOffChanged(object sender, RoutedEventArgs e)
+        {
+            vtkDataBasket.SetupVTKData(sop.Protocol);
+            gc.CreatePipelines();
+            UpdateGraphics();
+            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+        
     }
 
 

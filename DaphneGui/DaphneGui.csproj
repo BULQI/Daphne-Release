@@ -250,6 +250,9 @@
     <Compile Include="RenderSkinWindow.xaml.cs">
       <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Save3DView.xaml.cs">
+      <DependentUpon>Save3DView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -375,6 +378,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RenderSkinWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Save3DView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
