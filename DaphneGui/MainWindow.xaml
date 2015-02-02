@@ -516,6 +516,8 @@
                                                            PlacementTarget="{Binding ElementName=ECMOptionsExpander}" 
                                                            Placement="Bottom" 
                                                            IsOpen="{Binding ElementName=ECMOptionsExpander, Path=IsExpanded}"
+                                                           CheckBox.Checked="MolPopRenderOnOffChanged"
+                                                           CheckBox.Unchecked="MolPopRenderOnOffChanged"
                                                            >
                                                         <StackPanel Orientation="Vertical">
                                                             <local:ECMMolecules DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 

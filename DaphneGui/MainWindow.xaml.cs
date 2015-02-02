@@ -3509,6 +3509,15 @@ namespace DaphneGui
         {
             CellOptionsExpander.IsExpanded = false;
         }
+
+        private void MolPopRenderOnOffChanged(object sender, RoutedEventArgs e)
+        {
+            vtkDataBasket.SetupVTKData(sop.Protocol);
+            gc.CreatePipelines();
+            UpdateGraphics();
+            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+        
     }
 
 
