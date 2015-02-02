@@ -1781,7 +1781,7 @@ namespace DaphneGui
 
         private void save3DView_Click(object sender, RoutedEventArgs e)
         {
-            double[] rgb = { 1, 1, 1 };
+            double[] rgb = { 1, 1, 1 };     //Values are between 0 and 1
 
             Save3DView dialog = new Save3DView();
 
@@ -1815,12 +1815,12 @@ namespace DaphneGui
 
                 //Get selected color
                 Color c = dialog.ActualColor;
-                rgb[0] = c.R;
-                rgb[1] = c.G;
-                rgb[2] = c.B;
 
-                //Call SaveToFile - Doesn't seem to support all colors, just the basic ones
-                //Should probably remove the Custom option
+                //Values need to be between 0 and 1
+                rgb[0] = c.R / (double)255;
+                rgb[1] = c.G / (double)255;
+                rgb[2] = c.B / (double)255;
+
                 ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, writer, rgb);
             }
         }

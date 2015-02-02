@@ -15,7 +15,7 @@ using System.ComponentModel;
 namespace DaphneGui
 {
 
-    public enum OutputColorList { White, Red, Yellow, Green, Blue, Violet, Custom }
+    public enum OutputColorList { White, LightGrey, Grey, DarkGrey, Black, Custom }
 
     /// <summary>
     /// Interaction logic for Save3DView.xaml
@@ -179,20 +179,17 @@ namespace DaphneGui
                     case OutputColorList.White:
                         col = Color.FromRgb(255, 255, 255);
                         break;
-                    case OutputColorList.Red:
-                        col = Color.FromRgb(255, 0, 0);
+                    case OutputColorList.LightGrey:
+                        col = Color.FromRgb(194, 194, 194);
                         break;
-                    case OutputColorList.Yellow:
-                        col = Color.FromRgb(255, 255, 0);
+                    case OutputColorList.Grey:
+                        col = Color.FromRgb(128, 128, 128);
                         break;
-                    case OutputColorList.Green:
-                        col = Color.FromRgb(0, 255, 0);
+                    case OutputColorList.DarkGrey:
+                        col = Color.FromRgb(64, 64, 64);
                         break;
-                    case OutputColorList.Blue:
-                        col = Color.FromRgb(0, 0, 255);
-                        break;
-                    case OutputColorList.Violet:
-                        col = Color.FromRgb(192, 0, 255);
+                    case OutputColorList.Black:
+                        col = Color.FromRgb(0, 0, 0);
                         break;
                     case OutputColorList.Custom:
                         col = (Color)parameter;
@@ -236,22 +233,21 @@ namespace DaphneGui
                     case OutputColorList.White:
                         col = Color.FromRgb(255, 255, 255);
                         break;
-                    case OutputColorList.Red:
-                        col = Color.FromRgb(255, 0, 0);
+                    case OutputColorList.LightGrey:
+                        col = Color.FromRgb(194, 194, 194);
                         break;
-                    case OutputColorList.Yellow:
-                        col = Color.FromRgb(255, 255, 0);
+                    case OutputColorList.Grey:
+                        col = Color.FromRgb(128, 128, 128);
                         break;
-                    case OutputColorList.Green:
-                        col = Color.FromRgb(0, 255, 0);
+                    case OutputColorList.DarkGrey:
+                        col = Color.FromRgb(64, 64, 64);
                         break;
-                    case OutputColorList.Blue:
-                        col = Color.FromRgb(0, 0, 255);
-                        break;
-                    case OutputColorList.Violet:
-                        col = Color.FromRgb(192, 0, 255);
+                    case OutputColorList.Black:
+                        col = Color.FromRgb(0, 0, 0);
                         break;
                     case OutputColorList.Custom:
+                        col = (Color)parameter;
+                        break;
                     default:
                         break;
                 }
@@ -269,33 +265,5 @@ namespace DaphneGui
             return null;
         }
     }
-
-    /// <summary>
-    /// Convert System.Windows.Media.Color to SolidBrush for rectangle fills
-    /// </summary>
-    ////public class SWMColorToSolidBrushConverter : IValueConverter
-    ////{
-    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        System.Windows.Media.Color color;
-
-    ////        try
-    ////        {
-    ////            color = (System.Windows.Media.Color)value;
-    ////        }
-    ////        catch
-    ////        {
-    ////            color = System.Windows.Media.Color.FromRgb(0, 0, 0);
-    ////        }
-    ////        return new System.Windows.Media.SolidColorBrush(color);
-    ////    }
-
-    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        return null;
-    ////    }
-    ////}
-
-
 
 }

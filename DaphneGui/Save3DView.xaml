@@ -8,20 +8,17 @@
     
     <Window.Resources>
         <local:ColorListToIntConverter x:Key="ColorListToIntConv" />
-        <!--<local:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />-->
         <local:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
 
-        <!--<Setter Property="Fill" Value="{Binding ElementName=cbBackColor, Path=SelectedItem, Converter={StaticResource ColorListToBrushConv}}"/>-->
-        
         <DataTemplate x:Key="colorItemTemplate">
             <StackPanel Orientation="Horizontal">
 
-                <Rectangle Width="10" Height="10" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
+                <Rectangle Width="12" Height="12" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
                     <Rectangle.Style>
                         <Style TargetType="Rectangle">
                             <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding}" Value="6">
+                                <DataTrigger Binding="{Binding}" Value="5">
                                     <Setter Property="Fill" Value="{Binding Path=CustomColor}"/>
                                 </DataTrigger>
                             </Style.Triggers>
@@ -29,7 +26,7 @@
                     </Rectangle.Style>
 
                 </Rectangle>
-                <TextBlock Width="40" Text="{Binding}" Margin="5,0,0,0"/>
+                <TextBlock  Text="{Binding}" Margin="5,0,0,0"/>
             </StackPanel>
         </DataTemplate>
 
@@ -63,7 +60,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="Background Color:" Margin="0,0" Grid.Column="0" Grid.Row="0" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" />
-        <ComboBox x:Name="cbBackColor"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0" Margin="0,2"
+        <ComboBox x:Name="cbBackColor"  HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0" Margin="0,2"
                         ItemsSource="{Binding Source={StaticResource colorList}}"
                         ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
                         SelectedIndex="{Binding Path=PredefColorIndex, Converter={StaticResource ColorListToIntConv}}"       
@@ -76,7 +73,7 @@
                 <Style TargetType="StackPanel">
                     <Setter Property="Visibility" Value="Hidden"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=cbBackColor, Path=SelectedIndex}" Value="6">
+                        <DataTrigger Binding="{Binding ElementName=cbBackColor, Path=SelectedIndex}" Value="5">
                             <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
