@@ -25,27 +25,7 @@
 
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
         
-        <!--<daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />-->
-        
         <local:SimSetupControl x:Key="simSetupControl"/>
-        <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
-
-        <!--<ObjectDataProvider x:Key="RenderMethodEnum"
-                            MethodName="GetValues"
-                            ObjectType="{x:Type sys:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="daph:RenderMethod" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>-->
-
-        <!-- CellShapeEnum-->
-        <!--<ObjectDataProvider x:Key="cellRenderMethodEnum"
-                            MethodName="GetValues" 
-                            ObjectType="{x:Type sys:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:CellRenderMethod" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>-->
 
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
@@ -61,12 +41,6 @@
             </Grid>
         </DataTemplate>
 
-        <!--<DataTemplate x:Key="cellRenderMethodTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>
-            </StackPanel>
-        </DataTemplate>-->
-        
     </Window.Resources>
     
     <Window.CommandBindings>
@@ -77,7 +51,6 @@
         <CommandBinding Command="ApplicationCommands.Save" 
                         CanExecute="CommandBindingSave_CanExecute" 
                         Executed="CommandBindingSave_Executed" />
-
         
         <CommandBinding Command="{x:Static local:MainWindow.SelectReportFolderCommand}" 
                         CanExecute="CommandBindingSelectReportFolder_CanExecute"
