@@ -425,6 +425,27 @@ namespace DaphneGui
         }
     }
 
+    public class TransductionConstantVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string locomotor_guid = (string)value;
+            if (locomotor_guid == "")
+            {
+                return Visibility.Collapsed;
+            }
+            else 
+            {
+                return Visibility.Visible;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
     public class DataGridBehavior
     {
         #region DisplayRowNumber

@@ -587,24 +587,34 @@ namespace Daphne
         /// <summary>
         /// create the genes data array
         /// </summary>
-        private void createGenesData()
+        private void createGenesData(bool inner)
         {
             if (cellStateGenes == null || cellStateGenes.Length != cellCount)
             {
                 cellStateGenes = new double[cellCount][];
             }
 
-            int i = 0;
-
-            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+            if (inner == true)
             {
-                CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+                int i = 0;
 
-                if (cellStateGenes[i] == null || cellStateGenes[i].Length != cellPop.Cell.genes.Count)
+                foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
                 {
-                    cellStateGenes[i] = new double[cellPop.Cell.genes.Count];
+                    CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+                    // make sure the arrays are non-zero length
+                    int nonZeroLength = cellPop.Cell.genes.Count;
+
+                    if (nonZeroLength == 0)
+                    {
+                        nonZeroLength += 1;
+                    }
+
+                    if (cellStateGenes[i] == null || cellStateGenes[i].Length != cellPop.Cell.genes.Count)
+                    {
+                        cellStateGenes[i] = new double[nonZeroLength];
+                    }
+                    i++;
                 }
-                i++;
             }
         }
 
@@ -631,7 +641,7 @@ namespace Daphne
                 }
                 // need to do this regardless whether the cell number changed; it could be the same if the same number of cells died and got born, but
                 // depending on cell type we could have different gene numbers
-                createGenesData();
+                createGenesData(true);
 
                 // fill the data arrays
                 cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
@@ -662,11 +672,19 @@ namespace Daphne
                     // genes
                     CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
 
-                    j = 0;
-                    foreach (ConfigGene gene in cellPop.Cell.genes)
+                    // we ensure non-zero length arrays; write -1 in that case, which is an implausible value for a gene
+                    if (cellPop.Cell.genes.Count == 0)
                     {
-                        cellStateGenes[i][j] = c.Genes[gene.entity_guid].ActivationLevel;
-                        j++;
+                        cellStateGenes[i][0] = -1;
+                    }
+                    else
+                    {
+                        j = 0;
+                        foreach (ConfigGene gene in cellPop.Cell.genes)
+                        {
+                            cellStateGenes[i][j] = c.Genes[gene.entity_guid].ActivationLevel;
+                            j++;
+                        }
                     }
 
                     i++;
@@ -683,6 +701,7 @@ namespace Daphne
                 MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
 
                 cur_mp.Conc.CopyArray(ecsMolpops[i]);
+                i++;
             }
         }
 
@@ -716,6 +735,8 @@ namespace Daphne
 
             state.cgState.geneDict.Clear();
             i = 0;
+            // cellStateGenes[idx] will always have non-zero length, but this will skip artificial entries when there are no genes present,
+            // i.e. when length is one with the element being the result of padding
             foreach (ConfigGene gene in cellPop.Cell.genes)
             {
                 state.setGeneState(gene.entity_guid, cellStateGenes[idx][i]);
@@ -774,11 +795,8 @@ namespace Daphne
                 // gene activations
                 for (int i = 0; i < cellStateGenes.Length; i++)
                 {
-                    if (cellStateGenes[i].Length > 0)
-                    {
-                        dims[0] = cellStateGenes[i].Length;
-                        DataBasket.hdf5file.writeDSDouble("GeneState" + i, dims, new H5Array<double>(cellStateGenes[i]));
-                    }
+                    dims[0] = cellStateGenes[i].Length;
+                    DataBasket.hdf5file.writeDSDouble("GeneState" + i, dims, new H5Array<double>(cellStateGenes[i]));
                 }
 
                 // behaviors
@@ -834,13 +852,10 @@ namespace Daphne
                 DataBasket.hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
 
                 // gene activations
-                createGenesData();
+                createGenesData(false);
                 for (int i = 0; i < cellStateGenes.Length; i++)
                 {
-                    if (cellStateGenes[i].Length > 0)
-                    {
-                        DataBasket.hdf5file.readDSDouble("GeneState" + i, ref cellStateGenes[i]);
-                    }
+                    DataBasket.hdf5file.readDSDouble("GeneState" + i, ref cellStateGenes[i]);
                 }
 
                 // behaviors

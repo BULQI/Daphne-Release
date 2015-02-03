@@ -1372,10 +1372,8 @@ namespace DaphneGui
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = false;
-            MW.ScalarBarMarkerButton.IsEnabled = false;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = false;
             MW.ResetCameraButton.IsEnabled = false;
             MW.save3DView.IsEnabled = false;
@@ -1384,14 +1382,12 @@ namespace DaphneGui
         public void ToolsToolbarEnableAllIcons()
         {
             ToolsToolbar_IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = true;
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.ScalarBarMarkerButton.IsEnabled = true;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = true;
             MW.ResetCameraButton.IsEnabled = true;
             MW.save3DView.IsEnabled = true;
@@ -2107,15 +2103,19 @@ namespace DaphneGui
         /// <param name="filename" - File name
         /// <param name="imageWriter" - Object of one of these types depending on what user selected: 
         ///         vtkJPEGWriter, vtkBMPWriter, vtkPNGWriter, vtkTIFFWriter 
-        public void SaveToFile(string filename, vtkImageWriter imageWriter)
+        public void SaveToFile(string filename, vtkImageWriter imageWriter, double[] rgb)
         {
             //Use "rw" which is the current rendering window variable
             RenderWindowControl myRWC = new RenderWindowControl();
             myRWC = rwc;
             vtkRenderWindow myRW = rwc.RenderWindow;
             vtkRenderer ren = myRW.GetRenderers().GetFirstRenderer();
-            // background color
-            ren.SetBackground(1.0, 1.0, 1.0);
+            vtkWindow currWindow = ren.GetVTKWindow();
+
+            // remember the current color
+            double[] currentColor = ren.GetBackground(); 
+            // new background color
+            ren.SetBackground(rgb[0], rgb[1], rgb[2]);
 
             vtkWindowToImageFilter w2if = new vtkWindowToImageFilter();
             w2if.SetInput(myRW);
@@ -2125,9 +2125,10 @@ namespace DaphneGui
             imageWriter.SetFileName(filename);
             imageWriter.Write();
 
-            //System.Windows.Media.Color col = MainWindow.SOP.Palette.renderDrawing.bg_color.EntityColor;
-            //ren.SetBackground(col.R, col.G, col.B);
-            ren.SetBackground(0.0, 0.0, 0.0);
+            // reset background to original color
+            ren.SetBackground(currentColor[0], currentColor[1], currentColor[2]);
+            currWindow.Render();
+
         }
     }
 }

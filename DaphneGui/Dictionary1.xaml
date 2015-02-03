@@ -33,11 +33,15 @@
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
     <daph:ParameterDistributionTypeToStringConverter x:Key="ParamDistTypeEnumConv" />
     <daph:ParameterDistributionTypeToBoolConverter x:Key="ParamDistTypeBoolConv" />
+    <local:CellPopDistTypeTooltipConverter x:Key="CellPopDistTypeTooltipConv" />
 
 
     <daph:TransitionDriverElementTypeToStringConverter x:Key="TransitionDriverElementTypeEnumConv" />
     <daph:TransitionDriverElementTypeConverter x:Key="TransitionDriverElementTypeConv" />
 
+    <local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />
+    <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+    <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
@@ -492,11 +496,34 @@
         </Grid>
     </DataTemplate>
 
+    <DataTemplate x:Key="cellRenderMethodTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>
+        </StackPanel>
+    </DataTemplate>
+
     <ObjectDataProvider x:Key="boundaryFaces"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
         <ObjectDataProvider.MethodParameters>
             <x:Type TypeName="daph:BoundaryFace" />
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
+
+    <!-- CellShapeEnum-->
+    <ObjectDataProvider x:Key="cellRenderMethodEnum"
+                            MethodName="GetValues" 
+                            ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="local:CellRenderMethod" />
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
+
+    <ObjectDataProvider x:Key="RenderMethodEnum"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="daph:RenderMethod" />
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
 
