@@ -298,7 +298,7 @@
       ],
       "shades": 0,
       "name": "Leukocyte_staticReceptor",
-      "renderLabel": "1beccf18-0380-4b2b-bd7f-43e78d719949"
+      "renderLabel": "e9ea9cf4-4b19-4b08-a00e-a0623a8d4452"
     },
     {
       "base_color": {
@@ -597,7 +597,7 @@
       ],
       "shades": 0,
       "name": "Leukocyte_staticReceptor_motile",
-      "renderLabel": "0a6301eb-1193-47ec-a9a7-9da49c58a0e6"
+      "renderLabel": "5287d6cd-92d1-40ce-8ff5-0b62813918cf"
     },
     {
       "base_color": {
@@ -896,7 +896,7 @@
       ],
       "shades": 0,
       "name": "Leukocyte_dynamicReceptor_motile",
-      "renderLabel": "d1d6b49f-3ebc-4585-8dd4-c2d21f01364c"
+      "renderLabel": "1402832f-1045-44ff-b3d1-b01f1cabb643"
     },
     {
       "base_color": {
@@ -1195,7 +1195,7 @@
       ],
       "shades": 0,
       "name": "B",
-      "renderLabel": "d2709f58-ffa4-4749-a92d-8d89c1896731"
+      "renderLabel": "ce93ff47-a209-4336-a643-b00ebac8b728"
     },
     {
       "base_color": {
@@ -1494,7 +1494,7 @@
       ],
       "shades": 0,
       "name": "GC B",
-      "renderLabel": "8af126ba-6b86-4fc9-a4a2-9c65416d2e01"
+      "renderLabel": "b0e65d25-c30c-4873-b2a9-7a51bf8f9f20"
     },
     {
       "base_color": {
@@ -1793,7 +1793,7 @@
       ],
       "shades": 0,
       "name": "Stromal CXCL12-secreting",
-      "renderLabel": "70fe60f9-3a6e-47f8-8309-bc7cfcab31af"
+      "renderLabel": "a0b79fe5-ed7a-4c6d-9ae0-f1a306e6f81e"
     },
     {
       "base_color": {
@@ -2092,7 +2092,306 @@
       ],
       "shades": 0,
       "name": "Stromal CXCL13-secreting",
-      "renderLabel": "bdc6ffde-d1ed-4e34-b606-baf471b4bb41"
+      "renderLabel": "e3bdeada-b997-4b15-a6ab-b41ae4033bb6"
+    },
+    {
+      "base_color": {
+        "hint": "",
+        "EntityColor": "#FF008000"
+      },
+      "cell_pop_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FFB3E2CD"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFDCDAC"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFCBD5E8"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFF4CAE4"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFE6F5C9"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFF2AE"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFF1E2CC"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFCCCCCC"
+        }
+      ],
+      "diff_state_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FFE41A1C"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF377EB8"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF4DAF4A"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF984EA3"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFF7F00"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFFF33"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFA65628"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFF781BF"
+        }
+      ],
+      "diff_shade_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FFFE0000"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFF4528"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFF6746"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFF8363"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFF9D81"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFB69F"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFCFBE"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFE7DE"
+        }
+      ],
+      "div_state_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FF66C2A5"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFC8D62"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF8DA0CB"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFE78AC3"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFA6D854"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFD92F"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFE5C494"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFB3B3B3"
+        }
+      ],
+      "div_shade_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FF00FF00"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF58FF42"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF7CFF63"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF99FF80"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFB1FF9A"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFC6FFB4"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFDAFFCD"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFEDFFE6"
+        }
+      ],
+      "death_state_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FF8DD3C7"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFFFB3"
+        }
+      ],
+      "death_shade_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FF00FF00"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFB1FF9A"
+        }
+      ],
+      "gen_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FF8DD3C7"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFFFB3"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFBEBADA"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFB8072"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF80B1D3"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFDB462"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFB3DE69"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFCCDE5"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFD9D9D9"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFBC80BD"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFCCEBC5"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFFFED6F"
+        }
+      ],
+      "gen_shade_colors": [
+        {
+          "hint": "",
+          "EntityColor": "#FF00FF00"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF47FF34"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF66FF4E"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF7CFF63"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FF90FF76"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFA1FF89"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFB1FF9A"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFBFFFAB"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFCDFFBC"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFDAFFCD"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFE7FFDD"
+        },
+        {
+          "hint": "",
+          "EntityColor": "#FFF3FFEE"
+        }
+      ],
+      "shades": 0,
+      "name": "cb-cc_cycling",
+      "renderLabel": "52850fcc-6713-47c0-ad54-f489af2bc728"
     }
   ],
   "renderMols": [
@@ -2106,7 +2405,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12",
-      "renderLabel": "76ff88ec-2851-4998-89dd-0e898e063527"
+      "renderLabel": "8fabd71c-2c9b-4ba3-812a-3df441cfb9b5"
     },
     {
       "color": {
@@ -2118,7 +2417,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13",
-      "renderLabel": "dfc35ff6-2b94-4f48-b91f-daec1002c759"
+      "renderLabel": "ad04c809-9eed-4147-a00c-ba8328b657c8"
     },
     {
       "color": {
@@ -2130,7 +2429,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR4|",
-      "renderLabel": "182aae55-9f7c-42ef-a601-f19bcc642abc"
+      "renderLabel": "2600465b-6c1b-423b-bd3e-ca824a299bea"
     },
     {
       "color": {
@@ -2142,7 +2441,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR5|",
-      "renderLabel": "705990fa-30e0-411b-b1dd-99af0371ecd5"
+      "renderLabel": "18c80392-6a4e-4c78-803b-b3c88ab2c549"
     },
     {
       "color": {
@@ -2154,7 +2453,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12:CXCR4|",
-      "renderLabel": "a47975a5-cfd5-4baf-9ec3-c2beda08324f"
+      "renderLabel": "cc65d167-7b9f-4a62-9dc9-d25331fb944c"
     },
     {
       "color": {
@@ -2166,7 +2465,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13:CXCR5|",
-      "renderLabel": "f82edde0-b5c8-4d61-b413-496e45f30627"
+      "renderLabel": "b3f01dc1-40cd-4358-8fbb-906ebfa0d161"
     },
     {
       "color": {
@@ -2178,7 +2477,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12|",
-      "renderLabel": "254ca098-31ff-4870-b547-2631d65bc883"
+      "renderLabel": "dea810b9-b50c-4a38-a7b9-0810b4e0ec79"
     },
     {
       "color": {
@@ -2190,7 +2489,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13|",
-      "renderLabel": "fa7f4bec-2af9-41c6-9342-85b3a07f1bf7"
+      "renderLabel": "d5755742-d12f-491f-acdd-9e6b6c7f0bc8"
     },
     {
       "color": {
@@ -2202,7 +2501,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR5",
-      "renderLabel": "03bb86f1-4b6d-4d8f-b828-feefffe98884"
+      "renderLabel": "16066108-e22e-422e-9a4b-497de1328fbc"
     },
     {
       "color": {
@@ -2214,7 +2513,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR4",
-      "renderLabel": "bff3deb8-4ccc-4dd4-8130-150aa6d67fa3"
+      "renderLabel": "e99782f9-4846-422e-8960-b4cbd188050b"
     },
     {
       "color": {
@@ -2226,7 +2525,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13:CXCR5",
-      "renderLabel": "57f04a2c-6ed9-4378-b912-cb182090e7df"
+      "renderLabel": "7076663e-1e9b-4d81-9c6e-975e21a91795"
     },
     {
       "color": {
@@ -2238,7 +2537,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12:CXCR4",
-      "renderLabel": "42394f2b-c9bc-43f5-a49f-44e6d2681be7"
+      "renderLabel": "0725b3ab-252f-4db1-bdf4-c7a7f7157189"
     },
     {
       "color": {
@@ -2250,7 +2549,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "A",
-      "renderLabel": "c2db1f0b-8934-4ff2-8197-bd969708d201"
+      "renderLabel": "2b8de8de-eca7-4935-893c-a1f5dfec2747"
     },
     {
       "color": {
@@ -2262,7 +2561,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "A*",
-      "renderLabel": "c2b53227-28eb-45dc-93a7-d2682945a09f"
+      "renderLabel": "cdd31b28-cf15-4433-b82f-1d20cfc2abdf"
     },
     {
       "color": {
@@ -2274,7 +2573,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDiv",
-      "renderLabel": "ae96c1eb-5f61-4ba5-8854-56f37d8ff4e2"
+      "renderLabel": "83c67015-80a4-49e1-915d-393d9888b4d8"
     },
     {
       "color": {
@@ -2286,7 +2585,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif1",
-      "renderLabel": "5c690b6d-95a0-427d-8938-d9663c6e9ce1"
+      "renderLabel": "a2001818-8339-4646-83b6-76da00590993"
     },
     {
       "color": {
@@ -2298,7 +2597,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif2",
-      "renderLabel": "27190d14-1bcd-4441-9db2-ff6283944c7a"
+      "renderLabel": "5bda0b9e-267d-4b5d-bb2f-c127870bd81b"
     },
     {
       "color": {
@@ -2310,7 +2609,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif3",
-      "renderLabel": "51de7a65-2991-486d-abdc-8c51a3a384ad"
+      "renderLabel": "d366aa35-715e-4b6b-a1fa-39a5542e4bdb"
     },
     {
       "color": {
@@ -2322,7 +2621,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif4",
-      "renderLabel": "4b8e2a4d-a757-4677-9e71-4720d1abdb78"
+      "renderLabel": "3b1042b4-c1a3-4c76-af3b-fcdb478dd60a"
     },
     {
       "color": {
@@ -2334,7 +2633,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif5",
-      "renderLabel": "91f36ecf-980a-4675-9e2f-b2349193d06f"
+      "renderLabel": "d7729a5c-4744-4f8b-b6b9-52005eb9f029"
     },
     {
       "color": {
@@ -2346,7 +2645,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif6",
-      "renderLabel": "35083892-4891-476a-89ec-fd8fad890ab4"
+      "renderLabel": "9bc90d15-a77c-4222-bc03-07592f3093cd"
     },
     {
       "color": {
@@ -2358,7 +2657,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sDif7",
-      "renderLabel": "ecf10822-1a06-48c8-a7b2-c852146db757"
+      "renderLabel": "1de4bb4c-239b-4eeb-81ec-0460c6a2dcb9"
     },
     {
       "color": {
@@ -2370,7 +2669,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sApop",
-      "renderLabel": "c21446fe-39f9-40b6-8d95-8d4595ff9c9b"
+      "renderLabel": "a27b2f44-22b6-4b3f-8ead-85c460de9f35"
     },
     {
       "color": {
@@ -2382,7 +2681,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sResc1",
-      "renderLabel": "7615c22e-53b2-442f-8ffd-07ae14e568e6"
+      "renderLabel": "ffb71811-7a4f-488e-9946-370de08781cc"
     },
     {
       "color": {
@@ -2394,7 +2693,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "sResc2",
-      "renderLabel": "868cfd33-64c1-46da-9172-a12a7880a1d4"
+      "renderLabel": "6545249e-c70d-4644-9833-5bf0b09fb556"
     },
     {
       "color": {
@@ -2406,7 +2705,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "IgL",
-      "renderLabel": "85af5d75-7165-4ddc-8fb8-d321fb24fa3e"
+      "renderLabel": "575c976b-9609-4752-a611-6614bdabd026"
     },
     {
       "color": {
@@ -2418,7 +2717,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "IgS",
-      "renderLabel": "3bb59500-14be-4fd9-a9e4-202cafbbed0a"
+      "renderLabel": "982049af-4798-4e86-acff-cb391aac370f"
     },
     {
       "color": {
@@ -2430,7 +2729,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "IgH",
-      "renderLabel": "88294ad5-8041-412a-b9fa-177f06f67edd"
+      "renderLabel": "deb434ac-7fd8-48df-b625-7f806856ed07"
     },
     {
       "color": {
@@ -2442,7 +2741,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "AID",
-      "renderLabel": "a7fb480f-8dee-4afa-bbec-905703d575a5"
+      "renderLabel": "458a21cd-81c8-4428-bf29-ac1658fd7402"
     },
     {
       "color": {
@@ -2454,7 +2753,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "BL1",
-      "renderLabel": "4dff26ad-359a-4846-b266-82ad084bf674"
+      "renderLabel": "8e7da26f-54e9-4a92-9463-d97652d33b21"
     },
     {
       "color": {
@@ -2466,7 +2765,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "MHCII",
-      "renderLabel": "e2be6fc4-dcdc-4ea9-b1cf-038d16eb2129"
+      "renderLabel": "759ba7f5-c132-44fe-a460-118aa7d08991"
     }
   ]
 }
