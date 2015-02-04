@@ -189,6 +189,9 @@
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellOptions.xaml.cs">
+      <DependentUpon>CellOptions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
@@ -207,6 +210,9 @@
     </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ECMMolecules.xaml.cs">
+      <DependentUpon>ECMMolecules.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentExtents.xaml.cs">
       <DependentUpon>EnvironmentExtents.xaml</DependentUpon>
@@ -243,6 +249,9 @@
     </Compile>
     <Compile Include="RenderSkinWindow.xaml.cs">
       <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Save3DView.xaml.cs">
+      <DependentUpon>Save3DView.xaml</DependentUpon>
     </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
@@ -296,6 +305,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CellOptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -323,6 +336,10 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ECMMolecules.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentExtents.xaml">
       <SubType>Designer</SubType>
@@ -361,6 +378,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RenderSkinWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Save3DView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -460,6 +481,9 @@
     <Content Include="Config\RenderSkin\default_skin.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Config\daphne_gc_cycling_scenario.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:work="clr-namespace:Workbench"
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+        xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
@@ -24,27 +25,27 @@
 
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
         
-        <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
+        <!--<daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />-->
         
         <local:SimSetupControl x:Key="simSetupControl"/>
-        <local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />
+        <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
 
-        <ObjectDataProvider x:Key="RenderMethodEnum"
+        <!--<ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="daph:RenderMethod" />
             </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
+        </ObjectDataProvider>-->
 
         <!-- CellShapeEnum-->
-        <ObjectDataProvider x:Key="cellRenderMethodEnum"
+        <!--<ObjectDataProvider x:Key="cellRenderMethodEnum"
                             MethodName="GetValues" 
                             ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="local:CellRenderMethod" />
             </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
+        </ObjectDataProvider>-->
 
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
@@ -60,11 +61,11 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="cellRenderMethodTemplate">
+        <!--<DataTemplate x:Key="cellRenderMethodTemplate">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>
             </StackPanel>
-        </DataTemplate>
+        </DataTemplate>-->
         
     </Window.Resources>
     
@@ -144,7 +145,7 @@
                         <Separator />
                         <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Command="{x:Static local:MainWindow.SelectReportFolderCommand}"/>
                     </MenuItem>
-                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
+                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu"  IsEnabled="False">
                         <MenuItem Header="Cells..." Name="cellColorsMenu" />
                         <MenuItem Header="Molecules..." Name="molColorsMenu" />
                         <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" />
@@ -166,7 +167,7 @@
                     <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
                     <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
                     
@@ -205,7 +206,7 @@
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
-                    <MenuItem Header="Tech help" Name="techHelp">
+                    <MenuItem Header="Tech help" Name="techHelp"  IsEnabled="False">
                         <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
                         <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
                         <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
@@ -359,6 +360,8 @@
                                                 
                                                 />
                     <TextBlock VerticalAlignment="Center" Text="min" />
+                    <uc:DoublesBox AutoRange="false" AbsMinimum="-5" AbsMaximum="5"  Margin="10,0" SNLowerThreshold="-10"
+                                   Number="{Binding Path=SpeedFactorExponent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                 </ToolBar>
             </ToolBarTray>
         </shared:PixelSnapper>
@@ -444,7 +447,7 @@
                                         </DockPanel.Resources>
 
                                         <ToolBarTray DockPanel.Dock="Top">
-                                            <ToolBar Name="Tools_Toolbar" 
+                                            <ToolBar Name="Tools_Toolbar"
                                                 IsEnabled="{Binding ToolsToolbar_IsEnabled}"
                                                 RenderOptions.BitmapScalingMode="NearestNeighbor">
                                                 <ToggleButton Name="WhArrowToolButton" 
@@ -466,55 +469,62 @@
                                                     <Image Source="Images/preview_path.png" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cells</Label>
-
-                                                <!--ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
-                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
-                                                SelectedValue="{Binding Path=CellRenderMethod}"-->
-                                                <ComboBox Name="CellRenderMethodCB" Width="100"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
-                                                          ItemsSource="{Binding Converter={StaticResource CellRenderPopFromProtocolConverter}}"
-                                                          IsSynchronizedWithCurrentItem="True"
-                                                          DisplayMemberPath="name"
-                                                          />
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>
-                                                <ComboBox x:Name="CellsColorByCB" Width="100" 
-                                                          ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
-                                                          SelectedItem="{Binding ElementName=CellRenderMethodCB, Path=SelectedItem.renderMethod, UpdateSourceTrigger=PropertyChanged}"
-                                                          SelectionChanged="CellsColorByCB_SelectionChanged"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Choose cell render method">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                    <ComboBox.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
-                                                        </DataTemplate>
-                                                    </ComboBox.ItemTemplate>
-                                                </ComboBox>
-
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell Shape</Label>
-
-                                                <ComboBox ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
-                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
-                                                          SelectedValue="{Binding Path=CellRenderMethod}" MinWidth="60"/>
                                                 
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
-                                                <ComboBox Name="CellSelectionToolCB" Width="160"
-                                                          ItemsSource="{Binding Path=CellSelectionToolModes}"
-                                                          SelectedValue="{Binding Path=CellSelectionToolMode}"
-                                                          SelectionChanged="CellSelectionToolCB_SelectionChanged"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded"  ToolTip="Select the function the cell selection tool should perform"
-                                                          />-->
+                                                <Grid>
+                                                    <Expander x:Name="CellOptionsExpander" 
+                                                              ExpandDirection="Down" 
+                                                              MinWidth="150"
+                                                              IsExpanded="False"
+                                                              Header="Cell Options"
+                                                              Margin="4,4,0,0" 
+                                                              Canvas.ZIndex="1"
+                                                              BorderThickness="1"
+                                                              BorderBrush="Black"
+                                                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              Expanded="CellOptionsExpander_Expanded"
+                                                                >
+                                                    </Expander>
+                                                    <Popup x:Name="CellOptionsPopup"  AllowsTransparency="True" PopupAnimation="Fade" 
+                                                           PlacementTarget="{Binding ElementName=CellOptionsExpander}" Placement="Bottom" 
+                                                           IsOpen="{Binding ElementName=CellOptionsExpander, Path=IsExpanded}"
+                                                           ComboBox.SelectionChanged="CellsColorByCB_SelectionChanged"
+                                                           CheckBox.Checked="CellRenderOnOffChanged"
+                                                           CheckBox.Unchecked="CellRenderOnOffChanged"
+                                                           >
+                                                        <StackPanel Orientation="Vertical">
+                                                            <local:CellOptions DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
+                                                                               Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
+                                                        </StackPanel>
+                                                    </Popup>
+                                                </Grid>
+
+                                                <Grid>
+                                                    <Expander x:Name="ECMOptionsExpander" 
+                                                              MinWidth="150"
+                                                              ExpandDirection="Down" 
+                                                              IsExpanded="False"
+                                                              Header="ECM Options"
+                                                              Margin="4,4,0,0" 
+                                                              Canvas.ZIndex="1"
+                                                              BorderThickness="1"
+                                                              BorderBrush="Black"
+                                                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              Expanded="ECMOptionsExpander_Expanded"
+                                                            >
+                                                    </Expander>
+                                                    <Popup x:Name="ECMOptionsPopup"  AllowsTransparency="False" 
+                                                           PlacementTarget="{Binding ElementName=ECMOptionsExpander}" 
+                                                           Placement="Bottom" 
+                                                           IsOpen="{Binding ElementName=ECMOptionsExpander, Path=IsExpanded}"
+                                                           CheckBox.Checked="MolPopRenderOnOffChanged"
+                                                           CheckBox.Unchecked="MolPopRenderOnOffChanged"
+                                                           >
+                                                        <StackPanel Orientation="Vertical">
+                                                            <local:ECMMolecules DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
+                                                                                Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
+                                                        </StackPanel>
+                                                    </Popup>
+                                                </Grid>
 
                                                 <Slider x:Name="ColorMapScaleFactorSlider"
                                                         Visibility="{Binding ColorScaleSlider_IsEnabled}"
@@ -535,19 +545,8 @@
                                                             Visibility="{Binding ColorScaleSlider_IsEnabled}"
                                                             Text="{Binding ColorScaleMaxFactor, StringFormat={}{0:F2}, Mode=OneWay}"
                                                             />
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Extracellular medium</Label>
-                                                <ComboBox x:Name="SolfacRenderingCB" Width="120" 
-                                                            ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
-                                                            SelectedValue="{Binding Path=ECSRenderingMethod}"
-                                                            BorderBrush="LightGray" 
-                                                            ToolBar.OverflowMode="AsNeeded" ToolTip="Extracellular medium rendering style">
-                                                </ComboBox>
-                                                <ToggleButton x:Name="ScalarBarMarkerButton" 
-                                                        IsChecked="{Binding ScalarBarMarker_IsChecked}" 
-                                                        ToolTip="Show scalar color bar" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
-                                                <ToggleButton Name="OrientationMarkerButton" 
+                                               
+                                                <ToggleButton Name="OrientationMarkerButton" Margin="6,0"
                                                         IsChecked="{Binding OrientationMarker_IsChecked}" 
                                                         ToolTip="Show orientation axes marker" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
