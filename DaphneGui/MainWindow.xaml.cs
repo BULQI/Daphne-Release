@@ -241,6 +241,9 @@ namespace DaphneGui
 
         public MainWindow()
         {
+            //This allows you to debug if you are running an installed version of Daphne
+            //Debugger.Launch();
+
             InitializeComponent();
 
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
@@ -929,15 +932,37 @@ namespace DaphneGui
         private void SetPathVariable()
         {
             //Path of the dependencies folder
-            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies",
-                   pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+            string dependencies;
+            if (AssumeIDE() == true) {
+                dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies";
+            }
+            else {
+                dependencies = new Uri(appPath).LocalPath + @"\dependencies";
+            }
             
+            string pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+
             // path for libSBML
             pathEnv += ";" + dependencies;
+
             // path for hdf5
-            pathEnv += ";" + dependencies + @"\hdf5";
+            
+            
+
+            if (AssumeIDE() == true)
+            {
+                // path for hdf5
+                pathEnv += ";" + dependencies + @"\hdf5";
+            }
+            else
+            {
+                //pathEnv = new Uri(execPath).LocalPath;
+                string hdf5Path = (new Uri(execPath)).LocalPath;
+                pathEnv += ";" + hdf5Path;
+            }
 
             System.Environment.SetEnvironmentVariable("PATH", pathEnv, EnvironmentVariableTarget.Process);
+            
         }
 
         private Nullable<bool> saveScenarioUsingDialog()
@@ -1985,10 +2010,11 @@ namespace DaphneGui
 
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     ////      Do this once up front instead of doing each time user clicks Userstore or Daphnestore.
-                    sop.UserStore.FileName = "Config\\daphne_userstore.json";
-                    sop.UserStore.TempFile = "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
-                    sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
+                    string storesPath = new Uri(appPath).LocalPath;
+                    sop.UserStore.FileName = storesPath + @"\Config\daphne_userstore.json";
+                    sop.UserStore.TempFile = storesPath + "Config\\temp_userstore.json";
+                    sop.DaphneStore.FileName = storesPath + @"\Config\daphne_daphnestore.json";
+                    sop.DaphneStore.TempFile = storesPath + "Config\\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
                     orig_daphne_store_content = sop.DaphneStore.SerializeToString();
