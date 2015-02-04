@@ -41,7 +41,7 @@ namespace ManifoldRing
     {
         private Vector pos;
         private Matrix rot;
-        private double[] posArray;
+        private double[] position; //storage for pos data
         /// <summary>
         /// true when rotation is present
         /// </summary>
@@ -54,8 +54,8 @@ namespace ManifoldRing
         /// <param name="hasRot">true when the transform has rotation</param>
         public Transform(bool hasRot = true)
         {
+            position = new double[Dim];
             pos = new DenseVector(Dim);
-            posArray = new double[Dim];
             this.HasRot = hasRot;
 
             if (HasRot == true)
@@ -67,12 +67,15 @@ namespace ManifoldRing
 
 
         //allow outside access to array data without using translation.toArray() - axin
-        public double[] PosArray
+        public double[] Position
         {
             get
             {
-                for (int i = 0; i < Dim; i++) posArray[i] = pos[i];
-                return posArray;
+                for (int i = 0; i < Dim; i++)
+                {
+                    position[i] = pos[i];
+                }
+                return position;
             }
         }
 
