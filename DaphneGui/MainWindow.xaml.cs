@@ -3008,6 +3008,8 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            ToolWin.Apply();
+
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
 
             if (fi.IsReadOnly == false || !fi.Exists)
