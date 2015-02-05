@@ -328,6 +328,7 @@ namespace Daphne
                     {
                         simCell.DeathBehavior.CurrentState = nextIntValue;
                     }
+                    // else, the default is 0
                 }
                 // set the alive flag
                 simCell.Alive = simCell.DeathBehavior.CurrentState == 0;
@@ -352,10 +353,11 @@ namespace Daphne
                 {
                     // from distribution
                     nextIntValue = (int)cp.Cell.div_scheme.Driver.CurrentState.Sample();
-                    if (nextIntValue >= 0 && nextIntValue <= cp.Cell.div_scheme.Driver.states.Count())
+                    if (nextIntValue >= 0 && nextIntValue < cp.Cell.div_scheme.Driver.states.Count())
                     {
                         simCell.Divider.Behavior.CurrentState = nextIntValue;
                     }
+                    // else, the default is 0
                 }
                 simCell.Divider.Behavior.InitializeState();
                 // Set cell division scheme state
@@ -379,10 +381,11 @@ namespace Daphne
                 {
                     // from distribution
                     nextIntValue = (int)cp.Cell.diff_scheme.Driver.CurrentState.Sample();
-                    if (nextIntValue >= 0 && nextIntValue <= cp.Cell.diff_scheme.Driver.states.Count())
+                    if (nextIntValue >= 0 && nextIntValue < cp.Cell.diff_scheme.Driver.states.Count())
                     {
                         simCell.Differentiator.Behavior.CurrentState = nextIntValue;
                     }
+                    // else, the default is 0
                 }
                 simCell.Differentiator.Behavior.InitializeState();
                 // Set cell differentiation state

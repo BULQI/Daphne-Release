@@ -1040,8 +1040,8 @@ namespace DaphneGui
 
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
+            AddDifferentiationState(schemeName, "State0");
             AddDifferentiationState(schemeName, "State1");
-            AddDifferentiationState(schemeName, "State2");
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)
