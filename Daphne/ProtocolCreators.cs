@@ -1129,8 +1129,7 @@ namespace Daphne
             //MOLECULES IN MEMBRANE
             conc = new double[2] { cxcr5Conc_5umRadius, 0 };
             type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
-            float[,] colors = new float[2,4]{ {0.3f, 0.9f, 0.1f, 0.1f},
-                                              {0.3f, 0.2f, 0.9f, 0.1f} };
+
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
@@ -1183,16 +1182,9 @@ namespace Daphne
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
 #endif
 
-            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(0.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100);
+            gc.Sigma = new DistributedParameter(1.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1262,16 +1254,9 @@ namespace Daphne
                 }
             }
 
-            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(100.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1349,16 +1334,9 @@ namespace Daphne
                 }
             }
 
-            // Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(100.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1440,16 +1418,9 @@ namespace Daphne
                 }
             }
 
-            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(100.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
@@ -1550,16 +1521,9 @@ namespace Daphne
                 }
             }
 
-            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(0.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(0.0);
-            gc.Sigma = new DistributedParameter(0.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
@@ -1591,8 +1555,7 @@ namespace Daphne
             //MOLECULES IN MEMBRANE
             conc = new double[1] { 0 };
             type = new string[1] { "CXCL12|" };
-            //colors = new float[2, 4]{ {0.3f, 0.9f, 0.1f, 0.1f},
-            //                                  {0.3f, 0.2f, 0.9f, 0.1f} };
+
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
@@ -1646,13 +1609,6 @@ namespace Daphne
                 }
             }
 
-            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(0.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(0.0);
             gc.Sigma = new DistributedParameter(0.0);
@@ -1669,8 +1625,7 @@ namespace Daphne
             //MOLECULES IN MEMBRANE
             conc = new double[1] { 0 };
             type = new string[1] { "CXCL13|" };
-            colors = new float[2, 4]{ {0.3f, 0.9f, 0.1f, 0.1f},
-                                              {0.3f, 0.2f, 0.9f, 0.1f} };
+
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
@@ -1724,19 +1679,94 @@ namespace Daphne
                 }
             }
 
-            //// Must initialize ParamDistr fields or the scenarios will get flagged as new once they go through Load()
-            //gc.DragCoefficient.ConstValue = 1.0;
-            //gc.DragCoefficient.ParamDistr = new ConstantParameterDistribution(gc.DragCoefficient.ConstValue);
-            //gc.TransductionConstant = new DistributedParameter(0.0);
-            //gc.TransductionConstant.ParamDistr = new ConstantParameterDistribution(gc.TransductionConstant.ConstValue);
-            //gc.Sigma = new DistributedParameter(0.0);
-            //gc.Sigma.ParamDistr = new ConstantParameterDistribution(gc.Sigma.ConstValue);
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(0.0);
             gc.Sigma = new DistributedParameter(0.0);
 
             store.entity_repository.cells.Add(gc);
 
+            ////////////////////////////////
+            // Cycling cb-cc cell
+            //
+            gc = new ConfigCell();
+            gc.CellName = "cb-cc_cycling";
+            gc.CellRadius = 5.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[] { 0, 0, 0, 0 };
+            type = new string[] { "CXCR4|", "CXCR5|", "CXCL12:CXCR4|", "CXCL13:CXCR5|" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[] { 250,  0,     0,       0,         0,                0 };
+            type = new string[] { "A", "A*", "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+
+            // Add genes
+            type = new string[] { "gCXCR4", "gCXCR5" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes.Add(findGene(type[i], store));
+            }
+
+            // Reactions in Cytosol
+            type = new string[] { "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|", "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A", 
+                                  "gCXCR4 -> CXCR4 + gCXCR4", 
+                                  "CXCR4 ->", "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
+                                  "CXCL12:CXCR4| -> CXCL12:CXCR4",  "CXCL12:CXCR4 ->",
+                                  "gCXCR5 -> CXCR5 + gCXCR5", 
+                                  "CXCR5 ->", "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
+                                  "CXCL13:CXCR5| -> CXCL13:CXCR5",  "CXCL13:CXCR5 ->" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], store);
+                if (reac != null)
+                {
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
+                }
+            }
+
+            diff_scheme_guid = findDiffSchemeGuid("cycling cb-cc diff scheme", store);
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
+            {
+                gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
+            }
+
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(1.0);
+
+            store.entity_repository.cells.Add(gc);
         }
 
         private static void PredefinedDiffSchemesCreator(Level store)
@@ -1890,6 +1920,108 @@ namespace Daphne
 
             // Add DriverElements to TransitionDriver
             LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
+
+            // Add to Entity Repository
+            store.entity_repository.transition_drivers.Add(driver);
+            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
+            store.entity_repository.diff_schemes.Add(diffScheme);
+            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+
+            ////////////////////////////////////////
+            // cycling cb-cc cell differentiatior 
+            ////////////////////////////////////////
+
+            stateNames = new string[] { "centroblast", "centrocyte" };
+            geneNames = new string[] { "gCXCR4", "gCXCR5" };
+            activations = new double[,]  { { 1,     0  },  // centroblast
+                                           { 0,     1 },   // centrocyte
+                                         };
+            
+            // centrocyte/centroblast transition
+            // [Allen2007].
+            // Our estimate that GC B cells spend only several hours in the light zone ...
+            // Gamma distribution with rate=15 and shape=8 has mean value of 120 minutes
+            // pdf(60) = 1.1e-4, pdf(180) = 7.1e-4
+            //
+            // centroblast/centrocyte transition 
+            // Assume new centroblasts undergo 6 rounds of division at 12 hours per division.
+            // GC B cells can divide after differentiating to centrocytes (Allen 2007), but have the bulk of division in the DZ.
+            // Then make the mean transition time of centrocyte/centroblast transition ~4320 minutes.
+            // Weibull distribution with s=4312 and shape=6 gives a broad distribution with mean 4000 minutes.
+            //
+            ParameterDistribution pd01 = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)pd01).Scale = 4000;
+            ((WeibullParameterDistribution)pd01).Shape = 6.0;
+
+            ParameterDistribution pd10 = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)pd10).Scale = 1000;
+            ((WeibullParameterDistribution)pd10).Shape = 8.0;
+
+            diffScheme = new ConfigTransitionScheme();
+            diffScheme.Name = "cycling cb-cc diff scheme";
+            driver = new ConfigTransitionDriver();
+            driver.Name = "cycling cb-cc driver";
+            driver.CurrentState = new DistributedParameter(0);
+            driver.StateName = stateNames[0];
+
+            // Attach transition driver to differentiation scheme
+            diffScheme.Driver = driver;
+
+            // Add states
+            diffScheme.Driver.states = new ObservableCollection<string>();
+            for (int j = 0; j < stateNames.Count(); j++)
+            {
+                diffScheme.Driver.states.Add(stateNames[j]);
+            }
+
+            // Add genes
+            diffScheme.genes = new ObservableCollection<string>();
+            for (int j = 0; j < activations.GetLength(1); j++)
+            {
+                diffScheme.genes.Add(findGeneGuid(geneNames[j], store));
+            }
+
+            // Add epigenetic map of genes and activations
+            diffScheme.activationRows = new ObservableCollection<ConfigActivationRow>();
+            for (int i = 0; i < activations.GetLength(0); i++)
+            {
+                actRow = new ConfigActivationRow();
+                for (int j = 0; j < activations.GetLength(1); j++)
+                {
+                    actRow.activations.Add(activations[i, j]);
+                }
+                diffScheme.activationRows.Add(actRow);
+            }
+
+            //// Add DriverElements to TransitionDriver
+            //LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
+            // Create driver with default, empty molecule-driven transition driver elements
+            for (int i = 0; i < diffScheme.Driver.states.Count; i++)
+            {
+                ConfigTransitionDriverRow row = new ConfigTransitionDriverRow();
+
+                for (int j = 0; j < diffScheme.Driver.states.Count; j++)
+                {
+                    row.elements.Add(new ConfigMolTransitionDriverElement());
+                }
+                diffScheme.Driver.DriverElements.Add(row);
+            }
+
+            ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
+            distrTdE1.Distr = new DistributedParameter();
+            distrTdE1.Distr.DistributionType = ParameterDistributionType.WEIBULL;
+            distrTdE1.Distr.ParamDistr = pd01;
+            diffScheme.Driver.DriverElements[0].elements[1] = distrTdE1;
+            distrTdE1.CurrentState = 0;
+            distrTdE1.DestState = 1;
+
+            ConfigDistrTransitionDriverElement distrTdE2 = new ConfigDistrTransitionDriverElement();
+            distrTdE2.Distr = new DistributedParameter();
+            distrTdE2.Distr.DistributionType = ParameterDistributionType.WEIBULL;
+            distrTdE2.Distr.ParamDistr = pd10;
+            diffScheme.Driver.DriverElements[1].elements[0] = distrTdE2;
+            distrTdE2.CurrentState = 1;
+            distrTdE2.DestState = 0;
 
             // Add to Entity Repository
             store.entity_repository.transition_drivers.Add(driver);
@@ -2141,10 +2273,11 @@ namespace Daphne
             // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
             double ecsDefaultDegradRate = 0.1;
             //
-            // Default degradation rate for cytoplasm proteins  (min)
-            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
-            double cytoDefaultDegradRate = 0.1;
-
+            //// Default degradation rate for cytoplasm proteins  (min)
+            //// Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
+            //double cytoDefaultDegradRate = 0.1;
+            // This seems to work better in the simulations so far
+            double cytoDefaultDegradRate = 1.0;
             ConfigReaction cr = new ConfigReaction();
 
             // Annihiliation: CXCR5 -> 
@@ -2156,11 +2289,20 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
-            // Annihiliation: CXCL13:CXCR5 -> 
+            // Annihiliation: CXCL13 -> 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL13:CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
@@ -2198,16 +2340,13 @@ namespace Daphne
             // Barroso, Munoz, et al.
             // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
             // The FASEB Journal vol. 26 no. 12 4841-485
-            // CXCL13/CXCR5 binding affinity:  KD = 5.05e-8 M  = (50.5e-9)*(1e-18)*(6.022e23) molec/um^3 = 0.0304 molec/um^3
-            //
-            // KD = k_reverse / k_forward
-            // Use k_reverse from CXCL12/CXCR4| binding/unbinding.
-            // Vega2011 k_off = 8.24e-3/s = 0.494/min
-            // Use same for CXCL13:CXCR5| unbinding k_reverse = 0.494 min^{-1}
-            // k_forward = k_reverse / 0.0304 um^3/(molec-min) = 1.625 um^3/(molec-min)
-            //
-            kr = 0.494;
-            kf = 16.25;
+            // (measured) CXCL13/CXCR5 binding affinity:  KD = 30.4 molec/um^3
+            // (measured) K_on = 7.7e-3 um^3/#-min
+            // (measured) K_off = 0.21 1/min
+            // calculated K_off/K_on = 27.3 #/um^3
+            // revised:  1/19/2015
+            kr = 0.21;
+            kf = 7.7e-3;
             //
             // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
             cr = new ConfigReaction();
@@ -2250,8 +2389,10 @@ namespace Daphne
             double f1 = 1e-2;
             // Then  k_activation ~ 0.5 * f = 5e-3 min^{-1}
             //
-            // Choose a slower deactivation (A* -> A) rate   k_deactivation = k_activation / 100;
-            double f2 = 1e-1;
+            //// Choose a slower deactivation (A* -> A) rate   k_deactivation = k_activation / 100;
+            //double f2 = 1e-1;
+            // This seems to work better from preliminary simulations.
+            double f2 = 10;
             // 
             kf = 0.5 * f1;
             kr = kf * f2;
@@ -2297,25 +2438,16 @@ namespace Daphne
             ///////////////////////////////////////////////////////////////////////////////////
             // CXCL12 + CXCR4| -> CXCL12:CXCR4|
             //
-            ////// Crump, M. P., Gong, J. H., Loetscher, et al., (1997) EMBO J. 16, 6996–7007.
-            ////// CXCL12/CXCR4 binding affinity:  KD = 3.6e-9 M  = (3.6e-9)*(1e-18)*(6.022e23) molec/um^3 = 2.2e-3 molec/um^3
-            //////
-            ////// KD = k_reverse / k_forward
-            ////// Arbitrarily, choose k_reverse = 1/0.1   min^{-1} = 10 min^{-1}
-            ////// k_forward = k_reverse / 2.2e-3 um^3/(molec-min) = 455 um^3/(molec-min)
-            //////
-            ///////////////////////////////////////////////////////////////////////////////////
             // Vega et al., Technical Advance: Surface plasmon resonance-based analysis of CXCL12 binding 
             // using immobilized lentiviral particles. Journal of Leukocyte Biology Vol 90, 1-10, 2011. 
             // 
-            // CXCL12/CXCR4 binding affinity:  KD = 2.09e-2 molec/um^3
-            // k_reverse (k_off) = 0.494/min
-            //
-            // KD = k_reverse / k_forward
-            // k_forward = k_reverse / KD = 0.494 / 2.09e-2  um^3/(molec-min) = 23.6 um^3/(molec-min)
-            //
+            // (measured) XCL12/CXCR4 binding affinity:  KD = 20.9 molec/um^3
+            // (measured) k_off = 0.494/min
+            // (measured) k_on = 4.2e-2 um^3/#-min
+            // calculated K_off/K_on = 12 #/um^3
+            // revised:  1/19/2015
             kr = 0.494;
-            kf = 23.6;
+            kf = 4.2e-2;
             //
             // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
             cr = new ConfigReaction();
@@ -2344,10 +2476,13 @@ namespace Daphne
 
             // Internalization of bound receptor
             // 
-            // Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
-            // heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
-            // Fit of fig. S3b:
-            //          k = 0.010 min(-1)
+            //// Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
+            //// heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
+            //// Fit of fig. S3b:
+            ////          k = 0.010 min(-1)
+            //double k1_CXCL13_CXCR5 = 0.010;
+            // This works better and is closer to the CXCL12:CXCR4 fitted internalization rate. 
+            // Also, the fitted value of 0.01 is probably too small.
             double k1_CXCL13_CXCR5 = 0.010;
             //
             // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
@@ -2377,9 +2512,8 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
             //
-            // Assume that internalization of the unactivated receptor is slower than internalization of bound(activated) receptor
-            // Arbitrarily choose a factor of 100
-            f2 = 1e-2;
+            // See the calibration document.
+            //f2 = 0.1;
             //
             // BoundaryTransportFrom: CXCR5| -> CXCR5
             cr = new ConfigReaction();
@@ -2388,7 +2522,7 @@ namespace Daphne
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = f2 * k1_CXCL13_CXCR5;
+            cr.rate_const = 0.06;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
             //
@@ -2399,7 +2533,35 @@ namespace Daphne
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = f2 * k1_CXCL12_CXCR4;
+            cr.rate_const = 0.054;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // 
+            // BoundaryTransport from cytosol to membrane
+            // These values are chosen to get the desired receptor concentration at equilibrium
+            // and a short time-to-equilibrium for the membrane receptor concentration.
+            // See the calibration document.
+            //f2 = 10;
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 3.3;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // BoundaryTransportTo: CXCR4 -> CXCR4|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 3.0;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
@@ -2441,34 +2603,19 @@ namespace Daphne
             //
 
             // BoundaryTransportTo: CXCR5 -> CXCR5|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
-            cr.rate_const = 1.0;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
 
-            // BoundaryTransportTo: CXCR4 -> CXCR4|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
-            cr.rate_const = 1.0;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
 
             // Transcription
 
+            // Revised 1/19/2015
             // Schwanhausser et al, Nature 2011 (473), 337-342
-            // average mRNAs per hour:  ~ 2
-            // average proteins per mRNA per hour: ~ 100
+            // median 17 mRNAs per cell
+            // 140 protein copies/(mRNA copy - hr)
             // Default: 2 gene copies per cell
-            kf = 2 * 100.0 / (2 * 60);
+            // Cell volume = V
+            // V = 524 um3 for a 10 um diameter cell
+            // kf = 17 * 140 / (2 * 60 * V)  copies/(gene-min-um3)
+            kf = 0.4;
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
@@ -2917,6 +3064,122 @@ namespace Daphne
 
             store.entity_repository.reaction_complexes.Add(crc);
 
+
+            ////////////////////////////////////////////////////////////////
+            crc = new ConfigReactionComplex("CXCR5 receptor production and recycling");
+
+            //MOLECULES
+            //conc = new double[] { 0, 0, 0, 0 };
+            //type = new string[] { "CXCR5", "CXCR5|", "CXCL13:CXCR5", "CXCL13:CXCR5|" };
+            conc = new double[] { 0, 0};
+            type = new string[] { "CXCR5", "CXCL13:CXCR5" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+
+            //GENES
+            type = new string[] { "gCXCR5" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigGene cg = store.entity_repository.genes_dict[findGeneGuid(type[i], store)];
+                if (cg != null)
+                {
+                    crc.genes.Add(cg.Clone(store));
+                }
+            }
+
+            //REACTIONS
+            // Reaction strings
+            type = new string[] { "gCXCR5 -> CXCR5 + gCXCR5", 
+                                  "CXCR5 ->", "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
+                                  "CXCL13:CXCR5| -> CXCL13:CXCR5",  "CXCL13:CXCR5 ->" }; 
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+
+            store.entity_repository.reaction_complexes.Add(crc);
+
+
+            ////////////////////////////////////////////////////////////////
+            crc = new ConfigReactionComplex("CXCR4 receptor production and recycling");
+
+            //MOLECULES
+            conc = new double[] { 0, 0 };
+            type = new string[] { "CXCR4", "CXCL12:CXCR4" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+
+            //GENES
+            type = new string[] { "gCXCR4" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigGene cg = store.entity_repository.genes_dict[findGeneGuid(type[i], store)];
+                if (cg != null)
+                {
+                    crc.genes.Add(cg.Clone(store));
+                }
+            }
+
+            //REACTIONS
+            // Reaction strings
+            type = new string[] { "gCXCR4 -> CXCR4 + gCXCR4", 
+                                  "CXCR4 ->", "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
+                                  "CXCL12:CXCR4| -> CXCL12:CXCR4",  "CXCL12:CXCR4 ->" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+
+            store.entity_repository.reaction_complexes.Add(crc);
         }
 
         //Following function needs to be called only once
@@ -3370,6 +3633,234 @@ namespace Daphne
                 }
                 driver.DriverElements.Add(row);
             }
+        }
+
+        /// <summary>
+        /// New default scenario for first pass of Daphne germinal center simulation
+        /// </summary>
+        public static void CreateGCProtocol(Protocol protocol)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            //Load needed entities from User Store 
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            //EXPERIMENT
+            protocol.experiment_name = "Simple GC cycling Scenario";
+            protocol.experiment_description = "CXCL12 Gaussian distribution (LZ), CXCL13 Gaussian distribution (DZ), cb-cc cells";
+            protocol.scenario.time_config.duration = 6000.0;
+            protocol.scenario.time_config.rendering_interval = 6.0;
+            protocol.scenario.time_config.sampling_interval = 6.0;
+            protocol.scenario.time_config.integrator_step = 0.001;
+            protocol.reporter_file_name = "gc_cycling";
+
+            envHandle.extent_x = 260;
+            envHandle.extent_y = 260;
+            envHandle.extent_z = 260;
+            envHandle.gridstep = 10;
+
+            //ECS MOLECULES
+            string[] ecs_mols = new string[] { "CXCL13", "CXCL12" };
+            int itemsLoaded = LoadProtocolMolecules(protocol, ecs_mols, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != ecs_mols.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
+
+            //GENES
+            string[] item = new string[] { "gCXCR5", "gCXCR4" };
+            itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol genes.");
+            }
+
+            //CELL MOLECULES
+            item = new string[] { "A", "A*", "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5" };
+            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
+
+            item = new string[] { "CXCR4|", "CXCL12:CXCR4|", "CXCR5|", "CXCL13:CXCR5|" };
+            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
+            }
+
+            //ECS REACTIONS
+            string[] ecsReacs = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                    "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
+                                    "CXCL12 + CXCR4| -> CXCL12:CXCR4|",
+                                    "CXCL12:CXCR4| -> CXCL12 + CXCR4|" };
+            itemsLoaded = LoadProtocolReactions(protocol, ecsReacs, userstore);
+            if (itemsLoaded != ecsReacs.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            }
+
+            //CELL CYTOSOL REACTIONS
+            item = new string[] {  "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+                                    "A* -> A",
+                                    "CXCL13:CXCR5 ->",
+                                    "CXCR5 ->",
+                                    "CXCL12:CXCR4 ->",
+                                    "CXCR4 ->",
+                                    "gCXCR4 -> CXCR4 + gCXCR4",
+                                    "gCXCR5 -> CXCR5 + gCXCR5",
+                                    "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
+                                    "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
+                                    "CXCL12:CXCR4| -> CXCL12:CXCR4", "CXCL13:CXCR5| -> CXCL13:CXCR5",
+            };
+            itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            }
+
+            //CELLS - cell reactions will load with cell
+            item = new string[] { "cb-cc_cycling" };
+            itemsLoaded = LoadProtocolCells(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol cells.");
+            }
+
+            //ECS
+            double sep = 130;
+            double d = sep * Math.Cos(Math.PI/4.0);
+            double[] c = new double[] { envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2 };
+            double  lz_sigma = 400,
+                    dz_sigma = 200;
+            double[,] box_trans = new double[,] { { c[0], c[1], c[2] }, 
+                                                  { c[0] + d, c[1] + d, c[2] + d} };
+            double[,] box_scale = new double[,] { { lz_sigma, lz_sigma, lz_sigma }, { dz_sigma, dz_sigma, dz_sigma } };
+
+            System.Windows.Media.Color[] box_color = new System.Windows.Media.Color[] { System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.0f, 0.3f), 
+                                                                                        System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 1.0f, 0.0f) };
+            ConfigMolecularPopulation configMolPop = null;
+            // ECS
+            for (int i = 0; i < ecs_mols.Count(); i++)
+            {
+                ConfigMolecule cm = userstore.entity_repository.molecules_dict[findMoleculeGuid(ecs_mols[i], MoleculeLocation.Bulk, userstore)];
+                if (cm != null)
+                {
+                    configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+                    configMolPop.molecule = cm.Clone(null);
+                    configMolPop.Name = cm.Name;
+
+                    // Set the diffusion coefficient to zero
+                    configMolPop.molecule.DiffusionCoefficient = 0.0;
+
+                    // Gaussian Distrtibution
+                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
+                    // box x,y,z_scale parameters are 2*sigma
+                    GaussianSpecification gaussSpec = new GaussianSpecification();
+                    BoxSpecification box = new BoxSpecification();
+                    box.x_trans = box_trans[i, 0];
+                    box.y_trans = box_trans[i, 1];
+                    box.z_trans = box_trans[i, 2];
+                    box.x_scale = box_scale[i, 0];
+                    box.y_scale = box_scale[i, 1];
+                    box.z_scale = box_scale[i, 2];
+                    gaussSpec.box_spec = box;
+                    gaussSpec.gaussian_spec_color = box_color[i];
+                    gaussSpec.gaussian_region_visibility = false;
+                    gaussSpec.current_gaussian_region_visibility = false;
+                    gaussSpec.box_spec.current_box_visibility = false;
+                    gaussSpec.box_spec.box_visibility = false;
+
+                    MolPopGaussian molPopGaussian = new MolPopGaussian();
+                    molPopGaussian.peak_concentration = 500;
+                    molPopGaussian.gauss_spec = gaussSpec;
+
+                    configMolPop.mp_distribution = molPopGaussian;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    ReportECM r = configMolPop.report_mp as ReportECM;
+                    r.mean = false;
+
+                    //rendering
+                    ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
+
+                    protocol.scenario.environment.comp.molpops.Add(configMolPop);
+                }
+            }
+
+
+            //ECS REACTIONS
+            ConfigReaction reac;
+            for (int j = 0; j < ecsReacs.Length; j++)
+            {
+                reac = findReaction(ecsReacs[j], protocol);
+                if (reac != null)
+                {
+                    protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
+                }
+            }
+
+            //CELLS
+
+            // Add cell
+            //This code will add the cell and the predefined ConfigCell already has the molecules needed
+            ConfigCell configCell = findCell("cb-cc_cycling", protocol);
+
+            // Cell placement
+            CellPopulation cellPop = new CellPopulation();
+            cellPop.Cell = configCell.Clone(true);
+            cellPop.cellpopulation_name = configCell.CellName;
+            cellPop.number = 10;
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
+            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
+            minDisSquared *= minDisSquared;
+            cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
+            cellPop.cellPopDist.Initialize(); 
+
+            // Cell reporting
+            cellPop.report_xvf.position = true;
+            cellPop.report_xvf.velocity = true;
+            cellPop.report_xvf.force = true;
+
+            foreach (ConfigMolecularPopulation cmp in cellPop.Cell.membrane.molpops)
+            {
+                // Mean only
+                cmp.report_mp.mp_extended = ExtendedReport.LEAN;                
+            }
+            foreach (ConfigMolecularPopulation cmp in cellPop.Cell.cytosol.molpops)
+            {
+                // Mean only
+                cmp.report_mp.mp_extended = ExtendedReport.LEAN;
+            }
+            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
+            {
+                ReportECM reportECM = new ReportECM();
+                reportECM.molpop_guid_ref = mpECM.molpop_guid;
+                reportECM.mp_extended = ExtendedReport.LEAN;
+                cellPop.ecm_probe.Add(reportECM);
+            }
+
+            cellPop.reportStates.Differentiation = true;
+            cellPop.reportStates.Exit = true;
+
+            //rendering
+            ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
+            ((TissueScenario)protocol.scenario).popOptions.cellPopOptions[0].renderMethod = RenderMethod.CELL_DIFF_STATE;
+            //((TissueScenario)protocol.scenario).popOptions.cellPopOptions
+
+            ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
+
         }
     }
 }

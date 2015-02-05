@@ -1,7 +1,7 @@
 {
   "experiment_name": "Diffusion Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "2875b582-d1ad-45a1-ac99-c284463071be",
+  "experiment_guid": "1bdfd52a-bbc5-4181-b4e2-b4f16d74f604",
   "experiment_description": "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -14,7 +14,7 @@
           "renderOn": false,
           "renderMethod": 10,
           "name": "CXCL13",
-          "renderLabel": "dfc35ff6-2b94-4f48-b91f-daec1002c759"
+          "renderLabel": "ad04c809-9eed-4147-a00c-ba8328b657c8"
         }
       ]
     },
@@ -41,29 +41,29 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "a38739e2-8750-447b-ab93-d4887427b7d0",
+            "molpop_guid": "44ebf17d-60d5-4f0e-b37d-25295314d50d",
             "molecule": {
               "Name": "CXCL13",
-              "renderLabel": "dfc35ff6-2b94-4f48-b91f-daec1002c759",
+              "renderLabel": "ad04c809-9eed-4147-a00c-ba8328b657c8",
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
               "molecule_location": 0,
-              "entity_guid": "dfc35ff6-2b94-4f48-b91f-daec1002c759"
+              "entity_guid": "ad04c809-9eed-4147-a00c-ba8328b657c8"
             },
             "Name": "CXCL13",
             "report_mp": {
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 2,
-              "molpop_guid_ref": "a38739e2-8750-447b-ab93-d4887427b7d0"
+              "molpop_guid_ref": "44ebf17d-60d5-4f0e-b37d-25295314d50d"
             },
             "mp_distribution": {
               "$type": "Daphne.MolPopGaussian, Daphne",
               "peak_concentration": 10.0,
               "gauss_spec": {
                 "box_spec": {
-                  "box_guid": "d2e845e7-87d8-4c48-b214-59ac6dd72e53",
+                  "box_guid": "002b3926-5f30-495b-82c6-534bb753b85d",
                   "transform_matrix": [
                     [
                       70.710678118654755,
@@ -106,7 +106,7 @@
               "mp_distribution_type": 2,
               "boundaryCondition": null
             },
-            "renderLabel": "dfc35ff6-2b94-4f48-b91f-daec1002c759"
+            "renderLabel": "ad04c809-9eed-4147-a00c-ba8328b657c8"
           }
         ],
         "Reactions": [],
@@ -115,11 +115,16 @@
     }
   },
   "sim_params": {
+    "Phagocytosis": {
+      "ParamDistr": null,
+      "ConstValue": 0.0,
+      "DistributionType": 0
+    },
     "phi1": 100.0,
     "phi2": 0.0,
     "deathConstant": 0.001,
     "deathOrder": 1,
-    "globalRandomSeed": 863626252
+    "globalRandomSeed": -1387522581
   },
   "reporter_file_name": "Diffusion_test",
   "entity_repository": {
@@ -128,12 +133,12 @@
     "molecules": [
       {
         "Name": "CXCL13",
-        "renderLabel": "dfc35ff6-2b94-4f48-b91f-daec1002c759",
+        "renderLabel": "ad04c809-9eed-4147-a00c-ba8328b657c8",
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
         "molecule_location": 0,
-        "entity_guid": "dfc35ff6-2b94-4f48-b91f-daec1002c759"
+        "entity_guid": "ad04c809-9eed-4147-a00c-ba8328b657c8"
       }
     ],
     "genes": [],
@@ -148,7 +153,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 2,
-        "entity_guid": "b3f94c31-db39-4ce9-bf1a-6c35bbfbee77"
+        "entity_guid": "da830a5f-2306-412a-9a3b-9a635b468584"
       },
       {
         "name": "Association",
@@ -162,7 +167,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 0,
-        "entity_guid": "97f135c7-f50f-4d71-85be-d317a25e0204"
+        "entity_guid": "30f859e9-e2a6-48b1-927c-3f816dd31eb1"
       },
       {
         "name": "Dimerization",
@@ -175,7 +180,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 3,
-        "entity_guid": "eb8fff82-f88c-476f-b2be-fd6d10e2dabb"
+        "entity_guid": "a19a5bb0-ef25-47d9-b623-4a6febf8ec2c"
       },
       {
         "name": "DimerDissociation",
@@ -188,7 +193,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 4,
-        "entity_guid": "a9e5a9a1-87b1-4149-b8da-a14f916cfe85"
+        "entity_guid": "65760d2a-c868-479b-b267-ade2e9a2b865"
       },
       {
         "name": "Dissociation",
@@ -202,7 +207,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 1,
-        "entity_guid": "155d6306-acc5-49ac-a088-3c8a635ec703"
+        "entity_guid": "aa120932-0d9e-4618-b4f2-e14d2faeba01"
       },
       {
         "name": "Transformation",
@@ -215,7 +220,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 5,
-        "entity_guid": "43386ab6-2759-45b9-bb39-9ffb4e3f357c"
+        "entity_guid": "cecfc1da-316c-4388-8b2f-92a88b9937fd"
       },
       {
         "name": "CatalyzedBoundaryActivation",
@@ -230,7 +235,7 @@
         ],
         "isBoundary": true,
         "reac_type": 14,
-        "entity_guid": "fd9b120b-b053-47d1-ac3a-0cacb78f8749"
+        "entity_guid": "00fbf39d-10aa-4d46-b139-330f0742b2c3"
       },
       {
         "name": "BoundaryAssociation",
@@ -244,7 +249,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 15,
-        "entity_guid": "c8d6ed87-c554-43f2-94df-fc4e75bf80fe"
+        "entity_guid": "9284f0ba-7b3a-4434-ac46-e289bd6a2439"
       },
       {
         "name": "BoundaryDissociation",
@@ -258,7 +263,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 16,
-        "entity_guid": "a82a4efb-bfb5-453a-b28f-112eebcb490b"
+        "entity_guid": "1256cb3f-5a45-4bec-8e99-7e8e89daf416"
       },
       {
         "name": "BoundaryTransportTo",
@@ -271,7 +276,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 18,
-        "entity_guid": "e66776e6-c99a-4f0c-8c29-e28210ee68d5"
+        "entity_guid": "6bbdac25-ebec-4022-a71b-b3be639bc4ee"
       },
       {
         "name": "BoundaryTransportFrom",
@@ -284,7 +289,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 19,
-        "entity_guid": "6f8a62ac-1012-4a24-813c-ab36fbf847de"
+        "entity_guid": "d619a881-bc67-4664-8282-3d045335c99f"
       },
       {
         "name": "AutocatalyticTransformation",
@@ -298,7 +303,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 6,
-        "entity_guid": "a2fc482b-86b2-4e0f-87ae-29e188b9c3e3"
+        "entity_guid": "dd05dc8d-d1ed-4c0d-86aa-c82a88bcd6fc"
       },
       {
         "name": "CatalyzedAnnihilation",
@@ -311,7 +316,7 @@
         ],
         "isBoundary": false,
         "reac_type": 7,
-        "entity_guid": "08dbea1e-9e83-439e-8b22-a76abd012d63"
+        "entity_guid": "326511e3-63f5-4895-a4ce-da38ca9b2b9d"
       },
       {
         "name": "CatalyzedAssociation",
@@ -327,7 +332,7 @@
         ],
         "isBoundary": false,
         "reac_type": 8,
-        "entity_guid": "bd77731d-6135-40f0-bc99-09f916a7c32b"
+        "entity_guid": "92db15c9-30ea-4519-9543-f9ba596212ff"
       },
       {
         "name": "CatalyzedCreation",
@@ -340,7 +345,7 @@
         ],
         "isBoundary": false,
         "reac_type": 9,
-        "entity_guid": "0a9896eb-f717-4f18-8997-2f98b25b9eed"
+        "entity_guid": "17423f43-fac3-4bdd-a0ab-c27d49881712"
       },
       {
         "name": "CatalyzedDimerization",
@@ -355,7 +360,7 @@
         ],
         "isBoundary": false,
         "reac_type": 10,
-        "entity_guid": "bbdde4ea-3d9b-4d35-b5a9-c5f257ce42a8"
+        "entity_guid": "c865ed2e-57d8-44e0-8912-20572483eaa7"
       },
       {
         "name": "CatalyzedDimerDissociation",
@@ -370,7 +375,7 @@
         ],
         "isBoundary": false,
         "reac_type": 11,
-        "entity_guid": "426168d5-ebd6-43b5-9516-e8218a4e7c79"
+        "entity_guid": "a782834f-9911-4bdf-93a0-7992e8bf462e"
       },
       {
         "name": "CatalyzedDissociation",
@@ -386,7 +391,7 @@
         ],
         "isBoundary": false,
         "reac_type": 13,
-        "entity_guid": "79d3457b-efb7-406b-a70b-d06f86829e4d"
+        "entity_guid": "1871c7bd-d34a-4f77-b99e-b9d6bfd59b6c"
       },
       {
         "name": "CatalyzedTransformation",
@@ -401,7 +406,7 @@
         ],
         "isBoundary": false,
         "reac_type": 12,
-        "entity_guid": "3ea00a4d-ff0d-4eeb-aac3-333d752fefb0"
+        "entity_guid": "bfd5fa4b-df6a-44b6-8c34-aa3ff188acba"
       },
       {
         "name": "Transcription",
@@ -414,7 +419,7 @@
         ],
         "isBoundary": false,
         "reac_type": 20,
-        "entity_guid": "68de87d2-83ab-442e-9a40-043c24722ed5"
+        "entity_guid": "282ac2fd-9ec0-4557-a10d-91f666bfb44b"
       }
     ],
     "diff_schemes": [],
