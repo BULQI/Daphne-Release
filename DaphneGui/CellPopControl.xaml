@@ -123,6 +123,8 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
                         <Grid  VerticalAlignment="Center">
@@ -230,6 +232,14 @@
                                    >
 
                     </uc:DoublesBox>
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
+                        <TextBlock Text="Angle 1"></TextBlock>
+                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="100" Width="100"></uc:DoublesBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
+                        <TextBlock Text="Angle 2"></TextBlock>
+                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="200" Width="100"></uc:DoublesBox>
+                    </StackPanel>
 
                 </Grid>
             </DataTemplate>
