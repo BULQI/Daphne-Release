@@ -324,7 +324,7 @@ namespace Daphne
                 else
                 {
                     nextIntValue = (int)cp.Cell.death_driver.CurrentState.Sample();
-                    if (nextIntValue >= 0 && nextIntValue <= cp.Cell.death_driver.states.Count())
+                    if (nextIntValue >= 0 && nextIntValue < cp.Cell.death_driver.states.Count())
                     {
                         simCell.DeathBehavior.CurrentState = nextIntValue;
                     }
