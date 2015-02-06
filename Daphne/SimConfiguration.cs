@@ -2572,7 +2572,10 @@ namespace Daphne
 
                         er.molpop_guid_ref = mp.molpop_guid;
                         cp.ecm_probe.Add(er);
-                        cp.ecm_probe_dict.Add(mp.molpop_guid, er);
+                        if (cp.ecm_probe_dict.ContainsKey(mp.molpop_guid) == false)
+                        {
+                            cp.ecm_probe_dict.Add(mp.molpop_guid, er);
+                        }
                     }
                 }
             }

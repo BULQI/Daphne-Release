@@ -43,7 +43,8 @@ namespace DaphneUserControlLib
             //-----------------------------------------------------------------
 
             //If need scientific notation - positive exponent
-            if (number >= uThresh || number < 0 || (number >= 1 && number < lThresh))
+            //if (number >= uThresh || number < 0 || (number >= 1 && number < lThresh))
+            if (number >= uThresh || (number >= 1 && number < lThresh))
             {
                 if (digits == 0)
                     digits++;

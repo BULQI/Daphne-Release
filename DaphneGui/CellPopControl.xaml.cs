@@ -92,7 +92,7 @@ namespace DaphneGui
                 }
                 else
                 {
-                    MessageBox.Show("Please add cells form the User store first.");
+                    MessageBox.Show("Please add cells from the User store first.");
                     return;
                 }
             }
@@ -542,6 +542,9 @@ namespace DaphneGui
 
             int index = CellPopsListBox.SelectedIndex;
             CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
+
+            if (current_item == null)
+                return;
 
             MessageBoxResult res;
             res = MessageBox.Show("Are you sure you would like to remove this cell population?", "Warning", MessageBoxButton.YesNo);

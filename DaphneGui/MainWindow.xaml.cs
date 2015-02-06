@@ -3008,6 +3008,8 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            ToolWin.Apply();
+
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
 
             if (fi.IsReadOnly == false || !fi.Exists)
@@ -3541,8 +3543,9 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void CellsColorByCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (e.OriginalSource is ComboBox == false) return;
             //reset display
+            //remove unnecessary refresh/invalid refresh
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0 || gc as VTKFullGraphicsController == null) return;
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
@@ -3551,6 +3554,8 @@ namespace DaphneGui
 
         private void CellRenderOnOffChanged(object sender, RoutedEventArgs e)
         {
+            //only respond to the checkbox.
+            if (e.OriginalSource is CheckBox == false) return;
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
