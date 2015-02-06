@@ -142,7 +142,12 @@ namespace DaphneGui
                     break;
                 }
             }
-            if (cmp.molecule == null) return;
+
+            if (cmp.molecule == null)
+            {
+                MessageBox.Show("Please add more molecules from the User store.");
+                return;
+            }
 
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
@@ -1040,8 +1045,8 @@ namespace DaphneGui
 
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
+            AddDifferentiationState(schemeName, "State0");
             AddDifferentiationState(schemeName, "State1");
-            AddDifferentiationState(schemeName, "State2");
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)

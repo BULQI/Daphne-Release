@@ -45,22 +45,35 @@ namespace DaphneGui
                 return;
             }
 
-            ConfigMolecule cm;
+            ConfigMolecule cm = null;
+            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+
             foreach (ConfigMolecule item in MainWindow.SOP.Protocol.entity_repository.molecules)
             {
                 if (MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
 
                 // Take the first molecule that is not already in the ECS
-                cm = item.Clone(null);
-                if (cm == null) return;
+                if (item.molecule_location == MoleculeLocation.Bulk)
+                {
+                    cm = item.Clone(null);
+                    if (cm == null) return;
 
-                ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);        
-                cmp.molecule = item.Clone(null);
-                cmp.Name = item.Name;
-                MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(cmp);
+                    //ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+                    cmp.molecule = item.Clone(null);
+                    cmp.Name = item.Name;
+                    MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(cmp);
 
-                break;
+                    break;
+                }                
             }
+
+            //If all mol types are used up already, then just inform user
+            if (cmp.molecule == null)
+            {
+                MessageBox.Show("Please add more molecules from the User store first.");
+                return;
+            }
+
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
 
             CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();

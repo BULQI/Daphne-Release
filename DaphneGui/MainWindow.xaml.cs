@@ -241,6 +241,9 @@ namespace DaphneGui
 
         public MainWindow()
         {
+            //This allows you to debug if you are running an installed version of Daphne
+            //Debugger.Launch();
+
             InitializeComponent();
 
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
@@ -941,15 +944,37 @@ namespace DaphneGui
         private void SetPathVariable()
         {
             //Path of the dependencies folder
-            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies",
-                   pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+            string dependencies;
+            if (AssumeIDE() == true) {
+                dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies";
+            }
+            else {
+                dependencies = new Uri(appPath).LocalPath + @"\dependencies";
+            }
             
+            string pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+
             // path for libSBML
             pathEnv += ";" + dependencies;
+
             // path for hdf5
-            pathEnv += ";" + dependencies + @"\hdf5";
+            
+            
+
+            if (AssumeIDE() == true)
+            {
+                // path for hdf5
+                pathEnv += ";" + dependencies + @"\hdf5";
+            }
+            else
+            {
+                //pathEnv = new Uri(execPath).LocalPath;
+                string hdf5Path = (new Uri(execPath)).LocalPath;
+                pathEnv += ";" + hdf5Path;
+            }
 
             System.Environment.SetEnvironmentVariable("PATH", pathEnv, EnvironmentVariableTarget.Process);
+            
         }
 
         private Nullable<bool> saveScenarioUsingDialog()
@@ -1997,10 +2022,11 @@ namespace DaphneGui
 
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     ////      Do this once up front instead of doing each time user clicks Userstore or Daphnestore.
-                    sop.UserStore.FileName = "Config\\daphne_userstore.json";
-                    sop.UserStore.TempFile = "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
-                    sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
+                    string storesPath = new Uri(appPath).LocalPath;
+                    sop.UserStore.FileName = storesPath + @"\Config\daphne_userstore.json";
+                    sop.UserStore.TempFile = storesPath + "Config\\temp_userstore.json";
+                    sop.DaphneStore.FileName = storesPath + @"\Config\daphne_daphnestore.json";
+                    sop.DaphneStore.TempFile = storesPath + "Config\\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
                     orig_daphne_store_content = sop.DaphneStore.SerializeToString();
@@ -2471,12 +2497,18 @@ namespace DaphneGui
 
         private bool saveTempFiles()
         {
-            // check if there were changes
-            if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+            // no temp file saving when the vcr is open
+            if (vcrControl.IsOpen() == false)
             {
-                sop.Protocol.SerializeToFile(true);
-                tempFileContent = true;
-                return true;
+                // check if there were changes
+                string refs = sop.Protocol.SerializeToStringSkipDeco();
+
+                if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+                {
+                    sop.Protocol.SerializeToFile(true);
+                    tempFileContent = true;
+                    return true;
+                }
             }
             return false;
         }
@@ -2485,17 +2517,40 @@ namespace DaphneGui
         {
             if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
-                sop.DaphneStore.SerializeToFile(false);
-                orig_daphne_store_content = sop.DaphneStore.SerializeToString();
+                FileInfo info = new FileInfo(sop.DaphneStore.FileName);
+                if (info.IsReadOnly == false || !info.Exists)
+                {
+                    sop.DaphneStore.SerializeToFile(false);
+                    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
+                }
+                else
+                {
+                    string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                    string caption = "File write protected";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
+                    MessageBox.Show(messageBoxText, caption, button, icon);
+                }
             }
 
             if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
-                sop.UserStore.SerializeToFile(false);
-                orig_user_store_content = sop.UserStore.SerializeToString();
+                FileInfo info = new FileInfo(sop.UserStore.FileName);
+                if (info.IsReadOnly == false || !info.Exists)
+                {
+                    sop.UserStore.SerializeToFile(false);
+                    orig_user_store_content = sop.UserStore.SerializeToString();
+                }
+                else
+                {
+                    string messageBoxText = "The file is write protected: " + sop.UserStore.FileName;
+                    string caption = "File write protected";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
+                    MessageBox.Show(messageBoxText, caption, button, icon);
+                }
             }
         }
-
         private bool applyTempFilesAndSave(bool discard)
         {
             if (tempFileContent == true)
@@ -2765,14 +2820,9 @@ namespace DaphneGui
 
         public void DisplayCellInfo(int cellID)
         {
-            if (cellID >= SimulationBase.dataBasket.Cells.Count)
+            if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
             {
                 MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-            else if (cellID < 0)
-            {
-                MessageBox.Show("Please enter a cell ID greater than 0.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -2816,8 +2866,9 @@ namespace DaphneGui
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
+                double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;
                 // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
@@ -2829,8 +2880,9 @@ namespace DaphneGui
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
+                double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;
                 // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
@@ -2959,6 +3011,8 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            ToolWin.Apply();
+
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
 
             if (fi.IsReadOnly == false || !fi.Exists)
@@ -2976,6 +3030,7 @@ namespace DaphneGui
                 // display message box
                 MessageBox.Show(messageBoxText, caption, button, icon);
             }
+            saveStoreFiles();
             tempFileContent = false;
         }
 
@@ -3338,6 +3393,7 @@ namespace DaphneGui
             ReacComplexChartWindow.Close();
             ComponentsToolWindow.DataContext = SOP.UserStore;
             CellStudioToolWindow.DataContext = SOP.UserStore;
+            ComponentsToolWindow.Refresh();
         }
 
         private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
@@ -3349,6 +3405,7 @@ namespace DaphneGui
             ReacComplexChartWindow.Close();
             ComponentsToolWindow.DataContext = SOP.DaphneStore;
             CellStudioToolWindow.DataContext = SOP.DaphneStore;
+            ComponentsToolWindow.Refresh();
         }
 
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3489,8 +3546,9 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void CellsColorByCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (e.OriginalSource is ComboBox == false) return;
             //reset display
+            //remove unnecessary refresh/invalid refresh
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0 || gc as VTKFullGraphicsController == null) return;
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
@@ -3499,6 +3557,8 @@ namespace DaphneGui
 
         private void CellRenderOnOffChanged(object sender, RoutedEventArgs e)
         {
+            //only respond to the checkbox.
+            if (e.OriginalSource is CheckBox == false) return;
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
