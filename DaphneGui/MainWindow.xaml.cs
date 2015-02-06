@@ -2497,12 +2497,18 @@ namespace DaphneGui
 
         private bool saveTempFiles()
         {
-            // check if there were changes
-            if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+            // no temp file saving when the vcr is open
+            if (vcrControl.IsOpen() == false)
             {
-                sop.Protocol.SerializeToFile(true);
-                tempFileContent = true;
-                return true;
+                // check if there were changes
+                string refs = sop.Protocol.SerializeToStringSkipDeco();
+
+                if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+                {
+                    sop.Protocol.SerializeToFile(true);
+                    tempFileContent = true;
+                    return true;
+                }
             }
             return false;
         }
@@ -2814,14 +2820,9 @@ namespace DaphneGui
 
         public void DisplayCellInfo(int cellID)
         {
-            if (cellID >= SimulationBase.dataBasket.Cells.Count)
+            if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
             {
                 MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-            else if (cellID < 0)
-            {
-                MessageBox.Show("Please enter a cell ID greater than 0.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -2865,8 +2866,9 @@ namespace DaphneGui
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
+                double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;
                 // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
@@ -2878,8 +2880,9 @@ namespace DaphneGui
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
+                double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;
                 // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field

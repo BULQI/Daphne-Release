@@ -123,6 +123,15 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// indicates if the vcr is open
+        /// </summary>
+        /// <returns></returns>
+        public bool IsOpen()
+        {
+            return DataBasket.hdf5file.isOpen();
+        }
+
+        /// <summary>
         /// set the player's state
         /// </summary>
         /// <param name="state">value indicating the state</param>

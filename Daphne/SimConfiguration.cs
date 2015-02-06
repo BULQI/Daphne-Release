@@ -7056,6 +7056,11 @@ namespace Daphne
             cmState.molPopDict.Add(key, mp.CopyArray());
         }
 
+        public void addMolPopulation(string key, double[] vals)
+        {
+            cmState.molPopDict.Add(key, vals);
+        }
+
         public void setDeathDriverState(int state)
         {
             cbState.deathDriverState = state;

@@ -241,6 +241,8 @@ namespace Daphne
             DifferentiationState = state.cbState.differentiationDriverState;
             // genes
             SetGeneActivities(state.cgState.geneDict);
+            // molecules
+            SetMolPopConcentrations(state.cmState.molPopDict);
         }
 
         public void setSpatialState(CellSpatialState s)
@@ -287,14 +289,12 @@ namespace Daphne
             }
 
             //update cytosol/membrane boundary
-            foreach (KeyValuePair<string, MolecularPopulation> molpop in Cytosol.Populations)
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
             {
-                molpop.Value.UpdateCytosolMembraneBoundary();
+                kvp.Value.UpdateCytosolMembraneBoundary();
             }
 
-
             PlasmaMembrane.Step(dt);
-
 
             // step the cell behaviors
 
@@ -349,10 +349,10 @@ namespace Daphne
         }
 
         /// <summary>
-        /// save gene activity from saved values.
+        /// save gene activity from saved values
         /// </summary>
-        /// <param name="geneDict"></param>
-        public void SetGeneActivities(Dictionary<String, double> geneDict)
+        /// <param name="geneDict">saved values in a dictionary</param>
+        public void SetGeneActivities(Dictionary<string, double> geneDict)
         {
             foreach (var kvp in geneDict)
             {
@@ -360,6 +360,31 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// set molecular population concentrations from saved values
+        /// </summary>
+        /// <param name="molPopDict">saved values in a dictionary</param>
+        public void SetMolPopConcentrations(Dictionary<string, double[]> molPopDict)
+        {
+            // cytosol
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                if (molPopDict.ContainsKey(kvp.Key) == false)
+                {
+                    continue;
+                }
+                kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
+            }
+            // membrane
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
+            {
+                if (molPopDict.ContainsKey(kvp.Key) == false)
+                {
+                    continue;
+                }
+                kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
+            }
+        }
 
         /// <summary>
         /// Returns the force the cell applies to the environment.
