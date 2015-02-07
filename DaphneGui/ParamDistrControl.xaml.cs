@@ -183,6 +183,7 @@ namespace DaphneGui
 
             }
 
+            detailsStackPanel.DataContext = null;
             detailsStackPanel.DataContext = distr_parameter;
         }
 
@@ -319,7 +320,8 @@ namespace DaphneGui
             }
         }
 
-        private void cbParamDistr_Loaded(object sender, RoutedEventArgs e)
+        //Needed this to update the selected distribution's details
+        private void cbParamDistr_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             string sTag = Tag as string;
             var comboBox = sender as ComboBox;
@@ -345,24 +347,20 @@ namespace DaphneGui
                     coll.Add(ParameterDistributionType.GAMMA);
                     coll.Add(ParameterDistributionType.NEG_EXP);
                     coll.Add(ParameterDistributionType.UNIFORM);
-                    coll.Add(ParameterDistributionType.WEIBULL); 
+                    coll.Add(ParameterDistributionType.WEIBULL);
                     break;
                 default:
                     break;
             }
 
-            if (coll.Count > 0 && dp != null)
+            if (coll.Count > 0)
             {
                 comboBox.ItemsSource = coll;
                 comboBox.SelectedItem = dtype;
+
+                ParamDistrDetails.DataContext = null;
+                ParamDistrDetails.DataContext = e.NewValue;
             }
-
-        }
-
-        //Needed this to update the selected distribution's details
-        private void cbParamDistr_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            ParamDistrDetails.DataContext = e.NewValue;
         }
 
     }
