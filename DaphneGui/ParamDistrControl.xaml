@@ -50,7 +50,7 @@
                         <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
                     </StackPanel>
                     <StackPanel>
-                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
                                    Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>      
@@ -238,7 +238,6 @@
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
                           SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
-                          Loaded="cbParamDistr_Loaded"   
                           DataContextChanged="cbParamDistr_DataContextChanged"
                           >
                 </ComboBox>
