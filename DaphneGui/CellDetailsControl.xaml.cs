@@ -145,7 +145,7 @@ namespace DaphneGui
 
             if (cmp.molecule == null)
             {
-                MessageBox.Show("Please add more molecules from the User store.");
+                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Cell Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -246,7 +246,7 @@ namespace DaphneGui
             }
             else
             {
-                MessageBox.Show("All available molecular populations have already been added.", "Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Cell Membrane", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
       
