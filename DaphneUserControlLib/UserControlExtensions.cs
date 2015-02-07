@@ -7,6 +7,11 @@ namespace DaphneUserControlLib
 {
     public static class UserControlExtensions
     {
+        /// <summary>
+        /// Extension method to calculate the number of significant digits for a given double value
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
         public static int NumSignificantDigits(this double d)
         {            
             string sNumber = d.ToString();
@@ -32,26 +37,40 @@ namespace DaphneUserControlLib
             return len;
         }
 
-        public static string ConvertToSignificantDigits(this double number, int digits, double lThresh = 1e-20, double uThresh = 1e20)
+        /// <summary>
+        /// Formats a number for display
+        /// </summary>
+        /// <param name="display_number">Number to format - contains correct num of sig digits except for zeroes</param>
+        /// <param name="digits">Significant digits to show</param>
+        /// <param name="decimalPlaces">How many decimal places to show</param>
+        /// <param name="lThresh">Numbers less than lThresh will be displayed in scientific notation</param>
+        /// <param name="uThresh">Numbers greater than uThresh will be displayed in scientific notation</param>
+        /// <returns></returns>
+        public static string ConvertToSignificantDigits(this double display_number, int digits, int decimalPlaces, double lThresh = 1e-20, double uThresh = 1e20)
         {
             string sZeroes = "000000000000000000000000000000";
-            string sNum = number.ToString();
+            string sNum = display_number.ToString();
 
-            
+            double number = Math.Abs(display_number);
 
-            //return sNum;
             //-----------------------------------------------------------------
 
+            //Display as integer if number of decimal places wanted is 0
+            if (decimalPlaces == 0) 
+            {
+                int displayInt = (int)display_number;
+                sNum = displayInt.ToString();
+            }
             //If need scientific notation - positive exponent
-            if (number >= uThresh || number < 0 || (number >= 1 && number < lThresh))
+            else if (number >= uThresh || (number >= 1 && number < lThresh))
             {
                 if (digits == 0)
                     digits++;
 
                 string newFormat = "{0:0.";
-                for (int i = 0; i < digits-1; i++)
+                for (int i = 0; i < digits - 1; i++)
                 {
-                    newFormat += "0"; 
+                    newFormat += "0";
                 }
 
                 if (number >= 1 && number < 10)
@@ -63,7 +82,7 @@ namespace DaphneUserControlLib
                     newFormat += "E+00}";
                 }
 
-                sNum = string.Format(newFormat, number);
+                sNum = string.Format(newFormat, display_number);
             }
             //Need scientific notation - negative exponent
             else if (number <= lThresh && number > 0 && number < 1)
@@ -72,13 +91,14 @@ namespace DaphneUserControlLib
                     digits++;
 
                 string newFormat = "{0:0.";
-                for (int i = 0; i < digits-1; i++)
+                for (int i = 0; i < digits - 1; i++)
                 {
                     newFormat += "0";  //"#";
                 }
                 newFormat += "E-00}";
-                sNum = string.Format(newFormat, number);
+                sNum = string.Format(newFormat, display_number);
             }
+            //Don't need scientific notation
             else
             {
                 if (digits == 0)
@@ -106,16 +126,6 @@ namespace DaphneUserControlLib
                     }
                 }
             }
-
-            ////    Format = newFormat;
-            ////    result = string.Format(Format, number);
-
-
-
-
-
-
-
 
             return sNum;
         }

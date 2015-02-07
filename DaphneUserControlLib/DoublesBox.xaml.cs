@@ -228,25 +228,35 @@ namespace DaphneUserControlLib
 
         public string ToFormatted(double number)
         {
-            return number.ConvertToSignificantDigits(SignificantDigits, SNLowerThreshold, SNUpperThreshold);
+            return number.ConvertToSignificantDigits(SignificantDigits, DecimalPlaces, SNLowerThreshold, SNUpperThreshold);
         }
 
+        /// <summary>
+        /// This method figures out what to display, but not formatted.
+        /// The Number property is rounded to the correct num of significant digits except for zeroes
+        /// </summary>
+        /// <returns></returns>
         public double ToDisplayNumber()
         {
-            if (Number <= 0)
-                return Number;
+            int sign = Math.Sign(Number);
+            double absNumber = Math.Abs(Number);
+
+            if (absNumber == 0)
+            {
+                return 0.0;
+            }
 
             double result = 1;
-            double logvalue = Math.Log10(Number);
+            double logvalue = Math.Log10(absNumber);
             double n = Math.Floor(logvalue);
             double m = SignificantDigits - 1 - n;
 
-            double temp1 = Number * (Math.Pow(10, m));
+            double temp1 = absNumber * (Math.Pow(10, m));
             double temp2 = Math.Round(temp1);
 
             double multiplier = (Math.Pow(10,-m));
             result = temp2 * multiplier;
-
+            result = result * sign;
             return result;
         }
 
