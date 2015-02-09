@@ -363,6 +363,46 @@ namespace DaphneGui
             }
         }
 
+        private void cbParamDistr_Loaded(object sender, RoutedEventArgs e)
+        {
+            string sTag = Tag as string;
+            var comboBox = sender as ComboBox;
+            ObservableCollection<ParameterDistributionType> coll = new ObservableCollection<ParameterDistributionType>();
+
+            DistributedParameter dp = DataContext as DistributedParameter;
+            ParameterDistributionType dtype = ParameterDistributionType.CONSTANT;
+
+            if (dp != null)
+            {
+                dtype = dp.DistributionType;
+            }
+
+            switch (sTag)
+            {
+                case "DISCRETE":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.POISSON);
+                    coll.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.GAMMA);
+                    coll.Add(ParameterDistributionType.NEG_EXP);
+                    coll.Add(ParameterDistributionType.UNIFORM);
+                    coll.Add(ParameterDistributionType.WEIBULL);
+                    break;
+                default:
+                    break;
+            }
+
+            if (coll.Count > 0 && dp != null)
+            {
+                comboBox.ItemsSource = coll;
+                comboBox.SelectedItem = dtype;
+            }
+
+        }
+
     }
 
 

@@ -239,6 +239,7 @@
                           SelectionChanged="cbParamDistr_SelectionChanged"
                           SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
                           DataContextChanged="cbParamDistr_DataContextChanged"
+                          Loaded="cbParamDistr_Loaded"
                           >
                 </ComboBox>
             </StackPanel>
