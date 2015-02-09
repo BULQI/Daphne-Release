@@ -475,17 +475,15 @@ namespace Daphne
 
             if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                // only the TissueScenario has cell populations
                 cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
+                configComp[0] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.cytosol;
+                configComp[1] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.membrane;
             }
             else
             {
                 // for now
                 throw new NotImplementedException();
             }
-
-            configComp[0] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].cytosol;
-            configComp[1] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].membrane;
 
             bulk_reacs[0] = SimulationBase.ProtocolHandle.GetReactions(configComp[0], false);
             bulk_reacs[1] = SimulationBase.ProtocolHandle.GetReactions(configComp[1], false);
@@ -504,6 +502,13 @@ namespace Daphne
             SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs, null);
             // transcription reactions
             SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
+
+            // add the cell's membrane to the ecs boundary
+            ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(daughter.PlasmaMembrane.Interior);
+            // add ECS boundary reactions, where applicable
+            List<ConfigReaction> reacs = SimulationBase.ProtocolHandle.GetReactions(SimulationBase.ProtocolHandle.scenario.environment.comp, true);
+            bool[] result = new bool[reacs.Count];
+            SimulationBase.AddCompartmentBoundaryReactions(SimulationBase.dataBasket.Environment.Comp, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, reacs, result);
 
             // behaviors
 
