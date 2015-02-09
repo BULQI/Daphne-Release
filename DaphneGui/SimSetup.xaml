@@ -40,7 +40,7 @@
 
             <TextBlock Text="Description" FontWeight="Bold" Margin="0,10,0,0" />
             <TextBox Text="{Binding Path=Protocol.experiment_description, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
-                                Height="40" MaxWidth="{Binding ElementName=experiment_name_box, Path=ActualWidth}"
+                                Height="120" MaxWidth="{Binding ElementName=experiment_name_box, Path=ActualWidth}" AcceptsReturn="True"
                                 VerticalScrollBarVisibility="Auto"/>
 
             <!-- TimeConfig -->
@@ -71,7 +71,7 @@
                                                         HorizontalAlignment="Right"
                                                         Format="F3"
                                                         StepValue="100"
-                                                        Width="60" 
+                                                        Width="100" 
                                                         CenterSlotHorizontalAlignment="Right"
                                                         Value="{Binding ElementName=time_duration_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                         />
@@ -105,7 +105,7 @@
                                         HorizontalAlignment="Right"
                                         Format="N3"
                                         StepValue="0.01"
-                                        Width="60" 
+                                        Width="100" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=render_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                  />
@@ -139,7 +139,7 @@
                                         HorizontalAlignment="Right"
                                         Format="N3"
                                         StepValue="0.01"
-                                        Width="60" 
+                                        Width="100" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                 />
@@ -173,7 +173,7 @@
                                         HorizontalAlignment="Right"
                                         Format="N3"
                                         StepValue="0.01"
-                                        Width="60" 
+                                        Width="100" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=integrator_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                 />
@@ -204,7 +204,7 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Right"
-                                        Width="60" 
+                                        Width="100" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=exp_rep_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                         />

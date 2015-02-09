@@ -183,6 +183,7 @@ namespace DaphneGui
 
             }
 
+            detailsStackPanel.DataContext = null;
             detailsStackPanel.DataContext = distr_parameter;
         }
 
@@ -319,6 +320,49 @@ namespace DaphneGui
             }
         }
 
+        //Needed this to update the selected distribution's details
+        private void cbParamDistr_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            string sTag = Tag as string;
+            var comboBox = sender as ComboBox;
+            ObservableCollection<ParameterDistributionType> coll = new ObservableCollection<ParameterDistributionType>();
+
+            DistributedParameter dp = DataContext as DistributedParameter;
+            ParameterDistributionType dtype = ParameterDistributionType.CONSTANT;
+
+            if (dp != null)
+            {
+                dtype = dp.DistributionType;
+            }
+
+            switch (sTag)
+            {
+                case "DISCRETE":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.POISSON);
+                    coll.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.GAMMA);
+                    coll.Add(ParameterDistributionType.NEG_EXP);
+                    coll.Add(ParameterDistributionType.UNIFORM);
+                    coll.Add(ParameterDistributionType.WEIBULL);
+                    break;
+                default:
+                    break;
+            }
+
+            if (coll.Count > 0)
+            {
+                comboBox.ItemsSource = coll;
+                comboBox.SelectedItem = dtype;
+
+                ParamDistrDetails.DataContext = null;
+                ParamDistrDetails.DataContext = e.NewValue;
+            }
+        }
+
         private void cbParamDistr_Loaded(object sender, RoutedEventArgs e)
         {
             string sTag = Tag as string;
@@ -345,7 +389,7 @@ namespace DaphneGui
                     coll.Add(ParameterDistributionType.GAMMA);
                     coll.Add(ParameterDistributionType.NEG_EXP);
                     coll.Add(ParameterDistributionType.UNIFORM);
-                    coll.Add(ParameterDistributionType.WEIBULL); 
+                    coll.Add(ParameterDistributionType.WEIBULL);
                     break;
                 default:
                     break;
@@ -357,12 +401,6 @@ namespace DaphneGui
                 comboBox.SelectedItem = dtype;
             }
 
-        }
-
-        //Needed this to update the selected distribution's details
-        private void cbParamDistr_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            ParamDistrDetails.DataContext = e.NewValue;
         }
 
     }

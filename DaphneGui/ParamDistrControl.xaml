@@ -50,7 +50,7 @@
                         <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
                     </StackPanel>
                     <StackPanel>
-                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
                                    Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>      
@@ -60,7 +60,7 @@
             <DataTemplate DataType="{x:Type daph:PoissonParameterDistribution}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="mean" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
-                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" DecimalPlaces="0"
                                    Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
                 </StackPanel>
             </DataTemplate>
@@ -175,7 +175,8 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
                                                     <uc:DoublesBox x:Name="dblValues" HorizontalAlignment="Left" Margin="4,0"
-                                                    SignificantDigits="3"             
+                                                    SignificantDigits="3"  
+                                                    DecimalPlaces="0"
                                                     Number="{Binding Path=CategoryValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                                     RangeFactor="1"
                                                     SNLowerThreshold="0.001"
@@ -194,7 +195,7 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
                                                     <uc:DoublesBox x:Name="dblProbs" HorizontalAlignment="Left" Margin="4,0"
-                                                    SignificantDigits="3"             
+                                                    SignificantDigits="3"       
                                                     Number="{Binding Path=Prob, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                                     RangeFactor="1"
                                                     SNLowerThreshold="0.001"
@@ -238,8 +239,8 @@
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
                           SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
-                          Loaded="cbParamDistr_Loaded"   
                           DataContextChanged="cbParamDistr_DataContextChanged"
+                          Loaded="cbParamDistr_Loaded"
                           >
                 </ComboBox>
             </StackPanel>

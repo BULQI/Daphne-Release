@@ -70,7 +70,7 @@ namespace DaphneGui
             //If all mol types are used up already, then just inform user
             if (cmp.molecule == null)
             {
-                MessageBox.Show("Please add more molecules from the User store first.");
+                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Extracellular Medium", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
