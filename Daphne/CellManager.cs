@@ -130,11 +130,7 @@ namespace Daphne
                 {
                     // add the cell
                     SimulationBase.AddCell(c);
-                    // add the cell's membrane to the ecs boundary
-                    if (SimulationBase.dataBasket.Environment is ECSEnvironment)
-                    {
-                        ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(c.PlasmaMembrane.Interior);
-                    }
+                    // cell's membrane was added to the ecs in Cell.Divide()
                 }
             }
         }
