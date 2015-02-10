@@ -1266,7 +1266,7 @@ namespace DaphneGui
         private void VCRbutton_Play_Checked(object sender, RoutedEventArgs e)
         {
             DataStorageMenu.IsEnabled = false;
-            vcrControl.SetPlaybackState(VCRControlState.VCR_PLAY);
+            vcrControl.SetFlag(VCRControl.VCR_ACTIVE);
         }
 
         private void VCRbutton_Play_Unchecked(object sender, RoutedEventArgs e)
@@ -1292,14 +1292,14 @@ namespace DaphneGui
 
         private void VCRSlider_LeftMouse_Down(object sender, MouseButtonEventArgs e)
         {
-            vcrControl.SaveState();
+            vcrControl.SaveFlags();
             vcrControl.SetInactive();
         }
 
         private void VCRSlider_LeftMouse_Up(object sender, MouseButtonEventArgs e)
         {
-            vcrControl.SetPlaybackState(vcrControl.SavedState);
-            if (vcrControl.IsActive())
+            vcrControl.RestoreFlags();
+            if (vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
             {
                 VCRbutton_Play.IsChecked = true;
             }
@@ -1825,31 +1825,6 @@ namespace DaphneGui
             // Set image file format
             if (dialog.ShowDialog() == true)
             {
-                vtkImageWriter writer;
-                if (dialog.FileName.EndsWith("bmp"))
-                {
-                    writer = new vtkBMPWriter();
-                }
-                else if (dialog.FileName.EndsWith("jpg"))
-                {
-                    writer = new vtkJPEGWriter();
-                    vtkJPEGWriter jw = (vtkJPEGWriter)writer;
-                    jw.SetQuality(100);
-                    jw.SetProgressive(0);
-                }
-                else if (dialog.FileName.EndsWith("png"))
-                {
-                    writer = new vtkPNGWriter();
-                }
-                else if (dialog.FileName.EndsWith("tif"))
-                {
-                    writer = new vtkTIFFWriter();
-                }
-                else
-                {
-                    writer = new vtkBMPWriter();
-                }
-
                 //Get selected color
                 Color c = dialog.ActualColor;
 
@@ -1858,7 +1833,7 @@ namespace DaphneGui
                 rgb[1] = c.G / (double)255;
                 rgb[2] = c.B / (double)255;
 
-                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, writer, rgb);
+                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, rgb);
             }
         }
 
@@ -2374,10 +2349,10 @@ namespace DaphneGui
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateOneArg(updateGraphicsAndGUI), true);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
-                    else if (vcrControl != null && vcrControl.IsActive() == true)
+                    else if (vcrControl != null && vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
                     {
                         vcrControl.Play();
-                        if (vcrControl.IsActive() == false)
+                        if (vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == false)
                         {
                             // switch from pause to the play button
                             VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
@@ -2498,7 +2473,7 @@ namespace DaphneGui
         private bool saveTempFiles()
         {
             // no temp file saving when the vcr is open
-            if (vcrControl.IsOpen() == false)
+            if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
                 // check if there were changes
                 string refs = sop.Protocol.SerializeToStringSkipDeco();
