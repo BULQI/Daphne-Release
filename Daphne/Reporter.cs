@@ -69,6 +69,16 @@ namespace Daphne
         public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
         public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id);
         public abstract void AppendExitEvent(int cell_id, int cellpop_id);
+
+        public abstract void ReactionsReport();
+        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
+        {
+            foreach (ConfigReaction cr in reactions)
+            {
+                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
+            }
+        }
+
     }
 
     public class TissueSimulationReporter : ReporterBase
@@ -101,6 +111,7 @@ namespace Daphne
             startECM();
             startCells();
             startEvents();
+            ReactionsReport();
         }
 
         public override void AppendReporter()
@@ -495,6 +506,60 @@ namespace Daphne
                 }
             }
         }
+
+        public override void ReactionsReport()
+        {
+            if (SimulationBase.ProtocolHandle.scenario.reactionsReport  == true)
+            {
+                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+                writer.WriteLine("rate constant\treaction");
+                writer.WriteLine();
+
+                writer.WriteLine("ECM");
+                writer.WriteLine();
+                WriteReactionsList(writer, SimulationBase.ProtocolHandle.scenario.environment.comp.Reactions.ToList());
+                foreach (ConfigReactionComplex crc in SimulationBase.ProtocolHandle.scenario.environment.comp.reaction_complexes)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                    writer.WriteLine();
+                    WriteReactionsList(writer, crc.reactions.ToList());
+                }
+                writer.WriteLine();
+
+                foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+                {
+                    writer.WriteLine("Cell population {0}, cell type {1}", cp.cellpopulation_id, cp.Cell.CellName);
+                    writer.WriteLine();
+
+                    writer.WriteLine("\nmembrane");
+                    writer.WriteLine();
+                    WriteReactionsList(writer, cp.Cell.membrane.Reactions.ToList());
+                    foreach (ConfigReactionComplex crc in cp.Cell.membrane.reaction_complexes)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                        WriteReactionsList(writer, crc.reactions.ToList());
+                    }
+                    writer.WriteLine();
+
+                    writer.WriteLine("cytosol");
+                    writer.WriteLine();
+                    WriteReactionsList(writer, cp.Cell.cytosol.Reactions.ToList());
+                    foreach (ConfigReactionComplex crc in cp.Cell.cytosol.reaction_complexes)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                        writer.WriteLine();
+                        WriteReactionsList(writer, crc.reactions.ToList());
+                    }
+                }
+
+                writer.Close();
+            }
+        }
+
     }
 
     public class CompartmentMolpopReporter
@@ -580,6 +645,8 @@ namespace Daphne
             compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp,
                                         new double[] { 0.0, 0.0, 0.0 },
                                         SimulationBase.ProtocolHandle.scenario);
+
+            ReactionsReport();
         }
 
         public override void AppendReporter()
@@ -665,6 +732,30 @@ namespace Daphne
         {
             throw new NotImplementedException();
         }
+
+        public override void ReactionsReport()
+        {
+            if (SimulationBase.ProtocolHandle.scenario.reactionsReport == true)
+            {
+                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+                writer.WriteLine("rate constant\treaction");
+                writer.WriteLine();
+
+                WriteReactionsList(writer, SimulationBase.ProtocolHandle.scenario.environment.comp.Reactions.ToList());
+                foreach (ConfigReactionComplex crc in SimulationBase.ProtocolHandle.scenario.environment.comp.reaction_complexes)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                    writer.WriteLine();
+                    WriteReactionsList(writer, crc.reactions.ToList());
+                }
+                writer.WriteLine();
+
+                writer.Close();
+            }
+        }
+
     }
 
     public class TransitionEventReporter

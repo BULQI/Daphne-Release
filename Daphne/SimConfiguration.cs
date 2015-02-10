@@ -2129,6 +2129,7 @@ namespace Daphne
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public ConfigEnvironmentBase environment { get; set; }
+        public bool reactionsReport { get; set; }
     }
 
     public class VatReactionComplexScenario : ScenarioBase
@@ -7908,7 +7909,7 @@ namespace Daphne
         public MolPopHomogeneousLevel()
         {
             mp_distribution_type = MolPopDistributionType.Homogeneous;
-            concentration = 1.0;
+            concentration = 0.0;
         }
 
         public override bool Equals(MolPopDistribution mph)
