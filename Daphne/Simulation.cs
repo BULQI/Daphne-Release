@@ -921,6 +921,15 @@ namespace Daphne
                 // render and sample the final state upon completion
                 if (RunStatus == RUNSTAT_FINISHED)
                 {
+                    // only increment the counts if they were not incremented during the same call already
+                    if (CheckFlag(SIMFLAG_RENDER) == false)
+                    {
+                        renderCount++;
+                    }
+                    if (CheckFlag(SIMFLAG_SAMPLE) == false)
+                    {
+                        sampleCount++;
+                    }
                     setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
                 }
             }
