@@ -719,8 +719,24 @@
                         </StackPanel>
                     </Expander>
                     
-                    
-            </StackPanel>
+                    <!-- Reactions -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Reactions"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBlock  HorizontalAlignment="Left" Text="ECM and cell reactions" Margin="0,0,6,0"/>
+                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Protocol.scenario.reactionsReport, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                            </StackPanel>
+                    </Expander>
+
+                </StackPanel>
             </ScrollViewer>
 
         </TabItem>
@@ -952,9 +968,6 @@
         
     </TabControl>
  
-    
-
-    
 </local:ToolWinBase>
 
  
