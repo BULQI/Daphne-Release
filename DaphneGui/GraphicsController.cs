@@ -192,7 +192,9 @@ namespace DaphneGui
         public VTKECSController(vtkRenderWindow rw)
         {
             gradientActor = new GraphicsProp(rw);
-            renderGradient = false;
+            // Set renderGradient to true, so rendering capability will be there.
+            // The actual control for rendering of ECM molecule concentrations is set by the RenderOn boolean.
+            renderGradient = true;
         }
 
         /// <summary>
@@ -1013,10 +1015,8 @@ namespace DaphneGui
 
             // Fixed set of molpop rendering options, so pre-generate this list
             ECSRenderingMethodNames = new ObservableCollection<string>();
-            ECSRenderingMethodNames.Add("No Rendering");
             ECSRenderingMethodNames.Add("Outline");
-            ECSRenderingMethodNames.Add("Volume");
-            ECSRenderingMethodNames.Add("Outlined Volume");
+            ECSRenderingMethodNames.Add("No Outline");
             // regions
             regions = new Dictionary<string, RegionWidget>();
 
@@ -1139,26 +1139,17 @@ namespace DaphneGui
                     // Set up ecs rendering based on value
                     if (value != null)
                     {
-
-                        if (value == "Outlined Volume")
+                        if (value == "Outline")
                         {
                             EnvironmentController.RenderBox = true;
-                            ECSController.RenderGradient = true;
                         }
-                        else if (value == "Outline")
-                        {
-                            EnvironmentController.RenderBox = true;
-                            ECSController.RenderGradient = false;
-                        }
-                        else if (value == "Volume")
+                        else if (value == "No Outline")
                         {
                             EnvironmentController.RenderBox = false;
-                            ECSController.RenderGradient = true;
                         }
                         else
                         {
-                            EnvironmentController.RenderBox = false;
-                            ECSController.RenderGradient = false;
+                            EnvironmentController.RenderBox = true;
                         }
                         EnvironmentController.drawEnvBox();
                         ECSController.draw3D();
