@@ -79,12 +79,8 @@ namespace DaphneGui
             
             level.entity_repository.genes.Add(gm);
 
-            dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
-
-            ConfigGene cg = (ConfigGene)dgLibGenes.SelectedItem;
-
-            if (cg != null)
-                dgLibGenes.ScrollIntoView(cg);
+            dgLibGenes.SelectedItem = gm;
+            dgLibGenes.ScrollIntoView(gm);
         }
 
         //LIBRARIES TAB EVENT HANDLERS
@@ -98,10 +94,8 @@ namespace DaphneGui
             level.entity_repository.molecules.Add(gm);
             MainWindow.SOP.SelectedRenderSkin.AddRenderMol(gm.renderLabel, gm.Name);
 
-            dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-            ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-            dgLibMolecules.ScrollIntoView(cm);
+            dgLibMolecules.SelectedItem = gm;
+            dgLibMolecules.ScrollIntoView(gm);
         }
 
         private void btnCopyMolecule_Click(object sender, RoutedEventArgs e)
