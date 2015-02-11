@@ -31,7 +31,7 @@
                 </Grid.RowDefinitions>
                 <DataGrid x:Name="dgRenderMolDetails1" AutoGenerateColumns="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                                       ItemsSource="{Binding Path=scenario.popOptions.molPopOptions, UpdateSourceTrigger=PropertyChanged}"     
-                                      Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                      MinHeight="48" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                       CanUserReorderColumns="False" CanUserResizeRows="False"
                                       CanUserSortColumns="False" RowHeaderWidth="0"
                                       VerticalContentAlignment="Center"
