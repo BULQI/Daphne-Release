@@ -22,7 +22,7 @@
         
         <DataGrid x:Name="dgRenderCellDetails1" AutoGenerateColumns="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                     ItemsSource="{Binding Path=scenario.popOptions.cellPopOptions, UpdateSourceTrigger=PropertyChanged}"     
-                    Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                    MinHeight="48" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                     CanUserReorderColumns="False" CanUserResizeRows="False"
                     CanUserSortColumns="False" RowHeaderWidth="0"
                     VerticalContentAlignment="Center"
@@ -50,7 +50,7 @@
             </DataGrid.ColumnHeaderStyle>
 
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="cell population" >
+                <DataGridTemplateColumn Header="Cell population" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
