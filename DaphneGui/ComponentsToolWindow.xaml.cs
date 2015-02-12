@@ -125,56 +125,22 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
-
-            MessageBoxResult res;
             Level level = (Level)(this.DataContext);
 
-            //DO WE HAVE TO DO THIS?? 
-            //if level is protocol then we will have to remove entities that use this molecule in addition to removing the molecule from the entity_repository
-            if (level is Protocol)
+            try
             {
-                Protocol prot = level as Protocol;
-                if (prot.scenario.environment.comp.HasMolecule(gm))
-                {
-                    res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
-                }
-                else
-                {
-                    res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
-                }
-
-                if (res == MessageBoxResult.No)
-                    return;
-
-                prot.scenario.environment.comp.RemoveMolecularPopulation(gm.entity_guid);
-                prot.entity_repository.molecules.Remove(gm);    //should this be done a different way?
+                ConfigMolecule molToRemove = level.entity_repository.molecules.First(mol => mol.entity_guid == gm.entity_guid);
+                level.entity_repository.molecules.Remove(molToRemove);
 
                 dgLibMolecules.SelectedIndex = index;
-
                 if (index >= dgLibMolecules.Items.Count)
                     dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
                 if (dgLibMolecules.Items.Count == 0)
                     dgLibMolecules.SelectedIndex = -1;
             }
-            //if level is userstore or daphnestore, then we just have to remove the molecule from the entity_repository
-            else
+            catch 
             {
-                try
-                {
-                    ConfigMolecule molToRemove = level.entity_repository.molecules.First(mol => mol.entity_guid == gm.entity_guid);
-                    level.entity_repository.molecules.Remove(molToRemove);
-
-                    dgLibMolecules.SelectedIndex = index;
-                    if (index >= dgLibMolecules.Items.Count)
-                        dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-                    if (dgLibMolecules.Items.Count == 0)
-                        dgLibMolecules.SelectedIndex = -1;
-                }
-                catch 
-                {
-                }
             }
 
         }
