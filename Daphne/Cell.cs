@@ -226,19 +226,28 @@ namespace Daphne
         }
 
         /// <summary>
-        /// set the state as used in rendering; does not set the state for simulation purposes
+        /// set the state
         /// </summary>
-        /// <param name="state"></param>
-        public void SetStateForVCR(CellState state)
+        /// <param name="state">the state</param>
+        public void SetCellState(CellState state)
         {
             // spatial
             setSpatialState(state.spState);
             // generation
             generation = state.CellGeneration;
             // behaviors
-            Alive = state.cbState.deathDriverState == 0;
-            DividerState = state.cbState.divisionDriverState;
-            DifferentiationState = state.cbState.differentiationDriverState;
+            if (state.cbState.deathDriverState != -1)
+            {
+                Alive = state.cbState.deathDriverState == 0;
+            }
+            if (state.cbState.divisionDriverState != -1)
+            {
+                DividerState = state.cbState.divisionDriverState;
+            }
+            if (state.cbState.differentiationDriverState != -1)
+            {
+                DifferentiationState = state.cbState.differentiationDriverState;
+            }
             // genes
             SetGeneActivities(state.cgState.geneDict);
             // molecules
