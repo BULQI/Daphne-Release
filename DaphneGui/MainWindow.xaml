@@ -25,7 +25,9 @@
         <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
 
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
-        
+
+        <local:ToolwinComponentConverter x:Key="ToolwinComponentConv" />
+
         <local:SimSetupControl x:Key="simSetupControl"/>
 
         <!-- Tab header text layout for LP fitting tab -->
@@ -130,16 +132,25 @@
 
                 <MenuItem Header="_Window">
                     <MenuItem x:Name="menu_ActivateSimSetup" Header="Daphne Protocol"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=local:toolWinTissue}" />
+							  Command="docking:DockingCommands.ActivateWindow" 
+                              CommandTarget="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentConv}}" />
                     <MenuItem x:Name="menu_ActivateVTKView" Header="3D View"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}"
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=VTKDisplayDocWindow}" />
                     <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool" Visibility="Collapsed"
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
                     <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
-                    
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}"
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CellStudioToolWindow}" />
+                    <MenuItem x:Name="menu_ActivateRCChart" Header="Reaction Complex Chart"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ReacComplexChartWindow}"
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=ReacComplexChartWindow}" />
+
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ChartViewDocWindow}" />-->
@@ -390,7 +401,7 @@
                             <docking:TabbedMdiContainer Name="MdiTabContainer" Background="LightGray">
                                 <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige"
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                    ConverterParameter=VTKDisplayWindow}">
+                                    ConverterParameter=VTKDisplayDocWindow}">
                                     <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel" Visibility="{Binding ElementName=VTKDisplayDocWindow, Path=Visibility}">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->

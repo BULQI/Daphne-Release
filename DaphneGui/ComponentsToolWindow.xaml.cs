@@ -129,6 +129,7 @@ namespace DaphneGui
             MessageBoxResult res;
             Level level = (Level)(this.DataContext);
 
+            //DO WE HAVE TO DO THIS?? 
             //if level is protocol then we will have to remove entities that use this molecule in addition to removing the molecule from the entity_repository
             if (level is Protocol)
             {

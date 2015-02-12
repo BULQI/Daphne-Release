@@ -229,12 +229,50 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colCellName" Header="Name" Width="200" IsReadOnly="True" TextOptions.TextFormattingMode="Display"
                                  Binding="{Binding Path=CellName, Mode=OneWay}" />
+
+                            <!--<DataGridTemplateColumn x:Name="colCellRadius" Header="Radius" Width="50" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=CellRadius, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>-->
+
                             <DataGridTextColumn x:Name="colCellRadius" Header="Radius" Width="50" IsReadOnly="True"
                                  Binding="{Binding Path=CellRadius, Mode=OneWay}" />
+                            
+                            <!--<DataGridTemplateColumn x:Name="colCellTrans" Header="Transduction Constant" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=TransductionConstant.ConstValue, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>-->
+
                             <DataGridTextColumn x:Name="colCellTrans" Header="Transduction Constant" Width="100" IsReadOnly="True"
-                                 Binding="{Binding Path=TransductionConstant.ConstValue, Mode=OneWay}" />
+                                 Binding="{Binding Path=TransductionConstant.ConstValue, Mode=OneWay}"  />
+
+                            <!--<DataGridTemplateColumn x:Name="colCellDrag" Header="Drag Coefficient" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DragCoefficient.ConstValue, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>-->
+
                             <DataGridTextColumn x:Name="colCellDrag" Header="Drag Coefficient.Value" Width="100" IsReadOnly="True"
                                  Binding="{Binding Path=DragCoefficient.ConstValue, Mode=OneWay}" />
+
+                            <!--<DataGridTextColumn x:Name="colCellTrans" Header="Transduction Constant" Width="100" IsReadOnly="True"
+                                 Binding="{Binding Path=TransductionConstant.ConstValue, Mode=OneWay}"  StringFormat={}{0:F2}/>-->
+                            <!--<DataGridTextColumn x:Name="colCellDrag" Header="Drag Coefficient.Value" Width="100" IsReadOnly="True"
+                                 Binding="{Binding Path=DragCoefficient.ConstValue, Mode=OneWay}" />-->
+
+                            
+                            
                         </DataGrid.Columns>
                     </DataGrid>
 
