@@ -98,7 +98,7 @@
                 <TextBlock Width="150" Text="Name"></TextBlock>
                 <TextBlock Width="60" Margin="20,0" Text="Diff Coeff"></TextBlock>
                 <TextBlock Width="60" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="60" Margin="20,0" Text="Radiuss"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Radius"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Height="24" Text="{Binding Path=Name}" ></TextBox>
