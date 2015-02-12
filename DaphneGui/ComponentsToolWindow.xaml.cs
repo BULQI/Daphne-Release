@@ -119,11 +119,17 @@ namespace DaphneGui
 
         private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
         {
+            int index = dgLibMolecules.SelectedIndex;
+
+            if (index < 0)
+                return;
+
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
 
             MessageBoxResult res;
             Level level = (Level)(this.DataContext);
 
+            //if level is protocol then we will have to remove entities that use this molecule in addition to removing the molecule from the entity_repository
             if (level is Protocol)
             {
                 Protocol prot = level as Protocol;
@@ -139,10 +145,8 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                     return;
 
-                int index = dgLibMolecules.SelectedIndex;
-
                 prot.scenario.environment.comp.RemoveMolecularPopulation(gm.entity_guid);
-                prot.entity_repository.molecules.Remove(gm);
+                prot.entity_repository.molecules.Remove(gm);    //should this be done a different way?
 
                 dgLibMolecules.SelectedIndex = index;
 
@@ -151,6 +155,25 @@ namespace DaphneGui
 
                 if (dgLibMolecules.Items.Count == 0)
                     dgLibMolecules.SelectedIndex = -1;
+            }
+            //if level is userstore or daphnestore, then we just have to remove the molecule from the entity_repository
+            else
+            {
+                try
+                {
+                    ConfigMolecule molToRemove = level.entity_repository.molecules.First(mol => mol.entity_guid == gm.entity_guid);
+                    level.entity_repository.molecules.Remove(molToRemove);
+
+                    dgLibMolecules.SelectedIndex = index;
+                    if (index >= dgLibMolecules.Items.Count)
+                        dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
+
+                    if (dgLibMolecules.Items.Count == 0)
+                        dgLibMolecules.SelectedIndex = -1;
+                }
+                catch 
+                {
+                }
             }
 
         }
@@ -166,6 +189,8 @@ namespace DaphneGui
 
             Level level = this.DataContext as Level;
             level.entity_repository.reactions.Remove(cr);
+
+            //DO WE NEED TO REMOVE REACTION COMPLEXES THAT USE THIS REACTION?
         }
 
         //LIBRARIES REACTION COMPLEXES HANDLERS
