@@ -116,7 +116,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public abstract ScalarField DiffusionFluxTerm(ScalarField flux, Transform t);
+        public abstract ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt);
         /// <summary>
         /// integrate over the whole field
         /// </summary>
@@ -429,7 +429,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
             throw new NotImplementedException();
         }
@@ -630,7 +630,7 @@ namespace ManifoldRing
         /// <param name="flux">flux involved</param>
         /// <param name="t">Transform - not used</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
             if (flux.M is TinySphere == false)
             {
@@ -643,7 +643,8 @@ namespace ManifoldRing
             array[2] = 5 * flux.array[2] / radius;
             array[3] = 5 * flux.array[3] / radius;
 
-            return diffusionField;
+            return dst.Add(diffusionField.Multiply(-dt));
+            //return diffusionField;
         }
 
         /// <summary>
@@ -996,9 +997,9 @@ namespace ManifoldRing
             return to;
         }
 
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField sf, double dt)
         {
-            return interpolator.DiffusionFlux(flux, t);
+            return interpolator.DiffusionFlux(flux, t, sf, dt);
         }
 
         /// <summary>
@@ -1394,7 +1395,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
             throw new Exception("DiffusionFluxTerm not implemented for PointManifold fields");
         }

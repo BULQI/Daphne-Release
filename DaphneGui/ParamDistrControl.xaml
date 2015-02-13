@@ -12,16 +12,27 @@
              x:Name="paramDistrControl"
              >
  
+    <UserControl.Resources>
+            <!--To load distribution types based on who called this user control - does not work-->
+            <!--<ObjectDataProvider x:Name="objDistTypes" x:Key="paramDistributionTypes"
+                ObjectType="{x:Type local:CDataAccess}"
+                MethodName="GetDistributions" >
+                <ObjectDataProvider.MethodParameters>
+                    <sys:String>Tag</sys:String>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>-->
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.Resources>
 
             <!-- parameterDistributionTypes -->
             <ObjectDataProvider x:Key="parameterDistributionTypes"
-                    MethodName="GetValues" 
-                    ObjectType="{x:Type sys:Enum}">
-                    <ObjectDataProvider.MethodParameters>
-                        <x:Type TypeName="daph:ParameterDistributionType" />
-                    </ObjectDataProvider.MethodParameters>
+                MethodName="GetValues" 
+                ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="daph:ParameterDistributionType" />
+                </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
             <!-- DistrParameterDetailsTemplate -->
@@ -39,7 +50,7 @@
                         <TextBlock Text="const. Value" Margin="5,0,5,0" MinHeight="20"/>
                     </StackPanel>
                     <StackPanel>
-                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
                                    Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>      
@@ -49,7 +60,7 @@
             <DataTemplate DataType="{x:Type daph:PoissonParameterDistribution}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="mean" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
-                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" DecimalPlaces="0"
                                    Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
                 </StackPanel>
             </DataTemplate>
@@ -84,7 +95,32 @@
                                        Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </StackPanel>
-            </DataTemplate>  
+            </DataTemplate>
+
+            <!-- distributed parameter type: Weibull -->
+            <DataTemplate DataType="{x:Type daph:WeibullParameterDistribution}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="scale" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                       Number="{Binding Path=Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                        <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+            <!-- distributed parameter type: Negative Exponential -->
+            <DataTemplate DataType="{x:Type daph:NegExpParameterDistribution}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
+                    <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
+                                   Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </DataTemplate>
             
             <!-- distributed parameter type: Categorical -->
             <DataTemplate DataType="{x:Type daph:CategoricalParameterDistribution}">
@@ -139,7 +175,8 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
                                                     <uc:DoublesBox x:Name="dblValues" HorizontalAlignment="Left" Margin="4,0"
-                                                    SignificantDigits="3"             
+                                                    SignificantDigits="3"  
+                                                    DecimalPlaces="0"
                                                     Number="{Binding Path=CategoryValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                                     RangeFactor="1"
                                                     SNLowerThreshold="0.001"
@@ -158,7 +195,7 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
                                                     <uc:DoublesBox x:Name="dblProbs" HorizontalAlignment="Left" Margin="4,0"
-                                                    SignificantDigits="3"             
+                                                    SignificantDigits="3"       
                                                     Number="{Binding Path=Prob, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                                     RangeFactor="1"
                                                     SNLowerThreshold="0.001"
@@ -194,11 +231,16 @@
 
         <StackPanel Orientation="Vertical" x:Name="ParamDistrStackPanel">
             <StackPanel>
+                
+                <!--Replaced ItemsSource with code behind to populate the combo box-->
+                <!-- ItemsSource="{Binding Source={StaticResource parameterDistributionTypes}}" -->
+                
                 <ComboBox x:Name="cbParamDistr" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" Height="24"
-                          ItemsSource="{Binding Source={StaticResource parameterDistributionTypes}}"
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
-                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
+                          DataContextChanged="cbParamDistr_DataContextChanged"
+                          Loaded="cbParamDistr_Loaded"
                           >
                 </ComboBox>
             </StackPanel>

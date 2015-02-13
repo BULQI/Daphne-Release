@@ -27,7 +27,7 @@ namespace DaphneGui
         {
             InitializeComponent();
         }
-
+        
         private void cbParamDistr_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
@@ -58,8 +58,8 @@ namespace DaphneGui
                     switch (distr_parameter.DistributionType)
                     {
                         case ParameterDistributionType.GAMMA:
-                            distr_parameter.ConstValue = ((GammaParameterDistribution)old_pd).Shape;
-
+                            GammaParameterDistribution gpd = old_pd as GammaParameterDistribution;
+                            distr_parameter.ConstValue = gpd.Shape / gpd.Rate;
                             break;
 
                         case ParameterDistributionType.POISSON:
@@ -73,6 +73,15 @@ namespace DaphneGui
 
                         case ParameterDistributionType.CATEGORICAL:
                             distr_parameter.ConstValue = ((CategoricalParameterDistribution)old_pd).MeanCategoryValue();
+                            break;
+
+                        case ParameterDistributionType.WEIBULL:
+                            WeibullParameterDistribution wpd = old_pd as WeibullParameterDistribution;
+                            distr_parameter.ConstValue = wpd.Scale * MathNet.Numerics.SpecialFunctions.Gamma(1.0 + 1.0 / wpd.Shape);
+                            break;
+
+                        case ParameterDistributionType.NEG_EXP:
+                            distr_parameter.ConstValue = 1.0 / ((NegExpParameterDistribution)old_pd).Rate;
                             break;
 
                         default:
@@ -108,6 +117,20 @@ namespace DaphneGui
                     distr_parameter.DistributionType = ParameterDistributionType.GAMMA;
                     break;
 
+                case ParameterDistributionType.NEG_EXP:
+                    NegExpParameterDistribution new_neg_exp_distr = new NegExpParameterDistribution();
+                    if (distr_parameter.ConstValue != 0.0)
+                    {
+                        new_neg_exp_distr.Rate = 1.0 / distr_parameter.ConstValue;
+                    }
+                    else
+                    {
+                        new_neg_exp_distr.Rate= 1.0;
+                    }
+                    distr_parameter.ParamDistr = new_neg_exp_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.NEG_EXP;
+                    break;
+
                 case ParameterDistributionType.POISSON:
                     PoissonParameterDistribution new_poisson_distr = new PoissonParameterDistribution();
                     if (distr_parameter.ConstValue != 0.0)
@@ -138,11 +161,29 @@ namespace DaphneGui
                     distr_parameter.DistributionType = ParameterDistributionType.UNIFORM;
                     break;
 
+                case ParameterDistributionType.WEIBULL:
+                    WeibullParameterDistribution new_weibull_distr = new WeibullParameterDistribution();
+                    if (distr_parameter.ConstValue != 0.0)
+                    {
+                        new_weibull_distr.Shape = 1.0;
+                        new_weibull_distr.Scale = distr_parameter.ConstValue / MathNet.Numerics.SpecialFunctions.Gamma(2.0);
+                    }
+                    else
+                    {
+                        new_weibull_distr.Shape = 1.0;
+                        new_weibull_distr.Scale = 1.0;
+                    }
+                    distr_parameter.ParamDistr = new_weibull_distr;
+                    distr_parameter.DistributionType = ParameterDistributionType.WEIBULL;
+                    break;
+
+
                 default:
                     break;
 
             }
 
+            detailsStackPanel.DataContext = null;
             detailsStackPanel.DataContext = distr_parameter;
         }
 
@@ -174,7 +215,7 @@ namespace DaphneGui
         }
 
         private void dgProbMass_Check(object sender, RoutedEventArgs e)
-        {
+        {           
             DistributedParameter distrParam = (DistributedParameter)paramDistrControl.DataContext;
             if (distrParam == null)
             {
@@ -279,5 +320,137 @@ namespace DaphneGui
             }
         }
 
+        //Needed this to update the selected distribution's details
+        private void cbParamDistr_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            string sTag = Tag as string;
+            var comboBox = sender as ComboBox;
+            ObservableCollection<ParameterDistributionType> coll = new ObservableCollection<ParameterDistributionType>();
+
+            DistributedParameter dp = DataContext as DistributedParameter;
+            ParameterDistributionType dtype = ParameterDistributionType.CONSTANT;
+
+            if (dp != null)
+            {
+                dtype = dp.DistributionType;
+            }
+
+            switch (sTag)
+            {
+                case "DISCRETE":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.POISSON);
+                    coll.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.GAMMA);
+                    coll.Add(ParameterDistributionType.NEG_EXP);
+                    coll.Add(ParameterDistributionType.UNIFORM);
+                    coll.Add(ParameterDistributionType.WEIBULL);
+                    break;
+                default:
+                    break;
+            }
+
+            if (coll.Count > 0)
+            {
+                comboBox.ItemsSource = coll;
+                comboBox.SelectedItem = dtype;
+
+                ParamDistrDetails.DataContext = null;
+                ParamDistrDetails.DataContext = e.NewValue;
+            }
+        }
+
+        private void cbParamDistr_Loaded(object sender, RoutedEventArgs e)
+        {
+            string sTag = Tag as string;
+            var comboBox = sender as ComboBox;
+            ObservableCollection<ParameterDistributionType> coll = new ObservableCollection<ParameterDistributionType>();
+
+            DistributedParameter dp = DataContext as DistributedParameter;
+            ParameterDistributionType dtype = ParameterDistributionType.CONSTANT;
+
+            if (dp != null)
+            {
+                dtype = dp.DistributionType;
+            }
+
+            switch (sTag)
+            {
+                case "DISCRETE":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.POISSON);
+                    coll.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    coll.Add(ParameterDistributionType.CONSTANT);
+                    coll.Add(ParameterDistributionType.GAMMA);
+                    coll.Add(ParameterDistributionType.NEG_EXP);
+                    coll.Add(ParameterDistributionType.UNIFORM);
+                    coll.Add(ParameterDistributionType.WEIBULL);
+                    break;
+                default:
+                    break;
+            }
+
+            if (coll.Count > 0 && dp != null)
+            {
+                comboBox.ItemsSource = coll;
+                comboBox.SelectedItem = dtype;
+            }
+
+        }
+
     }
+
+
+
+#if ODP_METHOD_WORKS
+    /// <summary>
+    /// This class implements a custom method for ObjectDataProvider so that we can 
+    /// retrieve different subsets of the Enum depending on who called this control.
+    /// But it is not working. Tag is not set yet.
+    /// </summary>
+    public class CDataAccess
+    {
+        ObservableCollection<ParameterDistributionType> _DistCollection;
+
+        public ObservableCollection<ParameterDistributionType> DistCollection
+        {
+            get { return _DistCollection; }
+            set { _DistCollection = value; }
+        }
+
+        public CDataAccess()
+        {
+            _DistCollection = new ObservableCollection<ParameterDistributionType>();
+        }
+
+        public ObservableCollection<ParameterDistributionType> GetDistributions(string Tag)
+        {
+            switch (Tag)
+            {
+                case "DISCRETE":
+                    DistCollection.Add(ParameterDistributionType.CONSTANT);
+                    DistCollection.Add(ParameterDistributionType.POISSON);
+                    DistCollection.Add(ParameterDistributionType.CATEGORICAL);
+                    break;
+                case "CONTINUOUS":
+                    DistCollection.Add(ParameterDistributionType.CONSTANT);
+                    DistCollection.Add(ParameterDistributionType.GAMMA);
+                    DistCollection.Add(ParameterDistributionType.NEG_EXP);
+                    DistCollection.Add(ParameterDistributionType.UNIFORM);
+                    DistCollection.Add(ParameterDistributionType.WEIBULL); 
+                    break;
+                default:
+                    break;
+            }
+
+            return DistCollection;
+        }
+    }
+#endif
+
 }

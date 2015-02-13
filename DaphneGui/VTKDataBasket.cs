@@ -964,6 +964,8 @@ namespace DaphneGui
         public void AssignCell(Cell cell)
         {
 
+            //may cause this if user add and then remove cells without applying
+            if (colorMap.ContainsKey(cell.Population_id) == false) return;
             int index = colorMap[cell.Population_id];
             if (index == -1) return;
             int color_start_index = index >> 16;

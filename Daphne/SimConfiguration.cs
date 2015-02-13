@@ -1922,7 +1922,14 @@ namespace Daphne
         }
 
         
-        // given a total reaction string, find the ConfigCell object
+        
+        /// <summary>
+        /// Given a total reaction string, find it in the reactions list.
+        /// Return true if found, false otherwise.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="Reacs"></param>
+        /// <returns></returns>
         public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
         {
             //Get left and right side molecules of new reaction
@@ -1957,45 +1964,6 @@ namespace Daphne
 
             return false;
         }
-        
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the left side, i.e. the reactants.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacLeftSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string left = total.Substring(0, index);
-            left = left.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listLeft = new List<string>(reactants);
-            listLeft.Sort();
-            return listLeft;
-        }
-
-        /// <summary>
-        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
-        /// list of molecule strings on the right side, i.e. the products.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <returns></returns>
-        private List<string> getReacRightSide(string total)
-        {
-            int len = total.Length;
-            int index = total.IndexOf("->");
-            string right = total.Substring(index + 2);
-            right = right.Replace(" ", "");
-            char[] separator = { '+' };
-            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            List<string> listRight = new List<string>(products);
-            listRight.Sort();
-            return listRight;
-        }
-
 
         /// <summary>
         /// Select transcription reactions in the compartment.
@@ -2045,7 +2013,7 @@ namespace Daphne
             // Compartment reactions
             foreach (ConfigReaction cr in configComp.Reactions)
             {
-                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false) && (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type != ReactionType.Transcription))
                 {
                     config_reacs.Add(cr.entity_guid, cr);
                 }
@@ -2056,7 +2024,7 @@ namespace Daphne
             {
                 foreach (ConfigReaction cr in crc.reactions)
                 {
-                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false) && (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type != ReactionType.Transcription))
                     {
                         config_reacs.Add(cr.entity_guid, cr);
                     }
@@ -2161,6 +2129,7 @@ namespace Daphne
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public ConfigEnvironmentBase environment { get; set; }
+        public bool reactionsReport { get; set; }
     }
 
     public class VatReactionComplexScenario : ScenarioBase
@@ -2604,7 +2573,10 @@ namespace Daphne
 
                         er.molpop_guid_ref = mp.molpop_guid;
                         cp.ecm_probe.Add(er);
-                        cp.ecm_probe_dict.Add(mp.molpop_guid, er);
+                        if (cp.ecm_probe_dict.ContainsKey(mp.molpop_guid) == false)
+                        {
+                            cp.ecm_probe_dict.Add(mp.molpop_guid, er);
+                        }
                     }
                 }
             }
@@ -2682,6 +2654,20 @@ namespace Daphne
 
     public class SimulationParams : EntityModelBase
     {
+        private DistributedParameter phagocytosis = null;
+        public DistributedParameter Phagocytosis
+        {
+            get
+            {
+                return phagocytosis;
+            }
+            set
+            {
+                phagocytosis = value;
+                OnPropertyChanged("Phagocytosis");
+            }
+        }
+
         public SimulationParams()
         {
             // default value
@@ -2689,6 +2675,10 @@ namespace Daphne
             deathConstant = 1e-3;
             deathOrder = 1;
             globalRandomSeed = RandomSeed.Robust();
+
+            // Default is Constant parameter distribution with ConstValue = 0
+            // Instantaneous removal
+            Phagocytosis = new DistributedParameter();
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
@@ -4169,23 +4159,128 @@ namespace Daphne
 
     }
 
-    public class ConfigTransitionDriverElement
+    public abstract class ConfigTransitionDriverElement : EntityModelBase
     {
-        //public string driver_element_guid { get; set; }
-        public double Alpha { get; set; }
-        public double Beta { get; set; }
-        public string driver_mol_guid_ref { get; set; }
-
         public int CurrentState { get; set; }
         public string CurrentStateName { get; set; }
         public int DestState { get; set; }
         public string DestStateName { get; set; }
+        public TransitionDriverElementType Type { get; set; }
 
         public ConfigTransitionDriverElement()
         {
-            //Guid id = Guid.NewGuid();
-            //driver_element_guid = id.ToString();
+        }
+    }
+
+    public class ConfigMolTransitionDriverElement : ConfigTransitionDriverElement
+    {
+        public double Alpha { get; set; }
+        public double Beta { get; set; }
+        public string driver_mol_guid_ref { get; set; }
+
+        public ConfigMolTransitionDriverElement()
+        {
             driver_mol_guid_ref = "";
+            Type = TransitionDriverElementType.MOLECULAR;
+        }
+    }
+
+    public class ConfigDistrTransitionDriverElement : ConfigTransitionDriverElement
+    {
+        private DistributedParameter distr;
+        public DistributedParameter Distr
+        {
+            get
+            {
+                return distr;
+            }
+            set
+            {
+                distr = value;
+                OnPropertyChanged("Distr");
+            }
+        }
+
+        public ConfigDistrTransitionDriverElement()
+        {
+            Distr = new DistributedParameter();
+            Type = TransitionDriverElementType.DISTRIBUTION;
+        }
+    }
+
+
+    /// <summary>
+    /// Types of TransitionDriverElements
+    /// </summary>
+    public enum TransitionDriverElementType { NONE = 0, MOLECULAR, DISTRIBUTION };
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(TransitionDriverElementType), typeof(string))]
+    public class TransitionDriverElementTypeToStringConverter : IValueConverter
+    {
+        private List<string> _trans_driver_element_type_strings = new List<string>()
+                                {
+                                    "None",
+                                    "Molecular",
+                                    "Distribution"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value as string == "") return "None";
+            try
+            {
+                return _trans_driver_element_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _trans_driver_element_type_strings.FindIndex(item => item == str);
+            return (TransitionDriverElementType)Enum.ToObject(typeof(TransitionDriverElementType), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Convert:
+    ///     Converter to go between enum values and boolean for GUI
+    ///     If the TransitionDriverElementType is NONE then return false.
+    ///     Return True for all other distribution types.
+    ///  ConvertBack: 
+    ///     Shouldn't be used. Return NONE.
+    /// </summary>
+    [ValueConversion(typeof(TransitionDriverElement), typeof(string))]
+    public class TransitionDriverElementTypeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null) return "NONE";
+            if (value.GetType() == typeof(ConfigMolTransitionDriverElement))
+            {
+                return "MOLECULE";
+            }
+            else if (value.GetType() == typeof(ConfigDistrTransitionDriverElement))
+            {
+                return "DISTRIBUTION";
+            }
+            else
+            {
+                return "NONE";
+            }
+        }
+
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // Shouldn't be using this, so simply default to constant 
+            return null;
         }
     }
 
@@ -4255,6 +4350,7 @@ namespace Daphne
 
             return true;
         }
+
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -4305,7 +4401,7 @@ namespace Daphne
             : base()
         {
             genes = new ObservableCollection<string>();
-            Name = "New diff scheme";
+            Name = "New scheme";
             Driver = new ConfigTransitionDriver();
             activationRows = new ObservableCollection<ConfigActivationRow>();
         }
@@ -4320,14 +4416,23 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
-        public void RemoveActivationRow(ConfigActivationRow row)
+        public void AddGene(string gguid)
         {
-            int index = activationRows.IndexOf(row);
-            if (index > -1 && index < activationRows.Count)
+            genes.Add(gguid);
+            foreach (ConfigActivationRow row in activationRows)
             {
-                activationRows.Remove(row);
-                Driver.states.RemoveAt(index);
-                Driver.DriverElements.RemoveAt(index);
+                row.activations.Add(1.0);
+            }
+        }
+
+        public void DeleteGene(string gguid)
+        {
+            int index = genes.IndexOf(gguid);
+            genes.Remove(gguid);
+
+            foreach (var v in activationRows)
+            {
+                v.activations.RemoveAt(index);
             }
         }
 
@@ -4352,7 +4457,7 @@ namespace Daphne
             for (int k = 0; k < Driver.states.Count - 1; k++)
             {
                 trow = Driver.DriverElements[k];
-                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
                 e.driver_mol_guid_ref = "";
@@ -4367,7 +4472,7 @@ namespace Daphne
             trow = new ConfigTransitionDriverRow();
             for (int j = 0; j < Driver.states.Count; j++)
             {
-                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
                 e.driver_mol_guid_ref = "";
@@ -4379,6 +4484,44 @@ namespace Daphne
             }
 
             Driver.DriverElements.Add(trow);
+
+            OnPropertyChanged("Driver");
+        }
+
+        public void DeleteState(int index)
+        {
+            activationRows.RemoveAt(index);
+            Driver.states.RemoveAt(index);
+            Driver.DriverElements.RemoveAt(index);
+
+            //NOW LOOP THRU ALL REMAINING DRIVERELEMENTS
+            //IF DESTSTATE > INDEX, DECREMENT IT
+            //IF CURRENTSTATE > INDEX, DECREMENT IT
+
+            //Deletes the appropriate column from the Division Regulators grid
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                var elem = Driver.DriverElements[i].elements;
+                elem.RemoveAt(index);
+            }
+
+            OnPropertyChanged("activationRows");
+
+            //Updates the CurrentState and DestState values appropriately depending on which state was deleted
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                foreach (var v in Driver.DriverElements[i].elements)
+                {
+                    if (v.CurrentState > index)
+                    {
+                        v.CurrentState--;
+                    }
+                    if (v.DestState > index)
+                    {
+                        v.DestState--;
+                    }
+                }
+            }
 
             OnPropertyChanged("Driver");
         }
@@ -4447,7 +4590,7 @@ namespace Daphne
 
             for (int i = 0; i < this.activationRows.Count; i++)
             {
-                if (this.activationRows[i].Equals(cts.activationRows[i]) == false)
+                if (this.activationRows[i].Equals(cts.activationRows[i], this.Driver.states[i], cts.Driver.states[i]) == false)
                     return false;
             }
 
@@ -4456,7 +4599,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigActivationRow : EntityModelBase, IEquatable<ConfigActivationRow>
+    public class ConfigActivationRow : EntityModelBase
     {
         private ObservableCollection<double> _activations;
         public ObservableCollection<double> activations
@@ -4483,13 +4626,16 @@ namespace Daphne
             OnPropertyChanged("activations");
         }
 
-        public bool Equals(ConfigActivationRow car)
+        public bool Equals(ConfigActivationRow car, string state1, string state2)
         {
+            if (state1.Equals(state2) == false)
+                return false;
+
             if (this.activations.Count != car.activations.Count)
                 return false;
 
-            //Note that each double value here applies to a gene. 
-            //We are expecting them to be in the right order.
+            // Note that each double value here applies to a gene. 
+            // We are expecting them to be in the right order.
             for (int i = 0; i < activations.Count; i++)
             {
                 if (activations[i] != car.activations[i])
@@ -6598,9 +6744,15 @@ namespace Daphne
         // Needed if Gaussian/Box parameters change.
         public void Reset()
         {
-            int number = cellPop.CellStates.Count;
-            cellPop.CellStates.Clear();
-            AddByDistr(number);
+            if (cellPop != null)
+            {
+                // Reset the random number generator so we don't get the same values again.
+                // This shouldn't affect the reproducibility of the simulations.
+                Rand.ReseedAll(RandomSeed.Robust());
+                int number = cellPop.CellStates.Count;
+                cellPop.CellStates.Clear();
+                AddByDistr(number);
+            }
         }
 
         // <summary>
@@ -6615,24 +6767,27 @@ namespace Daphne
         /// </summary>
         public void CheckPositions()
         {
-            double[] pos;
-            int number = cellPop.CellStates.Count;
-
-            // Remove out-of-bounds cells
-            for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
+            if (cellPop != null)
             {
-                pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                if (!inBounds(pos))
+                double[] pos;
+                int number = cellPop.CellStates.Count;
+
+                // Remove out-of-bounds cells
+                for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
-                    cellPop.CellStates.RemoveAt(i);
+                    pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
+                    if (!inBounds(pos))
+                    {
+                        cellPop.CellStates.RemoveAt(i);
+                    }
                 }
-            }
 
-            // Replace removed cells
-            int cellsToAdd = number - cellPop.CellStates.Count;
-            if (cellsToAdd > 0)
-            {
-                AddByDistr(cellsToAdd);
+                // Replace removed cells
+                int cellsToAdd = number - cellPop.CellStates.Count;
+                if (cellsToAdd > 0)
+                {
+                    AddByDistr(cellsToAdd);
+                }
             }
         }
     }
@@ -6902,6 +7057,11 @@ namespace Daphne
             cmState.molPopDict.Add(key, mp.CopyArray());
         }
 
+        public void addMolPopulation(string key, double[] vals)
+        {
+            cmState.molPopDict.Add(key, vals);
+        }
+
         public void setDeathDriverState(int state)
         {
             cbState.deathDriverState = state;
@@ -6922,6 +7082,18 @@ namespace Daphne
             foreach (var item in genes)
             {
                 cgState.geneDict.Add(item.Key, item.Value.ActivationLevel);
+            }
+        }
+
+        public void setGeneState(string key, double activation)
+        {
+            if (cgState.geneDict.ContainsKey(key) == false)
+            {
+                cgState.geneDict.Add(key, activation);
+            }
+            else
+            {
+                cgState.geneDict[key] = activation;
             }
         }
 
@@ -6951,6 +7123,7 @@ namespace Daphne
         public bool Death { get; set; }
         public bool Division { get; set; }
         public bool Differentiation { get; set; }
+        public bool Exit { get; set; }
     }
 
     public class CellPopulation : EntityModelBase
@@ -7736,7 +7909,7 @@ namespace Daphne
         public MolPopHomogeneousLevel()
         {
             mp_distribution_type = MolPopDistributionType.Homogeneous;
-            concentration = 1.0;
+            concentration = 0.0;
         }
 
         public override bool Equals(MolPopDistribution mph)
@@ -9450,12 +9623,23 @@ namespace Daphne
 
             return true;
         }
+
+        public DistributedParameter Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            DistributedParameter newDistrParam = JsonConvert.DeserializeObject<DistributedParameter>(jsonSpec, Settings);
+
+            return newDistrParam;
+        }
     }
 
     /// <summary>
     /// Types of probability distributions for distributed parameters.
     /// </summary>
-    public enum ParameterDistributionType { CONSTANT=0, POISSON, GAMMA, UNIFORM, CATEGORICAL };
+    public enum ParameterDistributionType { CONSTANT=0, POISSON, GAMMA, UNIFORM, CATEGORICAL, WEIBULL, NEG_EXP };
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -9469,7 +9653,9 @@ namespace Daphne
                                     "Poisson",
                                     "Gamma",
                                     "Uniform",
-                                    "Categorical"
+                                    "Categorical",
+                                    "Weibull",
+                                    "Negative Exp"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -9541,33 +9727,69 @@ namespace Daphne
     /// </summary>
     public abstract class ParameterDistribution : EntityModelBase, IEquatable<ParameterDistribution>
     {
-        //public ParameterDistributionType DistributionType { get; set; }
         [JsonIgnore]
         public bool isInitialized;
 
         public ParameterDistribution()
-        //public ParameterDistribution(ParameterDistributionType _distributionType)
         {
-            //DistributionType = _distributionType;
             isInitialized = false;
         }
         public abstract void Initialize();
         public abstract double Sample();
-        public abstract bool Equals(ParameterDistribution pd); 
+        public abstract bool Equals(ParameterDistribution pd);
+        public abstract ParameterDistribution Clone();
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is uniform.
+    /// Probability distribution when the parameter is uniform.
     /// </summary>
     public class UniformParameterDistribution : ParameterDistribution
     {
-        public double MinValue { get; set; }
-        public double MaxValue { get; set; }
+        private double minValue;
+        public double MinValue
+        {
+            get
+            {
+                return minValue;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    minValue = value;
+                }
+                else
+                {
+                    minValue = 0.0;
+                }
+                OnPropertyChanged("MinValue");
+            }
+        }
+
+        private double maxValue;
+        public double MaxValue 
+        {
+            get
+            {
+                return maxValue;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    maxValue = value;
+                }
+                else
+                {
+                    maxValue = minValue + 1.0;
+                }
+                OnPropertyChanged("MaxValue");
+            }
+        }
+
         [JsonIgnore]
         private ContinuousUniform UniformDist;
 
-        //public UniformParameterDistribution()
-        //    : base(ParameterDistributionType.UNIFORM)
         public UniformParameterDistribution()
             : base()
         {
@@ -9605,14 +9827,46 @@ namespace Daphne
 
             return true;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<UniformParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is a Poisson distribution.
+    /// Probability distribution when the parameter is a Poisson distribution.
     /// </summary>
     public class PoissonParameterDistribution : ParameterDistribution
     {
-        public double Mean { get; set; }
+        private double mean;
+        public double Mean 
+        {
+            get
+            {
+                return mean;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    mean = value;
+                }
+                else
+                {
+                    mean = 1.0;
+                }
+                OnPropertyChanged("Mean");
+            }
+        }
+
         [JsonIgnore]
         private Poisson PoissonDist;
 
@@ -9651,15 +9905,67 @@ namespace Daphne
 
             return true;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<PoissonParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is a Gamma distribution.
+    /// Probability distribution when the parameter is a Gamma distribution.
     /// </summary>
     public class GammaParameterDistribution : ParameterDistribution
     {
-        public double Shape { get; set; }
-        public double Rate { get; set; }
+        private double shape;
+        public double Shape
+        {
+            get
+            {
+                return shape;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    shape = value;
+                }
+                else
+                {
+                    shape = 1.0;
+                }
+                OnPropertyChanged("Shape");
+            }
+        }
+
+        private double rate;
+        public double Rate
+        {
+            get
+            {
+                return rate;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    rate = value;
+                }
+                else
+                {
+                    rate = 1.0;
+                }
+                OnPropertyChanged("Rate");
+            }
+        }
+
         [JsonIgnore]
         private Gamma GammaDist;
 
@@ -9677,7 +9983,8 @@ namespace Daphne
             }
             if (Shape <= 0)
             {
-                MessageBox.Show("The shape parameter must be greater than zero in a Poisson distribution. The shape parameter has been set to 1.0.");
+                MessageBox.Show("The shape parameter must be greater than zero in a Gamma distribution. The shape parameter has been set to 1.0.");
+                Shape = 1.0;
             }
 
             GammaDist = new Gamma(Shape, Rate, Rand.MersenneTwister);
@@ -9703,6 +10010,18 @@ namespace Daphne
 
             return true;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<GammaParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
     /// <summary>
@@ -9757,7 +10076,7 @@ namespace Daphne
     }
 
     /// <summary>
-    /// Probability distribution for the parameter is a categorical distribution.
+    /// Probability distribution when the parameter is a categorical distribution.
     /// </summary>
     public class CategoricalParameterDistribution : ParameterDistribution
     {
@@ -9869,7 +10188,199 @@ namespace Daphne
 
             return mean;
         }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<CategoricalParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
     }
 
+    /// <summary>
+    /// Probability distribution when the parameter is a Weibull distribution.
+    /// </summary>
+    public class WeibullParameterDistribution : ParameterDistribution
+    {
+        private double shape;
+        public double Shape
+        {
+            get
+            {
+                return shape;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    shape = value;
+                }
+                else
+                {
+                    shape = 1.0;
+                }
+                OnPropertyChanged("Shape");
+            }
+        }
+
+        private double scale;
+        public double Scale
+        {
+            get
+            {
+                return scale;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    scale = value;
+                }
+                else
+                {
+                    scale = 1.0;
+                }
+                OnPropertyChanged("Scale");
+            }
+        }
+
+        [JsonIgnore]
+        private Weibull WeibulllDist;
+
+        public WeibullParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Scale <= 0)
+            {
+                MessageBox.Show("The scale parameter must be greater than zero in a Weibull distribution. The scale parameter has been set to 1.0.");
+                Scale = 1.0;
+            }
+            if (Shape <= 0)
+            {
+                MessageBox.Show("The shape parameter must be greater than zero in a Weibull distribution. The shape parameter has been set to 1.0.");
+                Shape = 1.0;
+            }
+
+            WeibulllDist = new Weibull(Shape, Scale, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+            return WeibulllDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            WeibullParameterDistribution d = pd as WeibullParameterDistribution;
+
+            if (this.Shape != d.Shape) return false;
+            if (this.Scale != d.Scale) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            WeibullParameterDistribution newDistr = JsonConvert.DeserializeObject<WeibullParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+    }
+
+    /// <summary>
+    /// Probability distribution when the parameter is a Weibull distribution.
+    /// </summary>
+    public class NegExpParameterDistribution : ParameterDistribution
+    {
+        private double rate;
+        public double Rate
+        {
+            get
+            {
+                return rate;
+            }
+            set
+            {
+                if (value > 0)
+                {
+                    rate = value;
+                }
+                else
+                {
+                    rate = 1.0;
+                }
+                OnPropertyChanged("Rate");
+            }
+        }
+
+        [JsonIgnore]
+        private Exponential ExplDist;
+
+        public NegExpParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            if (Rate < 0)
+            {
+                MessageBox.Show("The rate parameter must be greater than or equal to zero in a Negative Exponential distribution. The rate parameter has been set to 1.0.");
+                Rate = 1.0;
+            }
+
+            ExplDist = new Exponential(Rate, Rand.MersenneTwister);
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return ExplDist.Sample();
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            NegExpParameterDistribution d = pd as NegExpParameterDistribution;
+
+            if (this.Rate != d.Rate) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            NegExpParameterDistribution newDistr = JsonConvert.DeserializeObject<NegExpParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
+
+    }
 
 }

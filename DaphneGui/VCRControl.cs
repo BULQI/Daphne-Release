@@ -6,26 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
+using Kitware.VTK;
+
 using Daphne;
 
 
 namespace DaphneGui
 {
-    /// <summary>
-    /// enumeration that allows controlling the vcr state
-    /// </summary>
-    public enum VCRControlState
-    {
-        /// <summary>
-        /// inactive
-        /// </summary>
-        VCR_INACTIVE,
-        /// <summary>
-        /// play
-        /// </summary>
-        VCR_PLAY
-    };
-
     /// <summary>
     /// entity encapsulating a vcr-like controller to playback a simulation
     /// </summary>
@@ -37,10 +24,12 @@ namespace DaphneGui
 #if USE_DATACACHE
         private Dictionary<int, List<DBRow>> dataCache;
 #endif
-        private VCRControlState playbackState, savedState;
+        private byte vcrFlags, savedFlags;
         private long lastFramePlayed;
-        // frame time in milliseconds; currently 30fps
-        private const long E_DT = 1000 / 30;
+        public bool LastFrame { get; set; }
+        // reference frame time in milliseconds, 30fps
+        private const double E_DT = 1000 / 30;
+        private double speedFactor, speedFactorExp;
         /// <summary>
         /// property changed event to handle the updating of our vcr control
         /// </summary>
@@ -50,6 +39,10 @@ namespace DaphneGui
         private Object playLock = new Object(),
                        frameLock = new Object();
 
+        public static byte VCR_OPEN   = (1 << 0),
+                           VCR_ACTIVE = (1 << 1),
+                           VCR_EXPORT = (1 << 2);
+
         /// <summary>
         /// constructor
         /// </summary>
@@ -58,15 +51,15 @@ namespace DaphneGui
             frame = -1;
             SetInactive();
             frameNames = new List<string>();
+            LastFrame = true;
+            vcrFlags = savedFlags = 0;
         }
 
         /// <summary>
         /// create a data reader object
         /// </summary>
-        /// <param name="lastFrame">true for opening the control pointing to the last frame</param>
-        /// <param name="expID">experiment id</param>
         /// <returns>false for failure or empty simulation</returns>
-        public bool OpenVCR(bool lastFrame, int expID)
+        public bool OpenVCR()
         {
 #if USE_DATACACHE
             dataCache = new Dictionary<int, List<DBRow>>();
@@ -82,9 +75,10 @@ namespace DaphneGui
                 {
                     return false;
                 }
+                SetFlag(VCR_OPEN);
                 frameNames.Clear();
                 // find the frame names and with them the number of frames
-                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiments_VCR/Experiment_{0}_VCR/VCR_Frames", expID));
+                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiment_VCR/VCR_Frames"));
 
                 if (frameNames.Count == 0)
                 {
@@ -92,7 +86,7 @@ namespace DaphneGui
                 }
 
                 // open the parent group for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("/Experiments_VCR/Experiment_{0}_VCR", expID));
+                DataBasket.hdf5file.openGroup(String.Format("/Experiment_VCR"));
 
                 // open the group that holds the frames for this experiment
                 DataBasket.hdf5file.openGroup("VCR_Frames");
@@ -105,7 +99,7 @@ namespace DaphneGui
                     frames.Add(i);
                 }
 
-                if (lastFrame == true)
+                if (LastFrame == true)
                 {
                     CurrentFrame = frames.Count - 1;
                 }
@@ -114,18 +108,71 @@ namespace DaphneGui
                     CurrentFrame = 0;
                 }
                 SetInactive();
+                speedFactor = 1.0;
+                speedFactorExp = 0.0;
                 return true;
             }
             return false;
         }
 
         /// <summary>
-        /// set the player's state
+        /// clears a flag
         /// </summary>
-        /// <param name="state">value indicating the state</param>
-        public void SetPlaybackState(VCRControlState state)
+        /// <param name="flag">flag to clear</param>
+        private void clearFlag(byte flag)
         {
-            playbackState = state;
+            vcrFlags &= (byte)~flag;
+        }
+
+        /// <summary>
+        /// checks if a flag is set
+        /// </summary>
+        /// <param name="flag">flag to check for</param>
+        /// <returns>true if it's present</returns>
+        public bool CheckFlag(byte flag)
+        {
+            return (vcrFlags & flag) != 0;
+        }
+
+        /// <summary>
+        /// set a flag
+        /// </summary>
+        /// <param name="flag">flag to set</param>
+        public void SetFlag(byte flag)
+        {
+            vcrFlags |= flag;
+        }
+
+        /// <summary>
+        /// set the speed factor for playback; will set to normal speed if value is not greater than zero
+        /// </summary>
+        public double SpeedFactor
+        {
+            set
+            {
+                if (value <= 0.0)
+                {
+                    speedFactor = 1.0;
+                }
+                else
+                {
+                    speedFactor = value;
+                }
+            }
+            get { return speedFactor; }
+        }
+
+        /// <summary>
+        /// set the speed factor exponent and speed factor implicitly; normal speed for exponent = 0
+        /// </summary>
+        public double SpeedFactorExponent
+        {
+            set
+            {
+                speedFactorExp = value;
+                speedFactor = Math.Pow(2.0, speedFactorExp);
+            }
+            get { return speedFactorExp; }
         }
 
         /// <summary>
@@ -133,34 +180,25 @@ namespace DaphneGui
         /// </summary>
         public void SetInactive()
         {
-            SetPlaybackState(VCRControlState.VCR_INACTIVE);
+            clearFlag(VCR_ACTIVE);
             lock (playLock)
             lastFramePlayed = 0;
         }
 
         /// <summary>
-        /// save the current playback state
+        /// save the current flags
         /// </summary>
-        public void SaveState()
+        public void SaveFlags()
         {
-            savedState = playbackState;
+            savedFlags = vcrFlags;
         }
 
         /// <summary>
-        /// retrieve the saved playback state
+        /// restore the saved flags
         /// </summary>
-        public VCRControlState SavedState
+        public void RestoreFlags()
         {
-            get { return savedState; }
-        }
-
-        /// <summary>
-        /// retrieve if the player is active (currently anything but inactive qualifies)
-        /// </summary>
-        /// <returns>true for active</returns>
-        public bool IsActive()
-        {
-            return playbackState != VCRControlState.VCR_INACTIVE;
+            vcrFlags = savedFlags;
         }
 
         /// <summary>
@@ -185,6 +223,7 @@ namespace DaphneGui
                 frames = null;
             }
             SetInactive();
+            clearFlag(VCR_OPEN);
         }
 
         /// <summary>
@@ -204,7 +243,10 @@ namespace DaphneGui
                 // synch vtk to the current frame
                 if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                 {
-                    SimulationBase.dataBasket.UpdateCells((TissueSimulationFrameData)CurrentFrameData());
+                    TissueSimulationFrameData fdata = (TissueSimulationFrameData)CurrentFrameData();
+
+                    SimulationBase.dataBasket.UpdateCells(fdata);
+                    SimulationBase.dataBasket.UpdateECSMolpops(fdata);
                     MainWindow.VTKBasket.UpdateData();
                     MainWindow.GC.DrawFrame(GetPlaybackPercent());
                 }
@@ -340,11 +382,12 @@ namespace DaphneGui
         private void Delay()
         {
             long currentTime = DateTime.UtcNow.Ticks,
-                 msDelta = (currentTime - lastFramePlayed) / TimeSpan.TicksPerMillisecond;
+                 msDelta = (currentTime - lastFramePlayed) / TimeSpan.TicksPerMillisecond,
+                 target = (long)(1.0 / speedFactor * E_DT);
 
-            if (msDelta < E_DT)
+            if (msDelta < target)
             {
-                int delay = (int)(E_DT - msDelta);
+                int delay = (int)(target - msDelta);
 
                 if (delay > 0)
                 {
@@ -361,7 +404,7 @@ namespace DaphneGui
         {
             lock (playLock)
             {
-                if (playbackState == VCRControlState.VCR_PLAY)
+                if (CheckFlag(VCR_ACTIVE) == true)
                 {
                     // insert a delay when needed to keep the fps steady
                     Delay();

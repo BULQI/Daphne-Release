@@ -170,6 +170,23 @@
                         </StackPanel>
                     </Expander>
 
+                    <!-- Reactions -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Reactions"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                        <StackPanel  Orientation="Horizontal" >
+                            <TextBlock  HorizontalAlignment="Left" Text="reactions" Margin="0,0,6,0"/>
+                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Protocol.scenario.reactionsReport, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Expander>
+
                     <!-- Generate report-->
                     <Button  Content="Generate Report" ClickMode="Release" Click="GenerateReport_ButtonClick" />
                     

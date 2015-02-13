@@ -43,8 +43,13 @@ namespace DaphneGui
             //Don't want to do anything when first display this combo box
             //Only do something if user really clicked and selected a different scheme
 
-            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            if (isUserInteraction == false)
                 return;
+
+            isUserInteraction = false;
+
+            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            //    return;
 
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
@@ -55,7 +60,13 @@ namespace DaphneGui
             if (combo.SelectedIndex == -1)
                 return;
 
-            cell.locomotor_mol_guid_ref = ((ConfigMolecule)cbLocomotorDriver1.SelectedItem).entity_guid;
+            ConfigMolecule cm = (ConfigMolecule)cbLocomotorDriver1.SelectedItem;
+            string guid = cm.entity_guid;
+            if (cm.Name == "None")
+                guid = "";
+
+            cell.locomotor_mol_guid_ref = guid;
+            //cell.locomotor_mol_guid_ref = ((ConfigMolecule)cbLocomotorDriver1.SelectedItem).entity_guid;
         }
 
 
@@ -94,5 +105,37 @@ namespace DaphneGui
         {
         }
 
+        bool isUserInteraction;
+        private void cbLocomotorDriver1_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            isUserInteraction = true;
+        }
+        
+    }
+
+    public class RadiusValidator : ValidationRule
+    {
+        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        {
+            if (value == null)
+                return new ValidationResult(false, "Radius value cannot be empty.");
+            else
+            {                
+                string strValue = value.ToString();
+                strValue = strValue.Trim();
+                if (strValue.Length <= 0)
+                    return new ValidationResult(false, "Radius value cannot be blank.");
+
+                double dValue;
+                bool result = double.TryParse(strValue, out dValue);
+                if (result == false)
+                    return new ValidationResult(false, "Invalid Radius value entered.");
+
+                //dValue = (double)value;
+                if (dValue <= 0)
+                    return new ValidationResult(false, "Radius must be greater than 0.");
+            }
+            return ValidationResult.ValidResult;
+        }
     }
 }

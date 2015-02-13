@@ -14,18 +14,11 @@ namespace Daphne
     public abstract class ReporterBase
     {
         protected DateTime startTime;
-        protected string reportFolder, fileName;
+        protected string fileName;
         public string AppPath { get; set; } // non uri
 
         public ReporterBase()
         {
-            reportFolder = "";
-        }
-
-        public string ReportFolder
-        {
-            get { return reportFolder; }
-            set { reportFolder = value; }
         }
 
         public string FileName
@@ -37,14 +30,9 @@ namespace Daphne
         protected StreamWriter createStreamWriter(string file, string extension)
         {
             int version = 1;
-            string rootPath = reportFolder,
-                   nameStart,
+            string nameStart,
                    fullPath;
 
-            if (rootPath != "")
-            {
-                rootPath += @"\";
-            }
             if (fileName == "")
             {
                 nameStart = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
@@ -65,9 +53,9 @@ namespace Daphne
                 }
                 else
                 {
-                    if (rootPath != "" && Directory.Exists(rootPath) == false)
+                    if (AppPath != "" && Directory.Exists(AppPath) == false)
                     {
-                        Directory.CreateDirectory(rootPath);
+                        Directory.CreateDirectory(AppPath);
                     }
                     return File.CreateText(fullPath);
                 }
@@ -77,6 +65,20 @@ namespace Daphne
         public abstract void StartReporter(SimulationBase sim);
         public abstract void AppendReporter();
         public abstract void CloseReporter();
+
+        public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
+        public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id);
+        public abstract void AppendExitEvent(int cell_id, int cellpop_id);
+
+        public abstract void ReactionsReport();
+        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
+        {
+            foreach (ConfigReaction cr in reactions)
+            {
+                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
+            }
+        }
+
     }
 
     public class TissueSimulationReporter : ReporterBase
@@ -84,10 +86,16 @@ namespace Daphne
         private StreamWriter ecm_mean_file;
         private Dictionary<int, StreamWriter> cell_files;
         private TissueSimulation hSim;
+        private Dictionary<int, TransitionEventReporter> deathEvents;
+        private Dictionary<int, TransitionEventReporter> divisionEvents;
+        private Dictionary<int, TransitionEventReporter> exitEvents;
 
         public TissueSimulationReporter()
         {
             cell_files = new Dictionary<int, StreamWriter>();
+            deathEvents = new Dictionary<int, TransitionEventReporter>();
+            divisionEvents = new Dictionary<int, TransitionEventReporter>();
+            exitEvents = new Dictionary<int, TransitionEventReporter>();
         }
 
         public override void StartReporter(SimulationBase sim)
@@ -102,6 +110,8 @@ namespace Daphne
             CloseReporter();
             startECM();
             startCells();
+            startEvents();
+            ReactionsReport();
         }
 
         public override void AppendReporter()
@@ -114,6 +124,7 @@ namespace Daphne
         {
             closeECM();
             closeCells();
+            closeEvents();
         }
 
         private void startECM()
@@ -414,6 +425,141 @@ namespace Daphne
                 cell_files.Clear();
             }
         }
+
+        private void startEvents()
+        {
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+            {
+                if (cp.reportStates.Death == true)
+                {
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_deathEvents", "txt");
+                    writer.WriteLine("Cell {0} death events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
+                    writer.WriteLine("cell_id\ttime");
+                    deathEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
+                }
+                if (cp.reportStates.Division == true)
+                {
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_divisionEvents", "txt");
+                    writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);                
+                    writer.WriteLine("cell_id\ttime\tdaughter_id");
+                    divisionEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
+                }
+                if (cp.reportStates.Exit == true)
+                {
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_exitEvents", "txt");
+                    writer.WriteLine("Cell {0} exit events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
+                    writer.WriteLine("cell_id\ttime");
+                    exitEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
+                }
+            }
+        }
+
+        private void closeEvents()
+        {
+            foreach (KeyValuePair<int,TransitionEventReporter> kvp in deathEvents)
+            {
+                kvp.Value.WriteEvents();
+            }
+            foreach (KeyValuePair<int, TransitionEventReporter> kvp in divisionEvents)
+            {
+                kvp.Value.WriteEvents();
+            }
+            foreach (KeyValuePair<int, TransitionEventReporter> kvp in exitEvents)
+            {
+                kvp.Value.WriteEvents();
+            }
+
+            deathEvents.Clear();
+            divisionEvents.Clear();
+            exitEvents.Clear();
+        }
+
+        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        {
+            if (deathEvents != null)
+            {
+                if (deathEvents.ContainsKey(cellpop_id))
+                {
+                    deathEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                }
+            }
+        }
+
+        public override void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id)
+        {
+            if (divisionEvents != null)
+            {
+                if (divisionEvents.ContainsKey(cellpop_id))
+                {
+                    divisionEvents[cellpop_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell_id, daughter_id));
+                }
+            }
+        }
+
+        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        {
+            if (exitEvents != null)
+            {
+                if (exitEvents.ContainsKey(cellpop_id))
+                {
+                    exitEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                }
+            }
+        }
+
+        public override void ReactionsReport()
+        {
+            if (SimulationBase.ProtocolHandle.scenario.reactionsReport  == true)
+            {
+                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+                writer.WriteLine("rate constant\treaction");
+                writer.WriteLine();
+
+                writer.WriteLine("ECM");
+                writer.WriteLine();
+                WriteReactionsList(writer, SimulationBase.ProtocolHandle.scenario.environment.comp.Reactions.ToList());
+                foreach (ConfigReactionComplex crc in SimulationBase.ProtocolHandle.scenario.environment.comp.reaction_complexes)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                    writer.WriteLine();
+                    WriteReactionsList(writer, crc.reactions.ToList());
+                }
+                writer.WriteLine();
+
+                foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+                {
+                    writer.WriteLine("Cell population {0}, cell type {1}", cp.cellpopulation_id, cp.Cell.CellName);
+                    writer.WriteLine();
+
+                    writer.WriteLine("\nmembrane");
+                    writer.WriteLine();
+                    WriteReactionsList(writer, cp.Cell.membrane.Reactions.ToList());
+                    foreach (ConfigReactionComplex crc in cp.Cell.membrane.reaction_complexes)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                        WriteReactionsList(writer, crc.reactions.ToList());
+                    }
+                    writer.WriteLine();
+
+                    writer.WriteLine("cytosol");
+                    writer.WriteLine();
+                    WriteReactionsList(writer, cp.Cell.cytosol.Reactions.ToList());
+                    foreach (ConfigReactionComplex crc in cp.Cell.cytosol.reaction_complexes)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                        writer.WriteLine();
+                        WriteReactionsList(writer, crc.reactions.ToList());
+                    }
+                }
+
+                writer.Close();
+            }
+        }
+
     }
 
     public class CompartmentMolpopReporter
@@ -499,6 +645,8 @@ namespace Daphne
             compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp,
                                         new double[] { 0.0, 0.0, 0.0 },
                                         SimulationBase.ProtocolHandle.scenario);
+
+            ReactionsReport();
         }
 
         public override void AppendReporter()
@@ -569,5 +717,130 @@ namespace Daphne
                 vat_conc_file.WriteLine();
             }
           }
+
+        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AppendDivisionEvent(int mother_id, int cellpop_id, int daughter_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ReactionsReport()
+        {
+            if (SimulationBase.ProtocolHandle.scenario.reactionsReport == true)
+            {
+                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+                writer.WriteLine("rate constant\treaction");
+                writer.WriteLine();
+
+                WriteReactionsList(writer, SimulationBase.ProtocolHandle.scenario.environment.comp.Reactions.ToList());
+                foreach (ConfigReactionComplex crc in SimulationBase.ProtocolHandle.scenario.environment.comp.reaction_complexes)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                    writer.WriteLine();
+                    WriteReactionsList(writer, crc.reactions.ToList());
+                }
+                writer.WriteLine();
+
+                writer.Close();
+            }
+        }
+
+    }
+
+    public class TransitionEventReporter
+    {
+        /// <summary>
+        /// Reporting on an event type.
+        /// Data are written to file at the end of the simulation.
+        /// </summary>        
+        private StreamWriter writer;
+
+        private List<TransitionEvent> events;
+
+        public TransitionEventReporter(StreamWriter _writer)
+        {
+            writer = _writer;
+            events = new List<TransitionEvent>();
+        }
+
+        public void AddEvent(TransitionEvent te)
+        {
+            events.Add(te);
+        }
+
+        public void WriteEvents()
+        {
+            if (events.Count > 0)
+            {
+                for (int i = 0; i < events.Count; i++)
+                {
+                    ((TransitionEvent)events[i]).WriteLine(writer);
+                }
+            }
+
+            CloseReporter();
+        }
+
+        public void CloseReporter()
+        {
+            if (writer != null)
+            {
+                writer.Close();
+            }
+            if (events != null)
+            {
+                events.Clear();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Base class for recording cell transition events
+    /// </summary>
+    public class TransitionEvent
+    {
+        public double time;
+        public int cell_id;
+
+        public TransitionEvent(double _time, int _cell_id)
+        {
+            time = _time;
+            cell_id = _cell_id;
+        }
+
+        public virtual void WriteLine(StreamWriter writer)
+        {
+            writer.WriteLine("{0}\t{1}", this.cell_id, this.time);
+        }
+    }
+
+    /// <summary>
+    /// Record cell division events
+    /// </summary>
+    public class DivisionEvent : TransitionEvent
+    {
+        public int daughter_id;
+
+        public DivisionEvent(double _time, int _cell_id, int _daughter_id)
+            : base(_time, _cell_id)
+        {
+            daughter_id = _daughter_id;
+        }
+
+        public override void WriteLine(StreamWriter writer)
+        {
+            writer.WriteLine("{0}\t{1}\t{2}", this.cell_id, this.time, this.daughter_id);
+        }
     }
 }

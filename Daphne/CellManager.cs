@@ -8,15 +8,13 @@ namespace Daphne
 {
     public class CellManager : IDynamic
     {
-        Dictionary<int, double> deadDict = null;
-        int[] tempDeadKeys = null;
-        public double deathTimeConstant;
-        public int deathOrder;
-        public double deathFactor;
+        private Dictionary<int, double[]> deadDict = null;
+        private int[] tempDeadKeys = null;
+        public DistributedParameter Phagocytosis;
 
         public CellManager()
         {
-            deadDict = new Dictionary<int, double>();
+            deadDict = new Dictionary<int, double[]>();
         }
 
         public void Step(double dt)
@@ -75,7 +73,8 @@ namespace Daphne
                 {
                     if (!deadDict.ContainsKey(kvp.Value.Cell_id))
                     {
-                        deadDict.Add(kvp.Value.Cell_id, 0);
+                        // start clock at 0 and sample the distribution for the time of removal
+                        deadDict.Add(kvp.Value.Cell_id, new double[] {0.0, Phagocytosis.Sample()});
                     }
                 }
                 
@@ -91,6 +90,7 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
+                    SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id);
                 }
            }
 
@@ -99,6 +99,7 @@ namespace Daphne
             {
                 foreach (int key in removalList)
                 {
+                    SimulationBase.dataBasket.ExitEvent(key);
                     SimulationBase.dataBasket.RemoveCell(key);
                 }
             }
@@ -110,9 +111,12 @@ namespace Daphne
                 foreach(int key in tempDeadKeys)
                 {
                     // increment elapsed time since death
-                    deadDict[key] = deadDict[key] + dt;
-                    if (Rand.TroschuetzCUD.NextDouble() < deathFactor * Math.Pow(deadDict[key] * deathTimeConstant, deathOrder) * dt)
+                    double[] d = deadDict[key];
+                    d[0] += dt;
+
+                    if (d[0] >= d[1])
                     {
+                        SimulationBase.dataBasket.DeathEvent(key);
                         SimulationBase.dataBasket.RemoveCell(key);
                         deadDict.Remove(key);
                     }
@@ -126,11 +130,7 @@ namespace Daphne
                 {
                     // add the cell
                     SimulationBase.AddCell(c);
-                    // add the cell's membrane to the ecs boundary
-                    if (SimulationBase.dataBasket.Environment is ECSEnvironment)
-                    {
-                        ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(c.PlasmaMembrane.Interior);
-                    }
+                    // cell's membrane was added to the ecs in Cell.Divide()
                 }
             }
         }

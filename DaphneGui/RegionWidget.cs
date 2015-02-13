@@ -55,7 +55,7 @@ namespace DaphneGui
             // set some agreeable defaults
             red = green = blue = opacity = 0.5;
 
-            shapeActor = new GraphicsProp();
+            shapeActor = new GraphicsProp(rw);
 
             // create the associated actor
             if (shape == RegionShape.Rectangular)
@@ -118,7 +118,7 @@ namespace DaphneGui
 
             if (Showing() == true)
             {
-                shapeActor.addToScene(rw, false);
+                shapeActor.addToScene(false);
             }
 
             if (shape == RegionShape.Rectangular)
@@ -134,7 +134,7 @@ namespace DaphneGui
 
             if (Showing() == true)
             {
-                shapeActor.addToScene(rw, true);
+                shapeActor.addToScene(true);
             }
             this.shape = shape;
         }
@@ -395,12 +395,12 @@ namespace DaphneGui
             if (show == true)
             {
                 // add the actor to the renderer
-                shapeActor.addToScene(rw, true);
+                shapeActor.addToScene(true);
             }
             else
             {
                 // remove the actor from the renderer
-                shapeActor.addToScene(rw, false);
+                shapeActor.addToScene(false);
             }
         }
 

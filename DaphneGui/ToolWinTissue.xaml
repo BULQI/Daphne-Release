@@ -65,7 +65,7 @@
         </TabItem>
 
         <!-- CELL POPULATIONS -->
-        <TabItem x:Name="tabCellPop" Header="Cell Populations" Loaded="CellPopTabItem_Loaded" AutomationProperties.AutomationId="DaphneCellPopsTab">
+        <TabItem x:Name="tabCellPop" Header="Cells" Loaded="CellPopTabItem_Loaded" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <TabItem.Resources>
             </TabItem.Resources>
 
@@ -77,7 +77,7 @@
                     <Expander  Padding="5"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
-                                Header="Cell Properties"                                              
+                                Header="Properties"                                              
                                 x:Name="CellPropertiesExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
@@ -90,6 +90,7 @@
                             <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
                                 <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
                                         DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
+                                        
                                         />
                             </StackPanel>
 
@@ -113,7 +114,7 @@
                             Padding="5" 
                             ExpandDirection="Down"
                                 IsExpanded="False"
-                                Header="Cell Death Parameters"                                              
+                                Header="Death Parameters"                                              
                                 x:Name="CellDeathParamsExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
@@ -121,55 +122,15 @@
                             BorderBrush="Black"
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                        <StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Left" VerticalAlignment="Center"
-                                    TextAlignment="Left"
-                                    Width="Auto"
-                                    />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="time constant" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="2"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-                                <editors:DoubleEditBox x:Name="deathConstant_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="E2"
-                                                StepValue="0.1"
-                                                Width="100" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="order parameter" Margin="6,0"
-                                    Grid.Column="0" Grid.Row="3"  
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    TextAlignment="Right"
-                                    Width="120"
-                                    />
-
-                                <editors:DoubleEditBox x:Name="deathOrder_readout" 
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="F0"
-                                                StepValue="0.1"
-                                                Width="100" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                                <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                            </StackPanel>
+                        <StackPanel Orientation="Vertical" >
+                            <StackPanel.ToolTip>
+                                <StackPanel Width="400" >
+                                    <TextBlock Text="The Constant distribution with a value of zero results in instantaneous removal."></TextBlock>
+                                </StackPanel>
+                            </StackPanel.ToolTip>
+                            
+                            <TextBlock Text="Distribution for the rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" />
+                            <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </Expander>
@@ -179,7 +140,7 @@
                     Padding="5" 
                     ExpandDirection="Down"
                     IsExpanded="False"
-                    Header="Cell Interaction Parameters"                                              
+                    Header="Interaction Parameters"                                              
                     x:Name="CellParamsExpander"
                     Margin="0,5,0,0" 
                     Canvas.ZIndex="1"
@@ -507,6 +468,16 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
+                                <DataGridCheckBoxColumn Header="Exiting" Width="85"                
+                                    Binding="{Binding Path=reportStates.Exit, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding reportStates.Exit}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                                
                             </DataGrid.Columns>
                         </DataGrid>
                     </Expander>
@@ -524,6 +495,7 @@
                         <StackPanel>
                             <ListBox x:Name="lbRptCellPops"
                                 ItemsSource="{Binding Path=Protocol.scenario.cellpopulations}" 
+                                SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
                             />
 
@@ -546,7 +518,7 @@
                                         VerticalContentAlignment="Center"
                                         CanUserAddRows="False"
                                         BorderThickness="1"
-                                        BorderBrush="Black"
+                                        BorderBrush="Black"                                        
                                         >
 
                                         <DataGrid.ColumnHeaderStyle>
@@ -747,8 +719,24 @@
                         </StackPanel>
                     </Expander>
                     
-                    
-            </StackPanel>
+                    <!-- Reactions -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Reactions"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBlock  HorizontalAlignment="Left" Text="ECM and cell reactions" Margin="0,0,6,0"/>
+                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Protocol.scenario.reactionsReport, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                            </StackPanel>
+                    </Expander>
+
+                </StackPanel>
             </ScrollViewer>
 
         </TabItem>
@@ -980,9 +968,6 @@
         
     </TabControl>
  
-    
-
-    
 </local:ToolWinBase>
 
  

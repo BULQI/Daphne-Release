@@ -8,6 +8,8 @@ using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
 
+using System.Diagnostics;
+
 namespace Daphne
 {
     public struct CellSpatialState
@@ -224,19 +226,32 @@ namespace Daphne
         }
 
         /// <summary>
-        /// set the state as used in rendering; does not set the state for simulation purposes
+        /// set the state
         /// </summary>
-        /// <param name="state"></param>
-        public void SetRenderState(CellState state)
+        /// <param name="state">the state</param>
+        public void SetCellState(CellState state)
         {
             // spatial
             setSpatialState(state.spState);
             // generation
             generation = state.CellGeneration;
             // behaviors
-            Alive = state.cbState.deathDriverState == 0;
-            DividerState = state.cbState.divisionDriverState;
-            DifferentiationState = state.cbState.differentiationDriverState;
+            if (state.cbState.deathDriverState != -1)
+            {
+                Alive = state.cbState.deathDriverState == 0;
+            }
+            if (state.cbState.divisionDriverState != -1)
+            {
+                DividerState = state.cbState.divisionDriverState;
+            }
+            if (state.cbState.differentiationDriverState != -1)
+            {
+                DifferentiationState = state.cbState.differentiationDriverState;
+            }
+            // genes
+            SetGeneActivities(state.cgState.geneDict);
+            // molecules
+            SetMolPopConcentrations(state.cmState.molPopDict);
         }
 
         public void setSpatialState(CellSpatialState s)
@@ -269,6 +284,25 @@ namespace Daphne
         {
             // we are using the simplest kind of integrator here. It should be made more sophisticated at some point.
             Cytosol.Step(dt);
+
+            //apply cytosol/membrane boundary flux - specific to cytosol/Membrane
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                MolecularPopulation molpop = kvp.Value;
+                ScalarField conc = molpop.Conc;
+                foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
+                {
+                    conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
+                    item.Value.reset(0);
+                }
+            }
+
+            //update cytosol/membrane boundary
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                kvp.Value.UpdateCytosolMembraneBoundary();
+            }
+
             PlasmaMembrane.Step(dt);
 
             // step the cell behaviors
@@ -289,10 +323,10 @@ namespace Daphne
                 if (Divider.CurrentState == Divider.Behavior.FinalState)
                 {
                     cytokinetic = true;
-                    Divider.CurrentState = 0;
-                    Divider.Behavior.CurrentState = 0;
-                    Divider.PreviousState = Divider.Behavior.FinalState;
-                    Divider.Behavior.PreviousState = Divider.Behavior.FinalState;
+                    Divider.CurrentState = Divider.Behavior.CurrentState = 0;
+                    Divider.PreviousState = Divider.Behavior.PreviousState = Divider.Behavior.FinalState;
+                    // changing state, so we need to reinitialize the driver for this state
+                    Divider.Behavior.InitializeState();
                 }
                 // Epigentic changes
                 SetGeneActivities(Divider);
@@ -324,10 +358,10 @@ namespace Daphne
         }
 
         /// <summary>
-        /// save gene activity from saved values.
+        /// save gene activity from saved values
         /// </summary>
-        /// <param name="geneDict"></param>
-        public void SetGeneActivities(Dictionary<String, double> geneDict)
+        /// <param name="geneDict">saved values in a dictionary</param>
+        public void SetGeneActivities(Dictionary<string, double> geneDict)
         {
             foreach (var kvp in geneDict)
             {
@@ -335,6 +369,31 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// set molecular population concentrations from saved values
+        /// </summary>
+        /// <param name="molPopDict">saved values in a dictionary</param>
+        public void SetMolPopConcentrations(Dictionary<string, double[]> molPopDict)
+        {
+            // cytosol
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                if (molPopDict.ContainsKey(kvp.Key) == false)
+                {
+                    continue;
+                }
+                kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
+            }
+            // membrane
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
+            {
+                if (molPopDict.ContainsKey(kvp.Key) == false)
+                {
+                    continue;
+                }
+                kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
+            }
+        }
 
         /// <summary>
         /// Returns the force the cell applies to the environment.
@@ -380,7 +439,6 @@ namespace Daphne
             // same state
             daughter.setSpatialState(spatialState);
             // but offset the daughter randomly
-            //double[] delta = radius * Rand.RandomDirection(daughter.spatialState.X.Length);
             double[] delta = Rand.RandomDirection(daughter.spatialState.X.Length).Multiply(radius).ToArray();
 
             for (int i = 0; i < delta.Length; i++)
@@ -426,17 +484,15 @@ namespace Daphne
 
             if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                // only the TissueScenario has cell populations
                 cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
+                configComp[0] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.cytosol;
+                configComp[1] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.membrane;
             }
             else
             {
                 // for now
                 throw new NotImplementedException();
             }
-
-            configComp[0] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].cytosol;
-            configComp[1] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].membrane;
 
             bulk_reacs[0] = SimulationBase.ProtocolHandle.GetReactions(configComp[0], false);
             bulk_reacs[1] = SimulationBase.ProtocolHandle.GetReactions(configComp[1], false);
@@ -455,6 +511,12 @@ namespace Daphne
             SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs, null);
             // transcription reactions
             SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
+
+            // add the cell's membrane to the ecs boundary
+            ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(daughter.PlasmaMembrane.Interior);
+            // add ECS boundary reactions, where applicable
+            List<ConfigReaction> reacs = SimulationBase.ProtocolHandle.GetReactions(SimulationBase.ProtocolHandle.scenario.environment.comp, true);
+            SimulationBase.AddCompartmentBoundaryReactions(SimulationBase.dataBasket.Environment.Comp, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, reacs, null);
 
             // behaviors
 
@@ -478,70 +540,63 @@ namespace Daphne
             daughter.DragCoefficient = DragCoefficient;
 
             // death
-            foreach(KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DeathBehavior.Drivers)
-            {
-                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                {
-                    TransitionDriverElement tde = new TransitionDriverElement();
-
-                    tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                    tde.Alpha = kvp_inner.Value.Alpha;
-                    tde.Beta = kvp_inner.Value.Beta;
-                    // add it to the daughter
-                    daughter.DeathBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                }
-            }
+            LoadTransitionDriverElements(daughter, daughter.DeathBehavior, DeathBehavior);
+            daughter.DeathBehavior.CurrentState = DeathBehavior.CurrentState;
+            daughter.DeathBehavior.InitializeState();
 
             // division
             if (Divider.nStates > 1)
             {
                 daughter.Divider.Initialize(Divider.nStates, Divider.nGenes);
-                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Divider.Behavior.Drivers)
-                {
-                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                        tde.Alpha = kvp_inner.Value.Alpha;
-                        tde.Beta = kvp_inner.Value.Beta;
-                        // add it to the daughter
-                        daughter.Divider.Behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                    }
-                }
+                LoadTransitionDriverElements(daughter, daughter.Divider.Behavior, Divider.Behavior);
                 Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
                 Array.Copy(Divider.gene_id, daughter.Divider.gene_id, Divider.gene_id.Length);
                 Array.Copy(Divider.activity, daughter.Divider.activity, Divider.activity.Length);
-                daughter.DividerState = Divider.CurrentState;
-                daughter.SetGeneActivities(Divider);
+                daughter.DividerState = daughter.Divider.CurrentState = Divider.CurrentState;
+                daughter.SetGeneActivities(daughter.Divider);
+                daughter.Divider.Behavior.InitializeState();
             }
-
 
             // differentiation
             if (Differentiator.nStates > 1)
             {
                 daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
-                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.Behavior.Drivers)
-                {
-                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                        tde.Alpha = kvp_inner.Value.Alpha;
-                        tde.Beta = kvp_inner.Value.Beta;
-                        // add it to the daughter
-                        daughter.Differentiator.Behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                    }
-                }
+                LoadTransitionDriverElements(daughter, daughter.Differentiator.Behavior, Differentiator.Behavior);
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
                 Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
-                daughter.DifferentiationState = Differentiator.CurrentState;
-                daughter.SetGeneActivities(Differentiator);
+                daughter.DifferentiationState = daughter.Differentiator.CurrentState = Differentiator.CurrentState;
+                daughter.SetGeneActivities(daughter.Differentiator);
+                daughter.Differentiator.Behavior.InitializeState();
             }
 
             return daughter;
+        }
+
+        private void LoadTransitionDriverElements(Cell daughter, ITransitionDriver daughter_behavior, ITransitionDriver behavior)
+        {
+            foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in behavior.Drivers)
+            {
+                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
+                {
+                    if (kvp_inner.Value.GetType() == typeof(MolTransitionDriverElement))
+                    {
+                        MolTransitionDriverElement tde = new MolTransitionDriverElement();
+                        tde.Alpha = ((MolTransitionDriverElement)kvp_inner.Value).Alpha;
+                        tde.Beta = ((MolTransitionDriverElement)kvp_inner.Value).Beta;
+                        tde.DriverPop = daughter.Cytosol.Populations[((MolTransitionDriverElement)kvp_inner.Value).DriverPop.MoleculeKey];
+                        // add it to the daughter
+                        daughter_behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                    }
+                    else
+                    {
+                        DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
+                        tde.distr = ((DistrTransitionDriverElement)kvp_inner.Value).distr.Clone();
+                        // add it to the daughter
+                        daughter_behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                    }
+                }
+            }
         }
 
         public int DifferentiationState, DividerState;
@@ -549,7 +604,6 @@ namespace Daphne
         public Locomotor Locomotor { get; set; }
         public Compartment Cytosol { get; private set; }
         public Compartment PlasmaMembrane { get; private set; }
-        //public Differentiator Differentiator { get; private set; }
         private CellSpatialState spatialState;
         public double DragCoefficient { get; set; }
         public StochLocomotor StochLocomotor { get; set; } 

@@ -92,7 +92,7 @@ namespace DaphneGui
                 }
                 else
                 {
-                    MessageBox.Show("Please add cells form the User store first.");
+                    MessageBox.Show("Please add cells from the User store first.");
                     return;
                 }
             }
@@ -108,18 +108,9 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
             cp.cellPopDist.Initialize();
-
-
-            cp.CellStates[0] = new CellState(envHandle.extent_x - 2 * cp.Cell.CellRadius - envHandle.gridstep / 2,
-                                                  envHandle.extent_y / 2 - envHandle.gridstep / 2,
-                                                  envHandle.extent_z / 2 - envHandle.gridstep / 2);
-
-           
-
-            
-            //if about rendering...
-            //for now, use name as label
-            //cp.renderLabel = cp.Cell.entity_guid;
+            // Causes a new random seed for the random source
+            // Otherwise we will get the same values every time if this is followed by Apply()
+            cp.cellPopDist.Reset();
 
             //add rendering options to scenario
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
@@ -170,9 +161,8 @@ namespace DaphneGui
             if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform)
             {
                 current_dist.Reset();
-                // gmk - fix
                 MainWindow.ToolWin.Apply();
-                //applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                //MainWindow  applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
 
@@ -359,6 +349,11 @@ namespace DaphneGui
                     }
                 }
             }
+
+            //This forces the cell population to be reloaded and updates all details in GUI underneath
+            int index = CellPopsListBox.SelectedIndex;
+            CellPopsListBox.SelectedIndex = -1;
+            CellPopsListBox.SelectedIndex = index;
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
@@ -548,6 +543,9 @@ namespace DaphneGui
             int index = CellPopsListBox.SelectedIndex;
             CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
 
+            if (current_item == null)
+                return;
+
             MessageBoxResult res;
             res = MessageBox.Show("Are you sure you would like to remove this cell population?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
@@ -565,6 +563,14 @@ namespace DaphneGui
             //Remove the cell population
             scenario.cellpopulations.Remove(current_item);
 
+            //remove rendering option if no other refernece
+            string label = current_item.renderLabel;
+            bool safe_to_remove = (MainWindow.SOP.Protocol.scenario as TissueScenario).RenderPopReferenceCount(label, true) == 0;
+            if (safe_to_remove)
+            {
+                (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(label, true);
+            }
+
             CellPopsListBox.SelectedIndex = index;
 
             if (index >= CellPopsListBox.Items.Count)
@@ -572,15 +578,27 @@ namespace DaphneGui
 
             if (CellPopsListBox.Items.Count == 0)
                 CellPopsListBox.SelectedIndex = -1;
+
+            // gmk - Remove this cell population from the render skin editor?
+
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            CellPopsListBox.SelectedIndex = 0;
             CellPopulation cp = (CellPopulation)(CellPopsListBox.SelectedItem);
             if (cp == null)
             {
-                SelectedCell = null;
+                if (CellPopsListBox.Items.Count > 0)
+                {
+                    cp = (CellPopulation)CellPopsListBox.Items[0];
+                    SelectedCell = cp.Cell;
+                    CellPopsListBox.SelectedIndex = 0;
+                    CellPopsListBox.SelectedItem = cp;
+                }
+                else
+                {
+                    SelectedCell = null;
+                }
             }
             else
             {
@@ -589,6 +607,43 @@ namespace DaphneGui
         }
 
 
+    }
+
+
+    public class CellPopDistTypeTooltipConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        private List<string> tooltip_strings = new List<string>()
+        {
+            "Specify: User can assign specific cell locations.",
+            "Uniform: Cells will be evenly distributed.",
+            "Gaussian: Uses a Gaussian algorithm to place the cells."
+        };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value as string == "") return value;
+            if (value == null) 
+                return value as string;
+
+            try
+            {
+                int n = (int)value;
+                return tooltip_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = tooltip_strings.FindIndex(item => item == str);
+            return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
+        }
     }
 
 }

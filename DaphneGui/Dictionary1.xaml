@@ -33,10 +33,25 @@
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
     <daph:ParameterDistributionTypeToStringConverter x:Key="ParamDistTypeEnumConv" />
     <daph:ParameterDistributionTypeToBoolConverter x:Key="ParamDistTypeBoolConv" />
+    <local:CellPopDistTypeTooltipConverter x:Key="CellPopDistTypeTooltipConv" />
 
+
+    <daph:TransitionDriverElementTypeToStringConverter x:Key="TransitionDriverElementTypeEnumConv" />
+    <daph:TransitionDriverElementTypeConverter x:Key="TransitionDriverElementTypeConv" />
+
+    <local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />
+    <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+    <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
+    <!-- transitionDriverElementTypeTemplate -->
+    <DataTemplate x:Key="transitionDriverElementTypeTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Converter={StaticResource TransitionDriverElementTypeEnumConv}}"/>
+        </StackPanel>
+    </DataTemplate>
+    
     <!-- parameterDistributionTypeTemplate -->
     <DataTemplate x:Key="parameterDistributionTypeTemplate">
         <StackPanel Orientation="Horizontal">
@@ -152,7 +167,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Name"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Copy Number"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Activation Level"></TextBlock>
+                <TextBlock Width="90" Margin="20,0" Text="Activation Level"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
@@ -263,10 +278,19 @@
 
     <!-- Report settings template : DataContext must be Protocol -->
     <DataTemplate x:Key="reportSettingsTemplate">
-            <StackPanel>
-                <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
-                <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>           
+        <StackPanel>
+            <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
+            <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Select report folder:" FontWeight="Bold" Margin="0,12,0,0" />
+                <Button Content="Browse..." Height="23" Margin="10,8,0,0" Name="btnReportBrowse" VerticalAlignment="Top" Width="75" 
+                        Command="{x:Static local:MainWindow.SelectReportFolderCommand}" />
             </StackPanel>
+            
+            <!--Need MainWindow to make this work-->
+            <!--<TextBox x:Name="txtReportsFolder" IsReadOnly="True" Margin="0,2,0,0"  Text="{Binding Path=Sim.Reporter.ReportFolder}"></TextBox>-->
+                        
+        </StackPanel>
     </DataTemplate>
 
     <!-- Display a list of ReactionComplexes  - not sure if this is a keeper -->
@@ -472,11 +496,34 @@
         </Grid>
     </DataTemplate>
 
+    <DataTemplate x:Key="cellRenderMethodTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>
+        </StackPanel>
+    </DataTemplate>
+
     <ObjectDataProvider x:Key="boundaryFaces"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
         <ObjectDataProvider.MethodParameters>
             <x:Type TypeName="daph:BoundaryFace" />
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
+
+    <!-- CellShapeEnum-->
+    <ObjectDataProvider x:Key="cellRenderMethodEnum"
+                            MethodName="GetValues" 
+                            ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="local:CellRenderMethod" />
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
+
+    <ObjectDataProvider x:Key="RenderMethodEnum"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="daph:RenderMethod" />
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
 
@@ -531,5 +578,30 @@
             </ListView>
         </StackPanel>
     </DataTemplate>
-    
+
+    <!--Validation Error Template-->
+    <ControlTemplate x:Key="validationErrorTemplate">
+        <DockPanel>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                <Grid Width="12" Height="12" >
+                    <Ellipse Width="12" Height="12" 
+                        Fill="Red" HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"                     
+                     >
+                    </Ellipse>
+                    <TextBlock Foreground="White" FontWeight="Heavy" 
+                        FontSize="8" HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" TextAlignment="Center"
+                        ToolTip="{Binding ElementName=ErrorAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">X</TextBlock>
+                </Grid>
+                <TextBlock Foreground="Red" FontWeight="12" Margin="2,0,0,0" 
+                   Text="{Binding ElementName=ErrorAdorner, 
+                   Path=AdornedElement.(Validation.Errors)[0].ErrorContent}"
+                   ></TextBlock>
+            </StackPanel>
+            <AdornedElementPlaceholder x:Name="ErrorAdorner" ></AdornedElementPlaceholder>
+        </DockPanel>
+    </ControlTemplate>
+
+
 </ResourceDictionary>

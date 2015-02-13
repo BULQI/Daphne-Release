@@ -439,9 +439,9 @@ namespace ManifoldRing
         /// <param name="t">Transform that specifies the geometric relationship between 
         /// the boundary and interior manifolds </param>
         /// <returns>diffusion flux term as field in the interior manifold</returns>
-        public ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, double dt)
         {
-            return m.DiffusionFluxTerm(flux, t);
+            return m.DiffusionFluxTerm(flux, t, this, dt);
         }
 
         /// <summary>

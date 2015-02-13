@@ -6,6 +6,7 @@
              xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
              xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
              xmlns:local="clr-namespace:DaphneGui"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
              xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
              xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
@@ -46,58 +47,258 @@
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
 
 
-        <!-- Template for signal molecules in transitions schemes. Called from the code-behind -->
-        <DataTemplate x:Key="DiffRegCellTemplate" DataType="daph:ConfigTransitionDriverElement">
-            <TextBlock Name="textblock"  Text="{Binding Path=driver_mol_guid_ref, Converter={StaticResource MolGUIDtoMolNameConverter},
-                ConverterParameter={StaticResource moleculesListView}}" />
-        </DataTemplate>
-        
-        <!-- Template for transitions schemes. Called from the code-behind -->
-        <DataTemplate x:Key="DiffRegCellEditingTemplate" DataType="daph:ConfigTransitionDriverElement">
-            <StackPanel Name="CellEditStackPanel" Orientation="Vertical">
-                <ComboBox Name="MolPopComboBox"
+        <!-- Mol_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element.  -->
+        <DataTemplate x:Key="Mol_TDE_dgCell_Editing" >
+            <StackPanel Orientation="Vertical">
+            <ComboBox Name="MolPopComboBox"
                           DisplayMemberPath="Name"
                           >
 
-                    <ComboBox.SelectedValue>
-                        <MultiBinding Converter="{StaticResource MolGuidToMolPopForDiffMultiValueConverter}">
-                            <Binding Path="driver_mol_guid_ref" />
-                            <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type DataGrid}}" Path="DataContext.cytosol" />
-                        </MultiBinding>
-                    </ComboBox.SelectedValue>
+                <ComboBox.SelectedValue>
+                    <MultiBinding Converter="{StaticResource MolGuidToMolPopForDiffMultiValueConverter}">
+                        <Binding Path="driver_mol_guid_ref" />
+                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type DataGrid}}" Path="DataContext.cytosol" />
+                    </MultiBinding>
+                </ComboBox.SelectedValue>
 
-                    <ComboBox.ItemsSource>
-                        <CompositeCollection>
-                            <daph:ConfigMolecularPopulation Name="None" />
-                            <CollectionContainer Collection="{Binding Source={StaticResource CytoSolMolPopListView}}" />
-                        </CompositeCollection>
-                    </ComboBox.ItemsSource>
-                </ComboBox>
-                <Expander Header="Transition rate values" ExpandDirection="Down" BorderBrush="White" IsExpanded="False" Background="White">
-                    <Expander.Style>
-                        <Style TargetType="Expander">
-                            <Setter Property="IsEnabled" Value="True"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=driver_mol_guid_ref}" Value="">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Expander.Style>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Background:  " ToolTip="Background production rate" Width="110"/>
-                            <TextBox Text="{Binding Path=Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" ToolTip="Background production rate"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Linear coefficient: " Width="110" ToolTip="Production rate linear coefficient"/>
-                            <TextBox Text="{Binding Path=Beta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" ToolTip="Production rate linear coefficient" /> 
-                        </StackPanel>
+                <ComboBox.ItemsSource>
+                    <CompositeCollection>
+                        <daph:ConfigMolecularPopulation Name="None" />
+                        <CollectionContainer Collection="{Binding Source={StaticResource CytoSolMolPopListView}}" />
+                    </CompositeCollection>
+                </ComboBox.ItemsSource>
+            </ComboBox>
+            <Expander Header="Transition rate values" ExpandDirection="Down" BorderBrush="White" IsExpanded="False" Background="White">
+                <Expander.Style>
+                    <Style TargetType="Expander">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=driver_mol_guid_ref}" Value="">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Expander.Style>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Background:  " ToolTip="Background production rate" Width="110"/>
+                        <TextBox Text="{Binding Path=Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" ToolTip="Background production rate"/>
                     </StackPanel>
-                </Expander>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Linear coefficient: " Width="110" ToolTip="Production rate linear coefficient"/>
+                        <TextBox Text="{Binding Path=Beta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" ToolTip="Production rate linear coefficient" />
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
             </StackPanel>
         </DataTemplate>
 
+        <!-- Mol_TDE_dgCell_NonEditing: DataGrid cell non-editing of Molecular Transition driver element. -->
+        <DataTemplate x:Key="Mol_TDE_dgCell_NonEditing" DataType="daph:ConfigTransitionDriverElement">
+            <TextBlock Name="textblock"  Text="{Binding Path=driver_mol_guid_ref, Converter={StaticResource MolGUIDtoMolNameConverter},
+                        ConverterParameter={StaticResource moleculesListView}}" />
+        </DataTemplate>
+
+        <!-- Distr_TDE_dgCell_NonEditing: DataGrid cell non-editing of Molecular Transition driver element. -->
+        <DataTemplate x:Key="Distr_TDE_dgCell_NonEditing">
+            <TextBlock Text="{Binding Type}" />
+        </DataTemplate>
+
+        <!-- Distr_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element. -->
+        <DataTemplate x:Key="Distr_TDE_dgCell_Editing">
+            <StackPanel Orientation="Vertical">
+                <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
+                <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
+                                         DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Mol_Death_TDE_Template: Molecular Transition driver element Template for death driver -->
+        <DataTemplate x:Key="Mol_Death_TDE_Template">
+            <StackPanel x:Name="spConfigMolTransitionDriverTemplate" Orientation="Vertical">
+
+                <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
+                <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
+                            ItemsSource="{Binding Path=cytosol.molpops}"
+                            DisplayMemberPath="Name" 
+                            SelectedValue="{Binding Path=death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedValuePath="molecule.entity_guid"                                     
+                            >
+                </ComboBox>
+
+                <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
+                <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
+                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
+                                />
+
+                <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
+                <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,10,-4,10" VerticalAlignment="Bottom" Width="196"
+                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
+                                />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Distr_Death_TDE_Template: Distribution transition driver element Template for death driver-->
+        <DataTemplate x:Key="Distr_Death_TDE_Template">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
+                <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
+                                         DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </DataTemplate>
+        
+
+        <!-- simple null template for testing and detecting error condition -->
+        <DataTemplate x:Key="nullTemplate">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="NULL BLOCK" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- selectable_death_TDE_template: Style selector for death TDE template -->
+        <Style x:Key="selectable_death_TDE_template" TargetType="{x:Type ContentControl}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="MOLECULE">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Mol_Death_TDE_Template}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Distr_Death_TDE_Template}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="NONE">
+                    <Setter Property="ContentTemplate" Value="{StaticResource nullTemplate}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- selectable_DataGrid_TDE_editing_template: Style selector for data grid TDE editing template -->
+        <Style x:Key="selectable_DataGrid_TDE_editing_template" TargetType="{x:Type ContentControl}">
+            <Setter Property="ContentTemplate" Value="{StaticResource nullTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="MOLECULE">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Mol_TDE_dgCell_Editing}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Distr_TDE_dgCell_Editing}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- selectable_DataGrid_TDE_non-editing_template: Style selector for data grid TDE non-editing template -->
+        <Style x:Key="selectable_DataGrid_TDE_non-editing_template" TargetType="{x:Type ContentControl}">
+            <Setter Property="ContentTemplate" Value="{StaticResource nullTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="MOLECULE">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Mol_TDE_dgCell_NonEditing}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Distr_TDE_dgCell_NonEditing}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- selectable_Death_TDE_Type_ButtonContent: Display and switch TDE type in the Death driver -->
+        <Style x:Key="selectable_Death_TDE_Type_ButtonContent" TargetType="{x:Type Button}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="MOLECULE">
+                    <Setter Property="Content" Value="Molecular"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
+                    <Setter Property="Content" Value="Distribution"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=death_driver.DriverElements[0].elements[1], Converter={StaticResource TransitionDriverElementTypeConv}}" Value="NONE">
+                    <Setter Property="Content" Value="None"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- selectable_DataGrid_TDE_Type_ButtonContent: Display and switch TDE type in the DataGrid cell -->
+        <Style x:Key="selectable_DataGrid_TDE_Type_ButtonContent" TargetType="{x:Type Button}">
+            <Setter Property="Content" Value="None"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="MOLECULE">
+                    <Setter Property="Content" Value="Molecular"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="DISTRIBUTION">
+                    <Setter Property="Content" Value="Distribution" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Converter={StaticResource TransitionDriverElementTypeConv}}" Value="NONE">
+                    <Setter Property="Content" Value="None"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Death_TDE_Type_SwitchTemplate: Switchable template for death TDE details. -->
+        <DataTemplate x:Key="Death_TDE_Type_SwitchTemplate">
+            <StackPanel Orientation="Vertical">
+
+                <Button x:Name="btnDelDeathDriver" Click="btnDelDeathDriver_Click">Delete Death Driver</Button>
+                
+                <!-- starting state -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,5">
+                    <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" />
+                    <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding death_driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" 
+                                             HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                </StackPanel>
+
+                <StackPanel Name="spTransitionDriverElementDetailsContentControl" HorizontalAlignment="Left">
+                    <Button HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200"
+                            Click="ChangeDeathTDEType_Click" 
+                            Style="{StaticResource selectable_Death_TDE_Type_ButtonContent}"
+                            />          
+                    <ContentControl x:Name="TransitionDriverElementDetails"
+                                    Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                    Style="{StaticResource selectable_death_TDE_template}"
+                                    />
+                </StackPanel>
+                
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- NewDeathDriverTemplate: button for new death driver-->
+        <DataTemplate x:Key="NewDeathDriverTemplate">
+            <Button x:Name="btnNewDeathDriver" Click="btnNewDeathDriver_Click">New Death Driver</Button>
+        </DataTemplate>
+
+        <!-- Death_NewButton_or_TDE_details_SelectableStyle -->
+        <Style x:Key="Death_NewButton_or_TDE_details_SelectableStyle" TargetType="{x:Type ContentControl}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
+                    <Setter Property="ContentTemplate" Value="{StaticResource NewDeathDriverTemplate}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Death_TDE_Type_SwitchTemplate}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- DataGridCell_TDE_NonEditing_Template: Template for TDE in transition schemes. Non-editing template. Called from the code-behind -->
+        <DataTemplate x:Key="DataGridCell_TDE_NonEditing_Template" DataType="daph:ConfigTransitionDriverElement">
+            <ContentControl x:Name="TransitionDriverElementDetails_NonEditing"
+                                    Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                    Style="{StaticResource selectable_DataGrid_TDE_non-editing_template}"
+                                    />
+            
+        </DataTemplate>
+
+        <!-- DataGridCell_TDE_Editing_Template: Template for TDE in transition schemes. Editing version version. Called from the code-behind -->
+        <DataTemplate x:Key="DataGridCell_TDE_Editing_Template" DataType="daph:ConfigTransitionDriverElement">
+            
+            <StackPanel Name="TransitionSchemeStackPanel" Orientation="Vertical">
+                <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinWidth="20" MinHeight="20"
+                        FontSize="10"
+                        Click="ChangeDataGridTDEType_Click" 
+                        DataContext="{Binding}"
+                        Style="{StaticResource selectable_DataGrid_TDE_Type_ButtonContent}"
+                        />
+
+                <ContentControl x:Name="TransitionDriverElementDetails2"
+                                    Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                    Style="{StaticResource selectable_DataGrid_TDE_editing_template}"
+                                    />
+
+            </StackPanel>
+        </DataTemplate>
+        
     </UserControl.Resources>
 
     <Grid x:Name="CellDetailsGrid">
@@ -109,7 +310,7 @@
             <Expander   Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Cell Molecules and Genes"                                              
+                        Header="Molecules and Genes"                                              
                         x:Name="CellMolPopsExpander"
                         Margin="0,10,0,0" 
                         Canvas.ZIndex="1"
@@ -387,7 +588,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left"/>
+                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left"/>
                                             <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click"/>
                                         </StackPanel>
                                     </StackPanel>
@@ -403,7 +604,7 @@
             <Expander   Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Cell Reactions"                                              
+                        Header="Reactions"                                              
                         x:Name="CellReacExpander"
                         Margin="0,5,0,0" 
                         Canvas.ZIndex="1"
@@ -430,7 +631,7 @@
                                     <TextBlock Text="Membrane" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="MembReacListBox" MinHeight="20" 
+                                    <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
@@ -534,7 +735,7 @@
                                     <TextBlock Text="Cytosol" FontWeight="Bold" />
                                 </TabItem.Header>
                                 <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" 
+                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
@@ -646,7 +847,7 @@
                         Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Cell Reaction Complexes"                                            
+                        Header="Reaction Complexes"                                            
                         x:Name="ReacCompExpander"
                         Margin="0,5,0,0" 
                         Canvas.ZIndex="1"
@@ -877,77 +1078,25 @@
             </Expander>
 
             <!-- Cell Death -->
-            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Cell Death" x:Name="CellDeathExpander" 
+            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
                                                 Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
                 <StackPanel>
                     <StackPanel x:Name="spDeath" Orientation="Vertical" >
 
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-                            <Button x:Name="btnNewDeathDriver" Click="btnNewDeathDriver_Click">New Death Driver</Button>
+                        <!-- switch between new death driver or death driver content -->
+                        <StackPanel Name="spNewDriverSwitch" >
+                            <ContentControl x:Name="NewDriverSwitch"
+                                            Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                            Style="{StaticResource Death_NewButton_or_TDE_details_SelectableStyle}"
+                                            />
                         </StackPanel>
-
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding  Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-                            <Button x:Name="btnDelDeathDriver" Click="btnDelDeathDriver_Click">Delete Death Driver</Button>
-                            <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
-                            <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
-                                                              ItemsSource="{Binding Path=cytosol.molpops}"
-                                                              DisplayMemberPath="Name" 
-                                                              SelectedValue="{Binding Path=death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                              SelectedValuePath="molecule.entity_guid"
-                                                              
-                                                              >
-                            </ComboBox>
-
-
-                            <!-- starting state -->
-                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" >
-                                <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
-                                <local:ParamDistrControl DataContext="{Binding death_driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
-                            </StackPanel>
-                            
-                            <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
-                            <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
-                                                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
-                                                             />
-
-                            <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
-                            <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
-                                                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
-                                                             />
-
-                        </StackPanel>
-
-                        <StackPanel Height="10"></StackPanel>
+                                             
                     </StackPanel>
                 </StackPanel>
             </Expander>
             <!-- Division -->
-            <Expander   Header="Division Scheme"
+            <Expander   Header="Division"
                         Padding="5" ExpandDirection="Down"
                         IsExpanded="False"                                                  
                         x:Name="DivSchemeExpander"
@@ -958,7 +1107,8 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                 <!--Expanded="DivSchemeExpander_Expanded"-->
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
+                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
+                            x:Name="spDivScheme">
                     <StackPanel>
                         <Grid >
                             <Grid.Resources>
@@ -1028,7 +1178,8 @@
                     </StackPanel>
 
                     <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid"
-                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
+                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}"
+                                        Tag="div"/>
                     
                     
                 </StackPanel>
@@ -1037,7 +1188,7 @@
             <Expander   
                     Padding="5" ExpandDirection="Down"
                     IsExpanded="False"
-                    Header="Differentiation Scheme"                                                  
+                    Header="Differentiation"                                                  
                     x:Name="DiffSchemeExpander"
                     Margin="0,4,0,0" 
                     Canvas.ZIndex="1"

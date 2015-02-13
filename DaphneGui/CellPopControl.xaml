@@ -45,7 +45,15 @@
             <!-- cellPopDistributionTypeTemplate -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Converter={StaticResource CellPopDistTypeEnumConv}}"/>
+                    <TextBlock Text="{Binding Converter={StaticResource CellPopDistTypeEnumConv}}">
+                        <TextBlock.ToolTip>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" 
+                                           Text="{Binding Converter={StaticResource CellPopDistTypeTooltipConv}}">
+                                </TextBlock>                                
+                            </StackPanel>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
                 </StackPanel>
             </DataTemplate>
 
@@ -115,6 +123,8 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
                         <Grid  VerticalAlignment="Center">
@@ -128,7 +138,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_spec.box_visibility}"                                      
+                                        IsChecked="{Binding Path=box_spec.current_box_visibility}"                                      
                                         />
                         </Grid>
                         <Grid VerticalAlignment="Center">
@@ -143,7 +153,7 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=gaussian_region_visibility}"                        
+                                    IsChecked="{Binding Path=current_gaussian_region_visibility}"                        
                                       CommandParameter="{Binding}"
                                     />
                         </Grid>
@@ -157,6 +167,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"     
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -167,6 +178,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -179,6 +191,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -190,6 +203,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -202,6 +216,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
@@ -212,12 +227,40 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
+                                   SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
                     </uc:DoublesBox>
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
+                        <TextBlock Text="Angle 1"></TextBlock>
+                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="100" Width="100"></uc:DoublesBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
+                        <TextBlock Text="Angle 2"></TextBlock>
+                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="200" Width="100"></uc:DoublesBox>
+                    </StackPanel>
 
                 </Grid>
+            </DataTemplate>
+
+            <!-- cellpop distribution type: CellPopSpecific -->
+            <DataTemplate DataType="{x:Type daph:CellPopSpecific}">
+                <StackPanel x:Name="panelCoordinates" Grid.Row="1" Grid.Column="0">
+                </StackPanel>
+            </DataTemplate>
+
+            <!-- cellpop distribution type: CellPopUniform -->
+            <DataTemplate DataType="{x:Type daph:CellPopUniform}">
+                <StackPanel>
+                    <!--<StackPanel Orientation="Horizontal">
+                        <TextBlock>Number of cells:</TextBlock>
+                        <TextBox IsReadOnly="True" IsEnabled="False" Width="50" Margin="8,-2" Text="{Binding ElementName=numberBox, Path=Value}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock>These cells will be evenly distributed.</TextBlock>
+                    </StackPanel>-->
+                </StackPanel>
             </DataTemplate>
             
             <!-- cellpop distribution type: CellPopGaussian -->
@@ -345,7 +388,7 @@
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
-                                                SelectionChanged="cbCellLocationType_SelectionChanged">
+                                                SelectionChanged="cbCellLocationType_SelectionChanged">    
                                             </ComboBox>
 
                                             <Button x:Name="btnRegenerateCellPositions" Height="22" Margin="8,0" Click="btnRegenerateCellPositions_Click" Content="Reset">
@@ -397,9 +440,13 @@
                                                 </StackPanel>
 
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
-                                                    <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Actual Cell Locations</TextBlock>
-                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                    MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                                                    <Expander ExpandDirection="Down" Padding="6" IsExpanded="False" Margin="0,-10,0,0"  Canvas.ZIndex="1"  
+                                                        Header="Actual Cell Locations"
+                                                        x:Name="LocationsExpander"
+                                                        >
+                                                        <StackPanel Orientation="Vertical" Margin="10,0">
+                                                            <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                    MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80" MaxHeight="220"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" RowHeaderWidth="0"
                                                                     VerticalContentAlignment="Center" CanUserAddRows="False" BorderThickness="1" BorderBrush="Black"
                                                                     KeyDown="dgLocations_KeyDown"
@@ -407,38 +454,40 @@
                                                                     LostFocus="dgLocations_CheckPositions"
                                                                     VirtualizingStackPanel.VirtualizationMode="Standard"
                                                                     >
-                                                        <DataGrid.ContextMenu>
-                                                            <ContextMenu >
-                                                                <MenuItem Header="Paste" Name="menuCoordinatesPaste" Click="menuCoordinatesPaste_Click"></MenuItem>
-                                                            </ContextMenu>
-                                                        </DataGrid.ContextMenu>
+                                                            <DataGrid.ContextMenu>
+                                                                <ContextMenu >
+                                                                    <MenuItem Header="Paste" Name="menuCoordinatesPaste" Click="menuCoordinatesPaste_Click"></MenuItem>
+                                                                </ContextMenu>
+                                                            </DataGrid.ContextMenu>
 
-                                                        <DataGrid.ColumnHeaderStyle>
-                                                            <Style TargetType="DataGridColumnHeader" >
-                                                                <Setter Property="FontSize" Value="12" />
-                                                                <Setter Property="Height" Value="24" />
-                                                                <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                                                <Setter Property="BorderThickness" Value="1" />
-                                                                <Setter Property="BorderBrush" Value="Black" />
-                                                                <Setter Property="Background">
-                                                                    <Setter.Value>
-                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                            <GradientStop Offset="0.0" Color="White" />
-                                                                            <GradientStop Offset="1.0" Color="Beige" />
-                                                                        </LinearGradientBrush>
-                                                                    </Setter.Value>
-                                                                </Setter>
-                                                            </Style>
-                                                        </DataGrid.ColumnHeaderStyle>
-                                                        <DataGrid.Columns>
-                                                            <DataGridTextColumn Header="Cell"  Width="40" IsReadOnly="True"
+                                                            <DataGrid.ColumnHeaderStyle>
+                                                                <Style TargetType="DataGridColumnHeader" >
+                                                                    <Setter Property="FontSize" Value="12" />
+                                                                    <Setter Property="Height" Value="24" />
+                                                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                                                    <Setter Property="BorderThickness" Value="1" />
+                                                                    <Setter Property="BorderBrush" Value="Black" />
+                                                                    <Setter Property="Background">
+                                                                        <Setter.Value>
+                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                <GradientStop Offset="0.0" Color="White" />
+                                                                                <GradientStop Offset="1.0" Color="Beige" />
+                                                                            </LinearGradientBrush>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </DataGrid.ColumnHeaderStyle>
+                                                            <DataGrid.Columns>
+                                                                <DataGridTextColumn Header="Cell"  Width="40" IsReadOnly="True"
                                                                 ScrollViewer.CanContentScroll ="False"
                                                                 Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" 
                                                             />
 
-                                                        </DataGrid.Columns>
+                                                            </DataGrid.Columns>
 
-                                                    </DataGrid>
+                                                        </DataGrid>
+                                                        </StackPanel>
+                                                    </Expander>
                                                 </StackPanel>
                                             </Grid>
 
@@ -477,9 +526,9 @@
      
         <StackPanel>
             
-            <Expander ExpandDirection="Down" Padding="5"
+            <Expander ExpandDirection="Down" Padding="5" MaxHeight="600"
                     IsExpanded="True"
-                    Header="Cell Populations"
+                    Header="Populations"
                     x:Name="CellPopsExpander"
                     Margin="0,4,0,0" 
                     Canvas.ZIndex="1"
@@ -487,42 +536,42 @@
                     BorderBrush="Black"
                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                     >
-
-                <StackPanel>
-                    <!-- CELL POPULATIONS -->
-                    <ListBox x:Name="CellPopsListBox"  
+                <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,0,0,20" >
+                    <StackPanel>
+                        <!-- CELL POPULATIONS -->
+                        <ListBox x:Name="CellPopsListBox"  
                             ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
                             ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
-                            SelectedIndex="-1"
                             SelectionChanged="cellPopsListBoxSelChanged"
                             MinHeight="20"
                                                  />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                        <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
-                        <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
-                    </StackPanel>
-                
-                    <!-- Cell populations details -->
-                    <Expander ExpandDirection="Down" Padding="6"
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                            <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
+                            <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
+                        </StackPanel>
+
+                        <!-- Cell populations details -->
+                        <Expander ExpandDirection="Down" Padding="6"
                                     IsExpanded="False"
-                                    Header="Cell Population Details"
+                                    Header="Population Details"
                                     x:Name="CellPopsDetailsExpander"
                                     Margin="0,-15,0,0" 
                                     Canvas.ZIndex="1"
                                     >
 
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel HorizontalAlignment="Left">
-                                <ContentControl Name="CellPopDetails"
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel HorizontalAlignment="Left">
+                                    <ContentControl Name="CellPopDetails"
                                                 Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
                                                 Margin="6,0"/>
-                            </StackPanel>
+                                </StackPanel>
 
-                        </StackPanel>
-                    </Expander>
-                </StackPanel>
-                
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
+
             </Expander>
 
         </StackPanel>

@@ -385,6 +385,36 @@ namespace DaphneGui
             view.SortDescriptions.Add(sd);
         }
 
+        public void Refresh()
+        {
+            if (MoleculesExpander.IsExpanded == true)
+            {
+                MoleculesExpander.IsExpanded = false;
+                MoleculesExpander.IsExpanded = true;
+            }
+
+            if (GenesExpander.IsExpanded == true)
+            {
+                GenesExpander.IsExpanded = false;
+                GenesExpander.IsExpanded = true;
+            }
+
+            if (ReactionsExpander.IsExpanded == true)
+            {
+                ReactionsExpander.IsExpanded = false;
+                ReactionsExpander.IsExpanded = true;
+            }
+
+            if (ReacComplexExpander.IsExpanded == true)
+            {
+                ReacComplexExpander.IsExpanded = false;
+                ReacComplexExpander.IsExpanded = true;
+            }
+
+        }
+
+
+
 
     }
 }

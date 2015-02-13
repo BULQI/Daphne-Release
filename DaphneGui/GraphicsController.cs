@@ -25,8 +25,9 @@ namespace DaphneGui
         /// <summary>
         /// simple constructor
         /// </summary>
-        public GraphicsProp()
+        public GraphicsProp(vtkRenderWindow rw)
         {
+            this.rw = rw;
             inScene = false;
             prop = null;
         }
@@ -34,14 +35,11 @@ namespace DaphneGui
         /// <summary>
         /// cleanup vtk
         /// </summary>
-        public void cleanup(vtkRenderWindow rw)
+        public void cleanup()
         {
             if (prop != null)
             {
-                // TODO: Need to add a vtkRenderWindow reference to each GraphicsProp so
-                //   I can uncomment this addToScene call and then revert to definition of
-                //   addToScene to not need a render window passed to it...
-                addToScene(rw, false);
+                addToScene(false);
                 prop.Dispose();
                 prop = null;
             }
@@ -50,9 +48,8 @@ namespace DaphneGui
         /// <summary>
         /// add/remove the prop; prevent multiple insertions/deletions
         /// </summary>
-        /// <param name="rw">handle to the render window</param>
         /// <param name="add">indicates action</param>
-        public void addToScene(vtkRenderWindow rw, bool add)
+        public void addToScene(bool add)
         {
             // TODO: Probably need to be passing a rwc or renderer to addToScene...
             if (prop != null)
@@ -88,7 +85,23 @@ namespace DaphneGui
             set { prop = value; }
         }
 
+        /// <summary>
+        /// render window accessor
+        /// </summary>
+        public vtkRenderWindow RW
+        {
+            get
+            {
+                return rw;
+            }
+            set
+            {
+                rw = value;
+            }
+        }
+
         private vtkProp prop;
+        private vtkRenderWindow rw;
         private bool inScene;
     }
 
@@ -99,17 +112,15 @@ namespace DaphneGui
     {
         private GraphicsProp boxActor;
         private bool renderBox;
-        private vtkRenderWindow rw;
 
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="_rw">handle to the render window</param>
-        public VTKEnvironmentController(vtkRenderWindow _rw)
+        /// <param name="rw">handle to the render window</param>
+        public VTKEnvironmentController(vtkRenderWindow rw)
         {
-            boxActor = new GraphicsProp();
+            boxActor = new GraphicsProp(rw);
             renderBox = true;
-            rw = _rw;
         }
 
         /// <summary>
@@ -125,7 +136,7 @@ namespace DaphneGui
         /// </summary>
         public void Cleanup()
         {
-            boxActor.cleanup(rw);
+            boxActor.cleanup();
         }
 
         /// <summary>
@@ -162,7 +173,7 @@ namespace DaphneGui
             // handle the box
             if (boxActor != null)
             {
-                boxActor.addToScene(rw, renderBox);
+                boxActor.addToScene(renderBox);
             }
         }
     }
@@ -174,16 +185,16 @@ namespace DaphneGui
     {
         private GraphicsProp gradientActor;
         private bool renderGradient;
-        private vtkRenderWindow rw;
 
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKECSController(vtkRenderWindow _rw)
+        public VTKECSController(vtkRenderWindow rw)
         {
-            rw = _rw;
-            gradientActor = new GraphicsProp();
-            renderGradient = false;
+            gradientActor = new GraphicsProp(rw);
+            // Set renderGradient to true, so rendering capability will be there.
+            // The actual control for rendering of ECM molecule concentrations is set by the RenderOn boolean.
+            renderGradient = true;
         }
 
         /// <summary>
@@ -199,7 +210,7 @@ namespace DaphneGui
         /// </summary>
         public void Cleanup()
         {
-            gradientActor.cleanup(rw);
+            gradientActor.cleanup();
         }
 
         /// <summary>
@@ -228,12 +239,12 @@ namespace DaphneGui
             volProp.SetInterpolationTypeToLinear();//SetInterpolationTypeToNearest();
 
             // we have to call Render() before using IsRenderSupported
-            rw.Render();
+            gradientActor.RW.Render();
 
             // begin load openGL extensions; it seems this should not be necessary but we have seen problems on certain cards
             vtkOpenGLExtensionManager extMgr = new vtkOpenGLExtensionManager();
 
-            extMgr.SetRenderWindow(rw);
+            extMgr.SetRenderWindow(gradientActor.RW);
             // need to call this in order to be able to extract the extensions string
             extMgr.Update();
 
@@ -285,7 +296,7 @@ namespace DaphneGui
             // handle the gradient
             if (gradientActor != null)
             {
-                gradientActor.addToScene(rw, renderGradient);
+                gradientActor.addToScene(renderGradient);
             }
         }
     }
@@ -298,17 +309,15 @@ namespace DaphneGui
         private GraphicsProp actualTrack,
                              standardTrack,
                              zeroForceTrack;
-        private vtkRenderWindow rw;
 
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKCellTrack(vtkRenderWindow _rw)
+        public VTKCellTrack(vtkRenderWindow rw)
         {
-            rw = _rw;
-            actualTrack = new GraphicsProp();
-            standardTrack = new GraphicsProp();
-            zeroForceTrack = new GraphicsProp();
+            actualTrack = new GraphicsProp(rw);
+            standardTrack = new GraphicsProp(rw);
+            zeroForceTrack = new GraphicsProp(rw);
         }
 
         /// <summary>
@@ -537,7 +546,7 @@ namespace DaphneGui
         private GraphicsProp cellActor;
         private vtkArrayCalculator receptorCalculator;
         // private vtkLookupTable cellIDsColorTable, cellAttributesColorTable;
-        private vtkRenderWindow rw;
+
         /// <summary>
         /// accessor for the cell render method
         /// </summary>
@@ -546,11 +555,10 @@ namespace DaphneGui
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKCellController(vtkRenderWindow _rw)
+        public VTKCellController(vtkRenderWindow rw)
         {
-            rw = _rw;
             // cells
-            cellActor = new GraphicsProp();
+            cellActor = new GraphicsProp(rw);
             // cellIDsColorTable = MainWindow.VTKBasket.CellController.CellIDsColorTable;
             // cellAttributesColorTable = MainWindow.VTKBasket.CellController.CellAttributesColorTable;
             receptorCalculator = vtkArrayCalculator.New();
@@ -687,7 +695,7 @@ namespace DaphneGui
             // point size should only get used with vert representation
             actor.GetProperty().SetPointSize(8);
             cellActor.Prop = actor;
-            cellActor.addToScene(rw, true);
+            cellActor.addToScene(true);
         }
 
         public void SetGlyphSource()
@@ -786,7 +794,7 @@ namespace DaphneGui
         {
             if (cellActor != null)
             {
-                cellActor.cleanup(rw);
+                cellActor.cleanup();
                 if (glyphData != null)
                 {
                     glyphData.Dispose();
@@ -958,14 +966,14 @@ namespace DaphneGui
             rw.GetInteractor().EndInteractionEvt += new vtkObject.vtkObjectEventHandler(leftMouseClick);
 
             // progress
-            cornerAnnotation = new GraphicsProp();
+            cornerAnnotation = new GraphicsProp(rw);
             vtkCornerAnnotation prop = vtkCornerAnnotation.New();
             prop.SetLinearFontScaleFactor(2);
             prop.SetNonlinearFontScaleFactor(1);
             prop.SetMaximumFontSize(14);
             prop.GetTextProperty().SetColor(1, 1, 1);
             cornerAnnotation.Prop = prop;
-            cornerAnnotation.addToScene(rw, true);
+            cornerAnnotation.addToScene(true);
 
             // create the axes tool but don't enable it yet
             vtkAxesActor axesActor = vtkAxesActor.New();
@@ -1007,10 +1015,8 @@ namespace DaphneGui
 
             // Fixed set of molpop rendering options, so pre-generate this list
             ECSRenderingMethodNames = new ObservableCollection<string>();
-            ECSRenderingMethodNames.Add("No Rendering");
             ECSRenderingMethodNames.Add("Outline");
-            ECSRenderingMethodNames.Add("Volume");
-            ECSRenderingMethodNames.Add("Outlined Volume");
+            ECSRenderingMethodNames.Add("No Outline");
             // regions
             regions = new Dictionary<string, RegionWidget>();
 
@@ -1133,26 +1139,17 @@ namespace DaphneGui
                     // Set up ecs rendering based on value
                     if (value != null)
                     {
-
-                        if (value == "Outlined Volume")
+                        if (value == "Outline")
                         {
                             EnvironmentController.RenderBox = true;
-                            ECSController.RenderGradient = true;
                         }
-                        else if (value == "Outline")
-                        {
-                            EnvironmentController.RenderBox = true;
-                            ECSController.RenderGradient = false;
-                        }
-                        else if (value == "Volume")
+                        else if (value == "No Outline")
                         {
                             EnvironmentController.RenderBox = false;
-                            ECSController.RenderGradient = true;
                         }
                         else
                         {
-                            EnvironmentController.RenderBox = false;
-                            ECSController.RenderGradient = false;
+                            EnvironmentController.RenderBox = true;
                         }
                         EnvironmentController.drawEnvBox();
                         ECSController.draw3D();
@@ -1372,10 +1369,8 @@ namespace DaphneGui
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = false;
-            MW.ScalarBarMarkerButton.IsEnabled = false;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = false;
             MW.ResetCameraButton.IsEnabled = false;
             MW.save3DView.IsEnabled = false;
@@ -1384,14 +1379,12 @@ namespace DaphneGui
         public void ToolsToolbarEnableAllIcons()
         {
             ToolsToolbar_IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = true;
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.ScalarBarMarkerButton.IsEnabled = true;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = true;
             MW.ResetCameraButton.IsEnabled = true;
             MW.save3DView.IsEnabled = true;
@@ -2105,29 +2098,52 @@ namespace DaphneGui
         /// Function to save the current 3D image to a file - skg 8/2/12
         /// </summary>
         /// <param name="filename" - File name
-        /// <param name="imageWriter" - Object of one of these types depending on what user selected: 
-        ///         vtkJPEGWriter, vtkBMPWriter, vtkPNGWriter, vtkTIFFWriter 
-        public void SaveToFile(string filename, vtkImageWriter imageWriter)
+        public void SaveToFile(string filename, double[] rgb)
         {
-            //Use "rw" which is the current rendering window variable
-            RenderWindowControl myRWC = new RenderWindowControl();
-            myRWC = rwc;
-            vtkRenderWindow myRW = rwc.RenderWindow;
-            vtkRenderer ren = myRW.GetRenderers().GetFirstRenderer();
-            // background color
-            ren.SetBackground(1.0, 1.0, 1.0);
+            vtkImageWriter imageWriter;
+
+            if (filename.EndsWith("bmp"))
+            {
+                imageWriter = new vtkBMPWriter();
+            }
+            else if (filename.EndsWith("jpg"))
+            {
+                imageWriter = new vtkJPEGWriter();
+                ((vtkJPEGWriter)imageWriter).SetQuality(100);
+                ((vtkJPEGWriter)imageWriter).SetProgressive(0);
+            }
+            else if (filename.EndsWith("png"))
+            {
+                imageWriter = new vtkPNGWriter();
+            }
+            else if (filename.EndsWith("tif"))
+            {
+                imageWriter = new vtkTIFFWriter();
+            }
+            else
+            {
+                imageWriter = new vtkBMPWriter();
+            }
+
+            vtkRenderer ren = rwc.RenderWindow.GetRenderers().GetFirstRenderer();
+            vtkWindow currWindow = ren.GetVTKWindow();
+
+            // remember the current color
+            double[] currentColor = ren.GetBackground(); 
+            // new background color
+            ren.SetBackground(rgb[0], rgb[1], rgb[2]);
 
             vtkWindowToImageFilter w2if = new vtkWindowToImageFilter();
-            w2if.SetInput(myRW);
+            w2if.SetInput(rwc.RenderWindow);
 
             //Create Image output file            
             imageWriter.SetInput(w2if.GetOutput());
             imageWriter.SetFileName(filename);
             imageWriter.Write();
 
-            //System.Windows.Media.Color col = MainWindow.SOP.Palette.renderDrawing.bg_color.EntityColor;
-            //ren.SetBackground(col.R, col.G, col.B);
-            ren.SetBackground(0.0, 0.0, 0.0);
+            // reset background to original color
+            ren.SetBackground(currentColor[0], currentColor[1], currentColor[2]);
+            currWindow.Render();
         }
     }
 }
