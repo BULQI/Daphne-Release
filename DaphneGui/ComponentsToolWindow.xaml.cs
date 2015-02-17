@@ -41,12 +41,12 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            int index = dgLibMolecules.SelectedIndex;
+            int index = dgLibGenes.SelectedIndex;
             Level level = (Level)(this.DataContext);
             level.entity_repository.genes.Remove(gene);
             dgLibGenes.SelectedIndex = index;
 
-            if (index >= dgLibMolecules.Items.Count)
+            if (index >= dgLibGenes.Items.Count)
                 dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
 
             if (dgLibGenes.Items.Count == 0)
@@ -62,20 +62,20 @@ namespace DaphneGui
                 return;
 
             Level level = DataContext as Level;
-            ConfigGene newgene = gene.Clone(MainWindow.SOP.Protocol);
+            // ConfigGene newgene = gene.Clone(MainWindow.SOP.Protocol);
+            ConfigGene newgene = gene.Clone(level);
+
             level.entity_repository.genes.Add(newgene);
             
-            dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
-
-            gene = (ConfigGene)dgLibGenes.SelectedItem;
+            dgLibGenes.SelectedItem = newgene;
             dgLibGenes.ScrollIntoView(newgene);
         }
 
         private void btnAddGene_Click(object sender, RoutedEventArgs e)
         {
             Level level = (Level)(this.DataContext);
-            ConfigGene gm = new ConfigGene("NewGene", 0, 0);
-            gm.Name = gm.GenerateNewName(level, "_New");
+            ConfigGene gm = new ConfigGene("g", 0, 0);
+            gm.Name = gm.GenerateNewName(level, "New");
             
             level.entity_repository.genes.Add(gm);
 
@@ -94,37 +94,43 @@ namespace DaphneGui
             level.entity_repository.molecules.Add(gm);
             MainWindow.SOP.SelectedRenderSkin.AddRenderMol(gm.renderLabel, gm.Name);
 
-            dgLibMolecules.SelectedItem = gm;
-            dgLibMolecules.ScrollIntoView(gm);
+            molGrid.MoleculesGrid.SelectedItem = gm;
+            molGrid.MoleculesGrid.ScrollIntoView(gm);
         }
 
         private void btnCopyMolecule_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+            ConfigMolecule cm = (ConfigMolecule)molGrid.MoleculesGrid.SelectedItem;
 
             if (cm == null)
                 return;
 
             Level level = (Level)(this.DataContext);
             ConfigMolecule newmol = cm.Clone(level);
-            
+
             level.entity_repository.molecules.Add(newmol);
             MainWindow.SOP.SelectedRenderSkin.AddRenderMol(newmol.renderLabel, newmol.Name);
 
-            dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
+            //molGrid.MoleculesGrid.SelectedIndex = molGrid.MoleculesGrid.Items.Count - 1;
 
-            cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-            dgLibMolecules.ScrollIntoView(cm);
+            molGrid.MoleculesGrid.SelectedItem = newmol;
+            molGrid.MoleculesGrid.ScrollIntoView(newmol);
         }
 
         private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
         {
-            int index = dgLibMolecules.SelectedIndex;
+            int index = molGrid.MoleculesGrid.SelectedIndex;
 
             if (index < 0)
                 return;
 
-            ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
+            MessageBoxResult res;
+
+            res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
+            ConfigMolecule gm = (ConfigMolecule)molGrid.MoleculesGrid.SelectedValue;
             Level level = (Level)(this.DataContext);
 
             try
@@ -132,14 +138,14 @@ namespace DaphneGui
                 ConfigMolecule molToRemove = level.entity_repository.molecules.First(mol => mol.entity_guid == gm.entity_guid);
                 level.entity_repository.molecules.Remove(molToRemove);
 
-                dgLibMolecules.SelectedIndex = index;
-                if (index >= dgLibMolecules.Items.Count)
-                    dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
+                molGrid.MoleculesGrid.SelectedIndex = index;
+                if (index >= molGrid.MoleculesGrid.Items.Count)
+                    molGrid.MoleculesGrid.SelectedIndex = molGrid.MoleculesGrid.Items.Count - 1;
 
-                if (dgLibMolecules.Items.Count == 0)
-                    dgLibMolecules.SelectedIndex = -1;
+                if (molGrid.MoleculesGrid.Items.Count == 0)
+                    molGrid.MoleculesGrid.SelectedIndex = -1;
             }
-            catch 
+            catch
             {
             }
 
@@ -251,29 +257,29 @@ namespace DaphneGui
 
         }
 
-        private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
+        //private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
 
-            if (cm == null)
-                return;
+        //    if (cm == null)
+        //        return;
 
-            Level level = this.DataContext as Level;
-            if (level is Protocol)
-            {
-                Protocol p = level as Protocol;
-                cm.ValidateName(p);
-            }
+        //    Level level = this.DataContext as Level;
+        //    if (level is Protocol)
+        //    {
+        //        Protocol p = level as Protocol;
+        //        cm.ValidateName(p);
+        //    }
 
-            MainWindow.SOP.SelectedRenderSkin.SetRenderMolName(cm.renderLabel, cm.Name);
+        //    MainWindow.SOP.SelectedRenderSkin.SetRenderMolName(cm.renderLabel, cm.Name);
 
-            int index = dgLibMolecules.SelectedIndex;
-            dgLibMolecules.InvalidateVisual();
-            dgLibMolecules.Items.Refresh();
-            dgLibMolecules.SelectedIndex = index;
-            cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-            dgLibMolecules.ScrollIntoView(cm);
-        }
+        //    int index = dgLibMolecules.SelectedIndex;
+        //    dgLibMolecules.InvalidateVisual();
+        //    dgLibMolecules.Items.Refresh();
+        //    dgLibMolecules.SelectedIndex = index;
+        //    cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+        //    dgLibMolecules.ScrollIntoView(cm);
+        //}
 
         private void DrawSelectedReactionComplex()
         {
@@ -335,12 +341,17 @@ namespace DaphneGui
             // gmk - fix this 
             //DataContext = MainWindow.SOP.Protocol;
 
-            ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
-            view.SortDescriptions.Clear();
-            SortDescription sd = new SortDescription("molecule_location", ListSortDirection.Descending);
-            view.SortDescriptions.Add(sd);
-            sd = new SortDescription("Name", ListSortDirection.Ascending);
-            view.SortDescriptions.Add(sd);
+            ICollectionView molview = CollectionViewSource.GetDefaultView(molGrid.MoleculesGrid.ItemsSource);
+            molview.SortDescriptions.Clear();
+            SortDescription molSort = new SortDescription("molecule_location", ListSortDirection.Descending);
+            molview.SortDescriptions.Add(molSort);
+            molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            molview.SortDescriptions.Add(molSort);
+
+            ICollectionView geneview = CollectionViewSource.GetDefaultView(dgLibGenes.ItemsSource);
+            geneview.SortDescriptions.Clear();
+            SortDescription geneSort = new SortDescription("Name", ListSortDirection.Ascending);
+            geneview.SortDescriptions.Add(geneSort);
         }
 
         private void btnSaveReacToProtocol_Click(object sender, RoutedEventArgs e)
@@ -363,7 +374,7 @@ namespace DaphneGui
 
         private void MoleculesExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
+            ICollectionView view = CollectionViewSource.GetDefaultView(molGrid.MoleculesGrid.ItemsSource);
             view.SortDescriptions.Clear();
             SortDescription sd = new SortDescription("molecule_location", ListSortDirection.Descending);
             view.SortDescriptions.Add(sd);
@@ -398,6 +409,46 @@ namespace DaphneGui
             }
 
         }
+
+        private void dgLibGenes_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+        }
+
+        private void GenesExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            ICollectionView geneview = CollectionViewSource.GetDefaultView(dgLibGenes.ItemsSource);
+            geneview.SortDescriptions.Clear();
+            SortDescription geneSort = new SortDescription("Name", ListSortDirection.Ascending);
+            geneview.SortDescriptions.Add(geneSort);
+        }
+
+        //private Cursor _cursor;
+
+        //private void OnResizeThumbDragStarted(object sender, DragStartedEventArgs e)
+        //{
+        //    _cursor = Cursor;
+        //    Cursor = Cursors.SizeNWSE;
+        //}
+
+        //private void OnResizeThumbDragCompleted(object sender, DragCompletedEventArgs e)
+        //{
+        //    Cursor = _cursor;
+        //}
+
+        //private void OnResizeThumbDragDelta(object sender, DragDeltaEventArgs e)
+        //{
+        //    double yChange = e.VerticalChange;
+        //    double yNew = dgLibMolecules.ActualHeight + yChange;
+
+        //    //make sure not to resize to negative width or heigth  
+        //    if (yNew < dgLibMolecules.MinHeight)
+        //        yNew = dgLibMolecules.MinHeight;
+
+        //    if (yNew > dgLibMolecules.MaxHeight)
+        //        yNew = dgLibMolecules.MaxHeight;
+            
+        //    dgLibMolecules.Height = yNew;
+        //}
 
 
 

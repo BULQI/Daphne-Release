@@ -158,7 +158,7 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="Catalogs"                 Name="pushMenu">
+                <MenuItem Header="Stores"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
                     <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" 
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
@@ -181,8 +181,8 @@
                 </MenuItem>
                 <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
-                    <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" />
-                    <MenuItem Header="Back to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click"  />               
+                    <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
+                    <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
@@ -352,6 +352,8 @@
         <shared:PixelSnapper DockPanel.Dock="Bottom">
             <StatusBar x:Name="statusBar" Padding="0,2,0,0">
                 <StatusBarItem x:Name="statusBarMessagePanel" Content="Ready:  Protocol" />
+                <Button x:Name="ReturnToProtocolButton" Margin="20,0" Visibility="Collapsed" Click="ReturnToProtocolButton_Click"
+                        Background="{shared:LinearGradientBrush #FF549EF4, #FFBFD8F4, GradientType=TopToBottom}" >Return to protocol</Button>
             </StatusBar>
         </shared:PixelSnapper>
 
@@ -774,7 +776,9 @@
                                                     <!--<TextBlock TextAlignment="Left"></TextBlock>-->
                                                         <TextBlock TextAlignment="Left" Margin="0,4" Text ="{Binding ElementName=tbMolConcs, Path=Text}" />
                                                         <TextBlock Margin="40,4">Current State:</TextBlock>
-                                                    <TextBox x:Name="txtDivCellState" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
+                                                        <TextBox x:Name="txtDivCellState" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
+                                                        <TextBlock Margin="10,4">Generation:</TextBlock>
+                                                        <TextBox x:Name="txtDivCellGen" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
                                                 </StackPanel>
                                                 <ListView x:Name="lvCellDiv" Margin="0,4"
                                                       MinHeight="100" MaxHeight="150"
