@@ -329,6 +329,11 @@ namespace DaphneGui
             //Show a dialog that gets the new gene's name
             AddGeneToCell ads = new AddGeneToCell(cell);
 
+            if (ads.GeneComboBox.Items.Count == 0)
+            {
+                return;
+            }
+
             //If user clicked 'apply' and not 'cancel'
             if (ads.ShowDialog() == true)
             {

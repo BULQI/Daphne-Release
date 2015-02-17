@@ -76,7 +76,7 @@
                         <DataGrid x:Name="dgLibGenes" 
                                 ItemsSource="{Binding Source={StaticResource GenesListView}}" 
                                 AutoGenerateColumns="False" 
-                                MinHeight="20" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100" MaxHeight="500"
+                                MinHeight="48" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100" MaxHeight="500" Height="200"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 VerticalContentAlignment="Center"
@@ -136,6 +136,7 @@
 
                             </DataGrid.Columns>
                         </DataGrid>
+                        <local:ResizeThumb x:Name="geneGrid" DataContext="{Binding ElementName=dgLibGenes}" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                             <Button Name="btnCopyGene"  Width="50" Content="Copy" Click="btnCopyGene_Click"></Button>
                             <Button Name="btnAddGene"  Width="50" Content="New" Click="btnAddGene_Click"></Button>
@@ -159,7 +160,88 @@
                                 >
 
                 <StackPanel x:Name="sizableContent" >
-                    <local:ResizableDataGrid x:Name="molGrid" DataContext="{Binding}" />
+                    <DataGrid x:Name="dgLibMolecules"
+                                ItemsSource="{Binding Path=entity_repository.molecules}" AutoGenerateColumns="False" 
+                                Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80" MinHeight="48" MaxHeight="500"
+                                CanUserReorderColumns="False" CanUserResizeRows="False"
+                                CanUserSortColumns="True" RowHeaderWidth="0"
+                                VerticalContentAlignment="Center"
+                                CanUserAddRows="False"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                SelectionMode="Extended"
+                                SelectionUnit="FullRow"
+                                >
+
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" >
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="Black" />
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+
+                        <DataGrid.Columns>
+
+                            <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200" SortMemberPath="Name"  >
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                          LostFocus="MolTextBox_LostFocus">
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Diff Coeff" x:Name="colDiff" Width="90" MaxWidth="150" SortMemberPath="DiffusionCoefficient">
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <!--<TextBox Width="80" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiff, Path=Width-8}"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Weight" SortMemberPath="MolecularWeight">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
+                                        <uc:DoublesBox SliderEnabled="False" TextBorderThickness="0" HorizontalAlignment="Center" IsEnabled="True" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Radius" SortMemberPath="EffectiveRadius">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
+                                        <uc:DoublesBox SliderEnabled="False" TextBorderThickness="0" HorizontalAlignment="Center" IsEnabled="True" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Membrane Bound" Width="120" MinWidth="100" MaxWidth="150" SortMemberPath="molecule_location">
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"  IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}">
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <local:ResizeThumb DataContext="{Binding ElementName=dgLibMolecules}" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Canvas.ZIndex="10"  >
                         <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolecule_Click" ></Button>
                         <Button Name="btnAddMolec"  Width="50" Content="New" Click="btnAddLibMolecule_Click" ></Button>
@@ -184,7 +266,7 @@
                     <StackPanel>
                         <ListView x:Name="lvReactions" 
                                           ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
-                                          MinHeight="50" MaxHeight="150"
+                                          MinHeight="50" MaxHeight="500" Height="300"
                                           >
 
                             <ListView.ItemContainerStyle>
@@ -246,7 +328,10 @@
                                 </GridView>
                             </ListView.View>
                         </ListView>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+
+                    <local:ResizeThumb DataContext="{Binding ElementName=lvReactions}" />
+                        
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                             <Button x:Name="btnRemoveReaction" Grid.Column="2" Grid.Row="1" Width="100" Click="btnRemoveReaction_Click">Remove</Button>
                         </StackPanel>
 

@@ -250,8 +250,8 @@
     <Compile Include="RenderSkinWindow.xaml.cs">
       <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ResizableDataGrid.xaml.cs">
-      <DependentUpon>ResizableDataGrid.xaml</DependentUpon>
+    <Compile Include="ResizeThumb.xaml.cs">
+      <DependentUpon>ResizeThumb.xaml</DependentUpon>
     </Compile>
     <Compile Include="Save3DView.xaml.cs">
       <DependentUpon>Save3DView.xaml</DependentUpon>
@@ -384,7 +384,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ResizableDataGrid.xaml">
+    <Page Include="ResizeThumb.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
