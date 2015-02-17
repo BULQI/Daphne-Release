@@ -3324,7 +3324,7 @@ namespace DaphneGui
 
             if (source == null)
             {
-                MessageBox.Show("Nothing to push");
+                MessageBox.Show("Nothing to save");
                 return;
             }
 

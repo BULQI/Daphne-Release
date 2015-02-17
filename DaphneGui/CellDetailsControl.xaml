@@ -743,8 +743,8 @@
 
                                         <ListBox.ContextMenu>
                                             <ContextMenu >
-                                                <MenuItem Header="Push to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
+                                                <MenuItem Header="Save to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
+                                                <MenuItem Header="Get from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
                                             </ContextMenu>
                                         </ListBox.ContextMenu>
 
