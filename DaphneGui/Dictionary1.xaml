@@ -113,7 +113,7 @@
     <DataTemplate x:Key="editMoleculeTemplate">
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Width="150" Text="Name"></TextBlock>
+                <TextBlock Width="150" Text="Molecule Name"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
