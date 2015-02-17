@@ -306,8 +306,8 @@ namespace DaphneGui
         
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gene = new ConfigGene("NewGene", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            ConfigGene gene = new ConfigGene("g", 0, 0);
+            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
 
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
