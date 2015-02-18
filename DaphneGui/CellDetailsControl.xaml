@@ -122,7 +122,8 @@
                             ItemsSource="{Binding Path=cytosol.molpops}"
                             DisplayMemberPath="Name" 
                             SelectedValue="{Binding Path=death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            SelectedValuePath="molecule.entity_guid"                                     
+                            SelectedValuePath="molecule.entity_guid"  
+                            Loaded="comboDeathMolPop2_Loaded"
                             >
                 </ComboBox>
 
@@ -142,7 +143,7 @@
         <DataTemplate x:Key="Distr_Death_TDE_Template">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
-                <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
+                <local:ParamDistrControl Tag="DISCRETE" HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </DataTemplate>

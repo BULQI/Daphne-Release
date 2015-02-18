@@ -66,6 +66,9 @@ namespace DaphneGui
         private void OnResizeThumbDragDelta(object sender, DragDeltaEventArgs e)
         {
             Control c = DataContext as Control;
+            if (c == null)
+                return;
+
             //DataGrid grid = DataContext as DataGrid;
             double yChange = e.VerticalChange;
             double yNew = c.ActualHeight + yChange;

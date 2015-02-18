@@ -1729,6 +1729,41 @@ namespace DaphneGui
                 cell.membrane.Reactions.Add(newreac);
             }
         }
+
+        private void comboDeathMolPop2_Loaded(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Don't do anything if driver type is distribution
+            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
+                return;
+
+            ComboBox combo = sender as ComboBox;
+
+            //If no death molecule selected, and there are bulk molecules, select 1st molecule.
+            if (combo.SelectedIndex == -1 && combo.Items.Count > 0)
+            {
+                combo.SelectedIndex = 0;
+            }
+            //If no death molecule selected, and there are NO bulk molecules, issue a warning to acquire molecules from the user store.
+            else if (combo.SelectedIndex == -1 && combo.Items.Count == 0)
+            {
+                MessageBox.Show("There are no molecules in the cytosol. Please get molecules from the store.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                //Since there are no molecules, create a default DISTRIBUTION driver and assign it.
+                ConfigTransitionDriverElement tde = new ConfigDistrTransitionDriverElement();
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
+
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+
+                cell.death_driver.DriverElements[0].elements[1] = tde;
+            }
+        }
         
     }
 
