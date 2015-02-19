@@ -15,6 +15,7 @@
         Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
         Name="mainWindow"
+        
         >
 
     <Window.Resources>
@@ -24,7 +25,9 @@
         <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
 
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
-        
+
+        <local:ToolwinComponentConverter x:Key="ToolwinComponentConv" />
+
         <local:SimSetupControl x:Key="simSetupControl"/>
 
         <!-- Tab header text layout for LP fitting tab -->
@@ -101,27 +104,22 @@
                     <local:RecentFileList x:Name="recentFileList" />
                     <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
                 </MenuItem>
-                <MenuItem Header="Analysis" Name="analysisMenu">
-                    <MenuItem Header="Fit Tracks" Name="fitMenu" IsEnabled="False" Click="OpenLPFittingWindow" />
-                    <MenuItem Header="Cell Division" Name="cellDivMenu" IsEnabled="False" Click="OpenCellDivisionWindow" />
+                <MenuItem Header="Analysis" Name="analysisMenu" Visibility="Collapsed" >
+                    <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
+                    <MenuItem Header="Cell Division" Name="cellDivMenu" Click="OpenCellDivisionWindow" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
-                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" />
+                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" Visibility="Collapsed" />
                         <MenuItem Header="Restart opens last scenario" Name="openLastScenarioMenu" IsCheckable="True" IsChecked="False" Click="openLastScenario_click" />
-                        <MenuItem Header="Cell summaries" Name="writeCellSummariesMenu" IsCheckable="True" IsChecked="False" Click="runCellSummaries_click" />
-                        <MenuItem Header="Run statistical summary" Name="runStatisticalSummaryMenu" IsCheckable="True" IsChecked="True" Click="runStatisticalSummary_click" />
-                        <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" />
+                        <MenuItem Header="Cell summaries" Name="writeCellSummariesMenu" IsCheckable="True" IsChecked="False" Click="runCellSummaries_click" Visibility="Collapsed" />
+                        <MenuItem Header="Run statistical summary" Name="runStatisticalSummaryMenu" IsCheckable="True" IsChecked="True" Click="runStatisticalSummary_click" Visibility="Collapsed" />
+                        <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" Visibility="Collapsed" />
                     </MenuItem>
                     <MenuItem Header="Data storage" Name = "DataStorageMenu">
                         <MenuItem Header="Skip data writes" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataWrite_Click" />
                         <Separator />
                         <MenuItem Header="Select report folder" Name="selectReportFolderMenu" Command="{x:Static local:MainWindow.SelectReportFolderCommand}"/>
-                    </MenuItem>
-                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu"  IsEnabled="False">
-                        <MenuItem Header="Cells..." Name="cellColorsMenu" />
-                        <MenuItem Header="Molecules..." Name="molColorsMenu" />
-                        <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" />
                     </MenuItem>
                     <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
                         <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />
@@ -134,16 +132,25 @@
 
                 <MenuItem Header="_Window">
                     <MenuItem x:Name="menu_ActivateSimSetup" Header="Daphne Protocol"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ProtocolToolWindow}" />
+							  Command="docking:DockingCommands.ActivateWindow" 
+                              CommandTarget="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentConv}}" />
                     <MenuItem x:Name="menu_ActivateVTKView" Header="3D View"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
-                    <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}"
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=VTKDisplayDocWindow}" />
+                    <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool" Visibility="Collapsed"
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
                     <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
-                    
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}"
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CellStudioToolWindow}" />
+                    <MenuItem x:Name="menu_ActivateRCChart" Header="Reaction Complex Chart"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ReacComplexChartWindow}"
+                              Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=ReacComplexChartWindow}" />
+
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ChartViewDocWindow}" />-->
@@ -151,7 +158,7 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="Catalogs"                 Name="pushMenu">
+                <MenuItem Header="Stores"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
                     <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" 
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
@@ -161,11 +168,11 @@
                     <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" 
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=CatalogCells}"/>
-                    <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" IsEnabled="False"/>
-                    <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" IsEnabled="False"/>
+                    <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" IsEnabled="False" Visibility="Collapsed"/>
+                    <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" IsEnabled="False" Visibility="Collapsed"/>
                 </MenuItem>
                 
-                <MenuItem Header="Data Export" Name = "ExportMenu">
+                <MenuItem Header="Data Export" Name = "ExportMenu" Visibility="Collapsed">
                     <MenuItem Header="B Cell Summary" Name="bCellSummaryExport" Click="bCellSummaryExport_Click" />
                     <MenuItem Header="B Cell Pedigree" Name="bCellPedigreeExport" Click="bCellPedigreeExport_Click" />
                     <MenuItem Header="B Cell FDC Summary" Name="bCellFDCSummaryExport" Click="bCellFDCSummaryExport_Click" />
@@ -174,8 +181,8 @@
                 </MenuItem>
                 <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
-                    <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" />
-                    <MenuItem Header="Back to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click"  />               
+                    <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
+                    <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
@@ -345,6 +352,8 @@
         <shared:PixelSnapper DockPanel.Dock="Bottom">
             <StatusBar x:Name="statusBar" Padding="0,2,0,0">
                 <StatusBarItem x:Name="statusBarMessagePanel" Content="Ready:  Protocol" />
+                <Button x:Name="ReturnToProtocolButton" Margin="20,0" Visibility="Collapsed" Click="ReturnToProtocolButton_Click"
+                        Background="{shared:LinearGradientBrush #FF549EF4, #FFBFD8F4, GradientType=TopToBottom}" >Return to protocol</Button>
             </StatusBar>
         </shared:PixelSnapper>
 
@@ -394,7 +403,7 @@
                             <docking:TabbedMdiContainer Name="MdiTabContainer" Background="LightGray">
                                 <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige"
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                    ConverterParameter=VTKDisplayWindow}">
+                                    ConverterParameter=VTKDisplayDocWindow}">
                                     <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel" Visibility="{Binding ElementName=VTKDisplayDocWindow, Path=Visibility}">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->
@@ -767,7 +776,9 @@
                                                     <!--<TextBlock TextAlignment="Left"></TextBlock>-->
                                                         <TextBlock TextAlignment="Left" Margin="0,4" Text ="{Binding ElementName=tbMolConcs, Path=Text}" />
                                                         <TextBlock Margin="40,4">Current State:</TextBlock>
-                                                    <TextBox x:Name="txtDivCellState" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
+                                                        <TextBox x:Name="txtDivCellState" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
+                                                        <TextBlock Margin="10,4">Generation:</TextBlock>
+                                                        <TextBox x:Name="txtDivCellGen" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
                                                 </StackPanel>
                                                 <ListView x:Name="lvCellDiv" Margin="0,4"
                                                       MinHeight="100" MaxHeight="150"

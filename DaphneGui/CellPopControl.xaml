@@ -314,7 +314,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="name" Margin="6,0"
+                        <TextBlock Text="population name" Margin="6,0" TextWrapping="Wrap"
                                     Grid.Column="0" Grid.Row="1"  
                                     HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"

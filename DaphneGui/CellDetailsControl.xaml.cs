@@ -55,6 +55,7 @@ namespace DaphneGui
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = DataContext as ConfigCell;
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -145,7 +146,7 @@ namespace DaphneGui
 
             if (cmp.molecule == null)
             {
-                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Cell Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Please add more molecules from the store.");
                 return;
             }
 
@@ -246,7 +247,7 @@ namespace DaphneGui
             }
             else
             {
-                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Cell Membrane", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("All available molecular populations have already been added.", "Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
       
@@ -306,8 +307,8 @@ namespace DaphneGui
         
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gene = new ConfigGene("NewGene", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            ConfigGene gene = new ConfigGene("g", 0, 0);
+            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
 
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
@@ -328,6 +329,11 @@ namespace DaphneGui
 
             //Show a dialog that gets the new gene's name
             AddGeneToCell ads = new AddGeneToCell(cell);
+
+            if (ads.GeneComboBox.Items.Count == 0)
+            {
+                return;
+            }
 
             //If user clicked 'apply' and not 'cancel'
             if (ads.ShowDialog() == true)
@@ -351,6 +357,11 @@ namespace DaphneGui
 
             if (res == MessageBoxResult.No)
                 return;
+
+            if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+            {
+                cell.diff_scheme.genes.Remove(gene.entity_guid);
+            }
 
             if (cell.HasGene(gene.entity_guid)) {
                 cell.genes.Remove(gene);
@@ -378,6 +389,7 @@ namespace DaphneGui
         {
             if (lvCellAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            this.BringIntoView();
         }
 
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -516,6 +528,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = this.Tag;    //DataContext as ConfigCell
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -1801,7 +1814,47 @@ namespace DaphneGui
                 cell.membrane.Reactions.Add(newreac);
             }
         }
-        
+
+        private void comboDeathMolPop2_Loaded(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Don't do anything if driver type is distribution
+            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
+                return;
+
+            ComboBox combo = sender as ComboBox;
+
+            //If no death molecule selected, and there are bulk molecules, select 1st molecule.
+            if (combo.SelectedIndex == -1 && combo.Items.Count > 0)
+            {
+                combo.SelectedIndex = 0;
+            }
+            //If no death molecule selected, and there are NO bulk molecules, issue a warning to acquire molecules from the user store.
+            else if (combo.SelectedIndex == -1 && combo.Items.Count == 0)
+            {
+                MessageBox.Show("There are no molecules in the cytosol. Please get molecules from the store.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                //Since there are no molecules, create a default DISTRIBUTION driver and assign it.
+                ConfigTransitionDriverElement tde = new ConfigDistrTransitionDriverElement();
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
+
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+
+                cell.death_driver.DriverElements[0].elements[1] = tde;
+            }
+        }
+
+        private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
+        {
+            this.BringIntoView();
+        }
+
     }
 
 }

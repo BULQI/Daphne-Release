@@ -70,7 +70,7 @@ namespace DaphneGui
             //If all mol types are used up already, then just inform user
             if (cmp.molecule == null)
             {
-                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Extracellular Medium", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Please add more molecules from the User store first.");
                 return;
             }
 
@@ -406,6 +406,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = "ecs";
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -428,6 +429,7 @@ namespace DaphneGui
                         newLibMol.ValidateName(MainWindow.SOP.Protocol);
                         MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
                         aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                        aem.Tag = "ecs";
 
                         if (aem.ShowDialog() == false)
                         {
