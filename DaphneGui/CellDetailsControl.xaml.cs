@@ -358,14 +358,20 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+            if (cell.diff_scheme != null)
             {
-                cell.diff_scheme.genes.Remove(gene.entity_guid);
+                if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+                {
+                    cell.diff_scheme.genes.Remove(gene.entity_guid);
+                }
             }
 
-            if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+            if (cell.div_scheme != null)
             {
-                cell.div_scheme.genes.Remove(gene.entity_guid);
+                if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+                {
+                    cell.div_scheme.genes.Remove(gene.entity_guid);
+                }
             }
 
             if (cell.HasGene(gene.entity_guid)) {
