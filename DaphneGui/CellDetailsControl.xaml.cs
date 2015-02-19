@@ -342,7 +342,8 @@ namespace DaphneGui
                 if (geneToAdd == null)
                     return;
 
-                cell.genes.Add(geneToAdd);
+                ConfigGene newgene = geneToAdd.Clone(null);
+                cell.genes.Add(newgene);
             }
 
             txtGeneName.IsEnabled = false;
@@ -358,14 +359,20 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+            if (cell.diff_scheme != null)
             {
-                cell.diff_scheme.genes.Remove(gene.entity_guid);
+                if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+                {
+                    cell.diff_scheme.genes.Remove(gene.entity_guid);
+                }
             }
 
-            if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+            if (cell.div_scheme != null)
             {
-                cell.div_scheme.genes.Remove(gene.entity_guid);
+                if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+                {
+                    cell.div_scheme.genes.Remove(gene.entity_guid);
+                }
             }
 
             if (cell.HasGene(gene.entity_guid)) {
@@ -986,7 +993,14 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.AddGene(gene1.entity_guid);
+                scheme.AddGene(gene1.entity_guid);  
+
+                //HERE, WE NEED TO ADD THE GENE TO THE CELL ALSO
+                if (cell.HasGene(gene1.entity_guid) == false)
+                {
+                    ConfigGene newgene = gene1.Clone(null);
+                    cell.genes.Add(newgene);
+                }
               
                 //force refresh
                 //dataGrid.GetBindingExpression(DiffSchemeDataGrid.DiffSchemeSourceProperty).UpdateTarget();
