@@ -363,6 +363,11 @@ namespace DaphneGui
                 cell.diff_scheme.genes.Remove(gene.entity_guid);
             }
 
+            if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+            {
+                cell.div_scheme.genes.Remove(gene.entity_guid);
+            }
+
             if (cell.HasGene(gene.entity_guid)) {
                 cell.genes.Remove(gene);
             }
