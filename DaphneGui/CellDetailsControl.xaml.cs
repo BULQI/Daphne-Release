@@ -363,6 +363,11 @@ namespace DaphneGui
                 cell.diff_scheme.genes.Remove(gene.entity_guid);
             }
 
+            if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+            {
+                cell.div_scheme.genes.Remove(gene.entity_guid);
+            }
+
             if (cell.HasGene(gene.entity_guid)) {
                 cell.genes.Remove(gene);
             }
@@ -389,6 +394,7 @@ namespace DaphneGui
         {
             if (lvCellAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            this.BringIntoView();
         }
 
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -1847,6 +1853,11 @@ namespace DaphneGui
 
                 cell.death_driver.DriverElements[0].elements[1] = tde;
             }
+        }
+
+        private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
+        {
+            this.BringIntoView();
         }
 
     }

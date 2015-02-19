@@ -76,7 +76,7 @@
                         <DataGrid x:Name="dgLibGenes" 
                                 ItemsSource="{Binding Source={StaticResource GenesListView}}" 
                                 AutoGenerateColumns="False" 
-                                MinHeight="48" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100" MaxHeight="500" Height="200"
+                                MinHeight="52" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100" MaxHeight="500" Height="200"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 VerticalContentAlignment="Center"
@@ -162,7 +162,7 @@
                 <StackPanel x:Name="sizableContent" >
                     <DataGrid x:Name="dgLibMolecules"
                                 ItemsSource="{Binding Path=entity_repository.molecules}" AutoGenerateColumns="False" 
-                                Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80" MinHeight="48" MaxHeight="500"
+                                Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80" MinHeight="52" MaxHeight="500"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 VerticalContentAlignment="Center"
@@ -266,7 +266,7 @@
                     <StackPanel>
                         <ListView x:Name="lvReactions" 
                                           ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
-                                          MinHeight="50" MaxHeight="500" Height="300"
+                                          MinHeight="52" MaxHeight="500" Height="300"
                                           >
 
                             <ListView.ItemContainerStyle>

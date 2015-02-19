@@ -26,30 +26,6 @@ namespace DaphneGui
             InitializeComponent();
         }
 
-        //private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigMolecule cm = MoleculesGrid.SelectedItem as ConfigMolecule;
-
-        //    if (cm == null)
-        //        return;
-
-        //    Level level = this.DataContext as Level;
-        //    if (level is Protocol)
-        //    {
-        //        Protocol p = level as Protocol;
-        //        cm.ValidateName(p);
-        //    }
-
-        //    MainWindow.SOP.SelectedRenderSkin.SetRenderMolName(cm.renderLabel, cm.Name);
-
-        //    int index = MoleculesGrid.SelectedIndex;
-        //    MoleculesGrid.InvalidateVisual();
-        //    MoleculesGrid.Items.Refresh();
-        //    MoleculesGrid.SelectedIndex = index;
-        //    cm = (ConfigMolecule)MoleculesGrid.SelectedItem;
-        //    MoleculesGrid.ScrollIntoView(cm);
-        //}
-
         private Cursor _cursor;
 
         private void OnResizeThumbDragStarted(object sender, DragStartedEventArgs e)
@@ -69,7 +45,6 @@ namespace DaphneGui
             if (c == null)
                 return;
 
-            //DataGrid grid = DataContext as DataGrid;
             double yChange = e.VerticalChange;
             double yNew = c.ActualHeight + yChange;
 

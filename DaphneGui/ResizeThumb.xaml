@@ -21,10 +21,13 @@
                             <Setter.Value>
                                 <ControlTemplate>
                                     <Grid x:Name="resizeVisual" DockPanel.Dock="Right" VerticalAlignment="Bottom" Margin="0,2" Width="24" >
+                                        
+                                        <!--For diagonal lines-->
                                         <!--<Line X1="6" Y1="18" X2="18" Y2="6" Stroke="DarkGray" StrokeThickness="1.5"/>-->
                                         <!--<Line X1="10" Y1="18" X2="18" Y2="10" Stroke="DarkGray" StrokeThickness="1.5"/>
                                             <Line X1="14" Y1="18" X2="18" Y2="14" Stroke="DarkGray" StrokeThickness="1.5"/>-->
 
+                                        <!--For horizontal lines-->
                                         <Line X1="4" Y1="2" X2="20" Y2="2" Stroke="#FF4A4A48" StrokeThickness="1.25"/>
                                         <Line X1="6" Y1="5" X2="18" Y2="5" Stroke="#FF4A4A48" StrokeThickness="1.25"/>
                                         <Line X1="8" Y1="8" X2="16" Y2="8" Stroke="#FF4A4A48" StrokeThickness="1.25"/>

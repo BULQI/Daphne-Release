@@ -28,6 +28,8 @@ namespace DaphneGui
         {
             InitializeComponent();
 
+            this.Owner = Application.Current.MainWindow;
+
             Mol = mol;
             DlgType = type;
 

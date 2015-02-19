@@ -721,6 +721,7 @@
                                                     Header="Create New Reaction"                                                  
                                                     Margin="0,0,0,0" 
                                                     Canvas.ZIndex="1"
+                                                   Expanded="MembCreateNewReaction_Expanded"
                                                     >
                                             <Grid>
                                                 <local:AddReactionControl Margin="0,6" Tag="membrane" />
