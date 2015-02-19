@@ -1291,7 +1291,7 @@ namespace DaphneGui
         private void VCRbutton_Play_Checked(object sender, RoutedEventArgs e)
         {
             DataStorageMenu.IsEnabled = false;
-            vcrControl.SetPlaybackState(VCRControlState.VCR_PLAY);
+            vcrControl.SetFlag(VCRControl.VCR_ACTIVE);
         }
 
         private void VCRbutton_Play_Unchecked(object sender, RoutedEventArgs e)
@@ -1317,14 +1317,14 @@ namespace DaphneGui
 
         private void VCRSlider_LeftMouse_Down(object sender, MouseButtonEventArgs e)
         {
-            vcrControl.SaveState();
+            vcrControl.SaveFlags();
             vcrControl.SetInactive();
         }
 
         private void VCRSlider_LeftMouse_Up(object sender, MouseButtonEventArgs e)
         {
-            vcrControl.SetPlaybackState(vcrControl.SavedState);
-            if (vcrControl.IsActive())
+            vcrControl.RestoreFlags();
+            if (vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
             {
                 VCRbutton_Play.IsChecked = true;
             }
@@ -1850,31 +1850,6 @@ namespace DaphneGui
             // Set image file format
             if (dialog.ShowDialog() == true)
             {
-                vtkImageWriter writer;
-                if (dialog.FileName.EndsWith("bmp"))
-                {
-                    writer = new vtkBMPWriter();
-                }
-                else if (dialog.FileName.EndsWith("jpg"))
-                {
-                    writer = new vtkJPEGWriter();
-                    vtkJPEGWriter jw = (vtkJPEGWriter)writer;
-                    jw.SetQuality(100);
-                    jw.SetProgressive(0);
-                }
-                else if (dialog.FileName.EndsWith("png"))
-                {
-                    writer = new vtkPNGWriter();
-                }
-                else if (dialog.FileName.EndsWith("tif"))
-                {
-                    writer = new vtkTIFFWriter();
-                }
-                else
-                {
-                    writer = new vtkBMPWriter();
-                }
-
                 //Get selected color
                 Color c = dialog.ActualColor;
 
@@ -1883,7 +1858,7 @@ namespace DaphneGui
                 rgb[1] = c.G / (double)255;
                 rgb[2] = c.B / (double)255;
 
-                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, writer, rgb);
+                ((VTKFullGraphicsController)MainWindow.GC).SaveToFile(dialog.FileName, rgb);
             }
         }
 
@@ -2399,10 +2374,10 @@ namespace DaphneGui
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateOneArg(updateGraphicsAndGUI), true);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
-                    else if (vcrControl != null && vcrControl.IsActive() == true)
+                    else if (vcrControl != null && vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
                     {
                         vcrControl.Play();
-                        if (vcrControl.IsActive() == false)
+                        if (vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == false)
                         {
                             // switch from pause to the play button
                             VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
@@ -2522,12 +2497,18 @@ namespace DaphneGui
 
         private bool saveTempFiles()
         {
-            // check if there were changes
-            if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+            // no temp file saving when the vcr is open
+            if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
-                sop.Protocol.SerializeToFile(true);
-                tempFileContent = true;
-                return true;
+                // check if there were changes
+                string refs = sop.Protocol.SerializeToStringSkipDeco();
+
+                if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+                {
+                    sop.Protocol.SerializeToFile(true);
+                    tempFileContent = true;
+                    return true;
+                }
             }
             return false;
         }
@@ -2909,14 +2890,9 @@ namespace DaphneGui
 
         public void DisplayCellInfo(int cellID)
         {
-            if (cellID >= SimulationBase.dataBasket.Cells.Count)
+            if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
             {
                 MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-            else if (cellID < 0)
-            {
-                MessageBox.Show("Please enter a cell ID greater than 0.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -2960,8 +2936,9 @@ namespace DaphneGui
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
+                double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;
                 // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
@@ -2973,8 +2950,9 @@ namespace DaphneGui
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
+                double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;
                 // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field

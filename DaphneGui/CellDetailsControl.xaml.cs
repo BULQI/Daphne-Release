@@ -146,7 +146,7 @@ namespace DaphneGui
 
             if (cmp.molecule == null)
             {
-                MessageBox.Show("Please add more molecules from the User store.");
+                MessageBox.Show("Please add more molecules from the store.");
                 return;
             }
 
@@ -734,18 +734,14 @@ namespace DaphneGui
             }
 
             //This filter is called for every reaction complex in the repository.
-            //For current reaction complex, if all of its reactions are in the membrane, then the reaction complex should be included.
-            //Otherwise, exclude it.
 
-            //Check if all the reactions in the reaction complex reaction list exist in the membrane
+            // Only allow reaction complexes with membrane-bound molecules.
             bool bOK = true;
 
-            foreach (ConfigReaction cr in crc.reactions)
+            foreach (KeyValuePair<string,ConfigMolecule> kvp in crc.molecules_dict)
             {
-                string guid = cr.entity_guid;
-                if (cc.membrane.GetReaction(guid) == null)
+                if (kvp.Value.molecule_location == MoleculeLocation.Bulk)
                 {
-                    //if even one reaction is not found in cell cytosol, return false
                     bOK = false;
                     break;
                 }
@@ -774,25 +770,9 @@ namespace DaphneGui
                 return;
             }
 
-            //This filter is called for every reaction complex in the repository.
-            //For current reaction complex, if all of its reactions are in the cytosol, then the reaction complex should be included.
-            //Otherwise, exclude it.
+            // Allow any reaction commplex. Any missign molecules or genes will be added to the cell, as needed.
 
-            //Check if all the reactions in the reaction complex reaction list exist in the cytosol
-            bool bOK = true;
-
-            foreach (ConfigReaction cr in crc.reactions)
-            {
-                string guid = cr.entity_guid;
-                if (cc.cytosol.GetReaction(guid) == null)
-                {
-                    //if even one reaction is not found in cell cytosol, return false
-                    bOK = false;
-                    break;
-                }
-            }
-
-            e.Accepted = bOK;
+            e.Accepted = true;
         }
 
         //private bool EcmHasMolecule(string molguid)
@@ -1305,8 +1285,47 @@ namespace DaphneGui
 
             if (crc != null)
             {
+                string message = "If the membrane does not currently contain any of the molecules or genes necessary for these reactions, then they will be added. ";
+                message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
+                MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                } 
+                
                 if (cell.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
                 {
+                    // If the membrane does not have any of the required molecules, then add them.
+                    foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                    {
+                        if (molpop.molecule.molecule_location == MoleculeLocation.Boundary)
+                        {
+                            if (!cell.cytosol.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                {
+                                    molpop.report_mp = new ReportMP();
+                                }
+
+                                cell.cytosol.molpops.Add(molpop);
+                            }
+                        }
+                        else
+                        {            
+                            MessageBox.Show("Membrane cannot add reactions involving bulk molecules.", "Warning");
+                            return;
+                        }
+                    }
+
+                    // Check for duplicate reactions. Remove duplicates from membrane. 
+                    foreach (ConfigReaction reac in crc.reactions)
+                    {
+                        if (cell.membrane.reactions_dict.ContainsKey(reac.entity_guid))
+                        {
+                            cell.membrane.Reactions.Remove(cell.membrane.reactions_dict[reac.entity_guid]);
+                        }
+                    }
+
                     cell.membrane.reaction_complexes.Add(crc.Clone(true));
                     CollectionViewSource.GetDefaultView(lbMembAvailableReacCx.ItemsSource).Refresh();
                 }
@@ -1342,11 +1361,69 @@ namespace DaphneGui
 
             if (crc != null)
             {
+                string message = "If the cell does not currently contain any of the molecules or genes necessary for these reactions, then they will be added. ";
+                message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
+                MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+
                 if (cell.cytosol.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
                 {
                     cell.cytosol.reaction_complexes.Add(crc.Clone(true));
+
+                    // Check for duplicate reactions. Remove duplicates from cytosol. 
+                    foreach (ConfigReaction reac in crc.reactions)
+                    {
+                        if (cell.cytosol.reactions_dict.ContainsKey(reac.entity_guid))
+                        {
+                            cell.cytosol.Reactions.Remove(cell.cytosol.reactions_dict[reac.entity_guid]);
+                        }
+                    }
+
+                    // If the cytosol does not have any of the required molecules, then add them.
+                    foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                    {
+                        if (molpop.molecule.molecule_location == MoleculeLocation.Bulk)
+                        {
+                            if (!cell.cytosol.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                {
+                                    molpop.report_mp = new ReportMP();
+                                }
+
+                                cell.cytosol.molpops.Add(molpop);
+                            }
+                        }
+                        else
+                        {
+                            if (!cell.membrane.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                {
+                                    molpop.report_mp = new ReportMP();
+                                }
+
+                                cell.membrane.molpops.Add(molpop);
+                            }
+                        }
+                    }
+
+                    // If the cell does not have any of the required genes, then add them.
+                    foreach (ConfigGene gene in crc.genes)
+                    {
+                        if (!cell.HasGene(gene.entity_guid))
+                        {
+                            cell.genes.Add(gene);
+                        }
+                    }
+
+
                     CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
                 }
+                
             }
         }
 

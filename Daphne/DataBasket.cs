@@ -551,13 +551,10 @@ namespace Daphne
 
                     // create the cell
                     hSim.prepareCellInstantiation(cp, configComp, bulk_reacs, ref boundary_reacs, ref transcription_reacs);
-                    hSim.instantiateCell(cell_id, cp, configComp, state, bulk_reacs, boundary_reacs, transcription_reacs, false);
+                    hSim.instantiateCell(cell_id, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, false);
                 }
-                else // it exists, update it
-                {
-                    // apply the state
-                    cells[cell_id].SetStateForVCR(state);
-                }
+                // now apply the state
+                cells[cell_id].SetCellState(state);
             }
 
             // remove cells

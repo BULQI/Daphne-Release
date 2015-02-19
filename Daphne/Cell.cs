@@ -226,21 +226,32 @@ namespace Daphne
         }
 
         /// <summary>
-        /// set the state as used in rendering; does not set the state for simulation purposes
+        /// set the state
         /// </summary>
-        /// <param name="state"></param>
-        public void SetStateForVCR(CellState state)
+        /// <param name="state">the state</param>
+        public void SetCellState(CellState state)
         {
             // spatial
             setSpatialState(state.spState);
             // generation
             generation = state.CellGeneration;
             // behaviors
-            Alive = state.cbState.deathDriverState == 0;
-            DividerState = state.cbState.divisionDriverState;
-            DifferentiationState = state.cbState.differentiationDriverState;
+            if (state.cbState.deathDriverState != -1)
+            {
+                Alive = state.cbState.deathDriverState == 0;
+            }
+            if (state.cbState.divisionDriverState != -1)
+            {
+                DividerState = state.cbState.divisionDriverState;
+            }
+            if (state.cbState.differentiationDriverState != -1)
+            {
+                DifferentiationState = state.cbState.differentiationDriverState;
+            }
             // genes
             SetGeneActivities(state.cgState.geneDict);
+            // molecules
+            SetMolPopConcentrations(state.cmState.molPopDict);
         }
 
         public void setSpatialState(CellSpatialState s)
@@ -287,14 +298,12 @@ namespace Daphne
             }
 
             //update cytosol/membrane boundary
-            foreach (KeyValuePair<string, MolecularPopulation> molpop in Cytosol.Populations)
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
             {
-                molpop.Value.UpdateCytosolMembraneBoundary();
+                kvp.Value.UpdateCytosolMembraneBoundary();
             }
 
-
             PlasmaMembrane.Step(dt);
-
 
             // step the cell behaviors
 
@@ -349,10 +358,10 @@ namespace Daphne
         }
 
         /// <summary>
-        /// save gene activity from saved values.
+        /// save gene activity from saved values
         /// </summary>
-        /// <param name="geneDict"></param>
-        public void SetGeneActivities(Dictionary<String, double> geneDict)
+        /// <param name="geneDict">saved values in a dictionary</param>
+        public void SetGeneActivities(Dictionary<string, double> geneDict)
         {
             foreach (var kvp in geneDict)
             {
@@ -360,6 +369,31 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// set molecular population concentrations from saved values
+        /// </summary>
+        /// <param name="molPopDict">saved values in a dictionary</param>
+        public void SetMolPopConcentrations(Dictionary<string, double[]> molPopDict)
+        {
+            // cytosol
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                if (molPopDict.ContainsKey(kvp.Key) == false)
+                {
+                    continue;
+                }
+                kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
+            }
+            // membrane
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
+            {
+                if (molPopDict.ContainsKey(kvp.Key) == false)
+                {
+                    continue;
+                }
+                kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
+            }
+        }
 
         /// <summary>
         /// Returns the force the cell applies to the environment.
@@ -450,17 +484,15 @@ namespace Daphne
 
             if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                // only the TissueScenario has cell populations
                 cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
+                configComp[0] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.cytosol;
+                configComp[1] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.membrane;
             }
             else
             {
                 // for now
                 throw new NotImplementedException();
             }
-
-            configComp[0] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].cytosol;
-            configComp[1] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].membrane;
 
             bulk_reacs[0] = SimulationBase.ProtocolHandle.GetReactions(configComp[0], false);
             bulk_reacs[1] = SimulationBase.ProtocolHandle.GetReactions(configComp[1], false);
@@ -479,6 +511,12 @@ namespace Daphne
             SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs, null);
             // transcription reactions
             SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
+
+            // add the cell's membrane to the ecs boundary
+            ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(daughter.PlasmaMembrane.Interior);
+            // add ECS boundary reactions, where applicable
+            List<ConfigReaction> reacs = SimulationBase.ProtocolHandle.GetReactions(SimulationBase.ProtocolHandle.scenario.environment.comp, true);
+            SimulationBase.AddCompartmentBoundaryReactions(SimulationBase.dataBasket.Environment.Comp, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, reacs, null);
 
             // behaviors
 

@@ -2129,6 +2129,7 @@ namespace Daphne
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public ConfigEnvironmentBase environment { get; set; }
+        public bool reactionsReport { get; set; }
     }
 
     public class VatReactionComplexScenario : ScenarioBase
@@ -7056,6 +7057,11 @@ namespace Daphne
             cmState.molPopDict.Add(key, mp.CopyArray());
         }
 
+        public void addMolPopulation(string key, double[] vals)
+        {
+            cmState.molPopDict.Add(key, vals);
+        }
+
         public void setDeathDriverState(int state)
         {
             cbState.deathDriverState = state;
@@ -7903,7 +7909,7 @@ namespace Daphne
         public MolPopHomogeneousLevel()
         {
             mp_distribution_type = MolPopDistributionType.Homogeneous;
-            concentration = 1.0;
+            concentration = 0.0;
         }
 
         public override bool Equals(MolPopDistribution mph)

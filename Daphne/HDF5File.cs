@@ -476,14 +476,22 @@ namespace Daphne
                     B_DIV = 1,
                     B_DIFF = 2,
                     B_COUNT = 3,
+                    // state index
                     S_POS = 0,
                     S_VEL = 1,
-                    S_FORCE = 2;
+                    S_FORCE = 2,
+                    // linear numbering for molecules, m_count states number of compartments
+                    M_CYTOSOL = 0,
+                    M_MEMBRANE = 1,
+                    M_COUNT = 2;
         private int cellCount;
         private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
         private double[] cellStateSpatial;
-        private double[][] ecsMolpops, cellStateGenes;
+        private double[][] ecsMolpops, cellStateGenes, cellStateMolecules;
 
+        /// <summary>
+        /// access cell count, number of cells in this frame
+        /// </summary>
         public int CellCount
         {
             get
@@ -492,6 +500,9 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of cell ids in this frame
+        /// </summary>
         public int[] CellIDs
         {
             get
@@ -500,6 +511,9 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of cell generations in this frame
+        /// </summary>
         public int[] CellGens
         {
             get
@@ -508,6 +522,9 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of cell population ids in this frame
+        /// </summary>
         public int[] CellPopIDs
         {
             get
@@ -516,6 +533,9 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of cell behaviors in this frame
+        /// </summary>
         public int[] CellBehaviors
         {
             get
@@ -524,6 +544,9 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of spatal cell states in this frame
+        /// </summary>
         public double[] CellStateSpatial
         {
             get
@@ -532,6 +555,9 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of cell genes in this frame
+        /// </summary>
         public double[][] CellStateGenes
         {
             get
@@ -540,6 +566,20 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// access array of cell molecules in this frame
+        /// </summary>
+        public double[][] CellStateMolecules
+        {
+            get
+            {
+                return cellStateMolecules;
+            }
+        }
+
+        /// <summary>
+        /// access array of ecs molecular populations in this frame
+        /// </summary>
         public double[][] ECSMolPops
         {
             get
@@ -587,6 +627,7 @@ namespace Daphne
         /// <summary>
         /// create the genes data array
         /// </summary>
+        /// <param name="inner">true for complete creation including the inner arrays</param>
         private void createGenesData(bool inner)
         {
             if (cellStateGenes == null || cellStateGenes.Length != cellCount)
@@ -606,13 +647,74 @@ namespace Daphne
 
                     if (nonZeroLength == 0)
                     {
-                        nonZeroLength += 1;
+                        nonZeroLength = 1;
                     }
 
-                    if (cellStateGenes[i] == null || cellStateGenes[i].Length != cellPop.Cell.genes.Count)
+                    if (cellStateGenes[i] == null || cellStateGenes[i].Length != nonZeroLength)
                     {
                         cellStateGenes[i] = new double[nonZeroLength];
                     }
+                    i++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// create the molecules data array
+        /// </summary>
+        /// <param name="inner">true for complete creation including the inner arrays</param>
+        private void createMoleculesData(bool inner)
+        {
+            if (cellStateMolecules == null || cellStateMolecules.Length != cellCount * M_COUNT)
+            {
+                cellStateMolecules = new double[cellCount * M_COUNT][];
+            }
+
+            if (inner == true)
+            {
+                int i = 0;
+
+                foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+                {
+                    CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+                    // make sure the arrays are non-zero length
+                    int nonZeroLengthCytosol = cellPop.Cell.cytosol.molpops.Count,
+                        nonZeroLengthMembrane = cellPop.Cell.membrane.molpops.Count,
+                        index;
+
+                    // cytosol
+                    if (nonZeroLengthCytosol == 0)
+                    {
+                        nonZeroLengthCytosol = 1;
+                    }
+                    else
+                    {
+                        nonZeroLengthCytosol *= c.Cytosol.Interior.ArraySize;
+                    }
+
+                    // membrane
+                    if (nonZeroLengthMembrane == 0)
+                    {
+                        nonZeroLengthMembrane = 1;
+                    }
+                    else
+                    {
+                        nonZeroLengthMembrane *= c.PlasmaMembrane.Interior.ArraySize;
+                    }
+
+                    // create inner array for cytosol molecules
+                    index = i * M_COUNT + M_CYTOSOL;
+                    if (cellStateMolecules[index] == null || cellStateMolecules[index].Length != nonZeroLengthCytosol)
+                    {
+                        cellStateMolecules[index] = new double[nonZeroLengthCytosol];
+                    }
+                    // create inner array for membrane molecules
+                    index = i * M_COUNT + M_MEMBRANE;
+                    if (cellStateMolecules[index] == null || cellStateMolecules[index].Length != nonZeroLengthMembrane)
+                    {
+                        cellStateMolecules[index] = new double[nonZeroLengthMembrane];
+                    }
+
                     i++;
                 }
             }
@@ -642,6 +744,8 @@ namespace Daphne
                 // need to do this regardless whether the cell number changed; it could be the same if the same number of cells died and got born, but
                 // depending on cell type we could have different gene numbers
                 createGenesData(true);
+                // likewise for molecules
+                createMoleculesData(true);
 
                 // fill the data arrays
                 cellIds = SimulationBase.dataBasket.Cells.Keys.ToArray();
@@ -683,6 +787,38 @@ namespace Daphne
                         foreach (ConfigGene gene in cellPop.Cell.genes)
                         {
                             cellStateGenes[i][j] = c.Genes[gene.entity_guid].ActivationLevel;
+                            j++;
+                        }
+                    }
+
+                    // cytosol molecules
+                    // we ensure non-zero length arrays; write -1 in that case
+                    if (cellPop.Cell.cytosol.molpops.Count == 0)
+                    {
+                        cellStateMolecules[i * M_COUNT + M_CYTOSOL][0] = -1;
+                    }
+                    else
+                    {
+                        j = 0;
+                        foreach (ConfigMolecularPopulation molpop in cellPop.Cell.cytosol.molpops)
+                        {
+                            c.Cytosol.Populations[molpop.molecule.entity_guid].Conc.CopyArray(cellStateMolecules[i * M_COUNT + M_CYTOSOL], j * c.Cytosol.Interior.ArraySize);
+                            j++;
+                        }
+                    }
+
+                    // membrane molecules
+                    // we ensure non-zero length arrays; write -1 in that case
+                    if (cellPop.Cell.membrane.molpops.Count == 0)
+                    {
+                        cellStateMolecules[i * M_COUNT + M_MEMBRANE][0] = -1;
+                    }
+                    else
+                    {
+                        j = 0;
+                        foreach (ConfigMolecularPopulation molpop in cellPop.Cell.membrane.molpops)
+                        {
+                            c.PlasmaMembrane.Populations[molpop.molecule.entity_guid].Conc.CopyArray(cellStateMolecules[i * M_COUNT + M_MEMBRANE], j * c.PlasmaMembrane.Interior.ArraySize);
                             j++;
                         }
                     }
@@ -731,7 +867,7 @@ namespace Daphne
             state.setDifferentiationDriverState(cellBehaviors[idx * B_COUNT + B_DIFF]);
 
             // genes
-            CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(CellPopIDs[idx]);
+            CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(cellPopIds[idx]);
 
             state.cgState.geneDict.Clear();
             i = 0;
@@ -742,6 +878,52 @@ namespace Daphne
                 state.setGeneState(gene.entity_guid, cellStateGenes[idx][i]);
                 i++;
             }
+
+            double[] vals;
+            int blockSize = 0;
+
+            state.cmState.molPopDict.Clear();
+            // cytosol molecules
+            i = 0;
+            foreach (ConfigMolecularPopulation molpop in cellPop.Cell.cytosol.molpops)
+            {
+                // create value array
+                if (blockSize == 0)
+                {
+                    blockSize = cellStateMolecules[idx * M_COUNT + M_CYTOSOL].Length / cellPop.Cell.cytosol.molpops.Count;
+                }
+                vals = new double[blockSize];
+                // fill value array
+                for (int j = 0; j < blockSize; j++)
+                {
+                    vals[j] = cellStateMolecules[idx * M_COUNT + M_CYTOSOL][i * blockSize + j];
+                }
+                // transfer to state
+                state.addMolPopulation(molpop.molecule.entity_guid, vals);
+                i++;
+            }
+
+            // membrane molecules
+            blockSize = 0;
+            i = 0;
+            foreach (ConfigMolecularPopulation molpop in cellPop.Cell.membrane.molpops)
+            {
+                // create value array
+                if (blockSize == 0)
+                {
+                    blockSize = cellStateMolecules[idx * M_COUNT + M_MEMBRANE].Length / cellPop.Cell.membrane.molpops.Count;
+                }
+                vals = new double[blockSize];
+                // fill value array
+                for (int j = 0; j < blockSize; j++)
+                {
+                    vals[j] = cellStateMolecules[idx * M_COUNT + M_MEMBRANE][i * blockSize + j];
+                }
+                // transfer to state
+                state.addMolPopulation(molpop.molecule.entity_guid, vals);
+                i++;
+            }
+            
         }
 
         private void writeInt(int val, string name)
@@ -797,6 +979,13 @@ namespace Daphne
                 {
                     dims[0] = cellStateGenes[i].Length;
                     DataBasket.hdf5file.writeDSDouble("GeneState" + i, dims, new H5Array<double>(cellStateGenes[i]));
+                }
+
+                // molecules
+                for (int i = 0; i < cellStateMolecules.Length; i++)
+                {
+                    dims[0] = cellStateMolecules[i].Length;
+                    DataBasket.hdf5file.writeDSDouble("MoleculeState" + i, dims, new H5Array<double>(cellStateMolecules[i]));
                 }
 
                 // behaviors
@@ -856,6 +1045,13 @@ namespace Daphne
                 for (int i = 0; i < cellStateGenes.Length; i++)
                 {
                     DataBasket.hdf5file.readDSDouble("GeneState" + i, ref cellStateGenes[i]);
+                }
+
+                // molecules
+                createMoleculesData(false);
+                for (int i = 0; i < cellStateMolecules.Length; i++)
+                {
+                    DataBasket.hdf5file.readDSDouble("MoleculeState" + i, ref cellStateMolecules[i]);
                 }
 
                 // behaviors
