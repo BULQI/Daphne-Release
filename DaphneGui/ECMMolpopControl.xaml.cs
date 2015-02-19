@@ -331,6 +331,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = "ecs";
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -353,6 +354,7 @@ namespace DaphneGui
                         newLibMol.ValidateName(MainWindow.SOP.Protocol);
                         MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
                         aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                        aem.Tag = "ecs";
 
                         if (aem.ShowDialog() == false)
                         {

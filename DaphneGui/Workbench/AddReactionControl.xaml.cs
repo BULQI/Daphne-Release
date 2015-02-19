@@ -645,6 +645,7 @@ namespace DaphneGui
 
         private void populateCollection()
         {
+            //lbMol2.ScrollIntoView(lbMol2.Items[0]);
 
             CompositeCollection coll = new CompositeCollection();
             CollectionContainer cc = new CollectionContainer();
@@ -798,11 +799,34 @@ namespace DaphneGui
             ConfigMolecule newLibMol = new ConfigMolecule();
             newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
             AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+            aem.Tag = this.Tag;
 
             //do if user did not cancel from dialog box
             if (aem.ShowDialog() == true)
             {
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                
+                //Need to add a mol pop to cell
+                string environment = this.Tag as string;
+                //if (this.DataContext is ConfigCell)
+                if (environment == "membrane")
+                {
+                    ConfigCell cell = this.DataContext as ConfigCell;
+                    bool isCell = true;
+                    cell.membrane.AddMolPop(newLibMol, isCell);
+                }
+                else if (environment == "cytosol")
+                {
+                    ConfigCell cell = this.DataContext as ConfigCell;
+                    bool isCell = true;
+                    cell.cytosol.AddMolPop(newLibMol, isCell);
+                }
+                //else if (this.DataContext is ToolWinTissue)
+                else if (environment == "ecs")
+                {                    
+                    bool isCell = false;                    
+                    MainWindow.SOP.Protocol.scenario.environment.comp.AddMolPop(newLibMol, isCell);
+                }
             }
         }
 

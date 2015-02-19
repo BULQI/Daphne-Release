@@ -22,7 +22,7 @@
         <!--<daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />-->
 
         <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />
-        <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
+        <!--<daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />-->
         <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
 
         <CollectionViewSource x:Key="ecmReactionsListView"  

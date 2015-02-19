@@ -55,6 +55,7 @@ namespace DaphneGui
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = DataContext as ConfigCell;
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -357,6 +358,11 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
+            if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+            {
+                cell.diff_scheme.genes.Remove(gene.entity_guid);
+            }
+
             if (cell.HasGene(gene.entity_guid)) {
                 cell.genes.Remove(gene);
             }
@@ -521,6 +527,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = this.Tag;    //DataContext as ConfigCell
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -1764,7 +1771,7 @@ namespace DaphneGui
                 cell.death_driver.DriverElements[0].elements[1] = tde;
             }
         }
-        
+
     }
 
 }
