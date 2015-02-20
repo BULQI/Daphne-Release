@@ -476,4 +476,28 @@ namespace DaphneGui
 
 
     }
+
+    /// <summary>
+    /// If a reaction complex is selected, 
+    ///     return visible 
+    /// else 
+    ///     return collapsed
+    /// </summary>
+    public class selectedRCToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigReactionComplex rc = value as ConfigReactionComplex;
+            if (rc == null)
+                return Visibility.Collapsed;
+            else
+                return Visibility.Visible;
+            
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return false;
+        }
+    }
 }

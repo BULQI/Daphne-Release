@@ -92,8 +92,11 @@ namespace DaphneGui
             MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcCopy);
 
             ConfigCompartment cc = this.DataContext as ConfigCompartment;
-            ConfigReactionComplex crcLocal = crcCopy.Clone(true);
-            cc.reaction_complexes.Add(crcLocal);
+            if (cc != null)
+            {
+                ConfigReactionComplex crcLocal = crcCopy.Clone(true);
+                cc.reaction_complexes.Add(crcLocal);
+            }
 
             ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }
@@ -210,6 +213,10 @@ namespace DaphneGui
                 if (lb.SelectedIndex > -1)
                 {
                     SelectedReactionComplex = (ConfigReactionComplex)lb.SelectedItem;
+                }
+                else
+                {
+                    SelectedReactionComplex = null;
                 }
             }
         }

@@ -39,7 +39,9 @@
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
         
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
-        
+
+        <local:selectedRCToBoolConverter x:Key="selectedRCToBoolConv"/>
+
     </docking:ToolWindow.Resources>
 
     <!-- LIBRARIES: MOLECULES, REACTIONS, CELLS, REACTION COMPLEXES, AND DIFF SCHEMES -->
@@ -403,7 +405,10 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                                        
                             Width="480"
                             Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
-                            HorizontalAlignment="Left">
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding ElementName=RCControl, Path=SelectedReactionComplex, Converter={StaticResource selectedRCToBoolConv}}"
+                            >
+                            
                             <Grid>
                                 <local:AddReactionControl Tag="component_rc" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
                             </Grid>
