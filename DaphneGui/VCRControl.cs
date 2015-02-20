@@ -28,8 +28,9 @@ namespace DaphneGui
         private long lastFramePlayed;
         public bool LastFrame { get; set; }
         // reference frame time in milliseconds, 30fps
-        private const double E_DT = 1000 / 30;
+        private const double E_FPS = 30, E_DT = 1000 / E_FPS;
         private double speedFactor, speedFactorExp;
+        private int fps;
         /// <summary>
         /// property changed event to handle the updating of our vcr control
         /// </summary>
@@ -110,6 +111,7 @@ namespace DaphneGui
                 SetInactive();
                 speedFactor = 1.0;
                 speedFactorExp = 0.0;
+                fps = (int)E_FPS;
                 return true;
             }
             return false;
@@ -145,6 +147,9 @@ namespace DaphneGui
 
         /// <summary>
         /// set the speed factor for playback; will set to normal speed if value is not greater than zero
+        /// 1: normal speed
+        /// greater than 1: speed up
+        /// less than 1: speed down
         /// </summary>
         public double SpeedFactor
         {
@@ -157,20 +162,24 @@ namespace DaphneGui
                 else
                 {
                     speedFactor = value;
+                    fps = (int)(speedFactor * E_FPS);
                 }
             }
             get { return speedFactor; }
         }
 
         /// <summary>
-        /// set the speed factor exponent and speed factor implicitly; normal speed for exponent = 0
+        /// set the speed factor exponent and speed factor implicitly
+        /// 0: normal speed
+        /// positive: speed up
+        /// negative: speed down
         /// </summary>
         public double SpeedFactorExponent
         {
             set
             {
                 speedFactorExp = value;
-                speedFactor = Math.Pow(2.0, speedFactorExp);
+                SpeedFactor = Math.Pow(2.0, speedFactorExp);
             }
             get { return speedFactorExp; }
         }
@@ -404,7 +413,7 @@ namespace DaphneGui
         {
             lock (playLock)
             {
-                if (CheckFlag(VCR_ACTIVE) == true)
+                if (CheckFlag(VCR_ACTIVE) == true && CheckFlag(VCR_EXPORT) == false)
                 {
                     // insert a delay when needed to keep the fps steady
                     Delay();
@@ -445,6 +454,53 @@ namespace DaphneGui
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(info));
             }
+        }
+
+        public void ExportAVI(string filename)
+        {
+            if (CheckFlag(VCR_EXPORT) == true)
+            {
+                return;
+            }
+
+            vtkAVIWriter movieWriter;
+            vtkWindowToImageFilter movieSource = new vtkWindowToImageFilter();
+            bool first = true;
+
+            // set up the pipeline
+            movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow);
+            movieWriter = new vtkAVIWriter();
+            SetFlag(VCR_EXPORT);
+            movieWriter.SetFileName(filename);
+            movieWriter.SetInputConnection(movieSource.GetOutputPort());
+
+            // frame rate
+            movieWriter.SetRate(fps);
+
+            // start the writer
+            movieWriter.Start();
+            // loop over each frame and export
+            while (CheckFlag(VCR_EXPORT) == true)
+            {
+                if (first == true)
+                {
+                    // move to the first frame
+                    MoveToFrame(0);
+                    first = false;
+                }
+                else
+                {
+                    Advance(1);
+                }
+                movieSource.Modified();
+                movieWriter.Write();
+                if (frame >= TotalFrames() - 1)
+                {
+                    clearFlag(VCR_EXPORT);
+                }
+            }
+            // end
+            movieWriter.End();
         }
 
     }

@@ -643,7 +643,10 @@ namespace DaphneGui
 
         public void UpdateGraphics()
         {
-            if (gc == null) return;
+            if (gc == null)
+            {
+                return;
+            }
             vtkDataBasket.UpdateData();
             gc.DrawFrame(sim.GetProgressPercent());
         }
@@ -1057,7 +1060,7 @@ namespace DaphneGui
 
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
-                    this.menu_ActivateSimSetup.IsEnabled = false;
+                    menu_ActivateSimSetup.IsEnabled = false;
                     if (ToolWinType == ToolWindowType.Tissue)
                     {
                         ProtocolToolWindow.Close();
@@ -1194,6 +1197,43 @@ namespace DaphneGui
             displayTitle("Loaded past run " + DataBasket.hdf5file.FileName);
         }
 
+        private void ExportAVI(object sender, RoutedEventArgs e)
+        {
+            if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false || vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
+            {
+                return;
+            }
+
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            dlg.InitialDirectory = sim.Reporter.AppPath;
+            // Default file extension
+            dlg.DefaultExt = ".avi";
+            // Filter files by extension
+            dlg.Filter = "VCR export movie (.avi)|*.avi";
+            // set the suggested file name
+            dlg.FileName = System.IO.Path.GetFileNameWithoutExtension(DataBasket.hdf5file.FileName);
+
+            // Show save file dialog box
+            if (dlg.ShowDialog() == true)
+            {
+                // disable opening of a protocol
+                fileMenu.IsEnabled = false;
+                // disable changing playback
+                VCR_Toolbar.IsEnabled = false;
+                // process events and display the grayed out items immediately
+                System.Windows.Forms.Application.DoEvents();
+
+                // export the video
+                vcrControl.ExportAVI(dlg.FileName);
+
+                // disable opening of a protocol
+                fileMenu.IsEnabled = true;
+                // disable changing playback
+                VCR_Toolbar.IsEnabled = true;
+            }
+        }
+
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
         {
             #region MyRegion
@@ -1255,7 +1295,6 @@ namespace DaphneGui
             //    }
             //} 
             #endregion
-
         }
 
         private void VCRbutton_First_Click(object sender, RoutedEventArgs e)
@@ -2152,6 +2191,7 @@ namespace DaphneGui
             if (vcrControl != null)
             {
                 vcrControl.ReleaseVCR();
+                exportAVI.IsEnabled = false;
             }
 
             if (gc is VTKFullGraphicsController)
@@ -2399,6 +2439,7 @@ namespace DaphneGui
                 VCR_Toolbar.IsEnabled = true;
                 VCR_Toolbar.DataContext = vcrControl;
                 VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                exportAVI.IsEnabled = true;
             }
 
             bool finished = false;
