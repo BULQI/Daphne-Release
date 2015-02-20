@@ -70,6 +70,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
@@ -312,6 +313,10 @@ namespace DaphneGui
 
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
+
+            ConfigGene erGene = gene.Clone(null);
+            MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
+
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
             CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
 
@@ -555,6 +560,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
