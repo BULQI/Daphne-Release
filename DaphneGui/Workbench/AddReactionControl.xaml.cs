@@ -640,6 +640,7 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            this.BringIntoView();
             populateCollection();
         }
 
@@ -732,9 +733,15 @@ namespace DaphneGui
                     protocol = this.DataContext as Protocol;
                     if (protocol != null)
                     {
-                        protocol = this.DataContext as Protocol;
+                        //Why was this line here??
+                        //protocol = this.DataContext as Protocol;
                         ARCReactions = protocol.entity_repository.reactions;
-                        cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+
+                        //MADE A CHANGE HERE AS THIS WAS PROBLEMATIC. WE WANT TO GET MOLECULES FROM THE PROTOCOL WE'RE IN (USERSTORE, DAPHNESTORE OR MAINWINDOW.SOP).
+                        //THIS IS STILL MAY NOT BE A COMPLETE FIX.  NEED TO TEST THIS OUT MORE. TRY ALL THE PROTOCOL TYPES.
+                        //cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+                        cc.Collection = protocol.entity_repository.molecules;
+
                         coll.Add(cc);
                     }
                     break;
@@ -804,24 +811,32 @@ namespace DaphneGui
             //do if user did not cancel from dialog box
             if (aem.ShowDialog() == true)
             {
+                //Add new mol to Protocol
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 
                 //Need to add a mol pop to cell
                 string environment = this.Tag as string;
-                //if (this.DataContext is ConfigCell)
                 if (environment == "membrane")
                 {
                     ConfigCell cell = this.DataContext as ConfigCell;
-                    bool isCell = true;
-                    cell.membrane.AddMolPop(newLibMol, isCell);
+                    if (cell.membrane.HasMolecule(newLibMol) == false)
+                    {
+                        bool isCell = true;
+                        cell.membrane.AddMolPop(newLibMol, isCell);
+                    }
                 }
                 else if (environment == "cytosol")
                 {
                     ConfigCell cell = this.DataContext as ConfigCell;
-                    bool isCell = true;
-                    cell.cytosol.AddMolPop(newLibMol, isCell);
+                    if (cell.cytosol.HasMolecule(newLibMol) == false)
+                    {
+                        bool isCell = true;
+                        cell.cytosol.AddMolPop(newLibMol, isCell);
+                    }
                 }
-                //else if (this.DataContext is ToolWinTissue)
+
+                //Add new mol pop to the ecs
                 else if (environment == "ecs")
                 {                    
                     bool isCell = false;                    

@@ -1162,9 +1162,10 @@ namespace DaphneGui
             ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
+            //REMOVED this for resolving bug 2429 - the combo should populate from er.genes
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.HasGene(gene.entity_guid))
-                return;
+            //if (!cell.HasGene(gene.entity_guid))
+            //    return;
 
 
             if (ds != null)
@@ -1878,6 +1879,28 @@ namespace DaphneGui
         private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
         {
             this.BringIntoView();
+        }
+
+        private void CytoSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CytoReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(CytoReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
+        }
+
+        private void MembSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(MembReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
         }
 
     }

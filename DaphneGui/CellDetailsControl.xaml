@@ -891,6 +891,7 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click" />
                                     <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click" />
                                 </StackPanel>
 
@@ -998,6 +999,7 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click" />                                   
                                     <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click" />
                                 </StackPanel>
 

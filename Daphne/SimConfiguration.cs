@@ -3877,29 +3877,95 @@ namespace Daphne
             renderLabel = this.entity_guid;
         }
 
+        /// <summary>
+        /// Generates a unique molecule name when creating a new molecule or copying a molecule.
+        /// A molecule name consists of 3 parts - the base name, the ending, and an ordinal suffix.
+        /// As an example, consider Molecule_New001 (or Molecule_Copy001).  The base name is "Molecule",
+        /// the ending is "New" and the ordinal suffix is "001". 
+        /// 
+        /// We also have to consider whether the molecul is membrane bound or not.  If membrane bound,
+        /// a pipe character "|" must be added to the end.
+        /// </summary>
+        /// <param name="level">Protocol or UserStore or DaphneStore</param>
+        /// <param name="ending">Can be "New" or "Copy"</param>
+        /// <returns></returns>
         public override string GenerateNewName(Level level, string ending)
         {
-            string OriginalName = Name;
+            //Start with original name
+            string TempMolName = Name;
 
-            if (OriginalName.Contains(ending))
-            {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
-            }
+            //Get the base name, i.e. the text before the ending (which is "_New" or "_Copy")
+            //For example, this would convert "Molecule_New001" to "Molecule".
+            TempMolName = GetBaseName(Name);
+            
+            //If pipe is there, remove it, although it probably already got removed.
+            TempMolName = RemovePipe(TempMolName);
 
+            //Now the new molecule name is going to be TempMolName + ending + suffix
             int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindMoleculeByName(level.entity_repository, TempMolName) == true)
+            string rightSide = ending + string.Format("{0:000}", nSuffix);
+            string NewMolName = TempMolName + rightSide;
+
+            //Check the ordinal part and make sure the number is unique 
+            while (FindMoleculeByName(level.entity_repository, NewMolName) == true)
             {
                 nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
+                rightSide = ending + string.Format("{0:000}", nSuffix);
+                NewMolName = TempMolName + rightSide;
             }
 
+            //If membrane bound, add a pipe at the end
+            if (molecule_location == MoleculeLocation.Boundary)
+            {
+                NewMolName += "|";
+            }
+
+            return NewMolName;
+        }
+
+        /// <summary>
+        /// Extract the molecule's base name from the total name string.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="ending"></param>
+        /// <returns></returns>
+        private string GetBaseName(string name)
+        {
+            string TempMolName = name;
+            string ending = "_New";
+
+            if (TempMolName.Contains(ending))
+            {
+                int index = TempMolName.IndexOf(ending);
+                TempMolName = TempMolName.Substring(0, index);
+            }
+            ending = "_Copy";
+            if (TempMolName.Contains(ending))
+            {
+                int index = TempMolName.IndexOf(ending);
+                TempMolName = TempMolName.Substring(0, index);
+            }
             return TempMolName;
         }
 
+        /// <summary>
+        /// Removes pipe character, if it exists, from the end of a molecule name.
+        /// This method could have problems if multiple pipes are found.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private string RemovePipe(string name)
+        {
+            string TempMolName = name;
+            int pipeIndex = TempMolName.Length - 1;
+            string pipe = TempMolName.Substring(pipeIndex, 1);
+            if (pipe == "|")
+            {
+                TempMolName = TempMolName.Substring(0, pipeIndex);
+            }
+            return TempMolName;
+        }
+        
         /// <summary>
         /// Need to be able to clone for any Level, not just Protocol
         /// </summary>
@@ -4434,6 +4500,36 @@ namespace Daphne
             {
                 v.activations.RemoveAt(index);
             }
+        }
+
+        public bool HasState(string sname)
+        {
+            foreach (string s in Driver.states)
+            {
+                if (s.Equals(sname))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public string GenerateStateName()
+        {
+            string OriginalName = "State";
+            string ending = "_New";
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string NewStateName = OriginalName + suffix;
+
+            while (HasState(NewStateName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                NewStateName = OriginalName + suffix;
+            }
+
+            return NewStateName;
         }
 
         public void AddState(string sname)

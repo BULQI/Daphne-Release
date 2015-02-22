@@ -762,6 +762,17 @@ namespace DaphneGui
                 
         }
 
+        private void EcsSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(ReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
+        }
+
     }
 
 
