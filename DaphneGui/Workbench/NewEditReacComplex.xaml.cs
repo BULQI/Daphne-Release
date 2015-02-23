@@ -58,8 +58,10 @@ namespace DaphneGui
         public NewEditReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp)
         {
             InitializeComponent();
+            this.Owner = Application.Current.MainWindow;
             dlgType = type;
             comp = _comp;
+            
 
             Title = "Add Reaction Complex";
             if (type == ReactionComplexDialogType.EditComplex)
@@ -77,6 +79,7 @@ namespace DaphneGui
         public NewEditReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp)
         {
             InitializeComponent();
+            this.Owner = Application.Current.MainWindow;
             dlgType = type;
             selectedRC = crc;
             comp = _comp;
@@ -94,10 +97,7 @@ namespace DaphneGui
                 //leftList is whole reactions list initially
                 foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
                 {
-                    if (reac.HasBoundaryMolecule(MainWindow.SOP.Protocol.entity_repository) == false)
-                    {
-                        LeftList.Add(reac);
-                    }
+                    LeftList.Add(reac);
                 }                
                 //rightList is empty initially    
             }
@@ -108,10 +108,7 @@ namespace DaphneGui
                 // leftList is whole reactions list minus rc reactions - make a copy of it  
                 foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
                 {
-                    if (reac.HasBoundaryMolecule(MainWindow.SOP.Protocol.entity_repository) == false)
-                    {
-                        LeftList.Add(reac);
-                    }
+                    LeftList.Add(reac);
                 }
                 
                 // rightList is the reaction complex' reactions 
