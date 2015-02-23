@@ -163,9 +163,11 @@ namespace Daphne
 
         private void addCellMolpops(ConfigCompartment[] configComp, Compartment[] simComp)
         {
+            MoleculeLocation[] molLoc = new MoleculeLocation[] { MoleculeLocation.Bulk, MoleculeLocation.Boundary};
+
             for (int comp = 0; comp < 2; comp++)
             {
-                addCompartmentMolpops(simComp[comp], configComp[comp]);
+                addCompartmentMolpops(simComp[comp], configComp[comp], molLoc[comp]);
             }
         }
 
@@ -367,12 +369,18 @@ namespace Daphne
         /// </summary>
         /// <param name="simComp">the compartment</param>
         /// <param name="molpops">the list of molpops</param>
-        private void addCompartmentMolpops(Compartment simComp, ObservableCollection<ConfigMolecularPopulation> molpops)
+        private void addCompartmentMolpops(Compartment simComp, ObservableCollection<ConfigMolecularPopulation> molpops, MoleculeLocation molLoc)
         {
             foreach (ConfigMolecularPopulation cmp in molpops)
             {
                 // avoid duplicates
                 if (simComp.Populations.ContainsKey(cmp.molecule.entity_guid) == true)
+                {
+                    continue;
+                }
+
+                // cytosol and ecm reaction complexes may contain boundary molecules
+                if (cmp.molecule.molecule_location != molLoc)
                 {
                     continue;
                 }
@@ -480,15 +488,16 @@ namespace Daphne
 
         /// <summary>
         /// add molpops for a whole compartment, includes reaction complexes
+        /// specify whether bulk or boundary molecules are allowed
         /// </summary>
         /// <param name="simComp">the simlation compartment</param>
         /// <param name="configComp">the config compartment that describes the simulation compartment</param>
-        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp, MoleculeLocation molLoc)
         {
-            addCompartmentMolpops(simComp, configComp.molpops);
+            addCompartmentMolpops(simComp, configComp.molpops, molLoc);
             foreach (ConfigReactionComplex rc in configComp.reaction_complexes)
             {
-                addCompartmentMolpops(simComp, rc.molpops);
+                addCompartmentMolpops(simComp, rc.molpops, molLoc);
             }
         }
 
@@ -1012,7 +1021,7 @@ namespace Daphne
             }
 
             // ADD ECS MOLECULAR POPULATIONS
-            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
+            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp, MoleculeLocation.Bulk);
 
             // ECS molpops boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment)
@@ -1168,7 +1177,7 @@ namespace Daphne
 
             List<ConfigReaction> reacs = new List<ConfigReaction>();
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
+            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp, MoleculeLocation.Bulk);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
         }
 

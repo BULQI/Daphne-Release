@@ -70,7 +70,7 @@ namespace DaphneGui
             //If all mol types are used up already, then just inform user
             if (cmp.molecule == null)
             {
-                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Extracellular Medium", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Please add more molecules from the User store first.");
                 return;
             }
 
@@ -112,6 +112,89 @@ namespace DaphneGui
             {
                 if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Contains(crc) == false)
                 {
+                    string message = "If the ECM does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
+                    message = message + "Any duplicate reactions currently in the ECM will be removed. Continue?";
+                    MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.No)
+                    {
+                        return;
+                    }
+
+                    foreach (KeyValuePair<string, ConfigReaction> kvp in crc.reactions_dict)
+                    {
+                        if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(kvp.Key))
+                        {
+                            MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict[kvp.Key]);
+                        }
+                    }
+
+                    foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                    {
+                        if (molpop.molecule.molecule_location == MoleculeLocation.Bulk)
+                        {
+                            // Add missing bulk molecules to the ECM
+                            if (!MainWindow.SOP.Protocol.scenario.environment.comp.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportECM))
+                                {
+                                    molpop.report_mp = new ReportECM();
+                                }
+
+                                MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(molpop);
+                                
+                            }
+                        }
+                        else
+                        {
+                            bool cellHasMolecule = false;
+
+                            // Check to see if any of the cells have the boundary molecule in their membrane.
+                            foreach (CellPopulation cellpop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
+                            {
+                                if (cellpop.Cell.membrane.HasMolecule(molpop.molecule))
+                                {
+                                    cellHasMolecule = true;
+                                    break;
+                                }
+                            }
+
+                            // If this boundary molecule exists on at least one cell, then we are all set.
+                            // Otherwise, see if the user wants to add it to any of the cells.
+                            if (cellHasMolecule == false)
+                            {
+                                message = ("One or more reactions depend on molecule " + molpop.molecule.Name + ", which is not currently in the simulation. ");
+                                message = message + "You will be prompted to add this molecule to the cell membrane of one, or more, of the cell populations.";
+                                MessageBox.Show(message);
+
+                                foreach (CellPopulation cellpop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
+                                {
+                                    message = "Add molecule " + molpop.molecule.Name + " to cell population " + cellpop.cellpopulation_name + "?";
+                                    result = MessageBox.Show(message, "Question", MessageBoxButton.YesNo);
+
+                                    if (result == MessageBoxResult.Yes)
+                                    {
+                                        if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                        {
+                                            molpop.report_mp = new ReportMP();
+                                        }
+
+                                        cellpop.Cell.membrane.molpops.Add(molpop);
+                                        cellHasMolecule = true;
+                                    }
+                                }
+
+                                // Finally, if the user did not add the missing molecule to any of the cells, 
+                                // issue a warning that some reactions won't be included in the simulation.
+                                if (cellHasMolecule == false)
+                                {
+                                    message = "Molecule " + molpop.molecule.Name + " was not added to any of the cells. ";
+                                    message = message + "Reactions that require this molecule will not be included in the simulation.";
+                                    result = MessageBox.Show(message, "Warning");
+                                }
+                            }
+                        }
+                    }
+
                     MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crc.Clone(true));
                     CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
                 }
@@ -243,16 +326,8 @@ namespace DaphneGui
                 return;
             }
 
-            foreach (ConfigReaction cr in crc.reactions)
-            {
-                if (reactionIsAvailable(cr) == false)
-                {
-                    bOK = false;
-                }
-            }
-
-            //Finally, if the ecm already contains this reaction complex, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(crc.entity_guid) == true)
+            // Cannot add reaction complexes that require genes to the ECM.
+            if (crc.genes.Count != 0)
             {
                 bOK = false;
             }
@@ -331,6 +406,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = "ecs";
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -353,6 +429,7 @@ namespace DaphneGui
                         newLibMol.ValidateName(MainWindow.SOP.Protocol);
                         MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
                         aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                        aem.Tag = "ecs";
 
                         if (aem.ShowDialog() == false)
                         {

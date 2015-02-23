@@ -28,6 +28,8 @@ namespace DaphneGui
         {
             InitializeComponent();
 
+            this.Owner = Application.Current.MainWindow;
+
             Mol = mol;
             DlgType = type;
 
@@ -50,7 +52,50 @@ namespace DaphneGui
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            string caller = Tag as string;
+
+            if (caller == "ecs")
+            {
+                if (Mol.Name.Contains("|") || Mol.molecule_location == MoleculeLocation.Boundary)
+                {
+                    MessageBox.Show("You cannot add a membrane bound molecule to the ECS.");
+                    return;
+                }
+            }
+            //Called from cell cytosol or membrane
+            else {
+                if (Mol.molecule_location == MoleculeLocation.Bulk  && Mol.Name.Contains("|"))
+                {
+                    MessageBox.Show("A molecule containing '|' must be membrane bound.");
+                    return;
+                }
+                else if (Mol.molecule_location == MoleculeLocation.Boundary && Mol.Name.Contains("|") == false) 
+                {
+                    MessageBox.Show("In order to be membrane bound, the molecule name must end with '|'.");
+                    return;
+                }
+                else if (Mol.molecule_location == MoleculeLocation.Bulk && caller == "membrane")
+                {
+                    MessageBox.Show("You cannot add a bulk molecule to the cell membrane.");
+                    return;
+                }
+                else if (Mol.molecule_location == MoleculeLocation.Boundary && caller == "cytosol")
+                {
+                    MessageBox.Show("You cannot add a boundary molecule to the cell cytosol.");
+                    return;
+                }
+            }
+             
             DialogResult = true;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //If called by ecs, hide the membrane bound check box, but how?
+            string caller = Tag as string;
+            if (caller == "ecs")
+            {
+            }
         }
     }
 }

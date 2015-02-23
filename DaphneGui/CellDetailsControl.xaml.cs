@@ -55,6 +55,7 @@ namespace DaphneGui
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = DataContext as ConfigCell;
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -145,7 +146,7 @@ namespace DaphneGui
 
             if (cmp.molecule == null)
             {
-                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Cell Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Please add more molecules from the store.");
                 return;
             }
 
@@ -246,7 +247,7 @@ namespace DaphneGui
             }
             else
             {
-                MessageBox.Show("All available molecules have already been added.  You can add more molecules using the Catalogs menu.", "Cell Membrane", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("All available molecular populations have already been added.", "Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
       
@@ -306,8 +307,8 @@ namespace DaphneGui
         
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gene = new ConfigGene("NewGene", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            ConfigGene gene = new ConfigGene("g", 0, 0);
+            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
 
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
@@ -328,6 +329,11 @@ namespace DaphneGui
 
             //Show a dialog that gets the new gene's name
             AddGeneToCell ads = new AddGeneToCell(cell);
+
+            if (ads.GeneComboBox.Items.Count == 0)
+            {
+                return;
+            }
 
             //If user clicked 'apply' and not 'cancel'
             if (ads.ShowDialog() == true)
@@ -351,6 +357,22 @@ namespace DaphneGui
 
             if (res == MessageBoxResult.No)
                 return;
+
+            if (cell.diff_scheme != null)
+            {
+                if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
+                {
+                    cell.diff_scheme.genes.Remove(gene.entity_guid);
+                }
+            }
+
+            if (cell.div_scheme != null)
+            {
+                if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
+                {
+                    cell.div_scheme.genes.Remove(gene.entity_guid);
+                }
+            }
 
             if (cell.HasGene(gene.entity_guid)) {
                 cell.genes.Remove(gene);
@@ -378,6 +400,7 @@ namespace DaphneGui
         {
             if (lvCellAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            this.BringIntoView();
         }
 
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -516,6 +539,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+                aem.Tag = this.Tag;    //DataContext as ConfigCell
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -722,18 +746,14 @@ namespace DaphneGui
             }
 
             //This filter is called for every reaction complex in the repository.
-            //For current reaction complex, if all of its reactions are in the membrane, then the reaction complex should be included.
-            //Otherwise, exclude it.
 
-            //Check if all the reactions in the reaction complex reaction list exist in the membrane
+            // Only allow reaction complexes with membrane-bound molecules.
             bool bOK = true;
 
-            foreach (ConfigReaction cr in crc.reactions)
+            foreach (KeyValuePair<string,ConfigMolecule> kvp in crc.molecules_dict)
             {
-                string guid = cr.entity_guid;
-                if (cc.membrane.GetReaction(guid) == null)
+                if (kvp.Value.molecule_location == MoleculeLocation.Bulk)
                 {
-                    //if even one reaction is not found in cell cytosol, return false
                     bOK = false;
                     break;
                 }
@@ -762,25 +782,9 @@ namespace DaphneGui
                 return;
             }
 
-            //This filter is called for every reaction complex in the repository.
-            //For current reaction complex, if all of its reactions are in the cytosol, then the reaction complex should be included.
-            //Otherwise, exclude it.
+            // Allow any reaction commplex. Any missign molecules or genes will be added to the cell, as needed.
 
-            //Check if all the reactions in the reaction complex reaction list exist in the cytosol
-            bool bOK = true;
-
-            foreach (ConfigReaction cr in crc.reactions)
-            {
-                string guid = cr.entity_guid;
-                if (cc.cytosol.GetReaction(guid) == null)
-                {
-                    //if even one reaction is not found in cell cytosol, return false
-                    bOK = false;
-                    break;
-                }
-            }
-
-            e.Accepted = bOK;
+            e.Accepted = true;
         }
 
         //private bool EcmHasMolecule(string molguid)
@@ -1293,8 +1297,47 @@ namespace DaphneGui
 
             if (crc != null)
             {
+                string message = "If the membrane does not currently contain any of the molecules or genes necessary for these reactions, then they will be added. ";
+                message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
+                MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                } 
+                
                 if (cell.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
                 {
+                    // If the membrane does not have any of the required molecules, then add them.
+                    foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                    {
+                        if (molpop.molecule.molecule_location == MoleculeLocation.Boundary)
+                        {
+                            if (!cell.cytosol.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                {
+                                    molpop.report_mp = new ReportMP();
+                                }
+
+                                cell.cytosol.molpops.Add(molpop);
+                            }
+                        }
+                        else
+                        {            
+                            MessageBox.Show("Membrane cannot add reactions involving bulk molecules.", "Warning");
+                            return;
+                        }
+                    }
+
+                    // Check for duplicate reactions. Remove duplicates from membrane. 
+                    foreach (ConfigReaction reac in crc.reactions)
+                    {
+                        if (cell.membrane.reactions_dict.ContainsKey(reac.entity_guid))
+                        {
+                            cell.membrane.Reactions.Remove(cell.membrane.reactions_dict[reac.entity_guid]);
+                        }
+                    }
+
                     cell.membrane.reaction_complexes.Add(crc.Clone(true));
                     CollectionViewSource.GetDefaultView(lbMembAvailableReacCx.ItemsSource).Refresh();
                 }
@@ -1330,11 +1373,69 @@ namespace DaphneGui
 
             if (crc != null)
             {
+                string message = "If the cell does not currently contain any of the molecules or genes necessary for these reactions, then they will be added. ";
+                message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
+                MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+
                 if (cell.cytosol.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
                 {
                     cell.cytosol.reaction_complexes.Add(crc.Clone(true));
+
+                    // Check for duplicate reactions. Remove duplicates from cytosol. 
+                    foreach (ConfigReaction reac in crc.reactions)
+                    {
+                        if (cell.cytosol.reactions_dict.ContainsKey(reac.entity_guid))
+                        {
+                            cell.cytosol.Reactions.Remove(cell.cytosol.reactions_dict[reac.entity_guid]);
+                        }
+                    }
+
+                    // If the cytosol does not have any of the required molecules, then add them.
+                    foreach (ConfigMolecularPopulation molpop in crc.molpops)
+                    {
+                        if (molpop.molecule.molecule_location == MoleculeLocation.Bulk)
+                        {
+                            if (!cell.cytosol.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                {
+                                    molpop.report_mp = new ReportMP();
+                                }
+
+                                cell.cytosol.molpops.Add(molpop);
+                            }
+                        }
+                        else
+                        {
+                            if (!cell.membrane.HasMolecule(molpop.molecule))
+                            {
+                                if (molpop.report_mp.GetType() != typeof(ReportMP))
+                                {
+                                    molpop.report_mp = new ReportMP();
+                                }
+
+                                cell.membrane.molpops.Add(molpop);
+                            }
+                        }
+                    }
+
+                    // If the cell does not have any of the required genes, then add them.
+                    foreach (ConfigGene gene in crc.genes)
+                    {
+                        if (!cell.HasGene(gene.entity_guid))
+                        {
+                            cell.genes.Add(gene);
+                        }
+                    }
+
+
                     CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
                 }
+                
             }
         }
 
@@ -1724,7 +1825,47 @@ namespace DaphneGui
                 cell.membrane.Reactions.Add(newreac);
             }
         }
-        
+
+        private void comboDeathMolPop2_Loaded(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Don't do anything if driver type is distribution
+            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
+                return;
+
+            ComboBox combo = sender as ComboBox;
+
+            //If no death molecule selected, and there are bulk molecules, select 1st molecule.
+            if (combo.SelectedIndex == -1 && combo.Items.Count > 0)
+            {
+                combo.SelectedIndex = 0;
+            }
+            //If no death molecule selected, and there are NO bulk molecules, issue a warning to acquire molecules from the user store.
+            else if (combo.SelectedIndex == -1 && combo.Items.Count == 0)
+            {
+                MessageBox.Show("There are no molecules in the cytosol. Please get molecules from the store.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                //Since there are no molecules, create a default DISTRIBUTION driver and assign it.
+                ConfigTransitionDriverElement tde = new ConfigDistrTransitionDriverElement();
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
+
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+
+                cell.death_driver.DriverElements[0].elements[1] = tde;
+            }
+        }
+
+        private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
+        {
+            this.BringIntoView();
+        }
+
     }
 
 }

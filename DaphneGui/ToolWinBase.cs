@@ -396,7 +396,7 @@ namespace DaphneGui
             {
                 switch (parameter as string)
                 {
-                    case "VTKDisplayWindow":
+                    case "VTKDisplayDocWindow":
                     case "ComponentsToolWindow":
                     case "CellStudioToolWindow":
                     case "ComponentsToolWindow_Genes":
@@ -745,6 +745,23 @@ namespace DaphneGui
             ConfigTransitionScheme val = value as ConfigTransitionScheme;
             if (val != null && val.Name == "") return null;
             return value;
+        }
+    }
+
+    /// <summary>
+    /// This converter returns the ProtocolToolWindow (ToolWinTissue or ToolWinVatRC) that is in MainWindow.ToolWin
+    /// </summary>
+    public class ToolwinComponentConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return MainWindow.ToolWin;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
         }
     }
 

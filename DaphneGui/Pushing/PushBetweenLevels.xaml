@@ -6,7 +6,7 @@
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-        Title="Push Between Levels"
+        Title="Get/Save entities between stores"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"  
         MinHeight="120"

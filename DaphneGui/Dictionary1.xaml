@@ -34,6 +34,7 @@
     <daph:ParameterDistributionTypeToStringConverter x:Key="ParamDistTypeEnumConv" />
     <daph:ParameterDistributionTypeToBoolConverter x:Key="ParamDistTypeBoolConv" />
     <local:CellPopDistTypeTooltipConverter x:Key="CellPopDistTypeTooltipConv" />
+    <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
 
 
     <daph:TransitionDriverElementTypeToStringConverter x:Key="TransitionDriverElementTypeEnumConv" />
@@ -98,13 +99,15 @@
                 <TextBlock Width="150" Text="Name"></TextBlock>
                 <TextBlock Width="60" Margin="20,0" Text="Diff Coeff"></TextBlock>
                 <TextBlock Width="60" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="60" Margin="20,0" Text="Radiuss"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBlock Width="100" Margin="20,0" Text="Membrane Bound"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBox Width="150" Height="24" Text="{Binding Path=Name}" ></TextBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-10,2"  Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-10,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <TextBox x:Name="NameBox" Width="150" Height="24" Text="{Binding Path=Name}" ></TextBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="20,2"  Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-40,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <CheckBox x:Name="MembraneBox" Margin="10,4" IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -113,7 +116,7 @@
     <DataTemplate x:Key="editMoleculeTemplate">
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Width="150" Text="Name"></TextBlock>
+                <TextBlock Width="150" Text="Molecule Name"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
