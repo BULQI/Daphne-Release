@@ -14,6 +14,7 @@ using Ninject;
 using Ninject.Parameters;
 
 using System.Diagnostics;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -22,6 +23,7 @@ namespace Daphne
         public SimulationBase()
         {
             cellManager = new CellManager();
+            cellMangerHandle = cellManager;
         }
 
         /// <summary>
@@ -842,6 +844,10 @@ namespace Daphne
             }
 
             dataBasket.AddCell(c);
+            cellMangerHandle.AddCell(c);
+            
+
+
 
             // no cell rotation currently
             Transform t = new Transform(false);
@@ -956,6 +962,8 @@ namespace Daphne
         public static Protocol ProtocolHandle;
 
         protected CellManager cellManager;
+        public static CellManager cellMangerHandle;
+
         protected CollisionManager collisionManager;
 
         protected byte runStatus;
@@ -1021,6 +1029,9 @@ namespace Daphne
             // clear the databasket dictionaries
             dataBasket.Clear();
 
+            CellManager.nt_cellManager.Clear();
+
+
             // set up the collision manager
             //MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
             DenseVector box = new DenseVector(3);
@@ -1042,6 +1053,7 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
+            
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenarioHandle.cellpopulations)
             {
@@ -1110,6 +1122,8 @@ namespace Daphne
 
             // distribution governing time-to-removal for apoptotic cells
             cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();
+
+            cellManager.InitializeNtCellManger();
         }
 
         public override void Step(double dt)

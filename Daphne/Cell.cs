@@ -26,13 +26,26 @@ namespace Daphne
         public string Name { get; private set; }
         public int CopyNumber { get; private set; }
         // Activation level may be adjusted depending on cell state 
-        public double ActivationLevel { get; set; }
+        public double[] _activationLevel;
+        public double ActivationLevel 
+        {
+            get
+            {
+                return _activationLevel[0];
+            }
+            set
+            {
+                _activationLevel[0] = value;
+            }
+        }
 
         public Gene(string name, int copyNumber, double actLevel)
         {
             Name = name;
             CopyNumber = copyNumber;
-            ActivationLevel = actLevel;
+            _activationLevel = new double[1];
+            _activationLevel[0] = actLevel;
+            //ActivationLevel = actLevel;
         }
     }
 
@@ -264,6 +277,8 @@ namespace Daphne
             }
         }
         
+        //public static int iteration_count = 0;
+        //public static System.IO.StreamWriter debug_writer = null;
         /// <summary>
         /// Drives the cell's dynamics through time-step dt. The dynamics is applied in-place: the
         /// cell's state is changed directly through this method.
@@ -272,28 +287,28 @@ namespace Daphne
         public void Step(double dt) 
         {
             // we are using the simplest kind of integrator here. It should be made more sophisticated at some point.
-            Cytosol.Step(dt);
-
+            //Cytosol.Step(dt);
+ 
             //apply cytosol/membrane boundary flux - specific to cytosol/Membrane
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
-            {
-                MolecularPopulation molpop = kvp.Value;
-                ScalarField conc = molpop.Conc;
-                foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
-                {
-                    conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
-                    item.Value.reset(0);
-                }
-            }
+            //foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            //{
+            //    MolecularPopulation molpop = kvp.Value;
+            //    ScalarField conc = molpop.Conc;
+            //    foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
+            //    {
+            //        conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
+            //        item.Value.reset(0);
+            //    }
+            //}
 
             //update cytosol/membrane boundary
-            foreach (KeyValuePair<string, MolecularPopulation> molpop in Cytosol.Populations)
-            {
-                molpop.Value.UpdateCytosolMembraneBoundary();
-            }
+            //foreach (KeyValuePair<string, MolecularPopulation> molpop in Cytosol.Populations)
+            //{
+            //    molpop.Value.UpdateCytosolMembraneBoundary();
+            //}
 
 
-            PlasmaMembrane.Step(dt);
+            //PlasmaMembrane.Step(dt);
 
 
             // step the cell behaviors
@@ -627,7 +642,10 @@ namespace Daphne
         public bool Exiting
         {
             get { return exiting; }
-            set { exiting = value; }
+            set 
+            { 
+                exiting = value; 
+            }
         }
 
         /// <summary>

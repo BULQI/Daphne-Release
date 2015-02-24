@@ -9,6 +9,7 @@ using Ninject.Parameters;
 using ManifoldRing;
 
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Diagnostics;
 
 namespace Daphne
 {
@@ -50,9 +51,32 @@ namespace Daphne
             }
             else
             {
-                // add together
+                //add together
                 Populations[moleculeKey].Conc += mp.Conc;
                 // NOTE: presumably, we need to also add the boundaries here
+            }
+        }
+
+        public static void write_array(double[] array, System.IO.StreamWriter writer = null)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (writer == null)
+                {
+                    Debug.Write(array[i] + ", ");
+                }
+                else
+                {
+                    writer.Write(array[i] + ", ");
+                }
+            }
+            if (writer == null)
+            {
+                Debug.WriteLine("");
+            }
+            else
+            {
+                writer.WriteLine("");
             }
         }
 
@@ -62,22 +86,25 @@ namespace Daphne
         /// <param name="dt">The time interval.</param>
         public void Step(double dt)
         {
-            // the step method may organize the reactions in a more sophisticated manner to account
-            // for different rate constants etc.
-            foreach (Reaction r in BulkReactions)
+             //the step method may organize the reactions in a more sophisticated manner to account
+             //for different rate constants etc.
+            if (this.Interior is ManifoldRing.TinyBall == false)
             {
-                r.Step(dt);
-            }
-
-            //if (!(this.Interior is PointManifold))
-            foreach (List<Reaction> rlist in BoundaryReactions.Values)
-            {
-                foreach (Reaction r in rlist)
+                foreach (Reaction r in BulkReactions)
                 {
                     r.Step(dt);
                 }
-            }
 
+                //if (!(this.Interior is PointManifold))
+                foreach (List<Reaction> rlist in BoundaryReactions.Values)
+                {
+                    foreach (Reaction r in rlist)
+                    {
+                        r.Step(dt);
+                    }
+                }
+            }
+ 
             foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
             {
                 // Apply Laplacian, note: boundary fluxes moved to upper level

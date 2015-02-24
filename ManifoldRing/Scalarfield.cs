@@ -307,7 +307,7 @@ namespace ManifoldRing
     /// </summary>
     public class ScalarField
     {
-        internal double[] array;
+        public double[] array;
         private readonly Manifold m;
         private IFieldInitializer init;
 
