@@ -410,7 +410,7 @@
                             >
                             
                             <Grid>
-                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
+                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" />
                             </Grid>
                         </Expander>
                     </StackPanel>

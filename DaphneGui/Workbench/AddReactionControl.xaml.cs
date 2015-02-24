@@ -71,6 +71,38 @@ namespace DaphneGui
 
         }
 
+
+        public static DependencyProperty CurrentReactionComplexProperty = DependencyProperty.Register("CurrentReactionComplex", typeof(ConfigReactionComplex), typeof(AddReactionControl), new FrameworkPropertyMetadata(null, CurrentReactionComplexPropertyChanged));
+        public ConfigReactionComplex CurrentReactionComplex
+        {
+            get { return (ConfigReactionComplex)GetValue(CurrentReactionComplexProperty); }
+            set
+            {
+                SetValue(CurrentReactionComplexProperty, value);
+                OnPropertyChanged("CurrentReactionComplex");
+            }
+        }
+        private static void CurrentReactionComplexPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            AddReactionControl arc = d as AddReactionControl;
+            arc.CurrentReactionComplex = (ConfigReactionComplex)(e.NewValue);
+        }
+
+        ///
+        //Notification handling
+        /// 
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
+            {
+                var e = new PropertyChangedEventArgs(propertyName);
+                handler(this, e);
+            }
+        }
+
+
         public AddReactionControl()
         {
             InitializeComponent();
@@ -651,6 +683,7 @@ namespace DaphneGui
             CompositeCollection coll = new CompositeCollection();
             CollectionContainer cc = new CollectionContainer();
             Protocol protocol;
+            Level level;
             string reacEnvironment = Tag as string;
             switch (reacEnvironment)
             {
@@ -730,18 +763,16 @@ namespace DaphneGui
                 case "component_reacs":
                     ARCCell = null;
                     ARCComp = null;
-                    protocol = this.DataContext as Protocol;
-                    if (protocol != null)
+                    level = this.DataContext as Level;
+
+                    if (level != null)
                     {
-                        //Why was this line here??
-                        //protocol = this.DataContext as Protocol;
-                        ARCReactions = protocol.entity_repository.reactions;
+                        ARCReactions = level.entity_repository.reactions;
+                        cc.Collection = level.entity_repository.molecules;
+                        coll.Add(cc);
 
-                        //MADE A CHANGE HERE AS THIS WAS PROBLEMATIC. WE WANT TO GET MOLECULES FROM THE PROTOCOL WE'RE IN (USERSTORE, DAPHNESTORE OR MAINWINDOW.SOP).
-                        //THIS IS STILL MAY NOT BE A COMPLETE FIX.  NEED TO TEST THIS OUT MORE. TRY ALL THE PROTOCOL TYPES.
-                        //cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
-                        cc.Collection = protocol.entity_repository.molecules;
-
+                        cc = new CollectionContainer();
+                        cc.Collection = level.entity_repository.genes;
                         coll.Add(cc);
                     }
                     break;
@@ -750,11 +781,16 @@ namespace DaphneGui
                     ARCCell = null;
                     ARCComp = null;
                     
-                    crc = this.DataContext as ConfigReactionComplex;
+                    level = this.DataContext as Level;
+                    crc = this.CurrentReactionComplex as ConfigReactionComplex;
                     if (crc != null)
-                    {
+                    {                        
                         ARCReactions = crc.reactions;
-                        cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+                        cc.Collection = level != null ? level.entity_repository.molecules : null;
+                        coll.Add(cc);
+
+                        cc = new CollectionContainer();
+                        cc.Collection = level != null ? level.entity_repository.genes : null;
                         coll.Add(cc);
                     }
                     break;
@@ -815,7 +851,7 @@ namespace DaphneGui
                 newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 
-                //Need to add a mol pop to cell
+                //Need to add a mol pop to cell also
                 string environment = this.Tag as string;
                 if (environment == "membrane")
                 {
