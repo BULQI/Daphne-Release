@@ -732,6 +732,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                        <Button Name="EcsSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="EcsSaveReacCompToProtocolButton_Click" />
                         <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" />
                     </StackPanel>
 
@@ -750,9 +751,7 @@
                                 <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                 <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
                                                 Text="{Binding  ElementName=ReactionComplexListBox, 
-                                                                Path=SelectedItem,
-                                                                Converter={StaticResource ReacComplexGUIDtoStringConv},
-                                                                ConverterParameter={StaticResource ecmAvailableReactionComplexesListView}}" 
+                                                                Path=SelectedItem.Name}" 
                                                                 />
                             </StackPanel >
                             <StackPanel x:Name="spReacComp"  >

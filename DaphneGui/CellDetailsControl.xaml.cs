@@ -70,6 +70,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
@@ -312,6 +313,10 @@ namespace DaphneGui
 
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
+
+            ConfigGene erGene = gene.Clone(null);
+            MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
+
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
             CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
 
@@ -342,7 +347,8 @@ namespace DaphneGui
                 if (geneToAdd == null)
                     return;
 
-                cell.genes.Add(geneToAdd);
+                ConfigGene newgene = geneToAdd.Clone(null);
+                cell.genes.Add(newgene);
             }
 
             txtGeneName.IsEnabled = false;
@@ -554,6 +560,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
@@ -992,7 +999,14 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.AddGene(gene1.entity_guid);
+                scheme.AddGene(gene1.entity_guid);  
+
+                //HERE, WE NEED TO ADD THE GENE TO THE CELL ALSO
+                if (cell.HasGene(gene1.entity_guid) == false)
+                {
+                    ConfigGene newgene = gene1.Clone(null);
+                    cell.genes.Add(newgene);
+                }
               
                 //force refresh
                 //dataGrid.GetBindingExpression(DiffSchemeDataGrid.DiffSchemeSourceProperty).UpdateTarget();
@@ -1148,9 +1162,10 @@ namespace DaphneGui
             ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
+            //REMOVED this for resolving bug 2429 - the combo should populate from er.genes
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.HasGene(gene.entity_guid))
-                return;
+            //if (!cell.HasGene(gene.entity_guid))
+            //    return;
 
 
             if (ds != null)
@@ -1864,6 +1879,28 @@ namespace DaphneGui
         private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
         {
             this.BringIntoView();
+        }
+
+        private void CytoSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CytoReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(CytoReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
+        }
+
+        private void MembSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(MembReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
         }
 
     }

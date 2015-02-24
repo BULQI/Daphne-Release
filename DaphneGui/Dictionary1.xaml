@@ -111,7 +111,24 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
-    
+
+    <DataTemplate x:Key="moleculeTemplateBulk">
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="150" Text="Name"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Weight"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Radius"></TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="NameBox" Width="150" Height="24" Text="{Binding Path=Name}" ></TextBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="20,2"  Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-40,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
     <!-- ConfigMolecule properties template with non-editable Name field : DataContext must be ConfigMolecule -->
     <DataTemplate x:Key="editMoleculeTemplate">
         <StackPanel Orientation="Vertical">

@@ -85,17 +85,14 @@ namespace DaphneGui
 
         private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
         {
-
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
-            //Show a dialog that gets the new state's name
-            AddDiffState ads = new AddDiffState();
-            if (ads.ShowDialog() != true) return;
-
-            //DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-            if (diff_scheme == null) return;
 
-            diff_scheme.AddState(ads.StateName);            
+            if (diff_scheme == null) 
+                return;
+
+            string stateName = diff_scheme.GenerateStateName();
+            diff_scheme.AddState(stateName);            
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)

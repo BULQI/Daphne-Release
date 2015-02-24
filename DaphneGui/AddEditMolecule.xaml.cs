@@ -22,6 +22,7 @@ namespace DaphneGui
 
     public partial class AddEditMolecule : Window
     {
+        public string Caller { get; set; }
         public MoleculeDialogType DlgType { get; set; }
         public ConfigMolecule Mol { get; set; }
         public AddEditMolecule(ConfigMolecule mol, MoleculeDialogType type)
@@ -71,8 +72,8 @@ namespace DaphneGui
                 }
                 else if (Mol.molecule_location == MoleculeLocation.Boundary && Mol.Name.Contains("|") == false) 
                 {
-                    MessageBox.Show("In order to be membrane bound, the molecule name must end with '|'.");
-                    return;
+                    //If user forgot to add a pipe character, just add it automatically
+                    Mol.Name += "|";
                 }
                 else if (Mol.molecule_location == MoleculeLocation.Bulk && caller == "membrane")
                 {
@@ -91,11 +92,8 @@ namespace DaphneGui
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //If called by ecs, hide the membrane bound check box, but how?
-            string caller = Tag as string;
-            if (caller == "ecs")
-            {
-            }
+            //If called by ecs, we need to hide the membrane bound check box, by using a different template from xaml.
+            Caller = Tag as string;
         }
     }
 }
