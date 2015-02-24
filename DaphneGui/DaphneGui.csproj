@@ -488,9 +488,9 @@
     <Content Include="Config\RenderSkin\default_skin.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Config\daphne_gc_cycling_scenario.json">
+    <Content Include="Config\daphne_gc_cycling_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
