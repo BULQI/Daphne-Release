@@ -98,15 +98,15 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Name"></TextBlock>
                 <TextBlock Width="60" Margin="20,0" Text="Diff Coeff"></TextBlock>
-                <TextBlock Width="60" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="60" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Weight" Visibility="Collapsed" ></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Radius" Visibility="Collapsed" ></TextBlock>
                 <TextBlock Width="100" Margin="20,0" Text="Membrane Bound"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox x:Name="NameBox" Width="150" Height="24" Text="{Binding Path=Name}" ></TextBox>
                 <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="20,2"  Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-40,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="60" Margin="-40,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="60" Margin="10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                 <CheckBox x:Name="MembraneBox" Margin="10,4" IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </StackPanel>
@@ -117,14 +117,14 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Name"></TextBlock>
                 <TextBlock Width="60" Margin="20,0" Text="Diff Coeff"></TextBlock>
-                <TextBlock Width="60" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="60" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Weight" Visibility="Collapsed"></TextBlock>
+                <TextBlock Width="60" Margin="20,0" Text="Radius" Visibility="Collapsed"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox x:Name="NameBox" Width="150" Height="24" Text="{Binding Path=Name}" ></TextBox>
                 <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="20,2"  Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="-40,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="60" Margin="10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed"  SliderEnabled="False" TextFieldWidth="60" Margin="-40,0"  Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="60" Margin="10,0"  Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -135,14 +135,14 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Molecule Name"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Weight"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Radius"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
                 <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -153,14 +153,14 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Name"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Text="Weight" Visibility="Collapsed"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Text="Radius" Visibility="Collapsed"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" Height="24" IsEnabled="False"></TextBox>
                 <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" IsEnabled="False" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>

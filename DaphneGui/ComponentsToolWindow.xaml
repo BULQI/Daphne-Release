@@ -214,7 +214,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Weight" SortMemberPath="MolecularWeight">
+                            <DataGridTemplateColumn Header="Weight" SortMemberPath="MolecularWeight" Visibility="Collapsed">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
@@ -223,7 +223,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Radius" SortMemberPath="EffectiveRadius">
+                            <DataGridTemplateColumn Header="Radius" SortMemberPath="EffectiveRadius" Visibility="Collapsed">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->

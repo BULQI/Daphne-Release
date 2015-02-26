@@ -238,7 +238,7 @@
                 <ComboBox x:Name="cbParamDistr" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" Height="24"
                           ItemTemplate="{Binding Source={StaticResource parameterDistributionTypeTemplate}}"
                           SelectionChanged="cbParamDistr_SelectionChanged"
-                          SelectedValue="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
+                          SelectedItem="{Binding Path=DistributionType, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"  
                           DataContextChanged="cbParamDistr_DataContextChanged"
                           Loaded="cbParamDistr_Loaded"
                           >
