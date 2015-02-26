@@ -53,12 +53,12 @@
                           DisplayMemberPath="Name"
                           >
 
-                <ComboBox.SelectedItem>
+                <ComboBox.SelectedValue>
                     <MultiBinding Converter="{StaticResource MolGuidToMolPopForDiffMultiValueConverter}">
                         <Binding Path="driver_mol_guid_ref" />
                         <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type local:CellDetailsControl}}" Path="DataContext.cytosol" />
                     </MultiBinding>
-                </ComboBox.SelectedItem>
+                </ComboBox.SelectedValue>
 
                 <ComboBox.ItemsSource>
                     <CompositeCollection>
