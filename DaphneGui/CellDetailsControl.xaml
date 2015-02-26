@@ -142,7 +142,7 @@
         <DataTemplate x:Key="Distr_Death_TDE_Template">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
-                <local:ParamDistrControl Tag="DISCRETE" HorizontalAlignment="Left"
+                <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </DataTemplate>
