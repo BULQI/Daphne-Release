@@ -636,6 +636,7 @@ namespace DaphneGui
             // immediately run the simulation
             if (ControlledProfiling() == true)
             {
+                repetition = 0;
                 runSim();
             }
             postConstruction = true;
@@ -1808,6 +1809,7 @@ namespace DaphneGui
             ECMOptionsExpander.IsExpanded = false;
             mutex = true;
 
+            repetition = 0;
             runSim();
         }
 
@@ -2323,6 +2325,25 @@ namespace DaphneGui
             DataBasket.hdf5file.close(true);
         }
 
+        /// <summary>
+        /// indicates whether this is a repeating run, i.e. where the simulation restarts a determined
+        /// number of times automatically
+        /// </summary>
+        /// <returns>true for repeating run</returns>
+        public static bool RepeatingRun()
+        {
+            return sop.Protocol.experiment_reps > 1;
+        }
+
+        /// <summary>
+        /// indicates the end has not been reached in a repeating run
+        /// </summary>
+        /// <returns></returns>
+        private bool repeatInProgress()
+        {
+            return repetition < sop.Protocol.experiment_reps;
+        }
+
         private void run()
         {
             while (true)
@@ -2371,7 +2392,7 @@ namespace DaphneGui
                             if (sim.RunStatus != SimulationBase.RUNSTAT_RUN)
                             {
                                 // never rerun the simulation if the simulation was aborted
-                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repetition < sop.Protocol.experiment_reps)
+                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repeatInProgress() == true)
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
                                 }
@@ -2391,7 +2412,7 @@ namespace DaphneGui
                                         closeOutputFiles();
                                     }
                                     // for profiling: close the application after a completed experiment
-                                    if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
+                                    if (ControlledProfiling() == true && repeatInProgress() == false)
                                     {
                                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
                                         return;
@@ -2453,7 +2474,7 @@ namespace DaphneGui
         {
             // increment the repetition
             repetition++;
-            lockSaveStartSim(true);
+            runSim();
         }
 
         // re-enable the gui elements that got disabled during a simulation run
@@ -2811,13 +2832,18 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                bool repeat = RepeatingRun() && repetition > 1;
+
+                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
-                    // initiating a run starts always at repetition 1
-                    repetition = 1;
+                    // initiating a run starts always at repetition 1 unless we have a repeat run
+                    if (repeat == false)
+                    {
+                        repetition = 1;
+                    }
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
                     // after a run or vcr playback
-                    lockSaveStartSim(MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
+                    lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
                 }
                 else
                 {
