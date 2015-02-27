@@ -181,6 +181,8 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void EpigeneticGrid_Drop(object sender, DragEventArgs e)
         {
+            TargetItem = null;
+
             DataGrid dgSource = sender as DataGrid;
             if (dgSource.SelectedIndex < 0)
                 return;

@@ -860,6 +860,7 @@ namespace DaphneGui
                     {
                         bool isCell = true;
                         cell.membrane.AddMolPop(newLibMol, isCell);
+                        populateCollection();
                     }
                 }
                 else if (environment == "cytosol")
@@ -869,6 +870,7 @@ namespace DaphneGui
                     {
                         bool isCell = true;
                         cell.cytosol.AddMolPop(newLibMol, isCell);
+                        populateCollection();
                     }
                 }
 
@@ -877,6 +879,7 @@ namespace DaphneGui
                 {                    
                     bool isCell = false;                    
                     MainWindow.SOP.Protocol.scenario.environment.comp.AddMolPop(newLibMol, isCell);
+                    populateCollection();
                 }
             }
         }
