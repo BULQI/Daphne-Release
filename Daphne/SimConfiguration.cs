@@ -2215,7 +2215,6 @@ namespace Daphne
                         AllMols.Add(molpop);
                         popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
                         RenderPop rp = popOptions.GetMolRenderPop(molpop.renderLabel);
-                        rp.renderOn = true;
                     }
                 }
             }
