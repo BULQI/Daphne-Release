@@ -1379,6 +1379,12 @@ namespace DaphneGui
         private void CytoRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
         {
             CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
+            
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
         }
 
         private void CytoAddReacCxButton_Click(object sender, RoutedEventArgs e)
@@ -1901,6 +1907,70 @@ namespace DaphneGui
 
             ConfigReactionComplex newcrc = crc.Clone(true);
             MainWindow.GenericPush(newcrc);
+        }
+
+        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+
+        }
+
+        private void DivSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void MembRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellMolPopsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void ReacCompExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellDeathExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
         }
 
     }

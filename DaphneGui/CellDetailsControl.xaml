@@ -316,7 +316,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        Expanded="CellMolPopsExpander_Expanded">
 
                 <!-- Cell Molecular Populations -->
                 <StackPanel>
@@ -611,6 +612,7 @@
                         BorderThickness="1"
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        Expanded="CellReacExpander_Expanded"
                         >
 
                 <StackPanel>
@@ -855,7 +857,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        Expanded="ReacCompExpander_Expanded">
 
                 <StackPanel>
 
@@ -902,7 +905,8 @@
                                     Canvas.ZIndex="1"
                                     BorderThickness="1"
                                     BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                          Expanded="MembRCDetailsExpander_Expanded">
 
                                     <StackPanel Orientation="Vertical" >
                                         <StackPanel Orientation="Horizontal">
@@ -1011,7 +1015,8 @@
                                     Canvas.ZIndex="1"
                                     BorderThickness="1"
                                     BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                          >
 
                                     <StackPanel Orientation="Vertical" >
                                         <StackPanel Orientation="Horizontal">
@@ -1084,7 +1089,8 @@
             <!-- Cell Death -->
             <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
                                                 Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
-                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                Expanded="CellDeathExpander_Expanded">
                 <StackPanel>
                     <StackPanel x:Name="spDeath" Orientation="Vertical" >
 
@@ -1108,7 +1114,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"                                        
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        Expanded="DivSchemeExpander_Expanded" >
 
                 <!--Expanded="DivSchemeExpander_Expanded"-->
                 <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
@@ -1198,7 +1205,9 @@
                     Canvas.ZIndex="1"
                     BorderThickness="1"
                     BorderBrush="Black"
-                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                    Expanded="DiffSchemeExpander_Expanded"
+                >
 
                 <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
                     <StackPanel>
