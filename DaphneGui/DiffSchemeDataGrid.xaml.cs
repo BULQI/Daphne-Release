@@ -131,6 +131,80 @@ namespace DaphneGui
         {
         }
 
+        /// <summary>
+        /// This method is for drag-and-drop functionality. It allows the user to move a state up or down
+        /// in the epigenetic map grid. The corresponding changes happen in the regulators grid.
+        /// Remember that any time the rows are added/deleted/moved in the epigenetic grid, you must
+        /// call the update_datagrid_rowheaders method for both grids.
+        /// </summary>
+        private ConfigActivationRow DraggedItem;
+        private ConfigActivationRow TargetItem;
+
+        private void EpigeneticGrid_MouseMove(object sender, MouseEventArgs e)
+        {
+            DataGrid dgSource = sender as DataGrid;
+            if (dgSource.SelectedIndex < 0)
+                return;
+
+            ConfigActivationRow row = dgSource.SelectedItem as ConfigActivationRow;
+            DraggedItem = row;
+
+            if (row != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragDrop.DoDragDrop(dgSource,
+                             row,
+                             DragDropEffects.Copy);
+
+                if (TargetItem == null)
+                    return;
+
+                ConfigTransitionScheme scheme = DataContext as ConfigTransitionScheme;
+
+                //Get indices of the dragged and target rows
+                var draggedIndex = scheme.activationRows.IndexOf(DraggedItem);
+                var targetIndex = scheme.activationRows.IndexOf(TargetItem);
+
+                //Call Move method
+                scheme.MoveState(draggedIndex, targetIndex);
+                dgSource.SelectedIndex = targetIndex;
+
+                //Update row headers in both grids
+                DiffSchemeDataGrid.update_datagrid_rowheaders(dgSource);
+                DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
+            }
+        }
+
+        /// <summary>
+        /// This method gets the item at the destination row of the dragged item.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EpigeneticGrid_Drop(object sender, DragEventArgs e)
+        {
+            DataGrid dgSource = sender as DataGrid;
+            if (dgSource.SelectedIndex < 0)
+                return;
+
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            // iteratively traverse the visual tree
+            while ((dep != null) && !(dep is DataGridRow))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+                return;
+
+            if (dep is DataGridRow)
+            {
+                TargetItem = (ConfigActivationRow)((dep as DataGridRow).Item);
+            }
+        }
+
+
+        ///************************************
+
         #endregion
 
 

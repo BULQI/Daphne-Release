@@ -4622,6 +4622,48 @@ namespace Daphne
             OnPropertyChanged("Driver");
         }
 
+        /// <summary>
+        /// Move an activation row from one index to another
+        /// </summary>
+        /// <param name="sourceIndex"></param>
+        /// <param name="targetIndex"></param>
+        public void MoveState(int sourceIndex, int targetIndex)
+        {
+            if (sourceIndex == targetIndex)
+                return;
+
+            if (sourceIndex < 0 || sourceIndex >= activationRows.Count)
+                return;
+
+            if (targetIndex < 0 || targetIndex >= activationRows.Count)
+                return;
+
+            string state = Driver.states[sourceIndex];
+            Driver.states.RemoveAt(sourceIndex);
+            Driver.states.Insert(targetIndex, state);  
+
+            ConfigActivationRow car = new ConfigActivationRow();
+            car = activationRows[sourceIndex];
+            activationRows.RemoveAt(sourceIndex);
+            activationRows.Insert(targetIndex, car);
+
+            OnPropertyChanged("activationRows");
+
+            ConfigTransitionDriverRow ctdr = Driver.DriverElements[sourceIndex];
+            Driver.DriverElements.RemoveAt(sourceIndex);
+            Driver.DriverElements.Insert(targetIndex, ctdr);
+
+            for (int i = 0; i < Driver.DriverElements.Count; i++)
+            {
+                var elem = Driver.DriverElements[i].elements;
+                ConfigTransitionDriverElement ctde = elem[sourceIndex];
+                elem.RemoveAt(sourceIndex);
+                elem.Insert(targetIndex, ctde);
+            }
+
+            OnPropertyChanged("Driver");
+        }
+
         public ConfigTransitionScheme Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();

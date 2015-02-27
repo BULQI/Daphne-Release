@@ -444,6 +444,24 @@ namespace DaphneGui
             geneview.SortDescriptions.Add(geneSort);
         }
 
+        private void ReacComplexExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void ReactionsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
         //private Cursor _cursor;
 
         //private void OnResizeThumbDragStarted(object sender, DragStartedEventArgs e)
