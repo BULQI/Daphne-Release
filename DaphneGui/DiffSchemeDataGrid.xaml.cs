@@ -164,6 +164,8 @@ namespace DaphneGui
                 var draggedIndex = scheme.activationRows.IndexOf(DraggedItem);
                 var targetIndex = scheme.activationRows.IndexOf(TargetItem);
 
+                
+
                 //Call Move method
                 scheme.MoveState(draggedIndex, targetIndex);
                 dgSource.SelectedIndex = targetIndex;
@@ -181,6 +183,7 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void EpigeneticGrid_Drop(object sender, DragEventArgs e)
         {
+            TargetItem = null;
             DataGrid dgSource = sender as DataGrid;
             if (dgSource.SelectedIndex < 0)
                 return;
@@ -196,6 +199,7 @@ namespace DaphneGui
             if (dep == null)
                 return;
 
+            
             if (dep is DataGridRow)
             {
                 TargetItem = (ConfigActivationRow)((dep as DataGridRow).Item);
