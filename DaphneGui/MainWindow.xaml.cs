@@ -636,8 +636,7 @@ namespace DaphneGui
             // immediately run the simulation
             if (ControlledProfiling() == true)
             {
-                repetition = 0;
-                runSim();
+                runSim(true);
             }
             postConstruction = true;
         }
@@ -1809,8 +1808,7 @@ namespace DaphneGui
             ECMOptionsExpander.IsExpanded = false;
             mutex = true;
 
-            repetition = 0;
-            runSim();
+            runSim(true);
         }
 
         /// <summary>
@@ -2474,7 +2472,7 @@ namespace DaphneGui
         {
             // increment the repetition
             repetition++;
-            runSim();
+            runSim(false);
         }
 
         // re-enable the gui elements that got disabled during a simulation run
@@ -2740,9 +2738,13 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        internal void runSim()
+        /// <param name="setRep">true if resetting the repetition variable is needed</param>
+        internal void runSim(bool setRep)
         {
-
+            if (setRep == true)
+            {
+                repetition = 1;
+            }
             switch (ToolWinType)
             {
                 case ToolWindowType.Tissue:
@@ -2836,11 +2838,6 @@ namespace DaphneGui
 
                 if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
-                    // initiating a run starts always at repetition 1 unless we have a repeat run
-                    if (repeat == false)
-                    {
-                        repetition = 1;
-                    }
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
                     // after a run or vcr playback
                     lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
@@ -2855,23 +2852,16 @@ namespace DaphneGui
                             sop.Protocol.SerializeToFile();
                             orig_content = sop.Protocol.SerializeToStringSkipDeco();
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
                             lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
                             if (saveScenarioUsingDialog() == true)
                             {
-                                // initiating a run starts always at repetition 1
-                                repetition = 1;
-                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
                             lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
@@ -2928,7 +2918,7 @@ namespace DaphneGui
             }
 
             bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
-            repetition = 1;
+
             lockSaveStartSim(!mouseDrag);
 
             if (sim.RunStatus == SimulationBase.RUNSTAT_READY)

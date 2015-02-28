@@ -172,7 +172,7 @@ namespace Workbench
                     if (Chart.Legends.Count > 0)    //this means graph is already created
                     {
                         redraw_flag = true;
-                        MW.runSim();
+                        MW.runSim(true);
                     }
                 }
                 else
@@ -244,7 +244,7 @@ namespace Workbench
                     if (Chart.Legends.Count > 0)    //this means graph is already created
                     {
                         redraw_flag = true;
-                        MW.runSim();
+                        MW.runSim(true);
                     }
                 }
                 else
@@ -272,7 +272,7 @@ namespace Workbench
         private void DelayedRunSim(object state, bool timedOut)
         {
             redraw_flag = true;
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runSim(); }), null);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runSim(true); }), null);
         }
 
         private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
