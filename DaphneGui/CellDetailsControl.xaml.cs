@@ -359,7 +359,7 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
 
-            MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -371,11 +371,19 @@ namespace DaphneGui
                 }
             }
 
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
+            {
+                if (crc.genes_dict.ContainsKey(gene.entity_guid))
+                {
+                    cell.cytosol.reaction_complexes.Remove(crc);
+                }
+            }
+
             if (cell.diff_scheme != null)
             {
                 if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
                 {
-                    cell.diff_scheme.genes.Remove(gene.entity_guid);
+                    cell.diff_scheme.DeleteGene(gene.entity_guid);
                 }
             }
 
@@ -383,7 +391,7 @@ namespace DaphneGui
             {
                 if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
                 {
-                    cell.div_scheme.genes.Remove(gene.entity_guid);
+                    cell.div_scheme.DeleteGene(gene.entity_guid);
                 }
             }
 
