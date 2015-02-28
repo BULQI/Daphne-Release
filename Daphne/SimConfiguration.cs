@@ -5598,6 +5598,28 @@ namespace Daphne
             return false;
         }    
 
+        public bool HasGene(string geneguid)
+        {
+            foreach (string molguid in reactants_molecule_guid_ref)
+            {
+                if (molguid == geneguid)
+                    return true;
+            }
+            foreach (string molguid in modifiers_molecule_guid_ref)
+            {
+                if (molguid == geneguid)
+                    return true;
+            }
+            foreach (string molguid in products_molecule_guid_ref)
+            {
+                if (molguid == geneguid)
+                    return true;
+            }
+
+            return false;
+        }
+
+
         public bool IsBoundaryReaction(EntityRepository repos)
         {
             if (HasBoundaryMolecule(repos) == true && HasBulkMolecule(repos) == true)

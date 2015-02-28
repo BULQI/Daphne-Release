@@ -359,10 +359,17 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
 
-            MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
-
+            MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
+
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
+            {
+                if (cr.HasGene(gene.entity_guid))
+                {
+                    cell.cytosol.Reactions.Remove(cr);
+                }
+            }
 
             if (cell.diff_scheme != null)
             {
@@ -385,6 +392,12 @@ namespace DaphneGui
             }
 
             txtGeneName.IsEnabled = false;
+
+            CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
+
+            if (lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            
         }
 
         private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
