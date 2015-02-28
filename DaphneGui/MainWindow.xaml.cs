@@ -2748,7 +2748,7 @@ namespace DaphneGui
             switch (ToolWinType)
             {
                 case ToolWindowType.Tissue:
-                    runSim_Tissue();
+                    runSim_Tissue(!firstRun);
                     break;
                 case ToolWindowType.VatRC:
                     runSim_VatRc();
@@ -2758,7 +2758,7 @@ namespace DaphneGui
             }
         }
 
-        private void runSim_Tissue()
+        private void runSim_Tissue(bool repeat)
         {
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
@@ -2834,8 +2834,6 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                bool repeat = RepeatingRun() && repetition > 1;
-
                 if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
