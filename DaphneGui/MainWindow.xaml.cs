@@ -2738,10 +2738,10 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        /// <param name="setRep">true if resetting the repetition variable is needed</param>
-        internal void runSim(bool setRep)
+        /// <param name="firstRun">true if this is a single-shot simulation or the first iteration of a repeated run</param>
+        internal void runSim(bool firstRun)
         {
-            if (setRep == true)
+            if (firstRun == true)
             {
                 repetition = 1;
             }
