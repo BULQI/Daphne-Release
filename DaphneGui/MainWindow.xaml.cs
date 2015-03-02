@@ -2488,7 +2488,7 @@ namespace DaphneGui
                 {
                     vcrControl.FrameNames.Clear();
                     // find the frame names and with them the number of frames
-                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiment_VCR/VCR_Frames"));
+                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames("/Experiment_VCR/VCR_Frames");
 
                     if (vcrControl.FrameNames.Count > 0)
                     {
@@ -2898,7 +2898,7 @@ namespace DaphneGui
 
                         if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.AppPath, sim.Reporter.FileName, "vcr", ".hdf5", true) == false)
                         {
-                            MessageBox.Show("Error creating HDF5 file. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         DataBasket.hdf5file.openWrite(true);
                         // group for this experiment
