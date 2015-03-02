@@ -431,7 +431,7 @@ namespace DaphneGui
             {
                 VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
                 ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
-                crc.AddReactionMolPops(cr, MainWindow.SOP.Protocol.entity_repository);
+                crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
                 s.InitializeAllMols();
                 s.InitializeAllReacs();
             }

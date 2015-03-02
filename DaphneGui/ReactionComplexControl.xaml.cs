@@ -56,13 +56,19 @@ namespace DaphneGui
 
         private void ButtonEditComplex_Click(object sender, RoutedEventArgs e)
         {
-            // Data context: compartment's list of reactions, need access to ER?
             ConfigReactionComplex crc = (ConfigReactionComplex)ListBoxReactionComplexes.SelectedItem;
 
             if (crc == null)
                 return;
 
-            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, MainWindow.SOP.Protocol.scenario.environment.comp);
+            ConfigCompartment comp = null;
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            if (this.DataContext.GetType() == typeof(ConfigCompartment))
+            {
+                comp = (ConfigCompartment)this.DataContext;
+            }
+
+            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, comp, er);          
             arc.ShowDialog();
         }
 
@@ -76,8 +82,6 @@ namespace DaphneGui
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
         {
-            // This data context should be a compartment
-            // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
             if (ListBoxReactionComplexes.SelectedIndex < 0)
             {
                 MessageBox.Show("Select a reaction complex to copy from.");
@@ -103,20 +107,20 @@ namespace DaphneGui
 
         private void ButtonNewReactionComplex_Click(object sender, RoutedEventArgs e)
         {
-            // This data context should be a compartment
-            // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
-            // Will AddReacComplex need to access the ER for available reactions? 
-            NewEditReacComplex dlg = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, MainWindow.SOP.Protocol.scenario.environment.comp);
+            ConfigCompartment comp = null;
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            if (this.DataContext.GetType() == typeof(ConfigCompartment))
+            {
+                comp = (ConfigCompartment)this.DataContext;               
+            }
 
+            NewEditReacComplex dlg = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, comp, er);
             if (dlg.ShowDialog() == true)
                 ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }
 
         private void ButtonRemoveComplex_Click(object sender, RoutedEventArgs e)
         {
-            // This data context should be the list of reactions
-            // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
-
             ConfigReactionComplex crc = (ConfigReactionComplex)(ListBoxReactionComplexes.SelectedItem);
             if (crc != null)
             {

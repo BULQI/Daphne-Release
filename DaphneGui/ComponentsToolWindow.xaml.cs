@@ -188,73 +188,6 @@ namespace DaphneGui
             //DO WE NEED TO REMOVE REACTION COMPLEXES THAT USE THIS REACTION?
         }
 
-        //LIBRARIES REACTION COMPLEXES HANDLERS
-
-        private void btnCopyReactionComplex_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            if (lbComplexes.SelectedIndex < 0)
-            {
-                MessageBox.Show("Select a reaction complex to copy from.");
-                return;
-            }
-
-            ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
-            ConfigReactionComplex crcNew = crcCurr.Clone(false);
-
-            Level level = this.DataContext as Level;
-            level.entity_repository.reaction_complexes.Add(crcNew);
-
-            lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
-        }
-
-        private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, null);
-            if (arc.ShowDialog() == true)
-                lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
-        }
-
-        private void btnEditReactionComplex_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
-            if (crc == null)
-                return;
-
-            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, null);
-            arc.ShowDialog();
-
-        }
-
-        private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
-            if (crc != null)
-            {
-                MessageBoxResult res;
-                res = MessageBox.Show("Are you sure you would like to remove this reaction complex?", "Warning", MessageBoxButton.YesNo);
-                if (res == MessageBoxResult.No)
-                    return;
-
-                int index = lbComplexes.SelectedIndex;
-
-                Level level = this.DataContext as Level;
-                level.entity_repository.reaction_complexes.Remove(crc);
-
-                lbComplexes.SelectedIndex = index;
-
-                if (index >= lbComplexes.Items.Count)
-                    lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
-
-                if (lbComplexes.Items.Count == 0)
-                    lbComplexes.SelectedIndex = -1;
-
-            }
-        }
-
         private void GeneTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ConfigGene gene = dgLibGenes.SelectedItem as ConfigGene;
@@ -277,73 +210,6 @@ namespace DaphneGui
             gene = (ConfigGene)dgLibGenes.SelectedItem;
             dgLibGenes.ScrollIntoView(gene);
 
-        }
-
-        //private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
-
-        //    if (cm == null)
-        //        return;
-
-        //    Level level = this.DataContext as Level;
-        //    if (level is Protocol)
-        //    {
-        //        Protocol p = level as Protocol;
-        //        cm.ValidateName(p);
-        //    }
-
-        //    MainWindow.SOP.SelectedRenderSkin.SetRenderMolName(cm.renderLabel, cm.Name);
-
-        //    int index = dgLibMolecules.SelectedIndex;
-        //    dgLibMolecules.InvalidateVisual();
-        //    dgLibMolecules.Items.Refresh();
-        //    dgLibMolecules.SelectedIndex = index;
-        //    cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-        //    dgLibMolecules.ScrollIntoView(cm);
-        //}
-
-        private void DrawSelectedReactionComplex()
-        {
-            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
-
-            //Cleanup any previous RC stuff
-            Protocol p = null;
-            Level level = this.DataContext as Level;
-
-            if (level is Protocol)
-            {
-                p = level as Protocol;
-                foreach (ConfigCell cell in p.entity_repository.cells.ToList())
-                {
-                    if (cell.CellName == "RCCell")
-                    {
-                        p.entity_repository.cells.Remove(cell);
-                    }
-                }
-            }
-
-            ConfigCell cc = new ConfigCell();
-
-            cc.CellName = "RCCell";
-            foreach (ConfigMolecularPopulation cmp in crc.molpops)
-            {
-                cc.cytosol.molpops.Add(cmp);
-            }
-
-            foreach (ConfigReaction cr in crc.reactions)
-            {
-                cc.cytosol.Reactions.Add(cr.Clone(true));
-            }
-            p.entity_repository.cells.Add(cc);
-
-            CellPopulation cp = new CellPopulation();
-            cp.Cell = cc;
-            cp.cellpopulation_name = "RC cell";
-            cp.number = 1;
-
-            MainWindow.Sim.Load(p, true);
         }
 
         public ConfigReactionComplex GetConfigReactionComplex()
@@ -374,24 +240,6 @@ namespace DaphneGui
             geneview.SortDescriptions.Clear();
             SortDescription geneSort = new SortDescription("Name", ListSortDirection.Ascending);
             geneview.SortDescriptions.Add(geneSort);
-        }
-
-        private void btnSaveReacToProtocol_Click(object sender, RoutedEventArgs e)
-        {
-            ListBox lbComplexes = RCControl.ListBoxReactionComplexes;
-            ListView lvReacComplexReactions = RCControl.ListViewReacComplexReactions;
-            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
-
-            if (crc == null)
-                return;
-
-            if (lvReacComplexReactions.SelectedItems.Count <= 0)
-                return;
-
-            ConfigReaction reac = (ConfigReaction)(lvReacComplexReactions.SelectedItem);
-
-            ConfigReaction newreac = reac.Clone(true);
-            MainWindow.GenericPush(newreac);
         }
 
         private void MoleculesExpander_Expanded(object sender, RoutedEventArgs e)
@@ -461,37 +309,6 @@ namespace DaphneGui
 
             element.BringIntoView();
         }
-
-        //private Cursor _cursor;
-
-        //private void OnResizeThumbDragStarted(object sender, DragStartedEventArgs e)
-        //{
-        //    _cursor = Cursor;
-        //    Cursor = Cursors.SizeNWSE;
-        //}
-
-        //private void OnResizeThumbDragCompleted(object sender, DragCompletedEventArgs e)
-        //{
-        //    Cursor = _cursor;
-        //}
-
-        //private void OnResizeThumbDragDelta(object sender, DragDeltaEventArgs e)
-        //{
-        //    double yChange = e.VerticalChange;
-        //    double yNew = dgLibMolecules.ActualHeight + yChange;
-
-        //    //make sure not to resize to negative width or heigth  
-        //    if (yNew < dgLibMolecules.MinHeight)
-        //        yNew = dgLibMolecules.MinHeight;
-
-        //    if (yNew > dgLibMolecules.MaxHeight)
-        //        yNew = dgLibMolecules.MaxHeight;
-            
-        //    dgLibMolecules.Height = yNew;
-        //}
-
-
-
 
     }
 

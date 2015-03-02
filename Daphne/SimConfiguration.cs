@@ -6188,7 +6188,7 @@ namespace Daphne
         /// </summary>
         /// <param name="reac"></param>
         /// <param name="er"></param>
-        public void AddReactionMolPops(ConfigReaction reac, EntityRepository er)
+        public void AddReactionMolPopsAndGenes(ConfigReaction reac, EntityRepository er)
         {
             CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref, er);
             CreateReactionMolpops(reac, reac.products_molecule_guid_ref, er);
