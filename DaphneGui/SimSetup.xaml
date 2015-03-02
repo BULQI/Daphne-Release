@@ -51,29 +51,31 @@
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
                                             TextAlignment="Right"
                                             Width="120"
+                                            ToolTip="The total simulation time."
                                             />
                 <Slider Name="time_duration_slider"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center"
-                                        Width="100"
-                                        RenderTransform="1.0,0,0,0.5,0,7"
-                                        Minimum="0.001" 
-                                        Maximum="28800" 
-                                        Value="{Binding Path=Protocol.scenario.time_config.duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                        IsSnapToTickEnabled="True" 
-                                        TickFrequency="10" 
-                                        KeyboardNavigation.IsTabStop="False"
-                                        ValueChanged="time_duration_slider_ValueChanged"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Width="100"
+                            RenderTransform="1.0,0,0,0.5,0,7"
+                            Minimum="0.001" 
+                            Maximum="28800" 
+                            Value="{Binding Path=Protocol.scenario.time_config.duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            IsSnapToTickEnabled="True" 
+                            TickFrequency="10" 
+                            KeyboardNavigation.IsTabStop="False"
+                            ValueChanged="time_duration_slider_ValueChanged"
                                         />
                 <editors:DoubleEditBox x:Name="TimeDurationReadout" 
-                                                        CheckBoxVisibility="Collapsed" 
-                                                        SpinnerVisibility="Collapsed"
-                                                        HorizontalAlignment="Right"
-                                                        Format="F3"
-                                                        StepValue="100"
-                                                        Width="100" 
-                                                        CenterSlotHorizontalAlignment="Right"
-                                                        Value="{Binding ElementName=time_duration_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="F3"
+                                        StepValue="100"
+                                        Width="100" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=time_duration_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        ToolTip="The total simulation time."
                                                         />
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
@@ -81,11 +83,20 @@
             <!-- Rendering -->
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="rendering interval" Margin="6,0"
-                                            Grid.Column="0" Grid.Row="3"  
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            TextAlignment="Right"
-                                            Width="120"
-                                            />
+                                Grid.Column="0" Grid.Row="3"  
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                TextAlignment="Right"
+                                Width="120"
+                                ToolTipService.ShowDuration="80000">
+                 
+                           <TextBlock.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The rendering interval controls how frequently the 3D graphics are updated during the simulation. 
+                                    It also controls how often data is saved for playback after the simulation.
+                                    Larger rendering intervals will make the simulation run faster.
+                               </TextBlock>
+                           </TextBlock.ToolTip>
+                </TextBlock>
                 <Slider Name="render_interval_slider"
                                         Orientation="Horizontal"
                                         VerticalAlignment="Center"
@@ -108,7 +119,17 @@
                                         Width="100" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=render_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                 />
+                                       ToolTipService.ShowDuration="80000">
+                    
+                    <editors:DoubleEditBox.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                The rendering interval controls how frequently the 3D graphics are updated during the simulation. 
+                                It also controls how often data is saved for playback after the simulation.
+                                Larger rendering intervals will make the simulation run faster.
+                        </TextBlock>
+                    </editors:DoubleEditBox.ToolTip>
+                    
+                </editors:DoubleEditBox>
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
             
@@ -119,7 +140,17 @@
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             TextAlignment="Right"
                             Width="120"
-                />
+                           ToolTipService.ShowDuration="60000">
+                    
+                        <TextBlock.ToolTip>
+                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The sampling interval controls how frequently the data are written to the report files. 
+                                    Larger sampling intervals will make the simulation run faster.
+                            </TextBlock>
+                        </TextBlock.ToolTip>
+                    
+                </TextBlock>
+            
                 <Slider Name="sampling_interval_slider"
                         Orientation="Horizontal"
                         VerticalAlignment="Center"
@@ -134,15 +165,25 @@
                         ValueChanged="sampling_interval_slider_ValueChanged"
                 />
                 <editors:DoubleEditBox x:Name="SamplingInterval" 
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Right"
-                                        Format="N3"
-                                        StepValue="0.01"
-                                        Width="100" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                />
+                            CheckBoxVisibility="Collapsed" 
+                            SpinnerVisibility="Collapsed"
+                            HorizontalAlignment="Right"
+                            Format="N3"
+                            StepValue="0.01"
+                            Width="100" 
+                            CenterSlotHorizontalAlignment="Right"
+                            Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTipService.ShowDuration="60000">
+
+                    <editors:DoubleEditBox.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The sampling interval controls how frequently the data are written to the report files. 
+                                    Larger sampling intervals will make the simulation run faster.
+                        </TextBlock>
+                    </editors:DoubleEditBox.ToolTip>
+
+                </editors:DoubleEditBox>
+                
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
@@ -153,7 +194,19 @@
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             TextAlignment="Right"
                             Width="120"
-                />
+                            ToolTipService.ShowDuration="80000">
+
+                <TextBlock.ToolTip>
+                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                            The integrator step controls the time interval for upadating the molecular concentrations. 
+                            Increasing the integrator step will make the simulation run faster, but may 
+                            cause the simulation to become unstable and crash.
+                            It is generally recommended that you do not change this value.
+                    </TextBlock>
+                </TextBlock.ToolTip>
+                    
+                </TextBlock>
+                
                 <Slider Name="integrator_step_slider"
                         Orientation="Horizontal"
                         VerticalAlignment="Center"
@@ -168,15 +221,27 @@
                         ValueChanged="integrator_step_slider_ValueChanged"
                 />
                 <editors:DoubleEditBox x:Name="IntegratorStep" 
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Right"
-                                        Format="N3"
-                                        StepValue="0.01"
-                                        Width="100" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=integrator_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                />
+                                    CheckBoxVisibility="Collapsed" 
+                                    SpinnerVisibility="Collapsed"
+                                    HorizontalAlignment="Right"
+                                    Format="N3"
+                                    StepValue="0.01"
+                                    Width="100" 
+                                    CenterSlotHorizontalAlignment="Right"
+                                    Value="{Binding ElementName=integrator_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTipService.ShowDuration="80000">
+
+                    <editors:DoubleEditBox.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                            The integrator step controls the time interval for upadating the molecular concentrations. 
+                            Increasing the integrator step will make the simulation run faster, but may 
+                            cause the simulation to become unstable and crash.
+                            It is generally recommended that you do not change this value.
+                        </TextBlock>
+                    </editors:DoubleEditBox.ToolTip>
+
+                </editors:DoubleEditBox>
+                
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
@@ -187,7 +252,18 @@
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
                                             TextAlignment="Right"
                                             Width="120"
-                                            />
+                                            ToolTipService.ShowDuration="8000"
+                                            >
+                    <TextBlock.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                            This determines how many times the simulation will be repeated before control is returned to the user.
+                            Each repetition starts with the same initial conditions and will generate new report and playback files.
+                            Repeating the simulation can be helpful for exploring the range of behavior when there are stochastic events.
+                        </TextBlock>
+                    </TextBlock.ToolTip>
+                    
+                </TextBlock>
+                
                 <Slider Name="exp_rep_slider"
                                         Orientation="Horizontal"
                                         VerticalAlignment="Center"
@@ -207,7 +283,19 @@
                                         Width="100" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=exp_rep_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />
+                                        ToolTipService.ShowDuration="80000">
+
+                        <editors:Int32EditBox.ToolTip>
+                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                This deterimines how many times the simulation will be repeated before control is returned to the user.
+                                Each repetition starts with the same initial conditions and will generate new report and playback files.
+                                Repeating the simulation can be helpful for exploring the range of behavior when there are stochastic events, 
+                                such as stochastic cell motion or transitions for cell death, differentiation, or division.
+                            </TextBlock>
+                        </editors:Int32EditBox.ToolTip>
+                    
+                </editors:Int32EditBox>
+                
                 <TextBlock Text="times" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
             
@@ -218,11 +306,48 @@
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             TextAlignment="Right"
                             Width="120"
-                            />
+                            ToolTipService.ShowDuration="80000">
+                    
+                       <TextBlock.ToolTip>
+                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                The global random seed value is used to insure that user can reproduce the same simulation results when 
+                                the simulation includes stochastic processes, such as transitions for cell death, differentiation, or division.
+                                That is, running this protocol with the same initial conditions and the same seed will produce the same behavior.
+                                Changing this value will cause the simulation to sample a different set of possible events. 
+                            </TextBlock>
+                        </TextBlock.ToolTip>
+                        
+                </TextBlock>
+
                 <TextBox Text="{Binding Path=Protocol.sim_params.globalRandomSeed, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
                          x:Name="global_random_seed"
-                         LostFocus="global_random_seed_LostFocus" Width="90"/>
-                <Button x:Name="btnNewRandomSeed" Click="btnNewRandomSeed_Click" Margin="6,0">New random seed</Button>
+                         LostFocus="global_random_seed_LostFocus" Width="90"
+                         ToolTipService.ShowDuration="80000">
+
+                        <TextBox.ToolTip>
+                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The global random seed value is used to insure that user can reproduce the same simulation results when 
+                                    the simulation includes stochastic processes, such as transitions for cell death, differentiation, or division.
+                                    That is, running this protocol with the same initial conditions and the same seed will produce the same behavior.
+                                    Changing this value will cause the simulation to sample a different set of possible events.
+                            </TextBlock>
+                        </TextBox.ToolTip>
+                   
+                </TextBox>
+
+                <Button x:Name="btnNewRandomSeed" Click="btnNewRandomSeed_Click" Margin="6,0" ToolTipService.ShowDuration="8000">New random seed
+
+                    <Button.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                            This will randomly generate a new seed value. 
+                            Simulation results generated with a new seed value will be different than simulation results 
+                            generated with a different seed value if there are stochastic events such as 
+                            stochastic cell motion or transitions for cell death, differentiation, or division.
+                        </TextBlock>
+                    </Button.ToolTip>
+                    
+                </Button>
+                
             </StackPanel>
 
             <!-- Toroidal BC selection -->
@@ -239,8 +364,9 @@
                 </StackPanel.Resources>
         
                 <TextBlock Text="Boundary Condition" FontWeight="Bold" Margin="0,20,0,0"/>
-                
-                <ContentControl>
+
+                <ContentControl ToolTipService.ShowDuration="20000">
+                    
                     <ContentControl.Style>
                         <Style TargetType="ContentControl">
                             <Setter Property="Template" Value="{x:Null}" />
@@ -252,7 +378,28 @@
                             </Style.Triggers>
                         </Style>
                     </ContentControl.Style>
+                    
+                    <ContentControl.ToolTip>
+                        <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap">
+                            This setting controls the behavior of cells and molecules in the extracellular medium
+                            at the boundaries of the simulation space.
+                             <LineBreak/><LineBreak/>
+                             <Run FontWeight="Bold" Text="zero flux:" />
+                            Cells experience a repulsive force at the boundary that tends to keep them in the simulation space,
+                            but they may exit the simulation space if they experience a large enough outward force. 
+                            Once a cell leaves the simulation space it is removed from the simulation.
+                            <LineBreak/>
+                            Molecules do not leave the simulations space.
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold" Text="toroidal:" />
+                            Cells that leave the simulation space through one face of the cube re-enter on the opposite face. 
+                            <LineBreak/>
+                            Molecular concentrations at similar positions on opposite faces of the simulation space (cube) are equivalent.
+                        </TextBlock>
+                    </ContentControl.ToolTip>
+                    
                 </ContentControl>
+                
             </StackPanel>
      </StackPanel>
    </Grid>
