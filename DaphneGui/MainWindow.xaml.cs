@@ -2493,7 +2493,7 @@ namespace DaphneGui
                     if (vcrControl.FrameNames.Count > 0)
                     {
                         // open the parent group for this experiment
-                        DataBasket.hdf5file.openGroup(String.Format("/Experiment_VCR"));
+                        DataBasket.hdf5file.openGroup("/Experiment_VCR");
 
                         // open the group that holds the frames for this experiment
                         DataBasket.hdf5file.openGroup("VCR_Frames");
