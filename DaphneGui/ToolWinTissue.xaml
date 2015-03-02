@@ -120,7 +120,8 @@
                                 Canvas.ZIndex="1"
                             BorderThickness="1"
                             BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                            Expanded="CellDeathParamsExpander_Expanded">
 
                         <StackPanel Orientation="Vertical" >
                             <StackPanel.ToolTip>
@@ -146,7 +147,8 @@
                     Canvas.ZIndex="1"
                     BorderThickness="1"
                     BorderBrush="Black"
-                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                    Expanded="InteractionParamsExpander_Expanded">
 
                         <StackPanel>
 

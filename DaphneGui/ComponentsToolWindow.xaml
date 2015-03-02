@@ -39,7 +39,9 @@
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
         
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
-        
+
+        <local:selectedRCToBoolConverter x:Key="selectedRCToBoolConv"/>
+
     </docking:ToolWindow.Resources>
 
     <!-- LIBRARIES: MOLECULES, REACTIONS, CELLS, REACTION COMPLEXES, AND DIFF SCHEMES -->
@@ -212,7 +214,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Weight" SortMemberPath="MolecularWeight">
+                            <DataGridTemplateColumn Header="Weight" SortMemberPath="MolecularWeight" Visibility="Collapsed">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
@@ -221,7 +223,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Radius" SortMemberPath="EffectiveRadius">
+                            <DataGridTemplateColumn Header="Radius" SortMemberPath="EffectiveRadius" Visibility="Collapsed">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
@@ -261,7 +263,8 @@
                                 Canvas.ZIndex="1"
                                 BorderThickness="1"
                                 BorderBrush="Black"                        
-                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"  
+                                Expanded="ReactionsExpander_Expanded"
                                 >
                     <StackPanel>
                         <ListView x:Name="lvReactions" 
@@ -368,7 +371,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        Expanded="ReacComplexExpander_Expanded">
 
                     <!-- REACTION COMPLEXES -->
                     <Expander.Resources>
@@ -403,9 +407,12 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                                        
                             Width="480"
                             Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
-                            HorizontalAlignment="Left">
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding ElementName=RCControl, Path=SelectedReactionComplex, Converter={StaticResource selectedRCToBoolConv}}"
+                            >
+                            
                             <Grid>
-                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
+                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" />
                             </Grid>
                         </Expander>
                     </StackPanel>

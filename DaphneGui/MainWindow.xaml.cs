@@ -636,7 +636,7 @@ namespace DaphneGui
             // immediately run the simulation
             if (ControlledProfiling() == true)
             {
-                runSim();
+                runSim(true);
             }
             postConstruction = true;
         }
@@ -1808,7 +1808,7 @@ namespace DaphneGui
             ECMOptionsExpander.IsExpanded = false;
             mutex = true;
 
-            runSim();
+            runSim(true);
         }
 
         /// <summary>
@@ -2323,6 +2323,25 @@ namespace DaphneGui
             DataBasket.hdf5file.close(true);
         }
 
+        /// <summary>
+        /// indicates whether this is a repeating run, i.e. where the simulation restarts a determined
+        /// number of times automatically
+        /// </summary>
+        /// <returns>true for repeating run</returns>
+        public static bool RepeatingRun()
+        {
+            return sop.Protocol.experiment_reps > 1;
+        }
+
+        /// <summary>
+        /// indicates the end has not been reached in a repeating run
+        /// </summary>
+        /// <returns></returns>
+        private bool repeatInProgress()
+        {
+            return repetition < sop.Protocol.experiment_reps;
+        }
+
         private void run()
         {
             while (true)
@@ -2371,7 +2390,7 @@ namespace DaphneGui
                             if (sim.RunStatus != SimulationBase.RUNSTAT_RUN)
                             {
                                 // never rerun the simulation if the simulation was aborted
-                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repetition < sop.Protocol.experiment_reps)
+                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repeatInProgress() == true)
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
                                 }
@@ -2391,7 +2410,7 @@ namespace DaphneGui
                                         closeOutputFiles();
                                     }
                                     // for profiling: close the application after a completed experiment
-                                    if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
+                                    if (ControlledProfiling() == true && repeatInProgress() == false)
                                     {
                                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
                                         return;
@@ -2453,7 +2472,7 @@ namespace DaphneGui
         {
             // increment the repetition
             repetition++;
-            lockSaveStartSim(true);
+            runSim(false);
         }
 
         // re-enable the gui elements that got disabled during a simulation run
@@ -2719,13 +2738,17 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        internal void runSim()
+        /// <param name="firstRun">true if this is a single-shot simulation or the first iteration of a repeated run</param>
+        internal void runSim(bool firstRun)
         {
-
+            if (firstRun == true)
+            {
+                repetition = 1;
+            }
             switch (ToolWinType)
             {
                 case ToolWindowType.Tissue:
-                    runSim_Tissue();
+                    runSim_Tissue(!firstRun);
                     break;
                 case ToolWindowType.VatRC:
                     runSim_VatRc();
@@ -2735,7 +2758,7 @@ namespace DaphneGui
             }
         }
 
-        private void runSim_Tissue()
+        private void runSim_Tissue(bool repeat)
         {
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
@@ -2811,13 +2834,11 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
-                    // initiating a run starts always at repetition 1
-                    repetition = 1;
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
                     // after a run or vcr playback
-                    lockSaveStartSim(MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
+                    lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
                 }
                 else
                 {
@@ -2829,23 +2850,16 @@ namespace DaphneGui
                             sop.Protocol.SerializeToFile();
                             orig_content = sop.Protocol.SerializeToStringSkipDeco();
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
                             lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
                             if (saveScenarioUsingDialog() == true)
                             {
-                                // initiating a run starts always at repetition 1
-                                repetition = 1;
-                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
                             lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
@@ -2902,7 +2916,7 @@ namespace DaphneGui
             }
 
             bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
-            repetition = 1;
+
             lockSaveStartSim(!mouseDrag);
 
             if (sim.RunStatus == SimulationBase.RUNSTAT_READY)

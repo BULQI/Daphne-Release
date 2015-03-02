@@ -762,6 +762,47 @@ namespace DaphneGui
                 
         }
 
+        private void EcsSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(ReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
+        }
+
+        private void BringExpanderIntoView(object sender)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void ReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            BringExpanderIntoView(sender);
+        }
+
+        private void ReacCompExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            BringExpanderIntoView(sender);
+        }
+
+        private void AddReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            BringExpanderIntoView(sender);
+        }
+
+        private void CreateNewReaction_Expanded(object sender, RoutedEventArgs e)
+        {
+            BringExpanderIntoView(sender);
+        }
+
+
     }
 
 

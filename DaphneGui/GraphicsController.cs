@@ -2071,7 +2071,7 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.SOP.Protocol.experiment_reps > 1)
+                if (MainWindow.RepeatingRun() == true)
                 {
                     int rep = MainWindow.Repetition;
                     int reps = MainWindow.SOP.Protocol.experiment_reps;

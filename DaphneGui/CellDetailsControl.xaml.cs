@@ -70,6 +70,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
@@ -183,7 +184,7 @@ namespace DaphneGui
             if (cmp == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -197,11 +198,14 @@ namespace DaphneGui
                 }
             }
 
-            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
+            // Don't need to check membrane reactions. 
+            // Membrane reactions can only have membrane-bound molecules, which will not be available for removal in cytosol.
+
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
             {
-                if (cr.HasMolecule(cmp.molecule.entity_guid))
+                if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.Reactions.Remove(cr);
+                    cell.cytosol.reaction_complexes.Remove(crc);
                 }
             }
 
@@ -264,7 +268,7 @@ namespace DaphneGui
             if (cmp == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -284,6 +288,22 @@ namespace DaphneGui
                 if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
                     cell.cytosol.Reactions.Remove(cr);
+                }
+            }
+
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
+            {
+                if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
+                {
+                    cell.cytosol.reaction_complexes.Remove(crc);
+                }
+            }
+
+            foreach (ConfigReactionComplex crc in cell.membrane.reaction_complexes.ToList())
+            {
+                if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
+                {
+                    cell.membrane.reaction_complexes.Remove(crc);
                 }
             }
 
@@ -312,6 +332,10 @@ namespace DaphneGui
 
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
+
+            ConfigGene erGene = gene.Clone(null);
+            MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
+
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
             CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
 
@@ -342,7 +366,8 @@ namespace DaphneGui
                 if (geneToAdd == null)
                     return;
 
-                cell.genes.Add(geneToAdd);
+                ConfigGene newgene = geneToAdd.Clone(null);
+                cell.genes.Add(newgene);
             }
 
             txtGeneName.IsEnabled = false;
@@ -353,16 +378,31 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
 
-            MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
-
+            MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
+
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
+            {
+                if (cr.HasGene(gene.entity_guid))
+                {
+                    cell.cytosol.Reactions.Remove(cr);
+                }
+            }
+
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
+            {
+                if (crc.genes_dict.ContainsKey(gene.entity_guid))
+                {
+                    cell.cytosol.reaction_complexes.Remove(crc);
+                }
+            }
 
             if (cell.diff_scheme != null)
             {
                 if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
                 {
-                    cell.diff_scheme.genes.Remove(gene.entity_guid);
+                    cell.diff_scheme.DeleteGene(gene.entity_guid);
                 }
             }
 
@@ -370,7 +410,7 @@ namespace DaphneGui
             {
                 if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
                 {
-                    cell.div_scheme.genes.Remove(gene.entity_guid);
+                    cell.div_scheme.DeleteGene(gene.entity_guid);
                 }
             }
 
@@ -379,6 +419,12 @@ namespace DaphneGui
             }
 
             txtGeneName.IsEnabled = false;
+
+            CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
+
+            if (lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            
         }
 
         private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
@@ -554,6 +600,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
@@ -992,7 +1039,14 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.AddGene(gene1.entity_guid);
+                scheme.AddGene(gene1.entity_guid);  
+
+                //HERE, WE NEED TO ADD THE GENE TO THE CELL ALSO
+                if (cell.HasGene(gene1.entity_guid) == false)
+                {
+                    ConfigGene newgene = gene1.Clone(null);
+                    cell.genes.Add(newgene);
+                }
               
                 //force refresh
                 //dataGrid.GetBindingExpression(DiffSchemeDataGrid.DiffSchemeSourceProperty).UpdateTarget();
@@ -1148,9 +1202,10 @@ namespace DaphneGui
             ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
+            //REMOVED this for resolving bug 2429 - the combo should populate from er.genes
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.HasGene(gene.entity_guid))
-                return;
+            //if (!cell.HasGene(gene.entity_guid))
+            //    return;
 
 
             if (ds != null)
@@ -1364,6 +1419,12 @@ namespace DaphneGui
         private void CytoRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
         {
             CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
+            
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
         }
 
         private void CytoAddReacCxButton_Click(object sender, RoutedEventArgs e)
@@ -1864,6 +1925,92 @@ namespace DaphneGui
         private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
         {
             this.BringIntoView();
+        }
+
+        private void CytoSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CytoReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(CytoReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
+        }
+
+        private void MembSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReactionComplex crc = ((ConfigReactionComplex)(MembReactionComplexListBox.SelectedItem));
+
+            ConfigReactionComplex newcrc = crc.Clone(true);
+            MainWindow.GenericPush(newcrc);
+        }
+
+        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+
+        }
+
+        private void DivSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void MembRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellMolPopsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void ReacCompExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellDeathExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
         }
 
     }
