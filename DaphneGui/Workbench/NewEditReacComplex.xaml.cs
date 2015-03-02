@@ -51,24 +51,21 @@ namespace DaphneGui
             }
         }
 
-        private ConfigCompartment comp;
+        //private ConfigCompartment comp;
         private Point mouseLocation;
+        //private ObservableCollection<ConfigReactionComplex> rc_list;
+        private ConfigCompartment comp;
+        private EntityRepository er;
 
         //To create a new rc
-        public NewEditReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp)
+        public NewEditReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp, EntityRepository _er)
         {
             InitializeComponent();
             this.Owner = Application.Current.MainWindow;
             dlgType = type;
             comp = _comp;
-            
-
-            Title = "Add Reaction Complex";
-            if (type == ReactionComplexDialogType.EditComplex)
-            {
-                Title = "Edit Reaction Complex";
-            }
-
+            er = _er;
+            Title = "New Reaction Complex";
             Initialize();
             lbAllReactions.ItemsSource = LeftList;
             lbCxReactions.ItemsSource = RightList;
@@ -76,13 +73,15 @@ namespace DaphneGui
         }
 
         //To edit an existing rc
-        public NewEditReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp)
+        public NewEditReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp, EntityRepository _er)    
         {
             InitializeComponent();
             this.Owner = Application.Current.MainWindow;
             dlgType = type;
             selectedRC = crc;
             comp = _comp;
+            er = _er;
+            Title = "Edit Reaction Complex";
             Initialize();
         }
 
@@ -220,13 +219,11 @@ namespace DaphneGui
                 foreach (ConfigReaction reac in RightList)
                 {
                     if (selectedRC.reactions_dict.ContainsKey(reac.entity_guid) != true)
-                    {
-                        
-                            ConfigReaction newreac = reac.Clone(true);
-                            selectedRC.reactions.Add(newreac);
-                            selectedRC.AddReactionMolPops(newreac, MainWindow.SOP.Protocol.entity_repository);
-                            edited = true;
-                        
+                    {                      
+                        ConfigReaction newreac = reac.Clone(true);
+                        selectedRC.reactions.Add(newreac);
+                        selectedRC.AddReactionMolPopsAndGenes(newreac, MainWindow.SOP.Protocol.entity_repository);
+                        edited = true;                
                     }
                 }
                 if (edited)
@@ -249,8 +246,9 @@ namespace DaphneGui
                 foreach (ConfigReaction reac in RightList)
                 {
                     crc.reactions.Add(reac);
-                    crc.AddReactionMolPops(reac, MainWindow.SOP.Protocol.entity_repository);
+                    crc.AddReactionMolPopsAndGenes(reac, MainWindow.SOP.Protocol.entity_repository);
                 }
+
                 if (comp != null)
                 {
                     comp.reaction_complexes.Add(crc);

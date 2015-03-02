@@ -184,7 +184,7 @@ namespace DaphneGui
             if (cmp == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -198,11 +198,14 @@ namespace DaphneGui
                 }
             }
 
-            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
+            // Don't need to check membrane reactions. 
+            // Membrane reactions can only have membrane-bound molecules, which will not be available for removal in cytosol.
+
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
             {
-                if (cr.HasMolecule(cmp.molecule.entity_guid))
+                if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.Reactions.Remove(cr);
+                    cell.cytosol.reaction_complexes.Remove(crc);
                 }
             }
 
@@ -265,7 +268,7 @@ namespace DaphneGui
             if (cmp == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -285,6 +288,22 @@ namespace DaphneGui
                 if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
                     cell.cytosol.Reactions.Remove(cr);
+                }
+            }
+
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
+            {
+                if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
+                {
+                    cell.cytosol.reaction_complexes.Remove(crc);
+                }
+            }
+
+            foreach (ConfigReactionComplex crc in cell.membrane.reaction_complexes.ToList())
+            {
+                if (crc.molecules_dict.ContainsKey(cmp.molecule.entity_guid))
+                {
+                    cell.membrane.reaction_complexes.Remove(crc);
                 }
             }
 
@@ -359,7 +378,7 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
 
-            MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -371,11 +390,19 @@ namespace DaphneGui
                 }
             }
 
+            foreach (ConfigReactionComplex crc in cell.cytosol.reaction_complexes.ToList())
+            {
+                if (crc.genes_dict.ContainsKey(gene.entity_guid))
+                {
+                    cell.cytosol.reaction_complexes.Remove(crc);
+                }
+            }
+
             if (cell.diff_scheme != null)
             {
                 if (cell.diff_scheme.genes.Contains(gene.entity_guid) == true)
                 {
-                    cell.diff_scheme.genes.Remove(gene.entity_guid);
+                    cell.diff_scheme.DeleteGene(gene.entity_guid);
                 }
             }
 
@@ -383,7 +410,7 @@ namespace DaphneGui
             {
                 if (cell.div_scheme.genes.Contains(gene.entity_guid) == true)
                 {
-                    cell.div_scheme.genes.Remove(gene.entity_guid);
+                    cell.div_scheme.DeleteGene(gene.entity_guid);
                 }
             }
 
