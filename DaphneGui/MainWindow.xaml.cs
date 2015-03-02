@@ -2215,6 +2215,10 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
+                if (DataBasket.hdf5file != null)
+                {
+                    DataBasket.hdf5file.close(true);
+                }
                 vcrControl.ReleaseVCR();
                 exportAVI.IsEnabled = false;
             }
@@ -2478,12 +2482,29 @@ namespace DaphneGui
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(bool handleVCR, bool force)
         {
-            if (handleVCR == true && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR() == true)
+            if (handleVCR == true && skipDataWriteMenu.IsChecked == false)
             {
-                VCR_Toolbar.IsEnabled = true;
-                VCR_Toolbar.DataContext = vcrControl;
-                VCRslider.Maximum = vcrControl.TotalFrames() - 1;
-                exportAVI.IsEnabled = true;
+                if (DataBasket.hdf5file != null && DataBasket.hdf5file.openRead() == true)
+                {
+                    vcrControl.FrameNames.Clear();
+                    // find the frame names and with them the number of frames
+                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiment_VCR/VCR_Frames"));
+
+                    if (vcrControl.FrameNames.Count > 0)
+                    {
+                        // open the parent group for this experiment
+                        DataBasket.hdf5file.openGroup(String.Format("/Experiment_VCR"));
+
+                        // open the group that holds the frames for this experiment
+                        DataBasket.hdf5file.openGroup("VCR_Frames");
+
+                        vcrControl.OpenVCR();
+                        VCR_Toolbar.IsEnabled = true;
+                        VCR_Toolbar.DataContext = vcrControl;
+                        VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                        exportAVI.IsEnabled = true;
+                    }
+                }
             }
 
             bool finished = false;
@@ -3189,6 +3210,10 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
+                if (DataBasket.hdf5file != null)
+                {
+                    DataBasket.hdf5file.close(true);
+                }
                 vcrControl.ReleaseVCR();
             }
 
