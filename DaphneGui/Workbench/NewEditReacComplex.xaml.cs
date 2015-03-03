@@ -94,7 +94,7 @@ namespace DaphneGui
             if (dlgType == ReactionComplexDialogType.NewComplex)
             {
                 //leftList is whole reactions list initially
-                foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
+                foreach (ConfigReaction reac in MainWindow.ST_CurrentLevel.entity_repository.reactions)
                 {
                     LeftList.Add(reac);
                 }                
@@ -105,7 +105,7 @@ namespace DaphneGui
             else 
             {
                 // leftList is whole reactions list minus rc reactions - make a copy of it  
-                foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
+                foreach (ConfigReaction reac in MainWindow.ST_CurrentLevel.entity_repository.reactions)
                 {
                     LeftList.Add(reac);
                 }
@@ -200,12 +200,23 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
             bool edited = false;
+
+            string rcname = txtRcName.Text;
+            rcname = rcname.Trim();
+            if (rcname.Length == 0)
+            {
+                MessageBox.Show("Please enter a name.", "Missing name", MessageBoxButton.OK, MessageBoxImage.Stop);
+                return;
+            }
 
             //Edit existing
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
+                //Name
+                selectedRC.Name = txtRcName.Text;
+                selectedRC.ValidateName(MainWindow.ST_CurrentLevel);
+
                 //For removed reactions
                 foreach (ConfigReaction cr in selectedRC.reactions.ToList())
                 {
@@ -222,11 +233,11 @@ namespace DaphneGui
                     {                      
                         ConfigReaction newreac = reac.Clone(true);
                         selectedRC.reactions.Add(newreac);
-                        selectedRC.AddReactionMolPopsAndGenes(newreac, MainWindow.SOP.Protocol.entity_repository);
+                        selectedRC.AddReactionMolPopsAndGenes(newreac, MainWindow.ST_CurrentLevel.entity_repository);
                         edited = true;                
                     }
                 }
-                if (edited)
+                if (edited && MainWindow.ST_CurrentLevelType == MainWindow.LevelType.Protocol)
                 {
                     if (MainWindow.SOP.Protocol.scenario.GetType() == typeof(VatReactionComplexScenario))
                     {
@@ -239,9 +250,14 @@ namespace DaphneGui
             else
             //Add new RC
             {
+                if (RightList.Count == 0) 
+                {
+                    MessageBox.Show("Please add some reactions to the reaction complex.", "Missing reactions", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    return;
+                }
                 ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
-                crc.Name = crc.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                crc.ValidateName(MainWindow.SOP.Protocol);
+                //crc.Name = crc.GenerateNewName(MainWindow.ST_CurrentLevel, "_New");
+                crc.ValidateName(MainWindow.ST_CurrentLevel);
 
                 foreach (ConfigReaction reac in RightList)
                 {
@@ -253,8 +269,9 @@ namespace DaphneGui
                 {
                     comp.reaction_complexes.Add(crc);
                 }
-                MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crc);
+                MainWindow.ST_CurrentLevel.entity_repository.reaction_complexes.Add(crc);
             }
+            DialogResult = true;
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)

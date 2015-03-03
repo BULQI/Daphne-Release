@@ -232,7 +232,9 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
-        
+        public enum LevelType { Protocol = 0, UserStore, DaphneStore }
+        public static Level ST_CurrentLevel = null;
+        public static LevelType ST_CurrentLevelType = LevelType.Protocol;
 
 
         [DllImport("kernel32.dll")]
@@ -1790,8 +1792,14 @@ namespace DaphneGui
 
             saveStoreFiles();
             saveTempFiles();
-            // don't handle the vcr
-            updateGraphicsAndGUI(false);
+
+            //If user hit Apply while not in UserStore or DaphneStore, only then do this.
+            if (ST_CurrentLevel == SOP.Protocol)
+            {
+                // don't handle the vcr
+                updateGraphicsAndGUI(false);
+            }
+
         }
 
 
@@ -1876,9 +1884,7 @@ namespace DaphneGui
         public static bool CheckMouseLeftState(byte state)
         {
             return mouseLeftState == state;
-        }
-
-        //public enum ColorList { Red, Orange, Yellow, Green, Blue, Indigo, Violet, Custom }
+        }        
 
         private void save3DView_Click(object sender, RoutedEventArgs e)
         {
@@ -2015,6 +2021,7 @@ namespace DaphneGui
                 try
                 {
                     SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
+                    ST_CurrentLevel = protocol;
                     return protocol;
                 }
                 catch
@@ -2032,6 +2039,7 @@ namespace DaphneGui
                     protocol.FileName = protocol_path.LocalPath;
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
                     SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
+                    ST_CurrentLevel = protocol;
                     return protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
@@ -3126,6 +3134,7 @@ namespace DaphneGui
             if (result == true)
             {
                 prepareProtocol(ReadJson(""));
+                menuProtocolStore.IsEnabled = false;
             }
 
         }
@@ -3158,7 +3167,7 @@ namespace DaphneGui
                 // display message box
                 MessageBox.Show(messageBoxText, caption, button, icon);
             }
-            saveStoreFiles();
+            //saveStoreFiles();
             tempFileContent = false;
         }
 
@@ -3514,7 +3523,16 @@ namespace DaphneGui
 
         private void menuUserStore_Click(object sender, RoutedEventArgs e)
         {
-            //readStores();
+            prepareForUserStore();
+        }
+
+        private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
+        {
+            prepareForDaphneStore();
+        }
+
+        private void prepareForUserStore()
+        {
             statusBarMessagePanel.Content = "Ready:  User Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3524,11 +3542,12 @@ namespace DaphneGui
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             menuProtocolStore.IsEnabled = true;
+
+            ST_CurrentLevel = SOP.UserStore;
         }
 
-        private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
+        private void prepareForDaphneStore()
         {
-            //readStores();
             statusBarMessagePanel.Content = "Ready:  Daphne Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3538,6 +3557,8 @@ namespace DaphneGui
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             menuProtocolStore.IsEnabled = true;
+
+            ST_CurrentLevel = SOP.DaphneStore;
         }
 
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3548,6 +3569,8 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
+
+            ST_CurrentLevel = SOP.Protocol;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {

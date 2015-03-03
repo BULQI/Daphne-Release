@@ -645,7 +645,7 @@ namespace DaphneGui
             {
                 ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
 
-                MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove ECM reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+                MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove ECM reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res == MessageBoxResult.No)
                     return;
 

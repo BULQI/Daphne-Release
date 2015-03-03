@@ -62,7 +62,7 @@ namespace DaphneGui
                 return;
 
             ConfigCompartment comp = null;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
             if (this.DataContext.GetType() == typeof(ConfigCompartment))
             {
                 comp = (ConfigCompartment)this.DataContext;
@@ -75,7 +75,7 @@ namespace DaphneGui
         private void ButtonAddComplex_Click(object sender, RoutedEventArgs e)
         {            
             ReactionComplexesInStore rcis = new ReactionComplexesInStore();
-            rcis.DataContext = MainWindow.SOP.Protocol.entity_repository;
+            rcis.DataContext = MainWindow.ST_CurrentLevel.entity_repository;
             rcis.Tag = MainWindow.SOP.Protocol.scenario.environment.comp;
             rcis.ShowDialog();
         }
@@ -108,7 +108,7 @@ namespace DaphneGui
         private void ButtonNewReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             ConfigCompartment comp = null;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
             if (this.DataContext.GetType() == typeof(ConfigCompartment))
             {
                 comp = (ConfigCompartment)this.DataContext;               

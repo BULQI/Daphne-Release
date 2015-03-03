@@ -245,6 +245,30 @@ namespace Daphne
             entity_repository = new EntityRepository();
         }
 
+        public bool findReactionByTotalString(string total)
+        {
+            //Get left and right side molecules of new reaction
+            List<string> newReactants = getReacLeftSide(total);
+            List<string> newProducts = getReacRightSide(total);
+
+            //Loop through all existing reactions
+            foreach (ConfigReaction reac in entity_repository.reactions)
+            {
+                //Get left and right side molecules of each reaction in er
+                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+
+                //Key step! 
+                //Check if the list of reactants and products in new reaction equals 
+                //the list of reactants and products in this current reaction
+                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // given a reaction template type, find its guid
         public string findReactionTemplateGuid(ReactionType rt)
         {
@@ -4040,7 +4064,7 @@ namespace Daphne
             return ret;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempMolName = Name;
@@ -6041,7 +6065,7 @@ namespace Daphne
             return true;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempRCName = Name;
