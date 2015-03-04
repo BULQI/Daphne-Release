@@ -1751,6 +1751,11 @@ namespace DaphneGui
             }
             else
             {
+                if (cell.cytosol.molpops.Count == 0)
+                {
+                    MessageBox.Show("Death can only be controlled by a probability distribution because there are no molecules in the cytosol. Add molecules from the store to control the death by molecular concentrations.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
                 // Switch to Molecule-driven
                 tde = new ConfigMolTransitionDriverElement();
             }
@@ -1908,8 +1913,6 @@ namespace DaphneGui
             //If no death molecule selected, and there are NO bulk molecules, issue a warning to acquire molecules from the user store.
             else if (combo.SelectedIndex == -1 && combo.Items.Count == 0)
             {
-                MessageBox.Show("There are no molecules in the cytosol. Please get molecules from the store.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
-
                 //Since there are no molecules, create a default DISTRIBUTION driver and assign it.
                 ConfigTransitionDriverElement tde = new ConfigDistrTransitionDriverElement();
                 PoissonParameterDistribution poisson = new PoissonParameterDistribution();
