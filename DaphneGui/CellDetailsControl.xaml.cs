@@ -454,16 +454,57 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
+            Level protocol = MainWindow.ST_CurrentLevel;
+
+            string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
+            message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
+            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
             foreach (var item in lvCellAvailableReacs.SelectedItems)
             {
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
                     if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid) == false)
-                    {
+                    {                        
                         cc.membrane.Reactions.Add(cr.Clone(true));
-
                         needRefresh = true;
+
+                        //If any molecules from new reaction don't exist in the membrane, add them (can only be boundary molecules)
+                        foreach (string molguid in cr.reactants_molecule_guid_ref)
+                        {
+                            if (cc.membrane.HasMolecule(molguid) == false)
+                            {
+                                if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
+                                {
+                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                }
+                            }
+                        }
+                        foreach (string molguid in cr.products_molecule_guid_ref)
+                        {
+                            if (cc.membrane.HasMolecule(molguid) == false)
+                            {
+                                if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
+                                {
+                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                }
+                            }
+                        }
+                        foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                        {
+                            if (cc.membrane.HasMolecule(molguid) == false)
+                            {
+                                if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
+                                {
+                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -497,6 +538,16 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
+            Level protocol = MainWindow.ST_CurrentLevel;
+
+            string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
+            message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
+            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
             foreach (var item in lvCytosolAvailableReacs.SelectedItems)
             {
                 ConfigReaction cr = (ConfigReaction)item;
@@ -504,12 +555,56 @@ namespace DaphneGui
                 {
                     // Add to reactions list only if the cell does not already contain this reaction
                     if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid) == false)
-                    {
+                    {                        
                         cc.cytosol.Reactions.Add(cr.Clone(true));
-
                         needRefresh = true;
+
+                        //Here, add any molecules or genes (from this new reaction) that are missing from the cell.
+                        //If any molecules from new reaction don't exist in the membrane, add them.
+                        foreach (string molguid in cr.reactants_molecule_guid_ref)
+                        {
+                            if (cc.cytosol.HasMolecule(molguid) == false)
+                            {
+                                if (protocol.entity_repository.molecules_dict.ContainsKey(molguid) == true)
+                                {
+                                    cc.cytosol.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                }
+                            }
+                        }
+                        foreach (string molguid in cr.products_molecule_guid_ref)
+                        {
+                            if (cc.cytosol.HasMolecule(molguid) == false)
+                            {
+                                if (protocol.entity_repository.molecules_dict.ContainsKey(molguid) == true)
+                                {
+                                    cc.cytosol.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                }
+                            }
+                        }
+                        foreach (string geneguid in cr.modifiers_molecule_guid_ref)
+                        {
+                            if (cc.HasGene(geneguid) == false)
+                            {
+                                if (protocol.entity_repository.genes_dict.ContainsKey(geneguid) == true) {
+                                    ConfigGene newgene = protocol.entity_repository.genes_dict[geneguid].Clone(null);
+                                    cc.genes.Add(newgene);
+                                }
+                            }
+                        }
+                        //foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                        //{
+                        //    if (cc.cytosol.HasMolecule(molguid) == false)
+                        //    {
+                        //        if (protocol.entity_repository.molecules_dict.ContainsKey(molguid) == true)
+                        //        {
+                        //            cc.cytosol.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                        //        }
+                        //    }
+                        //}
                     }
                 }
+
+                
             }
 
             // Refresh the filter
@@ -663,73 +758,24 @@ namespace DaphneGui
                 return;
             }
 
-            ObservableCollection<string> membBound = new ObservableCollection<string>();
-            ObservableCollection<string> gene_guids = new ObservableCollection<string>();
-            ObservableCollection<string> bulk = new ObservableCollection<string>();
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
-            foreach (string molguid in cr.reactants_molecule_guid_ref)
-                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    membBound.Add(molguid);
-                else if (er.genes_dict.ContainsKey(molguid))
-                    gene_guids.Add(molguid);
-                else
-                    bulk.Add(molguid);
-
-            foreach (string molguid in cr.products_molecule_guid_ref)
-                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    membBound.Add(molguid);
-                else if (er.genes_dict.ContainsKey(molguid))
-                    gene_guids.Add(molguid);
-                else
-                    bulk.Add(molguid);
-
-            foreach (string molguid in cr.modifiers_molecule_guid_ref)
-                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    membBound.Add(molguid);
-                else if (er.genes_dict.ContainsKey(molguid))
-                    gene_guids.Add(molguid);
-                else
-                    bulk.Add(molguid);
-
-            bool bOK = true;
-            bool bTranscription = false;
-
-            if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+            //New filtering rules as of 3/5/15 bug 2426
+            //Allow all reactions except what belongs in membrane (where each molecule is a boundary molecule)
+            EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
+            if (cr.HasBulkMolecule(er) == true)
             {
-                bTranscription = bulk.Count > 0 && gene_guids.Count > 0 && cc.HasGenes(gene_guids) && cc.cytosol.HasMolecules(bulk);
-                if (bTranscription == true)
-                {
-                    bOK = true;
-                }
-                else
-                {
-                    bOK = false;
-                }
+                e.Accepted = true;
             }
             else
             {
-                if (bulk.Count <= 0)
-                    bOK = false;
-
-                if (bOK && membBound.Count > 0)
-                    bOK = cc.membrane.HasMolecules(membBound);
-
-                if (bOK)
-                    bOK = cc.cytosol.HasMolecules(bulk);
-
+                e.Accepted = false;
+                return;
             }
 
             //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (bOK == true)
+            if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
             {
-                if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
-                {
-                    bOK = false;
-                }
+                e.Accepted = false;
             }
-
-            e.Accepted = bOK;
         }
 
         private void membraneAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
@@ -743,33 +789,24 @@ namespace DaphneGui
                 return;
             }
 
-            //This filter is called for every reaction in the repository.
-            //For current reaction, if all of its molecules are in the membrane, then the reaction should be included.
-            //Otherwise, exclude it.
+            //New filter as of 3/5/2015 for bug 2426
+            //Molecules no longer need to be in the membrane. They will get added if needed.
 
-            //First check if all the molecules in the reactants list exist in the membrane
-            bool bOK = false;
-            bOK = cc.membrane.HasMolecules(cr.reactants_molecule_guid_ref);
-
-            //If bOK is true, that means the molecules in the reactants list all exist in the membrane
-            //Now check the products list
-            if (bOK)
-                bOK = cc.membrane.HasMolecules(cr.products_molecule_guid_ref);
-
-            //Loop through modifiers list
-            if (bOK)
-                bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
-
-            //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (bOK == true)
+            //If the reaction has any bulk molecules, it cannot go in the membrane
+            if (cr.HasBulkMolecule(MainWindow.ST_CurrentLevel.entity_repository) == true)
             {
-                if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid))
-                {
-                    bOK = false;
-                }
+                e.Accepted = false;
+                return;
             }
 
-            e.Accepted = bOK;
+            //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
+            if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid))
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            e.Accepted = true;
         }
 
         //THIS METHOD NEEDS TO BE IMPLEMENTED
