@@ -152,20 +152,21 @@ namespace DaphneGui
                 reactionsToAdd.Add(item as ConfigReaction);
             }
 
+            string message = "If the ECM does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
+            message = message + "Any duplicate reactions currently in the ECM will be removed. Continue?";
+            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
             foreach (var item in reactionsToAdd)
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
                 if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid) == false)
                 {
-                    string message = "If the ECM does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
-                    message = message + "Any duplicate reactions currently in the ECM will be removed. Continue?";
-                    MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.No)
-                    {
-                        return;
-                    }
-
+                    
                     MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                     needRefresh = true;
 
