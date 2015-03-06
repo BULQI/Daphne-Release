@@ -108,7 +108,7 @@ namespace DaphneGui
         private void ButtonNewReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             ConfigCompartment comp = null;
-            EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
+            EntityRepository er = this.DataContext as EntityRepository;  //MainWindow.ST_CurrentLevel.entity_repository;
             if (this.DataContext.GetType() == typeof(ConfigCompartment))
             {
                 comp = (ConfigCompartment)this.DataContext;               
