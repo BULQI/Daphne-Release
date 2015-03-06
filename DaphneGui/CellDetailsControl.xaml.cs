@@ -475,13 +475,13 @@ namespace DaphneGui
                         cc.membrane.Reactions.Add(cr.Clone(true));
                         needRefresh = true;
 
-                        //If any molecules from new reaction don't exist in the membrane, add them (can only be boundary molecules)                        
+                        //If any molecules from new reaction don't exist in the membrane, clone and add them (can only be boundary molecules)                        
                         foreach (string molguid in cr.reactants_molecule_guid_ref)
                         {
                             if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
                             {
                                 if (cc.membrane.HasMolecule(molguid) == false)
-                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid].Clone(null), true);
                             }
                         }
                         foreach (string molguid in cr.products_molecule_guid_ref)
@@ -489,7 +489,7 @@ namespace DaphneGui
                             if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
                             {
                                 if (cc.membrane.HasMolecule(molguid) == false)
-                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid].Clone(null), true);
                             }
                         }
                         foreach (string molguid in cr.modifiers_molecule_guid_ref)
@@ -497,7 +497,7 @@ namespace DaphneGui
                             if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
                             {
                                 if (cc.membrane.HasMolecule(molguid) == false)
-                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid], true);
+                                    cc.membrane.AddMolPop(protocol.entity_repository.molecules_dict[molguid].Clone(null), true);
                             }
                         }
                     }
@@ -562,15 +562,15 @@ namespace DaphneGui
                             {
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
-                                    cc.membrane.AddMolPop(mol, true);
+                                    cc.membrane.AddMolPop(mol.Clone(null), true);
                                 else if (cc.cytosol.HasMolecule(molguid) == false)
-                                    cc.cytosol.AddMolPop(mol, true);
+                                    cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, add to genes list
                             else if (protocol.entity_repository.genes_dict.ContainsKey(molguid))
                             {
                                 if (cc.HasGene(molguid) == false)
-                                    cc.genes.Add(protocol.entity_repository.genes_dict[molguid]);
+                                    cc.genes.Add(protocol.entity_repository.genes_dict[molguid].Clone(null));
                             }
                         }
                         foreach (string molguid in cr.products_molecule_guid_ref)
@@ -580,33 +580,33 @@ namespace DaphneGui
                             {
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
-                                    cc.membrane.AddMolPop(mol, true);
+                                    cc.membrane.AddMolPop(mol.Clone(null), true);
                                 else if (cc.cytosol.HasMolecule(molguid) == false)
-                                    cc.cytosol.AddMolPop(mol, true);
+                                    cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, add to genes list
                             else if (protocol.entity_repository.genes_dict.ContainsKey(molguid))
                             {
                                 if (cc.HasGene(molguid) == false)
-                                    cc.genes.Add(protocol.entity_repository.genes_dict[molguid]);
+                                    cc.genes.Add(protocol.entity_repository.genes_dict[molguid].Clone(null));
                             }
                         }
                         foreach (string molguid in cr.modifiers_molecule_guid_ref)
                         {
-                            //If molecule - can be bulk or boundary so have to add to appropriate compartment - membrane or cytosol
+                            //If molecule - can be bulk or boundary so have to clone and add to appropriate compartment - membrane or cytosol
                             if (protocol.entity_repository.molecules_dict.ContainsKey(molguid))
                             {
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
-                                    cc.membrane.AddMolPop(mol, true);
+                                    cc.membrane.AddMolPop(mol.Clone(null), true);
                                 else if (cc.cytosol.HasMolecule(molguid) == false)
-                                    cc.cytosol.AddMolPop(mol, true);
+                                    cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
-                            //If gene, add to genes list
+                            //If gene, clone and add to genes list
                             else if (protocol.entity_repository.genes_dict.ContainsKey(molguid))
                             {
                                 if (cc.HasGene(molguid) == false)
-                                    cc.genes.Add(protocol.entity_repository.genes_dict[molguid]);
+                                    cc.genes.Add(protocol.entity_repository.genes_dict[molguid].Clone(null));
                             }
                         }
                     }
