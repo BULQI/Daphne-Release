@@ -454,7 +454,8 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
-            Level protocol = MainWindow.ST_CurrentLevel;
+            //Level protocol = MainWindow.ST_CurrentLevel;
+            Level protocol = MainWindow.SOP.Protocol;
 
             string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
             message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
@@ -538,7 +539,8 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
-            Level protocol = MainWindow.ST_CurrentLevel;
+            //Level protocol = MainWindow.ST_CurrentLevel;
+            Level protocol = MainWindow.SOP.Protocol;
 
             string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
             message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
@@ -760,7 +762,9 @@ namespace DaphneGui
 
             //New filtering rules as of 3/5/15 bug 2426
             //Allow all reactions except what belongs in membrane (where each molecule is a boundary molecule)
-            EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
+            //EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
+
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             if (cr.HasBulkMolecule(er) == true)
             {
                 e.Accepted = true;
@@ -793,7 +797,8 @@ namespace DaphneGui
             //Molecules no longer need to be in the membrane. They will get added if needed.
 
             //If the reaction has any bulk molecules, it cannot go in the membrane
-            if (cr.HasBulkMolecule(MainWindow.ST_CurrentLevel.entity_repository) == true)
+            //if (cr.HasBulkMolecule(MainWindow.ST_CurrentLevel.entity_repository) == true)
+            if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)
             {
                 e.Accepted = false;
                 return;
