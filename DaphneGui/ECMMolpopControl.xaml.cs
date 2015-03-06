@@ -472,13 +472,6 @@ namespace DaphneGui
 
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
-            if (molpop == null)
-                return;
-
-            string curr_mol_pop_name = molpop.Name;
-            string curr_mol_guid = "";
-            curr_mol_guid = molpop.molecule.entity_guid;
-
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
@@ -536,8 +529,17 @@ namespace DaphneGui
                     B.repositoryPush(newLibMol, status); // push into B, inserts as new
                 }
 
-                molpop.molecule = newLibMol.Clone(null);
-                molpop.Name = newLibMol.Name;
+                if (molpop != null)
+                {
+                    molpop.molecule = newLibMol.Clone(null);
+                    molpop.Name = newLibMol.Name;
+                }
+                else
+                {
+                    //If no mol pop exists - create one. This relates to bug 2457.
+                    MainWindow.SOP.Protocol.scenario.environment.comp.AddMolPop(newLibMol, false);
+                    molpop = MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Last();
+                }
 
                 MainWindow.SOP.SelectedRenderSkin.AddRenderMol(molpop.molecule.renderLabel, newLibMol.Name);
 
@@ -546,6 +548,13 @@ namespace DaphneGui
             //user picked an existing molecule
             else
             {
+                if (molpop == null)
+                    return;
+
+                string curr_mol_pop_name = molpop.Name;
+                string curr_mol_guid = "";
+                curr_mol_guid = molpop.molecule.entity_guid;
+
                 ConfigMolecule newmol = (ConfigMolecule)cb.SelectedItem;
 
                 //if molecule has not changed, return

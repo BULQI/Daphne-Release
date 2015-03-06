@@ -331,6 +331,10 @@ namespace DaphneGui
             gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
 
             ConfigCell cell = DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
             cell.genes.Add(gene);
 
             ConfigGene erGene = gene.Clone(null);
