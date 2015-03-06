@@ -1,5 +1,4 @@
-﻿//#define USE_DATACACHE
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -21,15 +20,13 @@ namespace DaphneGui
         private List<string> frameNames;
         private List<int> frames;
         private int frame;
-#if USE_DATACACHE
-        private Dictionary<int, List<DBRow>> dataCache;
-#endif
         private byte vcrFlags, savedFlags;
         private long lastFramePlayed;
         public bool LastFrame { get; set; }
         // reference frame time in milliseconds, 30fps
-        private const double E_DT = 1000 / 30;
+        private const double E_FPS = 30, E_DT = 1000 / E_FPS;
         private double speedFactor, speedFactorExp;
+        private int fps;
         /// <summary>
         /// property changed event to handle the updating of our vcr control
         /// </summary>
@@ -56,63 +53,47 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// accessor for the frame names list
+        /// </summary>
+        public List<string> FrameNames
+        {
+            get
+            {
+                return frameNames;
+            }
+            set
+            {
+                frameNames = value;
+            }
+        }
+
+        /// <summary>
         /// create a data reader object
         /// </summary>
-        /// <returns>false for failure or empty simulation</returns>
-        public bool OpenVCR()
+        public void OpenVCR()
         {
-#if USE_DATACACHE
-            dataCache = new Dictionary<int, List<DBRow>>();
-#endif
+            SetFlag(VCR_OPEN);
 
-            if (DataBasket.hdf5file != null
-#if USE_DATACACHE
-                && dataCache != null
-#endif
-)
+            // build the list of frames
+            frames = new List<int>();
+
+            for (int i = 0; i < frameNames.Count; i++)
             {
-                if (DataBasket.hdf5file.openRead() == false)
-                {
-                    return false;
-                }
-                SetFlag(VCR_OPEN);
-                frameNames.Clear();
-                // find the frame names and with them the number of frames
-                frameNames = DataBasket.hdf5file.subGroupNames(String.Format("/Experiment_VCR/VCR_Frames"));
-
-                if (frameNames.Count == 0)
-                {
-                    return false;
-                }
-
-                // open the parent group for this experiment
-                DataBasket.hdf5file.openGroup(String.Format("/Experiment_VCR"));
-
-                // open the group that holds the frames for this experiment
-                DataBasket.hdf5file.openGroup("VCR_Frames");
-
-                // build the list of frames
-                frames = new List<int>();
-
-                for (int i = 0; i < frameNames.Count; i++)
-                {
-                    frames.Add(i);
-                }
-
-                if (LastFrame == true)
-                {
-                    CurrentFrame = frames.Count - 1;
-                }
-                else
-                {
-                    CurrentFrame = 0;
-                }
-                SetInactive();
-                speedFactor = 1.0;
-                speedFactorExp = 0.0;
-                return true;
+                frames.Add(i);
             }
-            return false;
+
+            if (LastFrame == true)
+            {
+                CurrentFrame = frames.Count - 1;
+            }
+            else
+            {
+                CurrentFrame = 0;
+            }
+            SetInactive();
+            speedFactor = 1.0;
+            speedFactorExp = 0.0;
+            fps = (int)E_FPS;
         }
 
         /// <summary>
@@ -145,6 +126,9 @@ namespace DaphneGui
 
         /// <summary>
         /// set the speed factor for playback; will set to normal speed if value is not greater than zero
+        /// 1: normal speed
+        /// greater than 1: speed up
+        /// less than 1: speed down
         /// </summary>
         public double SpeedFactor
         {
@@ -157,20 +141,24 @@ namespace DaphneGui
                 else
                 {
                     speedFactor = value;
+                    fps = (int)(speedFactor * E_FPS);
                 }
             }
             get { return speedFactor; }
         }
 
         /// <summary>
-        /// set the speed factor exponent and speed factor implicitly; normal speed for exponent = 0
+        /// set the speed factor exponent and speed factor implicitly
+        /// 0: normal speed
+        /// positive: speed up
+        /// negative: speed down
         /// </summary>
         public double SpeedFactorExponent
         {
             set
             {
                 speedFactorExp = value;
-                speedFactor = Math.Pow(2.0, speedFactorExp);
+                SpeedFactor = Math.Pow(2.0, speedFactorExp);
             }
             get { return speedFactorExp; }
         }
@@ -206,17 +194,6 @@ namespace DaphneGui
         /// </summary>
         public void ReleaseVCR()
         {
-            if (DataBasket.hdf5file != null)
-            {
-                DataBasket.hdf5file.close(true);
-            }
-#if USE_DATACACHE
-            if (dataCache != null)
-            {
-                dataCache.Clear();
-                dataCache = null;
-            }
-#endif
             if (frames != null)
             {
                 frames.Clear();
@@ -295,28 +272,12 @@ namespace DaphneGui
         /// </summary>
         private IFrameData CurrentFrameData()
         {
-#if USE_DATACACHE
-            if (dataCache == null)
-            {
-                return null;
-            }
-#endif
-
             lock (frameLock)
             {
                 if (frame >= 0 && frame < frames.Count)
                 {
-#if USE_DATACACHE
-                    if (dataCache.ContainsKey(frame) == false)
-                    {
-                        // add the data to the cache
-                        dataCache.Add(frame, reader.FetchByTime(frames[frame]));
-                    }
-                    return dataCache[frame];
-#else
                     MainWindow.Sim.FrameData.readData(frames[frame]);
                     return MainWindow.Sim.FrameData;
-#endif
                 }
                 return null;
             }
@@ -404,7 +365,7 @@ namespace DaphneGui
         {
             lock (playLock)
             {
-                if (CheckFlag(VCR_ACTIVE) == true)
+                if (CheckFlag(VCR_ACTIVE) == true && CheckFlag(VCR_EXPORT) == false)
                 {
                     // insert a delay when needed to keep the fps steady
                     Delay();
@@ -445,6 +406,53 @@ namespace DaphneGui
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(info));
             }
+        }
+
+        public void ExportAVI(string filename)
+        {
+            if (CheckFlag(VCR_EXPORT) == true)
+            {
+                return;
+            }
+
+            vtkAVIWriter movieWriter;
+            vtkWindowToImageFilter movieSource = new vtkWindowToImageFilter();
+            bool first = true;
+
+            // set up the pipeline
+            movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow);
+            movieWriter = new vtkAVIWriter();
+            SetFlag(VCR_EXPORT);
+            movieWriter.SetFileName(filename);
+            movieWriter.SetInputConnection(movieSource.GetOutputPort());
+
+            // frame rate
+            movieWriter.SetRate(fps);
+
+            // start the writer
+            movieWriter.Start();
+            // loop over each frame and export
+            while (CheckFlag(VCR_EXPORT) == true)
+            {
+                if (first == true)
+                {
+                    // move to the first frame
+                    MoveToFrame(0);
+                    first = false;
+                }
+                else
+                {
+                    Advance(1);
+                }
+                movieSource.Modified();
+                movieWriter.Write();
+                if (frame >= TotalFrames() - 1)
+                {
+                    clearFlag(VCR_EXPORT);
+                }
+            }
+            // end
+            movieWriter.End();
         }
 
     }

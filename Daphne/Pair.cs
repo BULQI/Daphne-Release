@@ -22,8 +22,8 @@ namespace Daphne
         {
             this.a = a;
             this.b = b;
-            dist   = 0;
-            b_ij   = 0;
+            dist = 0;
+            b_ij = 0;
         }
 
         /// <summary>
@@ -48,32 +48,63 @@ namespace Daphne
         /// </summary>
         public virtual void distance(double[] gridSize)
         {
-            Vector tmp = new DenseVector(a.SpatialState.X);
-            tmp = (DenseVector)tmp.Subtract(new DenseVector(b.SpatialState.X));
+            //Vector tmp = new DenseVector(a.SpatialState.X);
+            //tmp = (DenseVector)tmpArr.Subtract(new DenseVector(b.SpatialState.X));
 
+            double x = a.SpatialState.X[0] - b.SpatialState.X[0];
+            double y = a.SpatialState.X[1] - b.SpatialState.X[1];
+            double z = a.SpatialState.X[2] - b.SpatialState.X[2];
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
-                double dx = Math.Abs(tmp[0]),
-                       dy = Math.Abs(tmp[1]),
-                       dz = Math.Abs(tmp[2]);
+                double dx = Math.Abs(x),
+                       dy = Math.Abs(y),
+                       dz = Math.Abs(z);
 
-                if(dx > 0.5 * gridSize[0])
+                if (dx > 0.5 * gridSize[0])
                 {
-                    tmp[0] = gridSize[0] - dx;
+                    x = gridSize[0] - dx;
                 }
                 if (dy > 0.5 * gridSize[1])
                 {
-                    tmp[1] = gridSize[1] - dy;
+                    y = gridSize[1] - dy;
                 }
                 if (dz > 0.5 * gridSize[2])
                 {
-                    tmp[2] = gridSize[2] - dz;
+                    z = gridSize[2] - dz;
                 }
             }
-            //dist = tmp.Norm();
-            dist = tmp.Norm(2);
+            //dist = tmpArr.Norm(2);
+            dist = Math.Sqrt(x * x + y * y + z * z);
         }
+
+        public int GridIndex_dx
+        {
+            get
+            {
+                int dx;
+                return ((dx = a.GridIndex[0] - b.GridIndex[0]) >= 0 ? dx : -dx);
+            }
+        }
+
+        public int GridIndex_dy
+        {
+            get
+            {
+                int dy;
+                return ((dy = a.GridIndex[1] - b.GridIndex[1]) >= 0 ? dy : -dy);
+            }
+        }
+
+        public int GridIndex_dz
+        {
+            get
+            {
+                int dz;
+                return ((dz = a.GridIndex[2] - b.GridIndex[2]) >= 0 ? dz : -dz);
+            }
+        }
+
 
         /// <summary>
         /// tells if this pair is critical, i.e. if it is interacting
@@ -98,6 +129,7 @@ namespace Daphne
         protected double dist;
         protected int b_ij;
         public static double Phi1, Phi2;
+
     }
 
     /// <summary>
@@ -105,6 +137,8 @@ namespace Daphne
     /// </summary>
     public class CellPair : Pair
     {
+        //temp array use to speed up - axin
+        private double[] tmp_arr;
         /// <summary>
         /// constructor - takes the two cells that make up the pair
         /// </summary>
@@ -113,6 +147,7 @@ namespace Daphne
         public CellPair(Cell a, Cell b)
             : base(a, b)
         {
+            tmp_arr = new double[3];
 #if ALL_PAIRS
             variety = PairVariety.MOTILE;
 #endif
@@ -155,18 +190,39 @@ namespace Daphne
 
                 if (force != 0.0)
                 {
-                    DenseVector normal = new DenseVector(b.SpatialState.X);
+                    //DenseVector normal = new DenseVector(b.SpatialState.X);
 
-                    normal -= a.SpatialState.X;
-                    normal = (DenseVector)normal.Normalize(2.0);
+                    //normal -= a.SpatialState.X;
+                    //normal = (DenseVector)normal.Normalize(2.0);
 
-                    //Console.WriteLine(String.Format("Distance: {2:N}, Force: {0:N}, B: {1:N}", force, b_ij, dist));
+                    ////Console.WriteLine(String.Format("Distance: {2:N}, Force: {0:N}, B: {1:N}", force, b_ij, dist));
 
-                    // F_a = -F_b
-                    //a.addForce(normal * -force);
-                    //b.addForce(normal * force);
-                    a.addForce(normal.Multiply(-force).ToArray());
-                    b.addForce(normal.Multiply(force).ToArray());
+                    //// F_a = -F_b
+                    ////a.addForce(normal * -force);
+                    ////b.addForce(normal * force);
+
+                    //a.addForce(normal.Multiply(-force).ToArray());
+                    //b.addForce(normal.Multiply(force).ToArray());
+
+                    //performance tuning.
+                    double dx = b.SpatialState.X[0] - a.SpatialState.X[0];
+                    double dy = b.SpatialState.X[1] - a.SpatialState.X[1];
+                    double dz = b.SpatialState.X[2] - a.SpatialState.X[2];
+
+                    double tmplen = Math.Sqrt(dx * dx + dy * dy + dz * dz);
+
+                    dx = dx * force / tmplen;
+                    dy = dy * force / tmplen;
+                    dz = dz * force / tmplen;
+                    tmp_arr[0] = -dx;
+                    tmp_arr[1] = -dy;
+                    tmp_arr[2] = -dz;
+                    a.addForce(tmp_arr);
+                    tmp_arr[0] = dx;
+                    tmp_arr[1] = dy;
+                    tmp_arr[2] = dz;
+                    b.addForce(tmp_arr);
+
                 }
             }
         }

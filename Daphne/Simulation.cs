@@ -909,11 +909,11 @@ namespace Daphne
         /// constants used to set the run status
         /// </summary>
         public const byte RUNSTAT_OFF = 0,
-                           RUNSTAT_READY = 1,
-                           RUNSTAT_RUN = 2,
-                           RUNSTAT_PAUSE = 3,
-                           RUNSTAT_ABORT = 4,
-                           RUNSTAT_FINISHED = 5;
+                          RUNSTAT_READY = 1,
+                          RUNSTAT_RUN = 2,
+                          RUNSTAT_PAUSE = 3,
+                          RUNSTAT_ABORT = 4,
+                          RUNSTAT_FINISHED = 5;
         /// <summary>
         /// simulation actions
         /// </summary>

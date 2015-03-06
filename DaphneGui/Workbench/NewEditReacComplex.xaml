@@ -4,6 +4,7 @@
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
         Title="Add/Edit Reaction Complex" Height="359" Width="640"
+        WindowStartupLocation="CenterOwner"
         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}">
     
     <Window.Resources>

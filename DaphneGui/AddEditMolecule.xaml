@@ -2,12 +2,29 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Add/Edit a Molecule"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded"
+        x:Name="AddEditMoleculeWindow">
+
     <Grid>
         <ContentControl Name="ecmMolpopMolDetails"
                                         Content="{Binding Path=Mol}" 
-                                        ContentTemplate="{StaticResource moleculeTemplate}" 
-                                        Margin="6"/>
+                                        Margin="6">
+
+            <ContentControl.Style>
+                <Style  TargetType="{x:Type ContentControl}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource moleculeTemplate}"></Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=AddEditMoleculeWindow, Path=Tag}" Value="ecs">
+                            <Setter Property="ContentTemplate" Value="{StaticResource moleculeTemplateBulk}"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+            
+        </ContentControl>
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,80,20,20">
             <Button Content="Save" Height="24"  Name="btnSave" VerticalAlignment="Top" Width="60" Click="btnSave_Click" IsDefault="True" />
             <Button Content="Cancel" Height="24" Name="btnCancel" VerticalAlignment="Top" Width="60" Click="btnCancel_Click" />

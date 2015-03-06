@@ -106,6 +106,9 @@
             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
             
             ItemsSource="{Binding activationRows}"
+                  
+            MouseMove="EpigeneticGrid_MouseMove"
+            Drop="EpigeneticGrid_Drop"
             >
             
             <DataGrid.ContextMenu>

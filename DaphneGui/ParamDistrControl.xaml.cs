@@ -32,11 +32,7 @@ namespace DaphneGui
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
             // of parameter distribution type
-            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-            {
-                return;
-            }
-
+            
             DistributedParameter distr_parameter = DataContext as DistributedParameter;
             if (distr_parameter == null)
             {

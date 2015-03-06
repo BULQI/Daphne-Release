@@ -26,6 +26,7 @@ namespace DaphneGui
         public AddGeneToCell(ConfigCell cell)
         {
             InitializeComponent();
+            this.Owner = Application.Current.MainWindow;
             er = MainWindow.SOP.Protocol.entity_repository;
             //Protocol = sc;
             SelectedCell = cell;
@@ -42,6 +43,12 @@ namespace DaphneGui
             //GeneComboBox.ItemsSource = er.genes;
             GeneComboBox.DisplayMemberPath = "Name";
             GeneComboBox.SelectedIndex = 0;
+
+            if (GeneComboBox.Items.Count == 0)
+            {
+                MessageBox.Show("Please first add genes from the User store.", "No genes available", MessageBoxButton.OK, MessageBoxImage.Information);
+                this.Close();
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)

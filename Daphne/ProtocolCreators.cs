@@ -474,18 +474,9 @@ namespace Daphne
 
             // ECS
 
-            // Choose uniform CXCL13 distribution
+            // Linear CXCL13 distribution
             //
-            // Fraction of bound receptor = [CXCL13] / ( [CXCL13] + Kd )
-            // Binding Affinity Kd = kReverse/kForward 
-            //
-            // The FASEB Journal vol. 26 no. 12 4841-4854.  doi: 10.1096/fj.12-208876
-            // Kd ~ 50.5 nM for CXCL13:CXCR5| = (50.5e-9)*(1e-18)*(6.022e23) = 0.0304 molecule/um^3
-            //
-            // Arbitrarily, choose CXCL13 concentration that give equilibrium receptor occupancy of 0.5
-            // [CXCL13] = Kd = 0.0304 molecule/um^3
-            //
-            double CXCL13conc = 50.5e-9 * 1e-18 * 6.022e23;
+            double CXCL13conc = 3;
             double[] conc = new double[1] { CXCL13conc };
             item = new string[1] { "CXCL13" };
             for (int i = 0; i < item.Length; i++)
@@ -506,7 +497,7 @@ namespace Daphne
                     molpoplin.dim = 0;
                     molpoplin.x1 = 0;
                     molpoplin.boundaryCondition = new List<BoundaryCondition>();
-                    BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 5 * CXCL13conc);
+                    BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, CXCL13conc);
                     molpoplin.boundaryCondition.Add(bc);
                     bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
                     molpoplin.boundaryCondition.Add(bc);
@@ -1159,7 +1150,7 @@ namespace Daphne
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100);
-            gc.Sigma = new DistributedParameter(3.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1231,7 +1222,7 @@ namespace Daphne
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(3.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1311,7 +1302,7 @@ namespace Daphne
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(3.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -1395,7 +1386,7 @@ namespace Daphne
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(3.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
@@ -1552,7 +1543,7 @@ namespace Daphne
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(3.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
@@ -1793,7 +1784,7 @@ namespace Daphne
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(3.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
             store.entity_repository.cells.Add(gc);
 
@@ -3627,9 +3618,11 @@ namespace Daphne
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCR5 receptor production and recycling");
 
-            //MOLECULES
-            conc = new double[] { 0, 0};
-            type = new string[] { "CXCR5", "CXCL13:CXCR5"};
+            // Bulk MOLECULES
+            conc = new double[] { 0, 0 };
+            type = new string[] { "CXCR5", "CXCL13:CXCR5" };
+            //conc = new double[] { 0, 0};
+            //type = new string[] { "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
             {
@@ -3653,8 +3646,11 @@ namespace Daphne
                 }
             }
 
+            // Boundary MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR5|", "CXCL13:CXCR5|" };
+            //conc = new double[] { 0, 0};
+            //type = new string[] { "CXCR5", "CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
             {
@@ -3710,7 +3706,7 @@ namespace Daphne
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCR4 receptor production and recycling");
 
-            //MOLECULES
+            // Bulk MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR4", "CXCL12:CXCR4" };
             for (int i = 0; i < type.Length; i++)
@@ -3735,6 +3731,7 @@ namespace Daphne
                 }
             }
 
+            // Boundary MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR4|", "CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
@@ -3758,6 +3755,7 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
+
 
             //GENES
             type = new string[] { "gCXCR4" };

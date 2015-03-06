@@ -46,7 +46,6 @@
 
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
 
-
         <!-- Mol_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element.  -->
         <DataTemplate x:Key="Mol_TDE_dgCell_Editing" >
             <StackPanel Orientation="Vertical">
@@ -57,7 +56,7 @@
                 <ComboBox.SelectedValue>
                     <MultiBinding Converter="{StaticResource MolGuidToMolPopForDiffMultiValueConverter}">
                         <Binding Path="driver_mol_guid_ref" />
-                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type DataGrid}}" Path="DataContext.cytosol" />
+                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type local:CellDetailsControl}}" Path="DataContext.cytosol" />
                     </MultiBinding>
                 </ComboBox.SelectedValue>
 
@@ -101,7 +100,7 @@
 
         <!-- Distr_TDE_dgCell_NonEditing: DataGrid cell non-editing of Molecular Transition driver element. -->
         <DataTemplate x:Key="Distr_TDE_dgCell_NonEditing">
-            <TextBlock Text="{Binding Type}" />
+            <TextBlock Text="{Binding Distr.DistributionType}" />
         </DataTemplate>
 
         <!-- Distr_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element. -->
@@ -122,7 +121,8 @@
                             ItemsSource="{Binding Path=cytosol.molpops}"
                             DisplayMemberPath="Name" 
                             SelectedValue="{Binding Path=death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            SelectedValuePath="molecule.entity_guid"                                     
+                            SelectedValuePath="molecule.entity_guid"  
+                            Loaded="comboDeathMolPop2_Loaded"
                             >
                 </ComboBox>
 
@@ -316,7 +316,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        Expanded="CellMolPopsExpander_Expanded">
 
                 <!-- Cell Molecular Populations -->
                 <StackPanel>
@@ -610,7 +611,9 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        Expanded="CellReacExpander_Expanded"
+                        >
 
                 <StackPanel>
                     <!-- Reactions in cell -->
@@ -719,6 +722,7 @@
                                                     Header="Create New Reaction"                                                  
                                                     Margin="0,0,0,0" 
                                                     Canvas.ZIndex="1"
+                                                   Expanded="MembCreateNewReaction_Expanded"
                                                     >
                                             <Grid>
                                                 <local:AddReactionControl Margin="0,6" Tag="membrane" />
@@ -743,8 +747,8 @@
 
                                         <ListBox.ContextMenu>
                                             <ContextMenu >
-                                                <MenuItem Header="Push to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
+                                                <MenuItem Header="Save to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
+                                                <MenuItem Header="Get from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
                                             </ContextMenu>
                                         </ListBox.ContextMenu>
 
@@ -853,7 +857,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        Expanded="ReacCompExpander_Expanded">
 
                 <StackPanel>
 
@@ -888,6 +893,7 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click" />
                                     <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click" />
                                 </StackPanel>
 
@@ -899,12 +905,13 @@
                                     Canvas.ZIndex="1"
                                     BorderThickness="1"
                                     BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                          Expanded="MembRCDetailsExpander_Expanded">
 
                                     <StackPanel Orientation="Vertical" >
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                            <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
+                                            <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" Width="400" MinWidth="100"
                                                 Text="{Binding  ElementName=MembReactionComplexListBox, 
                                                                 Path=SelectedItem.Name}" />
                                         </StackPanel >
@@ -995,6 +1002,7 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click" />                                   
                                     <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click" />
                                 </StackPanel>
 
@@ -1007,7 +1015,8 @@
                                     Canvas.ZIndex="1"
                                     BorderThickness="1"
                                     BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                          >
 
                                     <StackPanel Orientation="Vertical" >
                                         <StackPanel Orientation="Horizontal">
@@ -1080,7 +1089,8 @@
             <!-- Cell Death -->
             <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
                                                 Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
-                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                Expanded="CellDeathExpander_Expanded">
                 <StackPanel>
                     <StackPanel x:Name="spDeath" Orientation="Vertical" >
 
@@ -1104,7 +1114,8 @@
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"                                        
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        Expanded="DivSchemeExpander_Expanded" >
 
                 <!--Expanded="DivSchemeExpander_Expanded"-->
                 <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
@@ -1194,7 +1205,9 @@
                     Canvas.ZIndex="1"
                     BorderThickness="1"
                     BorderBrush="Black"
-                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                    Expanded="DiffSchemeExpander_Expanded"
+                >
 
                 <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
                     <StackPanel>

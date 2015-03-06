@@ -421,7 +421,7 @@
                                         </Grid.RowDefinitions>
                                         <!-- display molpop name -->
                                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
-                                            <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
+                                            <TextBlock Text="population name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60" TextWrapping="Wrap"/>
                                     <TextBox Text="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <!-- Display and allow selection of molecule type -->
@@ -547,7 +547,8 @@
                             Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        Expanded="ReacExpander_Expanded">
 
                 <StackPanel>
                     
@@ -623,6 +624,7 @@
                                 x:Name="AddReacExpander"
                                 Margin="0,0,0,0" 
                                 Canvas.ZIndex="1"
+                               Expanded="AddReacExpander_Expanded"
                                 >
                         <StackPanel Orientation="Vertical" Margin="10,0">
                             <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
@@ -686,6 +688,7 @@
                                 x:Name="CreateNewReaction"
                                 Margin="0,0,0,0" 
                                 Canvas.ZIndex="1"
+                                Expanded="CreateNewReaction_Expanded"
                                 >
 
                         <Grid>
@@ -708,7 +711,8 @@
                             Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        Expanded="ReacCompExpander_Expanded">
 
                 <StackPanel>
 
@@ -732,6 +736,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                        <Button Name="EcsSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="EcsSaveReacCompToProtocolButton_Click" />
                         <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" />
                     </StackPanel>
 
@@ -750,9 +755,7 @@
                                 <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                 <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
                                                 Text="{Binding  ElementName=ReactionComplexListBox, 
-                                                                Path=SelectedItem,
-                                                                Converter={StaticResource ReacComplexGUIDtoStringConv},
-                                                                ConverterParameter={StaticResource ecmAvailableReactionComplexesListView}}" 
+                                                                Path=SelectedItem.Name}" 
                                                                 />
                             </StackPanel >
                             <StackPanel x:Name="spReacComp"  >

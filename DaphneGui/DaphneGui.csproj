@@ -250,6 +250,9 @@
     <Compile Include="RenderSkinWindow.xaml.cs">
       <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ResizeThumb.xaml.cs">
+      <DependentUpon>ResizeThumb.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Save3DView.xaml.cs">
       <DependentUpon>Save3DView.xaml</DependentUpon>
     </Compile>
@@ -381,6 +384,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ResizeThumb.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Save3DView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -481,9 +488,9 @@
     <Content Include="Config\RenderSkin\default_skin.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Config\daphne_gc_cycling_scenario.json">
+    <Content Include="Config\daphne_gc_cycling_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

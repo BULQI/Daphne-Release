@@ -636,14 +636,17 @@ namespace DaphneGui
             // immediately run the simulation
             if (ControlledProfiling() == true)
             {
-                runSim();
+                runSim(true);
             }
             postConstruction = true;
         }
 
         public void UpdateGraphics()
         {
-            if (gc == null) return;
+            if (gc == null)
+            {
+                return;
+            }
             vtkDataBasket.UpdateData();
             gc.DrawFrame(sim.GetProgressPercent());
         }
@@ -1008,6 +1011,31 @@ namespace DaphneGui
             return result;
         }
 
+        private Nullable<bool> saveStoreUsingDialog(Level store, string fileName)
+        {
+            // Configure save file dialog box
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            dlg.OverwritePrompt = true;
+            dlg.InitialDirectory = orig_path;
+            dlg.FileName = "store"; // Default file name
+            dlg.DefaultExt = ".json"; // Default file extension
+            dlg.Filter = "Daphne Stores JSON docs (.json)|*.json"; // Filter files by extension
+
+            // Show save file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process save file dialog box results
+            if (result == true)
+            {
+                string filename = dlg.FileName;
+                // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
+                store.FileName = filename;
+                store.SerializeToFile();
+            }
+            return result;
+        }
+
         private void lockSaveStartSim(bool completeReset)
         {
             // prevent when a fit is in progress
@@ -1057,7 +1085,7 @@ namespace DaphneGui
 
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
-                    this.menu_ActivateSimSetup.IsEnabled = false;
+                    menu_ActivateSimSetup.IsEnabled = false;
                     if (ToolWinType == ToolWindowType.Tissue)
                     {
                         ProtocolToolWindow.Close();
@@ -1194,6 +1222,43 @@ namespace DaphneGui
             displayTitle("Loaded past run " + DataBasket.hdf5file.FileName);
         }
 
+        private void ExportAVI(object sender, RoutedEventArgs e)
+        {
+            if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false || vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
+            {
+                return;
+            }
+
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            dlg.InitialDirectory = sim.Reporter.AppPath;
+            // Default file extension
+            dlg.DefaultExt = ".avi";
+            // Filter files by extension
+            dlg.Filter = "VCR export movie (.avi)|*.avi";
+            // set the suggested file name
+            dlg.FileName = System.IO.Path.GetFileNameWithoutExtension(DataBasket.hdf5file.FileName);
+
+            // Show save file dialog box
+            if (dlg.ShowDialog() == true)
+            {
+                // disable opening of a protocol
+                fileMenu.IsEnabled = false;
+                // disable changing playback
+                VCR_Toolbar.IsEnabled = false;
+                // process events and display the grayed out items immediately
+                System.Windows.Forms.Application.DoEvents();
+
+                // export the video
+                vcrControl.ExportAVI(dlg.FileName);
+
+                // disable opening of a protocol
+                fileMenu.IsEnabled = true;
+                // disable changing playback
+                VCR_Toolbar.IsEnabled = true;
+            }
+        }
+
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
         {
             #region MyRegion
@@ -1255,7 +1320,6 @@ namespace DaphneGui
             //    }
             //} 
             #endregion
-
         }
 
         private void VCRbutton_First_Click(object sender, RoutedEventArgs e)
@@ -1744,7 +1808,7 @@ namespace DaphneGui
             ECMOptionsExpander.IsExpanded = false;
             mutex = true;
 
-            runSim();
+            runSim(true);
         }
 
         /// <summary>
@@ -2151,7 +2215,12 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
+                if (DataBasket.hdf5file != null)
+                {
+                    DataBasket.hdf5file.close(true);
+                }
                 vcrControl.ReleaseVCR();
+                exportAVI.IsEnabled = false;
             }
 
             if (gc is VTKFullGraphicsController)
@@ -2258,6 +2327,25 @@ namespace DaphneGui
             DataBasket.hdf5file.close(true);
         }
 
+        /// <summary>
+        /// indicates whether this is a repeating run, i.e. where the simulation restarts a determined
+        /// number of times automatically
+        /// </summary>
+        /// <returns>true for repeating run</returns>
+        public static bool RepeatingRun()
+        {
+            return sop.Protocol.experiment_reps > 1;
+        }
+
+        /// <summary>
+        /// indicates the end has not been reached in a repeating run
+        /// </summary>
+        /// <returns></returns>
+        private bool repeatInProgress()
+        {
+            return repetition < sop.Protocol.experiment_reps;
+        }
+
         private void run()
         {
             while (true)
@@ -2306,7 +2394,7 @@ namespace DaphneGui
                             if (sim.RunStatus != SimulationBase.RUNSTAT_RUN)
                             {
                                 // never rerun the simulation if the simulation was aborted
-                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repetition < sop.Protocol.experiment_reps)
+                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repeatInProgress() == true)
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
                                 }
@@ -2326,7 +2414,7 @@ namespace DaphneGui
                                         closeOutputFiles();
                                     }
                                     // for profiling: close the application after a completed experiment
-                                    if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
+                                    if (ControlledProfiling() == true && repeatInProgress() == false)
                                     {
                                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
                                         return;
@@ -2388,17 +2476,35 @@ namespace DaphneGui
         {
             // increment the repetition
             repetition++;
-            lockSaveStartSim(true);
+            runSim(false);
         }
 
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(bool handleVCR, bool force)
         {
-            if (handleVCR == true && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR() == true)
+            if (handleVCR == true && skipDataWriteMenu.IsChecked == false)
             {
-                VCR_Toolbar.IsEnabled = true;
-                VCR_Toolbar.DataContext = vcrControl;
-                VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                if (DataBasket.hdf5file != null && DataBasket.hdf5file.openRead() == true)
+                {
+                    vcrControl.FrameNames.Clear();
+                    // find the frame names and with them the number of frames
+                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames("/Experiment_VCR/VCR_Frames");
+
+                    if (vcrControl.FrameNames.Count > 0)
+                    {
+                        // open the parent group for this experiment
+                        DataBasket.hdf5file.openGroup("/Experiment_VCR");
+
+                        // open the group that holds the frames for this experiment
+                        DataBasket.hdf5file.openGroup("VCR_Frames");
+
+                        vcrControl.OpenVCR();
+                        VCR_Toolbar.IsEnabled = true;
+                        VCR_Toolbar.DataContext = vcrControl;
+                        VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                        exportAVI.IsEnabled = true;
+                    }
+                }
             }
 
             bool finished = false;
@@ -2488,44 +2594,114 @@ namespace DaphneGui
             return false;
         }
 
-        private void saveStoreFiles()
+        private void saveStore(Level store, string storeName)
         {
-            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
-            {
-                FileInfo info = new FileInfo(sop.DaphneStore.FileName);
-                if (info.IsReadOnly == false || !info.Exists)
-                {
-                    sop.DaphneStore.SerializeToFile(false);
-                    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
-                }
-                else
-                {
-                    string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                    string caption = "File write protected";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Warning;
-                    MessageBox.Show(messageBoxText, caption, button, icon);
-                }
-            }
+            string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
+            string caption = storeName + " Changed";
+            MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            MessageBoxImage icon = MessageBoxImage.Warning;
 
-            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
+            // Display message box
+            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+            if (result == MessageBoxResult.Cancel)
             {
-                FileInfo info = new FileInfo(sop.UserStore.FileName);
+                return;
+            }
+            else if (result == MessageBoxResult.No)
+            {
+                saveStoreUsingDialog(store, store.FileName);
+            }
+            else
+            {
+                FileInfo info = new FileInfo(store.FileName);
                 if (info.IsReadOnly == false || !info.Exists)
                 {
-                    sop.UserStore.SerializeToFile(false);
-                    orig_user_store_content = sop.UserStore.SerializeToString();
+                    store.SerializeToFile(false);
+                    if (storeName == "DaphneStore")
+                    {
+                        orig_daphne_store_content = store.SerializeToString();
+                    }
+                    else if (storeName == "UserStore")
+                    {
+                        orig_user_store_content = store.SerializeToString();
+                    }
                 }
                 else
                 {
-                    string messageBoxText = "The file is write protected: " + sop.UserStore.FileName;
-                    string caption = "File write protected";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Warning;
+                    messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                    caption = "File write protected";
+                    button = MessageBoxButton.OK;
+                    icon = MessageBoxImage.Warning;
                     MessageBox.Show(messageBoxText, caption, button, icon);
                 }
             }
         }
+
+        private void saveStoreFiles()
+        {
+            //DaphneStore
+            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
+            {
+                saveStore(sop.DaphneStore, "DaphneStore");
+                
+                ////string messageBoxText = "Daphne store has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.DaphneStore.FileName) + "?";
+                ////string caption = "Daphne Store Changed";
+                ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                ////MessageBoxImage icon = MessageBoxImage.Warning;
+
+                ////// Display message box
+                ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+                ////if (result == MessageBoxResult.Cancel)
+                ////{
+                ////    return;
+                ////}
+                ////else if (result == MessageBoxResult.No)
+                ////{
+                ////    saveStoreUsingDialog(sop.DaphneStore, sop.DaphneStore.FileName);
+                ////}
+                ////else
+                ////{
+                ////    FileInfo info = new FileInfo(sop.DaphneStore.FileName);
+                ////    if (info.IsReadOnly == false || !info.Exists)
+                ////    {
+                ////        sop.DaphneStore.SerializeToFile(false);
+                ////        orig_daphne_store_content = sop.DaphneStore.SerializeToString();
+                ////    }
+                ////    else
+                ////    {
+                ////        messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                ////        caption = "File write protected";
+                ////        button = MessageBoxButton.OK;
+                ////        icon = MessageBoxImage.Warning;
+                ////        MessageBox.Show(messageBoxText, caption, button, icon);
+                ////    }
+                ////}
+            }
+
+            //UserStore
+            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
+            {
+                saveStore(sop.UserStore, "UserStore");
+
+                ////FileInfo info = new FileInfo(sop.UserStore.FileName);
+                ////if (info.IsReadOnly == false || !info.Exists)
+                ////{
+                ////    sop.UserStore.SerializeToFile(false);
+                ////    orig_user_store_content = sop.UserStore.SerializeToString();
+                ////}
+                ////else
+                ////{
+                ////    string messageBoxText = "The file is write protected: " + sop.UserStore.FileName;
+                ////    string caption = "File write protected";
+                ////    MessageBoxButton button = MessageBoxButton.OK;
+                ////    MessageBoxImage icon = MessageBoxImage.Warning;
+                ////    MessageBox.Show(messageBoxText, caption, button, icon);
+                ////}
+            }
+        }
+
         private bool applyTempFilesAndSave(bool discard)
         {
             if (tempFileContent == true)
@@ -2583,13 +2759,17 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        internal void runSim()
+        /// <param name="firstRun">true if this is a single-shot simulation or the first iteration of a repeated run</param>
+        internal void runSim(bool firstRun)
         {
-
+            if (firstRun == true)
+            {
+                repetition = 1;
+            }
             switch (ToolWinType)
             {
                 case ToolWindowType.Tissue:
-                    runSim_Tissue();
+                    runSim_Tissue(!firstRun);
                     break;
                 case ToolWindowType.VatRC:
                     runSim_VatRc();
@@ -2599,7 +2779,7 @@ namespace DaphneGui
             }
         }
 
-        private void runSim_Tissue()
+        private void runSim_Tissue(bool repeat)
         {
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
@@ -2675,13 +2855,11 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
-                    // initiating a run starts always at repetition 1
-                    repetition = 1;
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
                     // after a run or vcr playback
-                    lockSaveStartSim(MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
+                    lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
                 }
                 else
                 {
@@ -2693,23 +2871,16 @@ namespace DaphneGui
                             sop.Protocol.SerializeToFile();
                             orig_content = sop.Protocol.SerializeToStringSkipDeco();
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
                             lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
                             if (saveScenarioUsingDialog() == true)
                             {
-                                // initiating a run starts always at repetition 1
-                                repetition = 1;
-                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.None:
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
                             lockSaveStartSim(true);
                             tempFileContent = false;
                             break;
@@ -2727,7 +2898,7 @@ namespace DaphneGui
 
                         if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.AppPath, sim.Reporter.FileName, "vcr", ".hdf5", true) == false)
                         {
-                            MessageBox.Show("Error creating HDF5 file. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         DataBasket.hdf5file.openWrite(true);
                         // group for this experiment
@@ -2766,7 +2937,7 @@ namespace DaphneGui
             }
 
             bool mouseDrag = MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG);
-            repetition = 1;
+
             lockSaveStartSim(!mouseDrag);
 
             if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
@@ -2884,6 +3055,7 @@ namespace DaphneGui
 
             lvCellMolConcs.ItemsSource = currConcs;
 
+            //Cell differentiation
             int nDiffState = selectedCell.DifferentiationState;
             if (selectedCell.Differentiator.State != null)
             {
@@ -2904,11 +3076,13 @@ namespace DaphneGui
                 lvCellDiff.ItemsSource = gene_activations;
             }
 
+            //Cell division
             int nDivState = selectedCell.DividerState;
             if (selectedCell.Divider.State != null)
             {
                 ObservableCollection<CellGeneInfo> gene_activations2 = new ObservableCollection<CellGeneInfo>();
                 txtDivCellState.Text = selectedCell.Divider.State[nDivState];
+                txtDivCellGen.Text = selectedCell.generation.ToString();
                 ObservableCollection<double> activities = new ObservableCollection<double>();
                 int len = selectedCell.Divider.activity.GetLength(1);
                 for (int i = 0; i < len; i++)
@@ -3036,6 +3210,10 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
+                if (DataBasket.hdf5file != null)
+                {
+                    DataBasket.hdf5file.close(true);
+                }
                 vcrControl.ReleaseVCR();
             }
 
@@ -3204,7 +3382,7 @@ namespace DaphneGui
 
             if (source == null)
             {
-                MessageBox.Show("Nothing to push");
+                MessageBox.Show("Nothing to save");
                 return;
             }
 
@@ -3369,6 +3547,8 @@ namespace DaphneGui
             ComponentsToolWindow.DataContext = SOP.UserStore;
             CellStudioToolWindow.DataContext = SOP.UserStore;
             ComponentsToolWindow.Refresh();
+            ReturnToProtocolButton.Visibility = Visibility.Visible;
+            menuProtocolStore.IsEnabled = true;
         }
 
         private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
@@ -3381,14 +3561,27 @@ namespace DaphneGui
             ComponentsToolWindow.DataContext = SOP.DaphneStore;
             CellStudioToolWindow.DataContext = SOP.DaphneStore;
             ComponentsToolWindow.Refresh();
+            ReturnToProtocolButton.Visibility = Visibility.Visible;
+            menuProtocolStore.IsEnabled = true;
         }
 
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
         {
+            statusBarMessagePanel.Content = "Ready:  Protocol";
             ProtocolToolWindow.Open();
-            VTKDisplayDocWindow.Open();
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
+            ReturnToProtocolButton.Visibility = Visibility.Collapsed;
+            menuProtocolStore.IsEnabled = false;
+
+            if (SOP.Protocol.scenario is TissueScenario)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            else
+            {
+                ReacComplexChartWindow.Activate();
+            }
         }
 
         //private void readStores()
@@ -3563,6 +3756,25 @@ namespace DaphneGui
             gc.CreatePipelines();
             UpdateGraphics();
             (gc as VTKFullGraphicsController).Rwc.Invalidate();
+        }
+
+        private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)
+        {
+            statusBarMessagePanel.Content = "Ready:  Protocol";
+            ProtocolToolWindow.Open();            
+            ComponentsToolWindow.DataContext = SOP.Protocol;
+            CellStudioToolWindow.DataContext = SOP.Protocol;
+            ReturnToProtocolButton.Visibility = Visibility.Collapsed;
+            menuProtocolStore.IsEnabled = false;
+
+            if (SOP.Protocol.scenario is TissueScenario)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            else
+            {
+                ReacComplexChartWindow.Activate();
+            }
         }
         
     }

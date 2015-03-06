@@ -6,7 +6,7 @@
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-        Title="Push Between Levels"
+        Title="Get/Save entities between stores"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"  
         MinHeight="120"
@@ -62,7 +62,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn x:Name="colWeight" Header="Weight" Width="60" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colWeight" Visibility="Collapsed" Header="Weight" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
@@ -70,7 +70,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn x:Name="colRadius" Header="Radius" Width="60" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colRadius" Visibility="Collapsed" Header="Radius" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>

@@ -297,5 +297,23 @@ namespace DaphneGui
             //toolWinTissue.dgCellMembMols.SelectedItem = 0;
             //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
         }
+
+        private void CellDeathParamsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void InteractionParamsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
     }
 }

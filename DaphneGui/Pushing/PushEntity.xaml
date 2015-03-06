@@ -4,7 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:local="clr-namespace:DaphneGui"
-        Title="Push Entity" 
+        Title="Save Entity" 
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded">
     
@@ -53,7 +53,7 @@
                         FontSize="12" Margin="0,12" Height="48" Width="48" >
                     <StackPanel>
                         <Image Source="../Images/RightArrow_48x48.png" />
-                        <TextBlock>Push</TextBlock>
+                        <TextBlock>Save</TextBlock>
                     </StackPanel>
                 </Button>
 
