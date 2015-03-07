@@ -84,6 +84,37 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// levelContext property - to pass level to various reusable controls
+        /// </summary>
+        public static readonly DependencyProperty LevelContextProperty =
+           DependencyProperty.RegisterAttached("LevelContext",
+           typeof(Level), typeof(MainWindow), new FrameworkPropertyMetadata(null,
+           FrameworkPropertyMetadataOptions.Inherits));
+
+        public static Level GetLevelContext(DependencyObject target)
+        {
+            return (Level)target.GetValue(LevelContextProperty);
+        }
+
+        public static void SetLevelContext(DependencyObject target, Level value)
+        {
+            target.SetValue(LevelContextProperty, value);
+        }
+
+        public Level LevelContext
+        {
+            get
+            {
+                return GetLevelContext(this);
+            }
+            set
+            {
+                SetLevelContext(this, value);
+            }
+        }
+
+
+        /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
         public static string appPath;
@@ -2021,6 +2052,7 @@ namespace DaphneGui
                 try
                 {
                     SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
+                    LevelContext = protocol;
                     ST_CurrentLevel = protocol;
                     return protocol;
                 }
@@ -2039,6 +2071,7 @@ namespace DaphneGui
                     protocol.FileName = protocol_path.LocalPath;
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
                     SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
+                    LevelContext = protocol;
                     ST_CurrentLevel = protocol;
                     return protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
@@ -3537,6 +3570,9 @@ namespace DaphneGui
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
             ReacComplexChartWindow.Close();
+
+            LevelContext = SOP.UserStore;
+
             ComponentsToolWindow.DataContext = SOP.UserStore;
             CellStudioToolWindow.DataContext = SOP.UserStore;
             ComponentsToolWindow.Refresh();
@@ -3552,6 +3588,9 @@ namespace DaphneGui
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
             ReacComplexChartWindow.Close();
+
+            LevelContext = SOP.UserStore;
+
             ComponentsToolWindow.DataContext = SOP.DaphneStore;
             CellStudioToolWindow.DataContext = SOP.DaphneStore;
             ComponentsToolWindow.Refresh();
@@ -3565,6 +3604,8 @@ namespace DaphneGui
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
             ProtocolToolWindow.Open();
+
+            LevelContext = SOP.UserStore;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;

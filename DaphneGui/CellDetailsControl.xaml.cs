@@ -539,6 +539,9 @@ namespace DaphneGui
 
             Level protocol = MainWindow.SOP.Protocol;   //MainWindow.ST_CurrentLevel;
 
+
+            Level currLevel = MainWindow.GetLevelContext(this);
+
             string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
             message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
             MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
