@@ -30,8 +30,6 @@ namespace DaphneGui
         private Dictionary<string, int> inputModifiers;
         public double inputRateConstant { get; set; }
 
-        // gmk - It might be better to define these in the xaml code, but I couldn't get it to work.
-        // For now, they are defined in populateCollection()
         public ConfigCompartment ARCComp
         {
             get { return (ConfigCompartment)GetValue(ARCCompProperty); }
@@ -408,10 +406,21 @@ namespace DaphneGui
                         MessageBox.Show("Boundary reactions are not supported in this environment.");
                         return;
                     }
+                    else
+                    {
+                        VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
+                        ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
+                        crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
+                        s.InitializeAllMols();
+                        s.InitializeAllReacs();
+                    }
                     break;
 
                 case "component_reacs":
+                    break;
+
                 case "component_rc":
+                    this.CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
                     break;
 
                 default:
@@ -426,16 +435,6 @@ namespace DaphneGui
             {
                 MainWindow.SOP.Protocol.entity_repository.reactions.Add(cr);
             }
-
-            if (reacEnvironment == "vatRC")
-            {
-                VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
-                ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
-                crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
-                s.InitializeAllMols();
-                s.InitializeAllReacs();
-            }
-
 
             txtReac.Text = "";
             reacmolguids.Clear();
@@ -678,11 +677,8 @@ namespace DaphneGui
 
         private void populateCollection()
         {
-            //lbMol2.ScrollIntoView(lbMol2.Items[0]);
-
             CompositeCollection coll = new CompositeCollection();
             CollectionContainer cc = new CollectionContainer();
-            Protocol protocol;
             Level level;
             string reacEnvironment = Tag as string;
             switch (reacEnvironment)
@@ -727,14 +723,12 @@ namespace DaphneGui
                     }
                     break;
 
-
                 case "membrane":
                     ARCCell = this.DataContext as ConfigCell;
                     if (ARCCell != null)
                     {
                         ARCComp = ARCCell.membrane;
                         ARCReactions = ARCComp.Reactions;
-                        //cc.Collection = ARCCell.membrane.molecules_dict.Values.ToArray();
                         cc.Collection = ARCComp.molecules_dict.Values.ToArray();
                         coll.Add(cc);
                     }
@@ -742,8 +736,7 @@ namespace DaphneGui
 
                 case "vatRC":
                     ARCCell = null;
-                    ARCComp = null;
-                    
+                    ARCComp = null;                  
                     ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
                     if (crc != null)
                     {
@@ -751,20 +744,12 @@ namespace DaphneGui
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
-                    
-                    //if (protocol != null)
-                    //{
-                    //    ARCReactions = protocol.entity_repository.reactions ?? null;
-                    //    cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
-                    //    coll.Add(cc);
-                    //}
                     break;
 
                 case "component_reacs":
                     ARCCell = null;
                     ARCComp = null;
                     level = this.DataContext as Level;
-
                     if (level != null)
                     {
                         ARCReactions = level.entity_repository.reactions;
@@ -779,8 +764,7 @@ namespace DaphneGui
 
                 case "component_rc":
                     ARCCell = null;
-                    ARCComp = null;
-                    
+                    ARCComp = null;                   
                     level = this.DataContext as Level;
                     crc = this.CurrentReactionComplex as ConfigReactionComplex;
                     if (crc != null)
