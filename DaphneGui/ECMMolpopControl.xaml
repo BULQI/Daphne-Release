@@ -565,7 +565,7 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <ListView x:Name="lvEcsReactions" 
+                    <ListView x:Name="lvEcsReactions"
                               ItemsSource="{Binding Path=Protocol.scenario.environment.comp.Reactions}"
                               SelectedIndex="-1">
 
@@ -727,7 +727,7 @@
                         <TextBlock Text="Reaction Complexes" Margin="0,-10,0,0" >
                         </TextBlock>
 
-                        <ListBox x:Name="ReactionComplexListBox" MinHeight="50" 
+                        <ListBox x:Name="ReactionComplexListBox" MinHeight="20" 
                                     ItemsSource="{Binding Path=Protocol.scenario.environment.comp.reaction_complexes}" 
                                     DisplayMemberPath="Name"
                                     SelectedIndex="0"

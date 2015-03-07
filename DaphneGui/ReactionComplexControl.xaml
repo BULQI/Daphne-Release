@@ -14,7 +14,7 @@
     <StackPanel Orientation="Vertical" Margin="8">
         <StackPanel>
             <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
-            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="50" MaxHeight="150"
+            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150"
                             ItemsSource="{Binding reaction_complexes}"
                             DisplayMemberPath="Name"
                             IsSynchronizedWithCurrentItem="True"
