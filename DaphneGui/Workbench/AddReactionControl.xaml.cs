@@ -243,7 +243,7 @@ namespace DaphneGui
 
             IdentifyModifiers();
 
-            Level level = MainWindow.ST_CurrentLevel;
+            Level level = MainWindow.SOP.Protocol;  //MainWindow.ST_CurrentLevel;
             string geneGuid = "";
             ConfigReaction cr = new ConfigReaction();
             cr.rate_const = inputRateConstant;
@@ -386,7 +386,7 @@ namespace DaphneGui
                     break;
 
                 case "cytosol":
-                    ObservableCollection<string> bulkMols = cr.GetBulkMolecules(MainWindow.ST_CurrentLevel.entity_repository);
+                    ObservableCollection<string> bulkMols = cr.GetBulkMolecules(level.entity_repository);
                     if (bulkMols.Count < 1)
                     {
                         MessageBox.Show("Not a valid reaction for this environment.");
@@ -429,12 +429,14 @@ namespace DaphneGui
             //}
 
             //New way of adding reaction to er
-            if (MainWindow.ST_CurrentLevel.findReactionByTotalString(cr.TotalReactionString) == false)
+            if (level.findReactionByTotalString(cr.TotalReactionString) == false)
             {
-                MainWindow.ST_CurrentLevel.entity_repository.reactions.Add(cr);
+                level.entity_repository.reactions.Add(cr);
             }
 
-            if (reacEnvironment == "vatRC" && MainWindow.ST_CurrentLevelType == MainWindow.LevelType.Protocol)
+            //************
+            //if (reacEnvironment == "vatRC" && MainWindow.ST_CurrentLevelType == MainWindow.LevelType.Protocol)
+            if (reacEnvironment == "vatRC")
             {
                 VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
                 ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
@@ -623,7 +625,7 @@ namespace DaphneGui
 
         private bool ValidateMoleculeName(string sMol)
         {
-            Level level = MainWindow.ST_CurrentLevel;
+            Level level = MainWindow.SOP.Protocol;    //MainWindow.ST_CurrentLevel;
 
             string molGuid = level.findMoleculeGuidByName(sMol);
             string geneGuid = level.findGeneGuidByName(sMol);
@@ -663,7 +665,7 @@ namespace DaphneGui
 
         private bool HasMoleculeType(Dictionary<string, int> inputList, MoleculeLocation molLoc)
         {
-            Level level = MainWindow.ST_CurrentLevel;
+            Level level = MainWindow.SOP.Protocol;   //MainWindow.ST_CurrentLevel;
 
             foreach (KeyValuePair<string, int> kvp in inputList)
             {
@@ -857,8 +859,9 @@ namespace DaphneGui
                 return;
             }
 
+            Level level = MainWindow.SOP.Protocol;
             ConfigMolecule newLibMol = new ConfigMolecule();
-            newLibMol.Name = newLibMol.GenerateNewName(MainWindow.ST_CurrentLevel, "_New");
+            newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
             AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
             aem.Tag = this.Tag;
 
@@ -866,8 +869,8 @@ namespace DaphneGui
             if (aem.ShowDialog() == true)
             {
                 //Add new mol to the correct entity_repository
-                newLibMol.ValidateName(MainWindow.ST_CurrentLevel);
-                MainWindow.ST_CurrentLevel.entity_repository.molecules.Add(newLibMol);
+                newLibMol.ValidateName(level);
+                level.entity_repository.molecules.Add(newLibMol);
                 
                 //Need to add a mol pop to cell also
                 if (environment == "membrane")

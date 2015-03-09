@@ -1,9 +1,8 @@
 ﻿<Window x:Class="DaphneGui.NewEditReacComplex"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        
         xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
-        Title="Add/Edit Reaction Complex" Height="400" Width="720"
+        Title="Add/Edit Reaction Complex" Height="450" Width="780"
         WindowStartupLocation="CenterOwner"
         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}">
     
@@ -11,7 +10,7 @@
         <ResourceDictionary Source="..\Dictionary1.xaml" />
     </Window.Resources>
 
-    <StackPanel Height="350">
+    <StackPanel Height="400">
         <!-- Reaction Complex section -->
         <Grid>
             <Grid.Resources>
@@ -28,14 +27,14 @@
             </Grid.Resources>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="335" />
                 <ColumnDefinition Width="80" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="335" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="32" />
                 <RowDefinition Height="32" />
-                <RowDefinition Height="120" />
+                <RowDefinition Height="180" />
                 <RowDefinition Height="80" />
 
             </Grid.RowDefinitions>
