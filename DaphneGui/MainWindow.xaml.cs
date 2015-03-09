@@ -453,8 +453,8 @@ namespace DaphneGui
             }
             else
             {
-                file = "daphne_driver_locomotion_scenario.json";
-                //file = "daphne_vatRC_ligand_receptor_scenario.json";
+                //file = "daphne_driver_locomotion_scenario.json";
+                file = "simple_chemotaxis.json";
             }
 
             int repeat = 0;
@@ -669,62 +669,46 @@ namespace DaphneGui
         public void CreateAndSerializeDaphneProtocols()
         {
             //BLANK SCENARIO
-            var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
+            var protocol = new Protocol("Config\\blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateBlankProtocol(protocol);
-            //serialize to json
             protocol.SerializeToFile();
 
             //DRIVER-LOCOMOTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
+            protocol = new Protocol("Config\\simple_chemotaxis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
-            // serialize to json
             protocol.SerializeToFile();
 
-            //DIFFUSIION SCENARIO
-            protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            ////DIFFUSIION SCENARIO - no longer needed
+            //protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            //ProtocolCreators.CreateDiffusionProtocol(protocol);
+            ////Serialize to json
+            //protocol.SerializeToFile();
 
-            ProtocolCreators.CreateDiffusionProtocol(protocol);
-            //Serialize to json
-            protocol.SerializeToFile();
-
-            //LIGAND-RECEPTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
-            ProtocolCreators.CreateLigandReceptorProtocol(protocol);
-            //serialize to json
-            protocol.SerializeToFile();
+            ////LIGAND-RECEPTOR SCENARIO - no longer needed
+            //protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            //ProtocolCreators.CreateLigandReceptorProtocol(protocol);
+            ////serialize to json
+            //protocol.SerializeToFile();
 
             //GC SCENARIO
-            protocol = new Protocol("Config\\daphne_gc_cycling_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
+            protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateGCProtocol(protocol);
-            //serialize to json
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
-            // serialize
             protocol.SerializeToFile();
 
             // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
-            // serialize
             protocol.SerializeToFile();
 
             // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_2SiteAbBinding_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
-            // serialize
             protocol.SerializeToFile();
-
-
-
-
-
 
         }
 
