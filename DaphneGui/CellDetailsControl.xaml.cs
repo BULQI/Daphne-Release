@@ -333,7 +333,10 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
 
             if (cell == null)
+            {
+                MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
+            }
 
             cell.genes.Add(gene);
 
@@ -380,7 +383,19 @@ namespace DaphneGui
         private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+            {
+                MessageBox.Show("Please select a cell first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
+
+            if (gene == null)
+            {
+                MessageBox.Show("Please select a gene to remove before clicking the Remove button.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)

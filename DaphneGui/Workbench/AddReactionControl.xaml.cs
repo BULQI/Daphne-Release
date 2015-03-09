@@ -850,6 +850,13 @@ namespace DaphneGui
 
         private void btnCreateNewMol_Click(object sender, RoutedEventArgs e)
         {
+            string environment = this.Tag as string;
+            if ((environment == "membrane" || environment == "cytosol") && ((this.DataContext as ConfigCell) == null))
+            {
+                MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             ConfigMolecule newLibMol = new ConfigMolecule();
             newLibMol.Name = newLibMol.GenerateNewName(MainWindow.ST_CurrentLevel, "_New");
             AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
@@ -863,7 +870,6 @@ namespace DaphneGui
                 MainWindow.ST_CurrentLevel.entity_repository.molecules.Add(newLibMol);
                 
                 //Need to add a mol pop to cell also
-                string environment = this.Tag as string;
                 if (environment == "membrane")
                 {
                     ConfigCell cell = this.DataContext as ConfigCell;
