@@ -78,7 +78,7 @@
                             <Expander                                            
                                 Padding="6" ExpandDirection="Down"
                                 IsExpanded="True"
-                                Header="Locomotor"                                                  
+                                Header="Chemotaxis"                                                  
                                 x:Name="LocomotorExpander"
                                 Margin="0,0,0,0" 
                                 Canvas.ZIndex="1"     
@@ -136,7 +136,7 @@
 
                     <GroupBox Grid.Row="1" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="stochastic force parameter" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                            <TextBlock Text="stochastic motion (force parameter)" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"/>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>
