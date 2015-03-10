@@ -1849,13 +1849,13 @@ namespace DaphneGui
             if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
                 tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = new PoissonParameterDistribution();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
                 //stack_panel.DataContext = tde;
             }
             else
             {
-                tde = new ConfigMolTransitionDriverElement();
+                tde = new ConfigMolTransitionDriverElement();                
             }
             tde.CurrentStateName = CurrentStateName;
             tde.DestStateName = DestStateName;
