@@ -1031,8 +1031,9 @@ namespace DaphneGui
         /// This allows the user to add genes to the epigenetic map.
         /// </summary>
         /// <returns></returns>
-        public DataGridTextColumn CreateUnusedGenesColumn()
+        public DataGridTextColumn CreateUnusedGenesColumn(ConfigTransitionScheme currScheme)
         {
+            ConfigCell cell = DataContext as ConfigCell;
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             DataGridTextColumn editor_col = new DataGridTextColumn();
             editor_col.CanUserSort = false;
@@ -1040,7 +1041,15 @@ namespace DaphneGui
 
             CollectionViewSource cvs1 = new CollectionViewSource();
             cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
-            cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+
+            if (currScheme == cell.diff_scheme)
+            {
+                cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+            }
+            else
+            {
+                cvs1.Filter += new FilterEventHandler(unusedDivGenesListView_Filter);
+            }
 
             CompositeCollection coll1 = new CompositeCollection();
             ConfigGene dummyItem = new ConfigGene("Add a gene", 0, 0);
@@ -1057,6 +1066,7 @@ namespace DaphneGui
             addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
 
             addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
+            addGenesCombo.Name = "ComboGenes";
 
             HeaderTemplate.VisualTree = addGenesCombo;
             editor_col.HeaderTemplate = HeaderTemplate;
@@ -1289,6 +1299,35 @@ namespace DaphneGui
             }
         }
 
+        private void unusedDivGenesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+
+            e.Accepted = false;
+
+            if (cell == null)
+                return;
+
+            ConfigTransitionScheme ds = cell.div_scheme;
+            ConfigGene gene = e.Item as ConfigGene;
+
+            if (ds != null)
+            {
+                //if scheme already contains this gene, exclude it from the available gene pool
+                if (ds.genes.Contains(gene.entity_guid))
+                {
+                    e.Accepted = false;
+                }
+                else
+                {
+                    e.Accepted = true;
+                }
+            }
+            else
+            {
+                e.Accepted = true;
+            }
+        }
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
         {
             // Confirm parent and childName are valid. 

@@ -99,7 +99,7 @@
             CanUserSortColumns="False"                                                            
             AlternatingRowBackground="Beige"                                                            
             SelectionMode="Extended"                  
-            SelectionUnit="FullRow"
+            SelectionUnit="CellOrRowHeader"
             VirtualizingStackPanel.VirtualizationMode="Standard"
             VirtualizingStackPanel.IsVirtualizing="False" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"

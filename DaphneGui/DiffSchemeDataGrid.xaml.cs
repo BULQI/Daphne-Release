@@ -318,7 +318,8 @@ namespace DaphneGui
                 dataGrid.Columns.Add(col);
                 count++;
             }
-            DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn();
+            ConfigTransitionScheme currentScheme = GetDiffSchemeSource(dataGrid);
+            DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn(currentScheme);
             dataGrid.Columns.Add(combobox_col);
         }
 
