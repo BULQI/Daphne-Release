@@ -331,6 +331,13 @@ namespace DaphneGui
             gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
 
             ConfigCell cell = DataContext as ConfigCell;
+
+            if (cell == null)
+            {
+                MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             cell.genes.Add(gene);
 
             ConfigGene erGene = gene.Clone(null);
@@ -376,7 +383,19 @@ namespace DaphneGui
         private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+            {
+                MessageBox.Show("Please select a cell first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
+
+            if (gene == null)
+            {
+                MessageBox.Show("Please select a gene to remove before clicking the Remove button.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             MessageBoxResult res = MessageBox.Show("Removing this gene will remove cell reactions and reaction complexes that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
@@ -534,8 +553,7 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
-            //Level protocol = MainWindow.ST_CurrentLevel;
-            Level protocol = MainWindow.SOP.Protocol;
+            Level protocol = MainWindow.SOP.Protocol;   //MainWindow.ST_CurrentLevel;
 
             string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
             message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
@@ -768,8 +786,6 @@ namespace DaphneGui
 
             //New filtering rules as of 3/5/15 bug 2426
             //Allow all reactions except what belongs in membrane (where each molecule is a boundary molecule)
-            //EntityRepository er = MainWindow.ST_CurrentLevel.entity_repository;
-
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             if (cr.HasBulkMolecule(er) == true)
             {
@@ -803,7 +819,6 @@ namespace DaphneGui
             //Molecules no longer need to be in the membrane. They will get added if needed.
 
             //If the reaction has any bulk molecules, it cannot go in the membrane
-            //if (cr.HasBulkMolecule(MainWindow.ST_CurrentLevel.entity_repository) == true)
             if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)
             {
                 e.Accepted = false;

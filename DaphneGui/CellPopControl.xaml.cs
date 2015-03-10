@@ -290,23 +290,17 @@ namespace DaphneGui
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
             // of cell type list
-            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-                return;
+            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            //    return;
 
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
                 return;
 
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
-            if (cp == null)
-                return;
 
             if (cb.IsDropDownOpen == false) return;
             cb.IsDropDownOpen = false;
-
-            string curr_cell_pop_name = cp.cellpopulation_name;
-            string curr_cell_type_guid = "";
-            curr_cell_type_guid = cp.Cell.entity_guid;
 
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
@@ -325,16 +319,60 @@ namespace DaphneGui
                     B.repositoryPush(newLibCell, status); // push into B, inserts as new
                 }
 
-                cp.Cell = newLibCell.Clone(true);
-                cp.Cell.CellName = newLibCell.CellName;
-                cp.renderLabel = cp.Cell.renderLabel;
-                cb.SelectedItem = newLibCell;
+                if (cp != null)
+                {
+                    cp.Cell = newLibCell.Clone(true);
+                    cp.Cell.CellName = newLibCell.CellName;
+                    cp.renderLabel = cp.Cell.renderLabel;
+                }
+                else
+                {
+                    //If no cell pops exist, create a new one - part of bug 2457 fix
 
+                    ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+                    TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
+                    cp = new CellPopulation();
+                    cp.Cell = newLibCell.Clone(false);
+                    cp.cellpopulation_name = newLibCell.CellName;
+
+                    double[] extents = new double[3] { envHandle.extent_x, 
+                                               envHandle.extent_y, 
+                                               envHandle.extent_z };
+                    double minDisSquared = 2 * cp.Cell.CellRadius;
+                    minDisSquared *= minDisSquared;
+
+                    // Default is uniform probability distribution
+                    cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
+                    cp.cellPopDist.Initialize();
+                    // Causes a new random seed for the random source
+                    // Otherwise we will get the same values every time if this is followed by Apply()
+                    cp.cellPopDist.Reset();
+                    scenario.cellpopulations.Add(cp);
+
+                    //add rendering options to scenario
+                    (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
+
+                    //This is needed because without it, a new cell pop was showing black square to the left.
+                    MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cp.renderLabel, cp.Cell.CellName);
+
+                    CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
+                    cb.SelectedIndex = 0;
+                }
+
+                
                 MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cp.renderLabel, cp.Cell.CellName);
             }
             //user picked existing cell type 
             else
             {
+                if (cp == null)
+                    return;
+
+                string curr_cell_pop_name = cp.cellpopulation_name;
+                string curr_cell_type_guid = "";
+                curr_cell_type_guid = cp.Cell.entity_guid;
+
                 ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
                 //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
                 //of configCell, it will has its own entity_guid - only the name stays the same ---
