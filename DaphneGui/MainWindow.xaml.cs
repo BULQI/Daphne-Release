@@ -494,7 +494,7 @@ namespace DaphneGui
                     // allow one repetition with the blank scenario
                     if (repeat < 1)
                     {
-                        file = "daphne_blank_scenario.json";
+                        file = "blank_scenario.json";
                     }
                 }
                 repeat++;
@@ -3282,7 +3282,7 @@ namespace DaphneGui
             }
 
             //Grab the blank scenario
-            string file = "daphne_blank_scenario.json";
+            string file = "blank_scenario.json";
             string filename = appPath + @"\Config\" + file;
             Uri uri_path = new Uri(filename);
 
