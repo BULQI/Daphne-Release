@@ -328,19 +328,29 @@ namespace DaphneGui
         
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gene = new ConfigGene("g", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
-
             ConfigCell cell = DataContext as ConfigCell;
-
             if (cell == null)
             {
                 MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            //Create a new default gene
+            ConfigGene gene = new ConfigGene("g", 0, 0);
+            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
+
+            //Display it in dialog and allow user to edit name, etc.
+            AddEditGene aeg = new AddEditGene();
+            aeg.DataContext = gene;
+
+            //If cancelled from dialog, return.
+            if (aeg.ShowDialog() == false)
+                return;
+          
+            //Add new gene to cell
             cell.genes.Add(gene);
 
+            //Clone new gene and add to ER
             ConfigGene erGene = gene.Clone(null);
             MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
 

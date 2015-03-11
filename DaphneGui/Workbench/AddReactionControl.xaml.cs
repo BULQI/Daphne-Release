@@ -889,7 +889,56 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            btnCreateNewGene.Visibility = System.Windows.Visibility.Visible;
+            string environment = this.Tag as string;
+
+            //Do not allow "Create New Gene" feature for membrane and ecs
+            if (environment == "membrane" || environment == "ecs")
+            {
+                btnCreateNewGene.Visibility = System.Windows.Visibility.Collapsed;
+            }
+            //For cytosol, must have a cell selected
+            else if (environment == "cytosol" && ((this.DataContext as ConfigCell) == null)) 
+            {
+                MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
             populateCollection();
+        }
+
+        private void btnCreateNewGene_Click(object sender, RoutedEventArgs e)
+        {
+            string environment = this.Tag as string;
+            Level level = MainWindow.SOP.Protocol;
+
+            //Create a new gene with default name
+            ConfigGene newGene = new ConfigGene("g", 0, 0);
+            newGene.Name = newGene.GenerateNewName(level, "New");
+
+            //Allow user to change properties
+            AddEditGene aeg = new AddEditGene();
+            aeg.DataContext = newGene;
+
+            //If invoked from cytosol, add new gene to cell and ER
+            if (environment == "cytosol")
+            {
+                if (aeg.ShowDialog() == true)
+                {
+                    ConfigCell cell = this.DataContext as ConfigCell;
+                    cell.genes.Add(newGene);
+                    ConfigGene erGene = newGene.Clone(null);
+                    level.entity_repository.genes.Add(erGene);
+                }
+            }
+            else
+            //Just add new gene to ER
+            {
+                if (aeg.ShowDialog() == true)
+                {
+                    level.entity_repository.genes.Add(newGene);
+                }
+            }
         }
         
     }
