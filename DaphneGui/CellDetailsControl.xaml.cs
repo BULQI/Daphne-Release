@@ -26,7 +26,6 @@ namespace DaphneGui
         public CellDetailsControl()
         {
             InitializeComponent();
-
         }
 
         private void memb_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -48,11 +47,13 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
+            Level level = MainWindow.SOP.Protocol;
+
             //if user picked 'new molecule' then create new molecule in ER
             if (nIndex == (cb.Items.Count - 1))
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = DataContext as ConfigCell;
@@ -70,8 +71,8 @@ namespace DaphneGui
                     }
                     return;
                 }
-                newLibMol.ValidateName(MainWindow.SOP.Protocol);
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                newLibMol.ValidateName(level);
+                level.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
 
@@ -553,9 +554,7 @@ namespace DaphneGui
             bool needRefresh = false;
 
             Level protocol = MainWindow.SOP.Protocol;   //MainWindow.ST_CurrentLevel;
-
-
-            Level currLevel = MainWindow.GetLevelContext(this);
+            //Level protocol = MainWindow.GetLevelContext(this);
 
             string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
             message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
@@ -723,6 +722,7 @@ namespace DaphneGui
                     }
                     return;
                 }
+
                 newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
@@ -787,8 +787,10 @@ namespace DaphneGui
             }
 
             //New filtering rules as of 3/5/15 bug 2426
-            //Allow all reactions except what belongs in membrane (where each molecule is a boundary molecule)
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            //Allow all reactions except what belongs in membrane (where all molecules are boundary molecules)
+
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;            
+
             if (cr.HasBulkMolecule(er) == true)
             {
                 e.Accepted = true;
@@ -821,7 +823,8 @@ namespace DaphneGui
             //Molecules no longer need to be in the membrane. They will get added if needed.
 
             //If the reaction has any bulk molecules, it cannot go in the membrane
-            if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)
+
+            if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)            
             {
                 e.Accepted = false;
                 return;
@@ -899,16 +902,6 @@ namespace DaphneGui
             e.Accepted = true;
         }
 
-        //private bool EcmHasMolecule(string molguid)
-        //{
-        //    foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
-        //    {
-        //        if (molpop.molecule.entity_guid == molguid)
-        //            return true;
-        //    }
-        //    return false;
-        //}
-
         private bool MembraneHasMolecule(ConfigCell cell, string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
@@ -932,9 +925,11 @@ namespace DaphneGui
             return false;
         }
 
+        //This cannot get called in UserStore or DaphneStore - Cell Populations don't exist there.
         private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
             bool ret = false;
+            
             foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(cell_pop.Cell.entity_guid))
@@ -951,6 +946,7 @@ namespace DaphneGui
 
             return ret;
         }
+
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
             bool ret = false;
@@ -1266,12 +1262,6 @@ namespace DaphneGui
 
             ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
-
-            //REMOVED this for resolving bug 2429 - the combo should populate from er.genes
-            //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            //if (!cell.HasGene(gene.entity_guid))
-            //    return;
-
 
             if (ds != null)
             {
@@ -1851,8 +1841,8 @@ namespace DaphneGui
             if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
                 tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = new PoissonParameterDistribution();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
                 //stack_panel.DataContext = tde;
             }
             else

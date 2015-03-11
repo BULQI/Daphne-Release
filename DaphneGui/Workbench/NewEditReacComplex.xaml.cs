@@ -203,7 +203,7 @@ namespace DaphneGui
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             bool edited = false;
-            Level level = MainWindow.SOP.Protocol;
+            Protocol level = MainWindow.SOP.Protocol;
 
             string rcname = txtRcName.Text;
             rcname = rcname.Trim();

@@ -83,7 +83,19 @@ namespace DaphneGui
             MolDetailsExpander.IsExpanded = true;
         }
 
-        private void ProcessBoundaryMoleculeAvailReac(ConfigMolecule mol)
+        /// <summary>
+        /// This method checks if the given boundary molecule exists in any of the cells.
+        /// 
+        /// If so, then do nothing.
+        /// 
+        /// If the molecule does not exist in any cell, then the user is provided
+        /// with the option to add molecule to any of the cells.
+        /// 
+        /// It returns true if the molecule exists in a cell at the end of the method
+        /// 
+        /// </summary>
+        /// <param name="mol"></param>
+        private bool AddBoundaryMoleculeToCell(ConfigMolecule mol)
         {
             bool cellHasMolecule = false;
 
@@ -126,6 +138,8 @@ namespace DaphneGui
                     MessageBox.Show(message, "Warning");
                 }
             }
+
+            return cellHasMolecule;
         }
 
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
@@ -140,7 +154,7 @@ namespace DaphneGui
 
             string message = "If the ECM does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
             message = message + "Any duplicate reactions currently in the ECM will be removed. Continue?";
-            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.No)
             {
                 return;
@@ -152,6 +166,7 @@ namespace DaphneGui
 
                 if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid) == false)
                 {
+                    
                     MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                     needRefresh = true;
 
@@ -169,7 +184,7 @@ namespace DaphneGui
                         }
                         else  //If Boundary, then see if any of the cells have this molecule.
                         {
-                            ProcessBoundaryMoleculeAvailReac(mol);
+                            AddBoundaryMoleculeToCell(mol);
                         }
                     }
                     foreach (string molguid in reac.products_molecule_guid_ref)
@@ -184,9 +199,9 @@ namespace DaphneGui
                         }
                         else  //If Boundary, then see if any of the cells have this molecule.
                         {
-                            ProcessBoundaryMoleculeAvailReac(mol);
+                            AddBoundaryMoleculeToCell(mol);
                         }
-                    }
+                    }                    
                     foreach (string molguid in reac.modifiers_molecule_guid_ref)
                     {
                         ConfigMolecule mol = MainWindow.SOP.Protocol.entity_repository.molecules_dict[molguid];
@@ -199,7 +214,7 @@ namespace DaphneGui
                         }
                         else  //If Boundary, then see if any of the cells have this molecule.
                         {
-                            ProcessBoundaryMoleculeAvailReac(mol);
+                            AddBoundaryMoleculeToCell(mol);
                         }
                     }
                 }

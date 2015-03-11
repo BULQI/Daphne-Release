@@ -263,9 +263,7 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
-        public enum LevelType { Protocol = 0, UserStore, DaphneStore }
-        public static Level ST_CurrentLevel = null;
-        public static LevelType ST_CurrentLevelType = LevelType.Protocol;
+        
 
 
         [DllImport("kernel32.dll")]
@@ -486,8 +484,8 @@ namespace DaphneGui
             }
             else
             {
-                file = "daphne_driver_locomotion_scenario.json";
-                //file = "daphne_vatRC_ligand_receptor_scenario.json";
+                //file = "daphne_driver_locomotion_scenario.json";
+                file = "simple_chemotaxis.json";
             }
 
             int repeat = 0;
@@ -527,7 +525,7 @@ namespace DaphneGui
                     // allow one repetition with the blank scenario
                     if (repeat < 1)
                     {
-                        file = "daphne_blank_scenario.json";
+                        file = "blank_scenario.json";
                     }
                 }
                 repeat++;
@@ -702,62 +700,46 @@ namespace DaphneGui
         public void CreateAndSerializeDaphneProtocols()
         {
             //BLANK SCENARIO
-            var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
+            var protocol = new Protocol("Config\\blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateBlankProtocol(protocol);
-            //serialize to json
             protocol.SerializeToFile();
 
             //DRIVER-LOCOMOTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
+            protocol = new Protocol("Config\\simple_chemotaxis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
-            // serialize to json
             protocol.SerializeToFile();
 
-            //DIFFUSIION SCENARIO
-            protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            ////DIFFUSIION SCENARIO - no longer needed
+            //protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            //ProtocolCreators.CreateDiffusionProtocol(protocol);
+            ////Serialize to json
+            //protocol.SerializeToFile();
 
-            ProtocolCreators.CreateDiffusionProtocol(protocol);
-            //Serialize to json
-            protocol.SerializeToFile();
-
-            //LIGAND-RECEPTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
-            ProtocolCreators.CreateLigandReceptorProtocol(protocol);
-            //serialize to json
-            protocol.SerializeToFile();
+            ////LIGAND-RECEPTOR SCENARIO - no longer needed
+            //protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            //ProtocolCreators.CreateLigandReceptorProtocol(protocol);
+            ////serialize to json
+            //protocol.SerializeToFile();
 
             //GC SCENARIO
-            protocol = new Protocol("Config\\daphne_gc_cycling_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-
+            protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateGCProtocol(protocol);
-            //serialize to json
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
-            // serialize
             protocol.SerializeToFile();
 
             // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
-            // serialize
             protocol.SerializeToFile();
 
             // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_2SiteAbBinding_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
-            // serialize
             protocol.SerializeToFile();
-
-
-
-
-
 
         }
 
@@ -1823,14 +1805,8 @@ namespace DaphneGui
 
             saveStoreFiles();
             saveTempFiles();
-
-            //If user hit Apply while not in UserStore or DaphneStore, only then do this.
-            if (ST_CurrentLevel == SOP.Protocol)
-            {
-                // don't handle the vcr
-                updateGraphicsAndGUI(false);
-            }
-
+            // don't handle the vcr
+            updateGraphicsAndGUI(false);
         }
 
 
@@ -1915,7 +1891,7 @@ namespace DaphneGui
         public static bool CheckMouseLeftState(byte state)
         {
             return mouseLeftState == state;
-        }        
+        }
 
         private void save3DView_Click(object sender, RoutedEventArgs e)
         {
@@ -2053,7 +2029,6 @@ namespace DaphneGui
                 {
                     SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
                     LevelContext = protocol;
-                    ST_CurrentLevel = protocol;
                     return protocol;
                 }
                 catch
@@ -2072,7 +2047,6 @@ namespace DaphneGui
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
                     SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
                     LevelContext = protocol;
-                    ST_CurrentLevel = protocol;
                     return protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
@@ -2256,6 +2230,10 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
+                if (DataBasket.hdf5file != null)
+                {
+                    DataBasket.hdf5file.close(true);
+                }
                 vcrControl.ReleaseVCR();
                 exportAVI.IsEnabled = false;
             }
@@ -2519,12 +2497,29 @@ namespace DaphneGui
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(bool handleVCR, bool force)
         {
-            if (handleVCR == true && skipDataWriteMenu.IsChecked == false && vcrControl.OpenVCR() == true)
+            if (handleVCR == true && skipDataWriteMenu.IsChecked == false)
             {
-                VCR_Toolbar.IsEnabled = true;
-                VCR_Toolbar.DataContext = vcrControl;
-                VCRslider.Maximum = vcrControl.TotalFrames() - 1;
-                exportAVI.IsEnabled = true;
+                if (DataBasket.hdf5file != null && DataBasket.hdf5file.openRead() == true)
+                {
+                    vcrControl.FrameNames.Clear();
+                    // find the frame names and with them the number of frames
+                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames("/Experiment_VCR/VCR_Frames");
+
+                    if (vcrControl.FrameNames.Count > 0)
+                    {
+                        // open the parent group for this experiment
+                        DataBasket.hdf5file.openGroup("/Experiment_VCR");
+
+                        // open the group that holds the frames for this experiment
+                        DataBasket.hdf5file.openGroup("VCR_Frames");
+
+                        vcrControl.OpenVCR();
+                        VCR_Toolbar.IsEnabled = true;
+                        VCR_Toolbar.DataContext = vcrControl;
+                        VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                        exportAVI.IsEnabled = true;
+                    }
+                }
             }
 
             bool finished = false;
@@ -2918,7 +2913,7 @@ namespace DaphneGui
 
                         if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.AppPath, sim.Reporter.FileName, "vcr", ".hdf5", true) == false)
                         {
-                            MessageBox.Show("Error creating HDF5 file. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         DataBasket.hdf5file.openWrite(true);
                         // group for this experiment
@@ -3231,6 +3226,10 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
+                if (DataBasket.hdf5file != null)
+                {
+                    DataBasket.hdf5file.close(true);
+                }
                 vcrControl.ReleaseVCR();
             }
 
@@ -3578,8 +3577,6 @@ namespace DaphneGui
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             menuProtocolStore.IsEnabled = true;
-
-            ST_CurrentLevel = SOP.UserStore;
         }
 
         private void prepareForDaphneStore()
@@ -3596,8 +3593,6 @@ namespace DaphneGui
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             menuProtocolStore.IsEnabled = true;
-
-            ST_CurrentLevel = SOP.DaphneStore;
         }
 
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3610,8 +3605,6 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
-
-            ST_CurrentLevel = SOP.Protocol;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
