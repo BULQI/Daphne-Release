@@ -900,8 +900,7 @@ namespace DaphneGui
             //For cytosol, must have a cell selected
             else if (environment == "cytosol" && ((this.DataContext as ConfigCell) == null)) 
             {
-                MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                btnCreateNewGene.Visibility = System.Windows.Visibility.Collapsed;
             }
             
             populateCollection();
