@@ -26,15 +26,16 @@ namespace DaphneGui
         public AddGeneToCell(ConfigCell cell)
         {
             InitializeComponent();
-            er = MainWindow.SC.SimConfig.entity_repository;
-            //SimConfig = sc;
+            this.Owner = Application.Current.MainWindow;
+            er = MainWindow.SOP.Protocol.entity_repository;
+            //Protocol = sc;
             SelectedCell = cell;
             DataContext = this;
 
             GeneComboBox.Items.Clear();
             foreach (ConfigGene g in er.genes)
             {
-                if (!SelectedCell.genes_guid_ref.Contains(g.gene_guid))
+                if (!SelectedCell.HasGene(g.entity_guid))
                 {
                     GeneComboBox.Items.Add(g);
                 }
@@ -42,6 +43,12 @@ namespace DaphneGui
             //GeneComboBox.ItemsSource = er.genes;
             GeneComboBox.DisplayMemberPath = "Name";
             GeneComboBox.SelectedIndex = 0;
+
+            if (GeneComboBox.Items.Count == 0)
+            {
+                MessageBox.Show("Please first add genes from the User store.", "No genes available", MessageBoxButton.OK, MessageBoxImage.Information);
+                this.Close();
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)

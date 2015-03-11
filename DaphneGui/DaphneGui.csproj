@@ -98,6 +98,8 @@
     <Reference Include="ActiproSoftware.Docking.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Docking.Wpf.dll</HintPath>
+      <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="ActiproSoftware.Editors.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -110,12 +112,8 @@
     <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.2.0\lib\net40-client\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Daphne, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\Daphne.dll</HintPath>
-    </Reference>
-    <Reference Include="DaphneUserControlLib">
-      <HintPath>..\dependencies\DaphneUserControlLib.dll</HintPath>
+    <Reference Include="HDF5DotNet">
+      <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
     </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
@@ -127,8 +125,8 @@
     <Reference Include="ManifoldRing">
       <HintPath>..\dependencies\ManifoldRing.dll</HintPath>
     </Reference>
-    <Reference Include="MathNet.Iridium">
-      <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
@@ -139,6 +137,7 @@
     <Reference Include="Ninject.Extensions.Factory">
       <HintPath>..\packages\Ninject.Extensions.Factory.3.0.2-unstable-6\lib\net40\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="SBMLayer">
       <HintPath>..\dependencies\SBMLayer.dll</HintPath>
     </Reference>
@@ -160,10 +159,14 @@
     <Reference Include="TBKMath">
       <HintPath>..\dependencies\TBKMath.dll</HintPath>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>..\dependencies\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -176,29 +179,102 @@
     <Compile Include="AddDiffState.xaml.cs">
       <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AddEditGene.xaml.cs">
+      <DependentUpon>AddEditGene.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddEditMolecule.xaml.cs">
+      <DependentUpon>AddEditMolecule.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddGeneToCell.xaml.cs">
       <DependentUpon>AddGeneToCell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellDetailsControl.xaml.cs">
+      <DependentUpon>CellDetailsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellOptions.xaml.cs">
+      <DependentUpon>CellOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopControl.xaml.cs">
+      <DependentUpon>CellPopControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPropertiesControl.xaml.cs">
+      <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellStudioToolWindow.xaml.cs">
+      <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentsToolWindow.xaml.cs">
+      <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DaphneStackPanel.cs" />
+    <Compile Include="DiffSchemeDataGrid.xaml.cs">
+      <DependentUpon>DiffSchemeDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ECMMolecules.xaml.cs">
+      <DependentUpon>ECMMolecules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnvironmentExtents.xaml.cs">
+      <DependentUpon>EnvironmentExtents.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GraphicsController.cs" />
+    <Compile Include="MoleculeGridControl.xaml.cs">
+      <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ECMMolpopControl.xaml.cs">
+      <DependentUpon>ECMMolpopControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ParamDistrControl.xaml.cs">
+      <DependentUpon>ParamDistrControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
+      <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushEntity.xaml.cs">
+      <DependentUpon>PushEntity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ReactionComplexChart.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ReactionComplexControl.xaml.cs">
+      <DependentUpon>ReactionComplexControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ReactionComplexesInStore.xaml.cs">
+      <DependentUpon>ReactionComplexesInStore.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
+    <Compile Include="RenderSkinEditor.xaml.cs">
+      <DependentUpon>RenderSkinEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RenderSkinWindow.xaml.cs">
+      <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ResizeThumb.xaml.cs">
+      <DependentUpon>ResizeThumb.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Save3DView.xaml.cs">
+      <DependentUpon>Save3DView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VTKDataBasket.cs" />
-    <Compile Include="Workbench\AddReacComplex.xaml.cs">
-      <DependentUpon>AddReacComplex.xaml</DependentUpon>
+    <Compile Include="SimSetup.xaml.cs">
+      <DependentUpon>SimSetup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ToolWinBase.cs" />
+    <Compile Include="ToolWinTissue.xaml.cs">
+      <DependentUpon>ToolWinTissue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolWinVatRC.xaml.cs">
+      <DependentUpon>ToolWinVatRC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReactionControl.xaml.cs">
       <DependentUpon>AddReactionControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Workbench\ChartManager.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Workbench\ChartViewToolWindow.xaml.cs">
       <DependentUpon>ChartViewToolWindow.xaml</DependentUpon>
@@ -210,11 +286,11 @@
     </Compile>
     <Compile Include="GuiExtension.cs" />
     <Compile Include="RecentFileList.cs" />
-    <Compile Include="SimConfigToolWindow.xaml.cs">
-      <DependentUpon>SimConfigToolWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
+    <Compile Include="Workbench\NewEditReacComplex.xaml.cs">
+      <DependentUpon>NewEditReacComplex.xaml</DependentUpon>
+    </Compile>
     <Page Include="About.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -223,7 +299,39 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="AddEditGene.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddEditMolecule.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AddGeneToCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellDetailsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellOptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPropertiesControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellStudioToolWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ComponentsToolWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -231,13 +339,77 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="DiffSchemeDataGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Workbench\AddReacComplex.xaml">
+    <Page Include="ECMMolecules.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentExtents.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MoleculeGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ECMMolpopControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ParamDistrControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pushing\PushBetweenLevels.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushEntity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReactionComplexControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReactionComplexesInStore.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenderSkinEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenderSkinWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ResizeThumb.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Save3DView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SimSetup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWinTissue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWinVatRC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Workbench\AddReactionControl.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -263,9 +435,9 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SimConfigToolWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Workbench\NewEditReacComplex.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -282,6 +454,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Images\LeftArrow_48x48.png" />
+    <Resource Include="Images\RightArrow_48x48.png" />
+    <Resource Include="Images\arrow-32x32.png" />
     <Resource Include="Daphne.ico" />
     <Content Include="help\DaphneDevHelp.shfbproj" />
     <EmbeddedResource Include="Licences.licx" />
@@ -290,16 +465,31 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <Content Include="Config\daphne_blank_scenario.json">
+    <Content Include="Config\daphne_daphnestore.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Config\daphne_diffusion_scenario.json">
+    <Content Include="Config\daphne_userstore.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Config\daphne_driver_locomotion_scenario.json">
+    <Content Include="Config\daphne_vatRC_2SiteAbBinding_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Config\daphne_ligand_receptor_scenario.json">
+    <Content Include="Config\daphne_vatRC_blank_scenario.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\daphne_vatRC_ligand_receptor_scenario.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\RenderSkin\default_skin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\blank_scenario.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\centroblast-centrocyte_recycling.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\simple_chemotaxis.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="help\Documentation.chm">
@@ -355,11 +545,20 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DaphneUserControlLib\DaphneUserControlLib.csproj">
+      <Project>{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}</Project>
+      <Name>DaphneUserControlLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Daphne\Daphne.csproj">
+      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
+      <Name>Daphne</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Daphne\Daphne.csproj">
       <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
       <Name>Daphne</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

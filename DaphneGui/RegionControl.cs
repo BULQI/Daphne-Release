@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 
 using Kitware.VTK;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.RandomSources;
+using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.Random;
 
 using Daphne;
 
@@ -294,7 +294,7 @@ namespace DaphneGui
             vtkActor actor = vtkActor.New();
             actor.SetMapper(mapper);
             actor.GetProperty().SetColor(0.5, 0.5, 1.0);
-            MainWindow.GC.Rwc.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
+            ((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
         }
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace DaphneGui
             //actor.GetProperty().SetRepresentationToWireframe();
             actor.GetProperty().SetRepresentationToSurface();
             // TODO: This should not be dependent on any given render window control...
-            MainWindow.GC.Rwc.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
+            ((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
         }
 
         /// <summary>
@@ -344,19 +344,20 @@ namespace DaphneGui
             Vector[] axis0 = new Vector[3];
             for (int i = 0; i < 3; i++)
             {
-                axis0[i] = r0.GetColumnVector(i);
+                axis0[i] = (Vector)r0.Column(i);
             }
 
             Vector[] axis1 = new Vector[3];
             for (int i = 0; i < 3; i++)
             {
-                axis1[i] = r1.GetColumnVector(i);
+                axis1[i] = (Vector)r1.Column(i);
             }
 
             // translation, in parent frame
-            Vector v = c1 - c0;
+            Vector v = (Vector)(c1 - c0);
             // translation, in A's frame
-            Vector T = new Vector(new double[] { v.ScalarMultiply(axis0[0]), v.ScalarMultiply(axis0[1]), v.ScalarMultiply(axis0[2]) });
+            //Vector T = new Vector(new double[] { v.ScalarMultiply(axis0[0]), v.ScalarMultiply(axis0[1]), v.ScalarMultiply(axis0[2]) });
+            Vector T = new DenseVector(new double[] { v.DotProduct(axis0[0]), v.DotProduct(axis0[1]), v.DotProduct(axis0[2]) });
 
             // B's basis with respect to A's local frame
             // expressing B's basis this way will simplify the following tests such that comparisons can be done per component,
@@ -370,7 +371,8 @@ namespace DaphneGui
             {
                 for (int k = 0; k < 3; k++)
                 {
-                    Ba[i, k] = axis0[i].ScalarMultiply(axis1[k]);
+                    //Ba[i, k] = axis0[i].ScalarMultiply(axis1[k]);
+                    Ba[i, k] = axis0[i].DotProduct(axis1[k]);
                     // maintain a matrix with the absolute values in it as they are employed in the simplification mentioned in Gottschalk's paper
                     absBa[i, k] = Math.Abs(Ba[i, k]);
                 }
@@ -509,7 +511,7 @@ namespace DaphneGui
             // if we reach this point, i.e. no test was triggered, we know that the boxes are overlapping (not separated)
             return false;
         }
-
+#if BOX_FEASIBILITY_TEST
         /// <summary>
         /// test the feasibility for box-box using the OBB test for testing 'inside'
         /// </summary>
@@ -795,6 +797,7 @@ namespace DaphneGui
                 return false;
             }
         }
+#endif
 #if ALL_REGIONS
         /// <summary>
         /// generate a random point inside, outside, or on the surface of the region in local coordinates
@@ -898,7 +901,7 @@ namespace DaphneGui
                 else if (location == RelativePosition.Inside)
                 {
                     // inverse of cumulative distribution for uniform point spread
-                    double r = UNIT_SHAPE * Math.Pow(Utilities.SystemRandom.NextDouble(), 1.0 / 3.0);
+                    double r = UNIT_SHAPE * Math.Pow(Utilities.SystemRandom.Sample(), 1.0 / 3.0);
 
                     for (int i = 0; i < 3; i++)
                     {

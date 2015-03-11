@@ -27,9 +27,13 @@ namespace SBMLayer
         private const int SBMLLEVEL = 3;
         private const int SBMLVERSION = 1;
         private const int SPATIALPKGVERSION = 1;
+        private const string spatialPackageName = "spatial";
 
         //Handles spatial components of current SBML model
-        private SpatialComponents world;
+        private SpatialComponents spatialComponents;
+        private SpatialModelPlugin spatialModelPlugin;
+        private Geometry geometry;
+        private CSGeometry csgGeometry;
 
         //Instance of a model contained within sbmlDoc
         private Model model;
@@ -54,24 +58,38 @@ namespace SBMLayer
         //Unit definition declaration
         private UnitDefinition udef;
 
+        //Indicates whether Protocol file contains a ReactionComplex vs. Spatial simulation
+        private Boolean reactionComplexFlag;
+
         //String used for creating output directory
         private string appPath = string.Empty;
 
-        //SimConfig object where model info is extracted from
-        private SimConfigurator configurator;
+        //Protocol object where model info is extracted from
+        private Protocol protocol;
+
+        private Boolean isSpatialModel;
+
+        private TissueScenario scenario;
+        private ConfigECSEnvironment envHandle;
 
         /// <summary>
         /// Sets Paths for SBMLDocument - Level 3 Version 1 format
         /// </summary>
         /// <param name="appPath"></param>
-        /// <param name="configurator"></param>
-        public SBMLModel(string appPath, SimConfigurator configurator)
+        /// <param name="protocol"></param>
+        public SBMLModel(string appPath, Protocol protocol)
         {
-
-            // Creates a template SBML model and creates the respective folder if nonexistent
-
+            // Creates a template SBML model
             this.appPath = appPath;
-            this.configurator = configurator;
+            this.protocol = protocol;
+            
+            // for now, restrict to the tissue scenario
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+            scenario = (TissueScenario)protocol.scenario;
+            envHandle = (ConfigECSEnvironment)scenario.environment;
         }
 
         /// <summary>
@@ -108,16 +126,6 @@ namespace SBMLayer
             second.setScale(0);
             second.setMultiplier(60);
             udef.setId("minute");
-
-
-
-
-
-
-
-
-
-
 
             //build micro meter cubed unit and make it the default unit of volume used by compartments with spatialDims=3
             Unit mmetre;
@@ -320,7 +328,12 @@ namespace SBMLayer
                 if (!units.Equals(string.Empty))
                 {
                     species.setUnits(units);
-                } 
+                }
+
+                if (isSpatialModel)
+                {
+                    spatialComponents.ModifySpatialSpecies(species);
+                }
             }
       
             return model.getSpecies(CleanIds(sid));
@@ -370,6 +383,11 @@ namespace SBMLayer
                 if (!compartment.Equals(string.Empty))
                 {
                     currentGlobReaction.setCompartment(CleanIds(compartment));
+                }
+                if (isSpatialModel)
+                {
+                    SpatialReactionPlugin splug = (SpatialReactionPlugin)currentGlobReaction.getPlugin(spatialPackageName);
+                    splug.setIsLocal(false);
                 }
 	        }
         }
@@ -446,7 +464,7 @@ namespace SBMLayer
 
 
             if ((internal_errors + consistency_errors) == 0)
-            {
+            {                
                 if (exportFlag)
                 {
                     File.AppendAllText(logFileName, "The model was correctly encoded into SBML");
@@ -458,12 +476,6 @@ namespace SBMLayer
                 }
             }
         }
-
-
-
-
-
-
 
 
         /// <summary>
@@ -520,17 +532,6 @@ namespace SBMLayer
         }
 
         /// <summary>
-        /// Structures user output directory for SBML and log files to be saved
-        /// </summary>
-        /// <param name="path"></param>
-        private string SetUpDirectory(string path)
-        {
-            string SBML_folder = new Uri(path).LocalPath;
-            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
-            return path;
-        }
-
-        /// <summary>
         /// Copies directory file and output paths 
         /// </summary>
         /// <param name="dirPath"></param>
@@ -551,7 +552,7 @@ namespace SBMLayer
         private double CalculateGaussianConcentration(BoxSpecification spec, ConfigMolecularPopulation confMolPop)
         {
 
-            return ((Math.Pow(2 * Math.PI, 3 / 2)) * (((MolPopGaussian)confMolPop.mpInfo.mp_distribution).peak_concentration)) / (spec.x_scale * spec.y_scale * spec.z_scale);
+            return ((Math.Pow(2 * Math.PI, 3 / 2)) * (((MolPopGaussian)confMolPop.mp_distribution).peak_concentration)) / (spec.x_scale * spec.y_scale * spec.z_scale);
         }
 
         /// <summary>
@@ -563,30 +564,40 @@ namespace SBMLayer
             if (!isReactionComplex)
             {
                 //Simulation setup params
-                attr.add("description", configurator.SimConfig.experiment_description, annotNamespace, annotprefix);
-                attr.add("duration", Convert.ToString(configurator.SimConfig.scenario.time_config.duration), annotNamespace, annotprefix);
-                attr.add("rendering_interval", Convert.ToString(configurator.SimConfig.scenario.time_config.rendering_interval), annotNamespace, annotprefix);
-                attr.add("sampling_interval", Convert.ToString(configurator.SimConfig.scenario.time_config.sampling_interval), annotNamespace, annotprefix);
-                attr.add("gridstep", Convert.ToString(configurator.SimConfig.scenario.environment.gridstep), annotNamespace, annotprefix);
+                attr.add("description", protocol.experiment_description, annotNamespace, annotprefix);
+                attr.add("duration", Convert.ToString(protocol.scenario.time_config.duration), annotNamespace, annotprefix);
+                attr.add("rendering_interval", Convert.ToString(protocol.scenario.time_config.rendering_interval), annotNamespace, annotprefix);
+                attr.add("sampling_interval", Convert.ToString(protocol.scenario.time_config.sampling_interval), annotNamespace, annotprefix);
+                attr.add("integrator_step", Convert.ToString(protocol.scenario.time_config.integrator_step), annotNamespace, annotprefix);
+                attr.add("repetitions", Convert.ToString(protocol.experiment_reps), annotNamespace, annotprefix);
+                attr.add("grid_size", Convert.ToString(envHandle.gridstep), annotNamespace, annotprefix);
 
                 //Spatial Geometry params
+                attr.add("toroidal", Convert.ToString(envHandle.toroidal), annotNamespace, annotprefix);
+                if (!isSpatialModel)
+                {
+                    attr.add("extent_x", Convert.ToString(envHandle.extent_x), annotNamespace, annotprefix);
+                    attr.add("extent_y", Convert.ToString(envHandle.extent_y), annotNamespace, annotprefix);
+                    attr.add("extent_z", Convert.ToString(envHandle.extent_z), annotNamespace, annotprefix);
+                }
+                //Cell Death params
+                attr.add("death_constant", Convert.ToString(protocol.sim_params.deathConstant), annotNamespace, annotprefix);
+                attr.add("death_order", Convert.ToString(protocol.sim_params.deathOrder), annotNamespace, annotprefix);
 
-                attr.add("toroidal", Convert.ToString(configurator.SimConfig.scenario.environment.toroidal), annotNamespace, annotprefix);
-                attr.add("extent_x", Convert.ToString(configurator.SimConfig.scenario.environment.extent_x), annotNamespace, annotprefix);
-                attr.add("extent_y", Convert.ToString(configurator.SimConfig.scenario.environment.extent_y), annotNamespace, annotprefix);
-                attr.add("extent_z", Convert.ToString(configurator.SimConfig.scenario.environment.extent_z), annotNamespace, annotprefix);
+                //Cell Interaction params
+                attr.add("ph1", Convert.ToString(protocol.sim_params.phi1), annotNamespace, annotprefix);
+                attr.add("ph2", Convert.ToString(protocol.sim_params.phi2), annotNamespace, annotprefix);
             }
             else
             {
                 //ReactionComplex ID
-                attr.add("ReactionComplex", "true", annotNamespace, annotprefix);
+                attr.add("reaction_complex", "true", annotNamespace, annotprefix);
             }
 
             XMLNamespaces names = new XMLNamespaces();
             names.add(annotNamespace, annotprefix);
             XMLNode Childnode = new XMLNode(new XMLTriple("daphnemodel", annotNamespace, annotprefix), attr, names);
             model.setAnnotation(Childnode);
-
         }
 
         /// <summary>
@@ -594,21 +605,22 @@ namespace SBMLayer
         /// </summary>
         /// <param name="cellPop"></param>
         private void SetCompartmentAnnotation(CellPopulation cellPop, libsbmlcs.Compartment compartment, ConfigCell configCell = null)
-        {
-            //double dragCoeff=0, double transductionConst=0, string locomotor=""
+        {            
             XMLAttributes attr = new XMLAttributes();
             attr.add("cellPop", Convert.ToString(cellPop.cellpopulation_name), annotNamespace, annotprefix);
 
             //Only add when compartment has 3 dimensions, i.e., when it's the cytosol compartment
             if (compartment.getSpatialDimensions() == 3)
             {
-                attr.add("dragCoeff", Convert.ToString(configCell.DragCoefficient), annotNamespace, annotprefix);
-                attr.add("transdConst", Convert.ToString(configCell.TransductionConstant), annotNamespace, annotprefix);
+                attr.add("dragCoeff", Convert.ToString(cellPop.Cell.DragCoefficient.ConstValue), annotNamespace, annotprefix);
+                attr.add("transdConst", Convert.ToString(cellPop.Cell.TransductionConstant.ConstValue), annotNamespace, annotprefix);
+                attr.add("stochForce", Convert.ToString(cellPop.Cell.Sigma.ConstValue), annotNamespace, annotprefix);
+                if (!isSpatialModel) { attr.add("cell_radius", Convert.ToString(cellPop.Cell.CellRadius), annotNamespace, annotprefix); }
                 attr.add("number", Convert.ToString(cellPop.number), annotNamespace, annotprefix);
 
-                if (!configCell.locomotor_mol_guid_ref.Equals(string.Empty))
+                if (!cellPop.Cell.locomotor_mol_guid_ref.Equals(string.Empty))
                 {
-                    attr.add("locomotor", CleanIds(configurator.SimConfig.entity_repository.molecules_dict[configCell.locomotor_mol_guid_ref].Name) + "_" + compartment.getId(), annotNamespace, annotprefix);
+                    attr.add("locomotor", CleanIds(protocol.entity_repository.molecules_dict[cellPop.Cell.locomotor_mol_guid_ref].Name)+ "_" + compartment.getId(), annotNamespace, annotprefix);
                 }
             }
             XMLNamespaces names = new XMLNamespaces();
@@ -625,37 +637,32 @@ namespace SBMLayer
         private void SetSpeciesAnnotation(ConfigMolecularPopulation confMolPop, Species species)
         {
             //Species specific params
-            ConfigMolecule tempConfMol = configurator.SimConfig.entity_repository.molecules_dict[confMolPop.molecule_guid_ref];
             XMLAttributes attr = new XMLAttributes();
-            attr.add("diff_coeff", Convert.ToString(tempConfMol.DiffusionCoefficient), annotNamespace, annotprefix);
-            attr.add("mol_weight", Convert.ToString(tempConfMol.MolecularWeight), annotNamespace, annotprefix);
-            attr.add("complex", Convert.ToString(tempConfMol.Name.Contains(":") ? true : false), annotNamespace, annotprefix); //If name of species has a :, it is stored as a complex
+            if (!isSpatialModel) { attr.add("diff_coeff", Convert.ToString(confMolPop.molecule.DiffusionCoefficient), annotNamespace, annotprefix); }
+            attr.add("mol_weight", Convert.ToString(confMolPop.molecule.MolecularWeight), annotNamespace, annotprefix);
+            attr.add("mol_radius", Convert.ToString(confMolPop.molecule.EffectiveRadius), annotNamespace, annotprefix);
+            attr.add("complex", Convert.ToString(confMolPop.molecule.Name.Contains(":") ? true : false), annotNamespace, annotprefix); //If name of species has a :, it is stored as a complex
 
             //Distribution of species
-            if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
                 attr.add("distribution", "Gaussian", annotNamespace, annotprefix);
-                attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mpInfo.mp_distribution).peak_concentration), annotNamespace, annotprefix);
+                attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mp_distribution).peak_concentration), annotNamespace, annotprefix);
 
-                foreach (BoxSpecification box in configurator.SimConfig.entity_repository.box_specifications)
-                {
-                    //Only select appropriate box
-                    if ((configurator.SimConfig.entity_repository.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
-                    {
-                        attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
-                        attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
-                        attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
-                        attr.add("y_scale", Convert.ToString(box.y_scale), annotNamespace, annotprefix);
-                        attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
-                        attr.add("z_scale", Convert.ToString(box.z_scale), annotNamespace, annotprefix);
-                    }
-                }
+                BoxSpecification box = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
+
+                attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
+                attr.add("x_halfscale", Convert.ToString(box.half_x_scale), annotNamespace, annotprefix);
+                attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
+                attr.add("y_halfscale", Convert.ToString(box.half_y_scale), annotNamespace, annotprefix);
+                attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
+                attr.add("z_halfscale", Convert.ToString(box.half_z_scale), annotNamespace, annotprefix);
             }
-            else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+            else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
                 attr.add("distribution", "Linear", annotNamespace, annotprefix);
 
-                List<Daphne.BoundaryCondition> boundary = ((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition;
+                List<Daphne.BoundaryCondition> boundary = ((MolPopLinear)confMolPop.mp_distribution).boundaryCondition;
                 attr.add("boundary_type", Convert.ToString((int)boundary[0].boundaryType), annotNamespace, annotprefix);
                 attr.add("boundary_start", Convert.ToString((int)boundary[0].boundary), annotNamespace, annotprefix);
                 attr.add("boundary_start_conc", Convert.ToString(boundary[0].concVal), annotNamespace, annotprefix);
@@ -677,6 +684,7 @@ namespace SBMLayer
             //Species specific params
             XMLAttributes attr = new XMLAttributes();
             attr.add("copy_num", Convert.ToString(confGenePop.CopyNumber), annotNamespace, annotprefix);
+            attr.add("activation_level", Convert.ToString(confGenePop.ActivationLevel), annotNamespace, annotprefix);
            
             XMLNamespaces names = new XMLNamespaces();
             names.add(annotNamespace, annotprefix);
@@ -697,25 +705,19 @@ namespace SBMLayer
         /// <summary>
         /// Initializes SBMLDoc and adds Namespaces of Spatial and Req SBML packages
         /// </summary>
-        private void SetSBMLNameSpaces(Boolean isSpatial)
+        private void SetSBMLNameSpaces()
         {
-            if (isSpatial)
+            if (isSpatialModel)
             {
-                SBMLNamespaces sbmlns = new SBMLNamespaces(SBMLLEVEL, SBMLVERSION, "spatial", SPATIALPKGVERSION);
+                SBMLNamespaces sbmlns = new SBMLNamespaces(SBMLLEVEL, SBMLVERSION, spatialPackageName, SPATIALPKGVERSION);
                 sbmlDoc = new SBMLDocument(sbmlns);
 
                 /*Declare our model uses other packages by referencing their XMLnamespaceURI
                  * Spatial Package
                  * It allows us to encode modeling spatial information such as spatially localized reactions, non-homogenously
                  * distributed species, and cellular geometries.*/
-                sbmlDoc.enablePackage(SpatialExtension.getXmlnsL3V1V1(), "spatial", true);
-                sbmlDoc.setPackageRequired("spatial", true);
-
-                /*Required Elements Package
-                 * It allows us to explicitly declare which elements in the models have had their math changed
-                 * and by which package and if an alternative math representation is present in SBML Core*/
-                sbmlDoc.enablePackage(RequiredElementsExtension.getXmlnsL3V1V1(), "req", true);
-                sbmlDoc.setPackageRequired("req", true);
+                sbmlDoc.enablePackage(SpatialExtension.getXmlnsL3V1V1(), spatialPackageName, true);
+                sbmlDoc.setPackageRequired(spatialPackageName, true);
             }
             else
             {
@@ -724,24 +726,37 @@ namespace SBMLayer
         }
 
         /// <summary>
-        /// Exports the current simulation model in the configurator in SBML format
+        /// Exports the current simulation model in the protocol in SBML format
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void ConvertDaphneToSBML()
+        public void ConvertDaphneToSBML(int isSpatial)
         {
-            //Initializes SBMLDoc and adda spatial package namespaces to model if necessary
-            SetSBMLNameSpaces(false);
+            //Sets flag to know which type of SBML we are building:1 for Core, 2 for Spatial
+            if (isSpatial == 1)
+            {
+                isSpatialModel = false;
+            }
+            else
+            {
+                isSpatialModel = true;
+            }
 
-            //Configure spatial model constraints
-            //world= new SpatialComponents(configurator, ref model);
+            //Initializes SBMLDoc and adda spatial package namespaces to model if necessary
+            SetSBMLNameSpaces();
 
             model = sbmlDoc.createModel();
 
-            SetPaths(Uri.UnescapeDataString(new Uri(SetUpDirectory(appPath + @"\SBML\")).LocalPath), configurator.SimConfig.experiment_name.Replace(".", string.Empty));
+            //Configure spatial model constraints
+            if (isSpatialModel)
+            {
+                spatialComponents = new SpatialComponents(protocol, ref model);
+            }
+          
+            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
 
             //Populates model ids in SBML template
-            SetModelIds(configurator.SimConfig.experiment_name, "Daphne");
+            SetModelIds(protocol.experiment_name, "Daphne");
 
             //adds simulation specific parameters as annotations
             SetModelAnnotation(false);
@@ -750,139 +765,178 @@ namespace SBMLayer
             AddModelUnits();
 
             //adds ECS compartment
-            double ecsVol = (configurator.SimConfig.scenario.environment.extent_x) * (configurator.SimConfig.scenario.environment.extent_y) * (configurator.SimConfig.scenario.environment.extent_z);
-            AddCompartment("ECS", "ECS", true, ecsVol, configurator.SimConfig.scenario.environment.NumGridPts.Length, "");
+            double ecsVol = (envHandle.extent_x) * (envHandle.extent_y) * (envHandle.extent_z);
+            libsbmlcs.Compartment backgComp = AddCompartment("ECS", "ECS", true, ecsVol, envHandle.NumGridPts.Length, "");
+            Domain backgDomain=null;
+            if (isSpatialModel)
+            {
+                backgDomain= spatialComponents.AddBackground(backgComp);
+            }
 
             //adds species in the ECS
             BoxSpecification spec;
             string confMolPopName = string.Empty;
             Species species = null;
-            foreach (ConfigMolecularPopulation confMolPop in configurator.SimConfig.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation confMolPop in protocol.scenario.environment.comp.molpops)
             {
-                //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                confMolPopName = configurator.SimConfig.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
-                if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                //SBML species are created with the type of the molecular population and not with the name as the latter is user defined.                
+                confMolPopName = confMolPop.molecule.Name;
+
+                //Add the respective annotation depending on the distribution of each species
+                if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    spec = configurator.SimConfig.box_guid_box_dict[(configurator.SimConfig.entity_repository.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
+                    spec = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
                     species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, CalculateGaussianConcentration(spec, confMolPop), "");
                 }
-                else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+                else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
-                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopHomogeneousLevel)confMolPop.mpInfo.mp_distribution).concentration, "");
+                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
                 }
-                else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+                else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
                 {
-                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopExplicit)confMolPop.mpInfo.mp_distribution).conc.Average(), "");
+                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopExplicit)confMolPop.mp_distribution).conc.Average(), "");
                 }
-                else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
-                    if ((((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition != null) && (((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition.Count == 2))
+                    if ((((MolPopLinear)confMolPop.mp_distribution).boundaryCondition != null) && (((MolPopLinear)confMolPop.mp_distribution).boundaryCondition.Count == 2))
                     {
-                        species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition[0].concVal) + (((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition[1].concVal)) / 2, "");
+                        species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((((MolPopLinear)confMolPop.mp_distribution).boundaryCondition[0].concVal) + (((MolPopLinear)confMolPop.mp_distribution).boundaryCondition[1].concVal)) / 2, "");
                     }
                     else
                     {
                         //MessageBox.Show("Model could not be saved into SBML as linear gradient values could not be found", "Linear Gradient Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
-
                 }
                 SetSpeciesAnnotation(confMolPop, species);
+
+                if (isSpatialModel)
+                {
+                    spatialComponents.AddDiffusionCoefficient(species, confMolPop.molecule.DiffusionCoefficient);
+                    //All boundary conditions are no flux if they don't specify a linear distribution- all others are not supported by SBML spatial
+                    spatialComponents.SetBoxBoundaryCondition(species);
+                } 
             }
 
             //adds reactions in the ECS
-            ConfigReaction cr;
-            foreach (string rguid in configurator.SimConfig.scenario.environment.ecs.reactions_guid_ref)
+            foreach (ConfigReaction cr in protocol.scenario.environment.comp.Reactions)
             {
-                cr = configurator.SimConfig.entity_repository.reactions_dict[rguid];
-                AddSBMLReactions(cr, cr.rate_const, configurator.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, "ECS", string.Empty);
+                AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, "ECS", string.Empty);
 
                 //Add reaction annotation
-                SetReactionAnnotation(configurator.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type);
+                SetReactionAnnotation(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type);
             }
 
             //Add a membrane compartment and a cytosol compartment for each cell type
             string cellMembraneId, cytosolId = string.Empty;
             TinySphere sphere;
             TinyBall ball;
-            ConfigCompartment[] configComp;
             ConfigCell configCell = new ConfigCell();
             libsbmlcs.Compartment compartment;
-            foreach (CellPopulation cellPop in configurator.SimConfig.scenario.cellpopulations)
+            int ordinal = 1;
+            Domain membraneDomain=null, cytoDomain=null;
+            DomainType membraneDomainType=null, cytoDomainType=null;
+            foreach (CellPopulation cellPop in scenario.cellpopulations)
             {
-                //Name added to compartment includes cell type
-                //Membrane
-                configCell = configurator.SimConfig.entity_repository.cells_dict[cellPop.cell_guid_ref];
+                //Cell in scenario
+                configCell = cellPop.Cell;
+
+                //Add cell membrane compartment
                 cellMembraneId = string.Concat("Membrane_", configCell.CellName);
-                double radius = configCell.CellRadius;
+                double radius = cellPop.Cell.CellRadius;
                 sphere = new TinySphere();
                 sphere.Initialize(new double[] { radius });
                 compartment = AddCompartment(cellMembraneId, cellMembraneId, true, sphere.Area(), sphere.Dim, "");
                 SetCompartmentAnnotation(cellPop, compartment);
+                string [] membraneNames=new string[cellPop.number];
+                
+                //Adds Domains and DomainTypes of every cell membrane
+                if (isSpatialModel)
+                {
+                    membraneDomainType = spatialComponents.AddCellModel(compartment, true);
+                    for (int z = 0; z < cellPop.number; z++)
+                    {
+                        CellState positions = cellPop.CellStates[z];
+                        membraneDomain = spatialComponents.AddCellDomain(membraneDomainType, compartment, positions.X+radius, positions.Y, positions.Z, z);
+                        spatialComponents.AddAdjacency(backgDomain.getId(), membraneDomain.getId());
+                        membraneNames[z] = membraneDomain.getId();
+                    }
+                }
 
-                //Setup necessary to extract molecular populations from each compartment (cytosol/membrane)
-                configComp = new ConfigCompartment[2];
-                configComp[0] = configCell.cytosol;
-                configComp[1] = configCell.membrane;
-
-                //Only add a cytosol compartment if there are any molecular populations in the cytosol 
-                //if (configComp[0].molpops.Count > 0)
-                //{
+                //Add cell cytosol compartment
                 cytosolId = string.Concat("Cytosol_", configCell.CellName);
                 ball = new TinyBall();
                 ball.Initialize(new double[] { radius });
                 compartment = AddCompartment(cytosolId, cytosolId, true, ball.Volume(), ball.Dim, "");
                 SetCompartmentAnnotation(cellPop, compartment, configCell);
-                
-                ConfigGene configGene;
-                //}
 
-                for (int comp = 0; comp < 2; comp++)
+                //Adds DomainTypes and Domains for every cytosol
+                if (isSpatialModel)
                 {
-                    //0 cytosol, 1 membrane (both assume uniform distribution of molecular populations
-                    foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
+                    //Only one csgObject for each cell type
+                    cytoDomainType = spatialComponents.AddCellModel(compartment, false);
+                    spatialComponents.AddCellGeometry(cytoDomainType, ordinal, radius);
+                    for (int z = 0; z < cellPop.number; z++)
                     {
-                        //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                        confMolPopName = configurator.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
-                        if (comp == 0)
-                        {
-                            //Add cytosol molecular species
-                            species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, ((MolPopHomogeneousLevel)cmp.mpInfo.mp_distribution).concentration, "");
-                            SetSpeciesAnnotation(cmp, species);
-                            //configurator.SimConfig.entity_repository.cells[0].locomotor_mol_guid_ref
-                        }
-                        else
-                        {
-                            //Add membrane molecular species
-                            species = AddSpecies(confMolPopName.TrimEnd('|') + "_" + cellMembraneId, confMolPopName, cellMembraneId, false, false, false, ((MolPopHomogeneousLevel)cmp.mpInfo.mp_distribution).concentration, "");
-                            SetSpeciesAnnotation(cmp, species);
-                        }
+                        CellState positions = cellPop.CellStates[z];
+                        cytoDomain = spatialComponents.AddCellDomain(cytoDomainType, compartment, positions.X, positions.Y, positions.Z, z);
+                        spatialComponents.AddAdjacency(membraneNames[z], cytoDomain.getId());
                     }
+                    ordinal = ordinal + 1;
                 }
 
-                //add genes
-                for (int i = 0; i < configCell.genes_guid_ref.Count; i++)
+                //Encode molecules in cytosol 
+                foreach (ConfigMolecularPopulation cmp in configCell.cytosol.molpops)
                 {
-                    configGene= configurator.SimConfig.entity_repository.genes_dict[configCell.genes_guid_ref[i]];
+                    //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
+                    confMolPopName = cmp.molecule.Name;                                        
+                    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
+                    SetSpeciesAnnotation(cmp, species);
+                    
+                    if (isSpatialModel)
+                    {
+                        spatialComponents.AddDiffusionCoefficient(species, cmp.molecule.DiffusionCoefficient);
+                        //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
+                        spatialComponents.SetDomainTypeBoundaryCondition(species, cytoDomainType);
+                    }  
+                }
+
+                //Encode molecules in membrane 
+                foreach (ConfigMolecularPopulation cmp in configCell.membrane.molpops)
+                {     
+                    confMolPopName = cmp.molecule.Name;  
+                    species = AddSpecies(confMolPopName.TrimEnd('|') + "_" + cellMembraneId, confMolPopName, cellMembraneId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
+                    SetSpeciesAnnotation(cmp, species);
+
+                    if (isSpatialModel)
+                    {
+                        spatialComponents.AddDiffusionCoefficient(species, cmp.molecule.DiffusionCoefficient);
+                        //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
+                        spatialComponents.SetDomainTypeBoundaryCondition(species, membraneDomainType);
+                    }  
+                }                          
+
+                //Encode genes in the nucleus
+                foreach (ConfigGene configGene in configCell.genes)
+                {
                     confMolPopName = configGene.Name;
-                    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false,configGene.ActivationLevel, "");
+                    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, configGene.ActivationLevel, "");
                     SetGeneAnnotation(configGene, species);
+
+                    //No diffusion coefficients or Boundary Conditions are needed here
                 }
 
                 //Add reactions belonging to current cellPopulation and specify which compartment they take place in
-                foreach (string reaction in configCell.cytosol.reactions_guid_ref)
+                foreach (ConfigReaction cr in configCell.cytosol.Reactions)
                 {
-                    cr = configurator.SimConfig.entity_repository.reactions_dict[reaction];
                     cytosolId = string.Concat("Cytosol_", configCell.CellName);
-                    AddSBMLReactions(cr, cr.rate_const, configurator.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, cytosolId, cellPop.cell_guid_ref);
+                    AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, cytosolId, cellPop.Cell.entity_guid);
                 }
 
             }
 
             //Check for model consistency and serialize to file (provide output stream for log)
             CheckModelConsistency(true, outputLogFile);
-
-
             WriteSBMLModel();
         }
 
@@ -895,12 +949,12 @@ namespace SBMLayer
         public void ConvertReactionComplexToSBML(ConfigReactionComplex crc)
         {
             //Initializes SBMLDoc and adda spatial package namespaces to model if necessary
-            SetSBMLNameSpaces(false);
+            SetSBMLNameSpaces();
 
             model = sbmlDoc.createModel();
 
             string experimentName = CleanIds(crc.Name);
-            SetPaths(Uri.UnescapeDataString(new Uri(SetUpDirectory(appPath + @"\SBML\")).LocalPath), experimentName);
+            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
 
             //Populates model ids in SBML template
             SetModelIds(experimentName, "Daphne");
@@ -913,31 +967,21 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
-            double volume = (configurator.SimConfig.rc_scenario.environment.extent_x) * (configurator.SimConfig.rc_scenario.environment.extent_y) * (configurator.SimConfig.rc_scenario.environment.extent_z);
-            AddCompartment(compName, compName, true, volume, configurator.SimConfig.scenario.environment.NumGridPts.Length, "");
+            AddCompartment(compName, compName, true, 1.0, 3);
 
             //Adds molecular populations
-            Species specAnnot;
             foreach (ConfigMolecularPopulation confMolPop in crc.molpops)
             {
-                AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mpInfo.mp_distribution).concentration, "");
+                AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
             }
 
-            foreach (ConfigGene confGenPop in crc.genes)
+            // Adds reactions
+            foreach (ConfigReaction cr in crc.reactions)
             {
-                specAnnot= AddSpecies(confGenPop.Name + "_" + compName, confGenPop.Name, compName, false, false, false,confGenPop.ActivationLevel , "");
-                SetGeneAnnotation(confGenPop, specAnnot);
+                AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, compName, string.Empty);
             }
 
-            //Adds reactions
-            ConfigReaction cr;
-            foreach (string rguid in crc.reactions_guid_ref)
-            {
-                cr = configurator.SimConfig.entity_repository.reactions_dict[rguid];
-                AddSBMLReactions(cr, cr.rate_const, configurator.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, compName, string.Empty);
-            }
-
-            //Check for model consistency and serialize to file (provide output stream for log)
+            // Check for model consistency and serialize to file (provide output stream for log)
             CheckModelConsistency(true, outputLogFile);
             WriteSBMLModel();
         }
@@ -952,34 +996,36 @@ namespace SBMLayer
         private bool ExistMolecule(string cellId, string molecule, string compartment, bool isGene=false)
         {
             ObservableCollection<ConfigMolecularPopulation> configComp=null;
-            ObservableCollection<string> configGenes=null;
+            //ObservableCollection<string> configGenes=null;
+            ObservableCollection<ConfigGene> cGenes = null;
 
             if (!compartment.ToLower().Contains("complex") && isGene)
             {
-                configGenes = configurator.SimConfig.entity_repository.cells_dict[cellId].genes_guid_ref;
+                //configGenes = protocol.entity_repository.cells_dict[cellId].genes_guid_ref;
+                cGenes = protocol.entity_repository.cells_dict[cellId].genes;
             }
             else if (compartment.ToLower().Contains("membrane"))
             {
-                configComp = configurator.SimConfig.entity_repository.cells_dict[cellId].membrane.molpops;
+                configComp = protocol.entity_repository.cells_dict[cellId].membrane.molpops;
             }
             else if (compartment.ToLower().Contains("cytosol"))
             {
-                configComp = configurator.SimConfig.entity_repository.cells_dict[cellId].cytosol.molpops;
+                configComp = protocol.entity_repository.cells_dict[cellId].cytosol.molpops;
             }
             else if (compartment.Equals("ECS"))
             {
-                configComp = configurator.SimConfig.scenario.environment.ecs.molpops;
+                configComp = protocol.scenario.environment.comp.molpops;
             }
             else if (compartment.ToLower().Contains("complex"))//Reaction Complex
             {
-                foreach (ConfigMolecule mol in configurator.SimConfig.entity_repository.molecules)
+                foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
                 {
                     if (mol.Name.Equals(molecule))
                     {
                         return true;
                     }
                 }
-                foreach (ConfigGene gen in configurator.SimConfig.entity_repository.genes)
+                foreach (ConfigGene gen in protocol.entity_repository.genes)
                 {
                     if (gen.Name.Equals(molecule))
                     {
@@ -992,17 +1038,18 @@ namespace SBMLayer
             {
                 foreach (ConfigMolecularPopulation cmp in configComp)
                 {
-                    if (configurator.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name.Equals(molecule))
+                    if (protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].Name.Equals(molecule))
                     {
                         return true;
                     }
                 }  
             }
-            else if (configGenes != null)
+    
+            else if (cGenes != null)
             {
-                foreach (string cng in configGenes)
+                foreach (ConfigGene cg in cGenes)
                 {
-                    if (configurator.SimConfig.entity_repository.genes_dict[cng].Name.Equals(molecule))
+                    if (cg.Name.Equals(molecule))
                     {
                         return true;
                     }
@@ -1023,19 +1070,25 @@ namespace SBMLayer
         /// <param name="compartment"></param>
         private void AddSBMLReactions(ConfigReaction cr, double rateConstant, ReactionType type, string compartment, string cellId)
         {
+            if(protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             string receptor, ligand, complex, reactant, product, membrane, bulk, bulkActivated, modifier, rid, gene;
+            TissueScenario scenario = (TissueScenario)protocol.scenario;
 
             if (type == ReactionType.BoundaryAssociation)
             {
-                receptor = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
-                ligand = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                complex = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                receptor = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                ligand = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                complex = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in configurator.SimConfig.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
-                        AddBoundaryAssociation(cellPop.cell_guid_ref, receptor, ligand, complex, compartment, rateConstant);
+                        AddBoundaryAssociation(cellPop.Cell.entity_guid, receptor, ligand, complex, compartment, rateConstant);
                     }
                 }
                 else
@@ -1045,15 +1098,15 @@ namespace SBMLayer
             }
             else if (type == ReactionType.BoundaryDissociation)
             {
-                receptor = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
-                ligand = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                complex = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                receptor = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
+                ligand = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                complex = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in configurator.SimConfig.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
-                        AddBoundaryDissociation(cellPop.cell_guid_ref, receptor, ligand, complex, compartment, rateConstant);
+                        AddBoundaryDissociation(cellPop.Cell.entity_guid, receptor, ligand, complex, compartment, rateConstant);
                     }
                 }
                 else
@@ -1064,14 +1117,14 @@ namespace SBMLayer
             }
             else if (type == ReactionType.BoundaryTransportFrom)
             {
-                membrane = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                membrane = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in configurator.SimConfig.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
-                        AddBoundaryTransportFromReaction(cellPop.cell_guid_ref, bulk, membrane, compartment, rateConstant);
+                        AddBoundaryTransportFromReaction(cellPop.Cell.entity_guid, bulk, membrane, compartment, rateConstant);
                     }
                 }
                 else
@@ -1082,14 +1135,14 @@ namespace SBMLayer
             }
             else if (type == ReactionType.BoundaryTransportTo)
             {
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                membrane = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                membrane = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in configurator.SimConfig.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
-                        AddBoundaryTransportToReaction(cellPop.cell_guid_ref, bulk, membrane, compartment, rateConstant);
+                        AddBoundaryTransportToReaction(cellPop.Cell.entity_guid, bulk, membrane, compartment, rateConstant);
                     }
                 }
                 else
@@ -1100,15 +1153,15 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedBoundaryActivation)
             {
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulkActivated = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulkActivated = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in configurator.SimConfig.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
-                        AddCatalyzedBoundaryActivation(cellPop.cell_guid_ref, bulk, bulkActivated, modifier, compartment, rateConstant);
+                        AddCatalyzedBoundaryActivation(cellPop.Cell.entity_guid, bulk, bulkActivated, modifier, compartment, rateConstant);
                     }
                 }
                 else
@@ -1118,7 +1171,7 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Annihilation)
             {
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1136,9 +1189,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Association)
             {
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1156,9 +1209,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Dissociation)
             {
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1176,8 +1229,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.DimerDissociation)
             {
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1194,8 +1247,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.AutocatalyticTransformation)
             {
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment))
                 {
@@ -1213,8 +1266,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedAnnihilation)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, modifier, compartment))
                 {
@@ -1231,10 +1284,10 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedAssociation)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, bulk, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1253,8 +1306,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedCreation)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment))
                 {
@@ -1271,9 +1324,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedDimerDissociation)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1291,9 +1344,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedTransformation)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1311,9 +1364,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedDimerization)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1331,10 +1384,10 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedDissociation)
             {
-                modifier = configurator.SimConfig.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                bulk = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment))
                 {
@@ -1353,8 +1406,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Dimerization)
             {
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1371,8 +1424,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Transformation)
             {
-                reactant = configurator.SimConfig.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1389,8 +1442,8 @@ namespace SBMLayer
             }
             else if (type==ReactionType.Transcription)
             {
-                gene = configurator.SimConfig.entity_repository.genes_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                product = configurator.SimConfig.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                gene = protocol.entity_repository.genes_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
                
                 if (ExistMolecule(cellId, gene, compartment,true) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1418,7 +1471,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryTransportFromReaction(string cellIdentifier, string bulk, string membrane, string compartment, double rateConstant)
         {
-            string cellName = configurator.SimConfig.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
             ////need to check whether reactant is on membrane (associate with proper reactant on each cell) 
             if (ExistMolecule(cellIdentifier, bulk, compartment) & ExistMolecule(cellIdentifier, membrane, "membrane"))
             {
@@ -1447,7 +1500,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryTransportToReaction(string cellIdentifier, string bulk, string membrane, string compartment, double rateConstant)
         {
-            string cellName = configurator.SimConfig.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether product is on the membrane
             if (ExistMolecule(cellIdentifier, bulk, compartment) & ExistMolecule(cellIdentifier, membrane, "membrane"))
@@ -1477,7 +1530,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddCatalyzedBoundaryActivation(string cellIdentifier, string bulk, string bulkActivated, string modifier, string compartment, double rateConstant)
         {
-            string cellName = configurator.SimConfig.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether modifier(receptor) is on the membrane
             if (ExistMolecule(cellIdentifier, bulk, compartment) & ExistMolecule(cellIdentifier, bulkActivated, compartment) & ExistMolecule(cellIdentifier, modifier, "membrane"))
@@ -1509,7 +1562,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryDissociation(string cellIdentifier, string receptor, string ligand, string complex, string compartment, double rateConstant)
         {
-            string cellName = configurator.SimConfig.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether reactant 1 and product 1 are on the membrane (associate with proper reactant on each cell) 
             if (ExistMolecule(cellIdentifier, ligand, compartment) & ExistMolecule(cellIdentifier, receptor, "membrane") & ExistMolecule(cellIdentifier, complex, "membrane"))
@@ -1541,7 +1594,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryAssociation(string cellIdentifier, string receptor, string ligand, string complex, string compartment, double rateConstant)
         {
-            string cellName = configurator.SimConfig.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether reactant 1 and product 1 are on the membrane (associate with proper reactant on each cell) and whether ligand is on compartment
             if (ExistMolecule(cellIdentifier, ligand, compartment) & ExistMolecule(cellIdentifier, receptor, "membrane") & ExistMolecule(cellIdentifier, complex, "membrane"))
@@ -1566,11 +1619,10 @@ namespace SBMLayer
         /// Imports an SBML model for simulation from a given file
         /// </summary>
         /// <param name="filename"> </param>
-        public SimConfigurator ReadSBMLFile()
+        public Protocol ReadSBMLFile()
         {
-
             //Stores directory path and file name into appropriate variables
-            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
+            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath)+ @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
             //Reads and performs basic consistency checks upon reading the content
             sbmlDoc = libsbml.readSBML(dirPath + fileName + ".xml");
 
@@ -1578,9 +1630,9 @@ namespace SBMLayer
             CheckModelConsistency(false, inputLogFile);
 
             //Attempt to convert upwards imported SBMLdocument to supported Level and Version of SBML
-            if (sbmlDoc.getNumErrors() > 0)
+            if (sbmlDoc.getNumErrors() > 0 && (sbmlDoc.getNumErrors() != sbmlDoc.getErrorLog().getNumFailsWithSeverity(1)))
             {
-                MessageBox.Show("Model could not be read into SBML", "Error reading SBML file");
+                MessageBox.Show("File could not be read into Daphne. Please select another one", "Error reading SBML file");
                 return null;
             }
             if (!ConvertToL3V1(ref sbmlDoc))
@@ -1594,10 +1646,42 @@ namespace SBMLayer
             //Obtain SBML model
             model = sbmlDoc.getModel();
 
-            //Extracts all model components from the read SBML model and populates the Sim Configuration object
-            PopulateSimConfig();
+            //Determines whether input model uses the Spatial package
+            isSpatialModel=model.isPackageEnabled(spatialPackageName);
+            if (isSpatialModel)
+            {
+                spatialModelPlugin = (SpatialModelPlugin)model.getPlugin(spatialPackageName);
+                geometry = spatialModelPlugin.getGeometry();
+                if (geometry==null)
+                {
+                    MessageBox.Show("No geometry set. All SBML spatial models must contain a Geometry object");
+                    return null;
+                }
 
-            return configurator;
+                if(geometry.getNumCoordinateComponents()!=3)
+                {
+                    MessageBox.Show("There are fewer than 3 coordinate components in the geometry. All spatial SBML models supported must define 3 coordinate components");
+                    return null;
+                }
+
+                //Assumes the only one present in CSG - if more present, only pics CSG
+                for (int i = 0; i < geometry.getNumGeometryDefinitions(); ++i)
+                {
+                    if (geometry.getGeometryDefinition(i).isCSGeometry())
+                    {
+                        csgGeometry = geometry.getGeometryDefinition(i) as CSGeometry; 
+                    }
+
+                    if (csgGeometry==null)
+                    {
+                        MessageBox.Show("Geometry definition not supported. Only Constructive Solid Geometry (CSG) is supported");
+                        return null;
+                    }
+                }  
+            }
+            //Extracts all model components from the read SBML model and populates the Sim Configuration object
+            PopulateProtocol();             
+            return protocol;
         }
 
         /// <summary>
@@ -1605,6 +1689,13 @@ namespace SBMLayer
         /// </summary>
         private void GetModelAnnotation()
         {
+            if (protocol.scenario.environment is ConfigECSEnvironment == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
             //If there is a Daphne annotation
             if (model.isSetAnnotation())
             {
@@ -1612,29 +1703,39 @@ namespace SBMLayer
                 annotation = annotation.getChild("daphnemodel");
                 //Model description
                 XMLAttributes attributes = annotation.getAttributes();
-                configurator.SimConfig.experiment_description = attributes.getValue(attributes.getIndex("description"));
-                configurator.SimConfig.scenario.time_config.duration = Convert.ToDouble(attributes.getValue(attributes.getIndex("duration")));
-                configurator.SimConfig.scenario.time_config.rendering_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("rendering_interval")));
-                configurator.SimConfig.scenario.time_config.sampling_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("sampling_interval")));
+                protocol.experiment_description = attributes.getValue(attributes.getIndex("description"));
+                protocol.scenario.time_config.duration = Convert.ToDouble(attributes.getValue(attributes.getIndex("duration")));
+                protocol.scenario.time_config.rendering_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("rendering_interval")));
+                protocol.scenario.time_config.sampling_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("sampling_interval")));
+                protocol.scenario.time_config.integrator_step = Convert.ToDouble(attributes.getValue(attributes.getIndex("integrator_step")));
+                protocol.experiment_reps = Convert.ToInt32(attributes.getValue(attributes.getIndex("repetitions")));
 
-                configurator.SimConfig.scenario.environment.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("gridstep")));
-                configurator.SimConfig.scenario.environment.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
-                configurator.SimConfig.scenario.environment.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
-                configurator.SimConfig.scenario.environment.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
-                configurator.SimConfig.scenario.environment.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
+                envHandle.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("grid_size")));
+                envHandle.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
+
+                if (!isSpatialModel)
+                {
+                    envHandle.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
+                    envHandle.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
+                    envHandle.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
+                }
+                protocol.sim_params.deathConstant = Convert.ToDouble(attributes.getValue(attributes.getIndex("death_constant")));
+                protocol.sim_params.deathOrder = Convert.ToInt32(attributes.getValue(attributes.getIndex("death_order")));
+                protocol.sim_params.phi1 = Convert.ToDouble(attributes.getValue(attributes.getIndex("ph1")));
+                protocol.sim_params.phi2 = Convert.ToDouble(attributes.getValue(attributes.getIndex("ph2")));
             }
             else
             {
                 //Defaults in case a model doesn't have additional annotations (i.e., a model that isn't ours)
-                configurator.SimConfig.experiment_description = "Simulation Model";
-                configurator.SimConfig.scenario.time_config.duration = 100;
-                configurator.SimConfig.scenario.time_config.rendering_interval = 1;
-                configurator.SimConfig.scenario.time_config.sampling_interval = 1;
-                configurator.SimConfig.scenario.environment.gridstep = 50;
+                protocol.experiment_description = "Simulation Model";
+                protocol.scenario.time_config.duration = 100;
+                protocol.scenario.time_config.rendering_interval = 1;
+                protocol.scenario.time_config.sampling_interval = 1;
+                envHandle.gridstep = 50;
                 //Replace with spatial package constructs at some point
-                configurator.SimConfig.scenario.environment.extent_x = 200;
-                configurator.SimConfig.scenario.environment.extent_y = 200;
-                configurator.SimConfig.scenario.environment.extent_z = 200;
+                envHandle.extent_x = 200;
+                envHandle.extent_y = 200;
+                envHandle.extent_z = 200;
             }
         }
 
@@ -1651,7 +1752,7 @@ namespace SBMLayer
             annotation = annotation.getChild("daphnecomps");
             attributes = annotation.getAttributes();
 
-            return new double[] { Convert.ToDouble(attributes.getValue(attributes.getIndex("dragCoeff"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("transdConst"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("number"))) };
+            return new double[] { Convert.ToDouble(attributes.getValue(attributes.getIndex("dragCoeff"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("transdConst"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("number"))), Convert.ToDouble(attributes.getValue(attributes.getIndex("stochForce"))), isSpatialModel?CalculateCellRadius(cytosol.getSize(), false):Convert.ToDouble(attributes.getValue(attributes.getIndex("cell_radius"))) };
         }
 
         /// <summary>
@@ -1720,7 +1821,7 @@ namespace SBMLayer
                 annotation = annotation.getChild("daphnemodel");
                 //Model description
                 XMLAttributes attributes = annotation.getAttributes();
-                if (attributes.getIndex("ReactionComplex") == -1)
+                if (attributes.getIndex("reaction_complex") == -1)
                 {
                     return false;
                 }
@@ -1756,35 +1857,106 @@ namespace SBMLayer
         /// <returns></returns>
         private ConfigGene PrepareGenes(Species specGene) 
         {
-            int copy_num = GetCopyNum(specGene);
-            ConfigGene cg= new ConfigGene(specGene.getId(), copy_num, specGene.getInitialConcentration());
-            configurator.SimConfig.entity_repository.genes.Add(cg);
-            configurator.SimConfig.entity_repository.genes_dict.Add(cg.gene_guid, cg);
+            double[] geneAttributes= GetGeneAttributes(specGene);
+            ConfigGene cg = new ConfigGene(specGene.getId(), (Int32)geneAttributes[0], geneAttributes[1]);
+            protocol.entity_repository.genes.Add(cg);
+            protocol.entity_repository.genes_dict.Add(cg.entity_guid, cg);
             return cg;
         }
 
         /// <summary>
-        /// Returns copy number variation for a given gene
+        /// Returns copy number variation and activation level for a given gene
         /// </summary>
         /// <param name="specGene"></param>
         /// <returns></returns>
-        private int GetCopyNum(Species specGene)
+        private double[] GetGeneAttributes(Species specGene)
         {
             XMLNode annotation = specGene.getAnnotation();
             annotation = annotation.getChild("daphnespecies");
             //Model description
             XMLAttributes attributes = annotation.getAttributes();
-            return Convert.ToInt32(attributes.getValue("copy_num"));
+            return new double[]{Convert.ToInt32(attributes.getValue("copy_num")),Convert.ToInt32(attributes.getValue("activation_level"))};
+        }
+
+        public Boolean ContainsReactionComplex() {
+            return reactionComplexFlag;
         }
 
         /// <summary>
-        /// Populates SimConfiguration object with SBML model 
+        /// Extracts the size of the simulation container from Spatial components
+        /// </summary>
+        private void SetBoxExtents() {
+            //If the SBML validator didn't throw an error there exists an X,Y and Z coordinate
+            ListOfCoordinateComponents comps = geometry.getListOfCoordinateComponents();
+            if (comps.get(0) != null)
+            {
+                envHandle.extent_x = (Int32)comps.get(0).getBoundaryMax().getValue();
+            }            
+            //Missing coordinates are left set to Dahpne's default = 200
+            if (geometry.getNumCoordinateComponents() >= 2 && comps.get(1) != null)
+            {
+                envHandle.extent_y = (Int32)comps.get(1).getBoundaryMax().getValue();
+            }
+
+            if (geometry.getNumCoordinateComponents() == 3 && comps.get(2) != null)
+            {
+                envHandle.extent_z = (Int32)comps.get(2).getBoundaryMax().getValue();
+            }
+        }
+
+        /// <summary>
+        /// Fetches the spatial location of a cell from it's domain's first interior point
+        /// </summary>
+        /// <param name="cellPop"></param>
+        /// <returns></returns>
+        private double[,] GetDomainDomainPositions(CellPopulation cellPop, Dictionary<string, List<libsbmlcs.Compartment>> cellTypes)
+        {
+            string cellDomainType=null;
+            double [,] positions=new double[cellPop.number,3]; //for x,y and z position components
+            foreach (KeyValuePair<string, List<libsbmlcs.Compartment>> cellTypeComp in cellTypes)
+            {
+                if (cellTypeComp.Key.Equals(cellPop.cellpopulation_name))
+                {            
+                    foreach (libsbmlcs.Compartment comp in cellTypeComp.Value)
+                    {
+                        if (comp.getSpatialDimensions()==3)
+                        {
+                            cellDomainType=((SpatialCompartmentPlugin)comp.getPlugin(spatialPackageName)).getCompartmentMapping().getDomainType();                            
+                        }
+                    }
+                }
+            }
+
+            ListOfDomains domains = geometry.getListOfDomains();
+            Domain tempDomain;
+            int counter = 0;
+            for (int j = 0; j < domains.size(); j++)
+            {
+                tempDomain=domains.get(j);
+                if (tempDomain.getDomainType().Equals(cellDomainType))
+	            {
+                    ListOfInteriorPoints cellLocation = tempDomain.getListOfInteriorPoints();
+                    if (cellLocation.size()>=1)
+                    {
+                        positions[counter, 0] = cellLocation.get(0).getCoord1();
+                        positions[counter, 1] = cellLocation.get(0).getCoord2();
+                        positions[counter, 2] = cellLocation.get(0).getCoord3();
+                        counter++;
+                    }
+	            }  
+            }
+
+            return positions;
+        }
+
+        /// <summary>
+        /// Populates Protocol object with SBML model 
         /// </summary>
         /// <param name="sc"></param>
-        private void PopulateSimConfig()
+        private void PopulateProtocol()
         {
             //Set up predefined molecules, reactionTemplates, reactions, cells and reaction complexes
-            ConfigCreators.LoadDefaultGlobalParameters(configurator);
+            ProtocolCreators.LoadDefaultGlobalParameters(protocol);
 
             //Extract compartments from SBML model
             ListOfCompartments compartments = model.getListOfCompartments();
@@ -1798,33 +1970,23 @@ namespace SBMLayer
             if (IsReactionComplex())
             {
                 ConfigReactionComplex crc = new ConfigReactionComplex(model.getId());
-
-                libsbmlcs.Compartment reactionComplexCompartment = compartments.get(0);
-                if (reactionComplexCompartment.isSetSize())
-                {
-                    configurator.SimConfig.rc_scenario.environment.extent_x = (int)reactionComplexCompartment.getSize() / 3;
-                    configurator.SimConfig.rc_scenario.environment.extent_y = (int)reactionComplexCompartment.getSize() / 3;
-                    configurator.SimConfig.rc_scenario.environment.extent_z = (int)reactionComplexCompartment.getSize() / 3;
-                }
                 //Add all molecular populations
                 Species crcSpec;
+
                 for (int i = 0; i < speciesList.size(); i++)
                 {
-                    crcSpec=speciesList.get(i);
+                    crcSpec = speciesList.get(i);
                  
                     if(TestSpecies(crcSpec))
                     {
-                        //configurator.SimConfig.rc_scenario.environment.ecs.molpops.Add(PreparePopulation(speciesList.get(i), MoleculeLocation.Bulk, true));
+                        // protocol.rc_scenario.environment.ecs.molpops.Add(PreparePopulation(speciesList.get(i), MoleculeLocation.Bulk, true));
                         crc.molpops.Add(PreparePopulation(crcSpec, MoleculeLocation.Bulk, true));
                     }
-                    else
-	                {
-                        crc.genes.Add(PrepareGenes(crcSpec));    
-	                }
                 }
 
                 libsbmlcs.Reaction sbmlReaction;
                 ConfigReaction complexConfigReaction;
+
                 for (int i = 0; i < model.getListOfReactions().size(); i++)
                 {
                     sbmlReaction = model.getReaction(i);
@@ -1835,37 +1997,42 @@ namespace SBMLayer
                         complexConfigReaction = new ConfigReaction();
 
                         buildConfigReaction(sbmlReaction, ref complexConfigReaction);
-                        configurator.SimConfig.entity_repository.reactions.Add(complexConfigReaction);
-                        configurator.SimConfig.entity_repository.reactions_dict.Add(complexConfigReaction.reaction_guid, complexConfigReaction);
+                        complexConfigReaction.GetTotalReactionString(protocol.entity_repository);
+                        protocol.entity_repository.reactions.Add(complexConfigReaction);
+                        protocol.entity_repository.reactions_dict.Add(complexConfigReaction.entity_guid, complexConfigReaction);
 
                         if (complexConfigReaction != null)
                         {
-                            ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                            grp.Guid = complexConfigReaction.reaction_guid;
-                            grp.OriginalRate = complexConfigReaction.rate_const;
-                            grp.ReactionComplexRate = complexConfigReaction.rate_const;
-
-                            crc.reactions_guid_ref.Add(complexConfigReaction.reaction_guid);
-                            crc.ReactionRates.Add(grp);
+                            crc.reactions.Add(complexConfigReaction);
                         }
                     }
                 }
-                //Add the reaction to repository collection
-                configurator.SimConfig.entity_repository.reaction_complexes.Add(crc);
+                // add the reaction complex to repository collection
+                protocol.entity_repository.reaction_complexes.Add(crc);
+                reactionComplexFlag = true;
             }
             else
             {
+                if(protocol.scenario.environment is ConfigECSEnvironment == false)
+                {
+                    throw new InvalidCastException();
+                }
+
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
                 //Populate experiment
-                configurator.SimConfig.experiment_name = model.getId();
-                configurator.SimConfig.reporter_file_name = configurator.SimConfig.experiment_name;
+                protocol.experiment_name = model.getId();
+                protocol.reporter_file_name = protocol.experiment_name;
 
                 //Parse additional simulation elem these params as a custom annotation
                 GetModelAnnotation();
 
-                /****Populate SimConfig with ECS molPops****/
+                if (isSpatialModel) { SetBoxExtents(); }
+
+                /****Populate Protocol with ECS molPops****/
                 double CompSize = 0;
                 string largestCompID = string.Empty;
-                //Populate SimConfig
+                //Populate Protocol
 
                 //WHAT IF SIZE DOESN'T EXIST
                 //Obtain the ID of the 3D compartment with largest size (ECS)
@@ -1885,11 +2052,11 @@ namespace SBMLayer
                     tempSpecies = speciesList.get(i);
                     if (tempSpecies.getCompartment().Equals(largestCompID))
                     {
-                        configurator.SimConfig.scenario.environment.ecs.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, true));
+                        protocol.scenario.environment.comp.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, true));
                     }
                 }
 
-                /****Populate SimConfig with CellPops****/
+                /****Populate Protocol with CellPops****/
 
                 //Excludes ECS compartment from collection          
                 compartments.remove(largestCompID);
@@ -1933,8 +2100,9 @@ namespace SBMLayer
                         {
                             cytosol = comp;
                             compartAttributes = GetCellAttributes(cytosol);
-                            gc.DragCoefficient = compartAttributes[0];
-                            gc.TransductionConstant = compartAttributes[1];
+                            gc.DragCoefficient.ConstValue = compartAttributes[0];
+                            gc.TransductionConstant.ConstValue = compartAttributes[1];
+                            gc.Sigma.ConstValue = compartAttributes[3];
                             //Pull all cytosol species
                             for (int i = 0; i < speciesList.size(); i++)
                             {
@@ -1946,11 +2114,11 @@ namespace SBMLayer
                                         gc.cytosol.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, false));
                                         if (isLocomotor(tempSpecies, cytosol))
                                         {
-                                            gc.locomotor_mol_guid_ref = ConfigCreators.findMoleculeGuid(tempSpecies.getId(), MoleculeLocation.Bulk, configurator.SimConfig);
+                                            gc.locomotor_mol_guid_ref = ProtocolCreators.findMoleculeGuid(tempSpecies.getId(), MoleculeLocation.Bulk, protocol);
                                         }
                                     }
-                                    else {
-                                        gc.genes_guid_ref.Add(PrepareGenes(tempSpecies).gene_guid);
+                                    else {                                       
+                                        gc.genes.Add(PrepareGenes(tempSpecies));
                                     }
                                 }
                             }
@@ -1971,7 +2139,7 @@ namespace SBMLayer
                     }
 
                     //Add cell to entity repository
-                    configurator.SimConfig.entity_repository.cells.Add(gc);
+                    protocol.entity_repository.cells.Add(gc);
 
                     /****Add cytosol-specific reactions - between membrane and cytosol and cytosol-cytosol or cytosol-nucleus****/
                     for (int i = 0; i < model.getListOfReactions().size(); i++)
@@ -1984,34 +2152,48 @@ namespace SBMLayer
                             cr = new ConfigReaction();
 
                             buildConfigReaction(cellReaction, ref cr);
-
+                            cr.GetTotalReactionString(protocol.entity_repository);
                             //Add the reaction to repository collection
-                            configurator.SimConfig.entity_repository.reactions.Add(cr);
-                            gc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+                            protocol.entity_repository.reactions.Add(cr);
+                            gc.cytosol.Reactions.Add(cr.Clone(true));
                         }
                     }
 
+          
                     //Add cell population
                     CellPopulation cellPop = new CellPopulation();
-                    cellPop.cell_guid_ref = gc.cell_guid;
+                    cellPop.Cell = gc.Clone(true);
+                    cellPop.Cell.entity_guid = gc.entity_guid;
                     cellPop.cellpopulation_name = gc.CellName;
                     cellPop.number = (int)compartAttributes[2];
 
-                    double[] extents = new double[3] { configurator.SimConfig.scenario.environment.extent_x, 
-                                               configurator.SimConfig.scenario.environment.extent_y, 
-                                               configurator.SimConfig.scenario.environment.extent_z };
+                    double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
                     double minDisSquared = 2 * gc.CellRadius;
                     minDisSquared *= minDisSquared;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
                     // Don't start the cell on a lattice point, until gradient interpolation method improves.
-                    cellPop.cellPopDist.CellStates[0] = new CellState(configurator.SimConfig.scenario.environment.extent_x - 2 * gc.CellRadius - configurator.SimConfig.scenario.environment.gridstep / 2,
-                                                                        configurator.SimConfig.scenario.environment.extent_y / 2 - configurator.SimConfig.scenario.environment.gridstep / 2,
-                                                                        configurator.SimConfig.scenario.environment.extent_z / 2 - configurator.SimConfig.scenario.environment.gridstep / 2);
-                    cellPop.cellpopulation_constrained_to_region = false;
-                    cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+                    cellPop.cellPopDist.Initialize();
+ 
+                    //Fetch cell locations from SBML Geometry
+                    if (isSpatialModel)
+                    {
+                        //Assumes the interior point for a cell domain marks it's center of mass                            
+                        double[,] location = GetDomainDomainPositions(cellPop, cellTypes);
+                        for (int i = 0; i < cellPop.CellStates.Count; i++)
+                        {
+                            cellPop.CellStates[i] = new CellState(location[i, 0], location[i, 1], location[i, 2]);
+                        }
+                    }
+                    
+                    //cellPop.cellpopulation_color = Syste/m.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+
+                    if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+                    {
+                        throw new InvalidCastException();
+                    }
 
                     //Add cell population to scenario
-                    configurator.SimConfig.scenario.cellpopulations.Add(cellPop);
+                    ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
                     cellPop.report_xvf.position = true;
                     cellPop.report_xvf.velocity = true;
                     cellPop.report_xvf.force = true;
@@ -2027,7 +2209,7 @@ namespace SBMLayer
                         // Mean only
                         cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
                     }
-                    foreach (ConfigMolecularPopulation mpECM in configurator.SimConfig.scenario.environment.ecs.molpops)
+                    foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
                     {
                         ReportECM reportECM = new ReportECM();
                         reportECM.molpop_guid_ref = mpECM.molpop_guid;
@@ -2050,14 +2232,13 @@ namespace SBMLayer
                         cr = new ConfigReaction();
 
                         buildConfigReaction(ecsReaction, ref cr);
-
+                        cr.GetTotalReactionString(protocol.entity_repository);
                         //Add the reaction to repository collection
-                        configurator.SimConfig.entity_repository.reactions.Add(cr);
-                        configurator.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(cr.reaction_guid);
+                        protocol.entity_repository.reactions.Add(cr);
+                        protocol.scenario.environment.comp.Reactions.Add(cr.Clone(true));
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -2097,14 +2278,14 @@ namespace SBMLayer
                 inputModifiers.Add(modRef.getSpecies(), 1);
             }
 
-            cr.reaction_template_guid_ref = configurator.SimConfig.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);
+            cr.reaction_template_guid_ref = protocol.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);
             if (cr.reaction_template_guid_ref == null)
             {
                 string msg = string.Format("Unsupported reaction");
                 MessageBox.Show(msg);
                 return;
             }
-            crt = configurator.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
+            crt = protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
 
             // Don't have to add stoichiometry information since the reaction template knows it based on reaction type
             // For each list of reactants, products, and modifiers, add bulk then boundary molecules.
@@ -2112,8 +2293,8 @@ namespace SBMLayer
             // Bulk Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string guid = configurator.SimConfig.findMoleculeGuidByName(kvp.Key);
-                if (!cr.reactants_molecule_guid_ref.Contains(guid) && configurator.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                 {
                     cr.reactants_molecule_guid_ref.Add(guid);
                 }
@@ -2121,8 +2302,8 @@ namespace SBMLayer
             // Boundary Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string guid = configurator.SimConfig.findMoleculeGuidByName(kvp.Key);
-                if (!cr.reactants_molecule_guid_ref.Contains(guid) && configurator.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
                 {
                     cr.reactants_molecule_guid_ref.Add(guid);
                 }
@@ -2131,8 +2312,8 @@ namespace SBMLayer
             // Bulk Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string guid = configurator.SimConfig.findMoleculeGuidByName(kvp.Key);
-                if (!cr.products_molecule_guid_ref.Contains(guid) && configurator.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                 {
                     cr.products_molecule_guid_ref.Add(guid);
                 }
@@ -2140,8 +2321,8 @@ namespace SBMLayer
             // Boundary Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string guid = configurator.SimConfig.findMoleculeGuidByName(kvp.Key);
-                if (!cr.products_molecule_guid_ref.Contains(guid) && configurator.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
                 {
                     cr.products_molecule_guid_ref.Add(guid);
                 }
@@ -2153,7 +2334,7 @@ namespace SBMLayer
                 string guid;
                 if (crt.reac_type==ReactionType.Transcription)
                 {
-                    guid = configurator.SimConfig.findGeneGuidByName(kvp.Key);
+                    guid = protocol.findGeneGuidByName(kvp.Key);
                     if (!cr.modifiers_molecule_guid_ref.Contains(guid))
                     {
                          cr.modifiers_molecule_guid_ref.Add(guid);
@@ -2161,8 +2342,8 @@ namespace SBMLayer
                 }
                 else
                 {
-                    guid = configurator.SimConfig.findMoleculeGuidByName(kvp.Key);
-                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) && configurator.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                    guid = protocol.findMoleculeGuidByName(kvp.Key);
+                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                     {
                         cr.modifiers_molecule_guid_ref.Add(guid);
                     }
@@ -2174,7 +2355,7 @@ namespace SBMLayer
                 string guid;
                 if (crt.reac_type == ReactionType.Transcription)
                 {
-                    guid = configurator.SimConfig.findGeneGuidByName(kvp.Key);
+                    guid = protocol.findGeneGuidByName(kvp.Key);
                     if (!cr.modifiers_molecule_guid_ref.Contains(guid))
                     {
                         cr.modifiers_molecule_guid_ref.Add(guid);
@@ -2182,8 +2363,8 @@ namespace SBMLayer
                 }
                 else
                 {
-                    guid = configurator.SimConfig.findMoleculeGuidByName(kvp.Key);
-                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) && configurator.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                    guid = protocol.findMoleculeGuidByName(kvp.Key);
+                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
                     {
                         cr.modifiers_molecule_guid_ref.Add(guid);
                     }
@@ -2236,6 +2417,29 @@ namespace SBMLayer
             return value;
         }
 
+        /// <summary>
+        /// Retrieves the diffusion coefficient for a given species
+        /// </summary>
+        /// <param name="species"></param>
+        /// <returns></returns>
+        public double GetSpeciesDiffusionCoefficient(Species species) {
+            SpatialParameterPlugin paramPlug;
+            ListOfParameters paramList=model.getListOfParameters();
+            for (int i = 0; i < paramList.size(); i++)
+            {
+                paramPlug = (SpatialParameterPlugin)paramList.get(i).getPlugin(spatialPackageName);
+                if (paramPlug!=null && paramPlug.getDiffusionCoefficient()!=null)
+                {
+                    if (paramPlug.getDiffusionCoefficient().getVariable().Equals(species.getId()))
+	                {
+                        return paramList.get(i).getValue();
+	                }      
+                }
+
+            }
+            return 0;
+        }
+
 
         /// <summary>
         /// Calculates the radius of a cell from the area or volume provided
@@ -2267,6 +2471,7 @@ namespace SBMLayer
             double diffusion = 0;
             //Molecular weight in kDa
             double weight = 0;
+            double radius = 0;
             bool complex = false;
             if (species.isSetAnnotation())
             {
@@ -2274,9 +2479,18 @@ namespace SBMLayer
                 annotation = annotation.getChild("daphnespecies");
                 //Species description
                 XMLAttributes attributes = annotation.getAttributes();
-                diffusion = Convert.ToDouble(attributes.getValue(attributes.getIndex("diff_coeff")));
+                if (isSpatialModel)
+                {
+                    diffusion = GetSpeciesDiffusionCoefficient(species);
+                }
+                else
+                {
+                    diffusion = Convert.ToDouble(attributes.getValue(attributes.getIndex("diff_coeff")));
+                }
+                
                 weight = Convert.ToDouble(attributes.getValue(attributes.getIndex("mol_weight")));
                 complex = Convert.ToBoolean(attributes.getValue(attributes.getIndex("complex")));
+                radius = Convert.ToDouble(attributes.getValue(attributes.getIndex("mol_radius")));
             }
             else
             {
@@ -2312,7 +2526,7 @@ namespace SBMLayer
                     diffusion = 750;
                 }
             }
-            return new double[] { weight, diffusion };
+            return new double[] { weight, diffusion, radius };
         }
 
         /// <summary>
@@ -2323,6 +2537,13 @@ namespace SBMLayer
         /// <returns></returns>
         private void SetSpeciesDistribution(Species species, ref ConfigMolecularPopulation configMolPop)
         {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)protocol.scenario;
+
             Boolean isDistributionSet = false;
 
             if (species.isSetAnnotation())
@@ -2345,12 +2566,11 @@ namespace SBMLayer
                     box.x_trans = Convert.ToDouble(attributes.getValue(attributes.getIndex("x_trans")));
                     box.y_trans = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_trans")));
                     box.z_trans = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_trans")));
-                    box.x_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("x_scale")));
-                    box.y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_scale")));
-                    box.z_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_scale")));
+                    box.half_x_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("x_halfscale")));
+                    box.half_y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_halfscale")));
+                    box.half_z_scale= Convert.ToDouble(attributes.getValue(attributes.getIndex("z_halfscale")));
 
-                    configurator.SimConfig.entity_repository.box_specifications.Add(box);
-                    gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
+                    gaussSpec.box_spec = box;
                     //gg.gaussian_spec_name = "gaussian";
                     gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
                     // Rotate the box by 45 degrees about the box's y-axis.
@@ -2363,18 +2583,13 @@ namespace SBMLayer
                     trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
-                    configurator.SimConfig.entity_repository.gaussian_specifications.Add(gaussSpec);
-
-                    configMolPop.mpInfo.mp_dist_name = "Gaussian";
-                    configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mpInfo.mp_render_blending_weight = 2.0;
 
                     MolPopGaussian molPopGaussian = new MolPopGaussian();
                     molPopGaussian.peak_concentration = peakConc;
 
                     //double check this is the correct GUIid for this box
-                    molPopGaussian.gaussgrad_gauss_spec_guid_ref = gaussSpec.gaussian_spec_box_guid_ref;
-                    configMolPop.mpInfo.mp_distribution = molPopGaussian;
+                    molPopGaussian.gauss_spec = gaussSpec;
+                    configMolPop.mp_distribution = molPopGaussian;
 
                     isDistributionSet = true;
                 }
@@ -2388,7 +2603,7 @@ namespace SBMLayer
                     double boundaryEndConc = Convert.ToDouble(attributes.getValue(attributes.getIndex("boundary_end_conc")));
 
                     MolPopLinear molpoplin = new MolPopLinear();
-                    configMolPop.mpInfo.mp_dist_name = "Linear";
+                    //configMolPop.mp_dist_name = "Linear";
 
                     if (boundaryStart == Daphne.Boundary.left)
                     {
@@ -2410,7 +2625,7 @@ namespace SBMLayer
                     molpoplin.boundaryCondition.Add(bc);
                     bc = new Daphne.BoundaryCondition(boundaryType, boundaryEnd, boundaryEndConc);
                     molpoplin.boundaryCondition.Add(bc);
-                    configMolPop.mpInfo.mp_distribution = molpoplin;
+                    configMolPop.mp_distribution = molpoplin;
 
                     isDistributionSet = true;
                 }
@@ -2419,13 +2634,11 @@ namespace SBMLayer
             if (!isDistributionSet)
             {
                 MolPopHomogeneousLevel uniformDistribution;
-                configMolPop.mpInfo.mp_dist_name = "Uniform";
-                configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                configMolPop.mpInfo.mp_render_blending_weight = 2.0;
                 uniformDistribution = new MolPopHomogeneousLevel();
                 uniformDistribution.concentration = species.getInitialConcentration();
-                configMolPop.mpInfo.mp_distribution = uniformDistribution;
+                configMolPop.mp_distribution = uniformDistribution;
             }
+
         }
 
         /// <summary>
@@ -2441,8 +2654,7 @@ namespace SBMLayer
             //Create new molecule, add such molecule to the entity repository and continue.
             //Obtain diffusion coefficients (below included) for ECS molecules from spatial diffusion params
             double[] speciesAnnot = GetSpeciesAnnotation(tempSpecies, location, inECS);
-            double effRad = 1.0; //All seem to have molWeight/effRad=1 (default)!
-            ConfigMolecule configMolecule = new ConfigMolecule(tempSpecies.getId(), speciesAnnot[0], effRad, speciesAnnot[1]);
+            ConfigMolecule configMolecule = new ConfigMolecule(tempSpecies.getId(), speciesAnnot[0], speciesAnnot[2], speciesAnnot[1]);
             if (location == MoleculeLocation.Bulk)
             {
                 configMolecule.molecule_location = MoleculeLocation.Bulk;
@@ -2452,8 +2664,8 @@ namespace SBMLayer
                 configMolecule.molecule_location = MoleculeLocation.Boundary;
             }
 
-            configurator.SimConfig.entity_repository.molecules.Add(configMolecule);
-            configurator.SimConfig.entity_repository.molecules_dict.Add(configMolecule.molecule_guid, configMolecule);
+            protocol.entity_repository.molecules.Add(configMolecule);
+            protocol.entity_repository.molecules_dict.Add(configMolecule.entity_guid, configMolecule);
 
             ConfigMolecularPopulation configMolPop;
 
@@ -2466,8 +2678,7 @@ namespace SBMLayer
                 configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
             }
 
-            configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
-            configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
+            configMolPop.molecule = configMolecule.Clone(null);
             configMolPop.Name = configMolecule.Name;
 
             //Retrieve distribution of ECS molecules from custom annotation

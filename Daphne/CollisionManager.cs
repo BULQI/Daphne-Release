@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Daphne
 {
@@ -32,29 +32,38 @@ namespace Daphne
 
         private bool clearSeparation(Pair p)
         {
-            double maxSep = Math.Ceiling((p.Cell(0).Radius + p.Cell(1).Radius) / gridStep);
-            int dx = Math.Abs(p.Cell(0).GridIndex[0] - p.Cell(1).GridIndex[0]),
-                dy = Math.Abs(p.Cell(0).GridIndex[1] - p.Cell(1).GridIndex[1]),
-                dz = Math.Abs(p.Cell(0).GridIndex[2] - p.Cell(1).GridIndex[2]);
+             int maxSep = (int)Math.Ceiling((p.Cell(0).Radius + p.Cell(1).Radius) / gridStep);
+
+            int dx, dy, dz;
 
             // correction for periodic boundary conditions
-            if (Simulation.dataBasket.ECS.toroidal == true)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment && (SimulationBase.dataBasket.Environment as ECSEnvironment).toroidal == true)
             {
+                dx = p.GridIndex_dx;
                 if (dx > 0.5 * gridPts[0])
                 {
                     dx = gridPts[0] - dx;
                 }
+                if (dx > maxSep) return true;
+                dy = p.GridIndex_dy;
                 if (dy > 0.5 * gridPts[1])
                 {
                     dy = gridPts[1] - dy;
                 }
+                if (dy > maxSep) return true;
+                dz = p.GridIndex_dz;
                 if (dz > 0.5 * gridPts[2])
                 {
                     dz = gridPts[2] - dz;
                 }
+                return dz > maxSep;
             }
+            //dx = Math.Abs(p.Cell(0).GridIndex[0] - p.Cell(1).GridIndex[0]);
+
+            return (p.GridIndex_dx > maxSep || p.GridIndex_dy > maxSep || p.GridIndex_dz > maxSep);
+
             // the separation distance in units of voxels
-            return Math.Max(Math.Max(dx, dy), dz) > maxSep;
+            //return Math.Max(Math.Max(dx, dy), dz) > maxSep;
         }
 
         // think high and low byte but using integer logic
@@ -75,7 +84,7 @@ namespace Daphne
             if (legalIndex(idx) == false)
             {
                 // correction for periodic boundary conditions
-                if (Simulation.dataBasket.ECS.toroidal == true)
+                if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
                 {
                     if (idx[0] < 0 || idx[0] >= gridPts[0])
                     {
@@ -118,7 +127,7 @@ namespace Daphne
         {
             if (pairs != null && pairs.Count > 0 && del != null)
             {
-                foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+                foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
                 {
                     // no self-pairing
                     if (del.Cell_id == kvp.Value.Cell_id)
@@ -146,7 +155,7 @@ namespace Daphne
         {
             if (pairs != null && pairs.Count > 0 && cell != null)
             {
-                foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+                foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
                 {
                     // no self-pairing
                     if (oldKey == kvp.Value.Cell_id)
@@ -216,7 +225,8 @@ namespace Daphne
                 foreach (KeyValuePair<int, Pair> kvp in pairs)
                 {
                     // recalculate the distance for pairs
-                    kvp.Value.distance(gridSize);
+                    //kvp.Value.distance(gridSize);
+                    kvp.Value.distance(gridSize.ToArray());
                 }
             }
         }
@@ -229,6 +239,7 @@ namespace Daphne
             List<Cell> criticalCells = null;
             List<int> removalPairKeys = null;
 
+            double[] gridSizeArr = gridSize.ToArray();
             // create the pairs dictionary
             if (pairs == null)
             {
@@ -266,7 +277,8 @@ namespace Daphne
                     else
                     {
                         // recalculate the distance for pairs that stay
-                        kvp.Value.distance(gridSize);
+                        //kvp.Value.distance(gridSize);
+                        kvp.Value.distance(gridSizeArr);
                     }
                 }
                 if (removalPairKeys != null)
@@ -278,10 +290,12 @@ namespace Daphne
                 }
             }
 
+            int[] idx = new int[3];
             // look at all cells to see if they changed in the grid
-            foreach (KeyValuePair<int, Cell> kvpc in Simulation.dataBasket.Cells)
+            foreach (KeyValuePair<int, Cell> kvpc in SimulationBase.dataBasket.Cells)
             {
-                int[] idx = findGridIndex(kvpc.Value.SpatialState.X);
+                //int[] idx = findGridIndex(kvpc.Value.SpatialState.X);
+                findGridIndex(kvpc.Value.SpatialState.X, ref idx);
 
                 // if the grid index changed we have to:
                 // -put it in its new one
@@ -453,11 +467,13 @@ namespace Daphne
                                                 p = new MotilePair(cell, kvpg.Value);
                                             }
 #else
+                                            
                                             p = new CellPair(cell, kvpg.Value);
 #endif
 
                                             // calculate the distance
-                                            p.distance(gridSize);
+                                            //p.distance(gridSize);
+                                            p.distance(gridSizeArr);
                                             // insert the pair
                                             pairs.Add(hash, p);
                                         }

@@ -8,9 +8,59 @@ using System.Windows.Controls.Primitives;
 using Daphne;
 using System.Windows.Data;
 using System.ComponentModel;
+using System.Reflection;
+using System.Windows;
 
 namespace DaphneGui
 {
+    
+    public static class DataGridHelper
+    {
+        public static DataGridCell GetCell(DataGridCellInfo dataGridCellInfo)
+        {
+            if (!dataGridCellInfo.IsValid)
+            {
+                return null;
+            }
+
+            var cellContent = dataGridCellInfo.Column.GetCellContent(dataGridCellInfo.Item);
+            if (cellContent != null)
+            {
+                return (DataGridCell)cellContent.Parent;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public static int GetRowIndex(DataGridCell dataGridCell)
+        {
+            // Use reflection to get DataGridCell.RowDataItem property value.
+            PropertyInfo rowDataItemProperty = dataGridCell.GetType().GetProperty("RowDataItem", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            DataGrid dataGrid = GetDataGridFromChild(dataGridCell);
+
+            return dataGrid.Items.IndexOf(rowDataItemProperty.GetValue(dataGridCell, null));
+        }
+        public static DataGrid GetDataGridFromChild(DependencyObject dataGridPart)
+        {
+            if (VisualTreeHelper.GetParent(dataGridPart) == null)
+            {
+                throw new NullReferenceException("Control is null.");
+            }
+            if (VisualTreeHelper.GetParent(dataGridPart) is DataGrid)
+            {
+                return (DataGrid)VisualTreeHelper.GetParent(dataGridPart);
+            }
+            else
+            {
+                return GetDataGridFromChild(VisualTreeHelper.GetParent(dataGridPart));
+            }
+        }
+    }
+
+#if USE_MY_EXTENSIONS
+    //Not used
     public static class MyExtensions
     {
         public static T GetVisualChild<T>(Visual parent) where T : Visual
@@ -25,14 +75,14 @@ namespace DaphneGui
                 {
                     child = GetVisualChild<T>(v);
                 }
-               if (child != null)
-               {
-                   break;
-               }
-           }
-               return child;
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
         }
-        
+
         //There is a simple method for getting the current (selected) row of the DataGrid:
         public static DataGridRow GetSelectedRow(this DataGrid grid)
         {
@@ -93,105 +143,7 @@ namespace DaphneGui
         //var selectedRow = grid.GetSelectedRow();
         //var columnCell = grid.GetCell(selectedRow, 0);
 
-
-
-
-        //public static string ReactantsString(this ReactionTemplate rt)
-        //{
-            
-        //        string s = "";
-        //        foreach (SpeciesReference sr in rt.listOfReactants)
-        //        {
-        //            if (sr.stoichiometry > 1)
-        //                s += sr.stoichiometry;
-        //            s += sr.species;
-        //            s += " + ";
-        //        }
-        //        foreach (SpeciesReference sr in rt.listOfModifiers)
-        //        {
-        //            if (sr.stoichiometry > 1)
-        //                s += sr.stoichiometry;
-        //            s += sr.species;
-        //            s += " + ";
-        //        }
-        //        char[] trimChars = { ' ', '+' };
-        //        s = s.Trim(trimChars);
-        //        return s;
-                       
-
-        //}
-        //public static string ProductsString(this ReactionTemplate rt)
-        //{
-            
-        //        string s = "";
-        //        foreach (SpeciesReference sr in rt.listOfProducts)
-        //        {
-        //            if (sr.stoichiometry > 1)
-        //                s += sr.stoichiometry;
-        //            s += sr.species;
-        //            s += " + ";
-        //        }
-        //        foreach (SpeciesReference sr in rt.listOfModifiers)
-        //        {
-        //            if (sr.stoichiometry > 1)
-        //                s += sr.stoichiometry;
-        //            s += sr.species;
-        //            s += " + ";
-        //        }
-        //        char[] trimChars = { ' ', '+' };
-        //        s = s.Trim(trimChars);
-        //        return s;
-            
-        //}
-        //public static string TotalReactionString(this ReactionTemplate rt)
-        //{
-        //    string s = "";
-        //    foreach (SpeciesReference sr in rt.listOfReactants)
-        //    {
-        //        if (sr.stoichiometry > 1)
-        //            s += sr.stoichiometry;
-        //        s += sr.species;
-        //        s += " + ";
-        //    }
-        //    foreach (SpeciesReference sr in rt.listOfModifiers)
-        //    {
-        //        if (sr.stoichiometry > 1)
-        //            s += sr.stoichiometry;
-        //        s += sr.species;
-        //        s += " + ";
-        //    }
-        //    char[] trimChars = { ' ', '+' };
-        //    s = s.Trim(trimChars);
-
-        //    string totalString = s + " -> ";
-
-        //    s = "";
-        //    foreach (SpeciesReference sr in rt.listOfProducts)
-        //    {
-        //        if (sr.stoichiometry > 1)
-        //            s += sr.stoichiometry;
-        //        s += sr.species;
-        //        s += " + ";
-        //    }
-        //    foreach (SpeciesReference sr in rt.listOfModifiers)
-        //    {
-        //        if (sr.stoichiometry > 1)
-        //            s += sr.stoichiometry;
-        //        s += sr.species;
-        //        s += " + ";
-        //    }
-            
-        //    s = s.Trim(trimChars);
-
-        //    totalString += s;
-
-        //    return totalString;
-        //}    
-
-
-
-
-
-
     }
+#endif
+
 }

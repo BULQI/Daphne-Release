@@ -11,103 +11,181 @@ using System.Globalization;
 
 namespace Daphne
 {
-    public class Reporter
+    public abstract class ReporterBase
     {
-        private StreamWriter ecm_mean_file;
-        private Dictionary<int, StreamWriter> cell_files;
-        private DateTime startTime;
-        private string reportFolder, fileName;
-        public string AppPath { get; set; } //non uri
+        protected DateTime startTime;
+        protected string fileNameBase, fileNameAssembled;
+        public string AppPath { get; set; } // non uri
+        public string UniquePath { get; set; }
 
-        public Reporter()
+        public ReporterBase()
         {
-            cell_files = new Dictionary<int, StreamWriter>();
-            reportFolder = "";
         }
 
-        public string ReportFolder
+        /// <summary>
+        /// the starting string for the file name
+        /// </summary>
+        public string FileNameBase
         {
-            get { return reportFolder; }
-            set { reportFolder = value; }
+            get { return fileNameBase; }
+            set { fileNameBase = value; }
         }
 
-        public string FileName
+        /// <summary>
+        /// the assembled file name with extension, etc., but not the full path
+        /// </summary>
+        public string FileNameAssembled
         {
-            get { return fileName; }
-            set { fileName = value; }
+            get { return fileNameAssembled; }
+            set { fileNameAssembled = value; }
         }
 
-        public void StartReporter(SimConfiguration sc)
+        /// <summary>
+        /// create a unique folder name inside appPath
+        /// </summary>
+        protected void createUniqueFolderName(string protocolFileName)
         {
-            startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
-            CloseReporter();
-            startECM(sc);
-            startCells(sc);
+            int index = 1, upTo = 8;
+            string name = "";
+            
+            if (fileNameBase == "")
+            {
+                string protocol = System.IO.Path.GetFileName(protocolFileName);
+                int period = protocol.LastIndexOf('.');
+
+                name = protocol.Substring(0, Math.Min(upTo, period));
+            }
+            else
+            {
+                name = fileNameBase;
+            }
+            do
+            {
+                UniquePath = AppPath + name + "_" + index + @"\";
+                index++;
+            } while(Directory.Exists(UniquePath) == true);
         }
 
-        public void AppendReporter(SimConfiguration sc, Simulation sim)
-        {
-            appendECM(sc, sim);
-            appendCells(sc, sim);
-        }
-
-        public void CloseReporter()
-        {
-            closeECM();
-            closeCells();
-        }
-
-        private StreamWriter createStreamWriter(string file, string extension)
+        /// <summary>
+        /// general function to create a stream for a reporter file
+        /// </summary>
+        /// <param name="file">part of the file name</param>
+        /// <param name="extension">file extension</param>
+        /// <returns></returns>
+        protected StreamWriter createStreamWriter(string file, string extension)
         {
             int version = 1;
-            string rootPath = reportFolder,
-                   nameStart,
+            string nameStart,
                    fullPath;
-            
-            if(rootPath != "")
-            {
-                rootPath += @"\";
-            }
-            if (fileName == "")
+
+            if (fileNameBase == "")
             {
                 nameStart = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
             }
             else
             {
-                nameStart = fileName + "_";
+                nameStart = fileNameBase + "_";
             }
 
-            fullPath = AppPath + nameStart + file + "." + extension;
+            fileNameAssembled = nameStart + file + "." + extension;
+            fullPath = UniquePath + fileNameAssembled;
 
             do
             {
                 if (File.Exists(fullPath) == true)
                 {
-                    fullPath = AppPath + nameStart + "_" + file + "(" + version + ")." + extension;
+                    fileNameAssembled = nameStart + "_" + file + "(" + version + ")." + extension;
+                    fullPath = UniquePath + fileNameAssembled;
                     version++;
                 }
                 else
                 {
-                    if (rootPath != "" && Directory.Exists(rootPath) == false)
+                    if (UniquePath != "" && Directory.Exists(UniquePath) == false)
                     {
-                        Directory.CreateDirectory(rootPath);
+                        Directory.CreateDirectory(UniquePath);
                     }
                     return File.CreateText(fullPath);
                 }
             } while (true);
         }
 
-        private void startECM(SimConfiguration sc)
+        public abstract void StartReporter(SimulationBase sim, string protocolFileName);
+        public abstract void AppendReporter();
+        public abstract void CloseReporter();
+
+        public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
+        public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id);
+        public abstract void AppendExitEvent(int cell_id, int cellpop_id);
+
+        public abstract void ReactionsReport();
+        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
+        {
+            foreach (ConfigReaction cr in reactions)
+            {
+                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
+            }
+        }
+
+    }
+
+    public class TissueSimulationReporter : ReporterBase
+    {
+        private StreamWriter ecm_mean_file;
+        private Dictionary<int, StreamWriter> cell_files;
+        private TissueSimulation hSim;
+        private Dictionary<int, TransitionEventReporter> deathEvents;
+        private Dictionary<int, TransitionEventReporter> divisionEvents;
+        private Dictionary<int, TransitionEventReporter> exitEvents;
+
+        public TissueSimulationReporter()
+        {
+            cell_files = new Dictionary<int, StreamWriter>();
+            deathEvents = new Dictionary<int, TransitionEventReporter>();
+            divisionEvents = new Dictionary<int, TransitionEventReporter>();
+            exitEvents = new Dictionary<int, TransitionEventReporter>();
+        }
+
+        public override void StartReporter(SimulationBase sim, string protocolFileName)
+        {
+            if (sim is TissueSimulation == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            hSim = sim as TissueSimulation;
+            startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
+            CloseReporter();
+            createUniqueFolderName(protocolFileName);
+            startECM();
+            startCells();
+            startEvents();
+            ReactionsReport();
+        }
+
+        public override void AppendReporter()
+        {
+            appendECM();
+            appendCells();
+        }
+
+        public override void CloseReporter()
+        {
+            closeECM();
+            closeCells();
+            closeEvents();
+        }
+
+        private void startECM()
         {
             string header = "time";
             bool create = false;
 
             // mean
-            foreach (ConfigMolecularPopulation c in sc.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation c in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
             {
                 if (((ReportECM)c.report_mp).mean == true)
                 {
-                    header += "\t" + sc.entity_repository.molecules_dict[c.molecule_guid_ref].Name;
+                    header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
                     create = true;
                 }
             }
@@ -115,24 +193,24 @@ namespace Daphne
             if(create == true)
             {
                 ecm_mean_file = createStreamWriter("ecm_mean_report", "txt");
-                ecm_mean_file.WriteLine("ECM mean report from {0} run on {1}.", sc.experiment_name, startTime);
+                ecm_mean_file.WriteLine("ECM mean report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
                 ecm_mean_file.WriteLine(header);
             }
         }
 
-        private void appendECM(SimConfiguration sc, Simulation sim)
+        private void appendECM()
         {
             // mean
             if (ecm_mean_file != null)
             {
                 // simulation time
-                ecm_mean_file.Write(sim.AccumulatedTime);
-                foreach (ConfigMolecularPopulation c in sc.scenario.environment.ecs.molpops)
+                ecm_mean_file.Write(hSim.AccumulatedTime);
+                foreach (ConfigMolecularPopulation c in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                 {
                     if (((ReportECM)c.report_mp).mean == true)
                     {
                         // mean concentration of this ecm molecular population
-                        ecm_mean_file.Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref].Conc.MeanValue());
+                        ecm_mean_file.Write("\t{0:G4}", SimulationBase.dataBasket.Environment.Comp.Populations[c.molecule.entity_guid].Conc.MeanValue());
                     }
                 }
                 // terminate line
@@ -140,19 +218,19 @@ namespace Daphne
             }
 
             // extended
-            foreach (ConfigMolecularPopulation c in sc.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation c in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
             {
                 if (c.report_mp.mp_extended > ExtendedReport.NONE)
                 {
-                    string name = sc.entity_repository.molecules_dict[c.molecule_guid_ref].Name;
-                    StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + sim.AccumulatedTime, "txt");
+                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + hSim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
-                    writer.WriteLine("ECM {0} report at {1}min from {2} run on {3}.", name, sim.AccumulatedTime, sc.experiment_name, startTime);
+                    writer.WriteLine("ECM {0} report at {1}min from {2} run on {3}.", name, hSim.AccumulatedTime, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine(header);
 
-                    InterpolatedRectangularPrism prism = (InterpolatedRectangularPrism)Simulation.dataBasket.ECS.Space.Interior;
-                    MolecularPopulation mp = Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref];
+                    InterpolatedRectangularPrism prism = (InterpolatedRectangularPrism)SimulationBase.dataBasket.Environment.Comp.Interior;
+                    MolecularPopulation mp = SimulationBase.dataBasket.Environment.Comp.Populations[c.molecule.entity_guid];
 
                     for (int i = 0; i < prism.ArraySize; i++)
                     {
@@ -183,10 +261,10 @@ namespace Daphne
             }
         }
 
-        private void startCells(SimConfiguration sc)
+        private void startCells()
         {
             // create a file stream for each cell population
-            foreach (CellPopulation cp in sc.scenario.cellpopulations)
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
                 string header = "cell_id\ttime";
                 bool create = false;
@@ -207,15 +285,43 @@ namespace Daphne
                     create = true;
                 }
 
+                if (cp.reportStates.Differentiation == true)
+                {
+                    if (cp.Cell.diff_scheme != null && cp.Cell.diff_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDiffState";
+                        create = true;
+                    }
+
+                }
+                if (cp.reportStates.Division == true)
+                {
+                    if (cp.Cell.div_scheme != null && cp.Cell.div_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDivState";
+                        create = true;
+                    }
+                }
+                if (cp.reportStates.Death == true)
+                {
+                    if (cp.Cell.death_driver != null)
+                    {
+                        header += "\tDeathState";
+                        create = true;
+                    }
+                }
+
+
                 // cell molpop concentrations
                 for (int i = 0; i < 2; i++)
                 {
                     // 0: cytosol, 1: membrane
-                    ConfigCompartment comp = (i == 0) ? sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol : sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+                    //ConfigCompartment comp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                    ConfigCompartment comp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
 
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
-                        string name = sc.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                         if (mp.report_mp.mp_extended > ExtendedReport.NONE)
                         {
@@ -232,9 +338,9 @@ namespace Daphne
                 }
 
                 // ecm probe concentrations
-                foreach (ConfigMolecularPopulation mp in sc.scenario.environment.ecs.molpops)
+                foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                 {
-                    string name = sc.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                     if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                     {
@@ -254,27 +360,27 @@ namespace Daphne
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_report", "txt");
 
-                    writer.WriteLine("Cell {0} report from {1} run on {2}.", sc.entity_repository.cells_dict[cp.cell_guid_ref].CellName, sc.experiment_name, startTime);
+                    writer.WriteLine("Cell {0} report from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine(header);
                     cell_files.Add(cp.cellpopulation_id, writer);
                 }
             }
         }
 
-        private void appendCells(SimConfiguration sc, Simulation sim)
+        private void appendCells()
         {
             // create a file stream for each cell population
-            foreach (CellPopulation cp in sc.scenario.cellpopulations)
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
                 if (cell_files.ContainsKey(cp.cellpopulation_id) == false)
                 {
                     continue;
                 }
 
-                foreach (Cell c in Simulation.dataBasket.Populations[cp.cellpopulation_id].Values)
+                foreach (Cell c in SimulationBase.dataBasket.Populations[cp.cellpopulation_id].Values)
                 {
                     // cell_id time
-                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, sim.AccumulatedTime);
+                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, hSim.AccumulatedTime);
 
                     if (cp.report_xvf.position == true)
                     {
@@ -289,17 +395,30 @@ namespace Daphne
                         cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.SpatialState.F[0], c.SpatialState.F[1], c.SpatialState.F[2]);
                     }
 
+                    if (cp.reportStates.Differentiation == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Differentiator.CurrentState);
+                    }
+                    if (cp.reportStates.Division == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
+                    }
+                    if (cp.reportStates.Death == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.DeathBehavior.CurrentState);
+                    }
+
                     // cell molpop concentrations
                     for (int i = 0; i < 2; i++)
                     {
                         // 0: cytosol, 1: membrane
-                        ConfigCompartment configComp = (i == 0) ? sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol : sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+                        ConfigCompartment configComp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
                         Compartment comp = (i == 0) ? c.Cytosol : c.PlasmaMembrane;
                         double[] pos = new double[] { 0, 0, 0 };
 
                         foreach (ConfigMolecularPopulation cmp in configComp.molpops)
                         {
-                            MolecularPopulation mp = comp.Populations[cmp.molecule_guid_ref];
+                            MolecularPopulation mp = comp.Populations[cmp.molecule.entity_guid];
 
                             // concentration
                             if (cmp.report_mp.mp_extended > ExtendedReport.NONE)
@@ -318,18 +437,18 @@ namespace Daphne
                     }
 
                     // ecm probe concentrations
-                    foreach (ConfigMolecularPopulation mp in sc.scenario.environment.ecs.molpops)
+                    foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                     {
-                        string name = sc.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
-                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.SpatialState.X));
+                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(c.SpatialState.X));
 
                             // gradient
                             if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                             {
-                                double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(c.SpatialState.X);
+                                double[] grad = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(c.SpatialState.X);
 
                                 cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                             }
@@ -353,6 +472,422 @@ namespace Daphne
                 // remove the entries from the cell files dictionary
                 cell_files.Clear();
             }
+        }
+
+        private void startEvents()
+        {
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+            {
+                if (cp.reportStates.Death == true)
+                {
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_deathEvents", "txt");
+                    writer.WriteLine("Cell {0} death events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
+                    writer.WriteLine("cell_id\ttime");
+                    deathEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
+                }
+                if (cp.reportStates.Division == true)
+                {
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_divisionEvents", "txt");
+                    writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);                
+                    writer.WriteLine("cell_id\ttime\tdaughter_id");
+                    divisionEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
+                }
+                if (cp.reportStates.Exit == true)
+                {
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_exitEvents", "txt");
+                    writer.WriteLine("Cell {0} exit events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
+                    writer.WriteLine("cell_id\ttime");
+                    exitEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
+                }
+            }
+        }
+
+        private void closeEvents()
+        {
+            foreach (KeyValuePair<int,TransitionEventReporter> kvp in deathEvents)
+            {
+                kvp.Value.WriteEvents();
+            }
+            foreach (KeyValuePair<int, TransitionEventReporter> kvp in divisionEvents)
+            {
+                kvp.Value.WriteEvents();
+            }
+            foreach (KeyValuePair<int, TransitionEventReporter> kvp in exitEvents)
+            {
+                kvp.Value.WriteEvents();
+            }
+
+            deathEvents.Clear();
+            divisionEvents.Clear();
+            exitEvents.Clear();
+        }
+
+        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        {
+            if (deathEvents != null)
+            {
+                if (deathEvents.ContainsKey(cellpop_id))
+                {
+                    deathEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                }
+            }
+        }
+
+        public override void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id)
+        {
+            if (divisionEvents != null)
+            {
+                if (divisionEvents.ContainsKey(cellpop_id))
+                {
+                    divisionEvents[cellpop_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell_id, daughter_id));
+                }
+            }
+        }
+
+        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        {
+            if (exitEvents != null)
+            {
+                if (exitEvents.ContainsKey(cellpop_id))
+                {
+                    exitEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                }
+            }
+        }
+
+        public override void ReactionsReport()
+        {
+            if (SimulationBase.ProtocolHandle.scenario.reactionsReport  == true)
+            {
+                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+                writer.WriteLine("rate constant\treaction");
+                writer.WriteLine();
+
+                writer.WriteLine("ECM");
+                writer.WriteLine();
+                WriteReactionsList(writer, SimulationBase.ProtocolHandle.scenario.environment.comp.Reactions.ToList());
+                foreach (ConfigReactionComplex crc in SimulationBase.ProtocolHandle.scenario.environment.comp.reaction_complexes)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                    writer.WriteLine();
+                    WriteReactionsList(writer, crc.reactions.ToList());
+                }
+                writer.WriteLine();
+
+                foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+                {
+                    writer.WriteLine("Cell population {0}, cell type {1}", cp.cellpopulation_id, cp.Cell.CellName);
+                    writer.WriteLine();
+
+                    writer.WriteLine("\nmembrane");
+                    writer.WriteLine();
+                    WriteReactionsList(writer, cp.Cell.membrane.Reactions.ToList());
+                    foreach (ConfigReactionComplex crc in cp.Cell.membrane.reaction_complexes)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                        WriteReactionsList(writer, crc.reactions.ToList());
+                    }
+                    writer.WriteLine();
+
+                    writer.WriteLine("cytosol");
+                    writer.WriteLine();
+                    WriteReactionsList(writer, cp.Cell.cytosol.Reactions.ToList());
+                    foreach (ConfigReactionComplex crc in cp.Cell.cytosol.reaction_complexes)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                        writer.WriteLine();
+                        WriteReactionsList(writer, crc.reactions.ToList());
+                    }
+                }
+
+                writer.Close();
+            }
+        }
+
+    }
+
+    public class CompartmentMolpopReporter
+    {
+        public List<double> listTimes;
+        public Dictionary<string, List<double>> dictGraphConcs;
+        private Compartment comp;
+        private double[] defaultLoc;
+
+        public CompartmentMolpopReporter()
+        {
+            listTimes = new List<double>();
+            dictGraphConcs = new Dictionary<string, List<double>>();
+        }
+
+        public void StartCompReporter(Compartment _comp, double[] _defaultLoc, ScenarioBase scenario)
+        {
+            defaultLoc = (double[])_defaultLoc.Clone();
+            comp = _comp;
+            dictGraphConcs.Clear();
+            listTimes.Clear();
+
+            foreach (ConfigMolecularPopulation configMolPop in ((VatReactionComplexScenario)scenario).AllMols)
+            {
+                if (configMolPop.report_mp.mp_extended == ExtendedReport.LEAN)
+                {
+                    if (comp.Populations.ContainsKey(configMolPop.molecule.entity_guid))
+                    {
+                        dictGraphConcs.Add(configMolPop.molecule.entity_guid, new List<double>());
+                    }
+                }
+            }
+        }
+
+        public void AppendReporter(double accumulatedTime)
+        {
+            listTimes.Add(accumulatedTime);
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                if (dictGraphConcs.ContainsKey(kvp.Key))
+                {
+                    dictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+                }
+            }
+        }
+
+        public void CloseCompReporter()
+        {
+            dictGraphConcs.Clear();
+            listTimes.Clear();            
+        }
+    }
+
+    public class VatReactionComplexReporter : ReporterBase
+    {
+        private VatReactionComplex hSim;
+        private StreamWriter vat_conc_file;
+        private CompartmentMolpopReporter compMolpopReporter;
+        public bool reportOn;
+
+        public VatReactionComplexReporter()
+        {
+            compMolpopReporter = new CompartmentMolpopReporter();
+            reportOn = false;
+        }
+
+        public override void StartReporter(SimulationBase sim, string protocolFileName)
+        {
+            if (reportOn == false)
+            {
+                return;
+            }
+
+            if (sim is VatReactionComplex == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            hSim = sim as VatReactionComplex;
+
+            startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
+            CloseReporter();
+            createUniqueFolderName(protocolFileName);
+            compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp, new double[] { 0.0, 0.0, 0.0 }, SimulationBase.ProtocolHandle.scenario);
+
+            ReactionsReport();
+        }
+
+        public override void AppendReporter()
+        {
+            if (reportOn == false)
+            {
+                return;
+            }
+
+            compMolpopReporter.AppendReporter(hSim.AccumulatedTime);
+        }
+
+        public override void CloseReporter()
+        {
+            if (compMolpopReporter.listTimes.Count > 0)
+            {
+                WriteToFile();
+                reportOn = false;
+            }
+
+            if (vat_conc_file != null)
+            {
+                vat_conc_file.Close();
+                vat_conc_file = null;
+                compMolpopReporter.CloseCompReporter();
+            }
+        }
+
+        private void WriteToFile()
+        {
+            string header = "time";
+            bool create = false;
+
+            // header
+            foreach (ConfigMolecularPopulation configMolPop in ((VatReactionComplexScenario)SimulationBase.ProtocolHandle.scenario).AllMols)
+            {
+                if (configMolPop.report_mp.mp_extended == ExtendedReport.LEAN)
+                {
+                    if (SimulationBase.dataBasket.Environment.Comp.Populations.ContainsKey(configMolPop.molecule.entity_guid))
+                    {
+                        header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[configMolPop.molecule.entity_guid].Name;
+                        create = true;
+                    }
+                }
+            }
+
+            // was at least one molecule selected?
+            if (create == false)
+            {
+                return;
+            }
+
+            vat_conc_file = createStreamWriter("vatRC_report", "txt");
+            vat_conc_file.WriteLine("VatRC report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+            vat_conc_file.WriteLine(header);
+
+            // write simulation data
+            for (int i = 0; i < compMolpopReporter.listTimes.Count; i++)
+            {
+                vat_conc_file.Write(compMolpopReporter.listTimes[i]);
+
+                foreach (KeyValuePair<string,List<double>> kvp in compMolpopReporter.dictGraphConcs)
+                {
+                        // mean concentration of this compartment molecular population
+                        vat_conc_file.Write("\t{0:G4}", kvp.Value[i]);
+                }
+                // terminate line
+                vat_conc_file.WriteLine();
+            }
+          }
+
+        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AppendDivisionEvent(int mother_id, int cellpop_id, int daughter_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ReactionsReport()
+        {
+            if (SimulationBase.ProtocolHandle.scenario.reactionsReport == true)
+            {
+                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
+                writer.WriteLine("rate constant\treaction");
+                writer.WriteLine();
+
+                WriteReactionsList(writer, SimulationBase.ProtocolHandle.scenario.environment.comp.Reactions.ToList());
+                foreach (ConfigReactionComplex crc in SimulationBase.ProtocolHandle.scenario.environment.comp.reaction_complexes)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine("Reaction Complex: {0}", crc.Name);
+                    writer.WriteLine();
+                    WriteReactionsList(writer, crc.reactions.ToList());
+                }
+                writer.WriteLine();
+
+                writer.Close();
+            }
+        }
+
+    }
+
+    public class TransitionEventReporter
+    {
+        /// <summary>
+        /// Reporting on an event type.
+        /// Data are written to file at the end of the simulation.
+        /// </summary>        
+        private StreamWriter writer;
+
+        private List<TransitionEvent> events;
+
+        public TransitionEventReporter(StreamWriter _writer)
+        {
+            writer = _writer;
+            events = new List<TransitionEvent>();
+        }
+
+        public void AddEvent(TransitionEvent te)
+        {
+            events.Add(te);
+        }
+
+        public void WriteEvents()
+        {
+            if (events.Count > 0)
+            {
+                for (int i = 0; i < events.Count; i++)
+                {
+                    ((TransitionEvent)events[i]).WriteLine(writer);
+                }
+            }
+
+            CloseReporter();
+        }
+
+        public void CloseReporter()
+        {
+            if (writer != null)
+            {
+                writer.Close();
+            }
+            if (events != null)
+            {
+                events.Clear();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Base class for recording cell transition events
+    /// </summary>
+    public class TransitionEvent
+    {
+        public double time;
+        public int cell_id;
+
+        public TransitionEvent(double _time, int _cell_id)
+        {
+            time = _time;
+            cell_id = _cell_id;
+        }
+
+        public virtual void WriteLine(StreamWriter writer)
+        {
+            writer.WriteLine("{0}\t{1}", this.cell_id, this.time);
+        }
+    }
+
+    /// <summary>
+    /// Record cell division events
+    /// </summary>
+    public class DivisionEvent : TransitionEvent
+    {
+        public int daughter_id;
+
+        public DivisionEvent(double _time, int _cell_id, int _daughter_id)
+            : base(_time, _cell_id)
+        {
+            daughter_id = _daughter_id;
+        }
+
+        public override void WriteLine(StreamWriter writer)
+        {
+            writer.WriteLine("{0}\t{1}\t{2}", this.cell_id, this.time, this.daughter_id);
         }
     }
 }

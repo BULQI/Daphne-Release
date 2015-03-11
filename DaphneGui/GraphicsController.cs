@@ -8,8 +8,8 @@ using System.Threading;
 using System.Windows.Data;
 using System.Windows.Forms.Integration;
 
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.Distributions;
+//using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
 using Kitware.VTK;
 
@@ -25,8 +25,9 @@ namespace DaphneGui
         /// <summary>
         /// simple constructor
         /// </summary>
-        public GraphicsProp()
+        public GraphicsProp(vtkRenderWindow rw)
         {
+            this.rw = rw;
             inScene = false;
             prop = null;
         }
@@ -34,14 +35,11 @@ namespace DaphneGui
         /// <summary>
         /// cleanup vtk
         /// </summary>
-        public void cleanup(vtkRenderWindow rw)
+        public void cleanup()
         {
             if (prop != null)
             {
-                // TODO: Need to add a vtkRenderWindow reference to each GraphicsProp so
-                //   I can uncomment this addToScene call and then revert to definition of
-                //   addToScene to not need a render window passed to it...
-                addToScene(rw, false);
+                addToScene(false);
                 prop.Dispose();
                 prop = null;
             }
@@ -50,9 +48,8 @@ namespace DaphneGui
         /// <summary>
         /// add/remove the prop; prevent multiple insertions/deletions
         /// </summary>
-        /// <param name="rw">handle to the render window</param>
         /// <param name="add">indicates action</param>
-        public void addToScene(vtkRenderWindow rw, bool add)
+        public void addToScene(bool add)
         {
             // TODO: Probably need to be passing a rwc or renderer to addToScene...
             if (prop != null)
@@ -88,7 +85,23 @@ namespace DaphneGui
             set { prop = value; }
         }
 
+        /// <summary>
+        /// render window accessor
+        /// </summary>
+        public vtkRenderWindow RW
+        {
+            get
+            {
+                return rw;
+            }
+            set
+            {
+                rw = value;
+            }
+        }
+
         private vtkProp prop;
+        private vtkRenderWindow rw;
         private bool inScene;
     }
 
@@ -99,17 +112,15 @@ namespace DaphneGui
     {
         private GraphicsProp boxActor;
         private bool renderBox;
-        private vtkRenderWindow rw;
 
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="_rw">handle to the render window</param>
-        public VTKEnvironmentController(vtkRenderWindow _rw)
+        /// <param name="rw">handle to the render window</param>
+        public VTKEnvironmentController(vtkRenderWindow rw)
         {
-            boxActor = new GraphicsProp();
+            boxActor = new GraphicsProp(rw);
             renderBox = true;
-            rw = _rw;
         }
 
         /// <summary>
@@ -125,18 +136,18 @@ namespace DaphneGui
         /// </summary>
         public void Cleanup()
         {
-            boxActor.cleanup(rw);
+            boxActor.cleanup();
         }
 
         /// <summary>
         /// set up the graphics pipeline for the environment box
         /// </summary>
-        public void setupPipeline()
+        public void SetupPipeline()
         {
             // a simple box for quick and non-occluding indication of a volume
             vtkActor box = vtkActor.New();
             vtkOutlineFilter outlineFilter = vtkOutlineFilter.New();
-            outlineFilter.SetInput(MainWindow.VTKBasket.EnvironmentController.BoxSource.GetOutput());
+            outlineFilter.SetInput(((VTKFullDataBasket)MainWindow.VTKBasket).EnvironmentController.BoxSource.GetOutput());
             vtkPolyDataMapper mapper = vtkPolyDataMapper.New();
             mapper.SetInputConnection(outlineFilter.GetOutputPort());
             box.SetMapper(mapper);
@@ -162,7 +173,7 @@ namespace DaphneGui
             // handle the box
             if (boxActor != null)
             {
-                boxActor.addToScene(rw, renderBox);
+                boxActor.addToScene(renderBox);
             }
         }
     }
@@ -174,16 +185,16 @@ namespace DaphneGui
     {
         private GraphicsProp gradientActor;
         private bool renderGradient;
-        private vtkRenderWindow rw;
 
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKECSController(vtkRenderWindow _rw)
+        public VTKECSController(vtkRenderWindow rw)
         {
-            rw = _rw;
-            gradientActor = new GraphicsProp();
-            renderGradient = false;
+            gradientActor = new GraphicsProp(rw);
+            // Set renderGradient to true, so rendering capability will be there.
+            // The actual control for rendering of ECM molecule concentrations is set by the RenderOn boolean.
+            renderGradient = true;
         }
 
         /// <summary>
@@ -199,15 +210,15 @@ namespace DaphneGui
         /// </summary>
         public void Cleanup()
         {
-            gradientActor.cleanup(rw);
+            gradientActor.cleanup();
         }
 
         /// <summary>
         /// finish the pipelines for all molpop in the ecs
         /// </summary>
-        public void finish3DPipelines()
+        public void Finish3DPipelines()
         {
-            Compartment ecs = Simulation.dataBasket.ECS.Space;
+            Compartment ecs = SimulationBase.dataBasket.Environment.Comp;
             // create a transfer function mapping scalar value to opacity
             vtkPiecewiseFunction fOpacity = vtkPiecewiseFunction.New();
             // set the opacity: assume it is one along the volume's diagonal
@@ -228,12 +239,12 @@ namespace DaphneGui
             volProp.SetInterpolationTypeToLinear();//SetInterpolationTypeToNearest();
 
             // we have to call Render() before using IsRenderSupported
-            rw.Render();
+            gradientActor.RW.Render();
 
             // begin load openGL extensions; it seems this should not be necessary but we have seen problems on certain cards
             vtkOpenGLExtensionManager extMgr = new vtkOpenGLExtensionManager();
 
-            extMgr.SetRenderWindow(rw);
+            extMgr.SetRenderWindow(gradientActor.RW);
             // need to call this in order to be able to extract the extensions string
             extMgr.Update();
 
@@ -257,7 +268,7 @@ namespace DaphneGui
 
             vtkSmartVolumeMapper vmSmart = vtkSmartVolumeMapper.New();
             vmSmart.SetRequestedRenderModeToDefault();
-            vmSmart.SetInput(MainWindow.VTKBasket.ECSController.ImageGrid);
+            vmSmart.SetInput(((VTKFullDataBasket)MainWindow.VTKBasket).ECSController.ImageGrid);
 
             // the actual volume
             vtkVolume volume = vtkVolume.New();
@@ -285,7 +296,7 @@ namespace DaphneGui
             // handle the gradient
             if (gradientActor != null)
             {
-                gradientActor.addToScene(rw, renderGradient);
+                gradientActor.addToScene(renderGradient);
             }
         }
     }
@@ -298,17 +309,15 @@ namespace DaphneGui
         private GraphicsProp actualTrack,
                              standardTrack,
                              zeroForceTrack;
-        private vtkRenderWindow rw;
 
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKCellTrack(vtkRenderWindow _rw)
+        public VTKCellTrack(vtkRenderWindow rw)
         {
-            rw = _rw;
-            actualTrack = new GraphicsProp();
-            standardTrack = new GraphicsProp();
-            zeroForceTrack = new GraphicsProp();
+            actualTrack = new GraphicsProp(rw);
+            standardTrack = new GraphicsProp(rw);
+            zeroForceTrack = new GraphicsProp(rw);
         }
 
         /// <summary>
@@ -537,7 +546,7 @@ namespace DaphneGui
         private GraphicsProp cellActor;
         private vtkArrayCalculator receptorCalculator;
         // private vtkLookupTable cellIDsColorTable, cellAttributesColorTable;
-        private vtkRenderWindow rw;
+
         /// <summary>
         /// accessor for the cell render method
         /// </summary>
@@ -546,11 +555,10 @@ namespace DaphneGui
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKCellController(vtkRenderWindow _rw)
+        public VTKCellController(vtkRenderWindow rw)
         {
-            rw = _rw;
             // cells
-            cellActor = new GraphicsProp();
+            cellActor = new GraphicsProp(rw);
             // cellIDsColorTable = MainWindow.VTKBasket.CellController.CellIDsColorTable;
             // cellAttributesColorTable = MainWindow.VTKBasket.CellController.CellAttributesColorTable;
             receptorCalculator = vtkArrayCalculator.New();
@@ -662,7 +670,7 @@ namespace DaphneGui
                 GlyphFilter.SetInputConnection(MainWindow.VTKBasket.CellController.Poly.GetProducerPort());
             }
 #else
-            GlyphFilter.SetInputConnection(MainWindow.VTKBasket.CellController.Poly.GetProducerPort());
+            GlyphFilter.SetInputConnection(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.Poly.GetProducerPort());
 #endif
             GlyphFilter.Update();   // so glyphData will be valid right away
             glyphData = GlyphFilter.GetOutput();
@@ -687,7 +695,7 @@ namespace DaphneGui
             // point size should only get used with vert representation
             actor.GetProperty().SetPointSize(8);
             cellActor.Prop = actor;
-            cellActor.addToScene(rw, true);
+            cellActor.addToScene(true);
         }
 
         public void SetGlyphSource()
@@ -766,7 +774,7 @@ namespace DaphneGui
         //        }
         //    }
         //}
-        
+
         /// <summary>
         /// set the cell opacities
         /// </summary>
@@ -786,7 +794,7 @@ namespace DaphneGui
         {
             if (cellActor != null)
             {
-                cellActor.cleanup(rw);
+                cellActor.cleanup();
                 if (glyphData != null)
                 {
                     glyphData.Dispose();
@@ -803,11 +811,59 @@ namespace DaphneGui
             CleanupCells();
         }
     }
-   
+
+    public class VTKNullGraphicsController : EntityModelBase, IVTKGraphicsController
+    {
+        // Public accessors for toolbar button binding w/property changed notification
+        public bool WhArrowToolButton_IsEnabled {get; set;}
+        public bool WhArrowToolButton_IsChecked {get; set;}
+        public bool HandToolButton_IsEnabled {get; set; }
+        public bool HandToolButton_IsChecked { get; set; }
+        public bool PreviewButton_IsEnabled {get; set; }
+        public bool PreviewButton_IsChecked { get; set; }
+        public bool ToolsToolbar_IsEnabled {get; set; }
+        public System.Windows.Visibility ColorScaleSlider_IsEnabled { get; set; }
+        public double ColorScaleMaxFactor {get; set; }
+        public ObservableCollection<string> ECSRenderingMethodNames { get; set; }
+        public bool OrientationMarker_IsChecked { get; set; }
+        public bool ResetCamera_IsChecked {get; set; }
+        public bool ScalarBarMarker_IsChecked { get; set; }
+        public string ECSRenderingMethod { get; set; }
+        public WindowsFormsHost Wfh {get; set;}
+
+        public VTKNullGraphicsController()
+        {
+        }
+
+        public void Cleanup()
+        {
+        }
+
+        public void CreatePipelines()
+        {
+        }
+
+        public void DrawFrame(int progress)
+        {
+        }
+
+        public void DisableComponents()
+        {
+        }
+
+        public void EnableComponents(bool finished)
+        {
+        }
+
+        public void ResetGraphics()
+        {
+        }
+    }
+
     /// <summary>
     /// entity encapsulating the control of a simulation's 3D VTK graphics
     /// </summary>
-    public class VTKGraphicsController : EntityModelBase
+    public class VTKFullGraphicsController : EntityModelBase, IVTKGraphicsController
     {
         // the environment outline box controller
         private VTKEnvironmentController environmentController;
@@ -858,6 +914,10 @@ namespace DaphneGui
         public ObservableCollection<string> CellSelectionToolModes { get; set; }
         private string cellSelectionToolMode;
 
+        private bool leftButtonPressed = false;
+        private uint leftButtonPressTimeStamp = 0;
+        private int[] leftButtonPressPostion = new int[2];
+
         public static byte GET_CURSOR_ARROW
         {
             get
@@ -873,15 +933,15 @@ namespace DaphneGui
                 return CURSOR_HAND;
             }
         }
-       
+
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKGraphicsController(MainWindow mw)
+        public VTKFullGraphicsController(MainWindow mw)
         {
             // Trying to get a link to the main window so can activate toolwindow from a callback here...
             MW = mw;
-            
+
             // create a VTK output control and make the forms host point to it
             rwc = new RenderWindowControl();
             wfh = new WindowsFormsHost();
@@ -903,16 +963,17 @@ namespace DaphneGui
 
             // add events to the iren instead of Observers
             rw.GetInteractor().LeftButtonPressEvt += new vtkObject.vtkObjectEventHandler(leftMouseDown);
+            rw.GetInteractor().EndInteractionEvt += new vtkObject.vtkObjectEventHandler(leftMouseClick);
 
             // progress
-            cornerAnnotation = new GraphicsProp();
+            cornerAnnotation = new GraphicsProp(rw);
             vtkCornerAnnotation prop = vtkCornerAnnotation.New();
             prop.SetLinearFontScaleFactor(2);
             prop.SetNonlinearFontScaleFactor(1);
             prop.SetMaximumFontSize(14);
             prop.GetTextProperty().SetColor(1, 1, 1);
             cornerAnnotation.Prop = prop;
-            cornerAnnotation.addToScene(rw, true);
+            cornerAnnotation.addToScene(true);
 
             // create the axes tool but don't enable it yet
             vtkAxesActor axesActor = vtkAxesActor.New();
@@ -942,7 +1003,7 @@ namespace DaphneGui
 
             // cells
             cellController = new VTKCellController(rw);
-            
+
             // extracellular medium
             ecsController = new VTKECSController(rw);
 #if ALL_GRAPHICS
@@ -954,10 +1015,8 @@ namespace DaphneGui
 
             // Fixed set of molpop rendering options, so pre-generate this list
             ECSRenderingMethodNames = new ObservableCollection<string>();
-            ECSRenderingMethodNames.Add("No Rendering");
             ECSRenderingMethodNames.Add("Outline");
-            ECSRenderingMethodNames.Add("Volume");
-            ECSRenderingMethodNames.Add("Outlined Volume");
+            ECSRenderingMethodNames.Add("No Outline");
             // regions
             regions = new Dictionary<string, RegionWidget>();
 
@@ -968,7 +1027,7 @@ namespace DaphneGui
             CellSelectionToolModes.Add("Molecular Concentrations");
             CellSelectionToolMode = CellSelectionToolModes[0];
         }
-        
+
         /// <summary>
         /// free allocated memory
         /// </summary>
@@ -989,6 +1048,26 @@ namespace DaphneGui
 #endif
             CellAttributeArrayNames.Clear();
             // ColorScaleMaxFactor = 1.0;
+        }
+
+        public void DisableComponents()
+        {
+            ToolsToolbar_IsEnabled = false;
+            DisablePickingButtons();
+        }
+
+        public void EnableComponents(bool finished)
+        {
+            if (finished == true)
+            {
+                EnablePickingButtons();
+            }
+            ToolsToolbarEnableAllIcons();
+        }
+
+        public void ResetGraphics()
+        {
+            CellController.SetCellOpacities(1.0);
         }
 
         /// <summary>
@@ -1019,12 +1098,12 @@ namespace DaphneGui
         public bool ResetCamera_IsChecked
         {
             get { return resetCameraButton_IsChecked; }
-            set 
-            { 
+            set
+            {
                 // Using a cheat to make toggle button act like regular button
                 this.recenterCamera();
                 this.Rwc.Invalidate();
-                base.OnPropertyChanged("ResetCamera_IsChecked"); 
+                base.OnPropertyChanged("ResetCamera_IsChecked");
             }
         }
 
@@ -1044,7 +1123,7 @@ namespace DaphneGui
                 }
             }
         }
-        
+
         public string ECSRenderingMethod
         {
             get { return ecsRenderingMethod; }
@@ -1060,26 +1139,17 @@ namespace DaphneGui
                     // Set up ecs rendering based on value
                     if (value != null)
                     {
-
-                        if (value == "Outlined Volume")
+                        if (value == "Outline")
                         {
                             EnvironmentController.RenderBox = true;
-                            ECSController.RenderGradient = true;
                         }
-                        else if (value == "Outline")
-                        {
-                            EnvironmentController.RenderBox = true;
-                            ECSController.RenderGradient = false;
-                        }
-                        else if (value == "Volume")
+                        else if (value == "No Outline")
                         {
                             EnvironmentController.RenderBox = false;
-                            ECSController.RenderGradient = true;
                         }
                         else
                         {
-                            EnvironmentController.RenderBox = false;
-                            ECSController.RenderGradient = false;
+                            EnvironmentController.RenderBox = true;
                         }
                         EnvironmentController.drawEnvBox();
                         ECSController.draw3D();
@@ -1135,51 +1205,12 @@ namespace DaphneGui
             this.CellController.CellMapper.SelectColorArray(this.cellColorArrayName);
             if (this.CellController.GlyphData != null)
             {
-                double[] rr = new double[2];
-                rr = this.CellController.GlyphData.GetPointData().GetArray(this.cellColorArrayName).GetRange();
-                // TODO: Change this so that lookup tables are indexed by array name...
-                //   Hard-coding names for now...
-                if (this.cellColorArrayName == "cellID")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
-                    this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-                }
-                else if (this.cellColorArrayName == "cellSet")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellSetColorTable);
-                    this.CellController.CellMapper.SetScalarRange(0, MainWindow.VTKBasket.CellController.CellSetColorTable.GetNumberOfTableValues() - 1);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-                }
-                else if (this.cellColorArrayName == "generation")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenerationColorTable);
-                    this.CellController.CellMapper.SetScalarRange(0, 4);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-                }
-#if ALL_GRAPHICS
-                else if (this.cellColorArrayName == "receptorComp")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.BivariateColorTable);
-                    this.CellController.UpdateReceptorCalcFormula(this.colorScaleMaxFactor);
-                    this.CellController.CellMapper.SetScalarRange(0, 4 * this.colorScaleMaxFactor);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
-                }
-                else if (MainWindow.VTKBasket.CellReceptorMaxConcs.ContainsKey(this.cellColorArrayName))
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
-
-                    // Scale color map range by max value of receptor concentration rather than current values
-                    this.CellController.CellMapper.SetScalarRange(0f, this.ColorScaleMaxFactor * MainWindow.VTKBasket.CellReceptorMaxConcs[this.cellColorArrayName]);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
-                }
-#endif
-                else
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
-                    this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
-                }
+                var VTKBasket = ((VTKFullDataBasket)MainWindow.VTKBasket);
+                this.CellController.CellMapper.SetLookupTable(VTKBasket.CellController.CellColorTable);
+                this.CellController.CellMapper.SelectColorArray(this.cellColorArrayName);
+                int tmp = (int)VTKBasket.CellController.CellColorTable.GetNumberOfTableValues();
+                this.CellController.CellMapper.SetScalarRange(0, tmp - 1);
+                this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 this.scalarBar.GetScalarBarActor().SetLookupTable(cellController.CellMapper.GetLookupTable());
                 this.scalarBar.GetScalarBarActor().SetTitle(this.CellColorArrayName);
                 Rwc.Invalidate();
@@ -1338,10 +1369,8 @@ namespace DaphneGui
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = false;
-            MW.CellsColorByCB.IsEnabled = false;
-            MW.SolfacRenderingCB.IsEnabled = false;
-            MW.ScalarBarMarkerButton.IsEnabled = false;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = false;
             MW.ResetCameraButton.IsEnabled = false;
             MW.save3DView.IsEnabled = false;
@@ -1350,14 +1379,12 @@ namespace DaphneGui
         public void ToolsToolbarEnableAllIcons()
         {
             ToolsToolbar_IsEnabled = true;
-            MW.SolfacRenderingCB.IsEnabled = true;
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = true;
-            MW.CellsColorByCB.IsEnabled = true;
-            MW.ScalarBarMarkerButton.IsEnabled = true;
+            MW.CellOptionsExpander.IsEnabled = true;
+            MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = true;
             MW.ResetCameraButton.IsEnabled = true;
             MW.save3DView.IsEnabled = true;
@@ -1412,7 +1439,7 @@ namespace DaphneGui
             WhArrowToolButton_IsEnabled = false;
             WhArrowToolButton_IsChecked = true;
             HandToolButton_IsEnabled = true;                //false;    //TEMPORARILY ENABLED ALL THE TIME
-            HandToolButton_IsChecked = false;                        
+            HandToolButton_IsChecked = false;
             PreviewButton_IsEnabled = false;
             PreviewButton_IsChecked = true;
             Rwc.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
@@ -1422,7 +1449,7 @@ namespace DaphneGui
         {
             get { return rwc; }
         }
-        
+
         public WindowsFormsHost Wfh
         {
             get { return wfh; }
@@ -1451,29 +1478,24 @@ namespace DaphneGui
         /// <param name="transferMatrix">true if transferring the widget matrix to the gui is desired</param>
         public void WidgetInteractionToGUICallback(RegionWidget rw, bool transferMatrix)
         {
-            // identify the widget's key
-            string key = "";
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
 
             // NOTE: This callback specific to this GC (referencing Regions). 
             //   Not sure what will happen with mutiple GCs...
-            if (rw != null && Regions.ContainsValue(rw) == true)
+            if (rw != null)
             {
-                foreach (KeyValuePair<string, RegionWidget> kvp in Regions)
+                if (rw.Gaussian != null && rw.Gaussian.box_spec != null)
                 {
-                    if (kvp.Value == rw)
-                    {
-                        key = kvp.Key;
-                        break;
-                    }
-                }
+                    BoxSpecification box = rw.Gaussian.box_spec;
 
-                // found?
-                if (key != "")
-                {
                     if (transferMatrix == true)
                     {
                         double[] r = null, t = null, s = null;
-                        bool changed = false;
 
                         // get the scale, rotation, translation, check against their min/max values, and correct if needed
                         rw.GetScaleRotationTranslation(ref s, ref r, ref t);
@@ -1481,72 +1503,74 @@ namespace DaphneGui
                         if (s[0] < 0 && s[1] < 0 && s[2] < 0)
                         {
                             // restore the box matrix; the latter is known to be good
-                            rw.SetTransform(MainWindow.SC.SimConfig.box_guid_box_dict[key].transform_matrix, RegionControl.PARAM_SCALE);
+                            rw.SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                             // transfer transform to VTKDataBasket
-                            MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
+                            ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                             return;
                         }
+#if USE_BOX_LIMITS
+                        bool changed = false;
 
                         // translation
-                        if (t[0] < MainWindow.SC.SimConfig.box_guid_box_dict[key].x_trans_min)
+                        if (t[0] < scenario.box_guid_box_dict[key].x_trans_min)
                         {
-                            t[0] = MainWindow.SC.SimConfig.box_guid_box_dict[key].x_trans_min;
+                            t[0] = scenario.box_guid_box_dict[key].x_trans_min;
                             changed = true;
                         }
-                        if (t[0] > MainWindow.SC.SimConfig.box_guid_box_dict[key].x_trans_max)
+                        if (t[0] > scenario.box_guid_box_dict[key].x_trans_max)
                         {
-                            t[0] = MainWindow.SC.SimConfig.box_guid_box_dict[key].x_trans_max;
+                            t[0] = scenario.box_guid_box_dict[key].x_trans_max;
                             changed = true;
                         }
-                        if (t[1] < MainWindow.SC.SimConfig.box_guid_box_dict[key].y_trans_min)
+                        if (t[1] < scenario.box_guid_box_dict[key].y_trans_min)
                         {
-                            t[1] = MainWindow.SC.SimConfig.box_guid_box_dict[key].y_trans_min;
+                            t[1] = scenario.box_guid_box_dict[key].y_trans_min;
                             changed = true;
                         }
-                        if (t[1] > MainWindow.SC.SimConfig.box_guid_box_dict[key].y_trans_max)
+                        if (t[1] > scenario.box_guid_box_dict[key].y_trans_max)
                         {
-                            t[1] = MainWindow.SC.SimConfig.box_guid_box_dict[key].y_trans_max;
+                            t[1] = scenario.box_guid_box_dict[key].y_trans_max;
                             changed = true;
                         }
-                        if (t[2] < MainWindow.SC.SimConfig.box_guid_box_dict[key].z_trans_min)
+                        if (t[2] < scenario.box_guid_box_dict[key].z_trans_min)
                         {
-                            t[2] = MainWindow.SC.SimConfig.box_guid_box_dict[key].z_trans_min;
+                            t[2] = scenario.box_guid_box_dict[key].z_trans_min;
                             changed = true;
                         }
-                        if (t[2] > MainWindow.SC.SimConfig.box_guid_box_dict[key].z_trans_max)
+                        if (t[2] > scenario.box_guid_box_dict[key].z_trans_max)
                         {
-                            t[2] = MainWindow.SC.SimConfig.box_guid_box_dict[key].z_trans_max;
+                            t[2] = scenario.box_guid_box_dict[key].z_trans_max;
                             changed = true;
                         }
                         // scale
-                        if (s[0] < RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].x_scale_min)
+                        if (s[0] < RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_min)
                         {
-                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].x_scale_min;
+                            s[0] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_min;
                             changed = true;
                         }
-                        if (s[0] > RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].x_scale_max)
+                        if (s[0] > RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_max)
                         {
-                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].x_scale_max;
+                            s[0] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_max;
                             changed = true;
                         }
-                        if (s[1] < RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].y_scale_min)
+                        if (s[1] < RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_min)
                         {
-                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].y_scale_min;
+                            s[1] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_min;
                             changed = true;
                         }
-                        if (s[1] > RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].y_scale_max)
+                        if (s[1] > RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_max)
                         {
-                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].y_scale_max;
+                            s[1] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_max;
                             changed = true;
                         }
-                        if (s[2] < RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].z_scale_min)
+                        if (s[2] < RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_min)
                         {
-                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].z_scale_min;
+                            s[2] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_min;
                             changed = true;
                         }
-                        if (s[2] > RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].z_scale_max)
+                        if (s[2] > RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_max)
                         {
-                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.box_guid_box_dict[key].z_scale_max;
+                            s[2] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_max;
                             changed = true;
                         }
 
@@ -1555,19 +1579,15 @@ namespace DaphneGui
                         {
                             rw.SetScaleRotationTranslation(s, r, t, 0);
                         }
-                        WidgetTransformToBoxMatrix(rw, MainWindow.SC.SimConfig.box_guid_box_dict[key]);
+#endif
+                        WidgetTransformToBoxMatrix(rw, box);
                         // Transfer transform to VTKDataBasket
-                        MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
+                        ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// handler for left mouse button down
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
             if (!HandToolButton_IsChecked)
@@ -1575,6 +1595,29 @@ namespace DaphneGui
 
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] x = interactor.GetEventPosition();
+            leftButtonPressPostion[0] = x[0];
+            leftButtonPressPostion[1] = x[1];
+            leftButtonPressed = true;
+            leftButtonPressTimeStamp = interactor.GetMTime();
+        }
+
+        /// <summary>
+        /// handler for left mouse click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void leftMouseClick(vtkObject sender, vtkObjectEventArgs e)
+        {
+            if (!HandToolButton_IsChecked || !leftButtonPressed)
+                return;
+
+            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+            leftButtonPressed = false;
+            if (interactor.GetMTime() - leftButtonPressTimeStamp > 100) return;
+
+            //int[] x = interactor.GetEventPosition();
+            int[] x = leftButtonPressPostion;
+
             int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
 
             if (p > 0)
@@ -1617,7 +1660,7 @@ namespace DaphneGui
                                     if (MainWindow.CheckControlFlag(MainWindow.CONTROL_NEW_RUN) == true)
                                     {
                                         MainWindow.SetControlFlag(MainWindow.CONTROL_NEW_RUN, false);
-                                        MainWindow.Basket.ConnectToExperiment(MainWindow.SC.SimConfig.experiment_db_id);
+                                        MainWindow.Basket.ConnectToExperiment(MainWindow.SOP.Protocol.experiment_db_id);
                                     }
 
                                     // allow for the quick preview
@@ -1670,7 +1713,7 @@ namespace DaphneGui
                     }
                     else if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_MOLCONCS) == true)
                     {
-                        Cell c = Simulation.dataBasket.Cells[cellID];
+                        //Cell c = Simulation.dataBasket.Cells[cellID];
 
                         MW.DisplayCellInfo(cellID);
                     }
@@ -1758,6 +1801,7 @@ namespace DaphneGui
                 double[] bounds = new double[6];
 
                 bounds = EnvironmentController.BoxActor.Prop.GetBounds();
+ 
                 rwc.RenderWindow.GetRenderers().GetFirstRenderer().ResetCamera(bounds[0],
                                                                                bounds[1],
                                                                                bounds[2],
@@ -1770,6 +1814,13 @@ namespace DaphneGui
                                                                                             bounds[3],
                                                                                             bounds[4],
                                                                                             bounds[5]);
+
+                var fp = rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().GetFocalPoint();
+                var p = rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().GetPosition();
+                var dist = Math.Sqrt((p[0] - fp[0]) * (p[0] - fp[0]) + (p[1] - fp[1]) * (p[1] - fp[1]) + (p[2] - fp[2]) * (p[2] - fp[2]));
+                rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().SetPosition(fp[0], fp[1], fp[2] + dist);
+                rwc.RenderWindow.GetRenderers().GetFirstRenderer().GetActiveCamera().SetViewUp(0.0, 1.0, 0.0);
+
             }
         }
 #if ALL_GRAPHICS
@@ -1817,8 +1868,10 @@ namespace DaphneGui
 
             // Regions
             CreateRegionWidgets();
+
+            var VTKBasket = (VTKFullDataBasket)MainWindow.VTKBasket;
             // Cells
-            if (Simulation.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null)
+            if (SimulationBase.dataBasket.Cells != null && VTKBasket.CellController.Poly != null && VTKBasket.CellController.getAssignCellIndex() > 0)
             {
                 // Finish VTK pipeline by glyphing cells
                 cellController.GlyphCells();
@@ -1833,11 +1886,10 @@ namespace DaphneGui
                         this.CellAttributeArrayNames.Add(array_name);
                     }
                 }
-                
-                if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellSet"))
+
+                if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellColorMapper"))
                 {
-                    // Make "cellSet" a hard-coded first-pass default for now when it's available
-                    this.CellColorArrayName = "cellSet";
+                    this.CellColorArrayName = "cellColorMapper";
                 }
                 else if (this.CellAttributeArrayNames.Contains(this.CellColorArrayName))
                 {
@@ -1846,11 +1898,6 @@ namespace DaphneGui
                     var tmp = this.CellColorArrayName;
                     this.cellColorArrayName = "";
                     this.CellColorArrayName = tmp;
-                }
-                else if (!this.CellAttributeArrayNames.Contains(this.CellColorArrayName) && this.CellAttributeArrayNames.Contains("cellSet"))
-                {
-                    // If CellColorArrayName isn't null, but the existing name isn't in the current list (after reset) then default to cellSet if can
-                    this.CellColorArrayName = "cellSet";
                 }
                 else
                 {
@@ -1870,12 +1917,14 @@ namespace DaphneGui
             }
 
             // environment
-            EnvironmentController.setupPipeline();
+            EnvironmentController.SetupPipeline();
 
             // ecs
-            if (Simulation.dataBasket.ECS != null && MainWindow.VTKBasket.ECSController.ImageGrid != null)
+            if (SimulationBase.dataBasket.Environment != null &&
+                SimulationBase.dataBasket.Environment is ECSEnvironment &&
+                ((VTKFullDataBasket)MainWindow.VTKBasket).ECSController.ImageGrid != null)
             {
-                ecsController.finish3DPipelines();
+                ecsController.Finish3DPipelines();
                 // Make "Outline" a hard-coded first-pass default for now, otherwise keep old value
                 if (ECSRenderingMethod == null)
                 {
@@ -1886,11 +1935,18 @@ namespace DaphneGui
 
         public void AddGaussSpecRegionWidget(GaussianSpecification gs)
         {
-            string box_guid = gs.gaussian_spec_box_guid_ref;
-            // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, RegionShape.Ellipsoid, gs);
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
+            // Find the box spec that goes with this gaussian spec
+            BoxSpecification bs = gs.box_spec;
+
+            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, gs, RegionShape.Ellipsoid);
+
 
             // color
             rw.SetColor(gs.gaussian_spec_color.ScR,
@@ -1906,34 +1962,9 @@ namespace DaphneGui
             rw.ShowActor(Rwc.RenderWindow, gs.gaussian_region_visibility);
             // NOTE: Callback being added afterwards in MainWindow for now...
 
-            Regions.Add(box_guid, rw);
+            Regions.Add(gs.box_spec.box_guid, rw);
         }
-#if CELL_REGIONS
-        public void AddRegionRegionWidget(Region rr)
-        {
-            string box_guid = rr.region_box_spec_guid_ref;
-            // Find the box spec that goes with this region
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, rr.region_type);
-
-            // color
-            rw.SetColor(rr.region_color.ScR,
-                        rr.region_color.ScG,
-                        rr.region_color.ScB);
-            // alpha channel/opacity
-            rw.SetOpacity(rr.region_color.ScA);
-            // box transform
-            rw.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
-            // box visibility
-            rw.ShowWidget(bs.box_visibility);
-            // contained shape visibility
-            rw.ShowActor(Rwc.RenderWindow, rr.region_visibility);
-            // NOTE: Callback being added afterwards in MainWindow for now...
-
-            Regions.Add(box_guid, rw);
-        }
-#endif
         public void RemoveRegionWidget(string current_guid)
         {
             Regions[current_guid].ShowWidget(false);
@@ -1944,19 +1975,20 @@ namespace DaphneGui
 
         public void CreateRegionWidgets()
         {
-            // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SC.SimConfig.entity_repository.gaussian_specifications)
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                AddGaussSpecRegionWidget(gs);
+                throw new InvalidCastException();
             }
 
-#if CELL_REGIONS
-            // Regions
-            foreach (Region rr in MainWindow.SC.SimConfig.scenario.regions)
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            // Gaussian specs
+            GaussianSpecification next;
+
+            scenario.resetGaussRetrieve();
+            while ((next = scenario.nextGaussSpec()) != null)
             {
-                AddRegionRegionWidget(rr);
+                AddGaussSpecRegionWidget(next);
             }
-#endif
         }
 
         /// <summary>
@@ -2039,10 +2071,10 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.SC.SimConfig.experiment_reps > 1)
+                if (MainWindow.RepeatingRun() == true)
                 {
                     int rep = MainWindow.Repetition;
-                    int reps = MainWindow.SC.SimConfig.experiment_reps;
+                    int reps = MainWindow.SOP.Protocol.experiment_reps;
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Rep: " + rep + "/" + reps + " Progress: " + progress + "%");
                 }
                 else
@@ -2066,27 +2098,52 @@ namespace DaphneGui
         /// Function to save the current 3D image to a file - skg 8/2/12
         /// </summary>
         /// <param name="filename" - File name
-        /// <param name="imageWriter" - Object of one of these types depending on what user selected: 
-        ///         vtkJPEGWriter, vtkBMPWriter, vtkPNGWriter, vtkTIFFWriter 
-        public void SaveToFile(string filename, vtkImageWriter imageWriter)
+        public void SaveToFile(string filename, double[] rgb)
         {
-            //Use "rw" which is the current rendering window variable
-            RenderWindowControl myRWC = new RenderWindowControl();
-            myRWC = rwc;
-            vtkRenderWindow myRW = rwc.RenderWindow;
-            vtkRenderer ren = myRW.GetRenderers().GetFirstRenderer();
-            // background color
-            ren.SetBackground(1.0, 1.0, 1.0);
+            vtkImageWriter imageWriter;
+
+            if (filename.EndsWith("bmp"))
+            {
+                imageWriter = new vtkBMPWriter();
+            }
+            else if (filename.EndsWith("jpg"))
+            {
+                imageWriter = new vtkJPEGWriter();
+                ((vtkJPEGWriter)imageWriter).SetQuality(100);
+                ((vtkJPEGWriter)imageWriter).SetProgressive(0);
+            }
+            else if (filename.EndsWith("png"))
+            {
+                imageWriter = new vtkPNGWriter();
+            }
+            else if (filename.EndsWith("tif"))
+            {
+                imageWriter = new vtkTIFFWriter();
+            }
+            else
+            {
+                imageWriter = new vtkBMPWriter();
+            }
+
+            vtkRenderer ren = rwc.RenderWindow.GetRenderers().GetFirstRenderer();
+            vtkWindow currWindow = ren.GetVTKWindow();
+
+            // remember the current color
+            double[] currentColor = ren.GetBackground(); 
+            // new background color
+            ren.SetBackground(rgb[0], rgb[1], rgb[2]);
 
             vtkWindowToImageFilter w2if = new vtkWindowToImageFilter();
-            w2if.SetInput(myRW);
+            w2if.SetInput(rwc.RenderWindow);
 
             //Create Image output file            
             imageWriter.SetInput(w2if.GetOutput());
             imageWriter.SetFileName(filename);
             imageWriter.Write();
 
-            ren.SetBackground(0.0, 0.0, 0.0);
+            // reset background to original color
+            ren.SetBackground(currentColor[0], currentColor[1], currentColor[2]);
+            currWindow.Render();
         }
     }
 }

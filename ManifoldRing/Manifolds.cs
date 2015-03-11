@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace ManifoldRing
 {
@@ -116,13 +116,18 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public abstract ScalarField DiffusionFluxTerm(ScalarField flux, Transform t);
+        public abstract ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt);
         /// <summary>
         /// integrate over the whole field
         /// </summary>
         /// <param name="sf">field parameter</param>
         /// <returns>integral value</returns>
         public abstract double Integrate(ScalarField sf);
+        /// <summary>
+        /// manifold length
+        /// </summary>
+        /// <returns>length as double</returns>
+        public abstract double Length();
         /// <summary>
         /// manifold area
         /// </summary>
@@ -173,7 +178,7 @@ namespace ManifoldRing
         {
             ArraySize = 4;
             PrincipalPoints = new Vector[1];
-            PrincipalPoints[0] = new Vector(3, 0.0);
+            PrincipalPoints[0] = new DenseVector(3);
         }
 
         /// <summary>
@@ -217,7 +222,8 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation;
+            //double[] pos = t.Translation.ToArray();
+            double[] pos = t.Position;
             double[] grad = from.M.Grad(pos, from);
 
             to.array[0] = from.Value(pos);
@@ -305,6 +311,15 @@ namespace ManifoldRing
         /// <param name="i">direction index</param>
         /// <returns>number of nodes as int</returns>
         public override int NodesPerSide(int i)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// TinySphere manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
         {
             return 0;
         }
@@ -401,9 +416,9 @@ namespace ManifoldRing
         /// <returns>gradient vector</returns>
         public override double[] Grad(double[] x, ScalarField sf)
         {
-            Vector u = new Vector(x);
+            Vector u = new DenseVector(x);
 
-            u = u.Normalize();
+            u = (DenseVector)u.Normalize(2.0);
 
             double d = u[0] * sf.array[1] + u[1] * sf.array[2] + u[2] * sf.array[3];
 
@@ -415,7 +430,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
             throw new NotImplementedException();
         }
@@ -496,6 +511,15 @@ namespace ManifoldRing
         /// <param name="i">direction index</param>
         /// <returns>number of nodes as int</returns>
         public override int NodesPerSide(int i)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// TinyBall manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
         {
             return 0;
         }
@@ -607,7 +631,7 @@ namespace ManifoldRing
         /// <param name="flux">flux involved</param>
         /// <param name="t">Transform - not used</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
             if (flux.M is TinySphere == false)
             {
@@ -620,7 +644,8 @@ namespace ManifoldRing
             array[2] = 5 * flux.array[2] / radius;
             array[3] = 5 * flux.array[3] / radius;
 
-            return diffusionField;
+            return dst.Add(diffusionField.Multiply(-dt));
+            //return diffusionField;
         }
 
         /// <summary>
@@ -686,7 +711,8 @@ namespace ManifoldRing
             PrincipalPoints = new Vector[ArraySize];
             for (int i = 0; i < ArraySize; i++)
             {
-                PrincipalPoints[i] = linearIndexToLocal(i);
+                //PrincipalPoints[i] = linearIndexToLocal(i);
+                PrincipalPoints[i] = new DenseVector(linearIndexToLocal(i));
             }
 
             // initialize interpolator
@@ -769,6 +795,7 @@ namespace ManifoldRing
         /// <param name="x">local point</param>
         /// <returns>index array</returns>
         public int[] localToIndexArray(Vector x)
+        //public int[] localToIndexArray(double[] x)
         {
             int[] tmp = new int[Dim];
 
@@ -787,7 +814,7 @@ namespace ManifoldRing
         /// <returns>local point</returns>
         public Vector indexArrayToLocal(int[] idx)
         {
-            Vector tmp = new Vector(Transform.Dim);
+            Vector tmp = new DenseVector(Transform.Dim);
 
             for (int i = 0; i < Dim; i++)
             {
@@ -860,9 +887,11 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="lin">linear index</param>
         /// <returns>local point</returns>
-        public Vector linearIndexToLocal(int lin)
+        //public Vector linearIndexToLocal(int lin)
+        public double[] linearIndexToLocal(int lin)
         {
-            return indexArrayToLocal(linearIndexToIndexArray(lin));
+            //return indexArrayToLocal(linearIndexToIndexArray(lin));
+            return indexArrayToLocal(linearIndexToIndexArray(lin)).ToArray();
         }
 
         /// <summary>
@@ -952,22 +981,26 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation;
-            Vector x;
+            double[] pos = t.Translation.ToArray();
+            Vector x = new DenseVector(new double[3]);
 
             for (int i = 0; i < ArraySize; i++)
             {
                 // the coordinates of this interpolation point in this boundary manifold
-                x = this.linearIndexToLocal(i);
+                //x = this.linearIndexToLocal(i);
+                x = new DenseVector(this.linearIndexToLocal(i));
                 // x+pos are the coordinates of this interpolation point in the interior manifold
-                to.array[i] = from.M.Value(x+pos, from);
+                //to.array[i] = from.M.Value(x + pos, from);                
+                Vector y = new DenseVector(pos);
+                y = (DenseVector)(x + y);
+                to.array[i] = from.M.Value(y.ToArray(), from);
             }
             return to;
         }
 
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField sf, double dt)
         {
-            return interpolator.DiffusionFlux(flux, t);
+            return interpolator.DiffusionFlux(flux, t, sf, dt);
         }
 
         /// <summary>
@@ -985,6 +1018,79 @@ namespace ManifoldRing
     }
 
     /// <summary>
+    /// IL line
+    /// </summary>
+    public class InterpolatedLine : InterpolatedNodes
+    {
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="interpolator">handle to the interpolator instance used</param>
+        public InterpolatedLine(Interpolator interpolator)
+            : base(1, interpolator)
+        {
+        }
+
+        /// <summary>
+        /// IL line manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return extent[0];
+        }
+
+        /// <summary>
+        /// IL line manifold area
+        /// </summary>
+        /// <returns>area as double</returns>
+        public override double Area()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// IL line manifold volume
+        /// </summary>
+        /// <returns>volume as double</returns>
+        public override double Volume()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// IL line manifold voxel volume
+        /// </summary>
+        /// <returns>voxel volume as double</returns>
+        public override double VoxelVolume()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// IL line integrate over the whole field
+        /// </summary>
+        /// <param name="sf">field parameter</param>
+        /// <returns>integral value</returns>
+        public override double Integrate(ScalarField sf)
+        {
+            double[] point = new double[] { 0, 0, 0 };
+            double sum = 0,
+                   voxel = stepSize;
+
+                for (int i = 0; i < nNodesPerSide[0] - 1; i++)
+                {
+                    point[0] = (i + 0.5) * stepSize;
+
+                    // The value at the center of the voxel
+                    sum += sf.Value(point);
+                }
+
+            return sum * voxel;
+        }
+    }
+
+    /// <summary>
     /// IL rectangle
     /// </summary>
     public class InterpolatedRectangle : InterpolatedNodes
@@ -996,6 +1102,15 @@ namespace ManifoldRing
         public InterpolatedRectangle(Interpolator interpolator)
             : base(2, interpolator)
         {
+        }
+
+        /// <summary>
+        /// IL rectangle manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return 0;
         }
 
         /// <summary>
@@ -1064,6 +1179,15 @@ namespace ManifoldRing
         public InterpolatedRectangularPrism(Interpolator interpolator)
             : base(3, interpolator)
         {
+        }
+
+        /// <summary>
+        /// IL prism manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return 0;
         }
 
         /// <summary>
@@ -1137,8 +1261,8 @@ namespace ManifoldRing
             : base(0)
         {
             ArraySize = 1;
-            PrincipalPoints = new Vector[1];
-            PrincipalPoints[0] = new Vector(3, 0.0);
+            PrincipalPoints = new DenseVector[1];
+            PrincipalPoints[0] = new DenseVector(3);
         }
 
         /// <summary>
@@ -1252,7 +1376,8 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            return sf;
+            // return zeros - no diffusion
+            return new ScalarField(this);
         }
 
         /// <summary>
@@ -1271,7 +1396,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t, ScalarField dst, double dt)
         {
             throw new Exception("DiffusionFluxTerm not implemented for PointManifold fields");
         }
@@ -1284,6 +1409,15 @@ namespace ManifoldRing
         public override double Integrate(ScalarField sf)
         {
             return sf.array[0];
+        }
+
+        /// <summary>
+        /// manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return 0;
         }
 
         /// <summary>
@@ -1321,7 +1455,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-                double[] pos = t.Translation;
+                double[] pos = t.Translation.ToArray();
                 to.array[0] = from.Value(pos);
 
                 return to;

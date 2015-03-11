@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Daphne
 {
@@ -19,13 +19,13 @@ namespace Daphne
         /// <param name="gridStep">extent of each grid cell (uniform in all directions)</param>
         public Grid(Vector gridSize, double gridStep)
         {
-            if (gridSize.Length != 3)
+            if (gridSize.Count != 3)
             {
                 throw new Exception("Grid must be three-dimensional.");
             }
 
             this.gridStep = gridStep;
-            this.gridSize = gridSize.Clone();
+            this.gridSize = (DenseVector)gridSize.Clone();
             // volumes
             volume = gridSize[0] * gridSize[1] * gridSize[2];
             volumeVoxel = gridStep * gridStep * gridStep;
@@ -64,23 +64,34 @@ namespace Daphne
         /// </summary>
         /// <param name="pos">position to test</param>
         /// <returns>tuple with indices; negative for out of bounds</returns>
-        public int[] findGridIndex(Vector pos)
+        public void findGridIndex(double[] pos, ref int[] idx)
         {
-            double[] tmp = new double[pos.Length];
+            //double[] tmp = new double[pos.Count];
 
+            //for (int i = 0; i < pos.Count; i++)
+            //{
+            //    // tmp[0] goes along x, tmp[1] along y
+            //    tmp[i] = pos[i] / gridStep;
+
+            //    // for now return -1 for out of bounds
+            //    if (tmp[i] < 0 || (int)tmp[i] > gridPts[i] - 1)
+            //    {
+            //        return new int[] { -1, -1, -1 };
+            //    }
+            //}
+
+            //return new int[] { (int)tmp[0], (int)tmp[1], (int)tmp[2] };
+
+            //save one allocation
             for (int i = 0; i < pos.Length; i++)
             {
-                // tmp[0] goes along x, tmp[1] along y
-                tmp[i] = pos[i] / gridStep;
-
-                // for now return -1 for out of bounds
-                if (tmp[i] < 0 || (int)tmp[i] > gridPts[i] - 1)
+                idx[i] = (int)(pos[i] / gridStep);
+                if (idx[i] < 0 || idx[i] > gridPts[i] - 1)
                 {
-                    return new int[] { -1, -1, -1 };
+                    idx[0] = idx[1] = idx[2] = -1;
+                    return;
                 }
             }
-
-            return new int[] { (int)tmp[0], (int)tmp[1], (int)tmp[2] };
         }
 
         /// <summary>

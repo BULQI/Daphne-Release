@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.LinearAlgebra;
 
 using Ninject;
 using Ninject.Parameters;
@@ -61,6 +61,12 @@ namespace Daphne
         {
             get { return concentration; }
             set { concentration = value; }
+        }
+
+        public Compartment Comp
+        {
+            get { return compartment; }
+            set { compartment = value; }
         }
 
         public Dictionary<int, ScalarField> BoundaryFluxes
@@ -125,11 +131,7 @@ namespace Daphne
             boundaryConcs.Add(key, boundConc);
         }
 
-        /// <summary>
-        /// moved some initalization from ... to here - axin
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="parameters"></param>
+
         public void Initialize(string type, double[] parameters)
         {
             this.Conc.Initialize(type, parameters);
@@ -193,16 +195,24 @@ namespace Daphne
         }
 
         /// <summary>
-        /// At each array point in the embedded manifold, update the values of the concentration 
-        /// and global gradient of the embedding manifold MolecularPopulation.
+        /// Upadate boundaryConcs.
+        /// boundaryConc is the representation of the (bulk) concentration at the boundary surface.
+        /// bouncaryConcs are used in bulk/boundary reactions.
         /// </summary>
-        public void UpdateBoundary()
+        public void UpdateECSMembraneBoundary()
         {
-            // take the bulk at each boundary's location and write it into the boundary space, converting to the boundary scalar field type if needed
-            // translation is already the position of the boundary in the containing frame; no coordinate conversion needed
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
             {
                 kvp.Value.Restrict(concentration, compartment.BoundaryTransforms[kvp.Key]);
+            }
+        }
+
+        public void UpdateCytosolMembraneBoundary()
+        {
+            foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
+            {
+                //simple copy
+                kvp.Value.reset(concentration);
             }
         }
 
@@ -213,34 +223,9 @@ namespace Daphne
         /// <param name="dt">The time interval over which to integrate the diffusion equation.</param>
         public void Step(double dt)
         {
-            // Update boundary concentrations and global gradients
-            UpdateBoundary();
-
             // Laplacian
             concentration.Add(concentration.Laplacian().Multiply(dt * Molecule.DiffusionCoefficient));
 
-            // Boundary fluxes
-            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
-            {
-                concentration.Add(concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]).Multiply(-dt));
-                //kvp.Value.Initialize("explicit", new double[kvp.Value.M.ArraySize]);
-                kvp.Value.reset(0);
-            }
-
-            // Natural boundary conditions
-            // NOTE: we should be able to incorporate these into Laplacian()
-            foreach (KeyValuePair<int, MolBoundaryType> bc in boundaryCondition)
-            {
-                if (bc.Value == MolBoundaryType.Dirichlet)
-                {
-                    concentration = concentration.DirichletBC(NaturalBoundaryConcs[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]);
-                }
-                else
-                {
-                    //concentration += -dt * concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]) / Molecule.DiffusionCoefficient;
-                    concentration.Add(concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]).Multiply(-dt / Molecule.DiffusionCoefficient));
-                }
-            }
         }
     }
 }

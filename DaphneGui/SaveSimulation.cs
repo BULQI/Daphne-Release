@@ -12,7 +12,7 @@ namespace DaphneGui
 {
     public partial class MainWindow
     {
-        internal static SimConfigurator SimConfigSaver = null;
+        internal static Protocol ProtocolSaver = null;
         internal static string filepath_prefix = null;
         internal static int save_counter = 1;
 
@@ -26,29 +26,27 @@ namespace DaphneGui
             int RUN = 0, RESET = 1, ABORT = 2;
 
             buttons[RUN] = runButton.IsEnabled;
-            buttons[RESET] = resetButton.IsEnabled;
+            buttons[RESET] = applyButton.IsEnabled;
             buttons[ABORT] = abortButton.IsEnabled;
 
             runButton.IsEnabled = false;
-            resetButton.IsEnabled = false;
+            applyButton.IsEnabled = false;
             abortButton.IsEnabled = false;
-            if (SimConfigSaver == null)
+            if (ProtocolSaver == null)
             {
                 //copy initial settings, only done once
-                SimConfigSaver = new SimConfigurator();
-                SimConfigSaver.TempScenarioFile = orig_path + @"\temp_scenario.json";
-                SimConfigSaver.TempUserDefFile = orig_path + @"\temp_userdef.json";
+                ProtocolSaver = new Protocol("", orig_path + @"\temp_protocol.json", sop.Protocol.GetScenarioType());
             }
-            SimConfigSaver.DeserializeSimConfigFromString(configurator.SerializeSimConfigToString());
+            SystemOfPersistence.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
  
             //clear the contents from last save
-            foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
+            foreach (KeyValuePair<int, CellPopulation> item in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict)
             {
                 // item.Value.cell_list.Clear();
-                item.Value.cellPopDist.CellStates.Clear();
+                item.Value.CellStates.Clear();
             }
 
-            string sp = configurator.FileName;
+            string sp = sop.Protocol.FileName;
 
             filepath_prefix = System.IO.Path.GetDirectoryName(sp);
             if (argSave == false)
@@ -66,62 +64,66 @@ namespace DaphneGui
                 if (dlg.ShowDialog() != true)
                 {
                     runButton.IsEnabled = buttons[RUN];
-                    resetButton.IsEnabled = buttons[RESET];
+                    applyButton.IsEnabled = buttons[RESET];
                     abortButton.IsEnabled = buttons[ABORT];
                     return;
                 }
-                SimConfigSaver.FileName = dlg.FileName;
+                ProtocolSaver.FileName = dlg.FileName;
             }
             else
             {
-                if (reporter.FileName != "")
+                if (MainWindow.Sim.Reporter.FileNameBase != "")
                 {
-                    filepath_prefix = Path.Combine(filepath_prefix, reporter.FileName);
+                    filepath_prefix = Path.Combine(filepath_prefix, MainWindow.Sim.Reporter.FileNameBase);
                 }
                 else
                 {
                     filepath_prefix = Path.Combine(filepath_prefix, System.IO.Path.GetFileNameWithoutExtension(sp)) + "-" + save_counter;
                 }
-                SimConfigSaver.FileName = filepath_prefix + ".json";
+                ProtocolSaver.FileName = filepath_prefix + ".json";
             }
 
             save_counter++;
 
-            SimConfiguration save_config = SimConfigSaver.SimConfig;
-            Scenario save_scenario = save_config.scenario;
-
-            //same Simulation.dataBasket.ECS.Space.Population inot scenario.environmnet.ecs.molpop
-            foreach (ConfigMolecularPopulation cmp in save_scenario.environment.ecs.molpops)
+            //same Simulation.dataBasket.ECS.Comp.Population inot scenario.environmnet.ecs.molpop
+            foreach (ConfigMolecularPopulation cmp in ProtocolSaver.scenario.environment.comp.molpops)
             {
                 //loop through molecular population
-                MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref];
+                MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
 
                 MolPopExplicit mpex = new MolPopExplicit();
                 double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];
                 cur_mp.Conc.CopyArray(cur_conc_values);
                 mpex.conc = cur_conc_values;
+                mpex.Description = "saved state";
 
-                cmp.mpInfo.mp_distribution = mpex;
+                cmp.mp_distribution = mpex;
             }
 
-            foreach (var kvp in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
+            foreach (var kvp in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict)
             {
                 CellPopulation cp = kvp.Value;
                 cp.number = 0;
             }
 
             //add cells into their respenctive populaiton
-            foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
                 Cell cell = kvp.Value;
 
                 int cell_set_id = cell.Population_id;
 
-                CellPopulation target_cp = SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict[cell.Population_id];
+                CellPopulation target_cp = ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict[cell.Population_id];
                 target_cp.number++;
 
                 CellState cell_state = new CellState();
-                cell_state.setState(cell.SpatialState);
+                cell_state.setSpatialState(cell.SpatialState);
+
+                cell_state.setDeathDriverState(cell.DeathBehavior.CurrentState);
+                cell_state.setDivisonDriverState(cell.Divider.CurrentState);
+                cell_state.setDifferentiationDriverState(cell.DifferentiationState);
+                cell_state.setGeneState(cell.Genes);
+                cell_state.setCellGeneration(cell.generation);
 
                 Dictionary<string, MolecularPopulation> membrane_mol_pop_dict = cell.PlasmaMembrane.Populations;
                 foreach (KeyValuePair<string, MolecularPopulation> kvpair in membrane_mol_pop_dict)
@@ -136,13 +138,13 @@ namespace DaphneGui
                     MolecularPopulation mp = kvpair.Value;
                     cell_state.addMolPopulation(kvpair.Key, mp);
                 }
-                target_cp.cellPopDist.CellStates.Add(cell_state);
+                target_cp.CellStates.Add(cell_state);
                 //target_cp.cell_list.Add(cell_state);
             }
 
-            SimConfigSaver.SerializeSimConfigToFile();
+            ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];
-            resetButton.IsEnabled = buttons[RESET];
+            applyButton.IsEnabled = buttons[RESET];
             abortButton.IsEnabled = buttons[ABORT];
         }
 
@@ -159,7 +161,7 @@ namespace DaphneGui
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return (byte)value == Simulation.RUNSTAT_PAUSE || (byte)value == Simulation.RUNSTAT_FINISHED;
+            return (byte)value == SimulationBase.RUNSTAT_PAUSE || (byte)value == SimulationBase.RUNSTAT_FINISHED;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

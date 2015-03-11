@@ -18,9 +18,9 @@ namespace Daphne
     public class DataBasket
     {
         /// <summary>
-        /// cell environment data object
+        /// environment data object
         /// </summary>
-        private ExtraCellularSpace ecs;
+        private EnvironmentBase environment;
         /// <summary>
         /// dictionary of cells
         /// </summary>
@@ -40,7 +40,11 @@ namespace Daphne
         /// <summary>
         /// handle to the simulation
         /// </summary>
-        private Simulation hSim;
+        private SimulationBase hSim;
+        /// <summary>
+        /// data file
+        /// </summary>
+        public static HDF5File hdf5file;
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -61,13 +65,15 @@ namespace Daphne
         /// <summary>
         /// constructor
         /// </summary>
-        public DataBasket(Simulation s)
+        public DataBasket(SimulationBase s)
         {
             hSim = s;
             cells = new Dictionary<int,Cell>();
             populations = new Dictionary<int, Dictionary<int, Cell>>();
             molecules = new Dictionary<string, Molecule>();
             genes = new Dictionary<string, Gene>();
+            // create the hdf5 object
+            hdf5file = new HDF5File();
 #if ALL_DATA
             ResetTrackData();
 #endif
@@ -86,12 +92,12 @@ namespace Daphne
         }
 
         /// <summary>
-        /// accessor for the cell environment
+        /// accessor for the environment
         /// </summary>
-        public ExtraCellularSpace ECS
+        public EnvironmentBase Environment
         {
-            get { return ecs; }
-            set { ecs = value; }
+            get { return environment; }
+            set { environment = value; }
         }
 
         /// <summary>
@@ -201,7 +207,7 @@ namespace Daphne
         /// <param name="expID">experiment id</param>
         public bool ConnectToExperiment(int expID = -1)
         {
-            int ID = expID < 0 ? MainWindow.SC.SimConfig.experiment_db_id : expID;
+            int ID = expID < 0 ? MainWindow.SOP.Protocol.experiment_db_id : expID;
 
             // First, check whether already connected to correct experiment
             if (dr != null)
@@ -504,109 +510,51 @@ namespace Daphne
             return false;
         }
 
-#if ALL_DATA
         /// <summary>
         /// update all cells given a list of db rows
         /// </summary>
-        /// <param name="list">the db data</param>
-        /// <param name="progress">the progress state of playback</param>
-        public void UpdateCells(Dictionary<int, DBDict> list, int progress)
+        /// <param name="list">the frame data</param>
+        public void UpdateCells(TissueSimulationFrameData frame)
         {
-            // iterate through the list and update cells; we have to detect those that are new from division or got deleted by death
-            ConnectToExperiment();
-
             List<int> removalList = new List<int>();
+            CellState state = new CellState();
 
             foreach (int key in cells.Keys)
             {
                 removalList.Add(key);
             }
 
-            foreach (KeyValuePair<int, DBDict> kvpc in list)
+            for (int i = 0; i < frame.CellCount; i++)
             {
+                int cell_id = frame.CellIDs[i];
+
                 // take off the removal list
-                removalList.Remove(kvpc.Value.cell_id);
+                removalList.Remove(cell_id);
 
-                // if the cell exists update it
-                if (cells.ContainsKey(kvpc.Value.cell_id))
+                frame.applyStateByIndex(i, ref state);
+
+                // if the cell doesn't exist, create it
+                if (cells.ContainsKey(cell_id) == false)
                 {
-                    ObjectLoader.LoadValues(cells[kvpc.Value.cell_id], kvpc.Value.state);
-                }
-                // create a new cell
-                else
-                {
-                    // make sure the type exists
-                    //ADD THE CODE TO CREATE A NEW CELL
-                    if (dr.Cells[kvpc.Value.cell_id].ContainsKey("CellSetId"))
+                    ConfigCompartment[] configComp = new ConfigCompartment[2];
+                    List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
+                    List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
+                    List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+                    int cellPopId = frame.CellPopIDs[i];
+
+                    if (((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict.ContainsKey(cellPopId) == false)
                     {
-                        if (MainWindow.VTKBasket.CellController.ColorMap.ContainsKey((int)dr.Cells[kvpc.Value.cell_id]["CellSetId"]) == true)
-                        {
-                            CellSubset ct = null;
-                            int cellSetID = MainWindow.VTKBasket.CellController.ColorMap[(int)dr.Cells[kvpc.Value.cell_id]["CellSetId"]];
-
-                            // find cell type
-                            for (int j = 0; j < MainWindow.SC.SimConfig.entity_repository.cell_subsets.Count; j++)
-                            {
-                                if (MainWindow.SC.SimConfig.entity_repository.cell_subsets[j].cell_subset_guid.CompareTo(MainWindow.SC.SimConfig.scenario.cellpopulations[cellSetID].cell_subset_guid_ref) == 0)
-                                {
-                                    ct = MainWindow.SC.SimConfig.entity_repository.cell_subsets[j];
-                                    break;
-                                }
-                            }
-
-                            // cell type not found, don't create this cell
-                            if (ct == null)
-                            {
-                                System.Windows.MessageBox.Show("Cell set '" + MainWindow.SC.SimConfig.scenario.cellpopulations[kvpc.Value.cell_id].cellpopulation_name +
-                                                               "' could not be extracted from the repository!");
-                                continue;
-                            }
-
-                            int loco_idx = -1;
-
-                            for (int j = 0; j < MainWindow.SC.SimConfig.global_parameters.Count && loco_idx == -1; j++)
-                            {
-                                if (MainWindow.SC.SimConfig.global_parameters[j].global_parameter_type == GlobalParameterType.LocomotorParams)
-                                {
-                                    loco_idx = j;
-                                }
-                            }
-
-                            // if the locomotor parameter could not be found, don't create this cell
-                            if (loco_idx == -1)
-                            {
-                                System.Windows.MessageBox.Show("Invalid global parameters specified for locomotor params! Skipping creation of cell.");
-                                continue;
-                            }
-                            //skg 6/1/12 changed
-                            BaseCell cell;
-
-                            if (ct.cell_subset_type.baseCellType == CellBaseTypeLabel.BCell)
-                            {
-                                cell = CreateCell(ct.cell_subset_type.baseCellType, ((BCellSubsetType)ct.cell_subset_type).cell_subset_type_receptor_params, 0, 0, false);
-                            }
-                            else if (ct.cell_subset_type.baseCellType == CellBaseTypeLabel.TCell)
-                            {
-                                cell = CreateCell(ct.cell_subset_type.baseCellType, ((TCellSubsetType)ct.cell_subset_type).cell_subset_type_receptor_params, 0, 0, false);
-                            }
-                            else
-                            {
-                                // for now ignore everything but B and T cells
-                                continue;
-                            }
-                            //end skg
-
-                            cell.LM.SetParametersFromConfigFile((LocomotorParams)MainWindow.SC.SimConfig.global_parameters[loco_idx]);
-
-                            ObjectLoader.LoadValues(cell, kvpc.Value.state);
-                            ObjectLoader.LoadValues(cell, dr.Cells[kvpc.Value.cell_id]);
-#if FENG_DIVISION
-                            cell.CellDivides = true;
-#endif
-                            AddCell(cell);
-                        }
+                        throw new Exception("Cell population id invalid.");
                     }
+
+                    CellPopulation cp = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[cellPopId];
+
+                    // create the cell
+                    hSim.prepareCellInstantiation(cp, configComp, bulk_reacs, ref boundary_reacs, ref transcription_reacs);
+                    hSim.instantiateCell(cell_id, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, false);
                 }
+                // now apply the state
+                cells[cell_id].SetCellState(state);
             }
 
             // remove cells
@@ -614,12 +562,50 @@ namespace Daphne
             {
                 RemoveCell(key);
             }
+        }
 
-            MainWindow.VTKBasket.UpdateData();
-            MainWindow.GC.DrawFrame(progress);
+        /// <summary>
+        /// update all ecs molpop concentrations
+        /// </summary>
+        /// <param name="frame">the frame object containing the data</param>
+        public void UpdateECSMolpops(TissueSimulationFrameData frame)
+        {
+            int i = 0;
+
+            foreach (ConfigMolecularPopulation cmp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
+            {
+                MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
+
+                cur_mp.Initialize("explicit", frame.ECSMolPops[i]);
+                i++;
+            }
+        }
+
+        public void DeathEvent(int key)
+        {
+            if (cells.ContainsKey(key) == true)
+            {
+                Cell cell = cells[key];
+                hSim.Reporter.AppendDeathEvent(cell.Cell_id, cell.Population_id);
+            }
+        }
+
+        public void DivisionEvent(int mother_id, int pop_id, int daughter_id)
+        {
+            hSim.Reporter.AppendDivisionEvent(mother_id, pop_id, daughter_id);
+        }
+
+        public void ExitEvent(int key)
+        {
+            if (cells.ContainsKey(key) == true)
+            {
+                Cell cell = cells[key];
+                hSim.Reporter.AppendExitEvent(cell.Cell_id, cell.Population_id);
+            }
         }
     }
 
+#if ALL_DATA
     /// <summary>
     /// Data structure for single cell track data
     /// Reproduction of data structures and database methods from LPManager so can
@@ -703,6 +689,6 @@ namespace Daphne
             set { zeroForceTrackText = value; }
         }
 
-#endif
     }
+#endif
 }

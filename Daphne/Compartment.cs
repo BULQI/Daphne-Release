@@ -8,6 +8,8 @@ using Ninject.Parameters;
 
 using ManifoldRing;
 
+using MathNet.Numerics.LinearAlgebra.Double;
+
 namespace Daphne
 {
     /// <summary>
@@ -28,17 +30,19 @@ namespace Daphne
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
         }
 
-        public void AddMolecularPopulation(string moleculeKey, string type, double[] parameters)
+        public void AddMolecularPopulation(Molecule mol, string moleculeKey, string type, double[] parameters)
         {
-            if (Simulation.dataBasket.Molecules.ContainsKey(moleculeKey) == false)
-            {
-                throw new Exception("Invalid molecule key.");
-            }
-
-            Molecule mol = Simulation.dataBasket.Molecules[moleculeKey];
             MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("moleculeKey", moleculeKey), new ConstructorArgument("comp", this));
 
             mp.Initialize(type, parameters);
+            if (mp.Molecule.DiffusionCoefficient == 0)
+            {
+                mp.IsDiffusing = false;
+            }
+            else
+            {
+                mp.IsDiffusing = true;
+            }
 
             if (Populations.ContainsKey(moleculeKey) == false)
             {
@@ -64,6 +68,8 @@ namespace Daphne
             {
                 r.Step(dt);
             }
+
+            //if (!(this.Interior is PointManifold))
             foreach (List<Reaction> rlist in BoundaryReactions.Values)
             {
                 foreach (Reaction r in rlist)
@@ -72,18 +78,20 @@ namespace Daphne
                 }
             }
 
-            //double[] pos;
             foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
             {
-                // Update boundary concentrations
-                molpop.Value.Step(dt);
+                // Apply Laplacian, note: boundary fluxes moved to upper level
+                if (molpop.Value.IsDiffusing == true)
+                {
+                    molpop.Value.Step(dt);
+                }
             }
         }
 
         public void AddBoundaryReaction(int key, Reaction r)
         {
             // create the list if it doesn't exist
-            if(BoundaryReactions.ContainsKey(key) == false)
+            if (BoundaryReactions.ContainsKey(key) == false)
             {
                 BoundaryReactions.Add(key, new List<Reaction>());
             }
@@ -102,108 +110,106 @@ namespace Daphne
         public Dictionary<int, Transform> NaturalBoundaryTransforms { get; private set; }
     }
 
-    public class ExtraCellularSpace
+    public abstract class EnvironmentBase
     {
-        private Compartment space;
+        protected Compartment comp;
+
+        public EnvironmentBase()
+        {
+        }
+
+        public Compartment Comp
+        {
+            get { return comp; }
+        }
+
+        public virtual void Step(double dt)
+        { }
+    }
+
+    public class PointEnvironment : EnvironmentBase
+    {
+        public PointEnvironment()
+        {
+            PointManifold p = SimulationModule.kernel.Get<PointManifold>();
+
+            comp = new Compartment(p);
+        }
+
+        public override void Step(double dt)
+        {
+            this.comp.Step(dt);
+        }
+
+    }
+
+    public class RectEnvironment : EnvironmentBase
+    {
         private Dictionary<string, int> sides;
-        public double Gamma { get; set; }
         public bool toroidal { get; private set; }
 
-        public ExtraCellularSpace(int[] numGridPts, double gridStep, bool toroidal)
+        public RectEnvironment(int[] numGridPts, double gridStep, bool toroidal)
         {
-            InterpolatedRectangularPrism p = SimulationModule.kernel.Get<InterpolatedRectangularPrism>();
-            double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep, Convert.ToDouble(toroidal) };
+            InterpolatedRectangle r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            double[] data = new double[] { numGridPts[0], numGridPts[1], gridStep, Convert.ToDouble(toroidal) };
 
             // boundary condition
             this.toroidal = toroidal;
 
-            p.Initialize(data);
-            space = new Compartment(p);
+            r.Initialize(data);
+            comp = new Compartment(r);
             sides = new Dictionary<string, int>();
 
             // add the sides and transforms
 
-            InterpolatedRectangle r;
+            InterpolatedLine l;
             Transform t;
-            double[] axis = new double[Transform.Dim];
+            //double[] axis = new double[Transform.Dim];
+            DenseVector axis = new DenseVector(Transform.Dim);
 
-            data = new double[space.Interior.Dim+1];
-            // front: no rotation, translate +z
-            data[0] = space.Interior.NodesPerSide(0);
-            data[1] = space.Interior.NodesPerSide(1);
-            data[2] = space.Interior.StepSize();
+            data = new double[comp.Interior.Dim + 1];
+            data[1] = comp.Interior.StepSize();
             // Toroidal BCs are not relevant for sides
             data[3] = Convert.ToDouble(false);
-            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
-            r.Initialize(data);
-            t = new Transform();
-            t.translate(new double[] { 0, 0, space.Interior.Extent(2) });
-            space.NaturalBoundaries.Add(r.Id, r);
-            space.NaturalBoundaryTransforms.Add(r.Id, t);
-            sides.Add("front", r.Id);
 
-            // back: rotate by pi about y, translate +x
-            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
-            r.Initialize(data);
+            // right: rotate by pi/2 about z, translate +x
+            data[0] = comp.Interior.NodesPerSide(1);
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
             t = new Transform();
-            axis[1] = 1;
-            t.rotate(axis, Math.PI);
-            t.translate(new double[] { space.Interior.Extent(0), 0, 0 });
-            space.NaturalBoundaries.Add(r.Id, r);
-            space.NaturalBoundaryTransforms.Add(r.Id, t);
-            sides.Add("back", r.Id);
+            axis[2] = 1;
+            t.rotate(axis, Math.PI / 2.0);
+            t.translate(new DenseVector(new double[] { comp.Interior.Extent(0), 0, 0 }));
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("right", l.Id);
 
-            // right: rotate by pi/2 about y, translate +x, +z
-            data[0] = space.Interior.NodesPerSide(2);
-            data[1] = space.Interior.NodesPerSide(1);
-            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
-            r.Initialize(data);
+            // left: rotate by pi/2 about z, no translation
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
-            t.translate(new double[] { space.Interior.Extent(0), 0, space.Interior.Extent(2) });
-            space.NaturalBoundaries.Add(r.Id, r);
-            space.NaturalBoundaryTransforms.Add(r.Id, t);
-            sides.Add("right", r.Id);
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("left", l.Id);
 
-            // left: rotate by -pi/2 about y, no translation
-            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
-            r.Initialize(data);
+            // top: no rotation, translate +y
+            data[0] = comp.Interior.NodesPerSide(0);
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
             t = new Transform();
-            t.rotate(axis, -Math.PI / 2.0);
-            space.NaturalBoundaries.Add(r.Id, r);
-            space.NaturalBoundaryTransforms.Add(r.Id, t);
-            sides.Add("left", r.Id);
+            t.translate(new DenseVector(new double[] { 0, comp.Interior.Extent(1), 0 }));
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("top", l.Id);
 
-            // top: rotate by -pi/2 about x, translate +y, +z
-            data[0] = space.Interior.NodesPerSide(0);
-            data[1] = space.Interior.NodesPerSide(2);
-            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
-            r.Initialize(data);
+            // bottom: no rotation, no translation
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
             t = new Transform();
-            axis[0] = 1;
-            axis[1] = 0;
-            t.rotate(axis, -Math.PI / 2.0);
-            t.translate(new double[] { 0, space.Interior.Extent(1), space.Interior.Extent(2) });
-            space.NaturalBoundaries.Add(r.Id, r);
-            space.NaturalBoundaryTransforms.Add(r.Id, t);
-            sides.Add("top", r.Id);
-
-            // bottom: rotate by pi/2 about x, no translation
-            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
-            r.Initialize(data);
-            t = new Transform();
-            t.rotate(axis, Math.PI / 2.0);
-            space.NaturalBoundaries.Add(r.Id, r);
-            space.NaturalBoundaryTransforms.Add(r.Id, t);
-            sides.Add("bottom", r.Id);
-
-            // drag coefficient
-            Gamma = 0;
-        }
-
-        public Compartment Space
-        {
-            get { return space; }
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("bottom", l.Id);
         }
 
         public Dictionary<string, int> Sides
@@ -217,9 +223,162 @@ namespace Daphne
         /// <param name="m">the manifold</param>
         public void AddBoundaryManifold(Manifold m)
         {
-            foreach (MolecularPopulation mp in space.Populations.Values)
+            foreach (MolecularPopulation mp in comp.Populations.Values)
             {
                 mp.AddBoundaryFluxConc(m.Id, m);
+            }
+        }
+    }
+
+    public class ECSEnvironment : EnvironmentBase
+    {
+        private Dictionary<string, int> sides;
+        public bool toroidal { get; private set; }
+
+        public ECSEnvironment(int[] numGridPts, double gridStep, bool toroidal)
+        {
+            InterpolatedRectangularPrism p = SimulationModule.kernel.Get<InterpolatedRectangularPrism>();
+            double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep, Convert.ToDouble(toroidal) };
+
+            // boundary condition
+            this.toroidal = toroidal;
+
+            p.Initialize(data);
+            comp = new Compartment(p);
+            sides = new Dictionary<string, int>();
+
+            // add the sides and transforms
+
+            InterpolatedRectangle r;
+            Transform t;
+            //double[] axis = new double[Transform.Dim];
+            DenseVector axis = new DenseVector(Transform.Dim);
+
+            data = new double[comp.Interior.Dim + 1];
+            // front: no rotation, translate +z
+            data[0] = comp.Interior.NodesPerSide(0);
+            data[1] = comp.Interior.NodesPerSide(1);
+            data[2] = comp.Interior.StepSize();
+            // Toroidal BCs are not relevant for sides
+            data[3] = Convert.ToDouble(false);
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
+            t = new Transform();
+            t.translate(new DenseVector(new double[] { 0, 0, comp.Interior.Extent(2) }));
+            comp.NaturalBoundaries.Add(r.Id, r);
+            comp.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("front", r.Id);
+
+            // back: rotate by pi about y, translate +x
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
+            t = new Transform();
+            axis[1] = 1;
+            t.rotate(axis, Math.PI);
+            t.translate(new DenseVector(new double[] { comp.Interior.Extent(0), 0, 0 }));
+            comp.NaturalBoundaries.Add(r.Id, r);
+            comp.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("back", r.Id);
+
+            // right: rotate by pi/2 about y, translate +x, +z
+            data[0] = comp.Interior.NodesPerSide(2);
+            data[1] = comp.Interior.NodesPerSide(1);
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
+            t = new Transform();
+            t.rotate(axis, Math.PI / 2.0);
+            t.translate(new DenseVector(new double[] { comp.Interior.Extent(0), 0, comp.Interior.Extent(2) }));
+            comp.NaturalBoundaries.Add(r.Id, r);
+            comp.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("right", r.Id);
+
+            // left: rotate by -pi/2 about y, no translation
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
+            t = new Transform();
+            t.rotate(axis, -Math.PI / 2.0);
+            comp.NaturalBoundaries.Add(r.Id, r);
+            comp.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("left", r.Id);
+
+            // top: rotate by -pi/2 about x, translate +y, +z
+            data[0] = comp.Interior.NodesPerSide(0);
+            data[1] = comp.Interior.NodesPerSide(2);
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
+            t = new Transform();
+            axis[0] = 1;
+            axis[1] = 0;
+            t.rotate(axis, -Math.PI / 2.0);
+            t.translate(new DenseVector(new double[] { 0, comp.Interior.Extent(1), comp.Interior.Extent(2) }));
+            comp.NaturalBoundaries.Add(r.Id, r);
+            comp.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("top", r.Id);
+
+            // bottom: rotate by pi/2 about x, no translation
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
+            t = new Transform();
+            t.rotate(axis, Math.PI / 2.0);
+            comp.NaturalBoundaries.Add(r.Id, r);
+            comp.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("bottom", r.Id);
+        }
+
+        public Dictionary<string, int> Sides
+        {
+            get { return sides; }
+        }
+
+        /// <summary>
+        /// add a boundary manifold, i.e. insert it to each ecs molecular population's boundary and flux dictionary
+        /// </summary>
+        /// <param name="m">the manifold</param>
+        public void AddBoundaryManifold(Manifold m)
+        {
+            foreach (MolecularPopulation mp in comp.Populations.Values)
+            {
+                mp.AddBoundaryFluxConc(m.Id, m);
+            }
+        }
+
+        public override void Step(double dt)
+        {
+            this.Comp.Step(dt);
+
+            //apply ECS/membrane boundary flux - specific to ECS/Membran
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            {
+                MolecularPopulation molpop = kvp.Value;
+                if (molpop.IsDiffusing == false) continue;
+                ScalarField conc = molpop.Conc;
+
+                //apply ECS/membrane boundary flux
+                foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
+                {
+                    conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
+                    item.Value.reset(0);
+                }
+
+                // Apply natural boundary condition
+                foreach (KeyValuePair<int, MolBoundaryType> bc in molpop.boundaryCondition)
+                {
+                    if (bc.Value == MolBoundaryType.Dirichlet)
+                    {
+                        conc = conc.DirichletBC(molpop.NaturalBoundaryConcs[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key]);
+                    }
+                    else
+                    {
+                        conc.DiffusionFluxTerm(molpop.NaturalBoundaryFluxes[bc.Key], molpop.Comp.NaturalBoundaryTransforms[bc.Key], dt / molpop.Molecule.DiffusionCoefficient);
+                    }
+                }
+
+            }
+
+            //update ECS/Memrante boundary
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            {
+                kvp.Value.UpdateECSMembraneBoundary();
             }
         }
     }

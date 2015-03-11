@@ -2,12 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
-        Title="Add a gene" Height="135" Width="400">
+        Title="Add a gene" Height="135" Width="400"
+        WindowStartupLocation="CenterOwner"
+        >
     <Grid>
         <Grid.Resources>
             <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
-            <CollectionViewSource x:Key="AllGenesListView"  
-                                  Source="{Binding Path=SimConfig.entity_repository.genes}"/>
+            <CollectionViewSource x:Key="AllGenesListView" Source="{Binding Path=Protocol.entity_repository.genes}"/>
         </Grid.Resources>
         <Label Content="Select a gene:" Height="28" HorizontalAlignment="Left" Margin="12,19,0,0" Name="label1" VerticalAlignment="Top" />
         <ComboBox Name="GeneComboBox" Margin="120,19,0,0" Height="24" VerticalAlignment="Top" Width="200"    />

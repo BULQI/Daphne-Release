@@ -16,6 +16,8 @@ using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
 
 using Daphne;
+using DaphneUserControlLib;
+using System.Threading;
 
 namespace Workbench
 {
@@ -26,78 +28,89 @@ namespace Workbench
     {
         public Dictionary<string, List<double>> dictConcs = new Dictionary<string, List<double>>();
         public List<double> lTimes = new List<double>();
-        private ChartManager cm;
-        private System.Drawing.Size chartSize;
-        public ReactionComplexProcessor RC { get; set; }
+        private ReactionComplexChart Chart;
+        public VatReactionComplex RC { get; set; }      //Simulation object - used to plot graph
+        public Protocol protocol { get; set; }
+        public MainWindow MW;       //handle to main window
+        public bool redraw_flag;    //true if redraw and not creating a new chart
 
-        public ToggleButton toggleButton { get; set; }
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ChartViewToolWindow()
         {
             InitializeComponent();
-            chartSize = new System.Drawing.Size(700, 300);
-            DataContext = RC;
+            protocol = DataContext as Protocol;
+            Chart = new ReactionComplexChart();
+            Chart.panelRC = panelRC;
+            Chart.ToolWin = this;
+            redraw_flag = false;
+            windowsFormsHost1.Width = Chart.Width;
+            windowsFormsHost1.Height = Chart.Height;
+            Chart.MouseUp += new System.Windows.Forms.MouseEventHandler(Chart_MouseUp);
         }
 
-        public void ClearChart()
-        {
-            if (cm == null)
-                return;
-
-            cm.ClearChart();
-        }
-        
+        /// <summary>
+        /// This is called for initial draw and for redraws
+        /// Tag is used to store a pointer to VatReactionComplex (from simulation side).  This is what is drawn.
+        /// DataContext is Protocol. When the user changes mol concs or reac rates on right side, the changes are made on Config side.
+        /// </summary>
         public void Render()
         {
+            RC = Tag as VatReactionComplex;       
+            protocol = DataContext as Protocol;
+
+            if (protocol == null)
+                return;
+
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
-            if (lTimes.Count > 0 && dictConcs.Count > 0)
+            if (redraw_flag == true)
             {
-                cm = new ChartManager(this, chartSize);
-                cm.PChart = pChartMolConcs;
-                
-                cm.ListTimes = lTimes;
-                cm.DictConcs = dictConcs;                
+                Chart.UpdateSeries();
+                Chart.RedrawSeries();
+            }
+            else
+            {
+                Chart.Clear();
+                if (lTimes.Count > 0 && dictConcs.Count > 0)
+                {
+                    Chart.Initialize();
+                    Chart.ListTimes = lTimes;
+                    Chart.DictConcs = dictConcs;
 
-                cm.LabelX = "Time";
-                cm.LabelY = "Concentration";
-                cm.TitleXY = "Time Trajectory of Molecular Concentrations";
-                cm.DrawLine = true;
+                    btnIncSize.IsEnabled = true;
+                    btnDecSize.IsEnabled = true;
+                    btnLogX.IsEnabled = true;
+                    btnLogY.IsEnabled = true;
 
-                System.Windows.Forms.MenuItem[] menuItems = 
-                {   
-                    new System.Windows.Forms.MenuItem("Zoom in"),
-                    new System.Windows.Forms.MenuItem("Zoom out"),
-                    new System.Windows.Forms.MenuItem("Save Changes"),
-                    new System.Windows.Forms.MenuItem("Discard Changes"),
-                };
-
-                System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                cm.SetContextMenu(menu);
-                menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
-                menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
-
-                btnIncSize.IsEnabled = true;
-                btnDecSize.IsEnabled = true;
-                btnDiscard.IsEnabled = true;
-                btnSave.IsEnabled = true;
-
-                cm.DrawChart();
-
-                dgInitConcs.ItemsSource = RC.initConcs;
-                dgReactionRates.ItemsSource = RC.CRC.ReactionRates;
-
+                    Chart.Draw();
+                }
             }
         }
 
+        public void Reset()
+        {
+            lTimes.Clear();
+            dictConcs.Clear();
+            if (Chart != null) {
+                //Chart.Clear();
+                Chart.DrawBlank();
+            }            
+        }
         
+        /// <summary>
+        /// Zoom In
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            System.Drawing.Size sz = cm.ChartSize;
+            System.Drawing.Size sz = Chart.Size;
             int w = sz.Width;
             int h = sz.Height;
 
@@ -113,19 +126,21 @@ namespace Workbench
             windowsFormsHost1.Width = w;
             windowsFormsHost1.Height = h;
             
-            chartSize = sz;
-            cm.ChartSize = sz;
-
-            cm.DrawChart();
-                       
+            Chart.Size = sz;
+            Chart.Draw();
         }
 
+        /// <summary>
+        /// Zoom Out
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnDecSize_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            System.Drawing.Size sz = cm.ChartSize;
+            System.Drawing.Size sz = Chart.Size;
 
             sz.Width = (int)(sz.Width * 0.9);
             sz.Height = (int)(sz.Height * 0.9);
@@ -136,161 +151,136 @@ namespace Workbench
             windowsFormsHost1.Width = windowsFormsHost1.Width * 0.9;
             windowsFormsHost1.Height = windowsFormsHost1.Height * 0.9;            
 
-            chartSize = sz;
-            cm.ChartSize = sz;
-            cm.DrawChart();            
+            Chart.Size = sz;
+            Chart.Draw();            
         }        
 
-        private void btnDiscard_Click(object sender, RoutedEventArgs e)
-        {
-            if (RC == null)
-                return;
-
-            RC.RestoreOriginalConcs();
-            RC.RestoreOriginalRateConstants();
-
-            if (toggleButton != null)
-            {
-                //This causes a redraw
-                toggleButton.IsChecked = true;
-            }
-        }
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (cm != null)
-            {
-                cm.SaveChanges();
-            }
-        }
-        private void btnDiscard_Click(object sender, EventArgs e)
-        {
-            RC.RestoreOriginalConcs();
-            RC.Go();
-            cm.ListTimes = RC.ListTimes;
-            cm.DictConcs = RC.DictGraphConcs;
-            cm.DrawChart();
-        }
-
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            if (cm != null)
-            {
-                cm.SaveChanges();
-            }
-        }
-                
-        private void slConc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Slider s = sender as Slider;
-            if (!s.IsLoaded)
-                return;
-
-            if (e.OldValue == e.NewValue)
-                return;
-
-            foreach (MolConcInfo mci in RC.initConcs)
-            {
-                RC.EditConc(mci.molguid, mci.conc);
-            }
-
-            cm.RedrawSeries();
-            cm.RecalculateYMax();
-        }
-
-        private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Slider s = sender as Slider;
-            double m = s.Minimum;
-        }
-
-        private string GetNumerics(string input)
-        {
-            var sb = new StringBuilder();
-            string goodChars = "0123456789.eE+-";
-            foreach (var c in input)
-            {                
-                if (goodChars.IndexOf(c) >=0 )
-                    sb.Append(c);
-            }
-            string output = sb.ToString();
-            return output;
-        }
-
+        /// <summary>
+        /// This handler is called if user changes a reaction rate by slider or in text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (MW == null || RC == null || lTimes.Count == 0 || dictConcs.Count == 0)
+                return;
+
             if (e.PropertyName == "Number")
             {
-                RC.UpdateRateConstants();
-                RC.Sim.Load(MainWindow.SC.SimConfig, true, true);
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
+                if (lTimes.Count > 1)
+                {
+                    if (Chart.Legends.Count > 0)    //this means graph is already created
+                    {
+                        redraw_flag = true;
+                        MW.runSim(true);
+                    }
+                }
+                else
+                {
+                    redraw_flag = false;
+                    MW.runButton_Click(null, null);
+                }
             }
         }
 
+        /// <summary>
+        /// Push button to toggle X-Axis between linear and logarithmic
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnX_Axis_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.IsXLogarithmic = !cm.IsXLogarithmic;
-            cm.DrawChart();
+            Chart.IsXLogarithmic = !Chart.IsXLogarithmic;
+            if (Chart.IsXLogarithmic == true)
+            {
+                btnLogX.Content = "X-Axis: Logarithmic";
+            }
+            else
+            {
+                btnLogX.Content = "X-Axis: Linear";
+            }
+            Chart.Draw();
         }
 
+        /// <summary>
+        /// Push button to toggle Y-Axis between linear and logarithmic
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnY_Axis_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.IsYLogarithmic = !cm.IsYLogarithmic;
-            cm.DrawChart();
+            Chart.IsYLogarithmic = !Chart.IsYLogarithmic;
+            if (Chart.IsYLogarithmic == true)
+            {
+                btnLogY.Content = "Y-Axis: Logarithmic";
+            }
+            else
+            {
+                btnLogY.Content = "Y-Axis: Linear";
+            }
+            Chart.Draw();
         }
 
+        /// <summary>
+        /// This handler is called if user changes a molecular concentration by slider or in text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "Number")
-            {
-                foreach (MolConcInfo mci in RC.initConcs)
-                {
-                    RC.EditConc(mci.molguid, mci.conc);
-                }
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
-            }
-        }
+            if (MW == null || RC == null || lTimes.Count == 0 || dictConcs.Count == 0)
+                return;
 
-        private void dblMaxTime_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
             if (e.PropertyName == "Number")
             {
-                if (RC != null && cm != null)
+                if (lTimes.Count > 1)
                 {
-                    cm.RedrawSeries();
-                    cm.RecalculateYMax();
+                    if (Chart.Legends.Count > 0)    //this means graph is already created
+                    {
+                        redraw_flag = true;
+                        MW.runSim(true);
+                    }
+                }
+                else
+                {
+                    redraw_flag = false;
+                    MW.runButton_Click(null, null);
                 }
             }
         }
 
-        private void btnRedraw_Click(object sender, RoutedEventArgs e)
+        private void dgInitConcs_DragStarted(object sender, DragStartedEventArgs e)
         {
-            foreach (MolConcInfo mci in RC.initConcs)
+            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, true);
+        }
+
+        private void dgInitConcs_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            MainWindow.SetControlFlag(MainWindow.CONTROL_MOUSE_DRAG, false);
+            ThreadPool.RegisterWaitForSingleObject(MW.runFinishedEvent,
+                       new WaitOrTimerCallback(DelayedRunSim),
+                       null, 50, true);
+
+        }
+
+        private void DelayedRunSim(object state, bool timedOut)
+        {
+            redraw_flag = true;
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => { MW.runSim(true); }), null);
+        }
+
+        private void Chart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (MainWindow.CheckControlFlag(MainWindow.CONTROL_MOUSE_DRAG) == true)
             {
-                RC.EditConc(mci.molguid, mci.conc);
+                dgInitConcs_DragCompleted(null, null);
             }
-            RC.UpdateRateConstants();
-            cm.RedrawSeries();
-            cm.RecalculateYMax();
-
-            //This causes a refresh of the conc data grid
-            UpdateGrids();
         }
-
-        public void UpdateGrids()
-        {
-            dgInitConcs.ItemsSource = null;
-            dgInitConcs.ItemsSource = RC.initConcs;
-        }
-
-        
     }
 }

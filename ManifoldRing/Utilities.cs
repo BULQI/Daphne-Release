@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+//using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace ManifoldRing
 {
@@ -20,6 +21,7 @@ namespace ManifoldRing
             fieldInitFactory = fif;
         }
     }
+
 
     /// <summary>
     /// LocalMatrix is a struct to facilitate local matrix algebra on a lattice by providing an efficient
@@ -39,6 +41,7 @@ namespace ManifoldRing
     {
         private Vector pos;
         private Matrix rot;
+        private double[] position; //storage for pos data
         /// <summary>
         /// true when rotation is present
         /// </summary>
@@ -51,28 +54,31 @@ namespace ManifoldRing
         /// <param name="hasRot">true when the transform has rotation</param>
         public Transform(bool hasRot = true)
         {
-            pos = new Vector(Dim);
+            position = new double[Dim];
+            pos = new DenseVector(Dim);
             this.HasRot = hasRot;
 
             if (HasRot == true)
             {
                 // set up the rotation to be aligned with the canonical world coordinates
-                Vector tmp = new double[] { 1, 0, 0 };
-
-                rot = new Matrix(Dim, Dim);
-
-                // 1 0 0
-                rot.SetColumnVector(tmp, 0);
-                tmp[0] = 0;
-                tmp[1] = 1;
-                // 0 1 0
-                rot.SetColumnVector(tmp, 1);
-                tmp[1] = 0;
-                tmp[2] = 1;
-                // 0 0 1
-                rot.SetColumnVector(tmp, 2);
+                rot = new DenseMatrix(Dim, Dim, new double[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 });
             }
         }
+
+
+        //allow outside access to array data without using translation.toArray() - axin
+        public double[] Position
+        {
+            get
+            {
+                for (int i = 0; i < Dim; i++)
+                {
+                    position[i] = pos[i];
+                }
+                return position;
+            }
+        }
+
 
         /// <summary>
         /// retrieve the translation component
@@ -82,7 +88,7 @@ namespace ManifoldRing
             get { return pos; }
             set
             {
-                if (pos.Length != value.Length)
+                if (pos.Count != value.Count)
                 {
                     throw new Exception("Dimension mismatch.");
                 }
@@ -97,7 +103,7 @@ namespace ManifoldRing
         /// <param name="x">the position vector to synch with</param>
         public void setTranslationByReference(Vector x)
         {
-            if (pos.Length != x.Length)
+            if (pos.Count != x.Count)
             {
                 throw new Exception("Dimension mismatch.");
             }
@@ -150,12 +156,12 @@ namespace ManifoldRing
         /// <param name="x">delta x</param>
         public void translate(Vector x)
         {
-            if (pos.Length != x.Length)
+            if (pos.Count != x.Count)
             {
                 throw new Exception("Dimension mismatch.");
             }
 
-            pos += x;
+            pos = (DenseVector)(pos + x);
         }
 
         /// <summary>
@@ -167,15 +173,15 @@ namespace ManifoldRing
         {
             if (HasRot == true)
             {
-                if (axis.Length != Dim)
+                if (axis.Count != Dim)
                 {
                     throw new Exception("Dimension mismatch.");
                 }
 
-                Matrix tmp = new Matrix(Dim, Dim);
+                Matrix tmp = new DenseMatrix(Dim, Dim);
 
                 // make sure the axis is normalized
-                axis = axis.Normalize();
+                axis = (DenseVector)axis.Normalize(2.0);
                 // column 0
                 tmp[0, 0] = Math.Cos(rad) + axis[0] * axis[0] * (1 - Math.Cos(rad));
                 tmp[1, 0] = axis[1] * axis[0] * (1 - Math.Cos(rad)) + axis[2] * Math.Sin(rad);
@@ -191,7 +197,7 @@ namespace ManifoldRing
                 tmp[1, 2] = axis[1] * axis[2] * (1 - Math.Cos(rad)) - axis[0] * Math.Sin(rad);
                 tmp[2, 2] = Math.Cos(rad) + axis[2] * axis[2] * (1 - Math.Cos(rad));
 
-                rot = rot.Multiply(tmp);
+                rot = (Matrix)rot.Multiply(tmp);
             }
         }
 
@@ -202,30 +208,30 @@ namespace ManifoldRing
         /// <returns>the resulting vector in the parent frame</returns>
         public Vector toContaining(Vector x)
         {
-            if (x.Length != Dim)
+            if (x.Count != Dim)
             {
                 throw new Exception("Dimension mismatch.");
             }
 
             if (HasRot == true)
             {
-                Matrix tmp = new Matrix(Dim, 1);
+                Matrix tmp = new DenseMatrix(Dim, 1);
 
                 tmp[0, 0] = x[0];
                 tmp[1, 0] = x[1];
                 tmp[2, 0] = x[2];
 
-                tmp = rot.Multiply(tmp);
+                tmp = (DenseMatrix)rot.Multiply(tmp);
 
                 tmp[0, 0] += pos[0];
                 tmp[1, 0] += pos[1];
                 tmp[2, 0] += pos[2];
 
-                return tmp.GetColumnVector(0);
+                return (Vector)tmp.Column(0);
             }
             else
             {
-                return x + pos;
+                return (Vector)(x + pos);
             }
         }
 
@@ -238,12 +244,12 @@ namespace ManifoldRing
         {
             if (HasRot == true)
             {
-                if (x.Length != Dim)
+                if (x.Count != Dim)
                 {
                     throw new Exception("Dimension mismatch.");
                 }
 
-                Matrix tmp = new Matrix(Dim, 1);
+                Matrix tmp = new DenseMatrix(Dim, 1);
 
                 tmp[0, 0] = x[0];
                 tmp[1, 0] = x[1];
@@ -253,13 +259,13 @@ namespace ManifoldRing
                 tmp[1, 0] -= pos[1];
                 tmp[2, 0] -= pos[2];
 
-                tmp = rot.Inverse().Multiply(tmp);
+                tmp = (Matrix)rot.Inverse().Multiply(tmp);
 
-                return tmp.GetColumnVector(0);
+                return (Vector)tmp.Column(0);
             }
             else
             {
-                return x - pos;
+                return (Vector)(x - pos);
             }
         }
     }
