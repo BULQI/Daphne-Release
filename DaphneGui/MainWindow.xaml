@@ -181,7 +181,7 @@
                     <Separator />
                     <MenuItem Header="Export All" Name="allExport" Click="allExport_Click" />
                 </MenuItem>
-                <MenuItem Header="Administration" Name="AdminMenu" Visibility="Collapsed">
+                <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
                     <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
                     <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
