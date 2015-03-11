@@ -13,7 +13,7 @@ namespace Daphne
     /// </summary>
     public class HDF5File
     {
-        private string fullPath, fileName;
+        private string fullPath, fileName, filePath;
         private H5FileId fileId;
         // groups can be nested, so maintain a stack of open ones
         // note that this will only work for exclusive reads or writes, not mixed mode
@@ -41,6 +41,17 @@ namespace Daphne
         }
 
         /// <summary>
+        /// access the file path
+        /// </summary>
+        public string FilePath
+        {
+            get
+            {
+                return filePath;
+            }
+        }
+
+        /// <summary>
         /// (re)create the file
         /// </summary>
         /// <param name="fn">file name</param>
@@ -52,6 +63,8 @@ namespace Daphne
                 fullPath = fn;
                 // extract the last part, file name alone
                 fileName = System.IO.Path.GetFileName(fullPath);
+                // path only
+                filePath = System.IO.Path.GetDirectoryName(fullPath) + @"\";
                 return true;
             }
             return false;

@@ -14,55 +14,102 @@ namespace Daphne
     public abstract class ReporterBase
     {
         protected DateTime startTime;
-        protected string fileName;
+        protected string fileNameBase, fileNameAssembled;
         public string AppPath { get; set; } // non uri
+        public string UniquePath { get; set; }
 
         public ReporterBase()
         {
         }
 
-        public string FileName
+        /// <summary>
+        /// the starting string for the file name
+        /// </summary>
+        public string FileNameBase
         {
-            get { return fileName; }
-            set { fileName = value; }
+            get { return fileNameBase; }
+            set { fileNameBase = value; }
         }
 
+        /// <summary>
+        /// the assembled file name with extension, etc., but not the full path
+        /// </summary>
+        public string FileNameAssembled
+        {
+            get { return fileNameAssembled; }
+            set { fileNameAssembled = value; }
+        }
+
+        /// <summary>
+        /// create a unique folder name inside appPath
+        /// </summary>
+        protected void createUniqueFolderName(string protocolFileName)
+        {
+            int index = 1, upTo = 8;
+            string name = "";
+            
+            if (fileNameBase == "")
+            {
+                string protocol = System.IO.Path.GetFileName(protocolFileName);
+                int period = protocol.LastIndexOf('.');
+
+                name = protocol.Substring(0, Math.Min(upTo, period));
+            }
+            else
+            {
+                name = fileNameBase;
+            }
+            do
+            {
+                UniquePath = AppPath + name + "_" + index + @"\";
+                index++;
+            } while(Directory.Exists(UniquePath) == true);
+        }
+
+        /// <summary>
+        /// general function to create a stream for a reporter file
+        /// </summary>
+        /// <param name="file">part of the file name</param>
+        /// <param name="extension">file extension</param>
+        /// <returns></returns>
         protected StreamWriter createStreamWriter(string file, string extension)
         {
             int version = 1;
             string nameStart,
                    fullPath;
 
-            if (fileName == "")
+            if (fileNameBase == "")
             {
                 nameStart = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
             }
             else
             {
-                nameStart = fileName + "_";
+                nameStart = fileNameBase + "_";
             }
 
-            fullPath = AppPath + nameStart + file + "." + extension;
+            fileNameAssembled = nameStart + file + "." + extension;
+            fullPath = UniquePath + fileNameAssembled;
 
             do
             {
                 if (File.Exists(fullPath) == true)
                 {
-                    fullPath = AppPath + nameStart + "_" + file + "(" + version + ")." + extension;
+                    fileNameAssembled = nameStart + "_" + file + "(" + version + ")." + extension;
+                    fullPath = UniquePath + fileNameAssembled;
                     version++;
                 }
                 else
                 {
-                    if (AppPath != "" && Directory.Exists(AppPath) == false)
+                    if (UniquePath != "" && Directory.Exists(UniquePath) == false)
                     {
-                        Directory.CreateDirectory(AppPath);
+                        Directory.CreateDirectory(UniquePath);
                     }
                     return File.CreateText(fullPath);
                 }
             } while (true);
         }
 
-        public abstract void StartReporter(SimulationBase sim);
+        public abstract void StartReporter(SimulationBase sim, string protocolFileName);
         public abstract void AppendReporter();
         public abstract void CloseReporter();
 
@@ -98,7 +145,7 @@ namespace Daphne
             exitEvents = new Dictionary<int, TransitionEventReporter>();
         }
 
-        public override void StartReporter(SimulationBase sim)
+        public override void StartReporter(SimulationBase sim, string protocolFileName)
         {
             if (sim is TissueSimulation == false)
             {
@@ -108,6 +155,7 @@ namespace Daphne
             hSim = sim as TissueSimulation;
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             CloseReporter();
+            createUniqueFolderName(protocolFileName);
             startECM();
             startCells();
             startEvents();
@@ -626,7 +674,7 @@ namespace Daphne
             reportOn = false;
         }
 
-        public override void StartReporter(SimulationBase sim)
+        public override void StartReporter(SimulationBase sim, string protocolFileName)
         {
             if (reportOn == false)
             {
@@ -642,9 +690,8 @@ namespace Daphne
 
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             CloseReporter();
-            compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp,
-                                        new double[] { 0.0, 0.0, 0.0 },
-                                        SimulationBase.ProtocolHandle.scenario);
+            createUniqueFolderName(protocolFileName);
+            compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp, new double[] { 0.0, 0.0, 0.0 }, SimulationBase.ProtocolHandle.scenario);
 
             ReactionsReport();
         }

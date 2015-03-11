@@ -453,7 +453,6 @@ namespace DaphneGui
             }
             else
             {
-                //file = "daphne_driver_locomotion_scenario.json";
                 file = "simple_chemotaxis.json";
             }
 
@@ -522,6 +521,7 @@ namespace DaphneGui
                 {
                     //setup render skin 
                     string SkinFolderPath = new Uri(appPath + @"\Config\RenderSkin\").LocalPath;
+
                     if (!Directory.Exists(SkinFolderPath))
                     {
                         Directory.CreateDirectory(SkinFolderPath);
@@ -531,6 +531,7 @@ namespace DaphneGui
                     }
 
                     string[] files = Directory.GetFiles(SkinFolderPath, "*.json");
+
                     foreach (string skfile in files)
                     {
                         try
@@ -1215,7 +1216,7 @@ namespace DaphneGui
 
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-            dlg.InitialDirectory = sim.Reporter.AppPath;
+            dlg.InitialDirectory = DataBasket.hdf5file.FilePath;
             // Default file extension
             dlg.DefaultExt = ".avi";
             // Filter files by extension
@@ -2179,7 +2180,7 @@ namespace DaphneGui
             }
 
             // reporter file name
-            sim.Reporter.FileName = sop.Protocol.reporter_file_name;
+            sim.Reporter.FileNameBase = sop.Protocol.reporter_file_name;
 
             //if (true)
             //{
@@ -2878,9 +2879,9 @@ namespace DaphneGui
                 {
                     if (Properties.Settings.Default.skipDataWrites == false)
                     {
-                        sim.Reporter.StartReporter(sim);
+                        sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
 
-                        if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.AppPath, sim.Reporter.FileName, "vcr", ".hdf5", true) == false)
+                        if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.UniquePath, sim.Reporter.FileNameBase, "vcr", ".hdf5", true) == false)
                         {
                             MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
@@ -2928,7 +2929,7 @@ namespace DaphneGui
             {
                 if (Properties.Settings.Default.skipDataWrites == false)
                 {
-                    sim.Reporter.StartReporter(sim);
+                    sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
                 }
                 runFinishedEvent.Reset();
                 sim.RunStatus = SimulationBase.RUNSTAT_RUN;
