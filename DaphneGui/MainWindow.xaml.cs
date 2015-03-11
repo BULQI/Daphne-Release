@@ -1803,7 +1803,6 @@ namespace DaphneGui
             runButton.IsEnabled = false;
             mutex = true;
 
-            saveStoreFiles();
             saveTempFiles();
             // don't handle the vcr
             updateGraphicsAndGUI(false);
@@ -2654,66 +2653,17 @@ namespace DaphneGui
         }
 
         private void saveStoreFiles()
-        {
+        {            
             //DaphneStore
             if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
                 saveStore(sop.DaphneStore, "DaphneStore");
-                
-                ////string messageBoxText = "Daphne store has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.DaphneStore.FileName) + "?";
-                ////string caption = "Daphne Store Changed";
-                ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                ////MessageBoxImage icon = MessageBoxImage.Warning;
-
-                ////// Display message box
-                ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-
-                ////if (result == MessageBoxResult.Cancel)
-                ////{
-                ////    return;
-                ////}
-                ////else if (result == MessageBoxResult.No)
-                ////{
-                ////    saveStoreUsingDialog(sop.DaphneStore, sop.DaphneStore.FileName);
-                ////}
-                ////else
-                ////{
-                ////    FileInfo info = new FileInfo(sop.DaphneStore.FileName);
-                ////    if (info.IsReadOnly == false || !info.Exists)
-                ////    {
-                ////        sop.DaphneStore.SerializeToFile(false);
-                ////        orig_daphne_store_content = sop.DaphneStore.SerializeToString();
-                ////    }
-                ////    else
-                ////    {
-                ////        messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                ////        caption = "File write protected";
-                ////        button = MessageBoxButton.OK;
-                ////        icon = MessageBoxImage.Warning;
-                ////        MessageBox.Show(messageBoxText, caption, button, icon);
-                ////    }
-                ////}
             }
 
             //UserStore
             if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
                 saveStore(sop.UserStore, "UserStore");
-
-                ////FileInfo info = new FileInfo(sop.UserStore.FileName);
-                ////if (info.IsReadOnly == false || !info.Exists)
-                ////{
-                ////    sop.UserStore.SerializeToFile(false);
-                ////    orig_user_store_content = sop.UserStore.SerializeToString();
-                ////}
-                ////else
-                ////{
-                ////    string messageBoxText = "The file is write protected: " + sop.UserStore.FileName;
-                ////    string caption = "File write protected";
-                ////    MessageBoxButton button = MessageBoxButton.OK;
-                ////    MessageBoxImage icon = MessageBoxImage.Warning;
-                ////    MessageBox.Show(messageBoxText, caption, button, icon);
-                ////}
             }
         }
 
@@ -3176,6 +3126,12 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            //If we're in UserStore or DaphneStore mode, do this.
+            if (CellStudioToolWindow.DataContext != SOP.Protocol)
+            {
+                saveStoreFiles();
+            }
+
             ToolWin.Apply();
 
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
@@ -3195,7 +3151,7 @@ namespace DaphneGui
                 // display message box
                 MessageBox.Show(messageBoxText, caption, button, icon);
             }
-            //saveStoreFiles();
+            
             tempFileContent = false;
         }
 
@@ -3576,6 +3532,7 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.UserStore;
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
+            applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
         }
 
@@ -3586,12 +3543,13 @@ namespace DaphneGui
             VTKDisplayDocWindow.Close();
             ReacComplexChartWindow.Close();
 
-            LevelContext = SOP.UserStore;
+            LevelContext = SOP.DaphneStore;
 
             ComponentsToolWindow.DataContext = SOP.DaphneStore;
             CellStudioToolWindow.DataContext = SOP.DaphneStore;
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
+            applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
         }
 
@@ -3600,10 +3558,11 @@ namespace DaphneGui
             statusBarMessagePanel.Content = "Ready:  Protocol";
             ProtocolToolWindow.Open();
 
-            LevelContext = SOP.UserStore;
+            LevelContext = SOP.Protocol;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
+            applyButton.IsEnabled = true;
             menuProtocolStore.IsEnabled = false;
 
             if (SOP.Protocol.scenario is TissueScenario)
@@ -3616,19 +3575,6 @@ namespace DaphneGui
             }
         }
 
-        //private void readStores()
-        //{
-        //    //Code to retrieve userstore and daphnestore - deserialize from files
-        //    sop.UserStore.FileName = "Config\\daphne_userstore.json";
-        //    sop.UserStore.TempFile = "Config\\temp_userstore.json";
-        //    sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
-        //    sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
-        //    sop.DaphneStore = sop.DaphneStore.Deserialize();
-        //    sop.UserStore = sop.UserStore.Deserialize();
-        //    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
-        //    orig_user_store_content = sop.UserStore.SerializeToString();
-        //}
-
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
             //load the stores only as needed
@@ -3639,10 +3585,6 @@ namespace DaphneGui
 
             pushWindow.ShowDialog();
 
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
@@ -3654,11 +3596,7 @@ namespace DaphneGui
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
+            
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
@@ -3670,11 +3608,6 @@ namespace DaphneGui
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
@@ -3797,6 +3730,7 @@ namespace DaphneGui
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
+            applyButton.IsEnabled = true;
             menuProtocolStore.IsEnabled = false;
 
             if (SOP.Protocol.scenario is TissueScenario)
