@@ -494,6 +494,7 @@ namespace Daphne
 
         public override void Step(double dt)
         {
+            ScalarField boundarConc = ligand.BoundaryConcs[boundary.Id];
             intensity.reset(receptor.Conc).Multiply(ligand.BoundaryConcs[boundary.Id]).Multiply(RateConstant);
             ligand.BoundaryFluxes[boundary.Id].Add(intensity);
             intensity.Multiply(dt);

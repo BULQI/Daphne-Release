@@ -968,6 +968,10 @@ namespace ManifoldRing
             {
                 return new double[Dim];
             }
+            if (double.IsNaN(x[0]))
+            {
+                int y = 1;
+            }
             return interpolator.Gradient(x, sf);
         }
 

@@ -6,7 +6,7 @@ using namespace System::Security;
 namespace NativeDaphne 
 {
 	[SuppressUnmanagedCodeSecurity]
-	public ref class Utility
+	public ref class Nt_Utility
 	{
 	public:
 
@@ -19,13 +19,14 @@ namespace NativeDaphne
 			*dst++ = *src++;
 		}		
 		
-		static void Copy4DoublesToCli(double *src, array<double> ^dst)
+		static void Copy4DoublesToCli(double *src, array<double> ^dest)
 		{
-			pin_ptr<double> dst = &dst[0];
-			*dst++ = *src++;
-			*dst++ = *src++;
-			*dst++ = *src++;
-			*dst++ = *src++;
+			System::Runtime::InteropServices::Marshal::Copy((IntPtr)src, dest, 0, 4);
+			//pin_ptr<double> dst = &dest[0];
+			//*dst++ = *src++;
+			//*dst++ = *src++;
+			//*dst++ = *src++;
+			//*dst++ = *src++;
 		}
 
 		static void Copy3DoublesFromCli(array<double> ^source, double *dst)
@@ -36,9 +37,9 @@ namespace NativeDaphne
 			*dst++ = *src++;
 		}		
 		
-		static void Copy3DoublesToCli(double *src, array<double> ^dst)
+		static void Copy3DoublesToCli(double *src, array<double> ^dest)
 		{
-			pin_ptr<double> dst = &dst[0];
+			pin_ptr<double> dst = &dest[0];
 			*dst++ = *src++;
 			*dst++ = *src++;
 			*dst++ = *src++;
@@ -55,15 +56,26 @@ namespace NativeDaphne
 			}
 		}		
 		
-		static void CopyDoublesToCli(double *src, array<double> ^dst)
+		static void CopyDoublesToCli(double *src, array<double> ^dest)
 		{
-			pin_ptr<double> dst = &dst[0];
-			*ptr = dst + dst->Length;
+			pin_ptr<double> dst = &dest[0];
+			double *ptr = dst + dest->Length;
 			while (dst != ptr)
 			{
 				*dst++ = *src++;
 			}
 		}
+
+		//we will alloc memrory in 2^n
+		//the memory doubles when not enough
+		static int GetAllocSize(int n, int curSize)
+		{
+			int size = curSize == 0 ? 1: curSize;
+			while (n > size)size *= 2;
+			return size;
+		}
+
 	};
 
 }
+

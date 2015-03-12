@@ -30,7 +30,9 @@ namespace NativeDaphneLibrary
 		  inc - each scalar component contains inc elements
 		  result saved in x
 		*/
-		static int NtMultiplyScalar(int n, int inc, double *x, double *y);
+		static int NtMultiplyScalar(int n, int inc, double *x, double *y, double *z);
+
+		static int Utility::NtDcopy(int n, double* x, int incx, double *y, int incy);
 
 	};
 }

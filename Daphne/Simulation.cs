@@ -844,7 +844,7 @@ namespace Daphne
             }
 
             dataBasket.AddCell(c);
-            cellMangerHandle.AddCell(c);
+            cellMangerHandle.AddNtCell(c);
             
 
 

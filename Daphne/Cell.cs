@@ -7,35 +7,123 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
+using NativeDaphne;
 
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Daphne
 {
     public struct CellSpatialState
     {
-        public double[] X;
-        public double[] V;
-        public double[] F;
+        private double[] _X;
+        private double[] _V;
+        private double[] _F;
+
+        public double[] X
+        {
+            get
+            {
+                if (nt_specialState != null)
+                {
+                    //Debug.WriteLine("------------------------------------------");
+                    //Debug.WriteLine("after update X value= {0} {1} {2}", _X[0], _X[1], _X[2]);
+                    nt_specialState.updateManagedX();
+                    //Debug.WriteLine("after update X value= {0} {1} {2}", _X[0], _X[1], _X[2]);
+                }
+                return _X;
+            }
+            set
+            {
+                _X = value;
+                if (nt_specialState != null)
+                {
+                    nt_specialState.X = value;
+                    nt_specialState.updateUnmanagedX();
+                }
+            }
+        }
+
+
+        public double[] V
+        {
+            get
+            {
+                if (nt_specialState != null)
+                {
+                    nt_specialState.updateManagedV();
+                }
+                return _V;
+            }
+            set
+            {
+                _V = value;
+                if (nt_specialState != null)
+                {
+                    nt_specialState.V = value;
+                    nt_specialState.updateUnmanagedV();
+                }
+            }
+        }
+
+        public double[] F
+        {
+            get
+            {
+                if (nt_specialState != null)
+                {
+                    nt_specialState.updateManagedF();
+                }
+                return _F;
+            }
+            set
+            {
+                _F = value;
+                if (nt_specialState != null)
+                {
+                    nt_specialState.F = value;
+                    nt_specialState.updateUnmanagedF();
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public Nt_CellSpatialState nt_specialState { get; set; }
+
+        public static int SingleDim = 3, Dim = 3 * SingleDim;
+    }
+
+    public struct NtSpatialState
+    {
+        public Darray X;
+
+        public Darray V;
+
+        public Darray F;
 
         public static int SingleDim = 3, Dim = 3 * SingleDim;
     }
 
     public class Gene
     {
+        public Nt_Gene nt_gene; //unmanged instance
         public string Name { get; private set; }
         public int CopyNumber { get; private set; }
         // Activation level may be adjusted depending on cell state 
-        public double[] _activationLevel;
+        public double _activationLevel;
         public double ActivationLevel 
         {
             get
             {
-                return _activationLevel[0];
+                return _activationLevel;
             }
             set
             {
-                _activationLevel[0] = value;
+                _activationLevel = value;
+                if (nt_gene != null)
+                {
+                    nt_gene.SetActivationLevel(value);
+                }
             }
         }
 
@@ -43,9 +131,7 @@ namespace Daphne
         {
             Name = name;
             CopyNumber = copyNumber;
-            _activationLevel = new double[1];
-            _activationLevel[0] = actLevel;
-            //ActivationLevel = actLevel;
+            ActivationLevel = actLevel;
         }
     }
 
@@ -597,6 +683,12 @@ namespace Daphne
             set { spatialState = value; }
         }
 
+        public void SetSpatialStatNativeInstance(Nt_CellSpatialState ncs)
+        {
+
+            spatialState.nt_specialState = ncs;
+        }
+
         public bool IsMotile
         {
             get { return isMotile; }
@@ -662,9 +754,21 @@ namespace Daphne
         /// <param name="f"></param>
         public void addForce(double[] f)
         {
-            spatialState.F[0] += f[0];
-            spatialState.F[1] += f[1];
-            spatialState.F[2] += f[2];
+            //we cannot add directly to the F array elements
+            //because each add will pull from unmanaged
+            //and erase previous addition
+            double[] array = spatialState.F;
+            array[0] += f[0];
+            array[1] += f[1];
+            array[2] += f[2];
+
+            //spatialState.F[0] += f[0];
+            //spatialState.F[1] += f[1];
+            //spatialState.F[2] += f[2];
+            if (spatialState.nt_specialState != null)
+            {
+                spatialState.nt_specialState.updateUnmanagedF();
+            }
         }
 
         /// <summary>

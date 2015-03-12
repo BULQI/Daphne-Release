@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using NativeDaphne;
 using MathNet.Numerics.Random;
+using System.Diagnostics;
 
 namespace Daphne
 {
@@ -16,7 +17,7 @@ namespace Daphne
 
         public static Nt_CellManager nt_cellManager;
 
-       
+
 
         public CellManager()
         {
@@ -39,7 +40,8 @@ namespace Daphne
             List<int> removalList = null;
             List<Cell> daughterList = null;
 
-            iteration_count++;
+            //iteration_count++;
+            //Debug.WriteLine("*******************interation = {0} *********************", iteration_count);
             //testing cytosol reaction using native methods.
             bool use_native = true;
             if (use_native)
@@ -49,6 +51,8 @@ namespace Daphne
 
             foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
+                
+
                 // cell takes a step
                 if (kvp.Value.Alive == true)
                 {
@@ -58,31 +62,55 @@ namespace Daphne
                 // still alive and motile
                 if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
                 {
-                    //if (kvp.Value.IsChemotactic)
+                    //if (!use_native)
                     //{
-                    //    // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
-                    //    // add the chemotactic force (accumulate it into the force variable)
-                    //    kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
-                    //}
-                    //// apply the boundary force
-                    //kvp.Value.BoundaryForce();
-                    //// apply stochastic force
-                    //if (kvp.Value.IsStochastic)
-                    //{
-                    //    //kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
-                    //    kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
-                    //}
+                    //    if (kvp.Value.IsChemotactic)
+                    //    {
+                    //        // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
+                    //        // add the chemotactic force (accumulate it into the force variable)
+                    //        kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
+                    //    }
+                    //    // apply the boundary force
+                    //    kvp.Value.BoundaryForce();
+                    //    // apply stochastic force
+                    //    if (kvp.Value.IsStochastic)
+                    //    {
+                    //        kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
+                    //    }
 
-                    //// A simple implementation of movement. For testing.
-                    //for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
-                    //{
-                    //    kvp.Value.SpatialState.X[i] += kvp.Value.SpatialState.V[i] * dt;
-                    //    kvp.Value.SpatialState.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.SpatialState.V[i] + kvp.Value.SpatialState.F[i]) * dt;
+                    //    // A simple implementation of movement. For testing.
+                    //    for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
+                    //    {
+                    //        kvp.Value.SpatialState.X[i] += kvp.Value.SpatialState.V[i] * dt;
+                    //        kvp.Value.SpatialState.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.SpatialState.V[i] + kvp.Value.SpatialState.F[i]) * dt;
+                    //    }
                     //}
-
                     // enforce boundary condition
                     kvp.Value.EnforceBC();
                 }
+
+                ////this is after the step is done
+                //if (iteration_count <0 ) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
+                //{
+                //    Debug.WriteLine("\n----membrane----");
+                //    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
+                //    {
+                //        var tmp = item.Value.Conc;
+                //        if (tmp.native_instance != null) tmp.native_instance.pull();
+                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                //            iteration_count, tmp.array[0], tmp.array[1], tmp.array[2], item.Value.Molecule.Name);
+                //    }
+
+                //    Debug.WriteLine("----Cytosol----");
+                //    foreach (var item in kvp.Value.Cytosol.Populations)
+                //    {
+                //        var tmp = item.Value.Conc;
+                //        if (tmp.native_instance != null) tmp.native_instance.pull();
+                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                //            iteration_count, tmp.array[0], tmp.array[1], tmp.array[2], item.Value.Molecule.Name);
+                //    }
+
+                //}
 
                 // if the cell  moved out of bounds schedule its removal
                 if (kvp.Value.Exiting == true)
@@ -95,15 +123,15 @@ namespace Daphne
                 }
 
                 // if the cell died schedule its (stochastic) removal
-                if (kvp.Value.Alive == false) 
+                if (kvp.Value.Alive == false)
                 {
                     if (!deadDict.ContainsKey(kvp.Value.Cell_id))
                     {
                         // start clock at 0 and sample the distribution for the time of removal
-                        deadDict.Add(kvp.Value.Cell_id, new double[] {0.0, Phagocytosis.Sample()});
+                        deadDict.Add(kvp.Value.Cell_id, new double[] { 0.0, Phagocytosis.Sample() });
                     }
                 }
-                
+
                 // cell division
                 if (kvp.Value.Cytokinetic == true)
                 {
@@ -118,7 +146,12 @@ namespace Daphne
 
                     SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id);
                 }
-           }
+
+                //we will need cells position for some computation in ECS
+                //and transform needto be updated.
+                //for now we do forced update here until we decided what to do with it.
+                kvp.Value.SpatialState.nt_specialState.updateManagedX();
+            }
 
             // process removal list
             if (removalList != null)
@@ -134,7 +167,7 @@ namespace Daphne
             if (deadDict != null)
             {
                 tempDeadKeys = deadDict.Keys.ToArray<int>();
-                foreach(int key in tempDeadKeys)
+                foreach (int key in tempDeadKeys)
                 {
                     // increment elapsed time since death
                     double[] d = deadDict[key];
@@ -193,45 +226,123 @@ namespace Daphne
         /// add cell's reaction to nt_CellManager.
         /// </summary>
         /// <param name="c"></param>
-        internal void AddCell(Cell c)
+        internal void AddNtCell(Cell c)
         {
-            //if (nt_cellManager.IsInitialized() == false)
-            //{
-            //    double extend1 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0);
-            //    double extend2 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1);
-            //    double extend3 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2);
-            //    bool boundary_force_flag = SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false;
 
-            //    nt_cellManager.SetEnvironmentExtents(extend1, extend2, extend3, boundary_force_flag, Pair.Phi1);
-            //    int seed = SimulationBase.ProtocolHandle.sim_params.globalRandomSeed;
-            //    nt_cellManager.InitializeNormalDistributionSampler(0.0, 1.0, seed);
-            //}
+            Nt_Cell ntc = new Nt_Cell(c.Cell_id, c.Radius);
+            ntc.spatialState = new Nt_CellSpatialState(c.SpatialState.X, c.SpatialState.V, c.SpatialState.F);
+            c.SetSpatialStatNativeInstance(ntc.spatialState);
+            ntc.Population_id = c.Population_id;
+            ntc.isMotile = c.IsMotile;
+            ntc.IsChemotactic = c.IsChemotactic;
+            ntc.IsStochastic = c.IsStochastic;
+            ntc.cytokinetic = c.Cytokinetic;
+            ntc.TransductionConstant = c.Locomotor.TransductionConstant;
+            ntc.DragCoefficient = c.DragCoefficient;
+            ntc.Sigma = (c.StochLocomotor != null) ? c.StochLocomotor.Sigma : 0;
+            //add this when molpop is initialized.
+            //ntc.Driver = null;
+            nt_cellManager.AddCell(ntc);
 
-            foreach (Reaction r in c.Cytosol.BulkReactions)
+            //genes
+            Dictionary<string, Nt_Gene> gene_dict = new Dictionary<string, Nt_Gene>();
+            foreach (var item in c.Genes)
             {
+                Gene gene = item.Value;
+                Nt_Gene nt_gene = new Nt_Gene(gene.Name, gene.CopyNumber, gene.ActivationLevel);
+                gene.nt_gene = nt_gene;
+                gene_dict.Add(gene.Name, nt_gene);
+                nt_cellManager.AddGene(c.Population_id, nt_gene);
+            }
+
+            Dictionary<string, Nt_MolecularPopulation> cytosol_nt_mp = new Dictionary<string, Nt_MolecularPopulation>();
+            foreach (var item in c.Cytosol.Populations)
+            {
+                MolecularPopulation mp = item.Value;
+                double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
+
+                Nt_ScalarField conc_sf = new Nt_ScalarField(mp.Conc.array);
+                mp.Conc.native_instance = conc_sf;
+
+                Nt_ScalarField bflux = null;
+                if (mp.BoundaryFluxes.Count > 0)
+                {
+                    //cytosol should always have a boundary of memrane?
+                    var tmp = mp.BoundaryFluxes.First().Value;
+                    bflux = tmp.native_instance = new Nt_ScalarField(tmp.array);
+                }
+
+                Nt_ScalarField bconc = null;
+                if (mp.BoundaryConcs.Count > 0)
+                {
+                    var tmp = mp.BoundaryConcs.First().Value;
+                    bconc = tmp.native_instance = new Nt_ScalarField(tmp.array);
+                }
+                var cmp = new Nt_CytosolMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, conc_sf, bflux, bconc);
+                cmp.Name = item.Value.Molecule.Name; //exist for debugging
+                mp.nt_instance = cmp;
+                nt_cellManager.AddMolecularPopulation(c.Population_id, true, cmp);
+                cytosol_nt_mp.Add(item.Key, cmp);
+            }
+            if (c.Locomotor != null)
+            {
+                string driver_key = c.Locomotor.Driver.MoleculeKey;
+                ntc.Driver = cytosol_nt_mp[driver_key];
+            }
+
+            Dictionary<string, Nt_MolecularPopulation> membrane_nt_mp = new Dictionary<string, Nt_MolecularPopulation>();
+            foreach (var item in c.PlasmaMembrane.Populations)
+            {
+                MolecularPopulation mp = item.Value;
+                double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
+
+                Nt_ScalarField conc_sf = new Nt_ScalarField(mp.Conc.array);
+                mp.Conc.native_instance = conc_sf;
+                var cmp = new Nt_MembraneMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, conc_sf);
+                cmp.Name = item.Value.Molecule.Name;
+                mp.nt_instance = cmp;
+                nt_cellManager.AddMolecularPopulation(c.Population_id, false, cmp);
+                membrane_nt_mp.Add(item.Key, cmp);
+            }
+
+            //add reactions
+            for (int i = 0; i< c.Cytosol.BulkReactions.Count; i++)
+            {
+                Reaction r = c.Cytosol.BulkReactions[i];
                 if (r is Transformation)
                 {
                     Transformation tr = r as Transformation;
                     Nt_Transformation nt_rxn = new Nt_Transformation(c.Cell_id, tr.RateConstant);
-                    nt_rxn.reactant.Add(tr.reactant.Conc.array);
-                    nt_rxn.product.Add(tr.product.Conc.array);
-                    nt_cellManager.AddReaction(nt_rxn);
+                    nt_rxn.isBulkReaction = true;
+                    nt_rxn.reaction_index = i;
+                    //checking...
+                    string reactant_guid = tr.reactant.MoleculeKey;
+                    if (cytosol_nt_mp.ContainsKey(reactant_guid) == false)
+                    {
+                        throw new Exception("reactnat molpop not found");
+                    }
+                    nt_rxn.reactant = cytosol_nt_mp[reactant_guid];
+                    nt_rxn.product = cytosol_nt_mp[tr.product.MoleculeKey];
+                    nt_cellManager.AddReaction(c.Population_id, true, nt_rxn);
                 }
                 else if (r is Transcription)
                 {
                     Transcription tr = r as Transcription;
                     Nt_Transcription nt_rxn = new Nt_Transcription(c.Cell_id, tr.RateConstant);
-                    nt_rxn.CopyNumber.Add(tr.gene.CopyNumber);
-                    nt_rxn.ActivationLevel.Add(tr.gene._activationLevel);
-                    nt_rxn.product.Add(tr.product.Conc.array);
-                    nt_cellManager.AddReaction(nt_rxn);
+                    nt_rxn.isBulkReaction = true;
+                    nt_rxn.reaction_index = i;
+                    nt_rxn.gene = gene_dict[tr.gene.Name];
+                    nt_rxn.product = cytosol_nt_mp[tr.product.MoleculeKey];
+                    nt_cellManager.AddReaction(c.Population_id, true, nt_rxn);
                 }
                 else if (r is Annihilation)
                 {
                     Annihilation ah = r as Annihilation;
                     Nt_Annihilation nt_rxn = new Nt_Annihilation(c.Cell_id, ah.RateConstant);
-                    nt_rxn.reactant.Add(ah.reactant.Conc.array);
-                    nt_cellManager.AddReaction(nt_rxn);
+                    nt_rxn.isBulkReaction = true;
+                    nt_rxn.reaction_index = i;
+                    nt_rxn.reactant = cytosol_nt_mp[ah.reactant.MoleculeKey];
+                    nt_cellManager.AddReaction(c.Population_id, true, nt_rxn);
                 }
                 else
                 {
@@ -241,107 +352,46 @@ namespace Daphne
 
             foreach (List<Reaction> rlist in c.Cytosol.BoundaryReactions.Values)
             {
-                foreach (Reaction r in rlist)
+
+                for (int i = 0; i< rlist.Count; i++)
                 {
+                    Reaction r = rlist[i];
                     if (r is CatalyzedBoundaryActivation)
                     {
                         CatalyzedBoundaryActivation cba = r as CatalyzedBoundaryActivation;
                         Nt_CatalyzedBoundaryActivation nt_rxn = new Nt_CatalyzedBoundaryActivation(c.Cell_id, cba.RateConstant);
-                        nt_rxn.receptor.Add(cba.receptor.Conc.array);
-                        int boundary_id = cba.receptor.Man.Id;
-                        nt_rxn.bulkBoundaryConc.Add(cba.bulk.BoundaryConcs[boundary_id].array);
-                        nt_rxn.bulkBoundaryFluxes.Add(cba.bulk.BoundaryFluxes[boundary_id].array);
-                        nt_rxn.bulkActivatedBoundaryFluxes.Add(cba.bulkActivated.BoundaryFluxes[boundary_id].array);
-                        nt_cellManager.AddReaction(nt_rxn);
+                        nt_rxn.isBulkReaction = false;
+                        nt_rxn.reaction_index = i;
+                        nt_rxn.bulk = cytosol_nt_mp[cba.bulk.MoleculeKey];
+                        nt_rxn.bulkActivated = cytosol_nt_mp[cba.bulkActivated.MoleculeKey];
+                        nt_rxn.receptor = membrane_nt_mp[cba.receptor.MoleculeKey];
+                        nt_cellManager.AddReaction(c.Population_id, true, nt_rxn);
                     }
                     else if (r is BoundaryTransportTo)
                     {
                         BoundaryTransportTo btt = r as BoundaryTransportTo;
                         Nt_BoundaryTransportTo nt_rxn = new Nt_BoundaryTransportTo(c.Cell_id, btt.RateConstant);
-                        int boundary_id = btt.membrane.Man.Id;
-                        nt_rxn.BulkBoundaryConc.Add(btt.bulk.BoundaryConcs[boundary_id].array);
-                        nt_rxn.BulkBoundaryFluxes.Add(btt.bulk.BoundaryFluxes[boundary_id].array);
-                        nt_rxn.MembraneConc.Add(btt.membrane.Conc.array);
-                        nt_cellManager.AddReaction(nt_rxn);
+                        nt_rxn.isBulkReaction = false;
+                        nt_rxn.reaction_index = i;
+                        nt_rxn.bulk = cytosol_nt_mp[btt.bulk.MoleculeKey];
+                        nt_rxn.membrane = membrane_nt_mp[btt.membrane.MoleculeKey];
+                        nt_cellManager.AddReaction(c.Population_id, true, nt_rxn);
                     }
                     else if (r is BoundaryTransportFrom)
                     {
                         BoundaryTransportFrom btf = r as BoundaryTransportFrom;
                         Nt_BoundaryTransportFrom nt_rxn = new Nt_BoundaryTransportFrom(c.Cell_id, btf.RateConstant);
-                        int boundary_id = btf.membrane.Man.Id;
-                        nt_rxn.BulkBoundaryFluxes.Add(btf.bulk.BoundaryFluxes[boundary_id].array);
-                        nt_rxn.MembraneConc.Add(btf.membrane.Conc.array);
-                        nt_cellManager.AddReaction(nt_rxn);
+                        nt_rxn.isBulkReaction = false;
+                        nt_rxn.reaction_index = i;
+                        nt_rxn.bulk = cytosol_nt_mp[btf.bulk.MoleculeKey];
+                        nt_rxn.membrane = membrane_nt_mp[btf.membrane.MoleculeKey];
+                        nt_cellManager.AddReaction(c.Population_id, true, nt_rxn);
                     }
                     else
                     {
                         throw new NotImplementedException();
                     }
                 }
-            }
-
-            foreach (var item in c.Cytosol.Populations)
-            {
-                MolecularPopulation mp = item.Value;
-                double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
-                double[] bflux = null;
-                if (mp.BoundaryFluxes.Count > 0)
-                {
-                    //cytosol should always have a boundary of memrane?
-                    bflux = mp.BoundaryFluxes.First().Value.array;
-                }
-                else
-                {
-                    bflux = new double[4];
-                }
-                double[] bconc = null;
-                if (mp.BoundaryConcs.Count > 0)
-                {
-                    bconc = mp.BoundaryConcs.First().Value.array;
-                }
-                else
-                {
-                    bconc = new double[4];
-                }
-               
-                var cmp = new Nt_CytosolMolecularPopulation(c.Cell_id, c.Radius, diffCoeff, mp.Conc.array, bflux, bconc);
-                nt_cellManager.AddMolecularPopulation(cmp);
-            }
-
-            foreach (var item in c.PlasmaMembrane.Populations)
-            {
-                MolecularPopulation mp = item.Value;
-                double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
-                var cmp = new Nt_MembraneMolecularPopulation(c.Cell_id, c.Radius, diffCoeff, mp.Conc.array);
-                nt_cellManager.AddMolecularPopulation(cmp);
-            }
-
-            if (c.IsMotile && c.Alive && !c.Exiting)
-            {
-                Nt_Cell ntc = new Nt_Cell(c.Cell_id, c.Radius, c.SpatialState.X, c.SpatialState.V, c.SpatialState.F);
-
-                ntc.isMotile = c.IsMotile;
-                ntc.isChemotactic = c.IsChemotactic;
-                ntc.isStochastic = c.IsStochastic;
-                ntc.cytokinetic = c.Cytokinetic;
-
-                ntc.TransductionConsant = c.Locomotor.TransductionConstant;
-                ntc.DragCoefficient = c.DragCoefficient;
-                if (c.StochLocomotor != null)
-                {
-                    ntc.Sigma = c.StochLocomotor.Sigma;
-                }
-                else ntc.Sigma = 0;
-                if (c.Locomotor != null && c.Locomotor.Driver != null)
-                {
-                    ntc.driverConc = c.Locomotor.Driver.Conc.array;
-                }
-                else
-                {
-                    ntc.driverConc = new double[4];
-                }
-
-                nt_cellManager.AddCell(ntc);
             }
         }
     }

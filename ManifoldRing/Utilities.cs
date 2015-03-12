@@ -42,6 +42,7 @@ namespace ManifoldRing
         private Vector pos;
         private Matrix rot;
         private double[] position; //storage for pos data
+
         /// <summary>
         /// true when rotation is present
         /// </summary>

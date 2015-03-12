@@ -150,21 +150,35 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DArray.h" />
+    <ClInclude Include="Nt_Cell.h" />
     <ClInclude Include="Nt_CellManager.h" />
+    <ClInclude Include="Nt_CellPopulation.h" />
+    <ClInclude Include="Nt_Compartment.h" />
+    <ClInclude Include="Nt_Gene.h" />
     <ClInclude Include="Nt_InterpolatedRectangularPrism.h" />
+    <ClInclude Include="Nt_MolecularPopulation.h" />
     <ClInclude Include="Nt_NormalDist.h" />
+    <ClInclude Include="Nt_Reaction.h" />
+    <ClInclude Include="Nt_ScalarField.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
-    <ClInclude Include="Utility.h" />
+    <ClInclude Include="Nt_Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Nt_CellManager.cpp" />
+    <ClCompile Include="Nt_CellPopulation.cpp" />
+    <ClCompile Include="Nt_Cell.cpp" />
     <ClCompile Include="Nt_InterpolatedRectangularPrism.cpp" />
+    <ClCompile Include="Nt_MolecularPopulation.cpp" />
     <ClCompile Include="Nt_NormalDist.cpp" />
+    <ClCompile Include="Nt_Reaction.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

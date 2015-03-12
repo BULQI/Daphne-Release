@@ -20,7 +20,7 @@ namespace NativeDaphneLibrary
 	
 	int Utility::NtDscal(int n, double alpha, double *x, int incx)
 	{
-		dscal(n, alpha, x, 1);
+		dscal(n, alpha, x, incx);
 		return 0;
 	}
 
@@ -31,16 +31,23 @@ namespace NativeDaphneLibrary
 		return 0;
 	}
 
-	int Utility::NtMultiplyScalar(int n, int inc, double *x, double *y)
+	int Utility::NtDcopy(int n, double* x, int incx, double *y, int incy)
+	{
+		dcopy(n, x, incx, y, incy);
+		return 0;
+	}
+
+	//multiply two scalars and save result in z
+	int Utility::NtMultiplyScalar(int n, int inc, double *x, double *y, double *z)
 	{
 		for (int i=0; i<n; i+= inc)
 		{
 			double s1 = x[i];
 			double s2 = y[i];
-			x[i] = x[i] * y[i];
+			z[i] = x[i] * y[i];
 			for (int j = i+1; j< i+inc; j++)
 			{
-				x[j] = x[j] * s2 + s1 * y[j];
+				z[j] = x[j] * s2 + s1 * y[j];
 			}
 		}
 		return 0;

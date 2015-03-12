@@ -6,7 +6,7 @@ using System.Text;
 
 using Ninject;
 using Ninject.Parameters;
-
+using NativeDaphne;
 using ManifoldRing;
 
 namespace Daphne
@@ -41,6 +41,7 @@ namespace Daphne
         private Compartment compartment;
         private readonly Manifold manifold;
         private ScalarField concentration;
+        private Nt_MolecularPopulation nt_Molpop;
         private Dictionary<int, ScalarField> boundaryFluxes;
         private readonly Dictionary<int, ScalarField> boundaryConcs,
                                                       naturalBoundaryFluxes,
@@ -52,6 +53,8 @@ namespace Daphne
         // the molecule guid reference
         public string MoleculeKey { get; set; }
 
+        public Nt_MolecularPopulation nt_instance;
+
         public Manifold Man
         {
             get { return manifold; }
@@ -59,8 +62,22 @@ namespace Daphne
 
         public ScalarField Conc
         {
-            get { return concentration; }
-            set { concentration = value; }
+            get 
+            {
+                if (this.nt_Molpop != null)
+                {
+                    nt_Molpop.updateManaged();
+                }
+                return concentration; 
+            }
+            set 
+            {
+                concentration = value; 
+                if (this.nt_Molpop != null)
+                {
+                    nt_Molpop.updateUnmanaged(concentration.array);
+                }
+            }
         }
 
         public Compartment Comp

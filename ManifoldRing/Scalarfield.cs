@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using NativeDaphne;
 
 namespace ManifoldRing
 {
@@ -311,6 +312,25 @@ namespace ManifoldRing
         private readonly Manifold m;
         private IFieldInitializer init;
 
+        public Nt_ScalarField native_instance { get; set; }
+
+        //push data into unmanaged array
+        public void push()
+        {
+            if (native_instance != null)
+            {
+                native_instance.push();
+            }
+        }
+        //pull data from unmanaged array
+        public void pull()
+        {
+            if (native_instance != null)
+            {
+                native_instance.pull();
+            }
+        }
+
         /// <summary>
         /// underlying manifold
         /// </summary>
@@ -324,6 +344,7 @@ namespace ManifoldRing
         {
             this.m = m;
             array = new double[m.ArraySize];
+            native_instance = null;
         }
 
         /// <summary>
@@ -371,6 +392,7 @@ namespace ManifoldRing
 
         public ScalarField reset(ScalarField src)
         {
+            if (src.native_instance != null) src.native_instance.pull();
             for (int i = 0; i < array.Length; i++) array[i] = src.array[i];
             return this;
         }
@@ -472,11 +494,12 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public ScalarField Multiply(double s)
         {
+            if (native_instance != null) native_instance.pull();
             for (int i = 0; i < m.ArraySize; i++)
             {
                 array[i] *= s;
             }
-
+            if (native_instance != null) native_instance.push();
             return this;
         }
 
@@ -492,8 +515,11 @@ namespace ManifoldRing
             {
                 throw new Exception("Scalar field multiplicands must share a manifold.");
             }
-
-            return this.m.Multiply(this, f2);
+            if (native_instance != null) native_instance.pull();
+            if (f2.native_instance != null) f2.native_instance.pull();
+            this.m.Multiply(this, f2);
+            if (native_instance != null) native_instance.push();
+            return this;
         }
 
         /// <summary>
@@ -505,7 +531,10 @@ namespace ManifoldRing
         public static ScalarField operator *(ScalarField f, double s)
         {
             ScalarField product = new ScalarField(f.m);
-
+            if (f.native_instance != null)
+            {
+                throw new Exception("invalid operation exception");
+            }
             for (int i = 0; i < f.m.ArraySize; i++)
             {
                 product.array[i] = s * f.array[i];
@@ -552,11 +581,22 @@ namespace ManifoldRing
             {
                 throw new Exception("Scalar field addends must share a manifold.");
             }
+            if (this.native_instance != null)
+            {
+                this.native_instance.pull();
+            }
+            if (f.native_instance != null)
+            {
+                f.native_instance.pull();
+            }
             for (int i = 0; i < m.ArraySize; i++)
             {
                 array[i] += f.array[i];
             }
-
+            if (this.native_instance != null)
+            {
+                this.native_instance.push();
+            }
             return this;
         }
 
@@ -567,7 +607,10 @@ namespace ManifoldRing
         /// <returns></returns>
         public ScalarField Add(double d)
         {
-            return m.Add(this, d);
+            if (native_instance != null) native_instance.pull();
+            m.Add(this, d);
+            if (native_instance != null) native_instance.push();
+            return this;
         }
 
         /// <summary>
@@ -628,11 +671,14 @@ namespace ManifoldRing
                 throw new Exception("Scalar field addends must share a manifold.");
             }
 
+            if (this.native_instance != null) native_instance.pull();
+            if (f.native_instance != null) f.pull();
+
             for (int i = 0; i < m.ArraySize; i++)
             {
                 array[i] -= f.array[i];
             }
-
+            if (this.native_instance != null) native_instance.push();
             return this;
         }
 
@@ -668,7 +714,11 @@ namespace ManifoldRing
         public void Restrict(ScalarField from, Transform t)
         {
             // this.M.Restrict(from, pos, this);
+            if (this.native_instance != null) this.native_instance.pull();
+            if (from.native_instance != null) from.native_instance.pull();
             this.M.Restrict(from, t, this);
+            if (this.native_instance != null) this.native_instance.push();
+            if (from.native_instance != null) from.native_instance.push();
         }
     }
 }

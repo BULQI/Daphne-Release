@@ -94,6 +94,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NativeDaphne\NativeDaphne.vcxproj">
+      <Project>{0B679F33-7BF6-4CDE-8CDE-854E1F214E70}</Project>
+      <Name>NativeDaphne</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)dependencies"</PostBuildEvent>
