@@ -400,6 +400,54 @@ namespace Daphne
         }
 
         /// <summary>
+        /// Given a total reaction string, find it in the reactions list.
+        /// Return true if found, false otherwise.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="Reacs"></param>
+        /// <returns></returns>
+        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
+        {
+            //Get left and right side molecules of new reaction
+            List<string> newReactants = getReacLeftSide(total);
+            List<string> newProducts = getReacRightSide(total);
+
+            //Loop through all existing reactions
+            foreach (ConfigReaction reac in Reacs)
+            {
+                //Get left and right side molecules of each reaction in er
+                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+
+                //Key step! 
+                //Check if the list of reactants and products in new reaction equals 
+                //the list of reactants and products in this current reaction
+                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Given a total reaction string and a level, find out if the level's entity_repository
+        /// contains this reaction.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="protocol"></param>
+        /// <returns></returns>
+        public bool findReactionByTotalString(string total, Level protocol)
+        {
+            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Identifies reaction type given the input reactants, products and modifiers
         /// </summary>
         /// <param name="inputReactants"></param>
@@ -1923,47 +1971,53 @@ namespace Daphne
 
         
         
-        /// <summary>
-        /// Given a total reaction string, find it in the reactions list.
-        /// Return true if found, false otherwise.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <param name="Reacs"></param>
-        /// <returns></returns>
-        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
-        {
-            //Get left and right side molecules of new reaction
-            List<string> newReactants = getReacLeftSide(total);
-            List<string> newProducts = getReacRightSide(total);
+        /////// <summary>
+        /////// Given a total reaction string, find it in the reactions list.
+        /////// Return true if found, false otherwise.
+        /////// </summary>
+        /////// <param name="total"></param>
+        /////// <param name="Reacs"></param>
+        /////// <returns></returns>
+        ////public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
+        ////{
+        ////    //Get left and right side molecules of new reaction
+        ////    List<string> newReactants = getReacLeftSide(total);
+        ////    List<string> newProducts = getReacRightSide(total);
 
-            //Loop through all existing reactions
-            foreach (ConfigReaction reac in Reacs)
-            {
-                //Get left and right side molecules of each reaction in er
-                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
-                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+        ////    //Loop through all existing reactions
+        ////    foreach (ConfigReaction reac in Reacs)
+        ////    {
+        ////        //Get left and right side molecules of each reaction in er
+        ////        List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+        ////        List<string> currProducts = getReacRightSide(reac.TotalReactionString);
 
-                //Key step! 
-                //Check if the list of reactants and products in new reaction equals 
-                //the list of reactants and products in this current reaction
-                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        ////        //Key step! 
+        ////        //Check if the list of reactants and products in new reaction equals 
+        ////        //the list of reactants and products in this current reaction
+        ////        if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+        ////        {
+        ////            return true;
+        ////        }
+        ////    }
+        ////    return false;
+        ////}
 
-        // given a total reaction string, find the ConfigCell object
-        public bool findReactionByTotalString(string total, Protocol protocol)
-        {
-            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
-            {
-                return true;
-            }
+        /////// <summary>
+        /////// Given a total reaction string and a level, find out if the level's entity_repository
+        /////// contains this reaction.
+        /////// </summary>
+        /////// <param name="total"></param>
+        /////// <param name="protocol"></param>
+        /////// <returns></returns>
+        ////public bool findReactionByTotalString(string total, Level protocol)
+        ////{
+        ////    if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+        ////    {
+        ////        return true;
+        ////    }
 
-            return false;
-        }
+        ////    return false;
+        ////}
 
         /// <summary>
         /// Select transcription reactions in the compartment.
@@ -4040,7 +4094,7 @@ namespace Daphne
             return ret;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempMolName = Name;
@@ -6041,7 +6095,7 @@ namespace Daphne
             return true;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempRCName = Name;
