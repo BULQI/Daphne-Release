@@ -48,11 +48,13 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
+            Level level = MainWindow.GetLevelContext(this);
             //if user picked 'new molecule' then create new molecule in ER
             if (nIndex == (cb.Items.Count - 1))
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = DataContext as ConfigCell;
@@ -70,8 +72,10 @@ namespace DaphneGui
                     }
                     return;
                 }
-                newLibMol.ValidateName(MainWindow.SOP.Protocol);
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                //newLibMol.ValidateName(MainWindow.SOP.Protocol);
+                newLibMol.ValidateName(level);
+                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                level.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
 
@@ -334,9 +338,11 @@ namespace DaphneGui
                 return;
             }
 
+            Level level = MainWindow.GetLevelContext(this);
             //Create a new default gene
             ConfigGene gene = new ConfigGene("g", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
+            //gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
+            gene.Name = gene.GenerateNewName(level, "New");
 
             //Display it in dialog and allow user to edit name, etc.
             AddEditGene aeg = new AddEditGene();
@@ -351,7 +357,9 @@ namespace DaphneGui
 
             //Clone new gene and add to ER
             ConfigGene erGene = gene.Clone(null);
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
+            
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
+            level.entity_repository.genes.Add(erGene);
 
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
             CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
@@ -484,7 +492,8 @@ namespace DaphneGui
             bool needRefresh = false;
 
             //Level protocol = MainWindow.ST_CurrentLevel;
-            Level protocol = MainWindow.SOP.Protocol;
+            //Level protocol = MainWindow.SOP.Protocol;
+            Level protocol = MainWindow.GetLevelContext(this);
 
             string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
             message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
@@ -563,7 +572,8 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
-            Level protocol = MainWindow.SOP.Protocol;   //MainWindow.ST_CurrentLevel;
+            //Level protocol = MainWindow.SOP.Protocol;
+            Level protocol = MainWindow.GetLevelContext(this);
 
             string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
             message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";

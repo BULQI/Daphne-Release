@@ -143,7 +143,6 @@ namespace DaphneGui
         public override void PushMoleculeFilter(object configMols, Level level)
         {
             ObservableCollection<ConfigMolecule> mols = configMols as ObservableCollection<ConfigMolecule>;
-            EntityRepository er = level.entity_repository;   //MainWindow.SOP.Protocol.entity_repository;
             // Filter out boundary mols
             foreach (ConfigMolecule mol in mols.ToList())
             {

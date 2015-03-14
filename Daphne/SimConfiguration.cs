@@ -322,7 +322,7 @@ namespace Daphne
         /// <param name="name"></param>
         /// <param name="protocol"></param>
         /// <returns></returns>
-        public string findGeneGuid(string name, Protocol protocol)
+        public string findGeneGuid(string name, Level protocol)
         {
             foreach (ConfigGene gene in protocol.entity_repository.genes)
             {
@@ -6473,7 +6473,7 @@ namespace Daphne
         /// If it is a duplicate, a suffix like "_Copy" is added
         /// </summary>
         /// <param name="sc"></param>
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string newCellName = CellName;

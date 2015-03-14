@@ -32,7 +32,8 @@ namespace DaphneGui
         #region context_menus
         private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
         {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            Level level = MainWindow.GetLevelContext(this);
 
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
@@ -42,7 +43,7 @@ namespace DaphneGui
             {
                 bool isSelected = DataGridBehavior.GetHighlightColumn(col);
                 string gene_name = col.Header as string;
-                string guid = MainWindow.SOP.Protocol.findGeneGuid(gene_name, MainWindow.SOP.Protocol);
+                string guid = level.findGeneGuid(gene_name, level);
                 if (isSelected && guid != null && guid.Length > 0)
                 {
                     //diff_scheme.genes.Remove(guid);
@@ -298,8 +299,16 @@ namespace DaphneGui
             //}
             dataGrid.Columns.Clear();
             if (genes == null)return;
+            
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            
+
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+
+            ////Level level = MainWindow.GetLevelContext(cdc);
+            ////EntityRepository er = level.entity_repository;
+
+
             //create columns
             int count = 0;
             foreach (var gene_guid in genes)
@@ -340,7 +349,11 @@ namespace DaphneGui
 
             dataGrid.Columns.Clear();
             if (states == null || states.Count == 0) return;
+
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            ////Level level = MainWindow.GetLevelContext(dataGrid);
+            ////EntityRepository er = level.entity_repository;
+
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
 
             int count = 0;
@@ -432,7 +445,8 @@ namespace DaphneGui
             ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
 
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
             if (DiffSchemeTarget == "EpigeneticMap")
             {
