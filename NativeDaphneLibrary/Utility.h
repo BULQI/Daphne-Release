@@ -34,6 +34,14 @@ namespace NativeDaphneLibrary
 
 		static int Utility::NtDcopy(int n, double* x, int incx, double *y, int incy);
 
+
+		static int Utility::acml_getnumthreads();
+
+		static void Utility::acml_setnumthreads(int numthreads);
+
+		static void Utility::test_performance();
+
+
 	};
 }
 

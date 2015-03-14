@@ -23,14 +23,6 @@ namespace Daphne
         {
             deadDict = new Dictionary<int, double[]>();
             nt_cellManager = new Nt_CellManager();
-            //double extend1 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0);
-            //double extend2 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1);
-            //double extend3 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2);
-            //bool boundary_force_flag = SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false;
-
-            //nt_cellManager.SetEnvironmentExtents(extend1, extend2, extend3, boundary_force_flag, Pair.Phi1);
-            //int seed = SimulationBase.ProtocolHandle.sim_params.globalRandomSeed;
-            //nt_cellManager.InitializeNormalDistributionSampler(0.0, 1.0, seed);
         }
 
         public static int iteration_count = 0;

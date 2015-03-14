@@ -25,6 +25,11 @@ namespace NativeDaphne
 			cellPopulations = gcnew Dictionary<int, Nt_CellPopulation^>();
 			normalDist = gcnew Nt_NormalDistribution();
 			EnvironmentExtent = gcnew array<double>(3);
+
+			int numthreads = NativeDaphneLibrary::Utility::acml_getnumthreads();
+
+			NativeDaphneLibrary::Utility::acml_setnumthreads(8);
+
 		}
 
 		~Nt_CellManager(void){}

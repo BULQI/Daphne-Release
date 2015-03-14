@@ -50,10 +50,11 @@ namespace Daphne
         {
             //Vector tmp = new DenseVector(a.SpatialState.X);
             //tmp = (DenseVector)tmpArr.Subtract(new DenseVector(b.SpatialState.X));
-
-            double x = a.SpatialState.X[0] - b.SpatialState.X[0];
-            double y = a.SpatialState.X[1] - b.SpatialState.X[1];
-            double z = a.SpatialState.X[2] - b.SpatialState.X[2];
+            double[] a_X = a.SpatialState.X;
+            double[] b_X = b.SpatialState.X;
+            double x = a_X[0] - b_X[0];
+            double y = a_X[1] - b_X[1];
+            double z = a_X[2] - b_X[2];
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
@@ -204,10 +205,12 @@ namespace Daphne
                     //a.addForce(normal.Multiply(-force).ToArray());
                     //b.addForce(normal.Multiply(force).ToArray());
 
-                    //performance tuning.
-                    double dx = b.SpatialState.X[0] - a.SpatialState.X[0];
-                    double dy = b.SpatialState.X[1] - a.SpatialState.X[1];
-                    double dz = b.SpatialState.X[2] - a.SpatialState.X[2];
+                    //performance tuning
+                    double[] b_X = b.SpatialState.X;
+                    double[] a_X = a.SpatialState.X;
+                    double dx = b_X[0] - a_X[0];
+                    double dy = b_X[1] - a_X[1];
+                    double dz = b_X[2] - a_X[2];
 
                     double tmplen = Math.Sqrt(dx * dx + dy * dy + dz * dz);
 
