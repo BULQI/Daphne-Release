@@ -5,7 +5,7 @@
 #include "Nt_Cell.h"
 #include "Nt_CellPopulation.h"
 #include "Nt_ScalarField.h"
-#include "DArray.h"
+#include "Nt_DArray.h"
 
 
 using namespace System;

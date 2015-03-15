@@ -148,6 +148,9 @@
     <Reference Include="MathNet.Numerics, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -155,7 +158,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DArray.h" />
+    <ClInclude Include="Nt_DArray.h" />
     <ClInclude Include="Nt_Cell.h" />
     <ClInclude Include="Nt_CellManager.h" />
     <ClInclude Include="Nt_CellPopulation.h" />
@@ -172,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Nt_Darray.cpp" />
     <ClCompile Include="Nt_CellManager.cpp" />
     <ClCompile Include="Nt_CellPopulation.cpp" />
     <ClCompile Include="Nt_Cell.cpp" />

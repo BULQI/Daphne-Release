@@ -54,7 +54,7 @@
     <ClInclude Include="Nt_ScalarField.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DArray.h">
+    <ClInclude Include="Nt_DArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Nt_Cell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Nt_Darray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
