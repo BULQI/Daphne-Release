@@ -251,9 +251,9 @@
                          </TextBlock.Style>
                     </TextBlock>
 
-                    <StackPanel>
+                    <StackPanel x:Name="spUserControls">
                         <local:CellPropertiesControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
-                        <local:CellDetailsControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                        <local:CellDetailsControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
                     </StackPanel>
 
                 </StackPanel>
@@ -421,7 +421,7 @@
                 <GroupBox.Header>
                     <TextBlock Text="From" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
-                <StackPanel Margin="0,0,0,0">
+                <StackPanel x:Name="spLevelACombo" Margin="0,0,0,0">
                     <ComboBox x:Name="LevelAComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
                           ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"

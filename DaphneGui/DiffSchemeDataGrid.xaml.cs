@@ -49,7 +49,7 @@ namespace DaphneGui
                     //diff_scheme.genes.Remove(guid);
                     diff_scheme.DeleteGene(guid);
                 }
-          }
+            }
                     
         }
 

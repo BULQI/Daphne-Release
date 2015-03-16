@@ -37,8 +37,9 @@ namespace DaphneGui.Pushing
         public List<string> equalGuids { get; set; }
 
         public double GridHeight { get; set; }
+        private Level CurrentLevel = null;
 
-        public PushBetweenLevels(PushLevelEntityType type)
+        public PushBetweenLevels(PushLevelEntityType type, Level currLevel)
         {
             PushEntityType = type;
             PushLevelA = PushLevel.UserStore;
@@ -48,6 +49,7 @@ namespace DaphneGui.Pushing
             equalGuids = new List<string>();
             InitializeComponent();
 
+            CurrentLevel = currLevel;
             MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
             GridHeight = MaxHeight * 0.85;
 
@@ -92,7 +94,42 @@ namespace DaphneGui.Pushing
             this.Left = desktopWorkingArea.Left + 20;
             this.Top = desktopWorkingArea.Top + 20;
 
-            
+
+            //CellDetailsControl cdc = scrollViewer.GetChildOfType<CellDetailsControl>();
+
+            //var details = this.MainGrid.Children.OfType<CellDetailsControl>();
+            //GroupBox groupbox = this.MainGrid.Children.OfType<GroupBox>().FirstOrDefault();
+            //groupbox.
+            //var detailsWindow = this.MainGrid.Children .Children.OfType<CellDetailsControl>().FirstOrDefault();
+            //if (detailsWindow != null)
+            //{
+            //    detailsWindow.SetCurrentLevel(this.CurrentLevel);
+            //}
+
+            //var cc = this.MainGrid.GetChildOfType<ContentControl>();
+            //if (cc.ContentTemplate == null)
+            //    return;
+
+            //var myControl = cc.ContentTemplate.FindName("cellDetailsControl", cc);
+            //int i = 0;
+            //i++;
+            //var cc2 = this.MainGrid.FindChildControl<CellDetailsControl>("cellDetailsControl");
+
+            //if (cc == null)
+            //{
+            //    MessageBox.Show("Not found");
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Found");
+            //}
+
+            //if (cc != null)
+            //{
+            //    DataTemplate dt = cc.ContentTemplate;
+            //    string dtname = dt.FindName("templCells",
+            //}
+        
 
             ////Get the datagrids and set their max heights
             //DOES NOT WORK
@@ -856,6 +893,42 @@ namespace DaphneGui.Pushing
 
             return PushLevelMoleculeTemplate;
         }
+    }
+
+    /// <summary>
+    /// Extension methods to the DependencyObject class.
+    /// </summary>
+    public static class DependencyObjectExtensions
+    {
+        public static T GetChildOfType<T>(this DependencyObject depObj)
+        where T : DependencyObject
+        {
+            if (depObj == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+
+                var result = (child as T) ?? GetChildOfType<T>(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        ////public static DependencyObject FindChildControl<T>(this DependencyObject control, string name)
+        ////{
+        ////    int childCount = VisualTreeHelper.GetChildrenCount(control);
+        ////    for (int i = 0; i < childCount; i++)
+        ////    {
+        ////        DependencyObject child = VisualTreeHelper.GetChild(control, i);
+        ////        //if (child != null && child is T)
+        ////        if (child != null && child.Name)
+        ////            return child;
+        ////        else
+        ////            FindChildControl<T>(child, name);
+        ////    }
+        ////    return null;
+        ////}
     }
 
 }

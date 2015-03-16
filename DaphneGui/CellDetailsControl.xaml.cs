@@ -23,10 +23,20 @@ namespace DaphneGui
     /// </summary>
     public partial class CellDetailsControl : UserControl
     {
+        private Level CurrentLevel = null;
+
         public CellDetailsControl()
         {
             InitializeComponent();
+        }
 
+        /// <summary>
+        /// This method is only needed if user goes to "Stores" and selects "Cells" and then selects a cell.
+        /// </summary>
+        /// <param name="currLevel"></param>
+        public void SetCurrentLevel(Level currLevel)
+        {
+            CurrentLevel = currLevel;
         }
 
         private void memb_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -49,6 +59,10 @@ namespace DaphneGui
                 return;
 
             Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
             //if user picked 'new molecule' then create new molecule in ER
             if (nIndex == (cb.Items.Count - 1))
             {
@@ -339,6 +353,10 @@ namespace DaphneGui
             }
 
             Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
             //Create a new default gene
             ConfigGene gene = new ConfigGene("g", 0, 0);
             //gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
@@ -674,6 +692,8 @@ namespace DaphneGui
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
+        //I DON'T THINK THIS METHOD IS USED - SKG
+        //IN ANY CASE, IT IS RELEVANT ONLY FOR CELL POPULATIONS, NOT RELEVANT FOR USERSTORE OR DAPHNESTORE
         private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             CheckBox cb = e.OriginalSource as CheckBox;
@@ -720,11 +740,20 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
+
             //if user picked 'new molecule' then create new molecule in ER
             if (nIndex == (cb.Items.Count - 1))
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+
+                //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = this.Tag;    //DataContext as ConfigCell
 
@@ -741,8 +770,11 @@ namespace DaphneGui
                     }
                     return;
                 }
-                newLibMol.ValidateName(MainWindow.SOP.Protocol);
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                //newLibMol.ValidateName(MainWindow.SOP.Protocol);
+                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                newLibMol.ValidateName(level);
+                level.entity_repository.molecules.Add(newLibMol);
+
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
 
@@ -806,7 +838,15 @@ namespace DaphneGui
 
             //New filtering rules as of 3/5/15 bug 2426
             //Allow all reactions except what belongs in membrane (where each molecule is a boundary molecule)
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
+            EntityRepository er = level.entity_repository;
+
             if (cr.HasBulkMolecule(er) == true)
             {
                 e.Accepted = true;
@@ -839,7 +879,14 @@ namespace DaphneGui
             //Molecules no longer need to be in the membrane. They will get added if needed.
 
             //If the reaction has any bulk molecules, it cannot go in the membrane
-            if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)
+
+            //if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
+            if (cr.HasBulkMolecule(level.entity_repository) == true)
             {
                 e.Accepted = false;
                 return;
@@ -953,6 +1000,7 @@ namespace DaphneGui
         private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
             bool ret = false;
+            //This method should only get called if we have a tissue scenario so no need to use "LevelContext"
             foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(cell_pop.Cell.entity_guid))
@@ -972,6 +1020,7 @@ namespace DaphneGui
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
             bool ret = false;
+            //This method should only get called if we have a tissue scenario so no need to use "LevelContext"
             foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
@@ -1012,7 +1061,15 @@ namespace DaphneGui
                 string[,] signal = new string[,] { { "", "" }, { "", "" } };
                 double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
                 double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
-                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+
+                //ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                Level level = MainWindow.GetLevelContext(this);
+                if (level == null)
+                {
+                    level = CurrentLevel;
+                }
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, level);
+
                 config_td.CurrentState = new DistributedParameter(0);
                 config_td.StateName = config_td.states[(int)config_td.CurrentState.Sample()];
                 cell.death_driver = config_td;
@@ -1054,7 +1111,15 @@ namespace DaphneGui
         public DataGridTextColumn CreateUnusedGenesColumn(ConfigTransitionScheme currScheme)
         {
             ConfigCell cell = DataContext as ConfigCell;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
+            EntityRepository er = level.entity_repository;
+
             DataGridTextColumn editor_col = new DataGridTextColumn();
             editor_col.CanUserSort = false;
             DataTemplate HeaderTemplate = new DataTemplate();
@@ -1153,7 +1218,6 @@ namespace DaphneGui
         /// <param name="stateName"></param>
         private void AddDifferentiationState(string schemeName, string stateName)
         {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
 
@@ -1660,6 +1724,9 @@ namespace DaphneGui
                 return;
             }
 
+            //Level level = null;
+            //SetCurrentLevel(level);
+
             updateCollections(cell);
             updateSelectedMoleculesAndGenes(cell);
         }
@@ -1742,18 +1809,27 @@ namespace DaphneGui
         public void updateCollections(ConfigCell cell)
         {
             CollectionViewSource cvs;
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
+            {
+                level = CurrentLevel;
+            }
 
             // MOLECULES
 
             // cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
             cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
             cvs.Source = new ObservableCollection<ConfigMolecule>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            cvs.Source = level.entity_repository.molecules;
 
             // memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
             cvs.Source = new ObservableCollection<ConfigMolecule>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            cvs.Source = level.entity_repository.molecules;
 
             // list of cytosol molecules for use by division and differentitiation schemes
             cvs = (CollectionViewSource)(FindResource("moleculesListView"));
@@ -1768,20 +1844,28 @@ namespace DaphneGui
             // lvCellAvailableReacs
             cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
             cvs.Source = new ObservableCollection<ConfigReaction>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            cvs.Source = level.entity_repository.reactions;
 
             // lvCytosolAvailableReacs
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
             cvs.Source = new ObservableCollection<ConfigReaction>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            cvs.Source = level.entity_repository.reactions;
 
             cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
             cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            cvs.Source = level.entity_repository.reaction_complexes;
 
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
             cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            
+            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            cvs.Source = level.entity_repository.reaction_complexes;
         }
 
         //This is probably not needed any more but leaving here in case a problem occurs.
@@ -1974,10 +2058,18 @@ namespace DaphneGui
         }
         private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
         {
-            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
-            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
             {
-                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                level = CurrentLevel;
+            }
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+
+            //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            if (level.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                //ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction protReaction = level.entity_repository.reactions_dict[reac.entity_guid];
                 ConfigReaction newreac = protReaction.Clone(true);
 
                 ConfigCell cell = DataContext as ConfigCell;
@@ -2002,10 +2094,17 @@ namespace DaphneGui
         private void menuMembPullReacFromProto_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-
-            if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            Level level = MainWindow.GetLevelContext(this);
+            if (level == null)
             {
-                ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                level = CurrentLevel;
+            }
+
+            //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            if (level.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            {
+                //ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+                ConfigReaction protReaction = level.entity_repository.reactions_dict[reac.entity_guid];
                 ConfigReaction newreac = protReaction.Clone(true);
 
                 ConfigCell cell = DataContext as ConfigCell;

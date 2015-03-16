@@ -1188,7 +1188,7 @@
                         </Grid>
                     </StackPanel>
 
-                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid"
+                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid" 
                             Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}"
                                         Tag="div"/>
                     

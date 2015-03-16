@@ -3567,6 +3567,7 @@ namespace DaphneGui
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             menuProtocolStore.IsEnabled = true;
+            pushMenu.Visibility = Visibility.Collapsed;
         }
 
         private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
@@ -3582,6 +3583,7 @@ namespace DaphneGui
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             menuProtocolStore.IsEnabled = true;
+            pushMenu.Visibility = Visibility.Collapsed;
         }
 
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3593,6 +3595,7 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
+            pushMenu.Visibility = Visibility.Visible;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3609,7 +3612,7 @@ namespace DaphneGui
             //load the stores only as needed
             //readStores();
 
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3625,7 +3628,7 @@ namespace DaphneGui
             //load the stores only as needed
             //readStores();
 
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3641,7 +3644,7 @@ namespace DaphneGui
             //load the stores only as needed
             //readStores();
 
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3657,7 +3660,7 @@ namespace DaphneGui
             //load the stores only as needed
             //readStores();
 
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3673,7 +3676,7 @@ namespace DaphneGui
         {
             //load the stores only as needed
             //readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3688,7 +3691,7 @@ namespace DaphneGui
         {
             //load the stores only as needed
             //readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3703,7 +3706,7 @@ namespace DaphneGui
         {
             //load the stores only as needed
             //readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
             pushWindow.ShowDialog();
@@ -3774,6 +3777,7 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
+            pushMenu.Visibility = Visibility.Visible;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
