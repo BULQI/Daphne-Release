@@ -2093,11 +2093,6 @@ namespace DaphneGui
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // GUI Resources
-                // Set the data context for the main tab control config GUI
-                this.CellStudioToolWindow.DataContext = sop.Protocol;
-                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
-                this.ComponentsToolWindow.DataContext = sop.Protocol;
-
                 if (newFile == true)
                 {
                     if (ToolWinType != ToolWindowType.Tissue)
@@ -2125,6 +2120,12 @@ namespace DaphneGui
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinTissue)ToolWin);
                 }
+
+                // Moved these lines down from above because ToolWin needs to be instantiated before making these calls.
+                // Set the data context for the main tab control config GUI
+                this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
+                this.ComponentsToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
