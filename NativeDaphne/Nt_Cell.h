@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
+#include "Nt_DArray.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -15,79 +16,22 @@ namespace NativeDaphne
 	public ref class Nt_CellSpatialState
 	{
 	public:
-		array<double>^ X;
-		array<double>^ V;				
-		array<double>^ F;
+		Nt_Darray^ X;
+		Nt_Darray^ V;				
+		Nt_Darray^ F;
 
 		static int SingleDim = 3;
 		static int Dim = 9;
 
-		Nt_CellSpatialState(array<double>^ x, array<double>^ v, array<double>^ f)
+		Nt_CellSpatialState(Nt_Darray^ x, Nt_Darray^ v, Nt_Darray^ f)
 		{
 			X = x;
-			V=  v;
+			V = v;
 			F = f;
 			_X = _V = _F = NULL;
 		}
 
-		void updateManaged()
-		{
-			for (int i=0; i< X->Length; i++)
-			{
-				X[i] = _X[i];
-				V[i] = _V[i];
-				F[i] = _F[i];
-			}
-		}
-
-		void updateUnmanaged()
-		{
-			if (!_X || !_V || !_F) return; //??
-			for (int i=0; i< X->Length; i++)
-			{
-				_X[i] = X[i];
-				_V[i] = V[i];
-				_F[i] = F[i];
-			}
-		}
-
-		void updateManagedX()
-		{
-			if (_X == NULL)return; //not initialized yet.
-			X[0] = _X[0]; X[1] = _X[1]; X[2] = _X[2];
-		}
-
-		void updateUnmanagedX()
-		{
-			if (!_X) return;
-			_X[0] = X[0]; _X[1] = X[1]; _X[2] = X[2];
-		}
-
-		void updateManagedV()
-		{
-			if (!_V)return;
-			V[0] = _V[0]; V[1] = _V[1]; V[2] = _V[2];
-		}
-
-		void updateUnmanagedV()
-		{
-			if (!_V) return;
-			_V[0] = V[0]; _V[1] = V[1]; _V[2] = V[2];
-		}
-
-		void updateManagedF()
-		{
-			if (!_F)return;
-			F[0] = _F[0]; F[1] = _F[1]; F[2] = _F[2];
-		}
-
-		void updateUnmanagedF()
-		{
-			if (!_F) return;
-			_F[0] = F[0]; _F[1] = F[1]; _F[2] = F[2];
-		}
-
-	//private:
+	public private:
 		double *_X;
 		double *_V;
 		double *_F;
@@ -139,7 +83,7 @@ namespace NativeDaphne
 
 		~Nt_Cell()
 		{
-			//this->!Nt_Cell();
+			this->!Nt_Cell();
 		}
 
 		!Nt_Cell()
@@ -147,6 +91,7 @@ namespace NativeDaphne
 			if (allocedItemCount > 0)
 			{
 				free(_random_samples);
+				free(_driver_gradient);
 				free(_X);
 				free(_V);
 				free(_F);
@@ -167,70 +112,93 @@ namespace NativeDaphne
 			cell->IsStochastic = this->IsStochastic;
 			cell->cytokinetic = this->cytokinetic;
 			cell->ComponentCells = gcnew List<Nt_Cell^>();
-			cell->ComponentCells->Add(this);
 			cell->cellIds = gcnew List<int>();
 			cell->cellIds->Add(this->Cell_id);
+
+			cell->AddCell(this);
 			return cell;
 		}
 
-		void initialize()
+		void AddCell(Nt_Cell^ cell)
 		{
 			int itemCount = ComponentCells->Count;
-			if (itemCount > allocedItemCount)
+			if (itemCount + 1 > allocedItemCount)
 			{
-				free(_random_samples);
-				free(_driver_gradient);
-				free(_X);
-				free(_V);
-				free(_F);
-
-				allocedItemCount = Nt_Utility::GetAllocSize(itemCount, allocedItemCount);
+				allocedItemCount = Nt_Utility::GetAllocSize(itemCount+1, allocedItemCount);
 				int alloc_size = allocedItemCount * 3 * sizeof(double);
-				_random_samples = (double *)malloc(alloc_size);
-				_driver_gradient = (double *)malloc(alloc_size);
-				_X = (double *)malloc(alloc_size);
-				_V = (double *)malloc(alloc_size);
-				_F = (double *)malloc(alloc_size);
-				array_length = itemCount * 3;
-			}
+				_random_samples = (double *)realloc(_random_samples, alloc_size);
+				_driver_gradient = (double *)realloc(_driver_gradient, alloc_size);
 
-			int n = 0;
-			for (int i=0; i< ComponentCells->Count; i++)
-			{
-				Nt_CellSpatialState^ state = ComponentCells[i]->spatialState;
-				array<double>^ x = state->X;
-				array<double>^ v = state->V;
-				array<double>^ f = state->F;
-				state->_X = _X + n;
-				state->_V = _V + n;
-				state->_F = _F + n;
-				for (int j = 0; j< 3; j++, n++)
+				_X = (double *)realloc(_X, alloc_size);
+				_V = (double *)realloc(_V, alloc_size);
+				_F = (double *)realloc(_F, alloc_size);
+				if (_X == NULL || _V == NULL || _F == NULL)
 				{
-					_X[n] = x[j];
-					_V[n] = v[j];
-					_F[n] = f[j];
+					throw gcnew Exception("Error realloc memory");
 				}
-
+				//reassign memory address
+				for (int i=0; i< itemCount; i++)
+				{
+					ComponentCells[i]->spatialState->X->NativePointer = _X + i * 3 * sizeof(double);
+					ComponentCells[i]->spatialState->V->NativePointer = _V + i * 3 * sizeof(double);
+					ComponentCells[i]->spatialState->F->NativePointer = _F + i * 3 * sizeof(double);
+				}
 			}
-			initialized = true;
+			//copy new values
+			double *_xptr = _X + itemCount * 3 * sizeof(double);
+			double *_vptr = _V + itemCount * 3 * sizeof(double);
+			double *_fptr = _F + itemCount * 3 * sizeof(double);
+			for (int i=0; i<3; i++)
+			{
+				_xptr[i] = cell->spatialState->X[i];
+				_vptr[i] = cell->spatialState->V[i];
+				_fptr[i] = cell->spatialState->F[i];
+			}
+			cell->spatialState->X->NativePointer = _xptr;
+			cell->spatialState->V->NativePointer = _vptr;
+			cell->spatialState->F->NativePointer = _fptr;
+			ComponentCells->Add(cell);
+			cellIds->Add(cell->Cell_id);
+			array_length = ComponentCells->Count * 3;
 		}
 
 		void step(double dt);
-
-		void AddCell(Nt_Cell ^cell)
-		{
-			ComponentCells->Add(cell);
-			initialized = false;
-		}
 
 		void RemoveCell(int cell_id)
 		{
 			//we may want to use linkedlist for fast removal
 			int index = cellIds->IndexOf(cell_id);
 			if (index == -1)return;
+
+			ComponentCells[index]->spatialState->X->reallocate();
+			ComponentCells[index]->spatialState->V->reallocate();
+			ComponentCells[index]->spatialState->F->reallocate();
+
+			int move_count = ComponentCells->Count - index -1;
+			if (move_count > 0)
+			{
+				double *src = _X + (index+1)*3*sizeof(double);
+				double *dst = src - 3 * sizeof(double);
+				memmove(dst, src, move_count * 3 * sizeof(double));
+
+				src = _V + (index+1)*3*sizeof(double);
+				dst = src - 3 * sizeof(double);
+				memmove(dst, src, move_count * 3 * sizeof(double));
+
+				src = _F + (index+1)*3*sizeof(double);
+				dst = src - 3 * sizeof(double);
+				memmove(dst, src, move_count * 3 * sizeof(double));
+
+				for (int i= index+1; i<ComponentCells->Count; i++)
+				{
+					ComponentCells[i]->spatialState->X->NativePointer -= (3 * sizeof(double));
+					ComponentCells[i]->spatialState->V->NativePointer -= (3 * sizeof(double));
+					ComponentCells[i]->spatialState->F->NativePointer -= (3 * sizeof(double));
+				}
+			}
 			cellIds->RemoveAt(index);
 			ComponentCells->RemoveAt(index);
-			initialized = false;
+			array_length = ComponentCells->Count * 3;
 		}
 
 	private:
@@ -243,7 +211,6 @@ namespace NativeDaphne
 		double *_V;
 		double *_F;
 
-		bool initialized;
 		int allocedItemCount;
 		int array_length;
 

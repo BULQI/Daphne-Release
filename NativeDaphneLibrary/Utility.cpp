@@ -36,7 +36,7 @@ namespace NativeDaphneLibrary
 		dscal(n, (1-alpha), x, 1); //x = x - alpa*x = (1-a)*x
 
 
-		test_performance();
+		//test_performance();
 		//stress test
 		//for (int i=0; i< 10000000; i++)
 		//{

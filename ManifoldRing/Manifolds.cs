@@ -985,7 +985,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation.ToArray();
+            double[] pos = t.Translation.ArrayCopy;
             Vector x = new DenseVector(new double[3]);
 
             for (int i = 0; i < ArraySize; i++)
@@ -1459,7 +1459,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-                double[] pos = t.Translation.ToArray();
+                double[] pos = t.Translation.ArrayCopy;
                 to.array[0] = from.Value(pos);
 
                 return to;

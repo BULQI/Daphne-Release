@@ -57,10 +57,11 @@ namespace NativeDaphne
 
 		!Nt_Darray()
 		{
-			if (is_pointer_owner == false && _array != NULL)
+			if (is_pointer_owner == true && _array != NULL)
 			{
 				free(_array);
 			}
+			_array = NULL;
 		}
 
 		property array<double>^ ArrayCopy
@@ -108,6 +109,14 @@ namespace NativeDaphne
 			}
 		}
 
+		static void Copy(Nt_Darray ^src, Nt_Darray ^dst, int len)
+		{
+			for (int i=0; i<len; i++)
+			{
+				dst[i] = src[i];
+			}
+		}
+
 	public private:
 		[JsonIgnore]
 		property double *NativePointer
@@ -127,6 +136,15 @@ namespace NativeDaphne
 			}
 		}
 
+		//allocate and take owner ship of the pointer
+		//called when remoe this object from a collection
+		void reallocate()
+		{
+			if (is_pointer_owner == true || _array == NULL || length == 0)return;
+			double *tmp = (double *)malloc(length *sizeof(double));
+			memcpy(tmp, _array, length * sizeof(double));
+			is_pointer_owner = true;
+		}	
 	};
 
 }

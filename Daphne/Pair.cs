@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 
 using MathNet.Numerics.LinearAlgebra.Double;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -50,8 +51,8 @@ namespace Daphne
         {
             //Vector tmp = new DenseVector(a.SpatialState.X);
             //tmp = (DenseVector)tmpArr.Subtract(new DenseVector(b.SpatialState.X));
-            double[] a_X = a.SpatialState.X;
-            double[] b_X = b.SpatialState.X;
+            Nt_Darray a_X = a.SpatialState.X;
+            Nt_Darray b_X = b.SpatialState.X;
             double x = a_X[0] - b_X[0];
             double y = a_X[1] - b_X[1];
             double z = a_X[2] - b_X[2];
@@ -206,8 +207,8 @@ namespace Daphne
                     //b.addForce(normal.Multiply(force).ToArray());
 
                     //performance tuning
-                    double[] b_X = b.SpatialState.X;
-                    double[] a_X = a.SpatialState.X;
+                    var b_X = b.SpatialState.X;
+                    var a_X = a.SpatialState.X;
                     double dx = b_X[0] - a_X[0];
                     double dy = b_X[1] - a_X[1];
                     double dz = b_X[2] - a_X[2];

@@ -138,11 +138,6 @@ namespace Daphne
 
                     SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id);
                 }
-
-                //we will need cells position for some computation in ECS
-                //and transform needto be updated.
-                //for now we do forced update here until we decided what to do with it.
-                kvp.Value.SpatialState.nt_specialState.updateManagedX();
             }
 
             // process removal list
@@ -223,7 +218,6 @@ namespace Daphne
 
             Nt_Cell ntc = new Nt_Cell(c.Cell_id, c.Radius);
             ntc.spatialState = new Nt_CellSpatialState(c.SpatialState.X, c.SpatialState.V, c.SpatialState.F);
-            c.SetSpatialStatNativeInstance(ntc.spatialState);
             ntc.Population_id = c.Population_id;
             ntc.isMotile = c.IsMotile;
             ntc.IsChemotactic = c.IsChemotactic;

@@ -18,6 +18,7 @@ using System.Windows.Markup;
 
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
+using NativeDaphne;
 
 
 namespace Daphne
@@ -7022,9 +7023,9 @@ namespace Daphne
 
         public CellState()
         {
-            spState.X = new double[3];
-            spState.V = new double[3];
-            spState.F = new double[3];
+            spState.X = new Nt_Darray(3);
+            spState.V = new Nt_Darray(3);
+            spState.F = new Nt_Darray(3);
 
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
@@ -7033,9 +7034,12 @@ namespace Daphne
 
         public CellState(double x, double y, double z)
         {
-            spState.X = new double[3] { x, y, z };
-            spState.V = new double[3];
-            spState.F = new double[3];
+            spState.X = new Nt_Darray(3);
+            spState.X[0] = x;
+            spState.X[1] = y;
+            spState.X[2] = z;
+            spState.V = new Nt_Darray(3);
+            spState.F = new Nt_Darray(3);
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
             cgState = new CellGeneState();
@@ -7043,9 +7047,9 @@ namespace Daphne
 
         public void setSpatialState(CellSpatialState state)
         {
-            Array.Copy(state.X, spState.X, 3);
-            Array.Copy(state.V, spState.V, 3);
-            Array.Copy(state.F, spState.F, 3);
+            Nt_Darray.Copy(state.X, spState.X, 3);
+            Nt_Darray.Copy(state.V, spState.V, 3);
+            Nt_Darray.Copy(state.F, spState.F, 3);
         }
 
         public void addMolPopulation(string key, MolecularPopulation mp)

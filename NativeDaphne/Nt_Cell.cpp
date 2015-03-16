@@ -17,11 +17,6 @@ namespace NativeDaphne
 {
 	void Nt_Cell::step(double dt)
 	{
-		if (initialized == false)
-		{
-			initialize();
-		}
-
 		Nt_Cell::count++;
 		int iteration = Nt_Cell::count;
 
@@ -72,9 +67,9 @@ namespace NativeDaphne
 		//stochastic
 		if (this->IsStochastic)
 		{
-			Nt_CellManager::normalDist->Sample(array_length, _random_samples);
+			/*Nt_CellManager::normalDist->Sample(array_length, _random_samples);
 			double factor = Sigma /Math::Sqrt(dt);
-			NativeDaphneLibrary::Utility::NtDaxpy(array_length, factor, _random_samples, 1, _F, 1);
+			NativeDaphneLibrary::Utility::NtDaxpy(array_length, factor, _random_samples, 1, _F, 1);*/
 			
 		}
 		//handle movement

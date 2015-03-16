@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using MathNet.Numerics.LinearAlgebra.Double;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -64,24 +65,8 @@ namespace Daphne
         /// </summary>
         /// <param name="pos">position to test</param>
         /// <returns>tuple with indices; negative for out of bounds</returns>
-        public void findGridIndex(double[] pos, ref int[] idx)
+        public void findGridIndex(Nt_Darray pos, ref int[] idx)
         {
-            //double[] tmp = new double[pos.Count];
-
-            //for (int i = 0; i < pos.Count; i++)
-            //{
-            //    // tmp[0] goes along x, tmp[1] along y
-            //    tmp[i] = pos[i] / gridStep;
-
-            //    // for now return -1 for out of bounds
-            //    if (tmp[i] < 0 || (int)tmp[i] > gridPts[i] - 1)
-            //    {
-            //        return new int[] { -1, -1, -1 };
-            //    }
-            //}
-
-            //return new int[] { (int)tmp[0], (int)tmp[1], (int)tmp[2] };
-
             //save one allocation
             for (int i = 0; i < pos.Length; i++)
             {

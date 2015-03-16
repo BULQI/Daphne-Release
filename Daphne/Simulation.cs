@@ -854,7 +854,7 @@ namespace Daphne
 
             dataBasket.Environment.Comp.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
             // set translation by reference: when the cell moves then the transform gets updated automatically
-            t.setTranslationByReference(new DenseVector(c.SpatialState.X));
+            t.setTranslationByReference(c.SpatialState.X);
             dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
