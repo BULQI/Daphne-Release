@@ -1122,12 +1122,13 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.AddGene(gene1.entity_guid);  
+                ConfigGene newgene = gene1.Clone(null);
+                scheme.AddGene(newgene.entity_guid); 
 
                 //HERE, WE NEED TO ADD THE GENE TO THE CELL ALSO
                 if (cell.HasGene(gene1.entity_guid) == false)
                 {
-                    ConfigGene newgene = gene1.Clone(null);
+                    newgene = gene1.Clone(null);
                     cell.genes.Add(newgene);
                 }
               
