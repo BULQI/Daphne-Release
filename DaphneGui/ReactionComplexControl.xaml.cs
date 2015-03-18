@@ -92,9 +92,15 @@ namespace DaphneGui
             if (level is Protocol)
             {
                 rcis.Tag = MainWindow.SOP.Protocol.scenario.environment.comp;
+                if (rcis.ShowDialog() == true)
+                {
+                    ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
+                    if (ListBoxReactionComplexes.SelectedIndex < 0 || ListBoxReactionComplexes.SelectedIndex > ListBoxReactionComplexes.Items.Count)
+                    {
+                        ListBoxReactionComplexes.SelectedIndex = 0;
+                    }
+                }
             }
-
-            rcis.ShowDialog();
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
