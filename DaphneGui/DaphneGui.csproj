@@ -191,6 +191,9 @@
     <Compile Include="CellDetailsControl.xaml.cs">
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellDetailsReadOnlyControl.xaml.cs">
+      <DependentUpon>CellDetailsReadOnlyControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
@@ -314,6 +317,10 @@
     <Page Include="CellDetailsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellDetailsReadOnlyControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="CellOptions.xaml">
       <SubType>Designer</SubType>

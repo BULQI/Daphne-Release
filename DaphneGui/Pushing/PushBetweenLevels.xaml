@@ -9,6 +9,7 @@
         Title="Get/Save entities between stores"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"  
+        WindowStartupLocation="CenterOwner"
         MinHeight="120"
         x:Name="PushWindow"
         Margin="10,10"
@@ -252,8 +253,9 @@
                     </TextBlock>
 
                     <StackPanel x:Name="spUserControls">
-                        <local:CellPropertiesControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
-                        <local:CellDetailsControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                        <local:CellPropertiesControl IsEnabled="False" Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                        <local:CellDetailsReadOnlyControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                        <!--<local:CellDetailsControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>-->
                     </StackPanel>
 
                 </StackPanel>
@@ -432,7 +434,8 @@
                         <ContentControl Name="LeftContent"
                             Content="{Binding}"
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}" 
-                            Margin="6"/>                        
+                            Margin="6"
+                            Loaded="LeftContent_Loaded"/>                        
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

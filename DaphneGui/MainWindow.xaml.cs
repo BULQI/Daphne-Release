@@ -3661,6 +3661,7 @@ namespace DaphneGui
             //load the stores only as needed
             //readStores();
 
+            Level tempLevel = GetLevelContext(this);
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 
@@ -3707,6 +3708,7 @@ namespace DaphneGui
         {
             //load the stores only as needed
             //readStores();
+            
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex, GetLevelContext(this));
             pushWindow.DataContext = SOP;
 

@@ -16,6 +16,7 @@ using System.Reflection;
 using System.IO;
 using System.Globalization;
 using System.Data;
+using System.Collections;
 
 namespace DaphneGui.Pushing
 {
@@ -37,10 +38,11 @@ namespace DaphneGui.Pushing
         public List<string> equalGuids { get; set; }
 
         public double GridHeight { get; set; }
-        private Level CurrentLevel = null;
+        public Level CurrentLevel { get; set; }
 
         public PushBetweenLevels(PushLevelEntityType type, Level currLevel)
         {
+            this.Owner = Application.Current.MainWindow;
             PushEntityType = type;
             PushLevelA = PushLevel.UserStore;
             PushLevelB = PushLevel.Protocol;
@@ -49,6 +51,7 @@ namespace DaphneGui.Pushing
             equalGuids = new List<string>();
             InitializeComponent();
 
+            
             CurrentLevel = currLevel;
             MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
             GridHeight = MaxHeight * 0.85;
@@ -93,55 +96,32 @@ namespace DaphneGui.Pushing
             var desktopWorkingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
             this.Left = desktopWorkingArea.Left + 20;
             this.Top = desktopWorkingArea.Top + 20;
-
-
-            //CellDetailsControl cdc = scrollViewer.GetChildOfType<CellDetailsControl>();
-
-            //var details = this.MainGrid.Children.OfType<CellDetailsControl>();
-            //GroupBox groupbox = this.MainGrid.Children.OfType<GroupBox>().FirstOrDefault();
-            //groupbox.
-            //var detailsWindow = this.MainGrid.Children .Children.OfType<CellDetailsControl>().FirstOrDefault();
-            //if (detailsWindow != null)
-            //{
-            //    detailsWindow.SetCurrentLevel(this.CurrentLevel);
-            //}
-
-            //var cc = this.MainGrid.GetChildOfType<ContentControl>();
-            //if (cc.ContentTemplate == null)
-            //    return;
-
-            //var myControl = cc.ContentTemplate.FindName("cellDetailsControl", cc);
-            //int i = 0;
-            //i++;
-            //var cc2 = this.MainGrid.FindChildControl<CellDetailsControl>("cellDetailsControl");
-
-            //if (cc == null)
-            //{
-            //    MessageBox.Show("Not found");
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Found");
-            //}
-
-            //if (cc != null)
-            //{
-            //    DataTemplate dt = cc.ContentTemplate;
-            //    string dtname = dt.FindName("templCells",
-            //}
-        
-
-            ////Get the datagrids and set their max heights
-            //DOES NOT WORK
-            //List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);
-            //var grid = grids[0];
-            //for (int i = 0; i < grids.Count; i++)
-            //{
-            //    grids[i].MaxHeight = this.MaxHeight - 400;
-            //}
-
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
+        }
+
+        public static List<T> GetLogicalChildCollection<T>(object parent) where T : DependencyObject
+        {
+            List<T> logicalCollection = new List<T>();
+            GetLogicalChildCollection(parent as DependencyObject, logicalCollection);
+            return logicalCollection;
+        }
+
+        private static void GetLogicalChildCollection<T>(DependencyObject parent, List<T> logicalCollection) where T : DependencyObject
+        {
+            IEnumerable children = LogicalTreeHelper.GetChildren(parent);
+            foreach (object child in children)
+            {
+                if (child is DependencyObject)
+                {
+                    DependencyObject depChild = child as DependencyObject;
+                    if (child is T)
+                    {
+                        logicalCollection.Add(child as T);
+                    }
+                    GetLogicalChildCollection(depChild, logicalCollection);
+                }
+            }
         }
 
         private void ResetGrids()
@@ -799,6 +779,31 @@ namespace DaphneGui.Pushing
             //    PushButtonArrow.IsEnabled = false;
         }
 
+        private void LeftContent_Loaded(object sender, RoutedEventArgs e)
+        {
+            ContentControl cc = sender as ContentControl;
+            DataTemplateSelector dts = cc.ContentTemplateSelector;
+
+            //DataTemplate temp = PushLevelEntityTemplateSelector.PushLevelCellTemplate;
+            //if (dts is PushLevel)
+            //{
+            //}
+            
+
+            List<UIElement> elements = new List<UIElement>();
+            GetLogicalChildCollection(cc, elements);
+
+            foreach (UIElement child in elements)
+            {
+                Type t = child.GetType();
+                if (child.GetType() == typeof(CellDetailsControl))
+                {
+                    MessageBox.Show("Found celldetailscontrol");
+                    //((CellDetailsControl)child).IsEnabled = false;
+                }
+            }
+        }
+
     }  //End of PushBetweenLevels class
 
 
@@ -898,7 +903,7 @@ namespace DaphneGui.Pushing
     /// <summary>
     /// Extension methods to the DependencyObject class.
     /// </summary>
-    public static class DependencyObjectExtensions
+    public static class ViewExtensions
     {
         public static T GetChildOfType<T>(this DependencyObject depObj)
         where T : DependencyObject
@@ -915,20 +920,58 @@ namespace DaphneGui.Pushing
             return null;
         }
 
-        ////public static DependencyObject FindChildControl<T>(this DependencyObject control, string name)
-        ////{
-        ////    int childCount = VisualTreeHelper.GetChildrenCount(control);
-        ////    for (int i = 0; i < childCount; i++)
-        ////    {
-        ////        DependencyObject child = VisualTreeHelper.GetChild(control, i);
-        ////        //if (child != null && child is T)
-        ////        if (child != null && child.Name)
-        ////            return child;
-        ////        else
-        ////            FindChildControl<T>(child, name);
-        ////    }
-        ////    return null;
-        ////}
-    }
+        /// <summary>
+        /// Finds a Child of a given item in the visual tree. 
+        /// </summary>
+        /// <param name="parent">A direct parent of the queried item.</param>
+        /// <typeparam name="T">The type of the queried item.</typeparam>
+        /// <param name="childName">x:Name or Name of child. </param>
+        /// <returns>The first parent item that matches the submitted type parameter. 
+        /// If not matching item can be found, 
+        /// a null parent is being returned.</returns>
+        public static T FindChildByName<T>(this DependencyObject parent, string childName) 
+        where T : DependencyObject
+        {    
+          // Confirm parent and childName are valid. 
+          if (parent == null) return null;
 
+          T foundChild = null;
+
+          int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+          for (int i = 0; i < childrenCount; i++)
+          {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            // If the child is not of the request child type child
+            T childType = child as T;
+            if (childType == null)
+            {
+              // recursively drill down the tree
+                foundChild = FindChildByName<T>(child, childName);
+
+              // If the child is found, break so we do not overwrite the found child. 
+              if (foundChild != null) break;
+            }
+            else if (!string.IsNullOrEmpty(childName))
+            {
+              var frameworkElement = child as FrameworkElement;
+              // If the child's name is set for search
+              if (frameworkElement != null && frameworkElement.Name == childName)
+              {
+                // if the child's name is of the request name
+                foundChild = (T)child;
+                break;
+              }
+            }
+            else
+            {
+              // child element found.
+              foundChild = (T)child;
+              break;
+            }
+          }
+
+          return foundChild;
+        }
+
+    }
 }
