@@ -4235,6 +4235,7 @@ namespace Daphne
         public ConfigTransitionDriverElement()
         {
         }
+        public abstract bool Equals(ConfigTransitionDriverElement element);
     }
 
     public class ConfigMolTransitionDriverElement : ConfigTransitionDriverElement
@@ -4247,6 +4248,20 @@ namespace Daphne
         {
             driver_mol_guid_ref = "";
             Type = TransitionDriverElementType.MOLECULAR;
+        }
+
+        public override bool Equals(ConfigTransitionDriverElement element)
+        {
+            ConfigMolTransitionDriverElement mol_element = element as ConfigMolTransitionDriverElement;
+
+            if (Alpha != mol_element.Alpha)
+                return false;
+            if (Beta != mol_element.Beta)
+                return false;
+            if (driver_mol_guid_ref != mol_element.driver_mol_guid_ref)
+                return false;
+
+            return true;
         }
     }
 
@@ -4270,6 +4285,16 @@ namespace Daphne
         {
             Distr = new DistributedParameter();
             Type = TransitionDriverElementType.DISTRIBUTION;
+        }
+
+        public override bool Equals(ConfigTransitionDriverElement element)
+        {
+            ConfigDistrTransitionDriverElement distr_element = element as ConfigDistrTransitionDriverElement;
+
+            if (Distr.Equals(distr_element.Distr) == false)
+                return false;
+
+            return true;
         }
     }
 
@@ -4357,6 +4382,27 @@ namespace Daphne
         {
             elements = new ObservableCollection<ConfigTransitionDriverElement>();
         }
+
+        public bool Equals(ConfigTransitionDriverRow tdrow)
+        {
+            if (this != null && tdrow == null)
+                return false;
+            else if (this == null && tdrow != null)
+                return false;
+            else
+            {
+            }
+
+            if (elements.Count != tdrow.elements.Count)
+                return false;
+            foreach (ConfigTransitionDriverElement element in elements)
+            {
+                if (element.Equals(tdrow.elements[elements.IndexOf(element)]) == false)
+                    return false;
+            }
+
+            return true;
+        }
     }
 
     public class ConfigTransitionDriver : ConfigEntity
@@ -4404,6 +4450,14 @@ namespace Daphne
         {
             ConfigTransitionDriver ent = entity as ConfigTransitionDriver;
 
+            if (this.DriverElements == null && ent.DriverElements != null)
+                return false;
+            else if (this.DriverElements != null && ent.DriverElements == null)
+                return false;
+            else
+            {
+            }
+
             if (this.entity_guid != ent.entity_guid)
                 return false;
             if (this.CurrentState.Equals(ent.CurrentState) == false)
@@ -4412,6 +4466,21 @@ namespace Daphne
                 return false;
             if (this.Name != ent.Name)
                 return false;
+
+            if (states.Count != ent.states.Count)
+                return false;
+            foreach (string state in states)
+            {
+                if (ent.states.ElementAt(states.IndexOf(state)) != state)
+                    return false;
+            }
+            if (DriverElements.Count != ent.DriverElements.Count)
+                return false;
+            foreach (ConfigTransitionDriverRow tdrow in DriverElements)
+            {
+                if (tdrow.Equals(ent.DriverElements[DriverElements.IndexOf(tdrow)]) == false)
+                    return false;
+            }
 
             return true;
         }
