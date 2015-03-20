@@ -32,18 +32,6 @@
         <CollectionViewSource x:Key="availableBulkMoleculesListView"/>
         <CollectionViewSource x:Key="availableBoundaryMoleculesListView"/>
         <CollectionViewSource x:Key="moleculesListView"  />
-   
-        <CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
-                                  Filter="cytosolAvailableReactionsListView_Filter"/>
-
-        <CollectionViewSource x:Key="membraneAvailableReactionsListView"  
-                                  Filter="membraneAvailableReactionsListView_Filter"/>
-
-        <CollectionViewSource x:Key="membraneAvailableReactionComplexesListView"  
-                                  Filter="membraneAvailableReactionComplexesListView_Filter"/>
-        <CollectionViewSource x:Key="cytosolAvailableReactionComplexesListView"  
-                                  Filter="cytosolAvailableReactionComplexesListView_Filter"/>
-
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
 
         <!-- Mol_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element.  -->

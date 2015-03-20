@@ -151,36 +151,6 @@ namespace DaphneGui
             }
         }
 
-
-        //I DON'T THINK THIS METHOD IS USED - SKG
-        //IN ANY CASE, IT IS RELEVANT ONLY FOR CELL POPULATIONS, NOT RELEVANT FOR USERSTORE OR DAPHNESTORE
-        private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
-        {
-            CheckBox cb = e.OriginalSource as CheckBox;
-
-            if (cb.CommandParameter == null)
-            {
-                return;
-            }
-
-            string guid = cb.CommandParameter as string;
-
-            if (guid.Length > 0)
-            {
-                GaussianSpecification next;
-
-                ((TissueScenario)MainWindow.SOP.Protocol.scenario).resetGaussRetrieve();
-                while ((next = ((TissueScenario)MainWindow.SOP.Protocol.scenario).nextGaussSpec()) != null)
-                {
-                    if (next.box_spec.box_guid == guid)
-                    {
-                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
-                        break;
-                    }
-                }
-            }
-        }
-
         private void cyto_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = (ComboBox)e.Source;
@@ -324,219 +294,103 @@ namespace DaphneGui
             }
         }
 
-        private void membraneAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+
+        private void MembRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            ConfigReaction cr = e.Item as ConfigReaction;
-            ConfigCell cc = DataContext as ConfigCell;
-
-            if (cc == null)
-            {
-                e.Accepted = false;
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
                 return;
-            }
 
-            //New filter as of 3/5/2015 for bug 2426
-            //Molecules no longer need to be in the membrane. They will get added if needed.
-
-            //If the reaction has any bulk molecules, it cannot go in the membrane
-
-            //if (cr.HasBulkMolecule(MainWindow.SOP.Protocol.entity_repository) == true)
-            Level level = MainWindow.GetLevelContext(this);
-            if (level == null)
-            {
-                level = CurrentLevel;
-            }
-            if (cr.HasBulkMolecule(level.entity_repository) == true)
-            {
-                e.Accepted = false;
-                return;
-            }
-
-            //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid))
-            {
-                e.Accepted = false;
-                return;
-            }
-
-            e.Accepted = true;
+            element.BringIntoView();
         }
 
-        //THIS METHOD NEEDS TO BE IMPLEMENTED
-
-        private void membraneAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
+        private void CellMolPopsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
-            ConfigCell cc = DataContext as ConfigCell;
-
-            if (cc == null)
-            {
-                e.Accepted = false;
-                return;
-            }
-
-            //if already in cytosol, return
-            if (cc.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid))
-            {
-                e.Accepted = false;
-                return;
-            }
-
-            //This filter is called for every reaction complex in the repository.
-
-            // Only allow reaction complexes with membrane-bound molecules.
-            bool bOK = true;
-
-            foreach (KeyValuePair<string,ConfigMolecule> kvp in crc.molecules_dict)
-            {
-                if (kvp.Value.molecule_location == MoleculeLocation.Bulk)
-                {
-                    bOK = false;
-                    break;
-                }
-            }
-
-            e.Accepted = bOK;
-        }
-
-        //THIS METHOD NEEDS TO BE IMPLEMENTED
-        private void cytosolAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
-            ConfigCell cc = DataContext as ConfigCell;
-
-            //if null cell, return
-            if (cc == null)
-            {
-                e.Accepted = false;
-                return;
-            }
-
-            //if already in cytosol, return
-            if (cc.cytosol.reaction_complexes_dict.ContainsKey(crc.entity_guid))
-            {
-                e.Accepted = false;
-                return;
-            }
-
-            // Allow any reaction commplex. Any missign molecules or genes will be added to the cell, as needed.
-
-            e.Accepted = true;
-        }
-       
-        private bool MembraneHasMolecule(ConfigCell cell, string molguid)
-        {
-            foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
-            {
-                if (molguid == molpop.molecule.entity_guid)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        private bool CytosolHasMolecule(ConfigCell cell, string molguid)
-        {
-            foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
-            {
-                if (molguid == molpop.molecule.entity_guid)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private bool CellPopsHaveMoleculeInMemb(string molguid)
-        {
-            bool ret = false;
-            //This method should only get called if we have a tissue scenario so no need to use "LevelContext"
-            foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
-            {
-                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(cell_pop.Cell.entity_guid))
-                {
-                    ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
-                    if (MembraneHasMolecule(cell, molguid))
-                        return true;
-                }
-                else
-                {
-                    return ret;
-                }
-            }
-
-            return ret;
-        }
-        private bool CellPopsHaveMoleculeInCytosol(string molguid)
-        {
-            bool ret = false;
-            //This method should only get called if we have a tissue scenario so no need to use "LevelContext"
-            foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
-            {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
-                if (CytosolHasMolecule(cell, molguid))
-                    return true;
-            }
-
-            return ret;
-        }
-
-        private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
                 return;
 
-            if (cell.death_driver == null)
+            element.BringIntoView();
+        }
+
+        private void CellReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void ReacCompExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        private void CellDeathExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        //Cytosol reaction complex handlers
+
+        private void CytoRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
+        /// <summary>
+        /// This selects first item in each of the three molecules/genes lists.
+        /// </summary>
+        /// <param name="cell"></param>
+        public void updateSelectedMoleculesAndGenes(ConfigCell cell)
+        {
+            // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
+            // so do it manually here.
+
+            CellMembraneMolPopsListBox.SelectedIndex = 0;
+            CellCytosolMolPopsListBox.SelectedIndex = 0;
+            CellNucleusGenesListBox.SelectedItem = 0;
+        }
+
+        /// <summary>
+        /// This fixes the problem of selecting the 1st item in the mol pop list.
+        /// This shouldn't be a problem in the first place, but the data binding seems to occur before the list is populated
+        /// so the first item was not getting selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
             {
-                // The transition driver elements should default to ConfigMolTransitionDriverElement.
-                // If we use ConfigDistrDriverElement as the default we won't be able to distinguish between meaningful and empty TDEs. 
-                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
-                config_td.Name = "generic apoptosis";
-                string[] stateName = new string[] { "alive", "dead" };
-                string[,] signal = new string[,] { { "", "" }, { "", "" } };
-                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
-                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
-
-                //ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                Level level = MainWindow.GetLevelContext(this);
-                if (level == null)
-                {
-                    level = CurrentLevel;
-                }
-                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, level);
-
-                config_td.CurrentState = new DistributedParameter(0);
-                config_td.StateName = config_td.states[(int)config_td.CurrentState.Sample()];
-                cell.death_driver = config_td;
+                lb.SelectedIndex = 0;
             }
         }
 
-        private void btnDelDeathDriver_Click(object sender, RoutedEventArgs e)
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            //confirm deletion of driver
-            MessageBoxResult res;
-            res = MessageBox.Show("Are you sure you want to delete the selected cell's death driver?", "Warning", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.No)
-                return;
-
-            //delete driver
-            cell.death_driver = null;
-
-            ToolWinTissue twt = Tag as ToolWinTissue;
-            CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
-            if (cp != null)
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
             {
-                cp.reportStates.Death = false;
+                lb.SelectedIndex = 0;
             }
-
         }
+
+        //Transition Schemes code here
 
         /// <summary>
         /// This method creates a data grid column with a combo box in the header.
@@ -774,6 +628,25 @@ namespace DaphneGui
         {
         }
 
+        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+
+        }
+
+        private void DivSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            if (element == null)
+                return;
+
+            element.BringIntoView();
+        }
+
         private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
@@ -839,68 +712,49 @@ namespace DaphneGui
                 e.Accepted = true;
             }
         }
-        public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
+
+        private void ChangeDataGridTDEType_Click(object sender, RoutedEventArgs e)
         {
-            // Confirm parent and childName are valid. 
-            if (parent == null) return null;
+            Button button = sender as Button;
 
-            T foundChild = null;
+            var stack_panel = FindVisualParent<StackPanel>(button);
+            if (stack_panel == null) return;
 
-            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childrenCount; i++)
+            ConfigTransitionDriverElement tde = stack_panel.DataContext as ConfigTransitionDriverElement;
+            if (tde == null) return;
+
+            TransitionDriverElementType type = tde.Type;
+            int CurrentState = tde.CurrentState,
+                DestState = tde.DestState;
+            string CurrentStateName = tde.CurrentStateName,
+                    DestStateName = tde.DestStateName;
+
+            if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                // If the child is not of the request child type child
-                T childType = child as T;
-                if (childType == null)
-                {
-                    // recursively drill down the tree
-                    foundChild = FindChild<T>(child, childName);
-
-                    // If the child is found, break so we do not overwrite the found child. 
-                    if (foundChild != null) break;
-                }
-                else if (!string.IsNullOrEmpty(childName))
-                {
-                    var frameworkElement = child as FrameworkElement;
-                    // If the child's name is set for search
-                    if (frameworkElement != null && frameworkElement.Name == childName)
-                    {
-                        // if the child's name is of the request name
-                        foundChild = (T)child;
-                        break;
-                    }
-                    else
-                    {
-                        // recursively drill down the tree
-                        foundChild = FindChild<T>(child, childName);
-
-                        // If the child is found, break so we do not overwrite the found child. 
-                        if (foundChild != null) break;
-                    }
-                }
-                else
-                {
-                    // child element found.
-                    foundChild = (T)child;
-                    break;
-                }
+                tde = new ConfigDistrTransitionDriverElement();
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                //stack_panel.DataContext = tde;
             }
+            else
+            {
+                tde = new ConfigMolTransitionDriverElement();
+            }
+            tde.CurrentStateName = CurrentStateName;
+            tde.DestStateName = DestStateName;
+            tde.CurrentState = CurrentState;
+            tde.DestState = DestState;
 
-            return foundChild;
+            // update the transition scheme
+            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
+            if (dataGrid == null) return;
+            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            if (scheme != null)
+            {
+                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+            }
         }
 
-        //Cytosol reaction complex handlers
-
-        private void CytoRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-        }
-        
         // UserControl methods
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -921,7 +775,6 @@ namespace DaphneGui
             //Level level = null;
             //SetCurrentLevel(level);
 
-            updateCollections(cell);
             updateSelectedMoleculesAndGenes(cell);
         }
 
@@ -933,121 +786,41 @@ namespace DaphneGui
                 return;
             }
 
-            updateCollections(cell);
             updateSelectedMoleculesAndGenes(cell);
 
         }
 
-        public void updateCollections(ConfigCell cell)
+        //Cell death code
+        private void comboDeathMolPop2_Loaded(object sender, RoutedEventArgs e)
         {
-            CollectionViewSource cvs;
-            Level level = MainWindow.GetLevelContext(this);
-            if (level == null)
-            {
-                level = CurrentLevel;
-            }
+            ConfigCell cell = DataContext as ConfigCell;
 
-            if (level == null)
-            {
-                //var sopTag = Tag as SystemOfPersistence;
-                PushBetweenLevels pushwin = Window.GetWindow(this) as PushBetweenLevels;
-                if (pushwin != null)
-                {
-                    CurrentLevel = pushwin.CurrentLevel;
-                    level = pushwin.CurrentLevel;
-                }
-            }
-
-            if (level == null)
+            if (cell == null)
                 return;
 
-            // MOLECULES
+            //Don't do anything if driver type is distribution
+            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
+                return;
 
-            // cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
-            cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
-            cvs.Source = new ObservableCollection<ConfigMolecule>();
-            
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-            cvs.Source = level.entity_repository.molecules;
+            ComboBox combo = sender as ComboBox;
 
-            // memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
-            cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
-            cvs.Source = new ObservableCollection<ConfigMolecule>();
-            
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-            cvs.Source = level.entity_repository.molecules;
-
-            // list of cytosol molecules for use by division and differentitiation schemes
-            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            cvs.Source = new ObservableCollection<ConfigMolecule>();
-            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            //If no death molecule selected, and there are bulk molecules, select 1st molecule.
+            if (combo.SelectedIndex == -1 && combo.Items.Count > 0)
             {
-                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+                combo.SelectedIndex = 0;
             }
-
-            // REACTIONS
-
-            // lvCellAvailableReacs
-            cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
-            cvs.Source = new ObservableCollection<ConfigReaction>();
-            
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
-            cvs.Source = level.entity_repository.reactions;
-
-            // lvCytosolAvailableReacs
-            cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
-            cvs.Source = new ObservableCollection<ConfigReaction>();
-            
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
-            cvs.Source = level.entity_repository.reactions;
-
-            cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
-            cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
-            cvs.Source = level.entity_repository.reaction_complexes;
-
-            cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
-            cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
-            cvs.Source = level.entity_repository.reaction_complexes;
-        }
-
-        //This is probably not needed any more but leaving here in case a problem occurs.
-        //To be deleted for next checkin.
-        public void updateSelectedMoleculesAndGenes(ConfigCell cell)
-        {
-            // Setting ListBox.SelectedItem = 0 in the xaml code only works the first time the tab is populated,
-            // so do it manually here.
-
-            CellMembraneMolPopsListBox.SelectedIndex = 0;
-            CellCytosolMolPopsListBox.SelectedIndex = 0;
-            CellNucleusGenesListBox.SelectedItem = 0;
-        }
-
-        /// <summary>
-        /// This fixes the problem of selecting the 1st item in the mol pop list.
-        /// This shouldn't be a problem in the first place, but the data binding seems to occur before the list is populated
-        /// so the first item was not getting selected.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
+            //If no death molecule selected, and there are NO bulk molecules, issue a warning to acquire molecules from the user store.
+            else if (combo.SelectedIndex == -1 && combo.Items.Count == 0)
             {
-                lb.SelectedIndex = 0;
-            }
-        }
+                //Since there are no molecules, create a default DISTRIBUTION driver and assign it.
+                ConfigTransitionDriverElement tde = new ConfigDistrTransitionDriverElement();
+                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
 
-        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb.SelectedIndex == -1 && lb.Items.Count > 0)
-            {
-                lb.SelectedIndex = 0;
+                poisson.Mean = 1.0;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+
+                cell.death_driver.DriverElements[0].elements[1] = tde;
             }
         }
 
@@ -1105,46 +878,56 @@ namespace DaphneGui
             cell.death_driver.DriverElements[0].elements[1] = tde;
         }
 
-        private void ChangeDataGridTDEType_Click(object sender, RoutedEventArgs e)
-        { 
-            Button button = sender as Button;
+        //These are helper methods, and they are like extension methods.
+        public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
+        {
+            // Confirm parent and childName are valid. 
+            if (parent == null) return null;
 
-            var stack_panel = FindVisualParent<StackPanel>(button);
-            if (stack_panel == null) return;
+            T foundChild = null;
 
-            ConfigTransitionDriverElement tde = stack_panel.DataContext as ConfigTransitionDriverElement;
-            if (tde == null) return;
-    
-            TransitionDriverElementType type = tde.Type;
-            int CurrentState = tde.CurrentState,
-                DestState = tde.DestState;
-            string CurrentStateName = tde.CurrentStateName,
-                    DestStateName = tde.DestStateName;
-
-            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
             {
-                tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                //stack_panel.DataContext = tde;
-            }
-            else
-            {
-                tde = new ConfigMolTransitionDriverElement();                
-            }
-            tde.CurrentStateName = CurrentStateName;
-            tde.DestStateName = DestStateName;
-            tde.CurrentState = CurrentState;
-            tde.DestState = DestState;
+                var child = VisualTreeHelper.GetChild(parent, i);
+                // If the child is not of the request child type child
+                T childType = child as T;
+                if (childType == null)
+                {
+                    // recursively drill down the tree
+                    foundChild = FindChild<T>(child, childName);
 
-            // update the transition scheme
-            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
-            if (dataGrid == null) return;
-            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-            if (scheme != null)
-            {
-                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+                    // If the child is found, break so we do not overwrite the found child. 
+                    if (foundChild != null) break;
+                }
+                else if (!string.IsNullOrEmpty(childName))
+                {
+                    var frameworkElement = child as FrameworkElement;
+                    // If the child's name is set for search
+                    if (frameworkElement != null && frameworkElement.Name == childName)
+                    {
+                        // if the child's name is of the request name
+                        foundChild = (T)child;
+                        break;
+                    }
+                    else
+                    {
+                        // recursively drill down the tree
+                        foundChild = FindChild<T>(child, childName);
+
+                        // If the child is found, break so we do not overwrite the found child. 
+                        if (foundChild != null) break;
+                    }
+                }
+                else
+                {
+                    // child element found.
+                    foundChild = (T)child;
+                    break;
+                }
             }
+
+            return foundChild;
         }
 
         public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
@@ -1187,186 +970,6 @@ namespace DaphneGui
                 // use recursion to proceed with next level
                 return FindLogicalParent<T>(parentObject);
             }
-        }
-        private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
-        {
-            Level level = MainWindow.GetLevelContext(this);
-            if (level == null)
-            {
-                level = CurrentLevel;
-            }
-            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
-
-            //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            if (level.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            {
-                //ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction protReaction = level.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction newreac = protReaction.Clone(true);
-
-                ConfigCell cell = DataContext as ConfigCell;
-                cell.cytosol.Reactions.Remove(reac);
-                cell.cytosol.Reactions.Add(newreac);
-            }
-        }
-
-        private void menuMembPushReacToProto_Click(object sender, RoutedEventArgs e)
-        {
-            if (MembReacListBox.SelectedIndex < 0)
-            {
-                MessageBox.Show("Please select a reaction.");
-                return;
-            }
-
-            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-            ConfigReaction newreac = reac.Clone(true);
-            MainWindow.GenericPush(newreac);
-        }
-
-        private void menuMembPullReacFromProto_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-            Level level = MainWindow.GetLevelContext(this);
-            if (level == null)
-            {
-                level = CurrentLevel;
-            }
-
-            //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            if (level.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            {
-                //ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction protReaction = level.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction newreac = protReaction.Clone(true);
-
-                ConfigCell cell = DataContext as ConfigCell;
-                cell.membrane.Reactions.Remove(reac);
-                cell.membrane.Reactions.Add(newreac);
-            }
-        }
-
-        private void comboDeathMolPop2_Loaded(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            //Don't do anything if driver type is distribution
-            if (cell.death_driver.DriverElements[0].elements[1].Type == TransitionDriverElementType.DISTRIBUTION)
-                return;
-
-            ComboBox combo = sender as ComboBox;
-
-            //If no death molecule selected, and there are bulk molecules, select 1st molecule.
-            if (combo.SelectedIndex == -1 && combo.Items.Count > 0)
-            {
-                combo.SelectedIndex = 0;
-            }
-            //If no death molecule selected, and there are NO bulk molecules, issue a warning to acquire molecules from the user store.
-            else if (combo.SelectedIndex == -1 && combo.Items.Count == 0)
-            {
-                //Since there are no molecules, create a default DISTRIBUTION driver and assign it.
-                ConfigTransitionDriverElement tde = new ConfigDistrTransitionDriverElement();
-                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
-
-                poisson.Mean = 1.0;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
-
-                cell.death_driver.DriverElements[0].elements[1] = tde;
-            }
-        }
-
-        private void MembCreateNewReaction_Expanded(object sender, RoutedEventArgs e)
-        {
-            this.BringIntoView();
-        }
-
-        private void CytoSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (CytoReactionComplexListBox.SelectedIndex < 0)
-                return;
-
-            ConfigReactionComplex crc = ((ConfigReactionComplex)(CytoReactionComplexListBox.SelectedItem));
-
-            ConfigReactionComplex newcrc = crc.Clone(true);
-            MainWindow.GenericPush(newcrc);
-        }
-
-        private void MembSaveReacCompToProtocolButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (MembReactionComplexListBox.SelectedIndex < 0)
-                return;
-
-            ConfigReactionComplex crc = ((ConfigReactionComplex)(MembReactionComplexListBox.SelectedItem));
-
-            ConfigReactionComplex newcrc = crc.Clone(true);
-            MainWindow.GenericPush(newcrc);
-        }
-
-        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-
-        }
-
-        private void DivSchemeExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-        }
-
-        private void MembRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-        }
-
-        private void CellMolPopsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-        }
-
-        private void CellReacExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-        }
-
-        private void ReacCompExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
-        }
-
-        private void CellDeathExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            FrameworkElement element = sender as FrameworkElement;
-            if (element == null)
-                return;
-
-            element.BringIntoView();
         }
 
     }
