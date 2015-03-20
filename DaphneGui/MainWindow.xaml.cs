@@ -1031,6 +1031,7 @@ namespace DaphneGui
             // Configure save file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
+            string originalFileName = store.FileName;
             dlg.OverwritePrompt = true;
             dlg.InitialDirectory = orig_path;
             dlg.FileName = "store"; // Default file name
@@ -1047,6 +1048,11 @@ namespace DaphneGui
                 // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
                 store.FileName = filename;
                 store.SerializeToFile();
+                store.FileName = originalFileName;
+                if (GetLevelContext(this) == sop.UserStore)
+                    sop.UserStore = sop.UserStore.Deserialize();
+                else if (GetLevelContext(this) == sop.DaphneStore)
+                    sop.DaphneStore = sop.DaphneStore.Deserialize();
             }
             return result;
         }
@@ -2610,24 +2616,24 @@ namespace DaphneGui
 
         private void saveStore(Level store, string storeName)
         {
-            string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
-            string caption = storeName + " Changed";
-            MessageBoxButton button = MessageBoxButton.YesNoCancel;
-            MessageBoxImage icon = MessageBoxImage.Warning;
+            ////string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
+            ////string caption = storeName + " Changed";
+            ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            ////MessageBoxImage icon = MessageBoxImage.Warning;
 
-            // Display message box
-            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+            ////// Display message box
+            ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
 
-            if (result == MessageBoxResult.Cancel)
-            {
-                return;
-            }
-            else if (result == MessageBoxResult.No)
-            {
-                saveStoreUsingDialog(store, store.FileName);
-            }
-            else
-            {
+            ////if (result == MessageBoxResult.Cancel)
+            ////{
+            ////    return;
+            ////}
+            ////else if (result == MessageBoxResult.No)
+            ////{
+            ////    saveStoreUsingDialog(store, store.FileName);
+            ////}
+            ////else
+            ////{
                 FileInfo info = new FileInfo(store.FileName);
                 if (info.IsReadOnly == false || !info.Exists)
                 {
@@ -2643,27 +2649,65 @@ namespace DaphneGui
                 }
                 else
                 {
-                    messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                    caption = "File write protected";
-                    button = MessageBoxButton.OK;
-                    icon = MessageBoxImage.Warning;
+                    string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                    string caption = "File write protected";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
                     MessageBox.Show(messageBoxText, caption, button, icon);
                 }
-            }
+            ////}
         }
 
         private void saveStoreFiles()
-        {            
+        {
             //DaphneStore
             if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
-                saveStore(sop.DaphneStore, "DaphneStore");
+                string messageBoxText = "DaphneStore" + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.DaphneStore.FileName) + "?";
+                string caption = "DaphneStore" + " Changed";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+
+                // Display message box
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    saveStoreUsingDialog(sop.DaphneStore, "DaphneStore");
+                }
+                else
+                {
+                    saveStore(sop.DaphneStore, "DaphneStore");
+                }
             }
 
             //UserStore
             if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
-                saveStore(sop.UserStore, "UserStore");
+                string messageBoxText = "UserStore" + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.UserStore.FileName) + "?";
+                string caption = "UserStore" + " Changed";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+
+                // Display message box
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    saveStoreUsingDialog(sop.UserStore, "UserStore");
+                }
+                else
+                {
+                    saveStore(sop.UserStore, "UserStore");
+                }
             }
         }
 
@@ -3127,9 +3171,15 @@ namespace DaphneGui
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             //If we're in UserStore or DaphneStore mode, do this.
-            if (CellStudioToolWindow.DataContext != SOP.Protocol)
+            if (CellStudioToolWindow.DataContext == SOP.UserStore)
             {
-                saveStoreFiles();
+                saveStore(sop.UserStore, "UserStore");
+                return;
+            }
+            else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
+            {
+                saveStore(sop.DaphneStore, "DaphneStore");
+                return;
             }
 
             ToolWin.Apply();
@@ -3534,6 +3584,8 @@ namespace DaphneGui
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
+            menuAdminSave.Visibility = Visibility.Visible;
+            menuAdminSaveAs.Visibility = Visibility.Visible;
         }
 
         private void prepareForDaphneStore()
@@ -3551,6 +3603,8 @@ namespace DaphneGui
             ReturnToProtocolButton.Visibility = Visibility.Visible;
             applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
+            menuAdminSave.Visibility = Visibility.Visible;
+            menuAdminSaveAs.Visibility = Visibility.Visible;
         }
 
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3564,6 +3618,8 @@ namespace DaphneGui
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             applyButton.IsEnabled = true;
             menuProtocolStore.IsEnabled = false;
+            menuAdminSave.Visibility = Visibility.Collapsed;
+            menuAdminSaveAs.Visibility = Visibility.Collapsed;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3726,12 +3782,15 @@ namespace DaphneGui
         private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
-            ProtocolToolWindow.Open();            
+            ProtocolToolWindow.Open();
+            LevelContext = SOP.Protocol;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             applyButton.IsEnabled = true;
             menuProtocolStore.IsEnabled = false;
+            menuAdminSave.IsEnabled = false;
+            menuAdminSaveAs.IsEnabled = false;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3741,6 +3800,11 @@ namespace DaphneGui
             {
                 ReacComplexChartWindow.Activate();
             }
+        }
+
+        private void menuAdminSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            saveStoreUsingDialog(sop.UserStore, "UserStore");
         }
         
     }

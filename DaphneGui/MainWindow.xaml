@@ -184,6 +184,8 @@
                 <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
                     <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
+                    <MenuItem Header="Save" Name="menuAdminSave" Command="ApplicationCommands.Save" Visibility="Collapsed" />
+                    <MenuItem Header="Save As..." Name="menuAdminSaveAs" Click="menuAdminSaveAs_Click" Visibility="Collapsed" />                                       
                     <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
                 </MenuItem>
                 <MenuItem Header="Help">
