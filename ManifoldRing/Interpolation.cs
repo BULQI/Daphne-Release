@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Diagnostics;
 
 
 namespace ManifoldRing
@@ -94,7 +95,7 @@ namespace ManifoldRing
 
             if (lm != null)
             {
-                double[] sfarray = sf.array;
+                var sfarray = sf.array;
                 for (int i = 0; i < m.Dim; i++)
                 {
                     double value = 0;

@@ -15,48 +15,31 @@ namespace NativeDaphne
 	public:
 		String^ Name; 
 		int CopyNumber;
+		int cellId;
 		double ActivationLevel;
-		bool initialized;
 
 		List<Nt_Gene^> ^ComponentGenes;
+		List<int> ^cellIds;
 
-		Nt_Gene(String ^_name, int _cpnum, double _act_level)
+		Nt_Gene(int _cellId, String ^_name, int _cpnum, double _act_level)
 		{
 			Name = _name;
 			CopyNumber = _cpnum;
 			ActivationLevel = _act_level;
-			initialized = false;
 			_activation = NULL;
+			cellId = _cellId;
 			allocedItemCount = 0;
 		}
 
 		void AddGene(Nt_Gene^ gene)
 		{
-			ComponentGenes->Add(gene);
-			initialized = false;
-		}
-
-		Nt_Gene ^CloneParent()
-		{
-			Nt_Gene^ gene = gcnew Nt_Gene(Name, CopyNumber, 0);
-			gene->ComponentGenes = gcnew List<Nt_Gene^>();
-			gene->ComponentGenes->Add(this);
-			return gene;
-		}
-
-		void initialize()
-		{
 			int itemCount = ComponentGenes->Count;
-			if (itemCount > allocedItemCount)
+			if (itemCount+1 > allocedItemCount)
 			{
-				if (allocedItemCount > 0)
-				{
-					free(_activation);
-				}
-				allocedItemCount = Nt_Utility::GetAllocSize(itemCount, allocedItemCount);
+				allocedItemCount = Nt_Utility::GetAllocSize(itemCount+1, allocedItemCount);
 				//activation is one number per gene, not 4 elements like concentration
 				int allocSize = allocedItemCount * sizeof(double);
-				_activation = (double *)malloc(allocSize);
+				_activation = (double *)realloc(_activation, allocSize);
 
 				//update unamanged pointers for components
 				double *act_ptr = _activation;
@@ -66,8 +49,46 @@ namespace NativeDaphne
 					*act_ptr = ComponentGenes[i]->ActivationLevel;
 				}
 			}
-			initialized = true;
+			ComponentGenes->Add(gene);
+			cellIds->Add(gene->cellId);
+			double *tptr = _activation + itemCount;
+			*tptr = gene->ActivationLevel;
+			gene->_activation = tptr;
 		}
+
+		Nt_Gene ^CloneParent()
+		{
+			Nt_Gene^ gene = gcnew Nt_Gene(cellId, Name, CopyNumber, 0);
+			gene->ComponentGenes = gcnew List<Nt_Gene^>();
+			gene->cellIds = gcnew List<int>();
+			gene->AddGene(this);
+			return gene;
+		}
+
+		//void initialize()
+		//{
+		//	int itemCount = ComponentGenes->Count;
+		//	if (itemCount > allocedItemCount)
+		//	{
+		//		if (allocedItemCount > 0)
+		//		{
+		//			free(_activation);
+		//		}
+		//		allocedItemCount = Nt_Utility::GetAllocSize(itemCount, allocedItemCount);
+		//		//activation is one number per gene, not 4 elements like concentration
+		//		int allocSize = allocedItemCount * sizeof(double);
+		//		_activation = (double *)malloc(allocSize);
+
+		//		//update unamanged pointers for components
+		//		double *act_ptr = _activation;
+		//		for (int i=0; i< ComponentGenes->Count; i++, act_ptr++)
+		//		{
+		//			ComponentGenes[i]->_activation = act_ptr;
+		//			*act_ptr = ComponentGenes[i]->ActivationLevel;
+		//		}
+		//	}
+		//	initialized = true;
+		//}
 
 		//getter for pinter
 		double* activation_pointer()

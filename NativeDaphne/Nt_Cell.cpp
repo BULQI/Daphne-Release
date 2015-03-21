@@ -56,7 +56,7 @@ namespace NativeDaphne
 			for (int i=0; i < ComponentCells->Count; i++)
 			{
 				//copy gradient (the last 3 elements) of DriverConc
-				double *src = ComponentCells[i]->Driver->nativePointer + 1;
+				double *src = ComponentCells[i]->Driver->NativePointer + 1;
 				*gradient++ = *src++;
 				*gradient++ = *src++;
 				*gradient++ = *src++;

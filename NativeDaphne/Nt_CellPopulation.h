@@ -130,13 +130,6 @@ namespace NativeDaphne
 
 		void initialize()
 		{
-			for (int i= 0; i< genes->Count; i++)
-			{
-				if (genes[i]->initialized == false)
-				{
-					genes[i]->initialize();
-				}
-			}
 
 			//we need to intialize both PlasmaMembrane and Cytosol
 			//before going to step, because a boundary reaction

@@ -31,11 +31,12 @@ namespace NativeDaphne
 
 		Dictionary<int, bool> ^cellIdDictionary;
 
-		List<int>^ cellIds;
+		int cellId;
 		double rateConstant;
 
 		//stores the list of component reactions.
 		List<Nt_Reaction ^> ^ComponentReactions;
+		List<int>^ cellIds;
 
 
 		//since we don't have a key for reactions
@@ -43,14 +44,10 @@ namespace NativeDaphne
 		int reaction_index;
 		bool isBulkReaction;
 
-		//tell if the arrays have been allocated or not.
-		bool initialized;
 
 	    virtual void AddReaction(Nt_Reaction ^ rxn);
 
 		virtual void step(double dt);
-
-		virtual void initialize();
 
 		//clone this reaction and return reaction servers as placeholder
 		virtual Nt_Reaction ^CloneParent()
@@ -74,7 +71,6 @@ namespace NativeDaphne
 
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void initialize() override;
 		virtual void step(double dt) override;
 
 		Nt_MolecularPopulation ^reactant;
@@ -97,7 +93,6 @@ namespace NativeDaphne
 
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void initialize() override;
 		virtual void step(double dt) override;
 
 		Nt_Gene ^gene;
@@ -118,8 +113,6 @@ namespace NativeDaphne
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
 		virtual Nt_Reaction^ CloneParent() override;
-
-		virtual void initialize() override;
 
 		virtual void step(double dt) override;
 
@@ -144,7 +137,6 @@ namespace NativeDaphne
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
 		virtual Nt_Reaction^ CloneParent() override;
-		virtual void initialize() override;
 		virtual void step(double dt) override;
 
 		Nt_MolecularPopulation^ reactant;
@@ -161,7 +153,6 @@ namespace NativeDaphne
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void initialize() override;
 		virtual void step(double dt) override;
 	
 		Nt_MolecularPopulation^ bulk;
@@ -181,7 +172,6 @@ namespace NativeDaphne
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void initialize() override;
 		virtual void step(double dt) override;
 
 		Nt_MolecularPopulation^ bulk;

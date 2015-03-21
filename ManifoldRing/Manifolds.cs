@@ -400,7 +400,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            double[] array = laplacian.array;
+            var array = laplacian.array;
             array[0] = 0;
             array[1] = sf.array[1];
             array[2] = sf.array[2];
@@ -596,7 +596,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            double[] array = laplacian.array;
+            var array = laplacian.array;
             array[0] = 0;
             array[1] = sf.array[1];
             array[2] = sf.array[2];
@@ -638,7 +638,7 @@ namespace ManifoldRing
                 throw new Exception("Manifold mismatch: flux for TinyBall must be on TinySphere.");
             }
 
-            double[] array = diffusionField.array;
+            var array = diffusionField.array;
             array[0] = 3 * flux.array[0] / radius;
             array[1] = 5 * flux.array[1] / radius;
             array[2] = 5 * flux.array[2] / radius;

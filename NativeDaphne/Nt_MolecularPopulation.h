@@ -2,7 +2,7 @@
 
 #include "Utility.h"
 #include "Nt_NormalDist.h"
-#include "Nt_ScalarField.h"
+#include "Nt_DArray.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -20,90 +20,53 @@ namespace NativeDaphne
 		String^ molguid; 
 		String^ Name;
 
-		bool initialized;
 		double DiffusionCoefficient;
-		Nt_ScalarField ^molpopConc;
+		Nt_Darray ^molpopConc;
 
 		List<Nt_MolecularPopulation^> ^ComponentPopulations;
 
 		Nt_MolecularPopulation(String^ _molguid, double diff_coeff);
 
-		Nt_MolecularPopulation(String^ _molguid, double diff_coeff, Nt_ScalarField^ conc);
+		Nt_MolecularPopulation(String^ _molguid, double diff_coeff, Nt_Darray^ conc);
 
 		virtual Nt_MolecularPopulation^ CloneParent()
 		{
 			Nt_MolecularPopulation^ molpop = gcnew Nt_MolecularPopulation(this->molguid, this->DiffusionCoefficient);
 			molpop->ComponentPopulations = gcnew List<Nt_MolecularPopulation^>();
 			molpop->Name = this->Name;
-			molpop->ComponentPopulations->Add(this);
+			molpop->AddMolecularPopulation(this);
 			return molpop;
-		}
-
-		virtual void updateManaged()
-		{
-			//update component
-			if (this->molpopConc != nullptr)
-			{
-				molpopConc->pull();
-				//double *dptr = _molpopConc;
-				//for (int i=0; i< molpopConc->Length; i++)
-				//{
-				//	molpopConc[i] = *dptr++;
-				//}
-			}
-			else 
-			{
-				//update collection
-				double *dptr = _molpopConc;
-				for (int i=0; i< ComponentPopulations->Count; i++)
-				{
-					ComponentPopulations[i]->molpopConc->pull();
-					//array<double> ^item = ComponentPopulations[i]->molpopConc;
-					//for (int j= 0; j< item->Length; j++)
-					//{
-					//	item[j] = *dptr++;
-					//}
-				}
-			}
-		}
-
-		virtual void updateUnmanaged(array<double> ^conc)
-		{
-			double *dptr = _molpopConc;
-			for (int i=0; i<conc->Length; i++)
-			{
-				*dptr++ = conc[i];
-			}
 		}
 
 		virtual void AddMolecularPopulation(Nt_MolecularPopulation^ molpop);
 
-		virtual void initialize();
-
 		virtual void step(double dt);
 
-		virtual double* native_pointer(){ return _molpopConc;}
-
-		property double *nativePointer
+	internal:
+		property double *NativePointer
 		{
 			double* get()
 			{
-				return _molpopConc;
+				return molpopConc != nullptr ? molpopConc->NativePointer : _molpopConc;
 			}
 			void set(double *value)
 			{
-				_molpopConc = value;
 				if (molpopConc != nullptr)
 				{
-					molpopConc->_array = value;
+					molpopConc->NativePointer = value;
+				}
+				else 
+				{
+					_molpopConc = value;
 				}
 			}
 		}
-		double *_molpopConc;
+		
 	protected:
-		//double *_molpopConc;
+		double *_molpopConc;
 		//the size of memory allocated, number of items.
 		int allocedItemCount;
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -118,33 +81,63 @@ namespace NativeDaphne
 		//these exist only for access from managed side. but may not really necessary for the unmanaged side.
 		//since boundaryFluxes are updated for each step and then reset to 0
 		//boundaryConc is actually same thing (for cytosol) as this->Conc except it is marked as tinyShere as its manifold.
-		Nt_ScalarField^ boundaryFlux;
-		Nt_ScalarField^ boundaryConc; //this is mostlikey not necessary fo cytosol
+		Nt_Darray^ boundaryFlux;
+		Nt_Darray^ boundaryConc; //this is mostlikey not necessary fo cytosol
 
-		Nt_CytosolMolecularPopulation(int _cellId, double _cellRadius, String^ _molguid, double _diffusionCoefficient, Nt_ScalarField^ conc, Nt_ScalarField^ bflux, Nt_ScalarField^ bconc);
+		Nt_CytosolMolecularPopulation(int _cellId, double _cellRadius, String^ _molguid, double _diffusionCoefficient, Nt_Darray^ conc, Nt_Darray^ bflux, Nt_Darray^ bconc);
 
 		virtual Nt_MolecularPopulation^ CloneParent() override
 		{
 			Nt_CytosolMolecularPopulation^ molpop = gcnew Nt_CytosolMolecularPopulation(-1, CellRadius, this->molguid, this->DiffusionCoefficient, nullptr, nullptr, nullptr);
 			molpop->ComponentPopulations = gcnew List<Nt_MolecularPopulation^>();
+			molpop->cellIds = gcnew List<int>();
 			molpop->Name = this->Name;
-			molpop->ComponentPopulations->Add(this);
+			molpop->AddMolecularPopulation(this);
 			return molpop;
 		}
 
 		virtual void AddMolecularPopulation(Nt_MolecularPopulation^ molpop) override;
 
-		virtual void updateManaged() override;
-
-		virtual void updateUnmanaged(array<double> ^conc) override;
-
-		virtual void initialize() override;
-
 		virtual void step(double dt) override;
 
-		double *boundary_conc_pointer(){return _boundaryConc;}
-
-		double *boundary_flux_pointer(){return _boundaryFlux;}
+		property double *BoundaryConcPointer
+		{
+			double* get()
+			{
+				return boundaryConc != nullptr ? boundaryConc->NativePointer : _boundaryConc;
+			}
+			void set(double *value)
+			{
+				if (boundaryConc != nullptr)
+				{
+					boundaryConc->NativePointer = value;
+				}
+				else 
+				{
+					_boundaryConc = value;
+				}
+			}
+		}
+		
+		property double *BoundaryFluxPointer
+		{
+			double* get()
+			{
+				return boundaryFlux != nullptr ? boundaryFlux->NativePointer : _boundaryFlux;
+			}
+			void set(double *value)
+			{
+				if (boundaryFlux != nullptr)
+				{
+					boundaryFlux->NativePointer = value;
+				}
+				else 
+				{
+					_boundaryFlux = value;
+				}
+			}
+		}
+		
 	private:
 		//preallocated for step()
 		double *_laplacian;
@@ -158,19 +151,18 @@ namespace NativeDaphne
 	public:
 		int cellId;
 		double CellRadius;
-		bool initialized;
 
 		List<int> ^cellIds;
 
-		Nt_MembraneMolecularPopulation(int _cellId, double _cellRadius, String^ _molguid, double _diffusionCoefficient, Nt_ScalarField ^conc);
-
+		Nt_MembraneMolecularPopulation(int _cellId, double _cellRadius, String^ _molguid, double _diffusionCoefficient, Nt_Darray ^conc);
 
 		virtual Nt_MolecularPopulation^ CloneParent() override
 		{
 			Nt_MembraneMolecularPopulation^ molpop = gcnew Nt_MembraneMolecularPopulation(-1, CellRadius, this->molguid, this->DiffusionCoefficient, nullptr);
 			molpop->Name = this->Name;
 			molpop->ComponentPopulations = gcnew List<Nt_MolecularPopulation^>();
-			molpop->ComponentPopulations->Add(this);
+			molpop->cellIds = gcnew List<int>();
+			molpop->AddMolecularPopulation(this);
 			return molpop;
 		}
 
@@ -178,13 +170,51 @@ namespace NativeDaphne
 
 		virtual void step(double dt) override;
 
-		virtual void initialize() override;
+	private:
+		double *_laplacian;
+	};
 
-		virtual void updateManaged() override;
+	ref class Nt_ECS;
 
-		virtual void updateUnmanaged(array<double> ^conc) override;
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_ECSMolecularPopulation : public Nt_MolecularPopulation
+	{
+	public:
+		Nt_ECS^ ECS;
+
+		int boundryCount;
+		List<int> boundaryKeyList;
+		double** _boundaryConcs;
+
+		Dictionary<int, Nt_Darray^>^ boundaryFluxes;
+        Dictionary<int, Nt_Darray^>^ boundaryConcs;
+
+		Nt_ECSMolecularPopulation(String^ _molguid, double _diffusionCoefficient, Nt_Darray ^conc);
+
+		virtual Nt_MolecularPopulation^ CloneParent() override
+		{
+			throw gcnew Exception("not implemented exception");
+		}
+
+		virtual void AddMolecularPopulation(Nt_MolecularPopulation^ molpop) override
+		{
+			throw gcnew Exception("not implemented exception");
+		}
+
+		void AddBoundaryFlux(int id, Nt_Darray^ flux)
+		{
+			boundaryFluxes->Add(id, flux);
+		}
+
+		void AddBoundaryConc(int id, Nt_Darray^ conc)
+		{
+			boundaryConcs->Add(id, conc);
+		}
+
+		virtual void step(double dt) override;
 
 	private:
 		double *_laplacian;
 	};
+
 }

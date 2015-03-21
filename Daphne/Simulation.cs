@@ -846,9 +846,6 @@ namespace Daphne
             dataBasket.AddCell(c);
             cellMangerHandle.AddNtCell(c);
             
-
-
-
             // no cell rotation currently
             Transform t = new Transform(false);
 
@@ -856,6 +853,13 @@ namespace Daphne
             // set translation by reference: when the cell moves then the transform gets updated automatically
             t.setTranslationByReference(c.SpatialState.X);
             dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
+
+            if (dataBasket.Environment is ECSEnvironment)
+            {
+                var native_ecs = (dataBasket.Environment as ECSEnvironment).native_ecs;
+                native_ecs.AddBoundaryTransform(c.PlasmaMembrane.Interior.Id, c.SpatialState.X);
+            }
+
         }
 
         public void RemoveCell(Cell c)
@@ -1067,6 +1071,31 @@ namespace Daphne
 
             // ADD ECS MOLECULAR POPULATIONS
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
+
+            //add ecs molpop to native side
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+            {
+                ECSEnvironment ecs = SimulationBase.dataBasket.Environment as ECSEnvironment;
+                Nt_ECS native_ecs = ecs.native_ecs;
+                foreach (var item in ecs.Comp.Populations)
+                {
+                    var mp = item.Value;
+                    double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
+                    var nt_molpop = new Nt_ECSMolecularPopulation(item.Key,diffCoeff, mp.Conc.array);
+                    foreach (var val in mp.BoundaryConcs)
+                    {
+                        nt_molpop.AddBoundaryConc(val.Key, val.Value.array);
+                    }
+                    foreach (var val in mp.BoundaryFluxes)
+                    {
+                        nt_molpop.AddBoundaryFlux(val.Key, val.Value.array);
+                    }
+                    if (native_ecs != null)
+                    {
+                        native_ecs.AddMolecularPopulation(nt_molpop);
+                    }
+                }
+            }
 
             // ECS molpops boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment)

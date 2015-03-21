@@ -10,6 +10,7 @@ using ManifoldRing;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Diagnostics;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -261,6 +262,7 @@ namespace Daphne
     {
         private Dictionary<string, int> sides;
         public bool toroidal { get; private set; }
+        public Nt_ECS native_ecs;
 
         public ECSEnvironment(int[] numGridPts, double gridStep, bool toroidal)
         {
@@ -350,6 +352,12 @@ namespace Daphne
             comp.NaturalBoundaries.Add(r.Id, r);
             comp.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("bottom", r.Id);
+
+            int[] extents = new int[3];
+            extents[0] = comp.Interior.NodesPerSide(0);
+            extents[1] = comp.Interior.NodesPerSide(1);
+            extents[2] = comp.Interior.NodesPerSide(2);
+            native_ecs = new Nt_ECS(extents, comp.Interior.StepSize(), toroidal);
         }
 
         public Dictionary<string, int> Sides
@@ -372,7 +380,7 @@ namespace Daphne
         public override void Step(double dt)
         {
             this.Comp.Step(dt);
-
+            
             //apply ECS/membrane boundary flux - specific to ECS/Membran
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
@@ -402,11 +410,16 @@ namespace Daphne
 
             }
 
-            //update ECS/Memrante boundary
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            var native_ecs = (SimulationBase.dataBasket.Environment as ECSEnvironment).native_ecs;
+            if (native_ecs != null)
             {
-                kvp.Value.UpdateECSMembraneBoundary();
+                native_ecs.step(dt);
             }
+            //update ECS/Memrante boundary
+            //foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            //{
+            //    kvp.Value.UpdateECSMembraneBoundary();
+            //}
         }
     }
 

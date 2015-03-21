@@ -1,5 +1,6 @@
 #pragma once
 
+#include <errno.h>
 #include "Utility.h"
 #include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
@@ -31,7 +32,7 @@ namespace NativeDaphne
 			_X = _V = _F = NULL;
 		}
 
-	public private:
+	internal:
 		double *_X;
 		double *_V;
 		double *_F;
@@ -128,26 +129,26 @@ namespace NativeDaphne
 				int alloc_size = allocedItemCount * 3 * sizeof(double);
 				_random_samples = (double *)realloc(_random_samples, alloc_size);
 				_driver_gradient = (double *)realloc(_driver_gradient, alloc_size);
-
 				_X = (double *)realloc(_X, alloc_size);
 				_V = (double *)realloc(_V, alloc_size);
 				_F = (double *)realloc(_F, alloc_size);
 				if (_X == NULL || _V == NULL || _F == NULL)
 				{
+					int tt = errno;
 					throw gcnew Exception("Error realloc memory");
 				}
 				//reassign memory address
 				for (int i=0; i< itemCount; i++)
 				{
-					ComponentCells[i]->spatialState->X->NativePointer = _X + i * 3 * sizeof(double);
-					ComponentCells[i]->spatialState->V->NativePointer = _V + i * 3 * sizeof(double);
-					ComponentCells[i]->spatialState->F->NativePointer = _F + i * 3 * sizeof(double);
+					ComponentCells[i]->spatialState->X->NativePointer = _X + i * 3;
+					ComponentCells[i]->spatialState->V->NativePointer = _V + i * 3;
+					ComponentCells[i]->spatialState->F->NativePointer = _F + i * 3;
 				}
 			}
 			//copy new values
-			double *_xptr = _X + itemCount * 3 * sizeof(double);
-			double *_vptr = _V + itemCount * 3 * sizeof(double);
-			double *_fptr = _F + itemCount * 3 * sizeof(double);
+			double *_xptr = _X + itemCount * 3;
+			double *_vptr = _V + itemCount * 3;
+			double *_fptr = _F + itemCount * 3;
 			for (int i=0; i<3; i++)
 			{
 				_xptr[i] = cell->spatialState->X[i];

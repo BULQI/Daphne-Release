@@ -59,6 +59,7 @@ namespace NativeDaphne
 		{
 			if (is_pointer_owner == true && _array != NULL)
 			{
+				//there might be a problem for this free
 				free(_array);
 			}
 			_array = NULL;
@@ -117,7 +118,7 @@ namespace NativeDaphne
 			}
 		}
 
-	public private:
+	internal:
 		[JsonIgnore]
 		property double *NativePointer
 		{

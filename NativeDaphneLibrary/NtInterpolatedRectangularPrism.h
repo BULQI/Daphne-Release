@@ -1,19 +1,72 @@
+#pragma once
+
 #ifdef COMPILE_FLAG
 #define DllExport __declspec(dllexport)
 #else 
 #define DllExport __declspec(dllimport)
 #endif
 
+#include <stdlib.h>
+#include <stdio.h>
 
 namespace NativeDaphneLibrary
 {
+	//this class stores precomputed gradientMatrix information
+	//boundFlag, will tell if it is left bound, rightbound? for
+	//each component (x, y, z)
+	//the indexArray will be 3 * 20 - maximum indexes for each element is 20
+	class DllExport NtIndexMatrix
+	{
+	public:
+		int *indexArray0; 
+		int *indexArray1; //for gradient
+		int *indexArray2;
+		int *indexArray3;
+		int boundFlag;
+
+		NtIndexMatrix()
+		{
+			indexArray0 = (int *)malloc(8 * sizeof(int));
+			indexArray1 = (int *)malloc(20 * sizeof(int));
+			indexArray2 = (int *)malloc(20 * sizeof(int));
+			indexArray3 = (int *)malloc(20 * sizeof(int));
+			if (!indexArray0 || !indexArray1 || !indexArray2 || !indexArray3)
+			{
+				fprintf(stderr, "out of memory in NtLocalMatrix()");
+				exit(1);
+			}
+			boundFlag = 0;
+		}
+
+		~NtIndexMatrix()
+		{
+			free(indexArray0);
+			free(indexArray1);
+			free(indexArray2);
+			free(indexArray3);
+		}
+	};
+
 	class DllExport NtInterpolatedRectangularPrism
 	{
+		
+		static const int XLEFT = 1;
+		static const int XRIGHT = 2;
+		static const int XBOUND = XLEFT + XRIGHT;
+		static const int YLEFT = 4;
+		static const int YRIGHT = 8;
+		static const int YBOUND = YLEFT + YRIGHT;
+		static const int ZLEFT = 16;
+		static const int ZRIGHT = 32;
+		static const int ZBOUND = ZLEFT + ZRIGHT;
 
-		int nodePerSide0;
-		int nodePerSide1;
-		int nodePerSide2;
-		double stepSize;
+		int NodesPerSide0;
+		int NodesPerSide1;
+		int NodesPerSide2;
+		int NodesPerSide0m1; //-1
+		int NodesPerSide1m1;
+		int NodesPerSide2m1;
+		double StepSize;
 
 		//data for laplacian
 		double coef1;
@@ -30,6 +83,11 @@ namespace NativeDaphneLibrary
 		int inbound_length;
 
 		//data for restrict
+		//precomputed localmatrix informaiton
+		NtIndexMatrix **localMatrixArray;
+		bool isToroidal;
+		int NPS01;  //NodesPerSide0 * NodesPerSide1;
+
 		int num_restrict_node;
 		double *NodeIndex;	//for pos/sepsize in x, y z.
 		double *Delta;		//for dx dy dz
@@ -40,11 +98,19 @@ namespace NativeDaphneLibrary
 
 		NtInterpolatedRectangularPrism();
 
-		NtInterpolatedRectangularPrism(int* index_operator, int* side_lens, double step_size, double _coef1, double _coef2);
+		NtInterpolatedRectangularPrism(int* extents, double step_size, bool is_toroidal);
 
 		~NtInterpolatedRectangularPrism();
 
+		void initialize_index_matrix(int index, NtIndexMatrix *lm);
+
+		void initialize_laplacian(int* index_operator, double _coef1, double _coef2);
+
 		int Laplacian(double *sfarray, double *retval, int n);
+
+		int NativeRestrict(double *sfarray, double* pos, int n, double *output);
+
+		int NativeRestrictOneNode(double *sfarray, double* position, double *output);
 
 		//for testing access
 		int TestAddition(int a, int b);

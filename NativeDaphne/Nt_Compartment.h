@@ -4,15 +4,17 @@
 #include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
 #include "Nt_Reaction.h"
+#include "NtInterpolatedRectangularPrism.h"
 
 
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Security;
+using namespace NativeDaphneLibrary;
 
 namespace NativeDaphne 
 {
-	public enum class Nt_ManifoldType {TinyBall, TinySphere};
+	public enum class Nt_ManifoldType {TinyBall, TinySphere, InterpolatedRectangularPrism};
 
 	public ref class Nt_Compartment
     {
@@ -91,14 +93,6 @@ namespace NativeDaphne
 		//set up native data structure for molecular population and reactions.
 		void initialize()
 		{
-			for (int i= 0; i< Populations->Count; i++)
-			{
-				if (Populations[i]->initialized == false)
-				{
-					auto tmp = Populations[i]->GetType();
-					Populations[i]->initialize();
-				}
-			}
 			initialized = true;
 		}
     };
@@ -127,5 +121,51 @@ namespace NativeDaphne
 
 	};
 
+	public ref class Nt_ECS : Nt_Compartment
+	{
+	public:
+		int* NodesPerSide;
+		double StepSize;
+		bool IsToroidal;
+		NtInterpolatedRectangularPrism *ir_prism;
+
+		Dictionary<int, Nt_Darray^>^ BoundaryTransform;
+
+		Nt_ECS(array<int> ^extents, double step_size, bool toroidal) : Nt_Compartment(Nt_ManifoldType::InterpolatedRectangularPrism)
+		{
+			NodesPerSide = (int *)malloc(3 * sizeof(int));
+			NodesPerSide[0] = extents[0];
+			NodesPerSide[1] = extents[1];
+			NodesPerSide[2] = extents[2];
+			StepSize = step_size;
+			IsToroidal = toroidal;
+			BoundaryTransform = gcnew Dictionary<int, Nt_Darray^>();
+			ir_prism = new NtInterpolatedRectangularPrism(NodesPerSide, StepSize, IsToroidal);
+		}
+
+		~Nt_ECS(){}
+
+		void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
+        {
+
+			Nt_ECSMolecularPopulation^ mp = dynamic_cast<Nt_ECSMolecularPopulation ^>(molpop);
+			mp->ECS = this;
+			Populations->Add(molpop);
+        }
+
+		void AddBoundaryTransform(int id, Nt_Darray^ pos)
+		{
+			BoundaryTransform->Add(id, pos);
+		}
+
+		void step(double dt)
+        {
+			for (int i=0; i< Populations->Count; i++)
+			{
+				Populations[i]->step(dt);
+			}
+		}
+
+	};
 
 }

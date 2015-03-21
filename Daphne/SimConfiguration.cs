@@ -19,6 +19,7 @@ using System.Windows.Markup;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
 using NativeDaphne;
+using System.Runtime;
 
 
 namespace Daphne
@@ -8624,7 +8625,9 @@ namespace Daphne
         public static RenderSkin DeserializeFromFile(string jsonFile)
         {
             string readText = File.ReadAllText(jsonFile);
+
             RenderSkin skin = JsonConvert.DeserializeObject<RenderSkin>(readText);
+
             skin.FileName = jsonFile;
             skin.originalContent = readText;
             return skin;

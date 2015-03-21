@@ -41,7 +41,6 @@ namespace Daphne
         private Compartment compartment;
         private readonly Manifold manifold;
         private ScalarField concentration;
-        private Nt_MolecularPopulation nt_Molpop;
         private Dictionary<int, ScalarField> boundaryFluxes;
         private readonly Dictionary<int, ScalarField> boundaryConcs,
                                                       naturalBoundaryFluxes,
@@ -64,19 +63,11 @@ namespace Daphne
         {
             get 
             {
-                if (this.nt_Molpop != null)
-                {
-                    nt_Molpop.updateManaged();
-                }
                 return concentration; 
             }
             set 
             {
                 concentration = value; 
-                if (this.nt_Molpop != null)
-                {
-                    nt_Molpop.updateUnmanaged(concentration.array);
-                }
             }
         }
 

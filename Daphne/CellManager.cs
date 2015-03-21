@@ -32,7 +32,7 @@ namespace Daphne
             List<int> removalList = null;
             List<Cell> daughterList = null;
 
-            //iteration_count++;
+            iteration_count++;
             //Debug.WriteLine("*******************interation = {0} *********************", iteration_count);
             //testing cytosol reaction using native methods.
             bool use_native = true;
@@ -82,27 +82,25 @@ namespace Daphne
                 }
 
                 ////this is after the step is done
-                //if (iteration_count <0 ) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
-                //{
-                //    Debug.WriteLine("\n----membrane----");
-                //    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
-                //    {
-                //        var tmp = item.Value.Conc;
-                //        if (tmp.native_instance != null) tmp.native_instance.pull();
-                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                //            iteration_count, tmp.array[0], tmp.array[1], tmp.array[2], item.Value.Molecule.Name);
-                //    }
+                if (iteration_count < 0) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
+                {
+                    Debug.WriteLine("\n----membrane----");
+                    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
+                    {
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                            iteration_count, tmp.array[0], tmp.array[1], tmp.array[2], item.Value.Molecule.Name);
+                    }
 
-                //    Debug.WriteLine("----Cytosol----");
-                //    foreach (var item in kvp.Value.Cytosol.Populations)
-                //    {
-                //        var tmp = item.Value.Conc;
-                //        if (tmp.native_instance != null) tmp.native_instance.pull();
-                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                //            iteration_count, tmp.array[0], tmp.array[1], tmp.array[2], item.Value.Molecule.Name);
-                //    }
+                    Debug.WriteLine("----Cytosol----");
+                    foreach (var item in kvp.Value.Cytosol.Populations)
+                    {
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                            iteration_count, tmp.array[0], tmp.array[1], tmp.array[2], item.Value.Molecule.Name);
+                    }
 
-                //}
+                }
 
                 // if the cell  moved out of bounds schedule its removal
                 if (kvp.Value.Exiting == true)
@@ -147,6 +145,7 @@ namespace Daphne
                 {
                     SimulationBase.dataBasket.ExitEvent(key);
                     SimulationBase.dataBasket.RemoveCell(key);
+                    //nt_cellManager.RemoveCell(key);
                 }
             }
 
@@ -235,7 +234,7 @@ namespace Daphne
             foreach (var item in c.Genes)
             {
                 Gene gene = item.Value;
-                Nt_Gene nt_gene = new Nt_Gene(gene.Name, gene.CopyNumber, gene.ActivationLevel);
+                Nt_Gene nt_gene = new Nt_Gene(c.Cell_id, gene.Name, gene.CopyNumber, gene.ActivationLevel);
                 gene.nt_gene = nt_gene;
                 gene_dict.Add(gene.Name, nt_gene);
                 nt_cellManager.AddGene(c.Population_id, nt_gene);
@@ -247,24 +246,22 @@ namespace Daphne
                 MolecularPopulation mp = item.Value;
                 double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
 
-                Nt_ScalarField conc_sf = new Nt_ScalarField(mp.Conc.array);
-                mp.Conc.native_instance = conc_sf;
-
-                Nt_ScalarField bflux = null;
+                
+                Nt_Darray bflux = null;
                 if (mp.BoundaryFluxes.Count > 0)
                 {
-                    //cytosol should always have a boundary of memrane?
+                    //cytosol should always have a boundary of membrane?
                     var tmp = mp.BoundaryFluxes.First().Value;
-                    bflux = tmp.native_instance = new Nt_ScalarField(tmp.array);
+                    bflux = tmp.array;
                 }
 
-                Nt_ScalarField bconc = null;
+                Nt_Darray bconc = null;
                 if (mp.BoundaryConcs.Count > 0)
                 {
                     var tmp = mp.BoundaryConcs.First().Value;
-                    bconc = tmp.native_instance = new Nt_ScalarField(tmp.array);
+                    bconc = tmp.array;
                 }
-                var cmp = new Nt_CytosolMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, conc_sf, bflux, bconc);
+                var cmp = new Nt_CytosolMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, mp.Conc.array, bflux, bconc);
                 cmp.Name = item.Value.Molecule.Name; //exist for debugging
                 mp.nt_instance = cmp;
                 nt_cellManager.AddMolecularPopulation(c.Population_id, true, cmp);
@@ -282,9 +279,7 @@ namespace Daphne
                 MolecularPopulation mp = item.Value;
                 double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
 
-                Nt_ScalarField conc_sf = new Nt_ScalarField(mp.Conc.array);
-                mp.Conc.native_instance = conc_sf;
-                var cmp = new Nt_MembraneMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, conc_sf);
+                var cmp = new Nt_MembraneMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, mp.Conc.array);
                 cmp.Name = item.Value.Molecule.Name;
                 mp.nt_instance = cmp;
                 nt_cellManager.AddMolecularPopulation(c.Population_id, false, cmp);
