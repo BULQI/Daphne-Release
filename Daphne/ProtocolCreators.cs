@@ -427,14 +427,7 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.integrator_step = 0.001;
-            
-            ////GENES
-            //string[] item = new string[1] { "gApop" };
-            //int itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol genes.");
-            //}
+ 
 
             //ECM REACTIONS - recursive
             string[] item = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
@@ -445,22 +438,6 @@ namespace Daphne
                 System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
             } 
 
-            ////ECM MOLECULES
-            ////item = new string[4] { "CXCL13", "A", "A*", "sApop" };
-            //string[] item = new string[] { "CXCL13" };
-            //int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-            //}
-
-            //item = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
-            //itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
-            //} 
-
             //CELLS - recursive
             item = new string[1] { "Leukocyte_staticReceptor_motile" };
             itemsLoaded = LoadProtocolCells(protocol, item, userstore);
@@ -468,20 +445,6 @@ namespace Daphne
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol cells.");
             } 
-
-            ////REACTIONS
-            //item = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-            //                        "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-            //                        "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-            //                        "A* -> A",
-            //                        "gApop -> sApop + gApop",
-            //                        "sApop ->"
-            //};
-            //itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-            //} 
 
             // ECS
 
@@ -1075,8 +1038,6 @@ namespace Daphne
             //envHandle.comp.reaction_complexes_dict.Add(configRC.entity_guid, configRC);
 
             protocol.reporter_file_name = "Vat_2site_ab_binding";
-
-
 
         }
 
@@ -1754,6 +1715,75 @@ namespace Daphne
             gc.Sigma = new DistributedParameter(4.0);
 
             store.entity_repository.cells.Add(gc);
+
+            ////////////////////////////////
+            // T cell
+            //
+            gc = new ConfigCell();
+            gc.CellName = "T";
+            gc.CellRadius = 5.0;
+            gc.description = "Minimal implementation of a T cell. ";
+            gc.description = gc.description + "Chemotactic receptor (CXCR5) and T cell receptor (TCR) total molecular concentrations are fixed. ";
+            gc.description = gc.description + "[CXCR5|] value based on data from Hessengesser 2013. ";
+            gc.description = gc.description + "TCR density based on data from Hessengesser 2013.";
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[] { 520, 0, 0 };
+            type = new string[] { "CXCR5|", "CXCL13:CXCR5|", "TCR|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[] { 250, 0 };
+            type = new string[] { "A", "A*" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
+
+            // Reactions in Cytosol
+            type = new string[] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], store);
+                if (reac != null)
+                {
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
+                }
+            }
+
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(4.0);
+
+            store.entity_repository.cells.Add(gc);
+
+
         }
 
         private static void PredefinedTransitionSchemesCreator(Level store)
@@ -1888,17 +1918,6 @@ namespace Daphne
             signal[0, 1] = "sApop";
             LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
             config_td.StateName = config_td.states[0];
-
-            //ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
-            //distrTdE1.Distr = new DistributedParameter();
-            //distrTdE1.Distr.DistributionType = ParameterDistributionType.GAMMA;
-            //distrTdE1.Distr.ParamDistr = new GammaParameterDistribution();
-            //((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Rate = 36;
-            //((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 5.0;
-            //config_td.DriverElements[0].elements[1] = distrTdE1;
-            //distrTdE1.CurrentState = 0;
-            //distrTdE1.DestState = 1;
-
             store.entity_repository.transition_drivers.Add(config_td.Clone(true));
             store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td.Clone(true));
 
@@ -2334,6 +2353,7 @@ namespace Daphne
             // Wang2011, CXCL12:  MWt = 7.96 kDa, D = 4.5e3
             double MWt_CXCL12 = 7.96;
             cm = new ConfigMolecule("CXCL12", MWt_CXCL12, 1.0, 4.5e3);
+            cm.description = "Molecular weight and diffusion coefficient based on data from Wang 2011. ";
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
@@ -2352,6 +2372,7 @@ namespace Daphne
             // Marchese2001, CXCR4:  MWt = 43 kDa
             double MWt_CXCR4 = 43;
             cm = new ConfigMolecule("CXCR4|", MWt_CXCR4, 1.0, membraneDiffCoeff);
+            cm.description = "Molecular weight based on data from Marchese 2001. ";
             cm.molecule_location = MoleculeLocation.Boundary;
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
@@ -2385,6 +2406,11 @@ namespace Daphne
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+            // T cell receptor
+            cm = new ConfigMolecule("TCR|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             //
             // The following are generally intended as cytosol molecules 
@@ -3429,6 +3455,7 @@ namespace Daphne
         private static void PredefinedReactionComplexesCreator(Level store)
         {
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
+            crc.description = "A simple example of a reaction complex for binding and unbinding of bulk ligand and receptor molecules. ";
             //MOLECULES
             double[] conc = new double[3] { 2, 1, 0 };
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
@@ -3471,6 +3498,7 @@ namespace Daphne
 
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCL12/CXCR4 binding");
+            crc.description = "Binding and unbinding of CXL12 and CXCR4 bulk molecules. ";
             //MOLECULES
             conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL12", "CXCR4", "CXCL12:CXCR4" };
@@ -3510,6 +3538,7 @@ namespace Daphne
 
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCL13/CXCR5 binding");
+            crc.description = "Binding and unbinding of CXL13 and CXCR5 bulk molecules. ";
             //MOLECULES
             conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
@@ -3550,6 +3579,7 @@ namespace Daphne
 
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCR5 receptor production and recycling");
+            crc.description = "A set of reactions for synthesis of CXCR5, transport to the membrane, internalization of receptor and receptor/ligand complex, and degradation of internalized receptor. ";
             // Bulk MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR5", "CXCL13:CXCR5" };
@@ -3626,6 +3656,7 @@ namespace Daphne
 
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCR4 receptor production and recycling");
+            crc.description = "A set of reactions for synthesis of CXCR4, transport to the membrane, internalization of receptor and receptor/ligand complex, and degradation of internalized receptor. ";
             // Bulk MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR4", "CXCL12:CXCR4" };
@@ -3744,6 +3775,8 @@ namespace Daphne
 
             //////////////////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("Goldbeter-Koshland molecule homeostasis");
+            crc.description = "A set of transcription reactions needed to synthesize the molecules for the Goldbeter-Koshland switch reactions. ";
+            crc.description = crc.description + "sDif1 catalyzes the annihilation of E1. This can be used after the centroblast/centrocyte transition to arrest the cell cycle at the G0 phase. ";
             //BULK MOLECULES
              type = new string[] { "W", "E1", "E2", "sDif1"};
              conc = new double[type.Count()];
@@ -3794,6 +3827,8 @@ namespace Daphne
 
             //////////////////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("GC B cell chemotaxis: cytosol reactions");
+            crc.description = "A set of reactions that are needed by GC B cells for chemotaxis. These reactions should be added to the cytosol. ";
+            crc.description = crc.description + "The magnitude and direction of the chemotactic force is proportional to the polarization of activated pseudo-molecule A*, which is proportional to the polarization of bound chemokine receptors (CXCL12:CXCR4| and CXCL13:CXCR5|). ";
             //BULK MOLECULES
             type = new string[] { "A", "A*" };
             conc = new double[type.Count()]; 
@@ -3869,6 +3904,10 @@ namespace Daphne
 
             //////////////////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("GC B cell chemotaxis: ECM reactions");
+            crc.description = "A set of reactions that are needed by GC B cells for chemotaxis. These cells should be added to the ECM. ";
+            crc.description = crc.description + "Non-uniform distributions of ligand (CXCL13 and CXCL12) in the ECM will cause non-uniform concentrations of bound chemokine receptors (CXCR5| and CXCR4|) and ";
+            crc.description = crc.description + "non-uniform distributions of the pseudo-molecule A*. ";
+            crc.description = crc.description + "The magnitude and direction of the chemotactic force is proportional to the polarization of activated pseudo-molecule A*, which is proportional to the polarization of bound chemokine receptors (CXCL12:CXCR4| and CXCL13:CXCR5|). ";
             //BULK MOLECULES
             type = new string[] { "CXCL12", "CXCL13" };
             conc = new double[type.Count()]; 
@@ -4430,13 +4469,14 @@ namespace Daphne
             protocol.scenario.time_config.integrator_step = 0.001;
             protocol.reporter_file_name = "centroblast_centrocyte_cycling";
 
-            //// mean time for removal = shape/rate
-            //double mean_removal_time = 922.0; // min, from Feng's model of Victora et al
-            //double shape = 10.0;
-            //double rate = shape/mean_removal_time;
-            //protocol.sim_params.Phagocytosis.ParamDistr = new GammaParameterDistribution();
-            //((GammaParameterDistribution)protocol.sim_params.Phagocytosis.ParamDistr).Rate = rate;
-            //((GammaParameterDistribution)protocol.sim_params.Phagocytosis.ParamDistr).Shape = shape;
+            // mean time for removal = shape/rate
+            double mean_removal_time = 923.0; // min, from Feng's model of Victora et al
+            double shape = 10.0;
+            double rate = shape / mean_removal_time;
+            protocol.sim_params.Phagocytosis.ParamDistr = new GammaParameterDistribution();
+            protocol.sim_params.Phagocytosis.DistributionType = ParameterDistributionType.GAMMA;
+            ((GammaParameterDistribution)protocol.sim_params.Phagocytosis.ParamDistr).Rate = rate;
+            ((GammaParameterDistribution)protocol.sim_params.Phagocytosis.ParamDistr).Shape = shape;
 
             envHandle.extent_x = 260;
             envHandle.extent_y = 260;
@@ -4451,51 +4491,6 @@ namespace Daphne
                 System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
             }
 
-            ////ECS MOLECULES
-            //string[] ecs_mols = new string[] { "CXCL13", "CXCL12" };
-            //int itemsLoaded = LoadProtocolMolecules(protocol, ecs_mols, MoleculeLocation.Bulk, userstore);
-            //if (itemsLoaded != ecs_mols.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-            //}
-
-            ////GENES
-            //string[] item = new string[] { "gCXCR5", "gCXCR4", "gA", "gW", "gE1", "gE2", "gDif1" };
-            //itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol genes.");
-            //}
-
-            ////CELL MOLECULES
-            //item = new string[] {   "A", "A*", 
-            //                        "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5",
-            //                        "W", "Wp", "E1", "E2", "W:E1", "Wp:E2",
-            //                        "sDif1" };
-            //itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-            //}
-
-            //item = new string[] { "CXCR4|", "CXCL12:CXCR4|", "CXCR5|", "CXCL13:CXCR5|" };
-            //itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
-            //}
-
-            ////ECS REACTIONS
-            //string[] ecsReacs = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-            //                        "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-            //                        "CXCL12 + CXCR4| -> CXCL12:CXCR4|",
-            //                        "CXCL12:CXCR4| -> CXCL12 + CXCR4|" };
-            //itemsLoaded = LoadProtocolReactions(protocol, ecsReacs, userstore);
-            //if (itemsLoaded != ecsReacs.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-            //}
-
             //CELLS - recursive
             string[] cells = new string[] { "GC B" };
             itemsLoaded = itemsLoaded = LoadProtocolCells(protocol, cells, userstore);
@@ -4503,37 +4498,6 @@ namespace Daphne
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol cells.");
             }
-
-            ////CELL CYTOSOL REACTIONS
-            //item = new string[] {   "gDif1 -> sDif1 + gDif1",
-            //                        "E1 + sDif1 -> sDif1",
-            //                      };
-            //itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-            //}
-
-            ////CYTOSOL REACTION COMPLEXES
-            //string[] cytosolReacComplex = new string[] {   "CXCR5 receptor production and recycling", 
-            //                                                "CXCR4 receptor production and recycling", 
-            //                                                "GC B cell chemotaxis: cytosol reactions",
-            //                                                "Goldbeter-Koshland switch reactions",
-            //                                                "Goldbeter-Koshland molecule production"
-            //                                            };
-            //itemsLoaded = LoadProtocolRCs(protocol, ecsReacComplex, userstore);
-            //if (itemsLoaded != ecsReacComplex.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-            //}
-
-            ////CELLS - cell reactions will load with cell
-            //item = new string[] { "GC B" };
-            //itemsLoaded = LoadProtocolCells(protocol, item, userstore);
-            //if (itemsLoaded != item.Length)
-            //{
-            //    System.Windows.MessageBox.Show("Unable to load all protocol cells.");
-            //}
 
             //ECM
             double sep = 130;
