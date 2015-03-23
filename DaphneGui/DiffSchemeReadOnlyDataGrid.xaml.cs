@@ -154,29 +154,36 @@ namespace DaphneGui
 
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
             Level level = MainWindow.GetLevelContext(cdc);
+            if (level == null)
+            {
+                level = cdc.CurrentLevel;
+            }
 
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             //Level level = MainWindow.GetLevelContext(cdc);            
             //EntityRepository er = level.entity_repository;
+
+            ConfigCell cell = cdc.DataContext as ConfigCell;
 
             //create columns
             int count = 0;
             foreach (var gene_guid in genes)
             {
-                if (!er.genes_dict.ContainsKey(gene_guid))
-                    continue;
-                ConfigGene gene = er.genes_dict[gene_guid];
-
-                DataGridTextColumn col = new DataGridTextColumn();
-                col.IsReadOnly = true;
-                col.Header = gene.Name;
-                col.CanUserSort = false;
-                Binding b = new Binding(string.Format("activations[{0}]", count));
-                b.Mode = BindingMode.TwoWay;
-                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                col.Binding = b;
-                dataGrid.Columns.Add(col);
+                //if (!er.genes_dict.ContainsKey(gene_guid))
+                //    continue;
+                ConfigGene gene = cell.genes.First(g => g.entity_guid == gene_guid);
+                if (gene != null)
+                {
+                    DataGridTextColumn col = new DataGridTextColumn();
+                    col.IsReadOnly = true;
+                    col.Header = gene.Name;
+                    col.CanUserSort = false;
+                    Binding b = new Binding(string.Format("activations[{0}]", count));
+                    b.Mode = BindingMode.TwoWay;
+                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                    col.Binding = b;
+                    dataGrid.Columns.Add(col);
+                }
                 count++;
             }
             ConfigTransitionScheme currentScheme = GetRDiffSchemeSource(dataGrid);
@@ -188,6 +195,11 @@ namespace DaphneGui
             dataGrid.Columns.Add(combobox_col);
         }
 
+        /// <summary>
+        /// This creates the columns in the Transition Regulators data grid, the lower one.
+        /// </summary>
+        /// <param name="dataGrid"></param>
+        /// <param name="states"></param>
         private static void CreateStateColumns(DataGrid dataGrid, ObservableCollection<string> states)
         {
             foreach (var item in dataGrid.Columns)
@@ -200,15 +212,10 @@ namespace DaphneGui
                     var textBlock = dt.VisualTree;
                     
                 }
-
             }
 
             dataGrid.Columns.Clear();
             if (states == null || states.Count == 0) return;
-
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            ////Level level = MainWindow.GetLevelContext(dataGrid);
-            ////EntityRepository er = level.entity_repository;
 
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
 
@@ -217,20 +224,8 @@ namespace DaphneGui
             if (diffScheme == null) return;
             foreach (string s in states)
             {
-                DataGridTemplateColumn col = new DataGridTemplateColumn();
-                //column header binding
-                //Binding hb = new Binding(string.Format("states[{0}]", count));
-                //hb.Mode = BindingMode.OneWay;
-                //hb.Source = diffScheme.Driver;
-                //FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
-                //txtStateName.SetValue(TextBlock.StyleProperty, null);
-                ////txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
-                //txtStateName.SetBinding(TextBlock.TextProperty, hb);
-                //col.HeaderTemplate = new DataTemplate() { VisualTree = txtStateName };
-
+                DataGridTemplateColumn col = new DataGridTemplateColumn();                
                 col.Header = states[count];
-
-
                 col.CanUserSort = false;
                 Binding b = new Binding(string.Format("elements[{0}]", count));
 
@@ -352,10 +347,12 @@ namespace DaphneGui
             {
                 //e.Row.Header = context.RowHeaders[index];
                 DataGridRowHeader dgr = new DataGridRowHeader();
+                dgr.Focusable = false;
                 dgr.DataContext = diffScheme.Driver;
                 Binding binding = new Binding(string.Format("states[{0}]", index));
                 binding.NotifyOnTargetUpdated = true;
                 binding.Mode = BindingMode.TwoWay;
+                
                 binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;

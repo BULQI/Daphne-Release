@@ -23,7 +23,7 @@ namespace DaphneGui
     /// </summary>
     public partial class CellDetailsReadOnlyControl : UserControl
     {
-        private Level CurrentLevel = null;
+        public Level CurrentLevel { get; set; }
 
         public CellDetailsReadOnlyControl()
         {
@@ -802,6 +802,12 @@ namespace DaphneGui
             }
 
             updateSelectedMoleculesAndGenes(cell);
+
+            PushBetweenLevels pushwin = Window.GetWindow(this) as PushBetweenLevels;
+            if (pushwin != null)
+            {
+                CurrentLevel = pushwin.CurrentLevel;
+            }
 
             // list of cytosol molecules for use by division and differentitiation schemes
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("moleculesListView"));
