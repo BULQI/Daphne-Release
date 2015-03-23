@@ -89,9 +89,9 @@
         <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
 
         <DataGrid x:Name="EpigeneticMapGridDiv" 
-            local:DiffSchemeReadOnlyDataGrid.RDiffSchemeSource ="{Binding}"               
-            local:DiffSchemeReadOnlyDataGrid.RDiffSchemeTarget ="EpigeneticMap" 
-            local:DiffSchemeReadOnlyDataGrid.RGeneList ="{Binding genes}"
+            local:DiffSchemeReadOnlyDataGrid.DiffSchemeSource ="{Binding}"               
+            local:DiffSchemeReadOnlyDataGrid.DiffSchemeTarget ="EpigeneticMap" 
+            local:DiffSchemeReadOnlyDataGrid.GeneList ="{Binding genes}"
             MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
             AutoGenerateColumns="False"
             IsReadOnly="True"
@@ -186,7 +186,7 @@
             
             <DataGrid.RowHeaderTemplate>
                 <DataTemplate>
-                    <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" />
+                    <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" IsReadOnly="True" />
                 </DataTemplate>
             </DataGrid.RowHeaderTemplate>
         </DataGrid>
@@ -195,9 +195,9 @@
         <TextBlock Text="Transition Regulators" Grid.Column="0" Grid.Row="2" Width="130" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
 
         <DataGrid x:Name="DivRegGrid" 
-                local:DiffSchemeReadOnlyDataGrid.RDiffSchemeTarget ="Regulator"
-                local:DiffSchemeReadOnlyDataGrid.RDiffSchemeSource ="{Binding}"
-                local:DiffSchemeReadOnlyDataGrid.RStateList ="{Binding Driver.states}"
+                local:DiffSchemeReadOnlyDataGrid.DiffSchemeTarget ="Regulator"
+                local:DiffSchemeReadOnlyDataGrid.DiffSchemeSource ="{Binding}"
+                local:DiffSchemeReadOnlyDataGrid.StateList ="{Binding Driver.states}"
                 MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
                 AutoGenerateColumns="False"
                 IsReadOnly="False"

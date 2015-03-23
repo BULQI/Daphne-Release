@@ -485,7 +485,7 @@ namespace DaphneGui
 
             DataGrid dataGrid = (DataGrid)DiffSchemeReadOnlyDataGrid.FindVisualParent<DataGrid>(combo);
             if (dataGrid == null) return;
-            ConfigTransitionScheme scheme = DiffSchemeReadOnlyDataGrid.GetRDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme scheme = DiffSchemeReadOnlyDataGrid.GetDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
                 //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
@@ -763,7 +763,7 @@ namespace DaphneGui
             // update the transition scheme
             DataGrid dataGrid = (DataGrid)DiffSchemeReadOnlyDataGrid.FindVisualParent<DataGrid>(button);
             if (dataGrid == null) return;
-            ConfigTransitionScheme scheme = DiffSchemeReadOnlyDataGrid.GetRDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme scheme = DiffSchemeReadOnlyDataGrid.GetDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
                 scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;

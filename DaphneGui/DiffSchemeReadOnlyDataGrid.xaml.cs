@@ -75,75 +75,75 @@ namespace DaphneGui
         /// <summary>
         /// ConfigTransitionScheme Attached Dependency Property
         /// </summary>
-        public static readonly DependencyProperty RDiffSchemeSourceProperty =
-            DependencyProperty.RegisterAttached("RDiffSchemeSource",
+        public static readonly DependencyProperty DiffSchemeSourceProperty =
+            DependencyProperty.RegisterAttached("DiffSchemeSource",
             typeof(ConfigTransitionScheme), typeof(DiffSchemeReadOnlyDataGrid),
                 new FrameworkPropertyMetadata(null,
-                    new PropertyChangedCallback(OnRDiffSchemeChanged)));
+                    new PropertyChangedCallback(OnDiffSchemeChanged)));
 
-        public static readonly DependencyProperty RDiffSchemeTargetProperty =
-            DependencyProperty.RegisterAttached("RDiffSchemeTarget",
+        public static readonly DependencyProperty DiffSchemeTargetProperty =
+            DependencyProperty.RegisterAttached("DiffSchemeTarget",
             typeof(string), typeof(DiffSchemeReadOnlyDataGrid),
             new FrameworkPropertyMetadata(null,
             null));
 
-        public static readonly DependencyProperty RGeneListProperty =
-            DependencyProperty.RegisterAttached("RGeneList",
+        public static readonly DependencyProperty GeneListProperty =
+            DependencyProperty.RegisterAttached("GeneList",
             typeof(ObservableCollection<string>), typeof(DiffSchemeReadOnlyDataGrid),
                 new FrameworkPropertyMetadata(null,
-                new PropertyChangedCallback(OnRGeneListChanged)));
+                new PropertyChangedCallback(OnGeneListChanged)));
 
-        public static readonly DependencyProperty RStateListProperty =
-            DependencyProperty.RegisterAttached("RStateList",
+        public static readonly DependencyProperty StateListProperty =
+            DependencyProperty.RegisterAttached("StateList",
             typeof(ObservableCollection<string>), typeof(DiffSchemeReadOnlyDataGrid),
             new FrameworkPropertyMetadata(null,
-            new PropertyChangedCallback(OnRStateListChanged)));
+            new PropertyChangedCallback(OnStateListChanged)));
 
         /// <summary>
         /// Gets the DiffScheme property.  
         /// </summary>
-        public static ConfigTransitionScheme GetRDiffSchemeSource(DependencyObject d)
+        public static ConfigTransitionScheme GetDiffSchemeSource(DependencyObject d)
         {
-            return (ConfigTransitionScheme)d.GetValue(RDiffSchemeSourceProperty);
+            return (ConfigTransitionScheme)d.GetValue(DiffSchemeSourceProperty);
         }
 
-        public static string GetRDiffSchemeTarget(DependencyObject d)
+        public static string GetDiffSchemeTarget(DependencyObject d)
         {
-            return (string)d.GetValue(RDiffSchemeTargetProperty);
+            return (string)d.GetValue(DiffSchemeTargetProperty);
         }
 
         /// <summary>
         /// Sets the MatrixSource property.  
         /// </summary>
-        public static void SetRDiffSchemeSource(DependencyObject d, ConfigTransitionScheme value)
+        public static void SetDiffSchemeSource(DependencyObject d, ConfigTransitionScheme value)
         {
-            d.SetValue(RDiffSchemeSourceProperty, value);
+            d.SetValue(DiffSchemeSourceProperty, value);
         }
 
-        public static void SetRDiffSchemeTarget(DependencyObject d, string value)
+        public static void SetDiffSchemeTarget(DependencyObject d, string value)
         {
-            d.SetValue(RDiffSchemeTargetProperty, value);
+            d.SetValue(DiffSchemeTargetProperty, value);
         }
 
 
         public static ObservableCollection<string> GetGeneList(DependencyObject d)
         {
-            return (ObservableCollection<string>)d.GetValue(RGeneListProperty);
+            return (ObservableCollection<string>)d.GetValue(GeneListProperty);
         }
 
-        public static void SetRGeneList(DependencyObject d, ObservableCollection<string> value)
+        public static void SetGeneList(DependencyObject d, ObservableCollection<string> value)
         {
-            d.SetValue(RGeneListProperty, value);
+            d.SetValue(GeneListProperty, value);
         }
 
-        public static ObservableCollection<string> GetRStateList(DependencyObject d)
+        public static ObservableCollection<string> GetStateList(DependencyObject d)
         {
-            return (ObservableCollection<string>)d.GetValue(RStateListProperty);
+            return (ObservableCollection<string>)d.GetValue(StateListProperty);
         }
 
-        public static void SetRStateList(DependencyObject d, ObservableCollection<string> value)
+        public static void SetStateList(DependencyObject d, ObservableCollection<string> value)
         {
-            d.SetValue(RStateListProperty, value);
+            d.SetValue(StateListProperty, value);
         }
 
         private static void CreateGeneColumns(DataGrid dataGrid, ObservableCollection<string> genes)
@@ -186,7 +186,7 @@ namespace DaphneGui
                 }
                 count++;
             }
-            ConfigTransitionScheme currentScheme = GetRDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme currentScheme = GetDiffSchemeSource(dataGrid);
 
             //////FOR NOW DON'T CREATE THE LAST COLUMN
             return;
@@ -220,7 +220,7 @@ namespace DaphneGui
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
 
             int count = 0;
-            ConfigTransitionScheme diffScheme = GetRDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme diffScheme = GetDiffSchemeSource(dataGrid);
             if (diffScheme == null) return;
             foreach (string s in states)
             {
@@ -251,7 +251,7 @@ namespace DaphneGui
             }
         }
 
-        private static void OnRGeneListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnGeneListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             DataGrid dataGrid = d as DataGrid;
             ObservableCollection<string> genes = e.NewValue as ObservableCollection<string>;
@@ -267,7 +267,7 @@ namespace DaphneGui
             };
         }
 
-        private static void OnRStateListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnStateListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             DataGrid dataGrid = d as DataGrid;
             ObservableCollection<string> states = e.NewValue as ObservableCollection<string>;
@@ -286,12 +286,12 @@ namespace DaphneGui
         /// <summary>
         /// Handles changes to the MatrixSource property.
         /// </summary>
-        private static void OnRDiffSchemeChanged(DependencyObject d,
+        private static void OnDiffSchemeChanged(DependencyObject d,
             DependencyPropertyChangedEventArgs e)
         {
 
             DataGrid dataGrid = d as DataGrid;
-            string DiffSchemeTarget = GetRDiffSchemeTarget(dataGrid);
+            string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
 
             ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
@@ -330,7 +330,7 @@ namespace DaphneGui
         static void dataGrid_TargetUpdated(object sender, DataTransferEventArgs e)
         {
             DataGrid dg = (DataGrid)sender;
-            var diffScheme = GetRDiffSchemeSource(dg);
+            var diffScheme = GetDiffSchemeSource(dg);
             dg.RowHeaderWidth = 0;
             dg.RowHeaderWidth = Double.NaN;
         }
@@ -339,15 +339,14 @@ namespace DaphneGui
         {
 
             DataGrid dataGrid = sender as DataGrid;
-            var diffScheme = GetRDiffSchemeSource(dataGrid);
-            string DiffSchemeTarget = GetRDiffSchemeTarget(dataGrid);
+            var diffScheme = GetDiffSchemeSource(dataGrid);
+            string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
             if (diffScheme == null) return;
             int index = e.Row.GetIndex();
             if (index < diffScheme.Driver.states.Count)
             {
                 //e.Row.Header = context.RowHeaders[index];
                 DataGridRowHeader dgr = new DataGridRowHeader();
-                dgr.Focusable = false;
                 dgr.DataContext = diffScheme.Driver;
                 Binding binding = new Binding(string.Format("states[{0}]", index));
                 binding.NotifyOnTargetUpdated = true;
@@ -362,8 +361,8 @@ namespace DaphneGui
 
         public static void update_datagrid_rowheaders(DataGrid datagrid)
         {
-            var diffScheme = GetRDiffSchemeSource(datagrid);
-            string DiffSchemeTarget = GetRDiffSchemeTarget(datagrid);
+            var diffScheme = GetDiffSchemeSource(datagrid);
+            string DiffSchemeTarget = GetDiffSchemeTarget(datagrid);
 
             for (int i = 0; i < diffScheme.Driver.states.Count; i++)
             {
@@ -429,7 +428,7 @@ namespace DaphneGui
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var diff_scheme = DiffSchemeReadOnlyDataGrid.GetRDiffSchemeSource(EpigeneticMapGridDiv);
+            var diff_scheme = DiffSchemeReadOnlyDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
             int x = 0;
             x++;            
         }
