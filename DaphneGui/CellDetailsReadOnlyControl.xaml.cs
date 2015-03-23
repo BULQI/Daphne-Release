@@ -409,6 +409,21 @@ namespace DaphneGui
             {
                 level = CurrentLevel;
             }
+
+            if (level == null)
+            {
+                //var sopTag = Tag as SystemOfPersistence;
+                PushBetweenLevels pushwin = Window.GetWindow(this) as PushBetweenLevels;
+                if (pushwin != null)
+                {
+                    CurrentLevel = pushwin.CurrentLevel;
+                    level = pushwin.CurrentLevel;
+                }
+            }
+
+            if (level == null)
+                return null;
+
             EntityRepository er = level.entity_repository;
 
             DataGridTextColumn editor_col = new DataGridTextColumn();
@@ -468,9 +483,9 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(combo);
+            DataGrid dataGrid = (DataGrid)DiffSchemeReadOnlyDataGrid.FindVisualParent<DataGrid>(combo);
             if (dataGrid == null) return;
-            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme scheme = DiffSchemeReadOnlyDataGrid.GetRDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
                 //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
@@ -746,9 +761,9 @@ namespace DaphneGui
             tde.DestState = DestState;
 
             // update the transition scheme
-            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
+            DataGrid dataGrid = (DataGrid)DiffSchemeReadOnlyDataGrid.FindVisualParent<DataGrid>(button);
             if (dataGrid == null) return;
-            ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            ConfigTransitionScheme scheme = DiffSchemeReadOnlyDataGrid.GetRDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
                 scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
@@ -787,6 +802,14 @@ namespace DaphneGui
             }
 
             updateSelectedMoleculesAndGenes(cell);
+
+            // list of cytosol molecules for use by division and differentitiation schemes
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            cvs.Source = new ObservableCollection<ConfigMolecule>();
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            {
+                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+            }
 
         }
 
@@ -975,192 +998,4 @@ namespace DaphneGui
     }
 
 }
-
-/*
- * 
- *  <Expander   Header="Division"
-                        Padding="5" ExpandDirection="Down"
-                        IsExpanded="False"                                                  
-                        x:Name="DivSchemeExpander"
-                        Margin="0,4,0,0" 
-                        Canvas.ZIndex="1"
-                        BorderThickness="1"
-                        BorderBrush="Black"                                        
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
-                        Expanded="DivSchemeExpander_Expanded" >
-
-                <!--Expanded="DivSchemeExpander_Expanded"-->
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
-                            x:Name="spDivScheme">
-                    <StackPanel>
-                        <Grid >
-                            <Grid.Resources>
-                                <DataTemplate x:Key="geneListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
-                                        <CheckBox IsChecked="{Binding Path=Active}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="stateListItemTemplate">
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
-                                                            ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
-                                                            ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="cellState2ListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="20" Text="{Binding Path=Name}" />
-                                        <TextBlock Width="10" Text="" />
-                                        <TextBox Width="50" Text="{Binding Path=MolName}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="divStatesListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="cellStateGridItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Grid.Resources>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
-
-                            <!-- DIVISION SCHEME -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                        Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}}"
-                                        >
-                                <Button x:Name="btnDelDivScheme" Click="btnDelDiffScheme_Click" Tag="Division">Delete Division Scheme</Button>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                        Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}"
-                                        >
-                                <Button x:Name="btnNewDivScheme" Click="btnNewDiffScheme_Click" Tag="Division">New Division Scheme</Button>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-
-                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid" 
-                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}"
-                                        Tag="div"/>
-                    
-                    
-                </StackPanel>
-            </Expander>
-            <!-- Differentiation -->
-            <Expander   
-                    Padding="5" ExpandDirection="Down"
-                    IsExpanded="False"
-                    Header="Differentiation"                                                  
-                    x:Name="DiffSchemeExpander"
-                    Margin="0,4,0,0" 
-                    Canvas.ZIndex="1"
-                    BorderThickness="1"
-                    BorderBrush="Black"
-                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                    Expanded="DiffSchemeExpander_Expanded"
-                >
-
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
-                    <StackPanel>
-                        <Grid >
-                            <Grid.Resources>
-                                <DataTemplate x:Key="diffSchemeListItemTemplate2">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Path=Hello}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="geneListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
-                                        <CheckBox IsChecked="{Binding Path=Active}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="stateListItemTemplate">
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
-                                                            ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
-                                                            ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="cellState2ListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="20" Text="{Binding Path=Name}" />
-                                        <TextBlock Width="10" Text="" />
-                                        <TextBox Width="50" Text="{Binding Path=MolName}" />
-
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="diffStatesListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="cellStateGridItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Grid.Resources>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
-
-                            <!-- DIFFERENTIATION SCHEME -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}" >
-                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">Delete Differentiation Scheme</Button>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}">        
-                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">New Differentiation Scheme</Button>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                    
-                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
-                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
-
-                </StackPanel>
-            </Expander>
- * 
- * */
-
 
