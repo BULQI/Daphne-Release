@@ -182,6 +182,60 @@ namespace NativeDaphne
 		int array_length;
 
 	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_BoundaryAssociation : public Nt_Reaction
+	{
+
+	public:
+		Nt_BoundaryAssociation(){};
+
+		Nt_BoundaryAssociation(int cell_id, double rate_const);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void step(double dt) override;
+
+		Nt_MolecularPopulation ^receptor;
+		Nt_MolecularPopulation ^ligand;
+		Nt_MolecularPopulation ^complex;
+
+	private:
+		double* _receptor;
+		double* _ligand_boundaryConc;
+		double* _complex;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_BoundaryDissociation : public Nt_Reaction
+	{
+
+	public:
+		Nt_BoundaryDissociation(){};
+
+		Nt_BoundaryDissociation(int cell_id, double rate_const);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void step(double dt) override;
+
+		Nt_MolecularPopulation ^receptor;
+		Nt_MolecularPopulation ^ligand;
+		Nt_MolecularPopulation ^complex;
+	private:
+		double* _receptor;
+		double* _ligand;
+		double* _complex;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+	};
+
 }
 	
 	

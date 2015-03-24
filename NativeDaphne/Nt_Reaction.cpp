@@ -442,4 +442,124 @@ namespace NativeDaphne
 		NativeDaphneLibrary::Utility::NtDaxpy(array_length, -rateConstant, _membraneConc, 1, _bulk_BoundaryFlux, 1);
 		NativeDaphneLibrary::Utility::NtDscal(array_length, (1.0-rateConstant * dt), _membraneConc, 1);
 	}
+
+	//*************************************
+	// BoundarAssociation
+	//*************************************
+	Nt_BoundaryAssociation::Nt_BoundaryAssociation(int cell_id, double rate_const) :Nt_Reaction(Nt_ReactionType::CatalyzedBoundaryActivation, cell_id, rate_const)
+	{
+		_intensity = NULL;
+	}
+
+	void Nt_BoundaryAssociation:: AddReaction(Nt_Reaction ^src_rxn)
+	{
+		//ComponentReactions->Add(src_rxn);
+		//cellIds->Add(src_rxn->cellId);
+
+		//array_length = ComponentReactions->Count;
+
+		//Nt_BoundaryAssociation ^tmp = dynamic_cast<Nt_BoundaryAssociation ^>(ComponentReactions[0]);
+		//array_length *= tmp->receptor->molpopConc->Length;
+
+		//_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
+		//_receptor = tmp->receptor->molpopConc->NativePointer;	//membrane
+		//_complex = tmp->complex->NativePointer;					//membrane
+		////we cannot use boundaryConcPonter here...we will need to separte it by cellpops 
+		////so that we can use the appropriate pointers...
+		//_ligand_boundaryConc = tmp->ligand->BoundaryConcPointer;		//ecs 
+
+		//if (!_complex || !_ligand_boundaryConc || !_receptor)
+		//{
+		//	throw gcnew Exception("reaction component not initialized");
+		//}
+	}
+
+
+	Nt_Reaction^ Nt_BoundaryAssociation::CloneParent()
+	{
+		Nt_BoundaryAssociation^ rxn = gcnew Nt_BoundaryAssociation(this->cellId, this->rateConstant);
+		//rxn->ComponentReactions = gcnew List<Nt_Reaction ^>();
+		//rxn->cellIds = gcnew List<int>();
+		////for debug only
+		//rxn->complex = this->complex;
+		//rxn->ligand = this->ligand;
+		//rxn->receptor = this->receptor;
+		//rxn->AddReaction(this);
+		return rxn;
+	}
+
+
+
+	void Nt_BoundaryAssociation::step(double dt)
+	{
+		//int n = array_length;
+		//NativeDaphneLibrary::Utility::NtMultiplyScalar(n, 4, _receptor, _ligand_BoundaryConc, _intensity);
+		//NativeDaphneLibrary::Utility::NtDaxpy(n, rateConstant, _intensity, 1, _ligand_BoundaryFlux, 1);
+		//NativeDaphneLibrary::Utility::NtDaxpy(n, -dt*rateConstant, _intensity, 1, _receptor, 1);
+		//NativeDaphneLibrary::Utility::NtDaxpy(n, dt*rateConstant, _intensity, 1, _complex, 1);
+	}
+
+	//*************************************
+	// BoundarDissociation
+	//*************************************
+	Nt_BoundaryDissociation::Nt_BoundaryDissociation(int cell_id, double rate_const) :Nt_Reaction(Nt_ReactionType::CatalyzedBoundaryActivation, cell_id, rate_const)
+	{
+		_intensity = NULL;
+	}
+
+	void Nt_BoundaryDissociation:: AddReaction(Nt_Reaction ^src_rxn)
+	{
+		//ComponentReactions->Add(src_rxn);
+		//cellIds->Add(src_rxn->cellId);
+
+		//array_length = ComponentReactions->Count;
+
+		//Nt_BoundaryAssociation ^tmp = dynamic_cast<Nt_BoundaryAssociation ^>(ComponentReactions[0]);
+		//array_length *= tmp->receptor->molpopConc->Length;
+
+		//_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
+		//_receptor = tmp->receptor->molpopConc->NativePointer;	//membrane
+		//_complex = tmp->complex->NativePointer;					//membrane
+		////we cannot use boundaryConcPonter here...we will need to separte it by cellpops 
+		////so that we can use the appropriate pointers...
+		//_ligand_boundaryConc = tmp->ligand->BoundaryConcPointer;		//ecs 
+
+		//if (!_complex || !_ligand_boundaryConc || !_receptor)
+		//{
+		//	throw gcnew Exception("reaction component not initialized");
+		//}
+	}
+
+
+	Nt_Reaction^ Nt_BoundaryDissociation::CloneParent()
+	{
+		Nt_BoundaryDissociation^ rxn = gcnew Nt_BoundaryDissociation(this->cellId, this->rateConstant);
+		//rxn->ComponentReactions = gcnew List<Nt_Reaction ^>();
+		//rxn->cellIds = gcnew List<int>();
+		////for debug only
+		//rxn->complex = this->complex;
+		//rxn->ligand = this->ligand;
+		//rxn->receptor = this->receptor;
+		//rxn->AddReaction(this);
+		return rxn;
+	}
+
+
+
+	void Nt_BoundaryDissociation::step(double dt)
+	{
+		//int n = array_length;
+		//NativeDaphneLibrary::Utility::NtMultiplyScalar(n, 4, _receptor, _ligand_BoundaryConc, _intensity);
+		//NativeDaphneLibrary::Utility::NtDaxpy(n, rateConstant, _intensity, 1, _ligand_BoundaryFlux, 1);
+		//NativeDaphneLibrary::Utility::NtDaxpy(n, -dt*rateConstant, _intensity, 1, _receptor, 1);
+		//NativeDaphneLibrary::Utility::NtDaxpy(n, dt*rateConstant, _intensity, 1, _complex, 1);
+	}
+
+
+
+
+
+
+
+
 }

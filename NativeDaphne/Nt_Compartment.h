@@ -121,6 +121,16 @@ namespace NativeDaphne
 
 	};
 
+	public ref class Nt_ReactionSet
+	{
+		List<Nt_Reaction^>^ ReactionList;
+
+		Nt_ReactionSet()
+		{
+			ReactionList = gcnew List<Nt_Reaction^>();
+		}
+	};
+
 	public ref class Nt_ECS : Nt_Compartment
 	{
 	public:
@@ -128,8 +138,16 @@ namespace NativeDaphne
 		double StepSize;
 		bool IsToroidal;
 		NtInterpolatedRectangularPrism *ir_prism;
+		bool initialized;
 
-		Dictionary<int, Nt_Darray^>^ BoundaryTransform;
+		//here boundary reactions need to be organized diffrently than in cytosol
+		//here we need to explicitely organize them by cell population id.
+		Dictionary<int, Nt_ReactionSet^>^ boundaryReactions;
+
+		//<cell_population_id, List<interior->id, transformation>>
+		Dictionary<int, Nt_Darray^>^ BoundaryTransforms;
+		double **Positions;
+		List<int>^ BoundaryKeys; //to keep sync with boundary in molpop
 
 		Nt_ECS(array<int> ^extents, double step_size, bool toroidal) : Nt_Compartment(Nt_ManifoldType::InterpolatedRectangularPrism)
 		{
@@ -139,27 +157,53 @@ namespace NativeDaphne
 			NodesPerSide[2] = extents[2];
 			StepSize = step_size;
 			IsToroidal = toroidal;
-			BoundaryTransform = gcnew Dictionary<int, Nt_Darray^>();
+			BoundaryTransforms = gcnew Dictionary<int, Nt_Darray^>();
 			ir_prism = new NtInterpolatedRectangularPrism(NodesPerSide, StepSize, IsToroidal);
+			initialized = false;
+			Positions = NULL;
+			BoundaryKeys = gcnew List<int>();
+			boundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
 		}
 
 		~Nt_ECS(){}
 
 		void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
         {
-
 			Nt_ECSMolecularPopulation^ mp = dynamic_cast<Nt_ECSMolecularPopulation ^>(molpop);
 			mp->ECS = this;
 			Populations->Add(molpop);
         }
 
-		void AddBoundaryTransform(int id, Nt_Darray^ pos)
+		//here key is membrane's interor id
+		void AddBoundaryTransform(int key, Nt_Darray^ pos)
 		{
-			BoundaryTransform->Add(id, pos);
+			BoundaryTransforms->Add(key, pos);
+			initialized = false;
+		}
+
+		void initialize()
+		{
+			BoundaryKeys->Clear();
+			int items_count = BoundaryTransforms->Count;
+			Positions = (double **)realloc(Positions, items_count * sizeof(double *));
+			int n = 0;
+			for each (KeyValuePair<int, Nt_Darray^>^ kvp in BoundaryTransforms)
+			{
+				BoundaryKeys->Add(kvp->Key);
+				Positions[n++] = kvp->Value->NativePointer;
+			}
+			for (int i=0; i< Populations->Count; i++)
+			{
+				Nt_ECSMolecularPopulation^ pop = dynamic_cast<Nt_ECSMolecularPopulation^>(Populations[i]);
+				pop->initialize();
+			}
+
+			initialized = true;
 		}
 
 		void step(double dt)
         {
+			if (initialized == false)initialize();
 			for (int i=0; i< Populations->Count; i++)
 			{
 				Populations[i]->step(dt);

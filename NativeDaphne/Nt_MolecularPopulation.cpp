@@ -315,29 +315,66 @@ namespace NativeDaphne
 		NativeDaphneLibrary::Utility::NtDaxpy(n, factor1, _laplacian, 1, _molpopConc, 1);
 	}
 
+	//****************************************
+	// ECSMolecularPopulation
+	//****************************************
+
 	Nt_ECSMolecularPopulation::Nt_ECSMolecularPopulation(String ^_molguid, double _diffusionCoefficient, 
 		Nt_Darray^ conc) : Nt_MolecularPopulation(_molguid, _diffusionCoefficient, conc)
 	{
-		boundaryFluxes = gcnew Dictionary<int, Nt_Darray^>();
-        boundaryConcs = gcnew Dictionary<int, Nt_Darray^>();
+		cellBoundaries = gcnew Dictionary<int, ECS_Boundary^>();
+		//boundaryFluxes = gcnew Dictionary<int, Nt_Darray^>();
+		//boundaryConcs = gcnew Dictionary<int, Nt_Darray^>();
+		_boundaryConc = NULL;
+	}
+
+	void Nt_ECSMolecularPopulation::initialize()
+	{
+		List<int>^ BoundaryKeys = this->ECS->BoundaryKeys;
+
+		//this is to ensure that cell transoform and bouanaryConc are in same order
+		Dictionary<int, Nt_Darray^>^ boundPtrs = gcnew Dictionary<int, Nt_Darray^>();
+		for each (KeyValuePair<int, ECS_Boundary^>^ kvp in cellBoundaries)
+		{
+			Dictionary<int, Nt_Darray^> ^boundaryConcs = kvp->Value->boundaryConcs;
+			for each (KeyValuePair<int, Nt_Darray^> ^item in boundaryConcs)
+			{
+				boundPtrs->Add(item->Key, item->Value);
+			}
+		}
+		int n1 = BoundaryKeys->Count;
+		int n2 = boundPtrs->Count;
+		if (BoundaryKeys->Count != boundPtrs->Count)
+		{
+			throw gcnew Exception("Boundary count mismatch");
+		}
+		_boundaryConc = (double **)realloc(_boundaryConc, BoundaryKeys->Count * sizeof(double *));
+		for (int i=0; i< BoundaryKeys->Count; i++)
+		{
+			int key = BoundaryKeys[i];
+			_boundaryConc[i] = boundPtrs[key]->NativePointer;
+		}
 	}
 
 	void Nt_ECSMolecularPopulation::step(double dt)
 	{
+		NtInterpolatedRectangularPrism *ir_prism = this->ECS->ir_prism;
+
+		double *sfarray = this->molpopConc->NativePointer;
+		int item_count = ECS->BoundaryKeys->Count;
+		ir_prism->MultithreadNativeRestrict(sfarray, ECS->Positions, item_count, _boundaryConc);
 
 		//restrict
-		Dictionary<int, Nt_Darray^>^ BoundaryTransform = this->ECS->BoundaryTransform;
-		NtInterpolatedRectangularPrism *ir_prism = this->ECS->ir_prism;
-		//int n = BoundaryTransform->Count * 4;
-		//double *output = (double *)malloc(n *sizeof(double));
-		for each(KeyValuePair<int, Nt_Darray^>^ kvp in BoundaryTransform) 
-		{
-			int key = kvp->Key;
-			double* pos = kvp->Value->NativePointer;
-			double *sfarray = this->molpopConc->NativePointer;
-			double *boundConc = this->boundaryConcs[key]->NativePointer;
-			ir_prism->NativeRestrict(sfarray, pos, 1, boundConc);
-		}
+		//Dictionary<int, Nt_Darray^>^ BoundaryTransform = this->ECS->BoundaryTransform;
+		//NtInterpolatedRectangularPrism *ir_prism = this->ECS->ir_prism;
+		//for each(KeyValuePair<int, Nt_Darray^>^ kvp in BoundaryTransform) 
+		//{
+		//	int key = kvp->Key;
+		//	double* pos = kvp->Value->NativePointer;
+		//	double *sfarray = this->molpopConc->NativePointer;
+		//	double *boundConc = this->boundaryConcs[key]->NativePointer;
+		//	ir_prism->NativeRestrict(sfarray, &pos, 1, &boundConc);
+		//}
 	}
 
 }

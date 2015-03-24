@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <process.h>
+
 
 namespace NativeDaphneLibrary
 {
@@ -45,6 +47,19 @@ namespace NativeDaphneLibrary
 			free(indexArray2);
 			free(indexArray3);
 		}
+	};
+
+	class NtInterpolatedRectangularPrism;
+
+	class DllExport EcsRestrictArg
+	{
+	public:
+		NtInterpolatedRectangularPrism *owner;
+		double *sfarray;
+		double** position; 
+		int n; 
+		double **_output;
+		int threadId;
 	};
 
 	class DllExport NtInterpolatedRectangularPrism
@@ -93,6 +108,17 @@ namespace NativeDaphneLibrary
 		double *Delta;		//for dx dy dz
 		double *Omdelta;	//for 1-dx, 1-dy, 1-dz
 		double *D1Array;	//constant 1.0
+	
+		//thread stuff
+		int MaxNumThreads;
+		HANDLE* jobHandles;
+		HANDLE* JobReadyEvents;
+		HANDLE* JobFinishedEvents;
+
+		EcsRestrictArg** EcsArgs;
+
+		//hThread = (HANDLE)_beginthread( test, 0, NULL);
+
 
 	public:
 
@@ -108,12 +134,33 @@ namespace NativeDaphneLibrary
 
 		int Laplacian(double *sfarray, double *retval, int n);
 
-		int NativeRestrict(double *sfarray, double* pos, int n, double *output);
+		int NativeRestrict(double *sfarray, double** pos, int n, double **output);
 
-		int NativeRestrictOneNode(double *sfarray, double* position, double *output);
+		int NtInterpolatedRectangularPrism::thread_restrict( void* arg);
 
+		int MultithreadNativeRestrict(double *sfarray, double** position, int n, double **_output);
+	
 		//for testing access
 		int TestAddition(int a, int b);
+
+	private:
+		static unsigned __stdcall RestrictThreadEntry(void* pUserData) 
+		{
+			EcsRestrictArg *arg = (EcsRestrictArg *)pUserData;
+			int tid = arg->threadId;
+			NtInterpolatedRectangularPrism *owner = arg->owner;
+
+			while (true)
+			{
+				WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
+				arg->owner->NativeRestrict(arg->sfarray, arg->position, arg->n, arg->_output);
+				if ( !SetEvent(owner->JobFinishedEvents[tid])) 
+				{
+					printf("SetEvent failed (%d)\n", GetLastError());
+				}
+			}
+			//_endthread();
+		}
 
 	};
 }

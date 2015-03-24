@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <acml.h>
+#include <stdlib.h>
 #include "NtInterpolatedRectangularPrism.h"
 #include <stdexcept>
 
@@ -34,6 +35,31 @@ namespace NativeDaphneLibrary
 			localMatrixArray[i] = new NtIndexMatrix();
 			initialize_index_matrix(i, localMatrixArray[i]);
 		}
+
+		//thread related setup
+		MaxNumThreads = acmlgetnumthreads();
+		jobHandles = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+		JobReadyEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+		JobFinishedEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+
+		EcsArgs = (EcsRestrictArg **)malloc(MaxNumThreads * sizeof(EcsRestrictArg*));
+		for (int i=0; i< MaxNumThreads; i++)
+		{
+			unsigned int tid;
+			EcsArgs[i] = new EcsRestrictArg();
+			EcsArgs[i]->owner = this;
+			EcsArgs[i]->threadId = i;
+
+			JobReadyEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+			JobFinishedEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+			// default security attributes
+			// auto-reset event object
+			// initial state is nonsignaled
+			// unnamed object
+			jobHandles[i] = (HANDLE)_beginthreadex(0, 0, &RestrictThreadEntry, EcsArgs[i], 0, &tid);
+		}
+
+
 
 		////********************************
 		////data for restririct
@@ -248,16 +274,17 @@ namespace NativeDaphneLibrary
 
 	int NtInterpolatedRectangularPrism::Laplacian(double *, double *, int){ return 0;}
 
-	//n number of cells
-	int NtInterpolatedRectangularPrism::NativeRestrict(double *sfarray, double* position, int n, double *_output)
+	///each position * is for one cell
+	int NtInterpolatedRectangularPrism::NativeRestrict(double *sfarray, double** position, int n, double **_output)
 	{
-		double *pos_stop = position + n*3;
+		
 		double node_vals[20];
 		double node_coeffs[20];
-		double *output = _output;
 		double dx, dy, dz, ddx, ddy, ddz;
-		for (double *pos = position; pos < pos_stop; pos += 3, output += 4)
+		for (int p= 0; p < n; p++)
 		{
+			double *pos = position[p];
+			double *output = _output[p];
 			double idxval = pos[0]/StepSize;
 			int idx = (int)idxval;
 			if (idx == NodesPerSide0m1)idx--;
@@ -595,6 +622,57 @@ namespace NativeDaphneLibrary
 		}
 		return 0;
 	}
+
+	int NtInterpolatedRectangularPrism::MultithreadNativeRestrict(double *sfarray, double** position, int n, double **_output)
+	{
+		DWORD retVal;
+		int numThreads = MaxNumThreads;
+		if (n < numThreads)numThreads = n;
+		int NumItemsPerThread = n/numThreads;
+		if (NumItemsPerThread * numThreads < n)NumItemsPerThread++;
+
+		//for (int i = 0; i< numThreads; i++)
+		//{
+		//	ResetEvent(jobCompletedEvents[i]);
+		//}
+		int nn = 0; //start
+		for (int i=0; i< numThreads; i++)
+		{
+			EcsRestrictArg *arg = EcsArgs[i];
+			arg->owner = this;
+			arg->sfarray = sfarray;
+			arg->position = position + nn;
+			arg->_output = _output + nn;
+			arg->threadId = i;
+			arg->n = (nn + NumItemsPerThread) <= n ? NumItemsPerThread : n - nn;
+			nn += NumItemsPerThread;
+			::SetEvent(JobReadyEvents[i]);
+			//DWORD c = ::ResumeThread(jobHandles[i]);
+			//hThread[i] = (HANDLE)_beginthread(RestrictThreadEntry, 0, arg);
+		}
+
+		//wait for finish
+		retVal = WaitForMultipleObjects(numThreads, JobFinishedEvents, true, INFINITE);
+		//		DWORD retval[30];
+		//for (int i=0; i< numThreads; i++)
+		//{
+		//	retval[i] = ::WaitForSingleObject(jobHandles[i], INFINITE);
+		//	SuspendThread(jobHandles[i]);
+		//}
+		return 0;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
 
 	int NtInterpolatedRectangularPrism::TestAddition(int a, int b)
 	{

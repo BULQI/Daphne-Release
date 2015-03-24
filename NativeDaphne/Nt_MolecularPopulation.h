@@ -174,6 +174,27 @@ namespace NativeDaphne
 		double *_laplacian;
 	};
 
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class ECS_Boundary
+	{
+	public:
+		List<int>^ boundaryKeyList;
+		Dictionary<int, Nt_Darray^>^ boundaryFluxes;
+        Dictionary<int, Nt_Darray^>^ boundaryConcs;
+
+		ECS_Boundary()
+		{
+			boundaryKeyList = gcnew List<int>();
+			boundaryFluxes = gcnew Dictionary<int, Nt_Darray^>();
+			boundaryConcs = gcnew Dictionary<int, Nt_Darray^>();
+			_boundaryConcs = NULL;
+		}
+
+	private:
+		double *_boundaryConcs;
+	};
+
 	ref class Nt_ECS;
 
 	[SuppressUnmanagedCodeSecurity]
@@ -182,12 +203,9 @@ namespace NativeDaphne
 	public:
 		Nt_ECS^ ECS;
 
-		int boundryCount;
-		List<int> boundaryKeyList;
-		double** _boundaryConcs;
-
-		Dictionary<int, Nt_Darray^>^ boundaryFluxes;
-        Dictionary<int, Nt_Darray^>^ boundaryConcs;
+		//the boundaries are orgnanized by cellpopulaiton
+		//so that we can group boundaries together to perform reactions.
+		Dictionary<int, ECS_Boundary^>^ cellBoundaries;
 
 		Nt_ECSMolecularPopulation(String^ _molguid, double _diffusionCoefficient, Nt_Darray ^conc);
 
@@ -201,19 +219,32 @@ namespace NativeDaphne
 			throw gcnew Exception("not implemented exception");
 		}
 
-		void AddBoundaryFlux(int id, Nt_Darray^ flux)
+		void AddBoundaryFlux(int cellpop_id, int id, Nt_Darray^ flux)
 		{
-			boundaryFluxes->Add(id, flux);
+			if (cellBoundaries->ContainsKey(cellpop_id) == false)
+			{
+				cellBoundaries->Add(cellpop_id, gcnew ECS_Boundary());
+			}
+			cellBoundaries[cellpop_id]->boundaryFluxes->Add(id, flux);
 		}
 
-		void AddBoundaryConc(int id, Nt_Darray^ conc)
+		void AddBoundaryConc(int cellpop_id, int id, Nt_Darray^ conc)
 		{
-			boundaryConcs->Add(id, conc);
+			if (cellBoundaries->ContainsKey(cellpop_id) == false)
+			{
+				cellBoundaries->Add(cellpop_id, gcnew ECS_Boundary());
+			}
+			cellBoundaries[cellpop_id]->boundaryConcs->Add(id, conc);
 		}
+
+		void initialize();
 
 		virtual void step(double dt) override;
 
 	private:
+		//this boudnaryConc is for update boundary
+		//it contains all cell boundaries for this molpop, irrespective of cell population
+		double **_boundaryConc;
 		double *_laplacian;
 	};
 

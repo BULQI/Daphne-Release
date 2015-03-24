@@ -1073,8 +1073,15 @@ namespace Daphne
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
 
             //add ecs molpop to native side
+            //need membrane to cell map
+            Dictionary<int, Cell> memid_to_cell_map = new Dictionary<int, Cell>();
             if (SimulationBase.dataBasket.Environment is ECSEnvironment)
             {
+                foreach (var item in SimulationBase.dataBasket.Cells)
+                {
+                    Cell c = item.Value;
+                    memid_to_cell_map.Add(c.PlasmaMembrane.Interior.Id, c);
+                }
                 ECSEnvironment ecs = SimulationBase.dataBasket.Environment as ECSEnvironment;
                 Nt_ECS native_ecs = ecs.native_ecs;
                 foreach (var item in ecs.Comp.Populations)
@@ -1082,13 +1089,15 @@ namespace Daphne
                     var mp = item.Value;
                     double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
                     var nt_molpop = new Nt_ECSMolecularPopulation(item.Key,diffCoeff, mp.Conc.array);
-                    foreach (var val in mp.BoundaryConcs)
+                    foreach (var kvp in mp.BoundaryConcs)
                     {
-                        nt_molpop.AddBoundaryConc(val.Key, val.Value.array);
+                        int population_id = memid_to_cell_map[kvp.Key].Population_id;
+                        nt_molpop.AddBoundaryConc(population_id, kvp.Key, kvp.Value.array);
                     }
-                    foreach (var val in mp.BoundaryFluxes)
+                    foreach (var kvp in mp.BoundaryFluxes)
                     {
-                        nt_molpop.AddBoundaryFlux(val.Key, val.Value.array);
+                        int population_id = memid_to_cell_map[kvp.Key].Population_id;
+                        nt_molpop.AddBoundaryFlux(population_id, kvp.Key, kvp.Value.array);
                     }
                     if (native_ecs != null)
                     {
@@ -1142,6 +1151,26 @@ namespace Daphne
             {
                 AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs, result);
             }
+   
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+            {
+                ECSEnvironment ecs = SimulationBase.dataBasket.Environment as ECSEnvironment;
+                Nt_ECS native_ecs = ecs.native_ecs;
+                foreach (var item in ecs.Comp.BoundaryReactions)
+                {
+                    var key = item.Key;
+                    foreach (Reaction r in item.Value)
+                    {
+                        if (r is BoundaryAssociation)
+                        {
+                        }
+
+                      
+
+                    }
+                }   
+            }
+
             // report if a reaction could not be inserted
             boundaryReactionReport(reacs, result, "the ECS");
 

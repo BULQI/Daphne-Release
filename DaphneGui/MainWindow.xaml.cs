@@ -2569,8 +2569,11 @@ namespace DaphneGui
             }
         }
 
+        public static Stopwatch mywatch;
+
         private void runSim_Tissue()
         {
+            mywatch = Stopwatch.StartNew();
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
