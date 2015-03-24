@@ -74,15 +74,15 @@
         <!--Cell Name-->
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
             <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
-            <TextBox x:Name="txtDivName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
+            <TextBox x:Name="txtDivName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="False"
                      Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
        
         <!-- starting state -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" IsEnabled="False">
             <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
-            <TextBox MinWidth="150" Text="{Binding Driver.CurrentState, Converter={StaticResource ParamDistTypeEnumConv}}" />
-            <!--<local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>-->
+            <!--<TextBox MinWidth="150" Text="{Binding Driver.CurrentState, Converter={StaticResource ParamDistTypeEnumConv}}" />-->
+            <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
         </StackPanel>
         
         <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
