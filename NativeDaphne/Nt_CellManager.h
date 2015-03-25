@@ -19,6 +19,8 @@ namespace NativeDaphne
 	{
 	
 	public:
+		//this is used to sync order of boundary reactions in ECS
+		List<int>^ MembraneIdList;
 
 		Nt_CellManager(void)
 		{
@@ -29,6 +31,12 @@ namespace NativeDaphne
 			int numthreads = NativeDaphneLibrary::Utility::acml_getnumthreads();
 
 			NativeDaphneLibrary::Utility::acml_setnumthreads(8);
+
+			CellMebraneMolPopDictionary = gcnew Dictionary<Tuple<int, String^>^, Nt_MolecularPopulation^>();
+
+			MembraneIdList = gcnew List<int>();
+
+			BoundIdToCellPopIdDictionary = gcnew Dictionary<int, int>();
 
 		}
 
@@ -41,13 +49,18 @@ namespace NativeDaphne
 		/// <returns>void</returns>
 		void AddReaction(int cellpop_id, bool isCytosol, Nt_Reaction^ reaction)
 		{
-
 			cellPopulations[cellpop_id]->AddReaction(isCytosol, reaction);
 		}
 
-		void AddMolecularPopulation(int cellpop_id, bool isCytosol, Nt_MolecularPopulation^ molpop)
+		void AddMolecularPopulation(int cellpop_id, int membrane_id, bool isCytosol, Nt_MolecularPopulation^ molpop)
 		{
 			cellPopulations[cellpop_id]->AddMolecularPopulation(isCytosol, molpop);
+			if (isCytosol == false)
+			{
+				Tuple<int, String^> ^t = gcnew Tuple<int, String^>(membrane_id, molpop->molguid);
+				CellMebraneMolPopDictionary->Add(t, molpop);
+			}
+
 		}
 
 		void AddGene(int cellpop_id, Nt_Gene ^gene)
@@ -64,6 +77,8 @@ namespace NativeDaphne
 				cellPopulations->Add(cellpop_id, cellpop);
 			}
 			cellPopulations[cellpop_id]->AddCell(cell);
+			MembraneIdList->Add(cell->Membrane_id);
+			BoundIdToCellPopIdDictionary->Add(cell->Membrane_id, cell->Population_id);
 		}
 
 		/// <summary>
@@ -112,6 +127,26 @@ namespace NativeDaphne
 			return IsEnvironmentInitialzed && IsDistributionSamplerInitialized;
 		}
 
+		//utility method
+		//give membrane.interior.Id and molquid, find the Nt_molpop.
+		Nt_MolecularPopulation^ findMembraneMolecularPopulation(int membraneId, String^ molguid)
+		{
+			Tuple<int, String^>^ key = gcnew Tuple<int, String^>(membraneId, molguid);
+			if (CellMebraneMolPopDictionary->ContainsKey(key) == true)
+			{
+				return CellMebraneMolPopDictionary[key];
+			}
+			throw gcnew Exception("Nt_MolecularPopulation not found for membrane");
+		}
+
+		int findCellPopulationId(int bound_id)
+		{
+			if (BoundIdToCellPopIdDictionary->ContainsKey(bound_id) == true)
+			{
+				return BoundIdToCellPopIdDictionary[bound_id];
+			}
+			return -1;
+		}
 
 		static Nt_NormalDistribution ^normalDist;
 
@@ -130,6 +165,12 @@ namespace NativeDaphne
 
 		//population_id -> cell population
 		Dictionary<int, Nt_CellPopulation^> ^cellPopulations;
+
+		//used in ecs methods
+		Dictionary<int, int>^ BoundIdToCellPopIdDictionary;
+
+		//tuple<membrane.interior.Id, molguid> - used to get nt_molpop in ECS
+		Dictionary<Tuple<int, String^>^, Nt_MolecularPopulation^>^ CellMebraneMolPopDictionary;
 
 		bool IsEnvironmentInitialzed;
 

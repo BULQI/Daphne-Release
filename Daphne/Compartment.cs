@@ -96,12 +96,15 @@ namespace Daphne
                     r.Step(dt);
                 }
 
-                //if (!(this.Interior is PointManifold))
-                foreach (List<Reaction> rlist in BoundaryReactions.Values)
+                //moved to native side
+                if (!(this.Interior is InterpolatedRectangularPrism))
                 {
-                    foreach (Reaction r in rlist)
+                    foreach (List<Reaction> rlist in BoundaryReactions.Values)
                     {
-                        r.Step(dt);
+                        foreach (Reaction r in rlist)
+                        {
+                            r.Step(dt);
+                        }
                     }
                 }
             }

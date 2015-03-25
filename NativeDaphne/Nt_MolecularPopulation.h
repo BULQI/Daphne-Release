@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "Nt_NormalDist.h"
 #include "Nt_DArray.h"
+#include "Nt_Utility.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -175,24 +176,91 @@ namespace NativeDaphne
 	};
 
 
+	//serve as collective boundary for a cell population
 	[SuppressUnmanagedCodeSecurity]
 	public ref class ECS_Boundary
 	{
 	public:
-		List<int>^ boundaryKeyList;
-		Dictionary<int, Nt_Darray^>^ boundaryFluxes;
-        Dictionary<int, Nt_Darray^>^ boundaryConcs;
+		List<int>^ boundIdList;
+		List<Nt_Darray^>^ boundaryConcs;
+		List<Nt_Darray^>^ boundaryFluxes;
+		int allocedItemCount; 
 
 		ECS_Boundary()
 		{
-			boundaryKeyList = gcnew List<int>();
-			boundaryFluxes = gcnew Dictionary<int, Nt_Darray^>();
-			boundaryConcs = gcnew Dictionary<int, Nt_Darray^>();
+			boundIdList = gcnew List<int>();
+			boundaryFluxes = gcnew List<Nt_Darray^>();
+			boundaryConcs = gcnew List<Nt_Darray^>();
 			_boundaryConcs = NULL;
+			_boundaryFlux = NULL;
+			allocedItemCount = 0;
+			array_length = 0;
 		}
 
+		void AddBoundaryConcAndFlux(int boundId, Nt_Darray^ conc, Nt_Darray^ flux)
+		{
+			int itemCount = boundaryConcs->Count;
+			int itemLength = conc->Length;
+			if (itemCount + 1 > allocedItemCount)
+			{
+				allocedItemCount = Nt_Utility::GetAllocSize(itemCount+1, allocedItemCount);
+				int alloc_size = allocedItemCount * itemLength * sizeof(double);
+				_boundaryConcs = (double *)realloc(_boundaryConcs, alloc_size);
+				_boundaryFlux = (double *)realloc(_boundaryFlux, alloc_size);
+				if (! _boundaryConcs || !_boundaryFlux)
+				{
+					throw gcnew Exception("Error realloc memory");
+				}
+				//reassign memory address
+				for (int i=0; i< itemCount; i++)
+				{
+					boundaryConcs[i]->NativePointer = _boundaryConcs + i * itemLength;
+					boundaryFluxes[i]->NativePointer = _boundaryFlux + i * itemLength;
+				}
+			}
+
+			//appened new values
+			double *_cptr = _boundaryConcs + itemCount * itemLength;
+			double *_fptr = _boundaryFlux + itemCount * itemLength;
+			for (int i=0; i< itemLength; i++)
+			{
+				_cptr[i] = conc[i];
+				_fptr[i] = flux[i];
+			}
+			conc->NativePointer = _cptr;
+			flux->NativePointer = _fptr;
+			boundaryConcs->Add(conc);
+			boundaryFluxes->Add(flux);
+			boundIdList->Add(boundId);
+			array_length = boundaryConcs->Count * itemLength;
+		}
+
+		property double *ConcPointer
+		{
+			double* get()
+			{
+				return _boundaryConcs;
+			}
+			//void set(double *value)
+			//{
+			//}
+		}
+
+		property double *FluxPointer
+		{
+			double* get()
+			{
+				return _boundaryFlux;
+			}
+			//void set(double *value)
+			//{
+			//}
+		}
 	private:
+		//int allocedItemCount; 
+		int array_length;
 		double *_boundaryConcs;
+		double *_boundaryFlux;
 	};
 
 	ref class Nt_ECS;
@@ -219,22 +287,22 @@ namespace NativeDaphne
 			throw gcnew Exception("not implemented exception");
 		}
 
-		void AddBoundaryFlux(int cellpop_id, int id, Nt_Darray^ flux)
-		{
-			if (cellBoundaries->ContainsKey(cellpop_id) == false)
-			{
-				cellBoundaries->Add(cellpop_id, gcnew ECS_Boundary());
-			}
-			cellBoundaries[cellpop_id]->boundaryFluxes->Add(id, flux);
-		}
+		//void AddBoundaryFlux(int cellpop_id, int id, Nt_Darray^ flux)
+		//{
+		//	if (cellBoundaries->ContainsKey(cellpop_id) == false)
+		//	{
+		//		cellBoundaries->Add(cellpop_id, gcnew ECS_Boundary());
+		//	}
+		//	cellBoundaries[cellpop_id]->boundaryFluxes->Add(id, flux);
+		//}
 
-		void AddBoundaryConc(int cellpop_id, int id, Nt_Darray^ conc)
+		void AddBoundaryConcAndFlux(int cellpop_id, int id, Nt_Darray^ conc, Nt_Darray^ flux)
 		{
 			if (cellBoundaries->ContainsKey(cellpop_id) == false)
 			{
 				cellBoundaries->Add(cellpop_id, gcnew ECS_Boundary());
 			}
-			cellBoundaries[cellpop_id]->boundaryConcs->Add(id, conc);
+			cellBoundaries[cellpop_id]->AddBoundaryConcAndFlux(id, conc, flux);
 		}
 
 		void initialize();

@@ -46,6 +46,7 @@ namespace NativeDaphne
 	public:
 		int Cell_id;
 		int Population_id;
+		int Membrane_id;
 		double radius;
 
 		bool alive;

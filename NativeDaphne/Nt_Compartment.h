@@ -123,11 +123,25 @@ namespace NativeDaphne
 
 	public ref class Nt_ReactionSet
 	{
+	public:
 		List<Nt_Reaction^>^ ReactionList;
 
 		Nt_ReactionSet()
 		{
 			ReactionList = gcnew List<Nt_Reaction^>();
+		}
+
+		void AddReaction(Nt_Reaction ^rxn)
+		{
+			int index = rxn->reaction_index;
+			if (index >= ReactionList->Count)
+			{
+				ReactionList->Add(rxn->CloneParent());
+			}
+			else 
+			{
+				ReactionList[index]->AddReaction(rxn);
+			}
 		}
 	};
 
@@ -174,11 +188,32 @@ namespace NativeDaphne
 			Populations->Add(molpop);
         }
 
+		Nt_MolecularPopulation^ findEcsMolecularPopulation(String^ molguid)
+		{
+			for (int i=0; i< Populations->Count; i++)
+			{
+				if (Populations[i]->molguid == molguid) return Populations[i];
+			}
+			return nullptr;
+		}
+
+
 		//here key is membrane's interor id
 		void AddBoundaryTransform(int key, Nt_Darray^ pos)
 		{
 			BoundaryTransforms->Add(key, pos);
 			initialized = false;
+		}
+
+		void AddReaction(Nt_Reaction ^rxn)
+		{
+			int cellpop_id = rxn->boundaryId;
+			if (boundaryReactions->ContainsKey(cellpop_id) == false)
+			{
+				Nt_ReactionSet^ rset = gcnew Nt_ReactionSet();
+				boundaryReactions->Add(cellpop_id, rset);
+			}
+			boundaryReactions[cellpop_id]->AddReaction(rxn);
 		}
 
 		void initialize()
@@ -204,6 +239,24 @@ namespace NativeDaphne
 		void step(double dt)
         {
 			if (initialized == false)initialize();
+
+			//bulk reactions -- not implemented yet
+			//foreach (Reaction r in BulkReactions)
+			//{
+			//	r.Step(dt);
+			//}
+
+			//for boundary reactions
+			for each (KeyValuePair<int, Nt_ReactionSet^>^ kvp in boundaryReactions)
+			{
+				 List<Nt_Reaction^>^ ReactionList = kvp->Value->ReactionList;
+				 for (int i= 0; i< ReactionList->Count; i++)
+				 {
+					 ReactionList[i]->step(dt);
+				 }
+			}
+
+			//for now, this is doing update ecs/membrane boundary
 			for (int i=0; i< Populations->Count; i++)
 			{
 				Populations[i]->step(dt);

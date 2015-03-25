@@ -1089,20 +1089,23 @@ namespace Daphne
                     var mp = item.Value;
                     double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
                     var nt_molpop = new Nt_ECSMolecularPopulation(item.Key,diffCoeff, mp.Conc.array);
-                    foreach (var kvp in mp.BoundaryConcs)
+                    //here mp.BoundaryConc and BoundaryFlux are dictionary, so their order is undefined.
+                    //but we will need them to be ordered (synced with cell_manager in order to use them
+                    List<int> boundary_list = CellManager.nt_cellManager.MembraneIdList;
+                    int n = 0;
+                    for (int i = 0; i < boundary_list.Count; i++)
                     {
-                        int population_id = memid_to_cell_map[kvp.Key].Population_id;
-                        nt_molpop.AddBoundaryConc(population_id, kvp.Key, kvp.Value.array);
+                        int boundId = boundary_list[i];
+                        if (mp.BoundaryConcs.ContainsKey(boundId) == false) continue;
+                        int population_id = memid_to_cell_map[boundId].Population_id;
+                        nt_molpop.AddBoundaryConcAndFlux(population_id, boundId, mp.BoundaryConcs[boundId].array, mp.BoundaryFluxes[boundId].array);
+                        n++;
                     }
-                    foreach (var kvp in mp.BoundaryFluxes)
+                    if (n != mp.BoundaryConcs.Count)
                     {
-                        int population_id = memid_to_cell_map[kvp.Key].Population_id;
-                        nt_molpop.AddBoundaryFlux(population_id, kvp.Key, kvp.Value.array);
+                        throw new Exception("molpop boundary count mimsatch");
                     }
-                    if (native_ecs != null)
-                    {
-                        native_ecs.AddMolecularPopulation(nt_molpop);
-                    }
+                    native_ecs.AddMolecularPopulation(nt_molpop);
                 }
             }
 
@@ -1156,17 +1159,43 @@ namespace Daphne
             {
                 ECSEnvironment ecs = SimulationBase.dataBasket.Environment as ECSEnvironment;
                 Nt_ECS native_ecs = ecs.native_ecs;
-                foreach (var item in ecs.Comp.BoundaryReactions)
+                List<int> boundary_list = CellManager.nt_cellManager.MembraneIdList;
+                foreach(int boundId in boundary_list)
                 {
-                    var key = item.Key;
-                    foreach (Reaction r in item.Value)
+                    int population_id = CellManager.nt_cellManager.findCellPopulationId(boundId);
+                    if (ecs.Comp.BoundaryReactions.ContainsKey(boundId) == false)continue;
+                    List<Reaction> reactions = ecs.Comp.BoundaryReactions[boundId];
+                    for (int i= 0; i<reactions.Count; i++)
                     {
+                        Reaction r = reactions[i];
                         if (r is BoundaryAssociation)
                         {
+                            BoundaryAssociation bar = r as BoundaryAssociation;
+                            Nt_BoundaryAssociation rxn = new Nt_BoundaryAssociation(boundId, r.RateConstant);
+                            rxn.receptor = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.receptor.MoleculeKey);
+                            rxn.complex = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.complex.MoleculeKey);
+                            rxn.ligand = native_ecs.findEcsMolecularPopulation(bar.ligand.MoleculeKey);
+                            rxn.reaction_index = i;
+                            rxn.cellId = boundId; //todo: this is bound id.
+                            rxn.boundaryId = population_id;
+                            native_ecs.AddReaction(rxn);
                         }
-
-                      
-
+                        else if (r is BoundaryDissociation)
+                        {
+                            BoundaryDissociation bar = r as BoundaryDissociation;
+                            Nt_BoundaryDissociation rxn = new Nt_BoundaryDissociation(boundId, r.RateConstant);
+                            rxn.receptor = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.receptor.MoleculeKey);
+                            rxn.complex = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.complex.MoleculeKey);
+                            rxn.ligand = native_ecs.findEcsMolecularPopulation(bar.ligand.MoleculeKey);
+                            rxn.reaction_index = i;
+                            rxn.cellId = boundId; //todo: this is bound id.
+                            rxn.boundaryId = population_id;
+                            native_ecs.AddReaction(rxn);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException("boundary reaciton not implementd");
+                        }
                     }
                 }   
             }

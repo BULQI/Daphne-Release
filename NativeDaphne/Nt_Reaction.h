@@ -42,6 +42,7 @@ namespace NativeDaphne
 		//since we don't have a key for reactions
 		//this is the index of the reaction in List<Reaction>
 		int reaction_index;
+		int boundaryId; //in the context of ECS boundaryReaction, this is the cellPopulaitonId
 		bool isBulkReaction;
 
 
@@ -56,6 +57,7 @@ namespace NativeDaphne
 			return rxn;
 		}
 	protected:	
+		
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -198,13 +200,17 @@ namespace NativeDaphne
 
 		virtual void step(double dt) override;
 
+		//void initialize();
+
 		Nt_MolecularPopulation ^receptor;
 		Nt_MolecularPopulation ^ligand;
 		Nt_MolecularPopulation ^complex;
 
 	private:
+		double *_ligand_BoundaryConc; //from bulk
+		double *_ligand_BoundaryFlux; //from bulk
+
 		double* _receptor;
-		double* _ligand_boundaryConc;
 		double* _complex;
 		double *_intensity;
 		int array_length; //the "active" data length of the array
@@ -225,12 +231,17 @@ namespace NativeDaphne
 
 		virtual void step(double dt) override;
 
+		//void initialize();
+
 		Nt_MolecularPopulation ^receptor;
 		Nt_MolecularPopulation ^ligand;
 		Nt_MolecularPopulation ^complex;
+
 	private:
+		double *_ligand_BoundaryConc; //from bulk
+		double *_ligand_BoundaryFlux; //from bulk
+
 		double* _receptor;
-		double* _ligand;
 		double* _complex;
 		double *_intensity;
 		int array_length; //the "active" data length of the array

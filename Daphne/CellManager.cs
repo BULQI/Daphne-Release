@@ -218,6 +218,7 @@ namespace Daphne
             Nt_Cell ntc = new Nt_Cell(c.Cell_id, c.Radius);
             ntc.spatialState = new Nt_CellSpatialState(c.SpatialState.X, c.SpatialState.V, c.SpatialState.F);
             ntc.Population_id = c.Population_id;
+            ntc.Membrane_id = c.PlasmaMembrane.Interior.Id;
             ntc.isMotile = c.IsMotile;
             ntc.IsChemotactic = c.IsChemotactic;
             ntc.IsStochastic = c.IsStochastic;
@@ -264,7 +265,7 @@ namespace Daphne
                 var cmp = new Nt_CytosolMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, mp.Conc.array, bflux, bconc);
                 cmp.Name = item.Value.Molecule.Name; //exist for debugging
                 mp.nt_instance = cmp;
-                nt_cellManager.AddMolecularPopulation(c.Population_id, true, cmp);
+                nt_cellManager.AddMolecularPopulation(c.Population_id, -1, true, cmp);
                 cytosol_nt_mp.Add(item.Key, cmp);
             }
             if (c.Locomotor != null)
@@ -282,7 +283,7 @@ namespace Daphne
                 var cmp = new Nt_MembraneMolecularPopulation(c.Cell_id, c.Radius, item.Key, diffCoeff, mp.Conc.array);
                 cmp.Name = item.Value.Molecule.Name;
                 mp.nt_instance = cmp;
-                nt_cellManager.AddMolecularPopulation(c.Population_id, false, cmp);
+                nt_cellManager.AddMolecularPopulation(c.Population_id, c.PlasmaMembrane.Interior.Id, false, cmp);
                 membrane_nt_mp.Add(item.Key, cmp);
             }
 

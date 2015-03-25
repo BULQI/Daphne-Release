@@ -336,10 +336,11 @@ namespace NativeDaphne
 		Dictionary<int, Nt_Darray^>^ boundPtrs = gcnew Dictionary<int, Nt_Darray^>();
 		for each (KeyValuePair<int, ECS_Boundary^>^ kvp in cellBoundaries)
 		{
-			Dictionary<int, Nt_Darray^> ^boundaryConcs = kvp->Value->boundaryConcs;
-			for each (KeyValuePair<int, Nt_Darray^> ^item in boundaryConcs)
+			for (int i=0; i< kvp->Value->boundIdList->Count; i++)
 			{
-				boundPtrs->Add(item->Key, item->Value);
+				int key = kvp->Value->boundIdList[i];
+				Nt_Darray^ darray = kvp->Value->boundaryConcs[i];
+				boundPtrs->Add(key, darray);
 			}
 		}
 		int n1 = BoundaryKeys->Count;
@@ -358,6 +359,7 @@ namespace NativeDaphne
 
 	void Nt_ECSMolecularPopulation::step(double dt)
 	{
+
 		NtInterpolatedRectangularPrism *ir_prism = this->ECS->ir_prism;
 
 		double *sfarray = this->molpopConc->NativePointer;
