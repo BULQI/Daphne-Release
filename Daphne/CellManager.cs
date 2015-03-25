@@ -6,6 +6,7 @@ using System.IO;
 using NativeDaphne;
 using MathNet.Numerics.Random;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Daphne
 {
@@ -16,6 +17,11 @@ namespace Daphne
         public DistributedParameter Phagocytosis;
 
         public static Nt_CellManager nt_cellManager;
+
+        ParallelOptions parallelOption = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
 
 
 
@@ -43,8 +49,6 @@ namespace Daphne
 
             foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
-                
-
                 // cell takes a step
                 if (kvp.Value.Alive == true)
                 {

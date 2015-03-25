@@ -1226,7 +1226,9 @@ namespace Daphne
                 
 
                 // zero all cell forces; needs to happen first
+#if (!NATIVE)
                 cellManager.ResetCellForces();
+#endif
                 // handle collisions
                 if (collisionManager != null)
                 {

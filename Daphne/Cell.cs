@@ -314,9 +314,7 @@ namespace Daphne
 
             //PlasmaMembrane.Step(dt);
 
-
             // step the cell behaviors
-
             // death
             deathBehavior.Step(dt);
             if (deathBehavior.TransitionOccurred == true && deathBehavior.CurrentState == 1)
