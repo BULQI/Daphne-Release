@@ -107,10 +107,12 @@
             
             ItemsSource="{Binding activationRows}"
                   
-            MouseMove="EpigeneticGrid_MouseMove"
-            Drop="EpigeneticGrid_Drop"
-            >
             
+            >
+            <!--Disable drag-and-drop for now - was problematic-->
+            <!--MouseMove="EpigeneticGrid_MouseMove"
+            Drop="EpigeneticGrid_Drop"-->
+
             <DataGrid.ContextMenu>
                 <ContextMenu >
                     <MenuItem Header="Delete Selected Genes" Name="menuDeleteDivGenes" Click="ContextMenuDeleteGenes_Click" 
@@ -151,7 +153,15 @@
 
                         <!-- This trigger highlights a grid cell if user clicks on it -->
                         <Trigger Property="IsSelected" Value="true">
-                            <Setter Property="Background" Value="LightBlue" />
+                            <Setter Property="Background" Value="#FF97CFF6" />
+                            <Setter Property="Foreground" Value="Black" />
+                            <Setter Property="BorderBrush" Value="Black" />
+                        </Trigger>
+
+                        <!--Set grid cell bg to different color than row, when in focus-->
+                        <Trigger Property="IsFocused" Value="true">
+                            <!--<Setter Property="Background" Value="#E6EBF5" />-->
+                            <Setter Property="Background" Value="#C6EFCE" />                            
                             <Setter Property="Foreground" Value="Black" />
                             <Setter Property="BorderBrush" Value="Black" />
                         </Trigger>

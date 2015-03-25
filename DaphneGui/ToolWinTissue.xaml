@@ -19,6 +19,7 @@
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
         <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+        <local:CellToVisibilityConverter x:Key="CellToVisibilityConv" />
         
         <ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
@@ -81,9 +82,10 @@
                                 x:Name="CellPropertiesExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                                Visibility="{Binding ElementName=CellPopControl, Path=SelectedCell, Converter={StaticResource CellToVisibilityConv}}">
 
                         <local:DaphneStackPanel x:Name="CellPropertiesPanel">
 
@@ -744,14 +746,14 @@
         </TabItem>
 
         <!-- Rendering scheme -->
-        <TabItem Header="Rendering Scheme" x:Name="tabRending" AutomationProperties.AutomationId="DaphneRenderTab">
+        <TabItem Header="Rendering" x:Name="tabRending" AutomationProperties.AutomationId="DaphneRenderTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8" >
 
                     <!-- Rendering Settings -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
-                            Header="Rendering Settings"
+                            Header="Scheme"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
@@ -759,7 +761,7 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                         <StackPanel>
-                            <TextBlock Text="Rendering Skin" FontWeight="Bold" Margin="0,-10,0,5" />
+                            <!--<TextBlock Text="Rendering Scheme" FontWeight="Bold" Margin="0,-10,0,5" />-->
 
                             <StackPanel Orientation="Horizontal">
                                 <ComboBox x:Name="skinChoiceComboBox" MinWidth="80" 
@@ -771,13 +773,13 @@
                                           >
 
                                 </ComboBox>
-                                <Button Content="Edit Selected skin" Margin="20, 0" Click="Button_Click_Edit_RenderSkin"/>
+                                <Button Content="Edit" Margin="20, 0" Click="Button_Click_Edit_RenderSkin"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
                                 <TextBlock x:Name="skinLabel" Visibility="Collapsed">Name:</TextBlock>
                                 <TextBox x:Name="skinNameTextBox"  Visibility="Collapsed" MinWidth="80" Margin="5, 0, 10, 0"></TextBox>
-                                <Button Content="New skin" Click="btnNewSkinClick" MinWidth="80"/>
+                                <Button Content="New" Click="btnNewSkinClick" MinWidth="80"/>
                                 <TextBlock Name="skinNote" Margin="5,0"></TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -796,7 +798,7 @@
                         <!--<TextBlock Text="Cell Information" FontWeight="Bold" Margin="0,10,0,0" />-->
                         <DataGrid x:Name="dgRenderCellDetails1" AutoGenerateColumns="False" 
                               ItemsSource="{Binding Path=Protocol.scenario.popOptions.cellPopOptions, UpdateSourceTrigger=PropertyChanged}"     
-                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              MinHeight="50" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                               CanUserReorderColumns="False" CanUserResizeRows="False"
                               CanUserSortColumns="False" RowHeaderWidth="0"
                               VerticalContentAlignment="Center"
@@ -832,7 +834,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="RenderOn" Width="60">
+                                <DataGridTemplateColumn Header="Render" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -890,7 +892,7 @@
 
                         <DataGrid x:Name="dgRenderMolDetails1" AutoGenerateColumns="False" 
                               ItemsSource="{Binding Path=Protocol.scenario.popOptions.molPopOptions, UpdateSourceTrigger=PropertyChanged}"     
-                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              MinHeight="50" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                               CanUserReorderColumns="False" CanUserResizeRows="False"
                               CanUserSortColumns="False" RowHeaderWidth="0"
                               VerticalContentAlignment="Center"
@@ -926,7 +928,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="RenderOn" Width="60">
+                                <DataGridTemplateColumn Header="Render" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>

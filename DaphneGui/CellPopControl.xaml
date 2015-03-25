@@ -138,7 +138,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_spec.current_box_visibility}"                                      
+                                        IsChecked="{Binding Path=box_spec.current_box_visibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                      
                                         />
                         </Grid>
                         <Grid VerticalAlignment="Center">
@@ -153,7 +153,7 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=current_gaussian_region_visibility}"                        
+                                    IsChecked="{Binding Path=current_gaussian_region_visibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                        
                                       CommandParameter="{Binding}"
                                     />
                         </Grid>
@@ -232,14 +232,16 @@
                                    >
 
                     </uc:DoublesBox>
-                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
+                    
+                    <!--Hide for now-->
+                    <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
                         <TextBlock Text="Angle 1"></TextBlock>
                         <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="100" Width="100"></uc:DoublesBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
                         <TextBlock Text="Angle 2"></TextBlock>
                         <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="200" Width="100"></uc:DoublesBox>
-                    </StackPanel>
+                    </StackPanel>-->
 
                 </Grid>
             </DataTemplate>

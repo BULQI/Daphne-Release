@@ -14,7 +14,7 @@
 
             <ContentControl.Style>
                 <Style  TargetType="{x:Type ContentControl}">
-                    <Setter Property="ContentTemplate" Value="{StaticResource moleculeTemplate}"></Setter>
+                    <Setter Property="ContentTemplate" Value="{StaticResource moleculeTemplateHiddenCheckBox}"></Setter>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ElementName=AddEditMoleculeWindow, Path=Tag}" Value="ecs">
                             <Setter Property="ContentTemplate" Value="{StaticResource moleculeTemplateBulk}"></Setter>

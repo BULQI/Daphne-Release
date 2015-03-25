@@ -14,7 +14,7 @@
     <StackPanel Orientation="Vertical" Margin="8">
         <StackPanel>
             <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
-            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="50" MaxHeight="150"
+            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150"
                             ItemsSource="{Binding reaction_complexes}"
                             DisplayMemberPath="Name"
                             IsSynchronizedWithCurrentItem="True"
@@ -25,8 +25,6 @@
         <!--PUSH BUTTONS-->
         <StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
-                <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
-                <TextBox x:Name="TextBoxRCName" Width="150" HorizontalAlignment="Left" Text="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></TextBox>
                 <Button x:Name="ButtonEditComplex" Width="50" Click="ButtonEditComplex_Click">Edit</Button>
                 <Button x:Name="ButtonAddComplex" Width="50" Click="ButtonAddComplex_Click"
                         Visibility="{Binding Path=ShowMolecules, Mode=OneWay, ElementName=RCC}">Add</Button>

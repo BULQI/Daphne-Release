@@ -30,10 +30,10 @@ namespace Daphne
                     kvp.Value.Step(dt);
                 }
 
-                // still alive and motile
-                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
+                // motile cells
+                if (kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
                 {
-                    if (kvp.Value.IsChemotactic)
+                    if (kvp.Value.IsChemotactic && kvp.Value.Alive == true)
                     {
                         // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
                         // add the chemotactic force (accumulate it into the force variable)

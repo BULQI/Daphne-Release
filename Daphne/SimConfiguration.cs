@@ -1342,6 +1342,18 @@ namespace Daphne
                 ReactionPusher(reac, sourceLevel, s);
             }
 
+            //Cytosol reaction complexes
+            foreach (ConfigReactionComplex reac in cell.cytosol.reaction_complexes)
+            {
+                ReactionComplexPusher(reac, sourceLevel, s);
+            }
+
+            //Membrane reaction complexes
+            foreach (ConfigReactionComplex reac in cell.membrane.reaction_complexes)
+            {
+                ReactionComplexPusher(reac, sourceLevel, s);
+            }
+
             //Differentiation scheme
             SchemePusher(cell.diff_scheme, sourceLevel, s);
 
@@ -1457,15 +1469,15 @@ namespace Daphne
         private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
         {
             //Genes
-            //foreach (ConfigGene gene in rc.genes)
-            //{
-            //    PushStatus s2 = pushStatus(gene);
-            //    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
-            //    {
-            //        ConfigGene newgene = gene.Clone(null);
-            //        repositoryPush(newgene, s2);
-            //    }
-            //}
+            foreach (ConfigGene gene in rc.genes)
+            {
+                PushStatus s2 = pushStatus(gene);
+                if (s2 != PushStatus.PUSH_INVALID)
+                {
+                    ConfigGene newgene = gene.Clone(null);
+                    repositoryPush(newgene, s2);
+                }
+            }
 
             //Reactions
             foreach (ConfigReaction reac in rc.reactions)
@@ -2671,8 +2683,8 @@ namespace Daphne
         {
             // default value
             phi1 = 100;
-            deathConstant = 1e-3;
-            deathOrder = 1;
+            //deathConstant = 1e-3;
+            //deathOrder = 1;
             globalRandomSeed = RandomSeed.Robust();
 
             // Default is Constant parameter distribution with ConstValue = 0
@@ -2681,8 +2693,8 @@ namespace Daphne
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
-        public double deathConstant { get; set; }
-        public int deathOrder { get; set; }
+        //public double deathConstant { get; set; }
+        //public int deathOrder { get; set; }
 
         private int randomSeed;
         public int globalRandomSeed
@@ -3767,13 +3779,14 @@ namespace Daphne
         public ConfigEntity()
         {
             Guid id = Guid.NewGuid();
-
+            description = "";
             entity_guid = id.ToString();
         }
 
         public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
+        public string description { get; set; }
 
         public abstract bool Equals(ConfigEntity entity);
     }
@@ -3871,7 +3884,7 @@ namespace Daphne
             Name = "Molecule_New001"; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
-            DiffusionCoefficient = 2;
+            DiffusionCoefficient = 1e-7;
             molecule_location = MoleculeLocation.Bulk;
             renderLabel = this.entity_guid;
         }
@@ -4074,7 +4087,7 @@ namespace Daphne
     {
         public string Name { get; set; }
 
-        private int copyNumber;
+        private int copyNumber = 2;
         public int CopyNumber
         {
             get
@@ -4091,7 +4104,7 @@ namespace Daphne
             }
         }
 
-        private double activationLevel;
+        private double activationLevel = 1;
         public double ActivationLevel
         {
             get
@@ -4235,6 +4248,7 @@ namespace Daphne
         public ConfigTransitionDriverElement()
         {
         }
+        public abstract bool Equals(ConfigTransitionDriverElement element);
     }
 
     public class ConfigMolTransitionDriverElement : ConfigTransitionDriverElement
@@ -4247,6 +4261,20 @@ namespace Daphne
         {
             driver_mol_guid_ref = "";
             Type = TransitionDriverElementType.MOLECULAR;
+        }
+
+        public override bool Equals(ConfigTransitionDriverElement element)
+        {
+            ConfigMolTransitionDriverElement mol_element = element as ConfigMolTransitionDriverElement;
+
+            if (Alpha != mol_element.Alpha)
+                return false;
+            if (Beta != mol_element.Beta)
+                return false;
+            if (driver_mol_guid_ref != mol_element.driver_mol_guid_ref)
+                return false;
+
+            return true;
         }
     }
 
@@ -4270,6 +4298,16 @@ namespace Daphne
         {
             Distr = new DistributedParameter();
             Type = TransitionDriverElementType.DISTRIBUTION;
+        }
+
+        public override bool Equals(ConfigTransitionDriverElement element)
+        {
+            ConfigDistrTransitionDriverElement distr_element = element as ConfigDistrTransitionDriverElement;
+
+            if (Distr.Equals(distr_element.Distr) == false)
+                return false;
+
+            return true;
         }
     }
 
@@ -4357,6 +4395,27 @@ namespace Daphne
         {
             elements = new ObservableCollection<ConfigTransitionDriverElement>();
         }
+
+        public bool Equals(ConfigTransitionDriverRow tdrow)
+        {
+            if (this != null && tdrow == null)
+                return false;
+            else if (this == null && tdrow != null)
+                return false;
+            else
+            {
+            }
+
+            if (elements.Count != tdrow.elements.Count)
+                return false;
+            foreach (ConfigTransitionDriverElement element in elements)
+            {
+                if (element.Equals(tdrow.elements[elements.IndexOf(element)]) == false)
+                    return false;
+            }
+
+            return true;
+        }
     }
 
     public class ConfigTransitionDriver : ConfigEntity
@@ -4404,6 +4463,14 @@ namespace Daphne
         {
             ConfigTransitionDriver ent = entity as ConfigTransitionDriver;
 
+            if (this.DriverElements == null && ent.DriverElements != null)
+                return false;
+            else if (this.DriverElements != null && ent.DriverElements == null)
+                return false;
+            else
+            {
+            }
+
             if (this.entity_guid != ent.entity_guid)
                 return false;
             if (this.CurrentState.Equals(ent.CurrentState) == false)
@@ -4412,6 +4479,21 @@ namespace Daphne
                 return false;
             if (this.Name != ent.Name)
                 return false;
+
+            if (states.Count != ent.states.Count)
+                return false;
+            foreach (string state in states)
+            {
+                if (ent.states.ElementAt(states.IndexOf(state)) != state)
+                    return false;
+            }
+            if (DriverElements.Count != ent.DriverElements.Count)
+                return false;
+            foreach (ConfigTransitionDriverRow tdrow in DriverElements)
+            {
+                if (tdrow.Equals(ent.DriverElements[DriverElements.IndexOf(tdrow)]) == false)
+                    return false;
+            }
 
             return true;
         }
@@ -6146,22 +6228,29 @@ namespace Daphne
 
             //remove molpops whose molecules are not in the remaining reactions
             ObservableCollection<ConfigMolecularPopulation> newmolpops = new ObservableCollection<ConfigMolecularPopulation>();
+            ObservableCollection<ConfigGene> newgenes = new ObservableCollection<ConfigGene>();
 
             //Create a new molpops collection from the current reactions in the complex (molpops)
             //We cannot lose the attributes of the existing mol pops so we have to do it this way
             foreach (ConfigReaction reac in reactions)
             {
-                AddMolPop(newmolpops, reac.reactants_molecule_guid_ref);
-                AddMolPop(newmolpops, reac.products_molecule_guid_ref);
-                AddMolPop(newmolpops, reac.modifiers_molecule_guid_ref);
+                AddMolPop(newmolpops, newgenes, reac.reactants_molecule_guid_ref);
+                AddMolPop(newmolpops, newgenes, reac.products_molecule_guid_ref);
+                AddMolPop(newmolpops, newgenes, reac.modifiers_molecule_guid_ref);
             }
             molpops = newmolpops;
+            genes = newgenes;
 
-            //recreate molecules_dict
             molecules_dict.Clear();
             foreach (ConfigMolecularPopulation molpop in molpops)
             {               
                 molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+            }
+
+            genes_dict.Clear();
+            foreach (ConfigGene gene in genes)
+            {
+                genes_dict.Add(gene.entity_guid, gene);
             }
             
         }
@@ -6172,13 +6261,27 @@ namespace Daphne
         /// </summary>
         /// <param name="newmolpops"></param>
         /// <param name="guid_refs"></param>
-        private void AddMolPop(ObservableCollection<ConfigMolecularPopulation> newmolpops, ObservableCollection<string> guid_refs)
+        private void AddMolPop(ObservableCollection<ConfigMolecularPopulation> newmolpops, ObservableCollection<ConfigGene> newgenes, ObservableCollection<string> guid_refs)
         {
             foreach (string guid in guid_refs)
             {
-                ConfigMolecularPopulation cmp = molpops.Where(m => m.molecule.entity_guid == guid).First();
-                if (newmolpops.Contains(cmp) == false)
-                    newmolpops.Add(cmp);
+                ConfigMolecularPopulation cmp = molpops.Where(m => m.molecule.entity_guid == guid).FirstOrDefault();
+                if (cmp != null)
+                {
+                    if (newmolpops.Contains(cmp) == false)
+                        newmolpops.Add(cmp);
+                }
+                else
+                {
+                    ConfigGene cg = genes.Where(g => g.entity_guid == guid).FirstOrDefault();
+                    if (cg != null)
+                    {
+                        if (newgenes.Contains(cg) == false)
+                        {
+                            newgenes.Add(cg);
+                        }
+                    }
+                }
             }
         }
 
