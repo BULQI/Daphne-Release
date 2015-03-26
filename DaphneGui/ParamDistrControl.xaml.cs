@@ -401,6 +401,41 @@ namespace DaphneGui
 
     }
 
+    /// <summary>
+    /// This converter takes a distribution type and determines whether it's value should be displayed as an integer or double.
+    /// Really, it only handles the "CONSTANT" distribution type and checks if the control's Tag variable contains "DISCRETE"
+    /// or "CONTINUOUS".
+    /// The first parameter "value" is an array because this is a multi value converter.
+    /// value[0] is the distribution type
+    /// value[1] is the Tag
+    /// 
+    /// </summary>
+    public class ParameterDistributionTypeToDiscreteConverter : IMultiValueConverter
+    {
+        public object Convert(object[] value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ParameterDistributionType pdt;
+            pdt = (ParameterDistributionType)value[0];
+
+            string sTag = value[1] as string;
+
+            switch (pdt)
+            {
+                case ParameterDistributionType.CONSTANT:
+                    if (sTag == "DISCRETE") return true;
+                    break;
+            }
+            return false;
+        }
+
+
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // Not using this, so simply use dummy values 
+            string[] dummy = { "dummy1", "dummy2" };
+            return dummy;
+        }
+    }
 
 
 #if ODP_METHOD_WORKS

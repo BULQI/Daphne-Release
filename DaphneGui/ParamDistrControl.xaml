@@ -13,6 +13,8 @@
              >
  
     <UserControl.Resources>
+        <local:ParameterDistributionTypeToDiscreteConverter x:Key="ParamDistTypeToDiscreteConv" />
+        
             <!--To load distribution types based on who called this user control - does not work-->
             <!--<ObjectDataProvider x:Name="objDistTypes" x:Key="paramDistributionTypes"
                 ObjectType="{x:Type local:CDataAccess}"
@@ -51,7 +53,28 @@
                     </StackPanel>
                     <StackPanel>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
-                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+                            <uc:DoublesBox.Style>
+                                <Style  TargetType="{x:Type uc:DoublesBox}">
+                                    <Setter Property="DecimalPlaces" Value="0"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Value="False">
+
+                                            <DataTrigger.Binding>
+                                                <MultiBinding Converter="{StaticResource ParamDistTypeToDiscreteConv}">
+                                                    <Binding Path="DistributionType"/>
+                                                    <Binding ElementName="paramDistrControl" Path="Tag" />
+                                                </MultiBinding>
+                                            </DataTrigger.Binding>
+
+                                            <Setter Property="DecimalPlaces" Value="3"></Setter>
+                                        </DataTrigger>
+
+                                    </Style.Triggers>
+                                </Style>
+                            </uc:DoublesBox.Style>
+                        </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>      
             </DataTemplate>

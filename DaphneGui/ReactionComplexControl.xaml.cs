@@ -77,7 +77,14 @@ namespace DaphneGui
             ReactionComplexesInStore rcis = new ReactionComplexesInStore();
             rcis.DataContext = MainWindow.SOP.Protocol.entity_repository;
             rcis.Tag = MainWindow.SOP.Protocol.scenario.environment.comp;
-            rcis.ShowDialog();
+            if (rcis.ShowDialog() == true)
+            {
+                ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
+                if (ListBoxReactionComplexes.SelectedIndex < 0 || ListBoxReactionComplexes.SelectedIndex > ListBoxReactionComplexes.Items.Count)
+                {
+                    ListBoxReactionComplexes.SelectedIndex = 0;
+                }
+            }
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
