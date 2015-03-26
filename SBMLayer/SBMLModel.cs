@@ -580,9 +580,9 @@ namespace SBMLayer
                     attr.add("extent_y", Convert.ToString(envHandle.extent_y), annotNamespace, annotprefix);
                     attr.add("extent_z", Convert.ToString(envHandle.extent_z), annotNamespace, annotprefix);
                 }
-                //Cell Death params
-                attr.add("death_constant", Convert.ToString(protocol.sim_params.deathConstant), annotNamespace, annotprefix);
-                attr.add("death_order", Convert.ToString(protocol.sim_params.deathOrder), annotNamespace, annotprefix);
+                ////Cell Death params
+                //attr.add("death_constant", Convert.ToString(protocol.sim_params.deathConstant), annotNamespace, annotprefix);
+                //attr.add("death_order", Convert.ToString(protocol.sim_params.deathOrder), annotNamespace, annotprefix);
 
                 //Cell Interaction params
                 attr.add("ph1", Convert.ToString(protocol.sim_params.phi1), annotNamespace, annotprefix);
@@ -1719,8 +1719,8 @@ namespace SBMLayer
                     envHandle.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
                     envHandle.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
                 }
-                protocol.sim_params.deathConstant = Convert.ToDouble(attributes.getValue(attributes.getIndex("death_constant")));
-                protocol.sim_params.deathOrder = Convert.ToInt32(attributes.getValue(attributes.getIndex("death_order")));
+                //protocol.sim_params.deathConstant = Convert.ToDouble(attributes.getValue(attributes.getIndex("death_constant")));
+                //protocol.sim_params.deathOrder = Convert.ToInt32(attributes.getValue(attributes.getIndex("death_order")));
                 protocol.sim_params.phi1 = Convert.ToDouble(attributes.getValue(attributes.getIndex("ph1")));
                 protocol.sim_params.phi2 = Convert.ToDouble(attributes.getValue(attributes.getIndex("ph2")));
             }

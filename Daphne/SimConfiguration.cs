@@ -1342,6 +1342,18 @@ namespace Daphne
                 ReactionPusher(reac, sourceLevel, s);
             }
 
+            //Cytosol reaction complexes
+            foreach (ConfigReactionComplex reac in cell.cytosol.reaction_complexes)
+            {
+                ReactionComplexPusher(reac, sourceLevel, s);
+            }
+
+            //Membrane reaction complexes
+            foreach (ConfigReactionComplex reac in cell.membrane.reaction_complexes)
+            {
+                ReactionComplexPusher(reac, sourceLevel, s);
+            }
+
             //Differentiation scheme
             SchemePusher(cell.diff_scheme, sourceLevel, s);
 
@@ -1457,15 +1469,15 @@ namespace Daphne
         private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
         {
             //Genes
-            //foreach (ConfigGene gene in rc.genes)
-            //{
-            //    PushStatus s2 = pushStatus(gene);
-            //    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
-            //    {
-            //        ConfigGene newgene = gene.Clone(null);
-            //        repositoryPush(newgene, s2);
-            //    }
-            //}
+            foreach (ConfigGene gene in rc.genes)
+            {
+                PushStatus s2 = pushStatus(gene);
+                if (s2 != PushStatus.PUSH_INVALID)
+                {
+                    ConfigGene newgene = gene.Clone(null);
+                    repositoryPush(newgene, s2);
+                }
+            }
 
             //Reactions
             foreach (ConfigReaction reac in rc.reactions)
@@ -2671,8 +2683,8 @@ namespace Daphne
         {
             // default value
             phi1 = 100;
-            deathConstant = 1e-3;
-            deathOrder = 1;
+            //deathConstant = 1e-3;
+            //deathOrder = 1;
             globalRandomSeed = RandomSeed.Robust();
 
             // Default is Constant parameter distribution with ConstValue = 0
@@ -2681,8 +2693,8 @@ namespace Daphne
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
-        public double deathConstant { get; set; }
-        public int deathOrder { get; set; }
+        //public double deathConstant { get; set; }
+        //public int deathOrder { get; set; }
 
         private int randomSeed;
         public int globalRandomSeed
@@ -3767,13 +3779,14 @@ namespace Daphne
         public ConfigEntity()
         {
             Guid id = Guid.NewGuid();
-
+            description = "";
             entity_guid = id.ToString();
         }
 
         public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
+        public string description { get; set; }
 
         public abstract bool Equals(ConfigEntity entity);
     }
@@ -3871,7 +3884,7 @@ namespace Daphne
             Name = "Molecule_New001"; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
-            DiffusionCoefficient = 2;
+            DiffusionCoefficient = 1e-7;
             molecule_location = MoleculeLocation.Bulk;
             renderLabel = this.entity_guid;
         }
@@ -4074,7 +4087,7 @@ namespace Daphne
     {
         public string Name { get; set; }
 
-        private int copyNumber;
+        private int copyNumber = 2;
         public int CopyNumber
         {
             get
@@ -4091,7 +4104,7 @@ namespace Daphne
             }
         }
 
-        private double activationLevel;
+        private double activationLevel = 1;
         public double ActivationLevel
         {
             get
