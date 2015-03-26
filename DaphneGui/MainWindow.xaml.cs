@@ -1951,6 +1951,10 @@ namespace DaphneGui
             {
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].ShowWidget(box.box_visibility);
             }
+            else if (e.PropertyName == "current_box_visibility")
+            {
+                ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].ShowWidget(box.current_box_visibility);
+            }
 
             // Catch-all for other scale / translation manipulations
             if (((VTKFullDataBasket)MainWindow.VTKBasket).Regions.ContainsKey(box.box_guid) == true && ((VTKFullGraphicsController)MainWindow.GC).Regions.ContainsKey(box.box_guid) == true)
@@ -1981,6 +1985,12 @@ namespace DaphneGui
                 gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.gaussian_region_visibility);
                 gcHandle.Rwc.Invalidate();
             }
+            else if (e.PropertyName == "current_gaussian_region_visibility")
+            {
+                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.current_gaussian_region_visibility);
+                gcHandle.Rwc.Invalidate();
+            }
+
             if (e.PropertyName == "gaussian_spec_color")
             {
                 gcHandle.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);

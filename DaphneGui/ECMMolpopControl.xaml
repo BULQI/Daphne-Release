@@ -200,7 +200,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_spec.box_visibility}"                                      
+                                        IsChecked="{Binding Path=box_spec.current_box_visibility, UpdateSourceTrigger=PropertyChanged}"                                      
                                         />
                     </Grid>
                     <Grid VerticalAlignment="Center">
@@ -214,7 +214,7 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=gaussian_region_visibility}"
+                                    IsChecked="{Binding Path=current_gaussian_region_visibility, UpdateSourceTrigger=PropertyChanged}"
                                       Click="gaussian_region_actor_checkbox_clicked"
                                       CommandParameter="{Binding}"
                                     />
