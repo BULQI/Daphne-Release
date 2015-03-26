@@ -21,13 +21,15 @@
     <Grid>
         <StackPanel Orientation="Vertical" Margin="8" >
 
-            <TextBlock Text="Extracellular Medium Extents" FontWeight="Bold" Margin="0,-10,0,0" />
+            <!--<TextBlock Text="Extracellular Medium Extents" FontWeight="Bold" Margin="0,-10,0,0" 
+                       ToolTip="Determines the size of the simulation space."/>-->
             
             <!-- x -->
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="X" Margin="6,0" Grid.Column="0" Grid.Row="2"  
                            HorizontalAlignment="Right" VerticalAlignment="Center"
                            TextAlignment="Right" Width="60"
+                           ToolTip="The size of the simulation space in the x-dimension."
                 />
                     <Slider Name="extent_x_slider" Orientation="Horizontal" VerticalAlignment="Center"
                             Width="100" RenderTransform="1.0,0,0,0.5,0,7"
@@ -40,7 +42,8 @@
                                        CheckBoxVisibility="Collapsed" SpinnerVisibility="Collapsed"
                                        HorizontalAlignment="Right" Width="60"
                                        Value="{Binding ElementName=extent_x_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                                              />
+                                       ToolTip="The size of the simulation space in the x-dimension."/>
+                
                 <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
@@ -49,6 +52,7 @@
                 <TextBlock Text="Y" Margin="6,0" Grid.Column="0" Grid.Row="2"  
                            HorizontalAlignment="Right" VerticalAlignment="Center"
                            TextAlignment="Right" Width="60"
+                           ToolTip="The size of the simulation space in the y-dimension."
                 />
                 <Slider Name="extent_y_slider" Orientation="Horizontal" VerticalAlignment="Center"
                             Width="100" RenderTransform="1.0,0,0,0.5,0,7"
@@ -61,7 +65,7 @@
                                        CheckBoxVisibility="Collapsed" SpinnerVisibility="Collapsed"
                                        HorizontalAlignment="Right" Width="60"
                                        Value="{Binding ElementName=extent_y_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                                              />
+                                       ToolTip="The size of the simulation space in the y-dimension." />
                 <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
@@ -70,6 +74,7 @@
                 <TextBlock Text="Z" Margin="6,0" Grid.Column="0" Grid.Row="2"  
                            HorizontalAlignment="Right" VerticalAlignment="Center"
                            TextAlignment="Right" Width="60"
+                           ToolTip="The size of the simulation space in the z-dimension."
                 />
                 <Slider Name="extent_z_slider" Orientation="Horizontal" VerticalAlignment="Center"
                             Width="100" RenderTransform="1.0,0,0,0.5,0,7"
@@ -82,26 +87,53 @@
                                        CheckBoxVisibility="Collapsed" SpinnerVisibility="Collapsed"
                                        HorizontalAlignment="Right" Width="60"
                                        Value="{Binding ElementName=extent_z_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                       ToolTip="The size of the simulation space in the z-dimension."
                                                               />
                 <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
             
         
         <StackPanel Orientation="Horizontal">
-            <TextBlock Text="grid size" Margin="6,0" Grid.Column="0" Grid.Row="2"  
+                <TextBlock Text="grid size" Margin="6,0" Grid.Column="0" Grid.Row="2"  
                        HorizontalAlignment="Right" VerticalAlignment="Center"
                        TextAlignment="Right" Width="60"
-            />
+                       ToolTipService.ShowDuration="80000"
+                    >
+
+                <TextBlock.ToolTip>
+                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                        The spacing between grid points in the lattice. 
+                        The molecular concentrations in the extracellular medium are computed at the lattice grid points
+                        and interpolated between lattice points. 
+                        A smaller grid size gives a more accurate approximation of the molecular concentrations, 
+                        but will run more slowly than a larger grid size.
+                    </TextBlock>
+                </TextBlock.ToolTip>
+                                                                                       
+            </TextBlock>
             <Slider Name="sliderGridStep" Orientation="Horizontal" VerticalAlignment="Center" Width="100" RenderTransform="1.0,0,0,0.5,0,7" 
-                    Minimum="{Binding Path=Protocol.scenario.environment.gridstep_min}" 
-                    Maximum="{Binding Path=Protocol.scenario.environment.gridstep_max}" 
-                    Value="{Binding Path=Protocol.scenario.environment.gridstep}" 
-                    IsSnapToTickEnabled="True" TickFrequency="1" KeyboardNavigation.IsTabStop="False"
+                Minimum="{Binding Path=Protocol.scenario.environment.gridstep_min}" 
+                Maximum="{Binding Path=Protocol.scenario.environment.gridstep_max}" 
+                Value="{Binding Path=Protocol.scenario.environment.gridstep}" 
+                IsSnapToTickEnabled="True" TickFrequency="1" KeyboardNavigation.IsTabStop="False"
             />
-            <editors:DoubleEditBox x:Name="GridStepReadout" CenterSlotHorizontalAlignment="Right" CheckBoxVisibility="Collapsed" 
+                <editors:DoubleEditBox x:Name="GridStepReadout" CenterSlotHorizontalAlignment="Right" CheckBoxVisibility="Collapsed" 
                                    SpinnerVisibility="Collapsed" HorizontalAlignment="Right" Width="60" 
                                    Value="{Binding ElementName=sliderGridStep, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-             />
+                                   ToolTipService.ShowDuration="80000"
+                >
+                    <editors:DoubleEditBox.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                        The spacing between grid points in the lattice. 
+                        The molecular concentrations in the extracellular medium are computed at the lattice grid points
+                        and interpolated between lattice points. 
+                        A smaller grid size gives a more accurate approximation of the molecular concentrations, 
+                        but will run more slowly than a larger grid size.
+                        </TextBlock>
+                    </editors:DoubleEditBox.ToolTip>
+
+                </editors:DoubleEditBox>
+            
             <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
         </StackPanel>
 
