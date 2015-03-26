@@ -7,6 +7,7 @@ using NativeDaphne;
 using MathNet.Numerics.Random;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Daphne
 {
@@ -18,20 +19,96 @@ namespace Daphne
 
         public static Nt_CellManager nt_cellManager;
 
-        ParallelOptions parallelOption = new ParallelOptions
+        private List<Thread> threadList;
+        private List<CellThreadArg> threadArgs;
+        private AutoResetEvent[] jobDoneEvents;
+        private bool threadDataInitialized;
+
+        class CellThreadArg
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-
+            public int threadId;
+            public List<Cell> CellList;
+            public double dt;
+            public AutoResetEvent jobReady;
+            public AutoResetEvent jobDone;
+        }
 
         public CellManager()
         {
             deadDict = new Dictionary<int, double[]>();
+
+
             nt_cellManager = new Nt_CellManager();
+            //creating threads
+            threadList = new List<Thread>();
+            threadArgs = new List<CellThreadArg>();
+            int numTheads = 2;// Environment.ProcessorCount;
+            for (int i=0; i< numTheads; i++)
+            {
+                Thread th = new Thread(this.run_cell_step);
+                CellThreadArg cta = new CellThreadArg();
+                cta.threadId = i;
+                cta.CellList = new List<Cell>();
+                cta.jobReady = new AutoResetEvent(false);
+                cta.jobDone = new AutoResetEvent(false);
+                threadArgs.Add(cta);
+                th.Start(cta);
+                threadList.Add(th);
+            }
+            threadDataInitialized = false;
+        }
+
+        public void initializeThreadData(double dt)
+        {
+            int numCells = SimulationBase.dataBasket.Cells.Count;
+            int itemPerThread = numCells / threadList.Count + 1;
+
+            List<AutoResetEvent> activeEventList = new List<AutoResetEvent>();
+            //adding cells.
+            using (var cell_enumerator = SimulationBase.dataBasket.Cells.GetEnumerator())
+            {
+                for (int i = 0; i < threadArgs.Count; i++)
+                {
+                    CellThreadArg arg = threadArgs[i];
+                    arg.dt = dt;
+                    List<Cell> cell_list = arg.CellList;
+                    cell_list.Clear();
+                    while (cell_list.Count < itemPerThread)
+                    {
+                        if (!cell_enumerator.MoveNext()) break;
+                        cell_list.Add(cell_enumerator.Current.Value);
+                    }
+                    if (cell_list.Count > 0)
+                    {
+                        activeEventList.Add(arg.jobDone);
+                    }
+                }
+            }
+            jobDoneEvents = activeEventList.ToArray();
+            threadDataInitialized = true;
         }
 
         public static int iteration_count = 0;
+
+        void run_cell_step(object threadContext)
+        {
+            CellThreadArg arg = threadContext as CellThreadArg;
+            AutoResetEvent jobReady = arg.jobReady;
+            AutoResetEvent jobDone = arg.jobDone;
+            List<Cell> tasklist = arg.CellList;
+            while (true)
+            {
+                jobReady.WaitOne();
+                double dt = arg.dt;
+                for (int i = 0; i < tasklist.Count; i++)
+                {
+                    Cell c = tasklist[i];
+                    c.Step(dt);
+                    //tasklist[i].Step(dt);
+                }
+                jobDone.Set();
+            }
+        }
 
         public void Step(double dt)
         {
@@ -47,13 +124,27 @@ namespace Daphne
                 nt_cellManager.step(dt);
             }
 
+
+            if (threadDataInitialized == false)
+            {
+                initializeThreadData(dt);
+            }
+
+            //start job
+            for (int i = 0; i < jobDoneEvents.Length; i++)
+            {
+                threadArgs[i].jobReady.Set();
+            }
+            //wait for finish
+            WaitHandle.WaitAll(jobDoneEvents);
+
             foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
                 // cell takes a step
-                if (kvp.Value.Alive == true)
-                {
-                    kvp.Value.Step(dt);
-                }
+                //if (kvp.Value.Alive == true)
+                //{
+                //    kvp.Value.Step(dt);
+                //}
 
                 // still alive and motile
                 if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)

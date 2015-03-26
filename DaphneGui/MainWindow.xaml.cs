@@ -243,6 +243,10 @@ namespace DaphneGui
         {
             InitializeComponent();
 
+            //System.Diagnostics.Process myProcess = System.Diagnostics.Process.GetCurrentProcess();
+            //myProcess.MaxWorkingSet = (IntPtr)1500000000;
+            //myProcess.MinWorkingSet = (IntPtr)1000000000;
+
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
             ST_RenderSkinWindow = renderSkinWindow;
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
