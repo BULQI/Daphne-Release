@@ -153,13 +153,16 @@ namespace NativeDaphneLibrary
 			while (true)
 			{
 				WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
+				if (arg->n == -1) //signal to end
+				{
+					_endthread();
+				}
 				arg->owner->NativeRestrict(arg->sfarray, arg->position, arg->n, arg->_output);
 				if ( !SetEvent(owner->JobFinishedEvents[tid])) 
 				{
 					printf("SetEvent failed (%d)\n", GetLastError());
 				}
 			}
-			//_endthread();
 		}
 
 	};

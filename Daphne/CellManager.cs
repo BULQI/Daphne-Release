@@ -20,18 +20,20 @@ namespace Daphne
         public static Nt_CellManager nt_cellManager;
 
         private List<Thread> threadList;
-        private List<CellThreadArg> threadArgs;
+        private List<CellStepThreadArg> threadArgs;
         private int numWorkingThreads;
         private int numActiveThreads;
         private object jobDoneEvent;
         public bool threadDataInitialized;
 
-        class CellThreadArg
+        class CellStepThreadArg
         {
+            public double dt = 0;
+            public List<Cell> CellList = new List<Cell>();
+
             public int threadId;
-            public List<Cell> CellList;
-            public double dt;
-            public AutoResetEvent jobReady;
+            public readonly object JobReadySignal = new object();
+            public int blockFlag = 1;
         }
 
         public CellManager()
@@ -41,17 +43,15 @@ namespace Daphne
             nt_cellManager = new Nt_CellManager();
             //creating threads
             threadList = new List<Thread>();
-            threadArgs = new List<CellThreadArg>();
+            threadArgs = new List<CellStepThreadArg>();
             int numTheads = Environment.ProcessorCount / 2;
             jobDoneEvent = new object();
             for (int i = 0; i < numTheads; i++)
             {
                 Thread th = new Thread(this.run_cell_step);
                 th.IsBackground = true;
-                CellThreadArg cta = new CellThreadArg();
+                CellStepThreadArg cta = new CellStepThreadArg();
                 cta.threadId = i;
-                cta.CellList = new List<Cell>();
-                cta.jobReady = new AutoResetEvent(false);
                 threadArgs.Add(cta);
                 th.Start(cta);
                 threadList.Add(th);
@@ -71,7 +71,7 @@ namespace Daphne
             {
                 for (int i = 0; i < threadArgs.Count; i++)
                 {
-                    CellThreadArg arg = threadArgs[i];
+                    CellStepThreadArg arg = threadArgs[i];
                     arg.dt = dt;
                     List<Cell> cell_list = arg.CellList;
                     cell_list.Clear();
@@ -94,16 +94,22 @@ namespace Daphne
 
         void run_cell_step(object threadContext)
         {
-            CellThreadArg arg = threadContext as CellThreadArg;
-            AutoResetEvent jobReady = arg.jobReady;
+            CellStepThreadArg arg = threadContext as CellStepThreadArg;
+            Object JobReadySignal = arg.JobReadySignal;
             List<Cell> tasklist = arg.CellList;
             while (true)
             {
-                jobReady.WaitOne();
-                double dt = arg.dt;
+                lock (JobReadySignal)
+                {
+                    while (arg.blockFlag == 1)
+                    {
+                        Monitor.Wait(JobReadySignal);
+                    }
+                    Interlocked.Exchange(ref arg.blockFlag, 1);
+                }
                 for (int i = 0; i < tasklist.Count; i++)
                 {
-                    tasklist[i].Step(dt);
+                    tasklist[i].Step(arg.dt);
                 }
                 if (Interlocked.Decrement(ref numActiveThreads) == 0)
                 {
@@ -138,7 +144,12 @@ namespace Daphne
             Interlocked.Exchange(ref numActiveThreads, numWorkingThreads);
             for (int i = 0; i < numWorkingThreads; i++)
             {
-                threadArgs[i].jobReady.Set();
+                CellStepThreadArg arg = threadArgs[i];
+                lock (arg.JobReadySignal)
+                {
+                    Interlocked.Exchange(ref arg.blockFlag, 0);
+                    Monitor.Pulse(arg.JobReadySignal);
+                }
             }
             //wait for finish
             lock (jobDoneEvent)
@@ -158,8 +169,8 @@ namespace Daphne
                 //}
 
                 // still alive and motile
-                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
-                {
+                //if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
+                //{
                     //if (!use_native)
                     //{
                     //    if (kvp.Value.IsChemotactic)
@@ -184,8 +195,8 @@ namespace Daphne
                     //    }
                     //}
                     // enforce boundary condition
-                    kvp.Value.EnforceBC();
-                }
+                    //kvp.Value.EnforceBC();
+                //}
 
                 ////this is after the step is done
                 if (iteration_count < 0) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)

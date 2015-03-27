@@ -81,6 +81,14 @@ namespace NativeDaphneLibrary
 
 	NtInterpolatedRectangularPrism::~NtInterpolatedRectangularPrism()
 	{
+		//terminate thread
+		for (int i=0; i<MaxNumThreads; i++)
+		{
+			EcsRestrictArg *arg = EcsArgs[i];
+			arg->n = -1;
+			::SetEvent(JobReadyEvents[i]);
+		}
+
 		//todo: free allocated memory
 	}
 
@@ -631,11 +639,8 @@ namespace NativeDaphneLibrary
 		int NumItemsPerThread = n/numThreads;
 		if (NumItemsPerThread * numThreads < n)NumItemsPerThread++;
 
-		//for (int i = 0; i< numThreads; i++)
-		//{
-		//	ResetEvent(jobCompletedEvents[i]);
-		//}
-		int nn = 0; //start
+		//start job
+		int nn = 0;
 		for (int i=0; i< numThreads; i++)
 		{
 			EcsRestrictArg *arg = EcsArgs[i];
@@ -647,31 +652,14 @@ namespace NativeDaphneLibrary
 			arg->n = (nn + NumItemsPerThread) <= n ? NumItemsPerThread : n - nn;
 			nn += NumItemsPerThread;
 			::SetEvent(JobReadyEvents[i]);
-			//DWORD c = ::ResumeThread(jobHandles[i]);
-			//hThread[i] = (HANDLE)_beginthread(RestrictThreadEntry, 0, arg);
 		}
 
-		//wait for finish
+		//::InterlockedIncrement
+		//wait for job finish
 		retVal = WaitForMultipleObjects(numThreads, JobFinishedEvents, true, INFINITE);
-		//		DWORD retval[30];
-		//for (int i=0; i< numThreads; i++)
-		//{
-		//	retval[i] = ::WaitForSingleObject(jobHandles[i], INFINITE);
-		//	SuspendThread(jobHandles[i]);
-		//}
 		return 0;
 
 	}
-
-
-
-
-
-
-
-
-
-
 
 
 	int NtInterpolatedRectangularPrism::TestAddition(int a, int b)

@@ -13,6 +13,16 @@ namespace NativeDaphne
 	public:
 		Nt_InterpolatedRectangularPrism(void);
 
+		~Nt_InterpolatedRectangularPrism()
+		{
+			this->!Nt_InterpolatedRectangularPrism();
+		}
+
+		!Nt_InterpolatedRectangularPrism()
+		{
+			delete irprism;
+		}
+		//testing
 		int add(int a, int b);
 
 	private:

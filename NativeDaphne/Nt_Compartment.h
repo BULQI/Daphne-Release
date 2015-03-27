@@ -179,7 +179,15 @@ namespace NativeDaphne
 			boundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
 		}
 
-		~Nt_ECS(){}
+		~Nt_ECS()
+		{
+			this->!Nt_ECS();
+		}
+
+		!Nt_ECS()
+		{
+			delete ir_prism;
+		}
 
 		void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
         {
