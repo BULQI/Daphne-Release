@@ -1018,6 +1018,7 @@ namespace Daphne
             scenarioHandle = (TissueScenario)protocol.scenario;
             envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
+            cellManager.threadDataInitialized = false;
             // call the base
             base.Load(protocol, completeReset);
 

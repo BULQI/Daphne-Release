@@ -21,8 +21,10 @@ namespace Daphne
 
         private List<Thread> threadList;
         private List<CellThreadArg> threadArgs;
-        private AutoResetEvent[] jobDoneEvents;
-        private bool threadDataInitialized;
+        private int numWorkingThreads;
+        private int numActiveThreads;
+        private object jobDoneEvent;
+        public bool threadDataInitialized;
 
         class CellThreadArg
         {
@@ -30,27 +32,26 @@ namespace Daphne
             public List<Cell> CellList;
             public double dt;
             public AutoResetEvent jobReady;
-            public AutoResetEvent jobDone;
         }
 
         public CellManager()
         {
             deadDict = new Dictionary<int, double[]>();
 
-
             nt_cellManager = new Nt_CellManager();
             //creating threads
             threadList = new List<Thread>();
             threadArgs = new List<CellThreadArg>();
-            int numTheads = 2;// Environment.ProcessorCount;
-            for (int i=0; i< numTheads; i++)
+            int numTheads = Environment.ProcessorCount / 2;
+            jobDoneEvent = new object();
+            for (int i = 0; i < numTheads; i++)
             {
                 Thread th = new Thread(this.run_cell_step);
+                th.IsBackground = true;
                 CellThreadArg cta = new CellThreadArg();
                 cta.threadId = i;
                 cta.CellList = new List<Cell>();
                 cta.jobReady = new AutoResetEvent(false);
-                cta.jobDone = new AutoResetEvent(false);
                 threadArgs.Add(cta);
                 th.Start(cta);
                 threadList.Add(th);
@@ -65,6 +66,7 @@ namespace Daphne
 
             List<AutoResetEvent> activeEventList = new List<AutoResetEvent>();
             //adding cells.
+            numWorkingThreads = 0;
             using (var cell_enumerator = SimulationBase.dataBasket.Cells.GetEnumerator())
             {
                 for (int i = 0; i < threadArgs.Count; i++)
@@ -80,11 +82,11 @@ namespace Daphne
                     }
                     if (cell_list.Count > 0)
                     {
-                        activeEventList.Add(arg.jobDone);
+                        numWorkingThreads++;
                     }
+                    else break;
                 }
             }
-            jobDoneEvents = activeEventList.ToArray();
             threadDataInitialized = true;
         }
 
@@ -94,7 +96,6 @@ namespace Daphne
         {
             CellThreadArg arg = threadContext as CellThreadArg;
             AutoResetEvent jobReady = arg.jobReady;
-            AutoResetEvent jobDone = arg.jobDone;
             List<Cell> tasklist = arg.CellList;
             while (true)
             {
@@ -102,11 +103,15 @@ namespace Daphne
                 double dt = arg.dt;
                 for (int i = 0; i < tasklist.Count; i++)
                 {
-                    Cell c = tasklist[i];
-                    c.Step(dt);
-                    //tasklist[i].Step(dt);
+                    tasklist[i].Step(dt);
                 }
-                jobDone.Set();
+                if (Interlocked.Decrement(ref numActiveThreads) == 0)
+                {
+                    lock (jobDoneEvent)
+                    {
+                        Monitor.Pulse(jobDoneEvent);
+                    }
+                }
             }
         }
 
@@ -124,19 +129,25 @@ namespace Daphne
                 nt_cellManager.step(dt);
             }
 
-
             if (threadDataInitialized == false)
             {
                 initializeThreadData(dt);
             }
 
             //start job
-            for (int i = 0; i < jobDoneEvents.Length; i++)
+            Interlocked.Exchange(ref numActiveThreads, numWorkingThreads);
+            for (int i = 0; i < numWorkingThreads; i++)
             {
                 threadArgs[i].jobReady.Set();
             }
             //wait for finish
-            WaitHandle.WaitAll(jobDoneEvents);
+            lock (jobDoneEvent)
+            {
+                if (numActiveThreads != 0)
+                {
+                    Monitor.Wait(jobDoneEvent);
+                }
+            }
 
             foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
