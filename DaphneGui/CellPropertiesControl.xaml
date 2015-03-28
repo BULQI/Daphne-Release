@@ -134,13 +134,13 @@
 
                                             <ComboBox.ToolTip>
                                                 <ToolTip>
-                                                    <StackPanel Width="200" Orientation="Horizontal">
-                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                            The cytosol molecular that will produce the chemotactic force. 
+                                                    <StackPanel Width="400" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="400">
+                                                            The cytosol molecule that will produce the chemotactic force. 
                                                             The chemotactic force that the cell experiences is proportional to the gradient (polarity) of the distribution of this molecule in the cytosol. 
-                                                            Gradients in molecular distributions can be produced through interactions with non-uniform distributions of membrane-bound molecules,
-                                                            which are, in turn, can be generated throught binding with non-uniform distributions of chemokines in the extracellular medium. 
-                                                            Load the simple_chemotaxis scenario for an example of chemotaxis. 
+                                                            Gradients in molecular distributions can be produced through interactions with non-uniform distributions of membrane molecules,
+                                                            which, in turn, can be generated throught binding with non-uniform distributions of chemokines in the extracellular medium. 
+                                                            Load the predefined simple_chemotaxis scenario for an example of chemotaxis. 
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </ToolTip>
