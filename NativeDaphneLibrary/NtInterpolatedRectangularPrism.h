@@ -117,7 +117,9 @@ namespace NativeDaphneLibrary
 
 		EcsRestrictArg** EcsArgs;
 
-		//hThread = (HANDLE)_beginthread( test, 0, NULL);
+		unsigned long AcitveJobCount;
+		HANDLE JobFinishedSignal;
+
 
 
 	public:
@@ -153,14 +155,14 @@ namespace NativeDaphneLibrary
 			while (true)
 			{
 				WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
-				if (arg->n == -1) //signal to end
+				if (arg->n == -1) //signal to end thread
 				{
 					_endthread();
 				}
 				arg->owner->NativeRestrict(arg->sfarray, arg->position, arg->n, arg->_output);
-				if ( !SetEvent(owner->JobFinishedEvents[tid])) 
+				if (::InterlockedDecrement(&owner->AcitveJobCount) == 0)
 				{
-					printf("SetEvent failed (%d)\n", GetLastError());
+					//SetEvent(owner->JobFinishedSignal);
 				}
 			}
 		}

@@ -37,10 +37,12 @@ namespace NativeDaphneLibrary
 		}
 
 		//thread related setup
-		MaxNumThreads = acmlgetnumthreads();
+		MaxNumThreads = acmlgetnumthreads()-4; 
+		if (MaxNumThreads <= 0)MaxNumThreads = 1;
 		jobHandles = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
 		JobReadyEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
-		JobFinishedEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+		//JobFinishedEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+		JobFinishedSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 		EcsArgs = (EcsRestrictArg **)malloc(MaxNumThreads * sizeof(EcsRestrictArg*));
 		for (int i=0; i< MaxNumThreads; i++)
@@ -49,13 +51,7 @@ namespace NativeDaphneLibrary
 			EcsArgs[i] = new EcsRestrictArg();
 			EcsArgs[i]->owner = this;
 			EcsArgs[i]->threadId = i;
-
 			JobReadyEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-			JobFinishedEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-			// default security attributes
-			// auto-reset event object
-			// initial state is nonsignaled
-			// unnamed object
 			jobHandles[i] = (HANDLE)_beginthreadex(0, 0, &RestrictThreadEntry, EcsArgs[i], 0, &tid);
 		}
 
@@ -634,29 +630,44 @@ namespace NativeDaphneLibrary
 	int NtInterpolatedRectangularPrism::MultithreadNativeRestrict(double *sfarray, double** position, int n, double **_output)
 	{
 		DWORD retVal;
-		int numThreads = MaxNumThreads;
-		if (n < numThreads)numThreads = n;
-		int NumItemsPerThread = n/numThreads;
-		if (NumItemsPerThread * numThreads < n)NumItemsPerThread++;
+		int numThreads = MaxNumThreads; //total cores -4
+		int NumItemsPerThread = n /(numThreads + 2);
+		if (NumItemsPerThread < 20)
+		{
+			NumItemsPerThread = 20;
+			numThreads = n/20 - 2;
+			if (numThreads < 0)numThreads = 0;
+		}
 
 		//start job
-		int nn = 0;
+		::InterlockedExchange(&AcitveJobCount, numThreads);
+		int n0, nn;
+		n0 = nn = n - NumItemsPerThread * numThreads;
 		for (int i=0; i< numThreads; i++)
 		{
 			EcsRestrictArg *arg = EcsArgs[i];
-			arg->owner = this;
 			arg->sfarray = sfarray;
 			arg->position = position + nn;
 			arg->_output = _output + nn;
-			arg->threadId = i;
-			arg->n = (nn + NumItemsPerThread) <= n ? NumItemsPerThread : n - nn;
+			arg->n = NumItemsPerThread;
 			nn += NumItemsPerThread;
 			::SetEvent(JobReadyEvents[i]);
 		}
 
-		//::InterlockedIncrement
+		NativeRestrict(sfarray, position, n0, _output);
 		//wait for job finish
-		retVal = WaitForMultipleObjects(numThreads, JobFinishedEvents, true, INFINITE);
+		if (numThreads > 0)
+		{
+			while (::InterlockedCompareExchange(&AcitveJobCount, 1, 0) != 0);
+
+			//long xx = 0;
+			//if ( (xx = ::InterlockedCompareExchange(&AcitveJobCount, 1, 0)) != 0)
+			//{
+			//	fprintf(stderr, "waiting for %d out of %d\n", xx, numThreads);
+			//	WaitForSingleObject(this->JobFinishedSignal, INFINITE);
+			//}
+			//else fprintf(stderr, "goood..no wait\n");
+		}
 		return 0;
 
 	}
