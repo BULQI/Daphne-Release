@@ -74,6 +74,17 @@
                                     </Style.Triggers>
                                 </Style>
                             </uc:DoublesBox.Style>
+
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                            
                         </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>      
@@ -84,7 +95,19 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="mean" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                     <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" DecimalPlaces="0"
-                                   Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
+                                   Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
+                    </uc:DoublesBox> 
                 </StackPanel>
             </DataTemplate>
 
@@ -94,12 +117,32 @@
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="min." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                Number="{Binding Path=MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                Number="{Binding Path=MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="max." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
-                                Number="{Binding Path=MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                Number="{Binding Path=MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -110,12 +153,32 @@
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox> 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox> 
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -126,12 +189,32 @@
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="scale" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox> 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -141,7 +224,17 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                     <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                   Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                   Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                    </uc:DoublesBox>
                 </StackPanel>
             </DataTemplate>
             
@@ -207,7 +300,16 @@
                                                     SliderEnabled="False"
                                                     TextFieldWidth="50"
                                                     >
-                                                    </uc:DoublesBox>
+                                                <uc:DoublesBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </uc:DoublesBox.ToolTip>
+                                            </uc:DoublesBox>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -226,7 +328,16 @@
                                                     SliderEnabled="False"
                                                     TextFieldWidth="50"
                                                    >
-                                                    </uc:DoublesBox>
+                                                <uc:DoublesBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </uc:DoublesBox.ToolTip>
+                                            </uc:DoublesBox>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -265,6 +376,17 @@
                           DataContextChanged="cbParamDistr_DataContextChanged"
                           Loaded="cbParamDistr_Loaded"
                           >
+
+                    <ComboBox.ToolTip>
+                        <ToolTip>
+                            <StackPanel Width="200" Orientation="Horizontal">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </ComboBox.ToolTip>
+                    
                 </ComboBox>
             </StackPanel>
             
