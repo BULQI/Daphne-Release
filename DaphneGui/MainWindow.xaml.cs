@@ -47,6 +47,7 @@ using DaphneGui.Pushing;
 using SBMLayer;
 using System.Security.Principal;
 using System.Globalization;
+using DaphneUserControlLib;
 
 namespace DaphneGui
 {
@@ -232,7 +233,7 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
-        
+
 
 
         [DllImport("kernel32.dll")]
@@ -823,11 +824,11 @@ namespace DaphneGui
         {
             //ReactionComplex that was added
             ConfigReactionComplex crc = protocol.entity_repository.reaction_complexes.Last();
-                        // prevent when a fit is in progress
+            // prevent when a fit is in progress
             lock (cellFitLock)
             {
-                    sop.Protocol.entity_repository.reaction_complexes.Add(crc);
-            
+                sop.Protocol.entity_repository.reaction_complexes.Add(crc);
+
                 //Add reaction complex
                 foreach (ConfigMolecule cm in crc.molecules_dict.Values)
                 {
@@ -839,9 +840,9 @@ namespace DaphneGui
                 {
                     if (!sop.Protocol.entity_repository.reaction_templates_dict.ContainsKey(cr.reaction_template_guid_ref))
                     {
-                        sop.Protocol.entity_repository.reaction_templates.Add(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);      
+                        sop.Protocol.entity_repository.reaction_templates.Add(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
                     }
-                    int index = sop.Protocol.entity_repository.reaction_templates.IndexOf(sop.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);           
+                    int index = sop.Protocol.entity_repository.reaction_templates.IndexOf(sop.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
                     cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
                     sop.Protocol.entity_repository.reactions.Add(cr);
                 }
@@ -855,7 +856,7 @@ namespace DaphneGui
         private void LoadProtocolFromSBML(Protocol protocol)
         {
             protocol.InitializeStorageClasses();
-            
+
             //SetPaths
             protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
             protocol.TempFile = orig_path + @"\temp_scenario.json";
@@ -879,7 +880,7 @@ namespace DaphneGui
             dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
-            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml" + "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
             dlg.FileName = "SBMLModel";
 
             // Show open  file dialog box
@@ -933,21 +934,23 @@ namespace DaphneGui
         {
             //Path of the dependencies folder
             string dependencies;
-            if (AssumeIDE() == true) {
+            if (AssumeIDE() == true)
+            {
                 dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies";
             }
-            else {
+            else
+            {
                 dependencies = new Uri(appPath).LocalPath + @"\dependencies";
             }
-            
+
             string pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
 
             // path for libSBML
             pathEnv += ";" + dependencies;
 
             // path for hdf5
-            
-            
+
+
 
             if (AssumeIDE() == true)
             {
@@ -962,7 +965,7 @@ namespace DaphneGui
             }
 
             System.Environment.SetEnvironmentVariable("PATH", pathEnv, EnvironmentVariableTarget.Process);
-            
+
         }
 
         private Nullable<bool> saveScenarioUsingDialog()
@@ -1066,7 +1069,7 @@ namespace DaphneGui
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
-                    optionsMenu.IsEnabled = false;                    
+                    optionsMenu.IsEnabled = false;
 
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
@@ -1166,7 +1169,7 @@ namespace DaphneGui
 
             dlg.InitialDirectory = sim.Reporter.AppPath;
             dlg.DefaultExt = ".hdf5";
-            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5"; 
+            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5";
 
             // Show open file dialog box
             Nullable<bool> result = dlg.ShowDialog();
@@ -1442,7 +1445,7 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
         }
-        
+
         /// <summary>
         /// CanExecute method for select report folder command
         /// </summary>
@@ -2522,7 +2525,7 @@ namespace DaphneGui
         {
             if (skipDataWriteMenu.IsChecked == false)
             {
-                if(handleVCR == true)
+                if (handleVCR == true)
                 {
                     prepareVCR();
                 }
@@ -2665,7 +2668,7 @@ namespace DaphneGui
             if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
                 saveStore(sop.DaphneStore, "DaphneStore");
-                
+
                 ////string messageBoxText = "Daphne store has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.DaphneStore.FileName) + "?";
                 ////string caption = "Daphne Store Changed";
                 ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
@@ -2978,7 +2981,7 @@ namespace DaphneGui
         {
             if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
             {
-                MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -3402,7 +3405,7 @@ namespace DaphneGui
 
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
-                {                    
+                {
                     pm.ComponentLevelDetails.DataContext = erMol;
                     newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
@@ -3767,7 +3770,7 @@ namespace DaphneGui
         private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
-            ProtocolToolWindow.Open();            
+            ProtocolToolWindow.Open();
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
@@ -3782,9 +3785,37 @@ namespace DaphneGui
                 ReacComplexChartWindow.Activate();
             }
         }
-        
     }
 
+
+    public class SpeedFactorValidator : ValidationRule
+    {
+        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        {
+            if (value == null)
+                return new ValidationResult(false, "Value cannot be empty.");
+            else
+            {
+                string strValue = value.ToString();
+                strValue = strValue.Trim();
+
+                if (strValue.Length <= 0)
+                    return new ValidationResult(false, "Value cannot be blank.");
+
+                double dValue;
+                bool result = double.TryParse(strValue, out dValue);
+                if (result == false)
+                    return new ValidationResult(false, "Invalid Value entered.");
+
+                if (dValue < -5.0 || dValue > 5.0)
+                    return new ValidationResult(false, "Value must be between -5 and +5.");
+
+            }
+            return ValidationResult.ValidResult;
+        }
+    }
+
+    
 
     /// <summary>
     /// exist to access renderpop options collection
