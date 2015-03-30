@@ -79,7 +79,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The constant value of the parameter.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -101,7 +101,7 @@
                             <ToolTip>
                                 <StackPanel Width="200" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                        A Poisson probability distribution. Specify the mean value.                         
                                     </TextBlock>
                                 </StackPanel>
                             </ToolTip>
@@ -122,7 +122,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The minimum value for the uniform distribution.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -137,7 +137,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The maximum value for the uniform distribution.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -158,7 +158,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The shape parameter for the Gamma distribution.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -173,7 +173,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The rate parameter for the Gamma distribution.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -194,7 +194,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The scale parameter for the Weibull distribution.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -209,7 +209,7 @@
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                            The shape parameter for the Weibull distribution.
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
@@ -229,7 +229,7 @@
                             <ToolTip>
                                 <StackPanel Width="200" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                        The (positive) rate parameter for the negative exponential parameter.
                                     </TextBlock>
                                 </StackPanel>
                             </ToolTip>
@@ -304,7 +304,7 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                The value of the parameter for this category.
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -332,7 +332,7 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                The probability for this category.
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -381,7 +381,8 @@
                         <ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                    Selector to choose a probability distribution for a parameter. 
+                                    The default is a Constant value. 
                                 </TextBlock>
                             </StackPanel>
                         </ToolTip>
