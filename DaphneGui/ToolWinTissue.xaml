@@ -99,7 +99,17 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
                                 <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." 
                                         DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
-                                        Click="PushCellButton_Click"/>
+                                        Click="PushCellButton_Click">
+
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                    REDSOX
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </Button.ToolTip>
+
+                                </Button>
                             </StackPanel>
 
                             <StackPanel Margin="10,0">
@@ -161,6 +171,7 @@
                                     TextAlignment="Right"
                                     Width="120"
                                     />
+                                
                                 <editors:DoubleEditBox x:Name="phi1_readout" 
                                                 CheckBoxVisibility="Collapsed" 
                                                 SpinnerVisibility="Collapsed"
@@ -169,8 +180,15 @@
                                                 StepValue="100"
                                                 Width="50" 
                                                 CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}"
-                                                />
+                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}">
+                                    
+                                    <editors:DoubleEditBox.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            REDSOX
+                                        </TextBlock>
+                                    </editors:DoubleEditBox.ToolTip>
+                                </editors:DoubleEditBox>
+                                
                                 <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
@@ -189,8 +207,14 @@
                                                 StepValue="0.1"
                                                 Width="50" 
                                                 CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}"
-                                                />
+                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}">
+                                    
+                                            <editors:DoubleEditBox.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </editors:DoubleEditBox.ToolTip>
+                                </editors:DoubleEditBox>
                                 <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
                             </StackPanel>
                         </StackPanel>
