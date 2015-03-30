@@ -300,7 +300,7 @@
                     <!-- Cell spatial details (position, velocity, force) -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
-                            Header="Cell Information"
+                            Header="Cell Spatial State"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
@@ -376,7 +376,7 @@
                     <!-- Cell States (death, division, differentiation) -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
-                            Header="Cell State"
+                            Header="Cell Transition State"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
