@@ -416,8 +416,13 @@ namespace Daphne
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // Experiment
-            protocol.experiment_name = "Cell locomotion with driver molecule.";
-            protocol.experiment_description = "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.";
+            protocol.experiment_name = "Chemotactic and stochastic cell movement";
+            string descr = "";
+            descr = string.Format("{0}", "The cell moves in the direction of increasing CXCL13 concentration (right to left).");
+            descr = string.Format("{0}\n{1}", descr, "The chemotactic force is proportional to the gradient of molecule A* in the cytosol.");
+            descr = string.Format("{0}\n{1}", descr, "A* is produced when molecule A is activated by bound chemokine receptor (the CXCL13:CXCR5| membrane molecule).");
+            descr = string.Format("{0}\n{1}", descr, "The CXCL13 gradient in the extracellular medium causes a gradient in the bound chemokine receptor, which causes a gradient of the A* molecule in the cytosol. "); 
+            protocol.experiment_description = descr;
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
             envHandle.extent_z = 200;
@@ -1392,7 +1397,7 @@ namespace Daphne
             gc.description = "Preliminary germinal center B cell.";
 
             //MOLECULES IN MEMBRANE
-            conc = new double[4] { cxcr5Conc_5umRadius, 0, 0, 0 };
+            conc = new double[4] { 0, 0, 0, 0 };
             type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -1438,7 +1443,8 @@ namespace Daphne
             }
 
             // Reactions in Cytosol
-            type = new string[] {   "gApop -> sApop + gApop", "sApop ->", "sDif1 ->"  };
+            //type = new string[] { "gApop -> sApop + gApop", "sApop ->", "sDif1 ->" };
+            type = new string[] { "gApop -> sApop + gApop", "sApop ->" };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], store);
@@ -1914,7 +1920,7 @@ namespace Daphne
             beta = new double[2, 2];
             // sApop equil value = 0.8
             // mean transition time = 1/(beta * equil_value)
-            beta[0, 1] = 6.9e-4;
+            beta[0, 1] = 1.5e-2;
             signal[0, 1] = "sApop";
             LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
             config_td.StateName = config_td.states[0];
@@ -1930,7 +1936,7 @@ namespace Daphne
 
             stateNames = new string[] {  "activated", "initialization", "centroblast", "centrocyte" };
             geneNames = new string[] {             "gCXCR4", "gCXCR5", "gE1", "gW", "gE2",  "gDif1", "gApop", "gA" };
-            activations = new double[,]          { { 0,        0,       1,      0,      0,       0,     0 ,   0 },  // activated
+            activations = new double[,]          { { 0,        0,       5e-5,   0,      0,       0,     0 ,   0 },  // activated
                                                    { 0,        0,       0,      1,      1,       0,     0 ,   1 },  // initialization            
                                                    { 1,        0,       0,      0,      0,       0,     0 ,   0 },  // centroblast
                                                    { 0,        1,       0,      0,      0,       1,     1 ,   0 },  // centrocyte
@@ -2026,11 +2032,12 @@ namespace Daphne
             //diffScheme.Driver.DriverElements[1].elements[2] = distrTdE2;
 
             // centrocyte to centroblast 
+            // mean time of 6 hours
             ConfigDistrTransitionDriverElement distrTdE3 = new ConfigDistrTransitionDriverElement();
             distrTdE3.Distr = new DistributedParameter();
             distrTdE3.Distr.DistributionType = ParameterDistributionType.GAMMA;
             distrTdE3.Distr.ParamDistr = new GammaParameterDistribution();
-            ((GammaParameterDistribution)distrTdE3.Distr.ParamDistr).Rate = 1.0/36;
+            ((GammaParameterDistribution)distrTdE3.Distr.ParamDistr).Rate = 1.0/(360/5);  // 0.0139
             ((GammaParameterDistribution)distrTdE3.Distr.ParamDistr).Shape = 5.0;
             distrTdE3.CurrentState = 3;
             distrTdE3.DestState = 2;
@@ -2098,13 +2105,13 @@ namespace Daphne
             }
 
             // Add distribution driver elements
-
+            // approximate 6 hr cell cycle
             // G1 to S-G2-M 
             distrTdE1 = new ConfigDistrTransitionDriverElement();
             distrTdE1.Distr = new DistributedParameter();
             distrTdE1.Distr.DistributionType = ParameterDistributionType.GAMMA;
             distrTdE1.Distr.ParamDistr = new GammaParameterDistribution();
-            ((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Rate = 1.0/3.95;
+            ((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Rate = 0.514;
             ((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 50;
             distrTdE1.CurrentState = 1;
             distrTdE1.DestState = 2;
@@ -2117,7 +2124,7 @@ namespace Daphne
             distrTdE2.Distr = new DistributedParameter();
             distrTdE2.Distr.DistributionType = ParameterDistributionType.GAMMA;
             distrTdE2.Distr.ParamDistr = new GammaParameterDistribution();
-            ((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Rate = 1.0/10.69;
+            ((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Rate = 0.190;
             ((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 50;
             distrTdE2.CurrentState = 2;
             distrTdE2.DestState = 3;
@@ -3253,7 +3260,8 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
-            double E1_transcription = 0.06 / (2 * 1500);
+            //double E1_transcription = 0.06 / (2 * 1500);
+            double E1_transcription = 0.4;
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
@@ -3333,15 +3341,15 @@ namespace Daphne
             //cr.GetTotalReactionString(store.entity_repository);
             //store.entity_repository.reactions.Add(cr);
 
-            //cr = new ConfigReaction();
-            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
-            //// modifiers
-            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("sDif1", MoleculeLocation.Bulk, store));
-            //// reactants
-            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
-            //cr.rate_const = cytoDefaultDegradRate;
-            //cr.GetTotalReactionString(store.entity_repository);
-            //store.entity_repository.reactions.Add(cr);
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("sDif1", MoleculeLocation.Bulk, store));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            cr.rate_const = 16.7;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Switch dynamics
 
@@ -3640,8 +3648,10 @@ namespace Daphne
             }
             //REACTIONS
             type = new string[] { "gCXCR5 -> CXCR5 + gCXCR5", 
-                                  "CXCR5 ->", "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
-                                  "CXCL13:CXCR5| -> CXCL13:CXCR5",  "CXCL13:CXCR5 ->" }; 
+                                  "CXCR5 ->", "CXCR5 -> CXCR5|", 
+                                  "CXCR5| -> CXCR5",
+                                  "CXCL13:CXCR5| -> CXCL13:CXCR5",  
+                                  "CXCL13:CXCR5 ->" }; 
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -3717,8 +3727,10 @@ namespace Daphne
             }
             //REACTIONS
             type = new string[] { "gCXCR4 -> CXCR4 + gCXCR4", 
-                                  "CXCR4 ->", "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
-                                  "CXCL12:CXCR4| -> CXCL12:CXCR4",  "CXCL12:CXCR4 ->" };
+                                  "CXCR4 ->", "CXCR4 -> CXCR4|", 
+                                  "CXCR4| -> CXCR4",
+                                  "CXCL12:CXCR4| -> CXCL12:CXCR4",  
+                                  "CXCL12:CXCR4 ->" };
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -3759,9 +3771,12 @@ namespace Daphne
                 }
             }
             //REACTIONS
-            type = new string[] {   "W + E1 -> W:E1", "Wp + E2 -> Wp:E2", 
-                                    "W:E1 -> W + E1", "Wp:E2 -> Wp + E2", 
-                                    "W:E1 -> Wp + E1", "Wp:E2 -> W + E2" };
+            type = new string[] {   "W + E1 -> W:E1", 
+                                    "Wp + E2 -> Wp:E2", 
+                                    "W:E1 -> W + E1", 
+                                    "Wp:E2 -> Wp + E2", 
+                                    "W:E1 -> Wp + E1", 
+                                    "Wp:E2 -> W + E2" };
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -3812,8 +3827,12 @@ namespace Daphne
                 }
             }
             //REACTIONS
-            type = new string[] {   "gW -> W + gW", "gE1 -> E1 + gE1", "gE2 -> E2 + gE2", 
-                                    "gDif1 -> sDif1 + gDif1", "E1 + sDif1 -> sDif1" };
+            type = new string[] {   "gW -> W + gW", 
+                                    "gE1 -> E1 + gE1", 
+                                    "gE2 -> E2 + gE2", 
+                                    "gDif1 -> sDif1 + gDif1", 
+                                    "E1 + sDif1 -> sDif1" , 
+                                    "sDif1 ->" };
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -3839,7 +3858,6 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
 
@@ -3890,7 +3908,8 @@ namespace Daphne
             //REACTIONS
             type = new string[] { "gA -> A + gA", 
                                   "A* -> A", 
-                                  "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|",  "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|" };
+                                  "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|",  
+                                  "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|" };
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -4461,13 +4480,30 @@ namespace Daphne
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             //EXPERIMENT
-            protocol.experiment_name = "Simple GC scenario";
-            protocol.experiment_description = "CXCL12 Gaussian distribution (LZ), CXCL13 Gaussian distribution (DZ), cb-cc cells";
-            protocol.scenario.time_config.duration = 10000.0;
-            protocol.scenario.time_config.rendering_interval = 30.0;
-            protocol.scenario.time_config.sampling_interval = 5.0;
+            protocol.experiment_name = "recycling of centroblasts and centrocytes";
+            string descr="";
+            descr = string.Format("{0}{1}", descr, "Cells go through an activation phase (~25 h), followed by a brief phase to initialize molecules for the cell cycle."); 
+            descr = string.Format("{0}\n{1}", descr, "Cells then transition into a centroblast state where they upregulate CXCR4 receptor and migrate to the Dark Zone.");
+            descr = string.Format("{0}\n{1}", descr, "While in the centroblast state, cells undergo 3 to 4 cell divisions (~ 6 h cell cycle time) before transitioning to centrocytes.");
+            descr = string.Format("{0}\n{1}", descr, "Centrocytes down-regulate CXCR4 receptor and upregulate CXCR5 receptor, causing them to migrate to the Light Zone.");
+            descr = string.Format("{0}\n{1}", descr, "Centrocytes are rescued and transition back to centroblasts with a mean time of 6 h.");
+            descr = string.Format("{0}\n{1}", descr, "The E1 molecule that drives the transition out to the G0 cell cycle phase is not renewed after centrocyte rescue, so rescued cell undergo fewer rounds of division.");
+            descr = string.Format("{0}\n{1}", descr, "Centrocytes also upregulate production of the sApop molecule which drives cell death.");
+            descr = string.Format("{0}\n{1}", descr, "The mean time for removal of dead cells from the simulation is 15 h.");
+            descr = string.Format("{0}\n\n{1}", descr, "Light Zone: ");
+            descr = string.Format("{0}\n{1}", descr, "Gaussian distribution of CXCL13 centered in the simulation space");
+            descr = string.Format("{0}\n{1}", descr, "coordinates=(130, 130, 130), standard deviations=200");
+            descr = string.Format("{0}\n\n{1}", descr, "Dark Zone");
+            descr = string.Format("{0}\n{1}", descr, "Gaussian distribution of CXCL12 centered in the upper right corner of the simulation space");
+            descr = string.Format("{0}\n{1}", descr, "coordinates=(222, 222, 222), standard deviation=100");
+            protocol.experiment_description = descr;
+            protocol.scenario.time_config.duration = 20160.0;
+            protocol.scenario.time_config.rendering_interval = 60.0;
+            protocol.scenario.time_config.sampling_interval = 15.0;
             protocol.scenario.time_config.integrator_step = 0.001;
-            protocol.reporter_file_name = "centroblast_centrocyte_cycling";
+            protocol.reporter_file_name = "centroblast-centrocyte_recycling";
+
+            protocol.scenario.reactionsReport = true;
 
             // mean time for removal = shape/rate
             double mean_removal_time = 923.0; // min, from Feng's model of Victora et al
@@ -4593,7 +4629,7 @@ namespace Daphne
             foreach (ConfigMolecularPopulation cmp in cellPop.Cell.membrane.molpops)
             {
                 // Mean only
-                cmp.report_mp.mp_extended = ExtendedReport.LEAN;                
+                cmp.report_mp.mp_extended = ExtendedReport.NONE;                
             }
             foreach (ConfigMolecularPopulation cmp in cellPop.Cell.cytosol.molpops)
             {
@@ -4604,7 +4640,7 @@ namespace Daphne
             {
                 ReportECM reportECM = new ReportECM();
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
-                reportECM.mp_extended = ExtendedReport.LEAN;
+                reportECM.mp_extended = ExtendedReport.NONE;
                 cellPop.ecm_probe.Add(reportECM);
             }
 
