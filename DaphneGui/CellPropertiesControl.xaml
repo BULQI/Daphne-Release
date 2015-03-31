@@ -31,12 +31,33 @@
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal" Width="310" >
                         <TextBlock Text="cell name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="70" TextWrapping="Wrap" />
-                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="230" LostFocus="CellTextBox_LostFocus" />
+                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="230" LostFocus="CellTextBox_LostFocus">
+                            <TextBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBox.ToolTip>
+                        </TextBox>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0">
                         <TextBlock Text="radius" Margin="2,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
                         <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="2,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+
                         </uc:DoublesBox>
 
                         <!--This code is test code for using Validator-->
@@ -78,7 +99,7 @@
                             <Expander                                            
                                 Padding="6" ExpandDirection="Down"
                                 IsExpanded="True"
-                                Header="Locomotor"                                                  
+                                Header="Chemotaxis"                                                  
                                 x:Name="LocomotorExpander"
                                 Margin="0,0,0,0" 
                                 Canvas.ZIndex="1"     
@@ -109,6 +130,18 @@
                                                     <daph:ConfigMolecule Name="None" entity_guid=""/>
                                                 </CompositeCollection>
                                             </ComboBox.ItemsSource>
+
+                                            <ComboBox.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </ComboBox.ToolTip>
+
+
                                         </ComboBox>
 
                                     </StackPanel>
@@ -136,7 +169,7 @@
 
                     <GroupBox Grid.Row="1" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="stochastic force parameter" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                            <TextBlock Text="stochastic motion (force parameter)" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"/>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>

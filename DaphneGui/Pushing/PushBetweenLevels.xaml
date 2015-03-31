@@ -109,6 +109,8 @@
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
+                              CanUserSortColumns="True"
+                              
                               SelectionChanged="datagrid_SelectionChanged">
 
                         <DataGrid.CommandBindings>
@@ -119,7 +121,7 @@
                         
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="150" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
+                                 ScrollViewer.CanContentScroll ="False" SortDirection="Ascending"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
                             <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="90" IsReadOnly="True"
@@ -278,7 +280,7 @@
                         </DataGrid.CommandBindings>
 
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="colRCName" Header="Name" Width="150" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colRCName" Header="Name" MinWidth="300" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />

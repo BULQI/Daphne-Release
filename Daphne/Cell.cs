@@ -552,7 +552,7 @@ namespace Daphne
                 Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
                 Array.Copy(Divider.gene_id, daughter.Divider.gene_id, Divider.gene_id.Length);
                 Array.Copy(Divider.activity, daughter.Divider.activity, Divider.activity.Length);
-                daughter.DividerState = daughter.Divider.CurrentState = Divider.CurrentState;
+                daughter.DividerState = daughter.Divider.CurrentState = daughter.Divider.Behavior.CurrentState = Divider.CurrentState;
                 daughter.SetGeneActivities(daughter.Divider);
                 daughter.Divider.Behavior.InitializeState();
             }
@@ -565,7 +565,7 @@ namespace Daphne
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
                 Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
-                daughter.DifferentiationState = daughter.Differentiator.CurrentState = Differentiator.CurrentState;
+                daughter.DifferentiationState = daughter.Differentiator.CurrentState = daughter.Differentiator.Behavior.CurrentState = Differentiator.CurrentState;
                 daughter.SetGeneActivities(daughter.Differentiator);
                 daughter.Differentiator.Behavior.InitializeState();
             }

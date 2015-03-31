@@ -66,7 +66,18 @@
                         <CollectionContainer Collection="{Binding Source={StaticResource CytoSolMolPopListView}}" />
                     </CompositeCollection>
                 </ComboBox.ItemsSource>
-            </ComboBox>
+
+                <ComboBox.ToolTip>
+                    <ToolTip>
+                        <StackPanel Width="200" Orientation="Horizontal">
+                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                    REDSOX
+                            </TextBlock>
+                        </StackPanel>
+                    </ToolTip>
+                </ComboBox.ToolTip>
+                
+                </ComboBox>
             <Expander Header="Transition rate values" ExpandDirection="Down" BorderBrush="White" IsExpanded="False" Background="White">
                 <Expander.Style>
                     <Style TargetType="Expander">
@@ -81,11 +92,27 @@
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Background:  " ToolTip="Background production rate" Width="110"/>
-                        <TextBox Text="{Binding Path=Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" ToolTip="Background production rate"/>
+                        <TextBox Text="{Binding Path=Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" >
+                            <TextBox.ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                "Background production rate"
+                                    </TextBlock>
+                                </StackPanel>
+                            </TextBox.ToolTip>
+                        </TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Linear coefficient: " Width="110" ToolTip="Production rate linear coefficient"/>
-                        <TextBox Text="{Binding Path=Beta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" ToolTip="Production rate linear coefficient" />
+                            <TextBox Text="{Binding Path=Beta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50">
+                                <TextBox.ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        Production rate linear coefficient
+                                            </TextBlock>
+                                        </StackPanel>
+                                </TextBox.ToolTip>
+                            </TextBox>
                     </StackPanel>
                 </StackPanel>
             </Expander>
@@ -124,17 +151,45 @@
                             SelectedValuePath="molecule.entity_guid"  
                             Loaded="comboDeathMolPop2_Loaded"
                             >
+
+                    <ComboBox.ToolTip>
+                        <ToolTip>
+                            <StackPanel Width="200" Orientation="Horizontal">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </ComboBox.ToolTip>
+                    
                 </ComboBox>
 
                 <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
-                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
-                                />
+                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }" >
+
+                    <TextBox.ToolTip>
+                        <StackPanel Width="200" Orientation="Horizontal">
+                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                    REDSOX
+                            </TextBlock>
+                        </StackPanel>
+                    </TextBox.ToolTip>
+                    
+                </TextBox>
 
                 <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
-                <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,10,-4,10" VerticalAlignment="Bottom" Width="196"
-                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
-                                />
+                    <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,10,-4,10" VerticalAlignment="Bottom" Width="196"
+                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }">
+                    <TextBox.ToolTip>
+                            <StackPanel Width="200" Orientation="Horizontal">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                </TextBlock>
+                            </StackPanel>
+                    </TextBox.ToolTip>
+
+                </TextBox>
             </StackPanel>
         </DataTemplate>
 
@@ -231,7 +286,16 @@
         <DataTemplate x:Key="Death_TDE_Type_SwitchTemplate">
             <StackPanel Orientation="Vertical">
 
-                <Button x:Name="btnDelDeathDriver" Click="btnDelDeathDriver_Click">Delete Death Driver</Button>
+                <Button x:Name="btnDelDeathDriver" Click="btnDelDeathDriver_Click">
+                    Delete Death Driver
+
+                    <Button.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                        </TextBlock>
+                    </Button.ToolTip>
+
+                </Button>
                 
                 <!-- starting state -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,5">
@@ -243,8 +307,15 @@
                 <StackPanel Name="spTransitionDriverElementDetailsContentControl" HorizontalAlignment="Left">
                     <Button HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200"
                             Click="ChangeDeathTDEType_Click" 
-                            Style="{StaticResource selectable_Death_TDE_Type_ButtonContent}"
-                            />          
+                            Style="{StaticResource selectable_Death_TDE_Type_ButtonContent}">
+
+                        <Button.ToolTip>
+                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                            </TextBlock>
+                        </Button.ToolTip>
+
+                    </Button>
                     <ContentControl x:Name="TransitionDriverElementDetails"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectable_death_TDE_template}"
@@ -256,7 +327,14 @@
 
         <!-- NewDeathDriverTemplate: button for new death driver-->
         <DataTemplate x:Key="NewDeathDriverTemplate">
-            <Button x:Name="btnNewDeathDriver" Click="btnNewDeathDriver_Click">New Death Driver</Button>
+            <Button x:Name="btnNewDeathDriver" Click="btnNewDeathDriver_Click">
+                New Death Driver
+                <Button.ToolTip>
+                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                    </TextBlock>
+                </Button.ToolTip>
+            </Button>
         </DataTemplate>
 
         <!-- Death_NewButton_or_TDE_details_SelectableStyle -->
@@ -288,8 +366,14 @@
                         FontSize="10"
                         Click="ChangeDataGridTDEType_Click" 
                         DataContext="{Binding}"
-                        Style="{StaticResource selectable_DataGrid_TDE_Type_ButtonContent}"
-                        />
+                        Style="{StaticResource selectable_DataGrid_TDE_Type_ButtonContent}">
+
+                    <Button.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                        </TextBlock>
+                    </Button.ToolTip>
+                </Button>
 
                 <ContentControl x:Name="TransitionDriverElementDetails2"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
@@ -341,8 +425,20 @@
                                             />
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
-                                        <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click"/>
+                                        <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button> 
+                                        <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}">
@@ -377,12 +473,32 @@
                                                             </CompositeCollection>
                                                         </ComboBox.ItemsSource>
 
+                                                        <ComboBox.ToolTip>
+                                                            <ToolTip>
+                                                                <StackPanel Width="200" Orientation="Horizontal">
+                                                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                                    </TextBlock>
+                                                                </StackPanel>
+                                                            </ToolTip>
+                                                        </ComboBox.ToolTip>
+
                                                     </ComboBox>
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                     <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
-                                                    <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                                    <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
+                                                        <TextBox.ToolTip>
+                                                            <ToolTip>
+                                                                <StackPanel Width="200" Orientation="Horizontal">
+                                                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                                    </TextBlock>
+                                                                </StackPanel>
+                                                            </ToolTip>
+                                                        </TextBox.ToolTip>
+                                                    </TextBox>
                                                 </StackPanel>
 
                                             </Grid>
@@ -431,7 +547,13 @@
                                                                     ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                                                     Margin="6"/>
 
-                                            <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click"/>
+                                            <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
                                         </StackPanel>
                                     </Expander>
 
@@ -454,8 +576,20 @@
                                                 />
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
-                                        <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>
+                                        <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                        <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
                                     </StackPanel>
                                     
                                     <!-- Cell Cytosol Mol Pop Details-->
@@ -491,11 +625,32 @@
                                                                     <daph:ConfigMolecule Name="New Molecule"/>
                                                                 </CompositeCollection>
                                                             </ComboBox.ItemsSource>
+
+                                                            <ComboBox.ToolTip>
+                                                                <ToolTip>
+                                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                                        </TextBlock>
+                                                                    </StackPanel>
+                                                                </ToolTip>
+                                                            </ComboBox.ToolTip>
+                                                            
                                                         </ComboBox>
                                                     </StackPanel>
                                                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                         <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
-                                                        <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                                        <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
+                                                            <TextBox.ToolTip>
+                                                                <ToolTip>
+                                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                                        </TextBlock>
+                                                                    </StackPanel>
+                                                                </ToolTip>
+                                                            </TextBox.ToolTip>
+                                                        </TextBox>
                                                     </StackPanel>
 
                                                 </Grid>
@@ -546,7 +701,13 @@
                                                                     Content="{Binding Path=molecule}" 
                                                                     ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                                                     Margin="6"/>
-                                            <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click"/>
+                                                <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click">
+                                                    <Button.ToolTip>
+                                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                        </TextBlock>
+                                                    </Button.ToolTip>
+                                                </Button>
                                         </StackPanel>
                                     
                                     </Expander>
@@ -572,25 +733,80 @@
                                                 SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click"/>
-                                        <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click"/>
-                                        <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click"/>
+                                        <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+
+                                        </Button>
+                                        <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                        <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem}">
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                             <TextBox x:Name="txtGeneName" IsEnabled="False" Margin="4,2" MinWidth="140" HorizontalAlignment="Left"
-                                                                     Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                                                                     Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                                <TextBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </TextBox.ToolTip>
+                                            </TextBox>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Copy Number" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <TextBox x:Name="txtGeneCopyNum" Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                            <TextBox x:Name="txtGeneCopyNum" Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </TextBox.ToolTip>
+                                            </TextBox>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left"/>
-                                            <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click"/>
+                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left">
+                                                <uc:DoublesBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </uc:DoublesBox.ToolTip>
+                                            </uc:DoublesBox>
+                                            <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
@@ -648,8 +864,20 @@
                                         </ListBox.ContextMenu>
                                     </ListBox>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click" />
-                                        <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
+                                        <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                        <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
                                     </StackPanel>
                                     <StackPanel>
                                         <Expander x:Name="CellAddReacExpander" ExpandDirection="Down"  IsExpanded="False"
@@ -712,7 +940,13 @@
                                                     </ListView.View>
                                                 </ListView>
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                    <Button Name="MembraneAddReacButton"  Width="120" Content="Add" Click="MembraneAddReacButton_Click"/>
+                                                    <Button Name="MembraneAddReacButton"  Width="120" Content="Add" Click="MembraneAddReacButton_Click">
+                                                        <Button.ToolTip>
+                                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                            </TextBlock>
+                                                        </Button.ToolTip>
+                                                    </Button>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Expander>
@@ -754,8 +988,20 @@
 
                                     </ListBox>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click"/>
-                                        <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
+                                        <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                        <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button> 
                                     </StackPanel>
                                     <StackPanel>
                      
@@ -820,7 +1066,13 @@
                                                     </ListView.View>
                                                 </ListView>
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                    <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click"/>
+                                                    <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click">
+                                                        <Button.ToolTip>
+                                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                            </TextBlock>
+                                                        </Button.ToolTip>
+                                                    </Button>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Expander>
@@ -893,8 +1145,20 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                    <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click" />
-                                    <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click" />
+                                    <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click">
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button> 
+                                    <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click">
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>
                                 </StackPanel>
 
                                 <Expander ExpandDirection="Down"
@@ -913,7 +1177,17 @@
                                             <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                             <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" Width="400" MinWidth="100"
                                                 Text="{Binding  ElementName=MembReactionComplexListBox, 
-                                                                Path=SelectedItem.Name}" />
+                                                                Path=SelectedItem.Name}">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </TextBox.ToolTip>
+                                            </TextBox>
                                         </StackPanel >
                                         <StackPanel x:Name="spReacComp"  >
                                             <StackPanel.Resources>
@@ -963,7 +1237,13 @@
                                             SelectedIndex="-1" >
                                         </ListBox>
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                            <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click"/>
+                                            <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
                                         </StackPanel>
 
                                         <ContentControl Name="AddReactionComplexDetails1"
@@ -1002,8 +1282,20 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                    <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click" />                                   
-                                    <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click" />
+                                    <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click">
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>                                   
+                                    <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click">
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>
                                 </StackPanel>
 
                                 <Expander ExpandDirection="Down"
@@ -1022,7 +1314,17 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                             <TextBox Margin="0,2" x:Name="txtCytoReacComplexName" IsReadOnly="True" 
-                                                Text="{Binding  ElementName=CytoReactionComplexListBox, Path=SelectedItem.Name}" />
+                                                Text="{Binding  ElementName=CytoReactionComplexListBox, Path=SelectedItem.Name}">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </TextBox.ToolTip>
+                                            </TextBox>
                                         </StackPanel >
                                         <StackPanel x:Name="spCytoReacComp"  >
                                             <StackPanel.Resources>
@@ -1071,7 +1373,13 @@
                                                 SelectedIndex="-1" >
                                         </ListBox>
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                            <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click"  />
+                                            <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click" >
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
                                         </StackPanel>
                                         <ContentControl Name="AddCytoReactionComplexDetails"
                                             Content="{Binding ElementName=lbCytoAvailableReacCx, Path=SelectedItem}" 
@@ -1143,7 +1451,18 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="20" Text="{Binding Path=Name}" />
                                         <TextBlock Width="10" Text="" />
-                                        <TextBox Width="50" Text="{Binding Path=MolName}" />
+                                        <TextBox Width="50" Text="{Binding Path=MolName}">
+                                            <TextBox.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </TextBox.ToolTip>
+                                        </TextBox>
+                                        
                                     </StackPanel>
                                 </DataTemplate>
 
@@ -1177,13 +1496,27 @@
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                         Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}}"
                                         >
-                                <Button x:Name="btnDelDivScheme" Click="btnDelDiffScheme_Click" Tag="Division">Delete Division Scheme</Button>
+                                <Button x:Name="btnDelDivScheme" Click="btnDelDiffScheme_Click" Tag="Division">
+                                    Delete Division Scheme
+                                    <Button.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
                             </StackPanel>
 
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                         Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}"
                                         >
-                                <Button x:Name="btnNewDivScheme" Click="btnNewDiffScheme_Click" Tag="Division">New Division Scheme</Button>
+                                <Button x:Name="btnNewDivScheme" Click="btnNewDiffScheme_Click" Tag="Division">
+                                    New Division Scheme
+                                    <Button.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -1239,7 +1572,17 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="20" Text="{Binding Path=Name}" />
                                         <TextBlock Width="10" Text="" />
-                                        <TextBox Width="50" Text="{Binding Path=MolName}" />
+                                        <TextBox Width="50" Text="{Binding Path=MolName}">
+                                            <TextBox.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </TextBox.ToolTip>
+                                        </TextBox>
 
                                     </StackPanel>
                                 </DataTemplate>
@@ -1273,12 +1616,26 @@
                             <!-- DIFFERENTIATION SCHEME -->
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                     Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}" >
-                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">Delete Differentiation Scheme</Button>
+                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">
+                                    Delete Differentiation Scheme
+                                    <Button.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
                             </StackPanel>
 
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                     Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}">        
-                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">New Differentiation Scheme</Button>
+                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">
+                                    New Differentiation Scheme
+                                    <Button.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    REDSOX
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

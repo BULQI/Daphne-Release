@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Windows;
 
 using HDF5DotNet;
 
@@ -11,9 +12,9 @@ namespace Daphne
     /// <summary>
     /// encapsulate the file and what it needs to know
     /// </summary>
-    public class HDF5File
+    public abstract class HDF5FileBase
     {
-        private string fullPath, fileName;
+        private string fullPath, fileName, filePath;
         private H5FileId fileId;
         // groups can be nested, so maintain a stack of open ones
         // note that this will only work for exclusive reads or writes, not mixed mode
@@ -21,7 +22,7 @@ namespace Daphne
         // to retrieve a list of subgroup names
         private List<string> subGroups;
 
-        public HDF5File()
+        public HDF5FileBase()
         {
             fullPath = "";
             fileName = "";
@@ -41,6 +42,17 @@ namespace Daphne
         }
 
         /// <summary>
+        /// access the file path
+        /// </summary>
+        public string FilePath
+        {
+            get
+            {
+                return filePath;
+            }
+        }
+
+        /// <summary>
         /// (re)create the file
         /// </summary>
         /// <param name="fn">file name</param>
@@ -52,6 +64,8 @@ namespace Daphne
                 fullPath = fn;
                 // extract the last part, file name alone
                 fileName = System.IO.Path.GetFileName(fullPath);
+                // path only
+                filePath = System.IO.Path.GetDirectoryName(fullPath) + @"\";
                 return true;
             }
             return false;
@@ -427,6 +441,58 @@ namespace Daphne
         }
 
         /// <summary>
+        /// convenience, write a single int
+        /// </summary>
+        /// <param name="val">the integer value</param>
+        /// <param name="name">the name in the hdf5 file</param>
+        public void writeInt(int val, string name)
+        {
+            long[] dim = new long[] { 1 };
+            int[] data = new int[] { val };
+
+            writeDSInt(name, dim, new H5Array<int>(data));
+        }
+
+        /// <summary>
+        /// convenience, read a single int
+        /// </summary>
+        /// <param name="name">the name in the hdf5 file</param>
+        /// <returns>the value</returns>
+        public int readInt(string name)
+        {
+            int[] data = null;
+
+            readDSInt(name, ref data);
+            return data[0];
+        }
+
+        /// <summary>
+        /// convenience, write a single double
+        /// </summary>
+        /// <param name="val">the double value</param>
+        /// <param name="name">the name in the hdf5 file</param>
+        public void writeDouble(double val, string name)
+        {
+            long[] dim = new long[] { 1 };
+            double[] data = new double[] { val };
+
+            writeDSDouble(name, dim, new H5Array<double>(data));
+        }
+
+        /// <summary>
+        /// convenience, read a single double
+        /// </summary>
+        /// <param name="name">the name in the hdf5 file</param>
+        /// <returns>the value</returns>
+        public double readDouble(string name)
+        {
+            double[] data = null;
+
+            readDSDouble(name, ref data);
+            return data[0];
+        }
+
+        /// <summary>
         /// just a helper to be able to use H5G.iterate
         /// </summary>
         /// <param name="id"></param>
@@ -462,6 +528,104 @@ namespace Daphne
             return local;
         }
 
+        public void ReadReporterFileNamesFromClosedFile(string file)
+        {
+            // if the file is open we'll have to close it
+            if (isOpen() == true)
+            {
+                // close the file and all open groups
+                close(true);
+            }
+            // the file got regenerated, reopen
+            initialize(file);
+            if (openRead() == false)
+            {
+                MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
+                return;
+            }
+            // open the experiment parent group
+            openGroup("/Experiment");
+            // read the reporter file names
+            ReadReporterFileNames();
+            // close the file and all groups
+            close(true);
+        }
+
+        public abstract void StartHDF5File(SimulationBase sim, string protocolString);
+        public abstract void WriteReporterFileNames();
+        public abstract void ReadReporterFileNames();
+    }
+
+    public class VatReactionComplexHDF5File : HDF5FileBase
+    {
+        private VatReactionComplex hSim;
+
+        public VatReactionComplexHDF5File(VatReactionComplex sim)
+        {
+            hSim = sim;
+        }
+
+        public override void StartHDF5File(SimulationBase sim, string protocolString)
+        {
+            if (assembleFullPath(hSim.Reporter.UniquePath, hSim.Reporter.FileNameBase, "rep", ".hdf5", true) == false)
+            {
+                MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            openWrite(true);
+            // group for this experiment
+            createGroup("/Experiment");
+
+            // the protocol as string; needed to reload arbitrary past experiments
+            writeString("Protocol", protocolString);
+        }
+
+        public override void WriteReporterFileNames()
+        {
+            hSim.Reporter.WriteReporterFileNamesToHDF5(this);
+        }
+
+        public override void ReadReporterFileNames()
+        {
+            hSim.Reporter.ReadReporterFileNamesFromHDF5(this);
+        }
+    }
+
+    public class TissueSimulationHDF5File : HDF5FileBase
+    {
+        private TissueSimulation hSim;
+
+        public TissueSimulationHDF5File(TissueSimulation sim)
+        {
+            hSim = sim;
+        }
+
+        public override void StartHDF5File(SimulationBase sim, string protocolString)
+        {
+            if (assembleFullPath(hSim.Reporter.UniquePath, hSim.Reporter.FileNameBase, "vcr", ".hdf5", true) == false)
+            {
+                MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            openWrite(true);
+            // group for this experiment
+            createGroup("/Experiment");
+
+            // the protocol as string; needed to reload arbitrary past experiments
+            writeString("Protocol", protocolString);
+            // frames group
+            createGroup("VCR_Frames");
+        }
+
+        public override void WriteReporterFileNames()
+        {
+            // closes the VCR_Frames group
+            closeGroup();
+            hSim.Reporter.WriteReporterFileNamesToHDF5(this);
+        }
+
+        public override void ReadReporterFileNames()
+        {
+            hSim.Reporter.ReadReporterFileNamesFromHDF5(this);
+        }
     }
 
     // define the frame data classes here because they require knowledge of hdf5 data structures
@@ -488,6 +652,16 @@ namespace Daphne
         private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
         private double[] cellStateSpatial;
         private double[][] ecsMolpops, cellStateGenes, cellStateMolecules;
+        private TissueSimulationHDF5File hdf5file;
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="ts_hdf5file">handle to the hdf5 file; stored locally for conveninece</param>
+        public TissueSimulationFrameData(TissueSimulationHDF5File ts_hdf5file)
+        {
+            hdf5file = ts_hdf5file;
+        }
 
         /// <summary>
         /// access cell count, number of cells in this frame
@@ -586,10 +760,6 @@ namespace Daphne
             {
                 return ecsMolpops;
             }
-        }
-
-        public TissueSimulationFrameData()
-        {
         }
 
         /// <summary>
@@ -729,7 +899,7 @@ namespace Daphne
 
             cellCount = SimulationBase.dataBasket.Cells.Count;
             // write the cell count at any rate
-            writeInt(cellCount, "CellCount");
+            hdf5file.writeInt(cellCount, "CellCount");
 
             if (cellCount > 0)
             {
@@ -926,22 +1096,6 @@ namespace Daphne
             
         }
 
-        private void writeInt(int val, string name)
-        {
-            long[] dim = new long[] { 1 };
-            int[] data = new int[] { val };
-
-            DataBasket.hdf5file.writeDSInt(name, dim, new H5Array<int>(data));
-        }
-
-        private int readInt(string name)
-        {
-            int[] data = null;
-
-            DataBasket.hdf5file.readDSInt(name, ref data);
-            return data[0];
-        }
-
         /// <summary>
         /// write a simulation frame to file by index
         /// </summary>
@@ -959,7 +1113,7 @@ namespace Daphne
         {
             long[] dims = null;
 
-            DataBasket.hdf5file.createGroup(groupName);
+            hdf5file.createGroup(groupName);
 
             prepareData();
             if (cellCount > 0)
@@ -968,34 +1122,34 @@ namespace Daphne
                 dims = new long[] { cellCount };
 
                 // ids
-                DataBasket.hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
+                hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
                 // generations
-                DataBasket.hdf5file.writeDSInt("CellGens", dims, new H5Array<int>(cellGens));
+                hdf5file.writeDSInt("CellGens", dims, new H5Array<int>(cellGens));
                 // population ids
-                DataBasket.hdf5file.writeDSInt("CellPopIDs", dims, new H5Array<int>(cellPopIds));
+                hdf5file.writeDSInt("CellPopIDs", dims, new H5Array<int>(cellPopIds));
 
                 // gene activations
                 for (int i = 0; i < cellStateGenes.Length; i++)
                 {
                     dims[0] = cellStateGenes[i].Length;
-                    DataBasket.hdf5file.writeDSDouble("GeneState" + i, dims, new H5Array<double>(cellStateGenes[i]));
+                    hdf5file.writeDSDouble("GeneState" + i, dims, new H5Array<double>(cellStateGenes[i]));
                 }
 
                 // molecules
                 for (int i = 0; i < cellStateMolecules.Length; i++)
                 {
                     dims[0] = cellStateMolecules[i].Length;
-                    DataBasket.hdf5file.writeDSDouble("MoleculeState" + i, dims, new H5Array<double>(cellStateMolecules[i]));
+                    hdf5file.writeDSDouble("MoleculeState" + i, dims, new H5Array<double>(cellStateMolecules[i]));
                 }
 
                 // behaviors
                 dims = new long[] { cellCount, B_COUNT };
-                DataBasket.hdf5file.writeDSInt("CellBehaviors", dims, new H5Array<int>(cellBehaviors));
+                hdf5file.writeDSInt("CellBehaviors", dims, new H5Array<int>(cellBehaviors));
 
                 // write the cell spatial states
                 dims[0] = cellCount;
                 dims[1] = CellSpatialState.Dim;
-                DataBasket.hdf5file.writeDSDouble("SpatialState", dims, new H5Array<double>(cellStateSpatial));
+                hdf5file.writeDSDouble("SpatialState", dims, new H5Array<double>(cellStateSpatial));
             }
 
             // ecs
@@ -1006,11 +1160,11 @@ namespace Daphne
                     // index 0 is guaranteed to exist because of the loop over i
                     dims = new long[] { ecsMolpops[0].Length };
                 }
-                DataBasket.hdf5file.writeDSDouble("ECS" + i, dims, new H5Array<double>(ecsMolpops[i]));
+                hdf5file.writeDSDouble("ECS" + i, dims, new H5Array<double>(ecsMolpops[i]));
             }
 
             // close the group
-            DataBasket.hdf5file.closeGroup();
+            hdf5file.closeGroup();
         }
 
         /// <summary>
@@ -1028,48 +1182,48 @@ namespace Daphne
         /// <param name="groupName">group name in the HDF5 file</param>
         public void readData(string groupName)
         {
-            DataBasket.hdf5file.openGroup(groupName);
+            hdf5file.openGroup(groupName);
 
-            cellCount = readInt("CellCount");
+            cellCount = hdf5file.readInt("CellCount");
             if (cellCount > 0)
             {
                 // ids
-                DataBasket.hdf5file.readDSInt("CellIDs", ref cellIds);
+                hdf5file.readDSInt("CellIDs", ref cellIds);
                 // generations
-                DataBasket.hdf5file.readDSInt("CellGens", ref cellGens);
+                hdf5file.readDSInt("CellGens", ref cellGens);
                 // population ids
-                DataBasket.hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
+                hdf5file.readDSInt("CellPopIDs", ref cellPopIds);
 
                 // gene activations
                 createGenesData(false);
                 for (int i = 0; i < cellStateGenes.Length; i++)
                 {
-                    DataBasket.hdf5file.readDSDouble("GeneState" + i, ref cellStateGenes[i]);
+                    hdf5file.readDSDouble("GeneState" + i, ref cellStateGenes[i]);
                 }
 
                 // molecules
                 createMoleculesData(false);
                 for (int i = 0; i < cellStateMolecules.Length; i++)
                 {
-                    DataBasket.hdf5file.readDSDouble("MoleculeState" + i, ref cellStateMolecules[i]);
+                    hdf5file.readDSDouble("MoleculeState" + i, ref cellStateMolecules[i]);
                 }
 
                 // behaviors
-                DataBasket.hdf5file.readDSInt("CellBehaviors", ref cellBehaviors);
+                hdf5file.readDSInt("CellBehaviors", ref cellBehaviors);
 
                 // read the cell spatial states
-                DataBasket.hdf5file.readDSDouble("SpatialState", ref cellStateSpatial);
+                hdf5file.readDSDouble("SpatialState", ref cellStateSpatial);
             }
 
             // ecs
             createECSData();
             for (int i = 0; i < ecsMolpops.Length; i++)
             {
-                DataBasket.hdf5file.readDSDouble("ECS" + i, ref ecsMolpops[i]);
+                hdf5file.readDSDouble("ECS" + i, ref ecsMolpops[i]);
             }
 
             // close the group
-            DataBasket.hdf5file.closeGroup();
+            hdf5file.closeGroup();
         }
     }
 }

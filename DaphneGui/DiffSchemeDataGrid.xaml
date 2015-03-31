@@ -107,10 +107,12 @@
             
             ItemsSource="{Binding activationRows}"
                   
-            MouseMove="EpigeneticGrid_MouseMove"
-            Drop="EpigeneticGrid_Drop"
-            >
             
+            >
+            <!--Disable drag-and-drop for now - was problematic-->
+            <!--MouseMove="EpigeneticGrid_MouseMove"
+            Drop="EpigeneticGrid_Drop"-->
+
             <DataGrid.ContextMenu>
                 <ContextMenu >
                     <MenuItem Header="Delete Selected Genes" Name="menuDeleteDivGenes" Click="ContextMenuDeleteGenes_Click" 

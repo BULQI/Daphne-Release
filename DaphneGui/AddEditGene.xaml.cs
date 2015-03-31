@@ -21,6 +21,7 @@ namespace DaphneGui
         public AddEditGene()
         {
             InitializeComponent();
+            this.Owner = Application.Current.MainWindow;
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)

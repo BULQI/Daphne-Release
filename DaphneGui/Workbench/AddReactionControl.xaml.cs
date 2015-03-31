@@ -846,7 +846,7 @@ namespace DaphneGui
             if (aem.ShowDialog() == true)
             {
                 //Add new mol to the correct entity_repository
-                newLibMol.ValidateName(level);
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 level.entity_repository.molecules.Add(newLibMol);
                 
                 //Need to add a mol pop to cell also

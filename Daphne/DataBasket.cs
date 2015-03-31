@@ -13,7 +13,7 @@ using MathNet.Numerics.LinearAlgebra;
 namespace Daphne
 {
     /// <summary>
-    /// entity holding data used by the simulation and other components; also provides database retrieval functions
+    /// entity holding data used by the simulation and other components
     /// </summary>
     public class DataBasket
     {
@@ -40,11 +40,7 @@ namespace Daphne
         /// <summary>
         /// handle to the simulation
         /// </summary>
-        private SimulationBase hSim;
-        /// <summary>
-        /// data file
-        /// </summary>
-        public static HDF5File hdf5file;
+        private SimulationBase hSim;        
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -72,8 +68,7 @@ namespace Daphne
             populations = new Dictionary<int, Dictionary<int, Cell>>();
             molecules = new Dictionary<string, Molecule>();
             genes = new Dictionary<string, Gene>();
-            // create the hdf5 object
-            hdf5file = new HDF5File();
+
 #if ALL_DATA
             ResetTrackData();
 #endif

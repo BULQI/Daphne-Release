@@ -346,8 +346,37 @@
                     <TextBlock VerticalAlignment="Center" Text="min" />
                     <Separator Margin="4,0" />
                     <TextBlock VerticalAlignment="Center" Text="speed factor" />
-                    <uc:DoublesBox AutoRange="false" AbsMinimum="-5" AbsMaximum="5" SNLowerThreshold="-10"
-                                   Number="{Binding Path=SpeedFactorExponent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                    
+                    <Slider Name="SpeedSlider"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Margin="5,0,0,0"
+                                    ToolBar.OverflowMode="Never"
+                                    Width="80"
+                                    RenderTransform="1.0,0,0,0.5,0,4"
+                                    Minimum="-5" 
+                                    Maximum="5" 
+                                    Value="{Binding Path=SpeedFactorExponent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    IsSnapToTickEnabled="True" 
+                                    TickFrequency="0.1"
+                            />
+                    
+                    <TextBox x:Name="SpeedBox" MinWidth="80"
+                            VerticalAlignment="Center"
+                            Margin="2,0,5,0"
+                            Validation.ErrorTemplate="{StaticResource validationErrorTemplate}"
+                            >
+
+                        <TextBox.Text>
+                            <Binding ElementName="SpeedSlider" Path="Value" StringFormat="{}{0:F3}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                <Binding.ValidationRules>
+                                    <local:SpeedFactorValidator></local:SpeedFactorValidator>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+
+                    </TextBox>
+
                 </ToolBar>
             </ToolBarTray>
         </shared:PixelSnapper>

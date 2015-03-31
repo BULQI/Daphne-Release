@@ -337,5 +337,4 @@ namespace DaphneGui
             throw new NotSupportedException();
         }
     }
-
 }
