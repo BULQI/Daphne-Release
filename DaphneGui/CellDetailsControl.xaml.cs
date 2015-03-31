@@ -594,7 +594,7 @@ namespace DaphneGui
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
                                     cc.membrane.AddMolPop(mol.Clone(null), true);
-                                else if (cc.cytosol.HasMolecule(molguid) == false)
+                                else if (mol.molecule_location == MoleculeLocation.Bulk && cc.cytosol.HasMolecule(molguid) == false)
                                     cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, add to genes list
@@ -612,7 +612,7 @@ namespace DaphneGui
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
                                     cc.membrane.AddMolPop(mol.Clone(null), true);
-                                else if (cc.cytosol.HasMolecule(molguid) == false)
+                                else if (mol.molecule_location == MoleculeLocation.Bulk && cc.cytosol.HasMolecule(molguid) == false)
                                     cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, add to genes list
@@ -630,7 +630,7 @@ namespace DaphneGui
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
                                     cc.membrane.AddMolPop(mol.Clone(null), true);
-                                else if (cc.cytosol.HasMolecule(molguid) == false)
+                                else if (mol.molecule_location == MoleculeLocation.Bulk && cc.cytosol.HasMolecule(molguid) == false)
                                     cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, clone and add to genes list
