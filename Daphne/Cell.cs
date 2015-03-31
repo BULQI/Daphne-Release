@@ -106,6 +106,8 @@ namespace Daphne
         public string renderLabel;
         public int generation;
 
+        public Nt_Cell ntCell;
+
         /// <summary>
         /// the genes in a cell
         /// NOTE: should these be in the cytoplasm
@@ -149,6 +151,11 @@ namespace Daphne
             {
                 Cell_id = SafeCell_id++;
             }
+
+            //C++/Cli instance
+            ntCell = new Nt_Cell(Cell_id, Radius);
+            ntCell.spatialState = new Nt_CellSpatialState(SpatialState.X, SpatialState.V, SpatialState.F);
+            Nt_Cell.SafeCell_id = SafeCell_id;
         }
 
         [Inject]
@@ -643,7 +650,10 @@ namespace Daphne
         /// </summary>
         public int[] GridIndex
         {
-            get { return gridIndex; }
+            get 
+            {
+                return gridIndex; 
+            }
         }
 
         public bool Exiting

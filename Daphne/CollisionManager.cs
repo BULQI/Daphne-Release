@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using NativeDaphne;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -23,11 +24,21 @@ namespace Daphne
         public CollisionManager(Vector gridSize, double gridStep) : base(gridSize, gridStep)
         {
             grid = new Dictionary<int, Cell>[gridPts[0], gridPts[1], gridPts[2]];
+
+            bool toroidal = false;
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+            {
+                toroidal = (SimulationBase.dataBasket.Environment as ECSEnvironment).toroidal;
+            }
+
+            nt_collisionManager = new Nt_CollisionManager(gridSize.ToArray(), gridStep, toroidal);
         }
 
         public void Step(double dt)
         {
-            update(dt);
+            //update(dt);
+
+            nt_collisionManager.Step(dt);
         }
 
         private bool clearSeparation(Pair p)
@@ -261,9 +272,6 @@ namespace Daphne
                     }
                 }
 
-                // only keep the critical pairs and update their distance;
-                // remove the ones that are no longer critical,
-                // i.e. are 'clearly separated' and a) were critical but never became overlapping or b) have broken their bond
                 foreach (KeyValuePair<int, Pair> kvp in pairs)
                 {
                     if (kvp.Value.isCriticalPair() == false && clearSeparation(kvp.Value) == true || legalIndex(kvp.Value.Cell(0).GridIndex) == false || legalIndex(kvp.Value.Cell(1).GridIndex) == false)
@@ -281,6 +289,7 @@ namespace Daphne
                         kvp.Value.distance(gridSizeArr);
                     }
                 }
+
                 if (removalPairKeys != null)
                 {
                     foreach (int key in removalPairKeys)
@@ -528,5 +537,8 @@ namespace Daphne
         private Dictionary<int, Pair> pairs;
         private int pairKeyMultiplier, fastMultiplierDecide;
         private Dictionary<int, Cell>[, ,] grid;
+        object remove_key_pair_lock = new object();
+
+        Nt_CollisionManager nt_collisionManager;
     }
 }

@@ -9,6 +9,8 @@
 
 #include "Nt_CellManager.h"
 
+#include "Nt_CellPair.h"
+
 #include <vcclr.h>
 
 using namespace System;

@@ -7,6 +7,9 @@
 #include "Nt_ScalarField.h"
 #include "Nt_DArray.h"
 
+#include "Nt_CollisionManager.h"
+
+
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -25,7 +28,9 @@ namespace NativeDaphne
 		Nt_CellManager(void)
 		{
 			cellPopulations = gcnew Dictionary<int, Nt_CellPopulation^>();
+
 			normalDist = gcnew Nt_NormalDistribution();
+
 			EnvironmentExtent = gcnew array<double>(3);
 
 			int numthreads = NativeDaphneLibrary::Utility::acml_getnumthreads();
@@ -37,6 +42,8 @@ namespace NativeDaphne
 			MembraneIdList = gcnew List<int>();
 
 			BoundIdToCellPopIdDictionary = gcnew Dictionary<int, int>();
+
+
 
 		}
 
@@ -79,6 +86,7 @@ namespace NativeDaphne
 			cellPopulations[cellpop_id]->AddCell(cell);
 			MembraneIdList->Add(cell->Membrane_id);
 			BoundIdToCellPopIdDictionary->Add(cell->Membrane_id, cell->Population_id);
+			cellDictionary->Add(cell->Cell_id, cell);
 		}
 
 		/// <summary>
@@ -89,6 +97,7 @@ namespace NativeDaphne
 		void Clear()
 		{
 			cellPopulations->Clear();
+			cellDictionary->Clear();
 		}
 
 		void step(double dt)
@@ -158,10 +167,10 @@ namespace NativeDaphne
 		//from Pair.Phil1 name of the parameter?
 		static double PairPhi1;
 
-	private:
+		//contains all current cells, <cell_id, Nt_Cell^>
+		static Dictionary<int, Nt_Cell^> ^cellDictionary = gcnew Dictionary<int, Nt_Cell^>();
 
-		//need for quick access???
-		//Dictionary<int, Nt_Cell^> ^cellIdDictionary;
+	private:
 
 		//population_id -> cell population
 		Dictionary<int, Nt_CellPopulation^> ^cellPopulations;

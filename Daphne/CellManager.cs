@@ -360,8 +360,7 @@ namespace Daphne
         internal void AddNtCell(Cell c)
         {
 
-            Nt_Cell ntc = new Nt_Cell(c.Cell_id, c.Radius);
-            ntc.spatialState = new Nt_CellSpatialState(c.SpatialState.X, c.SpatialState.V, c.SpatialState.F);
+            Nt_Cell ntc = c.ntCell;
             ntc.Population_id = c.Population_id;
             ntc.Membrane_id = c.PlasmaMembrane.Interior.Id;
             ntc.isMotile = c.IsMotile;
@@ -371,8 +370,6 @@ namespace Daphne
             ntc.TransductionConstant = c.Locomotor.TransductionConstant;
             ntc.DragCoefficient = c.DragCoefficient;
             ntc.Sigma = (c.StochLocomotor != null) ? c.StochLocomotor.Sigma : 0;
-            //add this when molpop is initialized.
-            //ntc.Driver = null;
             nt_cellManager.AddCell(ntc);
 
             //genes

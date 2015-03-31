@@ -41,9 +41,10 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_Cell
 	{
-	//these are all set as public for testing, change
-	//later when necessary.
 	public:
+		//how to get this updated??
+		static int SafeCell_id = 0;
+
 		int Cell_id;
 		int Population_id;
 		int Membrane_id;
@@ -60,7 +61,7 @@ namespace NativeDaphne
 		bool IsStochastic;
 		bool cytokinetic;
 		Nt_CellSpatialState ^spatialState;
-
+		array<int>^ GridIndex;
 
 		static int count = 0;
 
@@ -72,6 +73,7 @@ namespace NativeDaphne
 		Nt_Cell()
 		{
 			cellIds = gcnew List<int>();
+			GridIndex = gcnew array<int>{-1, -1, -1};
 			allocedItemCount = 0;
 		}
 
@@ -80,6 +82,7 @@ namespace NativeDaphne
 			Cell_id = cid;
 			radius = r;
 			cellIds = gcnew List<int>();
+			GridIndex = gcnew array<int>{-1, -1, -1};
 			allocedItemCount = 0;
 		}
 
@@ -99,6 +102,30 @@ namespace NativeDaphne
 				free(_F);
 			}
 		}
+
+		property double Radius
+		{
+			double get()
+			{
+				return radius;
+			}
+		}
+
+		property Nt_CellSpatialState^ SpatialState
+        {
+			Nt_CellSpatialState^ get()
+			{
+				return spatialState;
+				
+			}
+
+			void set(Nt_CellSpatialState^ value)
+			{
+				spatialState = value;
+
+			}
+        }
+
 
 		Nt_Cell^ CloneParent()
 		{
@@ -163,6 +190,13 @@ namespace NativeDaphne
 			cellIds->Add(cell->Cell_id);
 			array_length = ComponentCells->Count * 3;
 		}
+
+		void addForce(array<double>^ f)
+        {
+            spatialState->F[0] += f[0];
+            spatialState->F[1] += f[1];
+            spatialState->F[2] += f[2];
+        }
 
 		void step(double dt);
 
