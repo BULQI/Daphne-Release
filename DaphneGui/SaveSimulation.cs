@@ -119,9 +119,13 @@ namespace DaphneGui
                 CellState cell_state = new CellState();
                 cell_state.setSpatialState(cell.SpatialState);
 
-                cell_state.setDeathDriverState(cell.DeathBehavior.CurrentState);
-                cell_state.setDivisonDriverState(cell.Divider.CurrentState);
-                cell_state.setDifferentiationDriverState(cell.DifferentiationState);
+                //cell_state.setDeathDriverState(cell.DeathBehavior.CurrentState);
+                //cell_state.setDivisonDriverState(cell.Divider.CurrentState);
+                //cell_state.setDifferentiationDriverState(cell.DifferentiationState);
+                cell_state.setDeathDriverState(cell.DeathBehavior);
+                cell_state.setDivisonDriverState(cell.Divider.Behavior);
+                cell_state.setDifferentiationDriverState(cell.Differentiator.Behavior);
+
                 cell_state.setGeneState(cell.Genes);
                 cell_state.setCellGeneration(cell.generation);
 

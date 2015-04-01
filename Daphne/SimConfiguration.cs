@@ -7239,11 +7239,17 @@ namespace Daphne
         public int divisionDriverState;
         public int differentiationDriverState;
 
+        public double[] deathDistrState;
+        public Dictionary<int, double[]> divisionDistrState;
+        public Dictionary<int, double[]> differentiationDistrState;
+
         public CellBehaviorState()
         {
             deathDriverState = -1;
             divisionDriverState = -1;
             differentiationDriverState = -1;
+            divisionDistrState = new Dictionary<int, double[]>();
+            differentiationDistrState = new Dictionary<int, double[]>();
         }
     }
 
@@ -7328,15 +7334,58 @@ namespace Daphne
         {
             cbState.deathDriverState = state;
         }
+        public void setDeathDriverState(ITransitionDriver behavior)
+        {
+            cbState.deathDriverState = behavior.CurrentState;
+
+            if (behavior.CurrentState == 0)
+            {
+                Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
+                if (elements[1].GetType() == typeof(DistrTransitionDriverElement))
+                {
+                    DistrTransitionDriverElement d = (DistrTransitionDriverElement)elements[1];
+                    cbState.deathDistrState = new double[] { d.timeToNextEvent, d.clock };
+                }
+            }
+        }
 
         public void setDivisonDriverState(int state)
         {
             cbState.divisionDriverState = state;
         }
+        public void setDivisonDriverState(ITransitionDriver behavior)
+        {
+            cbState.divisionDriverState = behavior.CurrentState;
+            Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
+
+            foreach (KeyValuePair<int, TransitionDriverElement> kvp in elements)
+            {
+                if (kvp.Value.GetType() == typeof(DistrTransitionDriverElement))
+                {
+                    DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
+                    cbState.divisionDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
+                }
+            }
+        }
+
 
         public void setDifferentiationDriverState(int state)
         {
             cbState.differentiationDriverState = state;
+        }
+        public void setDifferentiationDriverState(ITransitionDriver behavior)
+        {
+            cbState.differentiationDriverState = behavior.CurrentState;
+            Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
+
+            foreach (KeyValuePair<int, TransitionDriverElement> kvp in elements)
+            {
+                if (kvp.Value.GetType() == typeof(DistrTransitionDriverElement))
+                {
+                    DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
+                    cbState.differentiationDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
+                }
+            }
         }
 
         public void setGeneState(Dictionary<string, Gene> genes)
