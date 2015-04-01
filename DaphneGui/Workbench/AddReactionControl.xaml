@@ -213,6 +213,7 @@
                     <Button x:Name="btnProd"         Content="Add to Products"      Width="140"     Click="btnProd_Click" />
                     <Button x:Name="btnUnselectAll"  Content="Clear Selections"     Width="140"     Click="btnUnselectAll_Click" />
                     <Button x:Name="btnCreateNewMol" Content="Create New Molecule"  Width="140"     Click="btnCreateNewMol_Click"  Margin="0,10"/>
+                    <Button x:Name="btnCreateNewGene" Content="Create New Gene"     Width="140"     Click="btnCreateNewGene_Click"  Margin="0,0"/>
                 </StackPanel>
             </Grid>
 

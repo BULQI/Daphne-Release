@@ -1,0 +1,26 @@
+﻿<Window x:Class="DaphneGui.AddEditGene"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create New Gene"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        Name="AddEditGeneWindow">
+  
+  <Grid>
+    <ContentControl Name="geneDetails" Margin="6"
+                    Content="{Binding}" >
+
+      <ContentControl.Style>
+        <Style  TargetType="{x:Type ContentControl}">
+          <Setter Property="ContentTemplate" Value="{StaticResource newGeneTemplate}"></Setter>
+        </Style>
+      </ContentControl.Style>
+      
+    </ContentControl>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="6,80,40,20">
+      <Button Content="Save" Height="24"  Name="btnSave" VerticalAlignment="Top" Width="60" IsDefault="True" Click="btnSave_Click" />
+      <Button Content="Cancel" Height="24" Name="btnCancel" VerticalAlignment="Top" Width="60" Click="btnCancel_Click"/>
+    </StackPanel>
+  </Grid>
+</Window>

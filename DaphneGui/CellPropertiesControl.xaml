@@ -31,12 +31,33 @@
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal" Width="310" >
                         <TextBlock Text="cell name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="70" TextWrapping="Wrap" />
-                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="230" LostFocus="CellTextBox_LostFocus" />
+                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="230" LostFocus="CellTextBox_LostFocus">
+                            <TextBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The cell type.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBox.ToolTip>
+                        </TextBox>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0">
                         <TextBlock Text="radius" Margin="2,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
                         <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="2,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The cell radius. The default value is 5 micrometers.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+
                         </uc:DoublesBox>
 
                         <!--This code is test code for using Validator-->
@@ -78,7 +99,7 @@
                             <Expander                                            
                                 Padding="6" ExpandDirection="Down"
                                 IsExpanded="True"
-                                Header="Locomotor"                                                  
+                                Header="Chemotaxis"                                                  
                                 x:Name="LocomotorExpander"
                                 Margin="0,0,0,0" 
                                 Canvas.ZIndex="1"     
@@ -101,7 +122,8 @@
                                                     SelectionChanged="cbLocoDriver_SelectionChanged"
                                                     SelectedValuePath="entity_guid"
                                                     IsSynchronizedWithCurrentItem="True"
-                                                    PreviewMouseDown="cbLocomotorDriver1_PreviewMouseDown">
+                                                    PreviewMouseDown="cbLocomotorDriver1_PreviewMouseDown"
+                                                    ToolTipService.ShowDuration="10000">
 
                                             <ComboBox.ItemsSource>
                                                 <CompositeCollection>
@@ -109,13 +131,37 @@
                                                     <daph:ConfigMolecule Name="None" entity_guid=""/>
                                                 </CompositeCollection>
                                             </ComboBox.ItemsSource>
+
+                                            <ComboBox.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Width="400" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="400">
+                                                            The cytosol molecule that will produce the chemotactic force. 
+                                                            The chemotactic force that the cell experiences is proportional to the gradient (polarity) of the distribution of this molecule in the cytosol. 
+                                                            Gradients in molecular distributions can be produced through interactions with non-uniform distributions of membrane molecules,
+                                                            which, in turn, can be generated throught binding with non-uniform distributions of chemokines in the extracellular medium. 
+                                                            Load the predefined simple_chemotaxis scenario for an example of chemotaxis. 
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </ComboBox.ToolTip>
+
+
                                         </ComboBox>
 
                                     </StackPanel>
 
                                     <StackPanel Orientation="Vertical" Margin="50,0" 
                                                 Visibility="{Binding locomotor_mol_guid_ref, Converter={StaticResource TransductionConstantVisibilityConv}}">
-                                        <TextBlock Text="transduction constant" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"  />
+                                        <TextBlock Text="transduction constant" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap">
+                                            <TextBlock.ToolTip>
+                                                       <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                            A coefficient that multiplies the gradient of the chemotactic driver molecule. 
+                                                           A default value of 100 is recommended. 
+                                                           A probabilty distribution can also be selected to allow this parameter to vary among the cells in a cell population.
+                                                        </TextBlock>                                                
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
                                         <local:ParamDistrControl Margin="6,0"  Tag="CONTINUOUS"  
                                                                  DataContext="{Binding TransductionConstant, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
@@ -129,14 +175,31 @@
 
                     <GroupBox Grid.Row="1" Grid.Column="0">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="drag coefficient" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            <TextBlock Text="drag coefficient" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                                <TextBlock.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            A parameter that determines the magnitude of the drag force experienced by the cell.
+                                            The drag will cause the cell to slow down or stop, in the absence of chemotactic or stochastic forces. 
+                                            A default value of 1 is recommended. 
+                                            A probabilty distribution can also be selected to allow this parameter to vary among the cells in a cell population.
+                                    </TextBlock>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding DragCoefficient, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>
 
                     <GroupBox Grid.Row="1" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="stochastic force parameter" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                            <TextBlock Text="stochastic motion (force parameter)" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap">
+                                <TextBlock.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            A parameter that determines the magnitude of the stochastic force experienced by the cell. 
+                                            A default value of 4 is recommended for germinal center B cells. 
+                                            A probabilty distribution can also be selected to allow this parameter to vary among the cells in a cell population.
+                                    </TextBlock>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>

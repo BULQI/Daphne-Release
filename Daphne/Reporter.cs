@@ -14,57 +14,134 @@ namespace Daphne
     public abstract class ReporterBase
     {
         protected DateTime startTime;
-        protected string fileName;
+        protected string fileNameBase, fileNameAssembled;
+        protected bool needsFileNameWrite;
         public string AppPath { get; set; } // non uri
+        public string UniquePath { get; set; }
 
         public ReporterBase()
         {
+            needsFileNameWrite = false;
         }
 
-        public string FileName
+        /// <summary>
+        /// the starting string for the file name
+        /// </summary>
+        public string FileNameBase
         {
-            get { return fileName; }
-            set { fileName = value; }
+            get { return fileNameBase; }
+            set { fileNameBase = value; }
         }
 
+        /// <summary>
+        /// the assembled file name with extension, etc., but not the full path
+        /// </summary>
+        public string FileNameAssembled
+        {
+            get { return fileNameAssembled; }
+            set { fileNameAssembled = value; }
+        }
+
+        /// <summary>
+        /// create a unique folder name inside appPath
+        /// </summary>
+        /// <param name="protocolFileName">if a file name base does not exist we use part of the protocol name</param>
+        /// <param name="create">true when immediate creation of the folder is desired</param>
+        protected void createUniqueFolderName(string protocolFileName, bool create)
+        {
+            int index = 1, upTo = 8;
+            string name = "";
+            
+            if (fileNameBase == "")
+            {
+                string protocol = System.IO.Path.GetFileName(protocolFileName);
+                int period = protocol.LastIndexOf('.');
+
+                name = protocol.Substring(0, Math.Min(upTo, period));
+            }
+            else
+            {
+                name = fileNameBase;
+            }
+            do
+            {
+                UniquePath = AppPath + name + "_" + index + @"\";
+                index++;
+            } while(Directory.Exists(UniquePath) == true);
+
+            if (create == true && UniquePath != "" && Directory.Exists(UniquePath) == false)
+            {
+                Directory.CreateDirectory(UniquePath);
+            }
+        }
+
+        /// <summary>
+        /// general function to create a stream for a reporter file
+        /// </summary>
+        /// <param name="file">part of the file name</param>
+        /// <param name="extension">file extension</param>
+        /// <returns></returns>
         protected StreamWriter createStreamWriter(string file, string extension)
         {
             int version = 1;
             string nameStart,
                    fullPath;
 
-            if (fileName == "")
+            if (fileNameBase == "")
             {
                 nameStart = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
             }
             else
             {
-                nameStart = fileName + "_";
+                nameStart = fileNameBase + "_";
             }
 
-            fullPath = AppPath + nameStart + file + "." + extension;
+            fileNameAssembled = nameStart + file + "." + extension;
+            fullPath = UniquePath + fileNameAssembled;
 
             do
             {
                 if (File.Exists(fullPath) == true)
                 {
-                    fullPath = AppPath + nameStart + "_" + file + "(" + version + ")." + extension;
+                    fileNameAssembled = nameStart + "_" + file + "(" + version + ")." + extension;
+                    fullPath = UniquePath + fileNameAssembled;
                     version++;
                 }
                 else
                 {
-                    if (AppPath != "" && Directory.Exists(AppPath) == false)
+                    if (UniquePath != "" && Directory.Exists(UniquePath) == false)
                     {
-                        Directory.CreateDirectory(AppPath);
+                        Directory.CreateDirectory(UniquePath);
                     }
                     return File.CreateText(fullPath);
                 }
             } while (true);
         }
 
-        public abstract void StartReporter(SimulationBase sim);
+        /// <summary>
+        /// utility to convert to a safe string
+        /// </summary>
+        /// <param name="s">string to convert</param>
+        /// <returns>original string or "null"</returns>
+        protected string stringSafety(string s)
+        {
+            if (s == "null")
+            {
+                return "";
+            }
+            if (s == null || s == "")
+            {
+                return "null";
+            }
+            return s;
+        }
+
+        public abstract void StartReporter(SimulationBase sim, string protocolFileName);
         public abstract void AppendReporter();
         public abstract void CloseReporter();
+
+        public abstract void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File);
+        public abstract void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File);
 
         public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
         public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id);
@@ -81,6 +158,77 @@ namespace Daphne
 
     }
 
+    public abstract class SimulationReporterFiles
+    {
+        public SimulationReporterFiles()
+        {
+        }
+
+        public abstract void clearFileStrings();
+    }
+
+    public class TissueSimulationReporterFiles : SimulationReporterFiles
+    {
+        public string ECMMeanReport { get; set; }
+        public string ReactionsReport { get; set; }
+        public Dictionary<double, string> ECMReportStep { get; set; }
+        public Dictionary<int, string> CellTypeReport { get; set; }
+        public Dictionary<int, string> CellTypeDeath { get; set; }
+        public Dictionary<int, string> CellTypeDivision { get; set; }
+        public Dictionary<int, string> CellTypeExit { get; set; }
+
+        public TissueSimulationReporterFiles()
+        {
+            clearFileStrings();
+        }
+
+        public override void clearFileStrings()
+        {
+            ECMMeanReport = "";
+            ReactionsReport = "";
+            if (ECMReportStep == null)
+            {
+                ECMReportStep = new Dictionary<double, string>();
+            }
+            else
+            {
+                ECMReportStep.Clear();
+            }
+            if (CellTypeReport == null)
+            {
+                CellTypeReport = new Dictionary<int, string>();
+            }
+            else
+            {
+                CellTypeReport.Clear();
+            }
+            if (CellTypeDeath == null)
+            {
+                CellTypeDeath = new Dictionary<int, string>();
+            }
+            else
+            {
+                CellTypeDeath.Clear();
+            }
+            if (CellTypeDivision == null)
+            {
+                CellTypeDivision = new Dictionary<int, string>();
+            }
+            else
+            {
+                CellTypeDivision.Clear();
+            }
+            if (CellTypeExit == null)
+            {
+                CellTypeExit = new Dictionary<int, string>();
+            }
+            else
+            {
+                CellTypeExit.Clear();
+            }
+        }
+    }
+
     public class TissueSimulationReporter : ReporterBase
     {
         private StreamWriter ecm_mean_file;
@@ -89,6 +237,7 @@ namespace Daphne
         private Dictionary<int, TransitionEventReporter> deathEvents;
         private Dictionary<int, TransitionEventReporter> divisionEvents;
         private Dictionary<int, TransitionEventReporter> exitEvents;
+        private TissueSimulationReporterFiles tsFiles;
 
         public TissueSimulationReporter()
         {
@@ -96,18 +245,22 @@ namespace Daphne
             deathEvents = new Dictionary<int, TransitionEventReporter>();
             divisionEvents = new Dictionary<int, TransitionEventReporter>();
             exitEvents = new Dictionary<int, TransitionEventReporter>();
+            tsFiles = new TissueSimulationReporterFiles();
         }
 
-        public override void StartReporter(SimulationBase sim)
+        public override void StartReporter(SimulationBase sim, string protocolFileName)
         {
             if (sim is TissueSimulation == false)
             {
                 throw new InvalidCastException();
             }
 
+            needsFileNameWrite = true;
+            tsFiles.clearFileStrings();
             hSim = sim as TissueSimulation;
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             CloseReporter();
+            createUniqueFolderName(protocolFileName, false);
             startECM();
             startCells();
             startEvents();
@@ -145,6 +298,7 @@ namespace Daphne
             if(create == true)
             {
                 ecm_mean_file = createStreamWriter("ecm_mean_report", "txt");
+                tsFiles.ECMMeanReport = fileNameAssembled;
                 ecm_mean_file.WriteLine("ECM mean report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
                 ecm_mean_file.WriteLine(header);
             }
@@ -178,6 +332,7 @@ namespace Daphne
                     StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + hSim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
+                    tsFiles.ECMReportStep.Add(hSim.AccumulatedTime, fileNameAssembled);
                     writer.WriteLine("ECM {0} report at {1}min from {2} run on {3}.", name, hSim.AccumulatedTime, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine(header);
 
@@ -312,6 +467,7 @@ namespace Daphne
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_report", "txt");
 
+                    tsFiles.CellTypeReport.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} report from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine(header);
                     cell_files.Add(cp.cellpopulation_id, writer);
@@ -433,6 +589,8 @@ namespace Daphne
                 if (cp.reportStates.Death == true)
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_deathEvents", "txt");
+
+                    tsFiles.CellTypeDeath.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} death events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine("cell_id\ttime");
                     deathEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
@@ -440,6 +598,8 @@ namespace Daphne
                 if (cp.reportStates.Division == true)
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_divisionEvents", "txt");
+
+                    tsFiles.CellTypeDivision.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);                
                     writer.WriteLine("cell_id\ttime\tdaughter_id");
                     divisionEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
@@ -447,6 +607,8 @@ namespace Daphne
                 if (cp.reportStates.Exit == true)
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_exitEvents", "txt");
+
+                    tsFiles.CellTypeExit.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} exit events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine("cell_id\ttime");
                     exitEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
@@ -511,7 +673,9 @@ namespace Daphne
         {
             if (SimulationBase.ProtocolHandle.scenario.reactionsReport  == true)
             {
-                StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+                StreamWriter writer = createStreamWriter("reactions_report", "txt");
+
+                tsFiles.ReactionsReport = fileNameAssembled;
                 writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
                 writer.WriteLine("rate constant\treaction");
                 writer.WriteLine();
@@ -558,6 +722,204 @@ namespace Daphne
 
                 writer.Close();
             }
+        }
+
+        /// <summary>
+        /// write the reporter files group to file
+        /// </summary>
+        /// <param name="hdf5File">the file to write the data to</param>
+        public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File)
+        {
+            // write only once
+            if (needsFileNameWrite == false)
+            {
+                return;
+            }
+            needsFileNameWrite = false;
+
+            int i;
+
+            // create group entry
+            hdf5File.createGroup("ReporterFiles");
+
+            // single files
+            // non-existing files get saved as "null"
+            hdf5File.writeString("ECMMeanReport", stringSafety(tsFiles.ECMMeanReport));
+            hdf5File.writeString("ReactionsReport", stringSafety(tsFiles.ReactionsReport));
+
+            // groups with potentially multiple files in them
+            
+            // ecm report step, one file per time step
+            hdf5File.createGroup("ECMReportStep");
+            i = 0;
+            foreach (KeyValuePair<double, string> kvp in tsFiles.ECMReportStep)
+            {
+                hdf5File.createGroup("ECMReportStep_" + i);
+                hdf5File.writeDouble(kvp.Key, "Timestep");
+                hdf5File.writeString("Filename", kvp.Value);
+                hdf5File.closeGroup();
+                i++;
+            }
+            hdf5File.closeGroup();
+
+            // cell report, one file per cell population
+            hdf5File.createGroup("CellTypeReport");
+            i = 0;
+            foreach (KeyValuePair<int, string> kvp in tsFiles.CellTypeReport)
+            {
+                hdf5File.createGroup("CellTypeReport_" + i);
+                hdf5File.writeInt(kvp.Key, "Celltype");
+                hdf5File.writeString("Filename", kvp.Value);
+                hdf5File.closeGroup();
+                i++;
+            }
+            hdf5File.closeGroup();
+
+            // cell death report, one file per cell population
+            hdf5File.createGroup("CellTypeDeath");
+            i = 0;
+            foreach (KeyValuePair<int, string> kvp in tsFiles.CellTypeDeath)
+            {
+                hdf5File.createGroup("CellTypeDeath_" + i);
+                hdf5File.writeInt(kvp.Key, "Celltype");
+                hdf5File.writeString("Filename", kvp.Value);
+                hdf5File.closeGroup();
+                i++;
+            }
+            hdf5File.closeGroup();
+
+            // cell division report, one file per cell population
+            hdf5File.createGroup("CellTypeDivision");
+            i = 0;
+            foreach (KeyValuePair<int, string> kvp in tsFiles.CellTypeDivision)
+            {
+                hdf5File.createGroup("CellTypeDivision_" + i);
+                hdf5File.writeInt(kvp.Key, "Celltype");
+                hdf5File.writeString("Filename", kvp.Value);
+                hdf5File.closeGroup();
+                i++;
+            }
+            hdf5File.closeGroup();
+
+            // cell exit report, one file per cell population
+            hdf5File.createGroup("CellTypeExit");
+            i = 0;
+            foreach (KeyValuePair<int, string> kvp in tsFiles.CellTypeExit)
+            {
+                hdf5File.createGroup("CellTypeExit_" + i);
+                hdf5File.writeInt(kvp.Key, "Celltype");
+                hdf5File.writeString("Filename", kvp.Value);
+                hdf5File.closeGroup();
+                i++;
+            }
+            hdf5File.closeGroup();
+            // reporter files group close
+            hdf5File.closeGroup();
+        }
+
+        /// <summary>
+        /// read the reporter file names group from the file
+        /// </summary>
+        /// <param name="hdf5File">file to read from</param>
+        public override void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File)
+        {
+            string tmp = null;
+
+            // reset file names here
+            tsFiles.clearFileStrings();
+            // open the parent group; this assumes the file is open and groups higher in the hierarchy have been opened already
+            hdf5File.openGroup("ReporterFiles");
+            // single files
+            hdf5File.readString("ECMMeanReport", ref tmp);
+            // a non-existing file got saved as "null" - convert that back to "" here
+            tsFiles.ECMMeanReport = stringSafety(tmp);
+            hdf5File.readString("ReactionsReport", ref tmp);
+            tsFiles.ReactionsReport = stringSafety(tmp);
+
+            // groups with potentially multiple files in them
+            List<string> files;
+            double dkey;
+            int ikey;
+            string file = null;
+
+            // find the number of entries (files), then extract the key and file name string, and build the associated dictionaries
+            files = hdf5File.subGroupNames("/Experiment/ReporterFiles/ECMReportStep");
+            if (files.Count > 0)
+            {
+                hdf5File.openGroup("ECMReportStep");
+                foreach (string group in files)
+                {
+                    hdf5File.openGroup(group);
+                    dkey = hdf5File.readDouble("Timestep");
+                    hdf5File.readString("Filename", ref file);
+                    tsFiles.ECMReportStep.Add(dkey, file);
+                    hdf5File.closeGroup();
+                }
+                hdf5File.closeGroup();
+            }
+
+            files = hdf5File.subGroupNames("/Experiment/ReporterFiles/CellTypeReport");
+            if (files.Count > 0)
+            {
+                hdf5File.openGroup("CellTypeReport");
+                foreach (string group in files)
+                {
+                    hdf5File.openGroup(group);
+                    ikey = hdf5File.readInt("Celltype");
+                    hdf5File.readString("Filename", ref file);
+                    tsFiles.CellTypeReport.Add(ikey, file);
+                    hdf5File.closeGroup();
+                }
+                hdf5File.closeGroup();
+            }
+
+            files = hdf5File.subGroupNames("/Experiment/ReporterFiles/CellTypeDeath");
+            if (files.Count > 0)
+            {
+                hdf5File.openGroup("CellTypeDeath");
+                foreach (string group in files)
+                {
+                    hdf5File.openGroup(group);
+                    ikey = hdf5File.readInt("Celltype");
+                    hdf5File.readString("Filename", ref file);
+                    tsFiles.CellTypeDeath.Add(ikey, file);
+                    hdf5File.closeGroup();
+                }
+                hdf5File.closeGroup();
+            }
+
+            files = hdf5File.subGroupNames("/Experiment/ReporterFiles/CellTypeDivision");
+            if (files.Count > 0)
+            {
+                hdf5File.openGroup("CellTypeDivision");
+                foreach (string group in files)
+                {
+                    hdf5File.openGroup(group);
+                    ikey = hdf5File.readInt("Celltype");
+                    hdf5File.readString("Filename", ref file);
+                    tsFiles.CellTypeDivision.Add(ikey, file);
+                    hdf5File.closeGroup();
+                }
+                hdf5File.closeGroup();
+            }
+
+            files = hdf5File.subGroupNames("/Experiment/ReporterFiles/CellTypeExit");
+            if (files.Count > 0)
+            {
+                hdf5File.openGroup("CellTypeExit");
+                foreach (string group in files)
+                {
+                    hdf5File.openGroup(group);
+                    ikey = hdf5File.readInt("Celltype");
+                    hdf5File.readString("Filename", ref file);
+                    tsFiles.CellTypeExit.Add(ikey, file);
+                    hdf5File.closeGroup();
+                }
+                hdf5File.closeGroup();
+            }
+
+            // reporter files group close
+            hdf5File.closeGroup();
         }
 
     }
@@ -613,38 +975,58 @@ namespace Daphne
         }
     }
 
+    public class VatReactionComplexReporterFiles : SimulationReporterFiles
+    {
+        public string VatRCReport { get; set; }
+        public string ReactionsReport { get; set; }
+
+        public VatReactionComplexReporterFiles()
+        {
+            clearFileStrings();
+        }
+
+        public override void clearFileStrings()
+        {
+            VatRCReport = "";
+            ReactionsReport = "";
+        }
+    }
+
     public class VatReactionComplexReporter : ReporterBase
     {
         private VatReactionComplex hSim;
         private StreamWriter vat_conc_file;
         private CompartmentMolpopReporter compMolpopReporter;
+        private VatReactionComplexReporterFiles vatRCfiles;
         public bool reportOn;
 
         public VatReactionComplexReporter()
         {
             compMolpopReporter = new CompartmentMolpopReporter();
+            vatRCfiles = new VatReactionComplexReporterFiles();
             reportOn = false;
         }
 
-        public override void StartReporter(SimulationBase sim)
+        public override void StartReporter(SimulationBase sim, string protocolFileName)
         {
-            if (reportOn == false)
-            {
-                return;
-            }
-
             if (sim is VatReactionComplex == false)
             {
                 throw new InvalidCastException();
             }
 
+            needsFileNameWrite = true;
+            vatRCfiles.clearFileStrings();
             hSim = sim as VatReactionComplex;
+            createUniqueFolderName(protocolFileName, reportOn == false);
+
+            if (reportOn == false)
+            {
+                return;
+            }
 
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             CloseReporter();
-            compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp,
-                                        new double[] { 0.0, 0.0, 0.0 },
-                                        SimulationBase.ProtocolHandle.scenario);
+            compMolpopReporter.StartCompReporter(SimulationBase.dataBasket.Environment.Comp, new double[] { 0.0, 0.0, 0.0 }, SimulationBase.ProtocolHandle.scenario);
 
             ReactionsReport();
         }
@@ -700,6 +1082,7 @@ namespace Daphne
             }
 
             vat_conc_file = createStreamWriter("vatRC_report", "txt");
+            vatRCfiles.VatRCReport = fileNameAssembled;
             vat_conc_file.WriteLine("VatRC report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
             vat_conc_file.WriteLine(header);
 
@@ -716,7 +1099,7 @@ namespace Daphne
                 // terminate line
                 vat_conc_file.WriteLine();
             }
-          }
+        }
 
         public override void AppendDeathEvent(int cell_id, int cellpop_id)
         {
@@ -738,6 +1121,8 @@ namespace Daphne
             if (SimulationBase.ProtocolHandle.scenario.reactionsReport == true)
             {
                 StreamWriter writer = createStreamWriter("reactions_report.txt", "txt");
+
+                vatRCfiles.ReactionsReport = fileNameAssembled;
                 writer.WriteLine("Reactions from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
                 writer.WriteLine("rate constant\treaction");
                 writer.WriteLine();
@@ -754,6 +1139,48 @@ namespace Daphne
 
                 writer.Close();
             }
+        }
+
+        /// <summary>
+        /// write the reporter files group to file
+        /// </summary>
+        /// <param name="hdf5File">the file to write the data to</param>
+        public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File)
+        {
+            // only write once
+            if (needsFileNameWrite == false)
+            {
+                return;
+            }
+            needsFileNameWrite = false;
+
+            // create group
+            hdf5File.createGroup("ReporterFiles");
+            // the vatRC has only single files
+            hdf5File.writeString("VatRCReport", stringSafety(vatRCfiles.VatRCReport));
+            hdf5File.writeString("ReactionsReport", stringSafety(vatRCfiles.ReactionsReport));
+            hdf5File.closeGroup();
+        }
+
+        /// <summary>
+        /// read the reporter file names group from the file
+        /// </summary>
+        /// <param name="hdf5File">file to read from</param>
+        public override void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File)
+        {
+            string tmp = null;
+
+            // reset file names here
+            vatRCfiles.clearFileStrings();
+            // parent group
+            hdf5File.openGroup("ReporterFiles");
+            // the vatRC has only single files
+            hdf5File.readString("VatRCReport", ref tmp);
+            // a non-existing file got saved as "null" - convert that back to ""
+            vatRCfiles.VatRCReport = stringSafety(tmp);
+            hdf5File.readString("ReactionsReport", ref tmp);
+            vatRCfiles.ReactionsReport = stringSafety(tmp);
+            hdf5File.closeGroup();
         }
 
     }

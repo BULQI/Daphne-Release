@@ -47,6 +47,7 @@ using DaphneGui.Pushing;
 using SBMLayer;
 using System.Security.Principal;
 using System.Globalization;
+using DaphneUserControlLib;
 
 namespace DaphneGui
 {
@@ -232,7 +233,7 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
-        
+
 
 
         [DllImport("kernel32.dll")]
@@ -453,7 +454,6 @@ namespace DaphneGui
             }
             else
             {
-                //file = "daphne_driver_locomotion_scenario.json";
                 file = "simple_chemotaxis.json";
             }
 
@@ -494,7 +494,7 @@ namespace DaphneGui
                     // allow one repetition with the blank scenario
                     if (repeat < 1)
                     {
-                        file = "daphne_blank_scenario.json";
+                        file = "blank_scenario.json";
                     }
                 }
                 repeat++;
@@ -522,6 +522,7 @@ namespace DaphneGui
                 {
                     //setup render skin 
                     string SkinFolderPath = new Uri(appPath + @"\Config\RenderSkin\").LocalPath;
+
                     if (!Directory.Exists(SkinFolderPath))
                     {
                         Directory.CreateDirectory(SkinFolderPath);
@@ -531,6 +532,7 @@ namespace DaphneGui
                     }
 
                     string[] files = Directory.GetFiles(SkinFolderPath, "*.json");
+
                     foreach (string skfile in files)
                     {
                         try
@@ -822,11 +824,11 @@ namespace DaphneGui
         {
             //ReactionComplex that was added
             ConfigReactionComplex crc = protocol.entity_repository.reaction_complexes.Last();
-                        // prevent when a fit is in progress
+            // prevent when a fit is in progress
             lock (cellFitLock)
             {
-                    sop.Protocol.entity_repository.reaction_complexes.Add(crc);
-            
+                sop.Protocol.entity_repository.reaction_complexes.Add(crc);
+
                 //Add reaction complex
                 foreach (ConfigMolecule cm in crc.molecules_dict.Values)
                 {
@@ -838,9 +840,9 @@ namespace DaphneGui
                 {
                     if (!sop.Protocol.entity_repository.reaction_templates_dict.ContainsKey(cr.reaction_template_guid_ref))
                     {
-                        sop.Protocol.entity_repository.reaction_templates.Add(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);      
+                        sop.Protocol.entity_repository.reaction_templates.Add(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
                     }
-                    int index = sop.Protocol.entity_repository.reaction_templates.IndexOf(sop.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);           
+                    int index = sop.Protocol.entity_repository.reaction_templates.IndexOf(sop.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
                     cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
                     sop.Protocol.entity_repository.reactions.Add(cr);
                 }
@@ -854,7 +856,7 @@ namespace DaphneGui
         private void LoadProtocolFromSBML(Protocol protocol)
         {
             protocol.InitializeStorageClasses();
-            
+
             //SetPaths
             protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
             protocol.TempFile = orig_path + @"\temp_scenario.json";
@@ -878,7 +880,7 @@ namespace DaphneGui
             dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             //dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml "; //Add this for spatial models
-            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"+ "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml" + "|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml";// Add this for spatial models
             dlg.FileName = "SBMLModel";
 
             // Show open  file dialog box
@@ -932,21 +934,23 @@ namespace DaphneGui
         {
             //Path of the dependencies folder
             string dependencies;
-            if (AssumeIDE() == true) {
+            if (AssumeIDE() == true)
+            {
                 dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"\dependencies";
             }
-            else {
+            else
+            {
                 dependencies = new Uri(appPath).LocalPath + @"\dependencies";
             }
-            
+
             string pathEnv = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
 
             // path for libSBML
             pathEnv += ";" + dependencies;
 
             // path for hdf5
-            
-            
+
+
 
             if (AssumeIDE() == true)
             {
@@ -961,7 +965,7 @@ namespace DaphneGui
             }
 
             System.Environment.SetEnvironmentVariable("PATH", pathEnv, EnvironmentVariableTarget.Process);
-            
+
         }
 
         private Nullable<bool> saveScenarioUsingDialog()
@@ -1065,7 +1069,7 @@ namespace DaphneGui
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
-                    optionsMenu.IsEnabled = false;                    
+                    optionsMenu.IsEnabled = false;
 
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
@@ -1155,17 +1159,17 @@ namespace DaphneGui
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
             // if the file is open we'll have to close it
-            if (DataBasket.hdf5file.isOpen() == true)
+            if (sim.HDF5FileHandle.isOpen() == true)
             {
                 // close the file and all open groups
-                DataBasket.hdf5file.close(true);
+                sim.HDF5FileHandle.close(true);
             }
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
             dlg.InitialDirectory = sim.Reporter.AppPath;
             dlg.DefaultExt = ".hdf5";
-            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5"; 
+            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5";
 
             // Show open file dialog box
             Nullable<bool> result = dlg.ShowDialog();
@@ -1173,10 +1177,14 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                DataBasket.hdf5file.initialize(dlg.FileName);
+                sim.HDF5FileHandle.initialize(dlg.FileName);
+            }
+            else
+            {
+                return;
             }
 
-            if (DataBasket.hdf5file.openRead() == false)
+            if (sim.HDF5FileHandle.openRead() == false)
             {
                 MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
                 return;
@@ -1185,11 +1193,11 @@ namespace DaphneGui
             string protocolString = null;
 
             // open the experiment parent group
-            DataBasket.hdf5file.openGroup("/Experiment_VCR/");
+            sim.HDF5FileHandle.openGroup("/Experiment");
             // read the protocol string
-            DataBasket.hdf5file.readString("Protocol", ref protocolString);
+            sim.HDF5FileHandle.readString("Protocol", ref protocolString);
             // close the file and all groups
-            DataBasket.hdf5file.close(true);
+            sim.HDF5FileHandle.close(true);
 
             // do the loading
             MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
@@ -1199,11 +1207,15 @@ namespace DaphneGui
                 return;
             }
             MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+
+            // open, read reporter file names, close hdf5
+            sim.HDF5FileHandle.ReadReporterFileNamesFromClosedFile(dlg.FileName);
+
             // this function does not exist currently, do we need this call?
             //sim.runStatSummary();
             vcrControl.LastFrame = false;
             GUIUpdate(true, true);
-            displayTitle("Loaded past run " + DataBasket.hdf5file.FileName);
+            displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
         }
 
         private void ExportAVI(object sender, RoutedEventArgs e)
@@ -1215,13 +1227,13 @@ namespace DaphneGui
 
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-            dlg.InitialDirectory = sim.Reporter.AppPath;
+            dlg.InitialDirectory = sim.HDF5FileHandle.FilePath;
             // Default file extension
             dlg.DefaultExt = ".avi";
             // Filter files by extension
             dlg.Filter = "VCR export movie (.avi)|*.avi";
             // set the suggested file name
-            dlg.FileName = System.IO.Path.GetFileNameWithoutExtension(DataBasket.hdf5file.FileName);
+            dlg.FileName = System.IO.Path.GetFileNameWithoutExtension(sim.HDF5FileHandle.FileName);
 
             // Show save file dialog box
             if (dlg.ShowDialog() == true)
@@ -1433,7 +1445,7 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
         }
-        
+
         /// <summary>
         /// CanExecute method for select report folder command
         /// </summary>
@@ -1942,6 +1954,10 @@ namespace DaphneGui
             {
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].ShowWidget(box.box_visibility);
             }
+            else if (e.PropertyName == "current_box_visibility")
+            {
+                ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].ShowWidget(box.current_box_visibility);
+            }
 
             // Catch-all for other scale / translation manipulations
             if (((VTKFullDataBasket)MainWindow.VTKBasket).Regions.ContainsKey(box.box_guid) == true && ((VTKFullGraphicsController)MainWindow.GC).Regions.ContainsKey(box.box_guid) == true)
@@ -1972,6 +1988,12 @@ namespace DaphneGui
                 gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.gaussian_region_visibility);
                 gcHandle.Rwc.Invalidate();
             }
+            else if (e.PropertyName == "current_gaussian_region_visibility")
+            {
+                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.current_gaussian_region_visibility);
+                gcHandle.Rwc.Invalidate();
+            }
+
             if (e.PropertyName == "gaussian_spec_color")
             {
                 gcHandle.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
@@ -2179,7 +2201,7 @@ namespace DaphneGui
             }
 
             // reporter file name
-            sim.Reporter.FileName = sop.Protocol.reporter_file_name;
+            sim.Reporter.FileNameBase = sop.Protocol.reporter_file_name;
 
             //if (true)
             //{
@@ -2199,9 +2221,9 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
-                if (DataBasket.hdf5file != null)
+                if (sim.HDF5FileHandle != null)
                 {
-                    DataBasket.hdf5file.close(true);
+                    sim.HDF5FileHandle.close(true);
                 }
                 vcrControl.ReleaseVCR();
                 exportAVI.IsEnabled = false;
@@ -2303,12 +2325,21 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// finishing hdf5: write the reporter file group, close the hdf5 file
+        /// </summary>
+        private void finishHDF5()
+        {
+            sim.HDF5FileHandle.WriteReporterFileNames();
+            sim.HDF5FileHandle.close(true);
+        }
+
+        /// <summary>
         /// utility to close output files, reporter, hdf5
         /// </summary>
         private void closeOutputFiles()
         {
             sim.Reporter.CloseReporter();
-            DataBasket.hdf5file.close(true);
+            finishHDF5();
         }
 
         /// <summary>
@@ -2463,31 +2494,40 @@ namespace DaphneGui
             runSim(false);
         }
 
+        private void prepareVCR()
+        {
+            // we only currently handle the vcr for the tissue simulation
+            if (sim is TissueSimulation && sim.HDF5FileHandle != null && sim.HDF5FileHandle.openRead() == true)
+            {
+                vcrControl.FrameNames.Clear();
+                // find the frame names and with them the number of frames
+                vcrControl.FrameNames = sim.HDF5FileHandle.subGroupNames("/Experiment/VCR_Frames");
+
+                if (vcrControl.FrameNames.Count > 0)
+                {
+                    // open the parent group for this experiment
+                    sim.HDF5FileHandle.openGroup("/Experiment");
+
+                    // open the group that holds the frames for this experiment
+                    sim.HDF5FileHandle.openGroup("VCR_Frames");
+
+                    vcrControl.OpenVCR();
+                    VCR_Toolbar.IsEnabled = true;
+                    VCR_Toolbar.DataContext = vcrControl;
+                    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                    exportAVI.IsEnabled = true;
+                }
+            }
+        }
+
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(bool handleVCR, bool force)
         {
-            if (handleVCR == true && skipDataWriteMenu.IsChecked == false)
+            if (skipDataWriteMenu.IsChecked == false)
             {
-                if (DataBasket.hdf5file != null && DataBasket.hdf5file.openRead() == true)
+                if (handleVCR == true)
                 {
-                    vcrControl.FrameNames.Clear();
-                    // find the frame names and with them the number of frames
-                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames("/Experiment_VCR/VCR_Frames");
-
-                    if (vcrControl.FrameNames.Count > 0)
-                    {
-                        // open the parent group for this experiment
-                        DataBasket.hdf5file.openGroup("/Experiment_VCR");
-
-                        // open the group that holds the frames for this experiment
-                        DataBasket.hdf5file.openGroup("VCR_Frames");
-
-                        vcrControl.OpenVCR();
-                        VCR_Toolbar.IsEnabled = true;
-                        VCR_Toolbar.DataContext = vcrControl;
-                        VCRslider.Maximum = vcrControl.TotalFrames() - 1;
-                        exportAVI.IsEnabled = true;
-                    }
+                    prepareVCR();
                 }
             }
 
@@ -2628,7 +2668,7 @@ namespace DaphneGui
             if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
                 saveStore(sop.DaphneStore, "DaphneStore");
-                
+
                 ////string messageBoxText = "Daphne store has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.DaphneStore.FileName) + "?";
                 ////string caption = "Daphne Store Changed";
                 ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
@@ -2878,20 +2918,8 @@ namespace DaphneGui
                 {
                     if (Properties.Settings.Default.skipDataWrites == false)
                     {
-                        sim.Reporter.StartReporter(sim);
-
-                        if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.AppPath, sim.Reporter.FileName, "vcr", ".hdf5", true) == false)
-                        {
-                            MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                        DataBasket.hdf5file.openWrite(true);
-                        // group for this experiment
-                        DataBasket.hdf5file.createGroup("/Experiment_VCR");
-
-                        // the protocol as string; needed to reload arbitrary past experiments
-                        DataBasket.hdf5file.writeString("Protocol", sop.Protocol.SerializeToString());
-                        // frames group
-                        DataBasket.hdf5file.createGroup("VCR_Frames");
+                        sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
+                        sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString());
                     }
 
                     runButton.Content = "Pause";
@@ -2928,7 +2956,8 @@ namespace DaphneGui
             {
                 if (Properties.Settings.Default.skipDataWrites == false)
                 {
-                    sim.Reporter.StartReporter(sim);
+                    sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
+                    sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString());
                 }
                 runFinishedEvent.Reset();
                 sim.RunStatus = SimulationBase.RUNSTAT_RUN;
@@ -2952,7 +2981,7 @@ namespace DaphneGui
         {
             if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
             {
-                MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id",MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("No cell exists with this ID.", "Invalid Cell Id", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -3194,10 +3223,6 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
-                if (DataBasket.hdf5file != null)
-                {
-                    DataBasket.hdf5file.close(true);
-                }
                 vcrControl.ReleaseVCR();
             }
 
@@ -3282,7 +3307,7 @@ namespace DaphneGui
             }
 
             //Grab the blank scenario
-            string file = "daphne_blank_scenario.json";
+            string file = "blank_scenario.json";
             string filename = appPath + @"\Config\" + file;
             Uri uri_path = new Uri(filename);
 
@@ -3380,7 +3405,7 @@ namespace DaphneGui
 
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
-                {                    
+                {
                     pm.ComponentLevelDetails.DataContext = erMol;
                     newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
@@ -3745,7 +3770,7 @@ namespace DaphneGui
         private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
-            ProtocolToolWindow.Open();            
+            ProtocolToolWindow.Open();
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
@@ -3760,9 +3785,37 @@ namespace DaphneGui
                 ReacComplexChartWindow.Activate();
             }
         }
-        
     }
 
+
+    public class SpeedFactorValidator : ValidationRule
+    {
+        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        {
+            if (value == null)
+                return new ValidationResult(false, "Value cannot be empty.");
+            else
+            {
+                string strValue = value.ToString();
+                strValue = strValue.Trim();
+
+                if (strValue.Length <= 0)
+                    return new ValidationResult(false, "Value cannot be blank.");
+
+                double dValue;
+                bool result = double.TryParse(strValue, out dValue);
+                if (result == false)
+                    return new ValidationResult(false, "Invalid Value entered.");
+
+                if (dValue < -5.0 || dValue > 5.0)
+                    return new ValidationResult(false, "Value must be between -5 and +5.");
+
+            }
+            return ValidationResult.ValidResult;
+        }
+    }
+
+    
 
     /// <summary>
     /// exist to access renderpop options collection

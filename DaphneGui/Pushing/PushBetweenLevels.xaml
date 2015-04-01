@@ -29,6 +29,7 @@
         </ObjectDataProvider>
 
         <daph:PushLevelToStringConverter x:Key="PushLevelToStringConv" />
+        <push:PushLevelIsDaphneStoreConverter x:Key="PushLevelIsDaphneStoreConv" />
 
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
             <StackPanel Orientation="Vertical">
@@ -278,7 +279,7 @@
                         </DataGrid.CommandBindings>
 
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="colRCName" Header="Name" Width="150" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colRCName" Header="Name" MinWidth="300" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
@@ -471,8 +472,21 @@
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
                           ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
                           SelectedIndex="0"
-                          SelectionChanged="LevelBComboBox_SelectionChanged"
-                    />
+                          SelectionChanged="LevelBComboBox_SelectionChanged">
+
+                        <!--This hides the DaphneStore in the "To" combo box-->
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ComboBoxItem}">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding  Converter={StaticResource PushLevelIsDaphneStoreConv}}" Value="true">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                        
+                    </ComboBox>
 
                     <ContentControl Name="RightContent" 
                         Content="{Binding}" 

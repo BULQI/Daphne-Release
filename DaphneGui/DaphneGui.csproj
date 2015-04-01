@@ -179,6 +179,9 @@
     <Compile Include="AddDiffState.xaml.cs">
       <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AddEditGene.xaml.cs">
+      <DependentUpon>AddEditGene.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddEditMolecule.xaml.cs">
       <DependentUpon>AddEditMolecule.xaml</DependentUpon>
     </Compile>
@@ -295,6 +298,10 @@
     <Page Include="AddDiffState.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddEditGene.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="AddEditMolecule.xaml">
       <SubType>Designer</SubType>

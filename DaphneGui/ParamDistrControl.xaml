@@ -13,6 +13,8 @@
              >
  
     <UserControl.Resources>
+        <local:ParameterDistributionTypeToDiscreteConverter x:Key="ParamDistTypeToDiscreteConv" />
+        
             <!--To load distribution types based on who called this user control - does not work-->
             <!--<ObjectDataProvider x:Name="objDistTypes" x:Key="paramDistributionTypes"
                 ObjectType="{x:Type local:CDataAccess}"
@@ -51,7 +53,39 @@
                     </StackPanel>
                     <StackPanel>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
-                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                   Number="{Binding Path=ConstValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+                            <uc:DoublesBox.Style>
+                                <Style  TargetType="{x:Type uc:DoublesBox}">
+                                    <Setter Property="DecimalPlaces" Value="0"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Value="False">
+
+                                            <DataTrigger.Binding>
+                                                <MultiBinding Converter="{StaticResource ParamDistTypeToDiscreteConv}">
+                                                    <Binding Path="DistributionType"/>
+                                                    <Binding ElementName="paramDistrControl" Path="Tag" />
+                                                </MultiBinding>
+                                            </DataTrigger.Binding>
+
+                                            <Setter Property="DecimalPlaces" Value="3"></Setter>
+                                        </DataTrigger>
+
+                                    </Style.Triggers>
+                                </Style>
+                            </uc:DoublesBox.Style>
+
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The constant value of the parameter.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                            
+                        </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>      
             </DataTemplate>
@@ -61,7 +95,19 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="mean" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                     <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" DecimalPlaces="0"
-                                   Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />                
+                                   Number="{Binding Path=Mean, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        A Poisson probability distribution. Specify the mean value.                         
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
+                    </uc:DoublesBox> 
                 </StackPanel>
             </DataTemplate>
 
@@ -71,12 +117,32 @@
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="min." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                Number="{Binding Path=MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                Number="{Binding Path=MinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The minimum value for the uniform distribution.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="max." Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False" 
-                                Number="{Binding Path=MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                Number="{Binding Path=MaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The maximum value for the uniform distribution.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -87,12 +153,32 @@
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The shape parameter for the Gamma distribution.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox> 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The rate parameter for the Gamma distribution.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox> 
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -103,12 +189,32 @@
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="scale" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The scale parameter for the Weibull distribution.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox> 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" >
                         <TextBlock Text="shape" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                         <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                       Number="{Binding Path=Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                            <uc:DoublesBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The shape parameter for the Weibull distribution.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </uc:DoublesBox.ToolTip>
+                        </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -118,7 +224,17 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="rate" Margin="5,0,5,0" MinHeight="20" VerticalAlignment="Center"/>
                     <uc:DoublesBox Margin="0,6" TextFieldWidth="95" SliderEnabled="False"
-                                   Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                   Number="{Binding Path=Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The (positive) rate parameter for the negative exponential parameter.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                    </uc:DoublesBox>
                 </StackPanel>
             </DataTemplate>
             
@@ -184,7 +300,16 @@
                                                     SliderEnabled="False"
                                                     TextFieldWidth="50"
                                                     >
-                                                    </uc:DoublesBox>
+                                                <uc:DoublesBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                The value of the parameter for this category.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </uc:DoublesBox.ToolTip>
+                                            </uc:DoublesBox>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -203,7 +328,16 @@
                                                     SliderEnabled="False"
                                                     TextFieldWidth="50"
                                                    >
-                                                    </uc:DoublesBox>
+                                                <uc:DoublesBox.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                The probability for this category.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </uc:DoublesBox.ToolTip>
+                                            </uc:DoublesBox>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -242,6 +376,18 @@
                           DataContextChanged="cbParamDistr_DataContextChanged"
                           Loaded="cbParamDistr_Loaded"
                           >
+
+                    <ComboBox.ToolTip>
+                        <ToolTip>
+                            <StackPanel Width="200" Orientation="Horizontal">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                    Selector to choose a probability distribution for a parameter. 
+                                    The default is a Constant value. 
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </ComboBox.ToolTip>
+                    
                 </ComboBox>
             </StackPanel>
             

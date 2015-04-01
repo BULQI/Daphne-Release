@@ -72,9 +72,9 @@ namespace DaphneGui
             }
             else
             {
-                if (MainWindow.Sim.Reporter.FileName != "")
+                if (MainWindow.Sim.Reporter.FileNameBase != "")
                 {
-                    filepath_prefix = Path.Combine(filepath_prefix, MainWindow.Sim.Reporter.FileName);
+                    filepath_prefix = Path.Combine(filepath_prefix, MainWindow.Sim.Reporter.FileNameBase);
                 }
                 else
                 {

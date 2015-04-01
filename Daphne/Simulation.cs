@@ -545,6 +545,14 @@ namespace Daphne
             }
         }
 
+        public HDF5FileBase HDF5FileHandle
+        {
+            get
+            {
+                return hdf5file;
+            }
+        }
+
         protected void prepareBoundaryReactionReport(int size, ref bool[] result)
         {
             result = new bool[size];
@@ -933,6 +941,7 @@ namespace Daphne
         protected int renderCount, sampleCount;
         protected double integratorStep;
         protected ReporterBase reporter;
+        protected HDF5FileBase hdf5file;
         protected IFrameData frameData;
     }
 
@@ -947,7 +956,8 @@ namespace Daphne
             dataBasket = new DataBasket(this);
             //integratorStep = 0.001;
             reporter = new TissueSimulationReporter();
-            frameData = new TissueSimulationFrameData();
+            hdf5file = new TissueSimulationHDF5File(this);
+            frameData = new TissueSimulationFrameData((TissueSimulationHDF5File)hdf5file);
             reset();
         }
 
@@ -1147,6 +1157,7 @@ namespace Daphne
         {
             dataBasket = new DataBasket(this);
             reporter = new VatReactionComplexReporter();
+            hdf5file = new VatReactionComplexHDF5File(this);
             reset();
             listTimes = new List<double>();
             dictGraphConcs = new Dictionary<string, List<double>>();

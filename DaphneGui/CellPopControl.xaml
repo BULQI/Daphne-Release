@@ -138,8 +138,21 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_spec.current_box_visibility}"                                      
-                                        />
+                                        IsChecked="{Binding Path=box_spec.current_box_visibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                                <CheckBox.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                Toggle the visibility of the guide box for the Gaussian distribution. 
+                                                The half-widths of the box indicate 1-sigma of the initial Gaussian distribution of the cell population.
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </CheckBox.ToolTip>
+
+                            </CheckBox>                                   
+                                       
                         </Grid>
                         <Grid VerticalAlignment="Center">
                             <Rectangle Fill="LightPink"
@@ -153,9 +166,19 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=current_gaussian_region_visibility}"                        
-                                      CommandParameter="{Binding}"
-                                    />
+                                    IsChecked="{Binding Path=current_gaussian_region_visibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                        
+                                      CommandParameter="{Binding}">
+                                <CheckBox.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                Toggle the visibility of the blob. 
+                                                The half-widths of the blob indicate 1-sigma of the initial Gaussian distribution of the cell population.
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </CheckBox.ToolTip>
+                            </CheckBox>
                         </Grid>
                     </StackPanel>
                     <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
@@ -171,7 +194,19 @@
                                    Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                       The x-coordinate of the center of the Gaussian distribution.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+
                     </uc:DoublesBox>
+                    
+                    
                     <uc:DoublesBox x:Name="dbl_x_scale"
                                    Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
@@ -182,6 +217,16 @@
                                    Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The standard deviation of the Gaussian distribution in the x-direction.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
                     </uc:DoublesBox>
 
                     <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
@@ -195,6 +240,16 @@
                                    Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The y-coordinate of the center of the Gaussian distribution.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
                     </uc:DoublesBox>
 
                     <uc:DoublesBox x:Name="dbl_y_scale"
@@ -207,6 +262,16 @@
                                    Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The standard deviation of the Gaussian distribution in the y-direction.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
                     </uc:DoublesBox>
 
                     <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
@@ -220,6 +285,16 @@
                                    Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The z-coordinate of the center of the Gaussian distribution.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
                     </uc:DoublesBox>
                     <uc:DoublesBox x:Name="dbl_z_scale"
                                    Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
@@ -231,15 +306,27 @@
                                    Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The standard deviation of the Gaussian distribution in the z-direction.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                        
                     </uc:DoublesBox>
-                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
+                    
+                    <!--Hide for now-->
+                    <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
                         <TextBlock Text="Angle 1"></TextBlock>
                         <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="100" Width="100"></uc:DoublesBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
                         <TextBlock Text="Angle 2"></TextBlock>
                         <uc:DoublesBox SliderEnabled="False" TextFieldWidth="100"  Number="200" Width="100"></uc:DoublesBox>
-                    </StackPanel>
+                    </StackPanel>-->
 
                 </Grid>
             </DataTemplate>
@@ -318,7 +405,15 @@
                                     Grid.Column="0" Grid.Row="1"  
                                     HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
-                                 Grid.Column="1" Grid.Row="1"  Margin="0,2"   />
+                                 Grid.Column="1" Grid.Row="1"  Margin="0,2" >
+
+                            <TextBox.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    A user-defined name for the cell population. The default is the name of the cell type.
+                                </TextBlock>
+                            </TextBox.ToolTip>
+
+                        </TextBox> 
 
                         <TextBlock Text="cell type" Margin="6,0"
                                         Grid.Column="0" Grid.Row="0"  
@@ -338,6 +433,14 @@
                                     <daph:ConfigCell CellName="New Cell Type"/>
                                 </CompositeCollection>
                             </ComboBox.ItemsSource>
+
+                            <ComboBox.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The type of cell comprising the population. 
+                                    Use this selector to change the cell type or to create a new cell type.
+                                    If the cell type that you are looking for is not with this selector you can see if it is available from the Store. 
+                                </TextBlock>
+                            </ComboBox.ToolTip>
 
                         </ComboBox>
 
@@ -369,8 +472,14 @@
                                     CenterSlotHorizontalAlignment="Right"
                                     Value="{Binding ElementName=number_slider, Path=Value}"
                                     x:Name="numberBox"
-                                    ValueChanged="numberBox_ValueChanged"
-                                    />
+                                    ValueChanged="numberBox_ValueChanged">
+                                <editors:Int32EditBox.ToolTip>
+                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                        The number of cells in this population.
+                                    </TextBlock>
+                                </editors:Int32EditBox.ToolTip>
+                            </editors:Int32EditBox>
+                                    
                         </StackPanel>
                     </Grid>
                     <Grid>
@@ -388,7 +497,14 @@
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
-                                                SelectionChanged="cbCellLocationType_SelectionChanged">    
+                                                SelectionChanged="cbCellLocationType_SelectionChanged">
+
+                                                <ComboBox.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                        Use this selector to specify the intial distribution for the cells in the population.
+                                                    </TextBlock>
+                                                </ComboBox.ToolTip>
+
                                             </ComboBox>
 
                                             <Button x:Name="btnRegenerateCellPositions" Height="22" Margin="8,0" Click="btnRegenerateCellPositions_Click" Content="Reset">
@@ -546,8 +662,30 @@
                             MinHeight="20"
                                                  />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                            <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
-                            <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
+                            <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click" ToolTipService.ShowDuration="8000">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                Add a new population of cells. 
+                                                The cell type will default to the first unused cell type in the Cell Library. 
+                                                The default value can be modified using the cell type selector.
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+                            <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" >
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                Remove the selected cell population.
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
                         </StackPanel>
 
                         <!-- Cell populations details -->

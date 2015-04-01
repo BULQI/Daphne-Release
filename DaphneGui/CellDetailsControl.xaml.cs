@@ -324,22 +324,32 @@ namespace DaphneGui
                 lb.SelectedIndex = 0;
             }
         }
-        
+
         private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gene = new ConfigGene("g", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
-
             ConfigCell cell = DataContext as ConfigCell;
-
             if (cell == null)
             {
                 MessageBox.Show("You must first select a cell. If no cell exists, you need to add one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            //Create a new default gene
+            ConfigGene gene = new ConfigGene("g", 0, 0);
+            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
+
+            //Display it in dialog and allow user to edit name, etc.
+            AddEditGene aeg = new AddEditGene();
+            aeg.DataContext = gene;
+
+            //If cancelled from dialog, return.
+            if (aeg.ShowDialog() == false)
+                return;
+
+            //Add new gene to cell
             cell.genes.Add(gene);
 
+            //Clone new gene and add to ER
             ConfigGene erGene = gene.Clone(null);
             MainWindow.SOP.Protocol.entity_repository.genes.Add(erGene);
 
@@ -583,7 +593,7 @@ namespace DaphneGui
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
                                     cc.membrane.AddMolPop(mol.Clone(null), true);
-                                else if (cc.cytosol.HasMolecule(molguid) == false)
+                                else if (mol.molecule_location == MoleculeLocation.Bulk && cc.cytosol.HasMolecule(molguid) == false)
                                     cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, add to genes list
@@ -601,7 +611,7 @@ namespace DaphneGui
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
                                     cc.membrane.AddMolPop(mol.Clone(null), true);
-                                else if (cc.cytosol.HasMolecule(molguid) == false)
+                                else if (mol.molecule_location == MoleculeLocation.Bulk && cc.cytosol.HasMolecule(molguid) == false)
                                     cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, add to genes list
@@ -619,7 +629,7 @@ namespace DaphneGui
                                 ConfigMolecule mol = protocol.entity_repository.molecules_dict[molguid];
                                 if (mol.molecule_location == MoleculeLocation.Boundary && cc.membrane.HasMolecule(molguid) == false)
                                     cc.membrane.AddMolPop(mol.Clone(null), true);
-                                else if (cc.cytosol.HasMolecule(molguid) == false)
+                                else if (mol.molecule_location == MoleculeLocation.Bulk && cc.cytosol.HasMolecule(molguid) == false)
                                     cc.cytosol.AddMolPop(mol.Clone(null), true);
                             }
                             //If gene, clone and add to genes list
@@ -1031,8 +1041,9 @@ namespace DaphneGui
         /// This allows the user to add genes to the epigenetic map.
         /// </summary>
         /// <returns></returns>
-        public DataGridTextColumn CreateUnusedGenesColumn()
+        public DataGridTextColumn CreateUnusedGenesColumn(ConfigTransitionScheme currScheme)
         {
+            ConfigCell cell = DataContext as ConfigCell;
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             DataGridTextColumn editor_col = new DataGridTextColumn();
             editor_col.CanUserSort = false;
@@ -1040,7 +1051,15 @@ namespace DaphneGui
 
             CollectionViewSource cvs1 = new CollectionViewSource();
             cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
-            cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+
+            if (currScheme == cell.diff_scheme)
+            {
+                cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+            }
+            else
+            {
+                cvs1.Filter += new FilterEventHandler(unusedDivGenesListView_Filter);
+            }
 
             CompositeCollection coll1 = new CompositeCollection();
             ConfigGene dummyItem = new ConfigGene("Add a gene", 0, 0);
@@ -1057,6 +1076,7 @@ namespace DaphneGui
             addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
 
             addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
+            addGenesCombo.Name = "ComboGenes";
 
             HeaderTemplate.VisualTree = addGenesCombo;
             editor_col.HeaderTemplate = HeaderTemplate;
@@ -1102,12 +1122,13 @@ namespace DaphneGui
                     scheme.AddState("state2");
                 }
 
-                scheme.AddGene(gene1.entity_guid);  
+                ConfigGene newgene = gene1.Clone(null);
+                scheme.AddGene(newgene.entity_guid); 
 
                 //HERE, WE NEED TO ADD THE GENE TO THE CELL ALSO
                 if (cell.HasGene(gene1.entity_guid) == false)
                 {
-                    ConfigGene newgene = gene1.Clone(null);
+                    newgene = gene1.Clone(null);
                     cell.genes.Add(newgene);
                 }
               
@@ -1289,6 +1310,35 @@ namespace DaphneGui
             }
         }
 
+        private void unusedDivGenesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+
+            e.Accepted = false;
+
+            if (cell == null)
+                return;
+
+            ConfigTransitionScheme ds = cell.div_scheme;
+            ConfigGene gene = e.Item as ConfigGene;
+
+            if (ds != null)
+            {
+                //if scheme already contains this gene, exclude it from the available gene pool
+                if (ds.genes.Contains(gene.entity_guid))
+                {
+                    e.Accepted = false;
+                }
+                else
+                {
+                    e.Accepted = true;
+                }
+            }
+            else
+            {
+                e.Accepted = true;
+            }
+        }
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
         {
             // Confirm parent and childName are valid. 
@@ -1849,13 +1899,13 @@ namespace DaphneGui
             if (tde.Type == TransitionDriverElementType.MOLECULAR)
             {
                 tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = new PoissonParameterDistribution();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
                 //stack_panel.DataContext = tde;
             }
             else
             {
-                tde = new ConfigMolTransitionDriverElement();
+                tde = new ConfigMolTransitionDriverElement();                
             }
             tde.CurrentStateName = CurrentStateName;
             tde.DestStateName = DestStateName;

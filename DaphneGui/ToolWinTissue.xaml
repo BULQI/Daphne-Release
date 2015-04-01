@@ -19,6 +19,7 @@
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
         <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+        <local:CellToVisibilityConverter x:Key="CellToVisibilityConv" />
         
         <ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
@@ -81,9 +82,10 @@
                                 x:Name="CellPropertiesExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                                Visibility="{Binding ElementName=CellPopControl, Path=SelectedCell, Converter={StaticResource CellToVisibilityConv}}">
 
                         <local:DaphneStackPanel x:Name="CellPropertiesPanel">
 
@@ -97,7 +99,20 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
                                 <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." 
                                         DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
-                                        Click="PushCellButton_Click"/>
+                                        Click="PushCellButton_Click" ToolTipService.ShowDuration="8000">
+
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                Any changes to properties of the selected cell only apply to this simulation. 
+                                                Select this option to save the changes to the Protocol Cell Library in order to make the modified cell available for use 
+                                                in another cell population 
+                                                or to make the the modified cell available for saving as a permanent user default.
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </Button.ToolTip>
+
+                                </Button>
                             </StackPanel>
 
                             <StackPanel Margin="10,0">
@@ -109,12 +124,12 @@
 
                     </Expander>
 
-                    <!-- CELL DEATH PARAMETERS -->
+                    <!-- CELL REMOVAL PARAMETERS -->
                     <Expander
                             Padding="5" 
                             ExpandDirection="Down"
                                 IsExpanded="False"
-                                Header="Death Parameters"                                              
+                                Header="Removal"                                              
                                 x:Name="CellDeathParamsExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
@@ -124,13 +139,21 @@
                             Expanded="CellDeathParamsExpander_Expanded">
 
                         <StackPanel Orientation="Vertical" >
-                            <StackPanel.ToolTip>
+                            <!--<StackPanel.ToolTip>
                                 <StackPanel Width="400" >
-                                    <TextBlock Text="The Constant distribution with a value of zero results in instantaneous removal."></TextBlock>
+ 
                                 </StackPanel>
-                            </StackPanel.ToolTip>
-                            
-                            <TextBlock Text="Distribution for the rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" />
+                            </StackPanel.ToolTip>-->
+
+                            <TextBlock Text="Rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" >
+                                <TextBlock.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        Use the selector below to choose a probability distribution to govern cell removal.
+                                        The default Constant selection with a value of zero results in instantaneous removal of cells after death. 
+                                    </TextBlock>                                   
+                                </TextBlock.ToolTip>
+
+                            </TextBlock>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
@@ -159,6 +182,7 @@
                                     TextAlignment="Right"
                                     Width="120"
                                     />
+                                
                                 <editors:DoubleEditBox x:Name="phi1_readout" 
                                                 CheckBoxVisibility="Collapsed" 
                                                 SpinnerVisibility="Collapsed"
@@ -167,18 +191,31 @@
                                                 StepValue="100"
                                                 Width="50" 
                                                 CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}"
-                                                />
+                                                Value="{Binding Path=Protocol.sim_params.phi1, UpdateSourceTrigger=PropertyChanged}">
+                                    
+                                    <editors:DoubleEditBox.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            A coefficient used to determine the force experienced by interacting cells or by a cell at the simulation boundary 
+                                            when the No Flux boundary condition has been selected. 
+                                            The force exerted on the cell is proportional to this coefficient.
+                                        </TextBlock>
+                                    </editors:DoubleEditBox.ToolTip>
+                                </editors:DoubleEditBox>
+                                
                                 <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
                             </StackPanel>
+                            
+                            
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="phi2" Margin="6,0"
+
+                                <!-- Phi2 is not currently used, but retain this section for future use. -->
+                                
+                                <!--<TextBlock Text="phi2" Margin="6,0"
                                     Grid.Column="0" Grid.Row="3"  
                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                     TextAlignment="Right"
                                     Width="120"
-                                    />
-
+                                    />                    
                                 <editors:DoubleEditBox x:Name="phi2_readout" 
                                                 CheckBoxVisibility="Collapsed" 
                                                 SpinnerVisibility="Collapsed"
@@ -187,9 +224,16 @@
                                                 StepValue="0.1"
                                                 Width="50" 
                                                 CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                                <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                                                Value="{Binding Path=Protocol.sim_params.phi2, UpdateSourceTrigger=PropertyChanged}">
+                                    
+                                            <editors:DoubleEditBox.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    (provide content)
+                                                </TextBlock>
+                                            </editors:DoubleEditBox.ToolTip>
+                                </editors:DoubleEditBox>
+                                <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>-->
+                                
                             </StackPanel>
                         </StackPanel>
 
@@ -298,7 +342,7 @@
                     <!-- Cell spatial details (position, velocity, force) -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
-                            Header="Cell Information"
+                            Header="Cell Spatial State"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
@@ -374,7 +418,7 @@
                     <!-- Cell States (death, division, differentiation) -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
-                            Header="Cell State"
+                            Header="Cell Transition State"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
