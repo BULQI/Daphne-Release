@@ -243,7 +243,7 @@ namespace Daphne
                 if (state.cbState.deathDistrState != null)
                 {
                     Dictionary<int, TransitionDriverElement> drivers = DeathBehavior.Drivers[DeathBehavior.CurrentState];
-                    ((DistrTransitionDriverElement)drivers[1]).Restore(state.cbState.deathDistrState); 
+                    ((DistrTransitionDriverElement)drivers[1]).Restore(state.cbState.deathDistrState);
                 }
             }
             if (state.cbState.divisionDriverState != -1)
@@ -276,6 +276,11 @@ namespace Daphne
             SetGeneActivities(state.cgState.geneDict);
             // molecules
             SetMolPopConcentrations(state.cmState.molPopDict);
+            // dead cell removal
+            if (state.cbState.removalDistrState != null)
+            {
+                SimulationBase.cellManager.DeadDict.Add(Cell_id, state.cbState.removalDistrState);
+            }
         }
 
         public void setSpatialState(CellSpatialState s)
