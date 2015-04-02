@@ -1,5 +1,4 @@
-﻿//#define ALL_GRAPHICS
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -300,24 +299,20 @@ namespace DaphneGui
             }
         }
     }
-#if ALL_GRAPHICS
+
     /// <summary>
     /// entity encapsulating a cell track
     /// </summary>
-    public class VTKCellTrack
+    public class VTKCellTrackController
     {
-        private GraphicsProp actualTrack,
-                             standardTrack,
-                             zeroForceTrack;
+        private GraphicsProp actualTrack;
 
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKCellTrack(vtkRenderWindow rw)
+        public VTKCellTrackController(vtkRenderWindow rw)
         {
             actualTrack = new GraphicsProp(rw);
-            standardTrack = new GraphicsProp(rw);
-            zeroForceTrack = new GraphicsProp(rw);
         }
 
         /// <summary>
@@ -329,115 +324,29 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// retrieve the GraphicsProp object encapsulating the vtk actor of the standard track
-        /// </summary>
-        public GraphicsProp StandardTrack
-        {
-            get { return standardTrack; }
-        }
-
-        /// <summary>
-        /// retrieve the GraphicsProp object encapsulating the vtk actor of the zero force track
-        /// </summary>
-        public GraphicsProp ZeroForceTrack
-        {
-            get { return zeroForceTrack; }
-        }
-
-        /// <summary>
         /// release track objects (VTK)
         /// </summary>
         public void Cleanup()
         {
-            actualTrack.cleanup(rw);
-            standardTrack.cleanup(rw);
-            zeroForceTrack.cleanup(rw);
+            actualTrack.cleanup();
         }
 
-        /// <summary>
-        /// draw a tube path for the selected cell
-        /// </summary>
-        /// <param name="cellID">integer id for the cell</param>
-        /// <param name="zeroForce">true to indicate zero force fit</param>
-        /// <returns>a pointer to the inserted vtk actor, null for error</returns>
-        public void GenerateTubeFitPathProp(int cellID, bool zeroForce)
+        public void GenerateActualPathProp(VTKCellTrackData data)
         {
-            vtkPolyData poly;
-            if (zeroForce)
-                poly = MainWindow.VTKBasket.GetCellTrack(cellID).ZeroForceTrack;
-            else
-                poly = MainWindow.VTKBasket.GetCellTrack(cellID).StandardTrack;
-
             vtkTubeFilter tubeFilter = vtkTubeFilter.New();
-            tubeFilter.SetInputConnection(poly.GetProducerPort());
+            tubeFilter.SetInputConnection(data.ActualTrack.GetProducerPort());
             tubeFilter.SetRadius(0.5); //default is .5
-            tubeFilter.SetNumberOfSides(20);
-            tubeFilter.CappingOn();
-
-            vtkLookupTable lut = vtkLookupTable.New();
-            lut.SetValueRange(0.5, 1.0);
-            lut.SetSaturationRange(1.0, 1.0);
-            if (zeroForce)
-            {
-                lut.SetHueRange(0.10, 0.17);
-            }
-            else
-            {
-                lut.SetHueRange(0.33, 0.17);
-            }
-            lut.SetRampToLinear();
-            // When using a vector component for coloring
-            // lut.SetVectorModeToComponent();
-            // lut.SetVectorComponent(1);
-            // When using vector magnitude for coloring
-            lut.SetVectorModeToMagnitude();
-            lut.Build();
-
-            vtkPolyDataMapper tubeMapper = vtkPolyDataMapper.New();
-            tubeMapper.SetInputConnection(tubeFilter.GetOutputPort());
-            tubeMapper.SetLookupTable(lut);
-            tubeMapper.ScalarVisibilityOn();
-            tubeMapper.SetScalarModeToUsePointFieldData();
-            tubeMapper.SelectColorArray("predicted_velocity");
-            // When using a vector component for coloring
-            // tubeMapper.SetScalarRange(velocity.GetRange(1));
-            // When using a vector component for coloring
-            double[] range = new double[2];
-            range = poly.GetPointData().GetArray("predicted_velocity").GetRange(-1);
-            tubeMapper.SetScalarRange(range[0], range[1]);
-
-            vtkActor tubeActor = vtkActor.New();
-            tubeActor.SetMapper(tubeMapper);
-            //tubeActor.GetProperty().SetColor(1.0, 1.0, 0.0);
-
-            if (zeroForce)
-            {
-                this.zeroForceTrack.Prop = tubeActor;
-            }
-            else
-            {
-                this.standardTrack.Prop = tubeActor;
-            }
-        }
-
-        public void GenerateActualPathProp(int cellID)
-        {
-            vtkPolyData poly_track = MainWindow.VTKBasket.GetCellTrack(cellID).ActualTrack;
-
-            vtkTubeFilter tubeFilter = vtkTubeFilter.New();
-            tubeFilter.SetInputConnection(poly_track.GetProducerPort());
-            tubeFilter.SetRadius(0.25); //default is .5
             tubeFilter.SetNumberOfSides(10);
             tubeFilter.CappingOn();
 
             vtkSphereSource sph = vtkSphereSource.New();
             sph.SetThetaResolution(8);
             sph.SetPhiResolution(8);
-            sph.SetRadius(0.5);
+            sph.SetRadius(0.7);
 
             vtkGlyph3D glyp = vtkGlyph3D.New();
             glyp.SetSourceConnection(sph.GetOutputPort(0));
-            glyp.SetInput(poly_track);
+            glyp.SetInput(data.ActualTrack);
             // Tell glyph which arrays to use for 'scalars' and 'vectors'
             glyp.SetInputArrayToProcess(0, 0, 0, 0, "time");		// scalars
             // glyp.SetInputArrayToProcess(1,0,0,0,'RTDataGradient');		// vectors
@@ -467,7 +376,7 @@ namespace DaphneGui
             mapper.SetScalarModeToUsePointFieldData();
             mapper.SelectColorArray("time");
             double[] range = new double[2];
-            range = poly_track.GetPointData().GetArray("time").GetRange();
+            range = data.ActualTrack.GetPointData().GetArray("time").GetRange();
             mapper.SetScalarRange(range[0], range[1]);
 
             vtkActor actor = vtkActor.New();
@@ -479,7 +388,7 @@ namespace DaphneGui
             this.actualTrack.Prop = actor;
         }
     }
-#endif
+
     /// <summary>
     /// enum to control the cell render state
     /// </summary>
@@ -544,8 +453,6 @@ namespace DaphneGui
         public vtkGlyph3D GlyphFilter { get; set; }
         private vtkPolyDataMapper cellGlyphMapper;
         private GraphicsProp cellActor;
-        private vtkArrayCalculator receptorCalculator;
-        // private vtkLookupTable cellIDsColorTable, cellAttributesColorTable;
 
         /// <summary>
         /// accessor for the cell render method
@@ -559,9 +466,6 @@ namespace DaphneGui
         {
             // cells
             cellActor = new GraphicsProp(rw);
-            // cellIDsColorTable = MainWindow.VTKBasket.CellController.CellIDsColorTable;
-            // cellAttributesColorTable = MainWindow.VTKBasket.CellController.CellAttributesColorTable;
-            receptorCalculator = vtkArrayCalculator.New();
             render_method = CellRenderMethod.CELL_RENDER_SPHERES;
         }
 
@@ -584,11 +488,6 @@ namespace DaphneGui
         public vtkPolyData GlyphData
         {
             get { return glyphData; }
-        }
-
-        public vtkArrayCalculator ReceptorCalculator
-        {
-            get { return receptorCalculator; }
         }
 
         /// <summary>
@@ -636,42 +535,11 @@ namespace DaphneGui
         /// </summary>
         public void GlyphCells()
         {
-            // Put a calculator filter in first to do relative receptor to 2D bivariate color map calculation
-            // TODO: This should maybe go in VTKDataBasket so it would be consistent across views...
-            //   ==> Problem is that the formula needs the colormap scaling factor, which is specific to a GraphicsController right now.
-            //       This means that the colormap scaling factor had better be part of VTKDataBasket, too, and GC can just reveal it for
-            //       binding to a specific view.
-            //   ==> The scaling factor had better be variable/colormap-specific, then, somehow...
-#if ALL_GRAPHICS
-            if (MainWindow.VTKBasket.CompReceptors == true)
-            {
-                receptorCalculator.SetFunction("");
-                receptorCalculator.RemoveAllVariables();
-                receptorCalculator.SetInputConnection(MainWindow.VTKBasket.CellController.Poly.GetProducerPort());
-                foreach (KeyValuePair<string, double> kvp in MainWindow.VTKBasket.CellReceptorMaxConcs)
-                {
-                    receptorCalculator.AddScalarArrayName(kvp.Key, 0);
-                }
-                this.UpdateReceptorCalcFormula(1.0);
-                receptorCalculator.SetResultArrayName("receptorComp");
-            }
-#endif
             GlyphFilter = vtkGlyph3D.New();
 
             // Glyph source can be verts, polys or spheres
             this.SetGlyphSource();
-#if ALL_GRAPHICS
-            if (MainWindow.VTKBasket.CompReceptors == true)
-            {
-                GlyphFilter.SetInputConnection(receptorCalculator.GetOutputPort());
-            }
-            else
-            {
-                GlyphFilter.SetInputConnection(MainWindow.VTKBasket.CellController.Poly.GetProducerPort());
-            }
-#else
             GlyphFilter.SetInputConnection(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.Poly.GetProducerPort());
-#endif
             GlyphFilter.Update();   // so glyphData will be valid right away
             glyphData = GlyphFilter.GetOutput();
 
@@ -723,21 +591,7 @@ namespace DaphneGui
 
             GlyphFilter.SetSourceConnection(source.GetOutputPort(0));
         }
-#if ALL_GRAPHICS
-        /// <summary>
-        /// Update the formula string to be used in the calculator filter for receptor comparison.
-        /// This shouldn't even be called if receptor comparison is disabled.
-        /// </summary>
-        /// <param name="scale_factor"></param>
-        public void UpdateReceptorCalcFormula(double scale_factor)
-        {
-            string xx = MainWindow.VTKBasket.CompReceptor1 + "/" + MainWindow.VTKBasket.CellReceptorMaxConcs[MainWindow.VTKBasket.CompReceptor1].ToString();
-            string yy = MainWindow.VTKBasket.CompReceptor2 + "/" + MainWindow.VTKBasket.CellReceptorMaxConcs[MainWindow.VTKBasket.CompReceptor2].ToString();
-            string zz = scale_factor.ToString();
-            string function_str = xx + " + " + zz + " * floor(4*(( " + yy + " ) / " + zz + " ))";
-            receptorCalculator.SetFunction(function_str);
-        }
-#endif
+
         ///// <summary>
         ///// Set the attribute to color cells by.
         ///// Right now "colorIDs", "cell type" (equivalent to previous) and "generation" are the only valid possibilities,
@@ -820,7 +674,6 @@ namespace DaphneGui
         public bool HandToolButton_IsEnabled {get; set; }
         public bool HandToolButton_IsChecked { get; set; }
         public bool PreviewButton_IsEnabled {get; set; }
-        public bool PreviewButton_IsChecked { get; set; }
         public bool ToolsToolbar_IsEnabled {get; set; }
         public System.Windows.Visibility ColorScaleSlider_IsEnabled { get; set; }
         public double ColorScaleMaxFactor {get; set; }
@@ -873,18 +726,14 @@ namespace DaphneGui
         private VTKCellController cellController;
         // the ecs
         private VTKECSController ecsController;
-#if ALL_GRAPHICS
         // dictionary holding track data keyed by cell id
-        private Dictionary<int, VTKCellTrack> cellTracks;
-#endif
+        private Dictionary<int, VTKCellTrackController> cellTrackControllers;
         // dictionary holding all of the region widgets for this VTK window
         private Dictionary<string, RegionWidget> regions;
         private RenderWindowControl rwc;
         private vtkRenderWindow rw;
         private WindowsFormsHost wfh;
-#if ALL_GRAPHICS
-        private static LPManager lpm;
-#endif
+        private CellTrackTool trackTool;
         private vtkOrientationMarkerWidget axesTool;
         private vtkScalarBarWidget scalarBar;
 
@@ -895,8 +744,6 @@ namespace DaphneGui
         private bool whArrowToolButton_IsChecked = true;
         private bool handToolButton_IsEnabled = true;
         private bool handToolButton_IsChecked = false;
-        private bool previewButton_IsEnabled = false;
-        private bool previewButton_IsChecked = true;
         private bool toolsToolbar_IsEnabled = true;
         private bool resetCameraButton_IsChecked = false;
         private bool orientationMarker_IsChecked = false;
@@ -1006,10 +853,10 @@ namespace DaphneGui
 
             // extracellular medium
             ecsController = new VTKECSController(rw);
-#if ALL_GRAPHICS
+
             // cell tracks
-            cellTracks = new Dictionary<int, VTKCellTrack>();
-#endif
+            cellTrackControllers = new Dictionary<int, VTKCellTrackController>();
+
             // This list will be regenerated on each CreatePipelines() call
             this.CellAttributeArrayNames = new ObservableCollection<string>();
 
@@ -1026,6 +873,8 @@ namespace DaphneGui
             CellSelectionToolModes.Add("Tracks");
             CellSelectionToolModes.Add("Molecular Concentrations");
             CellSelectionToolMode = CellSelectionToolModes[0];
+
+            trackTool = new CellTrackTool();
         }
 
         /// <summary>
@@ -1036,16 +885,14 @@ namespace DaphneGui
             foreach (KeyValuePair<string, RegionWidget> kvp in regions)
             {
                 kvp.Value.ShowWidget(false);
-                kvp.Value.ShowActor(Rwc.RenderWindow, false);
+                kvp.Value.ShowActor(RWC.RenderWindow, false);
                 kvp.Value.CleanUp();
             }
             regions.Clear();
             environmentController.Cleanup();
             cellController.Cleanup();
             ecsController.Cleanup();
-#if ALL_GRAPHICS
             CleanupTracks();
-#endif
             CellAttributeArrayNames.Clear();
             // ColorScaleMaxFactor = 1.0;
         }
@@ -1102,7 +949,7 @@ namespace DaphneGui
             {
                 // Using a cheat to make toggle button act like regular button
                 this.recenterCamera();
-                this.Rwc.Invalidate();
+                this.RWC.Invalidate();
                 base.OnPropertyChanged("ResetCamera_IsChecked");
             }
         }
@@ -1118,7 +965,7 @@ namespace DaphneGui
                 {
                     scalarBarMarker_IsChecked = value;
                     this.scalarBar.SetEnabled(value ? 1 : 0);
-                    this.Rwc.Invalidate();
+                    this.RWC.Invalidate();
                     base.OnPropertyChanged("ScalarBarMarker_IsChecked");
                 }
             }
@@ -1153,7 +1000,7 @@ namespace DaphneGui
                         }
                         EnvironmentController.drawEnvBox();
                         ECSController.draw3D();
-                        Rwc.Invalidate();
+                        RWC.Invalidate();
                     }
                     base.OnPropertyChanged("ECSRenderingMethod");
                 }
@@ -1213,7 +1060,7 @@ namespace DaphneGui
                 this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 this.scalarBar.GetScalarBarActor().SetLookupTable(cellController.CellMapper.GetLookupTable());
                 this.scalarBar.GetScalarBarActor().SetTitle(this.CellColorArrayName);
-                Rwc.Invalidate();
+                RWC.Invalidate();
             }
         }
 
@@ -1235,7 +1082,7 @@ namespace DaphneGui
 
                     // NOTE: If allow null reset of name, move this back outside the if() brackets
                     base.OnPropertyChanged("CellRenderMethod");
-                    Rwc.Invalidate();
+                    RWC.Invalidate();
                 }
             }
         }
@@ -1267,10 +1114,9 @@ namespace DaphneGui
                 {
                     whArrowToolButton_IsChecked = value;
                     HandToolButton_IsChecked = !value;
-                    PreviewButton_IsEnabled = false;    // !value;  //TEMPORARILY DISABLED BECAUSE FEATURE IS NYI
                     CellController.SetCellOpacities(value ? MainWindow.cellOpacity : 1.0);
-                    Rwc.RenderWindow.SetCurrentCursor(value ? CURSOR_ARROW : CURSOR_HAND);
-                    Rwc.Invalidate();
+                    RWC.RenderWindow.SetCurrentCursor(value ? CURSOR_ARROW : CURSOR_HAND);
+                    RWC.Invalidate();
                     base.OnPropertyChanged("WhArrowToolButton_IsChecked");
                 }
             }
@@ -1302,48 +1148,10 @@ namespace DaphneGui
                 {
                     handToolButton_IsChecked = value;
                     WhArrowToolButton_IsChecked = !value;
-                    PreviewButton_IsEnabled = false;  // value;     //THIS IS TEMPORARILY DISABLED BECAUSE THE TRACKS FEATURE IS NOT YET DONE
                     CellController.SetCellOpacities(!value ? MainWindow.cellOpacity : 1.0);
-                    Rwc.RenderWindow.SetCurrentCursor(!value ? CURSOR_ARROW : CURSOR_HAND);
-                    Rwc.Invalidate();
+                    RWC.RenderWindow.SetCurrentCursor(!value ? CURSOR_ARROW : CURSOR_HAND);
+                    RWC.Invalidate();
                     base.OnPropertyChanged("HandToolButton_IsChecked");
-                }
-            }
-        }
-
-        public bool PreviewButton_IsEnabled
-        {
-            get { return previewButton_IsEnabled; }
-            set
-            {
-                if (previewButton_IsEnabled == value)
-                    return;
-                else
-                {
-                    previewButton_IsEnabled = value;
-                    base.OnPropertyChanged("PreviewButton_IsEnabled");
-                }
-            }
-        }
-
-        public bool PreviewButton_IsChecked
-        {
-            get { return previewButton_IsChecked; }
-            set
-            {
-                if (previewButton_IsChecked == value)
-                    return;
-                else
-                {
-                    previewButton_IsChecked = value;
-                    base.OnPropertyChanged("PreviewButton_IsChecked");
-                    // show the fitting tool panel if we are not in preview
-                    // this is a workaround, at least for now, to address the fit -> Activate() -> camera rotation problem
-                    // if the user then closes the fitting panel and continues fitting, then the panel will not automatically open
-                    if (previewButton_IsChecked == false)
-                    {
-                        MW.LPFittingToolWindow.Activate();
-                    }
                 }
             }
         }
@@ -1368,7 +1176,6 @@ namespace DaphneGui
             ToolsToolbar_IsEnabled = true;
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
-            PreviewButton_IsEnabled = false;
             MW.CellOptionsExpander.IsEnabled = true;
             MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = false;
@@ -1382,7 +1189,6 @@ namespace DaphneGui
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
-            PreviewButton_IsEnabled = false;
             MW.CellOptionsExpander.IsEnabled = true;
             MW.ECMOptionsExpander.IsEnabled = true;
             MW.OrientationMarkerButton.IsEnabled = true;
@@ -1429,9 +1235,7 @@ namespace DaphneGui
             WhArrowToolButton_IsChecked = true;
             HandToolButton_IsEnabled = true;
             HandToolButton_IsChecked = false;
-            PreviewButton_IsEnabled = false;  // true;    //THIS IS TEMPORARILY DISABLED BECAUSE THE FEATURE IS NYI
-            PreviewButton_IsChecked = true;
-            Rwc.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
+            RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
         }
 
         public void DisablePickingButtons()
@@ -1440,12 +1244,10 @@ namespace DaphneGui
             WhArrowToolButton_IsChecked = true;
             HandToolButton_IsEnabled = true;                //false;    //TEMPORARILY ENABLED ALL THE TIME
             HandToolButton_IsChecked = false;
-            PreviewButton_IsEnabled = false;
-            PreviewButton_IsChecked = true;
-            Rwc.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
+            RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
         }
 
-        public RenderWindowControl Rwc
+        public RenderWindowControl RWC
         {
             get { return rwc; }
         }
@@ -1609,11 +1411,17 @@ namespace DaphneGui
         public void leftMouseClick(vtkObject sender, vtkObjectEventArgs e)
         {
             if (!HandToolButton_IsChecked || !leftButtonPressed)
+            {
                 return;
+            }
 
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+
             leftButtonPressed = false;
-            if (interactor.GetMTime() - leftButtonPressTimeStamp > 100) return;
+            if (interactor.GetMTime() - leftButtonPressTimeStamp > 100)
+            {
+                return;
+            }
 
             //int[] x = interactor.GetEventPosition();
             int[] x = leftButtonPressPostion;
@@ -1627,89 +1435,17 @@ namespace DaphneGui
                 {
                     int cellID = CellController.GetCellIndex(p);
 
+                    MainWindow.selectedCell = SimulationBase.dataBasket.Cells[cellID];
+
                     if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_TRACK) == true)
                     {
-#if ALL_GRAPHICS
-                        // only allow one activity that is related to fitting or changing/accessing the selected cell at a time
-                        lock (MainWindow.cellFitLock)
+                        if (trackTool.IsInitialized(cellID) == false)
                         {
-                            // NOTE: we may have other cells in the future that require path fitting besides motile cells
-                            if (MainWindow.Basket.Cells[cellID].isMotileBaseType() == true)
-                            {
-                                MainWindow.selectedCell = (MotileCell)MainWindow.Basket.Cells[cellID];
-                            }
-                            else
-                            {
-                                MainWindow.selectedCell = null;
-                            }
+                            CellTrackData data = MainWindow.Sim.Reporter.ProvideTrackData(cellID, MainWindow.Sim.HDF5FileHandle);
 
-                            if (MainWindow.selectedCell != null)
-                            {
-                                // do the tube track fits only when not in fast preview mode
-                                if ((MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == false && GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.Prop == null ||
-                                     MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true && GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.Prop == null) && PreviewButton_IsChecked == false ||
-                                    PreviewButton_IsChecked == true && GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop == null)
-                                {
-                                    if (lpm == null)
-                                    {
-                                        //Console.WriteLine("Created new LPM");
-                                        lpm = new LPManager();
-                                    }
-
-                                    // check if file exists and whether it is a new file
-                                    if (MainWindow.CheckControlFlag(MainWindow.CONTROL_NEW_RUN) == true)
-                                    {
-                                        MainWindow.SetControlFlag(MainWindow.CONTROL_NEW_RUN, false);
-                                        MainWindow.Basket.ConnectToExperiment(MainWindow.SOP.Protocol.experiment_db_id);
-                                    }
-
-                                    // allow for the quick preview
-                                    if (PreviewButton_IsChecked == true)
-                                    {
-                                        // need to initialize the data arrays, then do the fast preview
-                                        // TODO: Can remove LoadTrackData since GetCellTrack should do this...
-                                        if (MainWindow.Basket.LoadTrackData(MainWindow.selectedCell.CellIndex) == true)
-                                        {
-                                            GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, true);
-                                            zoomToPath(GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop);
-                                            rwc.Invalidate();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Note: having this here is a good idea, but it causes a relative mouse coordinate change,
-                                        // which in turn initiates a camera rotation
-                                        //MW.LPFittingToolWindow.Activate();
-
-                                        Thread fitThread = new Thread(new ThreadStart(fit)) { IsBackground = true };
-                                        fitThread.Start();
-                                    }
-                                }
-                                // toggle visibility
-                                else
-                                {
-                                    // switch the tubes on only if the mode is not fast preview
-                                    if (GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.Prop != null && (GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene == true || PreviewButton_IsChecked == false))
-                                    {
-                                        GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.addToScene(rw, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == false && !GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene);
-                                    }
-                                    if (GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.Prop != null && (GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene == true || PreviewButton_IsChecked == false))
-                                    {
-                                        GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.addToScene(rw, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true && !GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene);
-                                    }
-
-                                    // switch off the actual path only if the mode is fast preview or the other two are also off
-                                    if (GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene == false || (PreviewButton_IsChecked == true ||
-                                        GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene == false && GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene == false))
-                                    {
-                                        GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, !GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene);
-                                    }
-                                    MainWindow.SetControlFlag(MainWindow.CONTROL_UPDATE_GUI, true);
-                                    rwc.Invalidate();
-                                }
-                            }
+                            trackTool.InitializeCellTrack(data, cellID);
                         }
-#endif
+                        trackTool.ToggleCellTrack(cellID);
                     }
                     else if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_MOLCONCS) == true)
                     {
@@ -1725,59 +1461,9 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// the main logic for the fit thread
-        /// NOTE: This used to be static when in MainWindow... Does it need to be for the threading???
-        /// </summary>
-        private void fit()
-        {
-#if ALL_GRAPHICS
-            string optStr,
-                   paramStr;
-
-            // only allow one activity that is related to fitting or changing/accessing the selected cell at a time
-            lock (MainWindow.cellFitLock)
-            {
-                if (MainWindow.selectedCell != null)
-                {
-                    MainWindow.fitStatus = MainWindow.PROGRESS_INIT;
-                    //Console.WriteLine("Performing fit!");
-                    if (lpm.fit(MainWindow.selectedCell.CellIndex, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE), out optStr, out paramStr) == true)
-                    {
-                        if (MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true)
-                        {
-                            // force to show
-                            GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.addToScene(rw, true);
-                            if (GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop != null && !GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene)
-                            {
-                                GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, true);
-                            }
-                        }
-                        else
-                        {
-                            // force to show
-                            GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.addToScene(rw, true);
-                            if (GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop != null && !GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene)
-                            {
-                                GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, true);
-                            }
-                        }
-                        GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, true);
-
-                        // user option: update the 3d render window to zoom in on newly fit track
-                        zoomToPath(GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop);
-                        rwc.Invalidate();
-                    }
-                    MainWindow.fitStatus = MainWindow.PROGRESS_COMPLETE;
-                    MainWindow.SetControlFlag(MainWindow.CONTROL_UPDATE_GUI, true);
-                }
-            }
-#endif
-        }
-
         public void zoomToPath(vtkProp p)
         {
-            if (p != null && Properties.Settings.Default.autoZoomFit == true && PreviewButton_IsChecked == false)
+            if (p != null && Properties.Settings.Default.autoZoomFit == true)
             {
                 double[] bounds = new double[6];
 
@@ -1823,13 +1509,13 @@ namespace DaphneGui
 
             }
         }
-#if ALL_GRAPHICS
+
         /// <summary>
         /// retrieve the cell tracks
         /// </summary>
-        public Dictionary<int, VTKCellTrack> CellTracks
+        public Dictionary<int, VTKCellTrackController> CellTrackControllers
         {
-            get { return cellTracks; }
+            get { return cellTrackControllers; }
         }
 
         /// <summary>
@@ -1838,26 +1524,13 @@ namespace DaphneGui
         public void CleanupTracks()
         {
             // the tracks
-            foreach (KeyValuePair<int, VTKCellTrack> kvp in cellTracks)
+            foreach (KeyValuePair<int, VTKCellTrackController> kvp in cellTrackControllers)
             {
                 kvp.Value.Cleanup();
             }
-            cellTracks.Clear();
+            cellTrackControllers.Clear();
         }
 
-        /// <summary>
-        /// toggle drawing of fitted cell tracks on/off
-        /// </summary>
-        /// <param name="zeroForce">specifies zero force/standard fit</param>
-        public void ToggleCellFitTracks(bool zeroForce)
-        {
-            foreach (KeyValuePair<int, VTKCellTrack> kvp in cellTracks)
-            {
-                kvp.Value.StandardTrack.addToScene(rw, !zeroForce && kvp.Value.ActualTrack.InScene);
-                kvp.Value.ZeroForceTrack.addToScene(rw, zeroForce && kvp.Value.ActualTrack.InScene);
-            }
-        }
-#endif
         /// <summary>
         /// Create the VTK graphics pipelines for all cells and ecs, but use pre-allocated arrays for speed
         /// This will clear all old pipelines and generate new ones based on VTKDataBasket contents
@@ -1945,8 +1618,7 @@ namespace DaphneGui
             // Find the box spec that goes with this gaussian spec
             BoxSpecification bs = gs.box_spec;
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, gs, RegionShape.Ellipsoid);
-
+            RegionWidget rw = new RegionWidget(RWC.RenderWindow, gs, RegionShape.Ellipsoid);
 
             // color
             rw.SetColor(gs.gaussian_spec_color.ScR,
@@ -1959,7 +1631,7 @@ namespace DaphneGui
             // box visibility
             rw.ShowWidget(bs.box_visibility);
             // contained shape visibility
-            rw.ShowActor(Rwc.RenderWindow, gs.gaussian_region_visibility);
+            rw.ShowActor(RWC.RenderWindow, gs.gaussian_region_visibility);
             // NOTE: Callback being added afterwards in MainWindow for now...
 
             Regions.Add(gs.box_spec.box_guid, rw);
@@ -1968,7 +1640,7 @@ namespace DaphneGui
         public void RemoveRegionWidget(string current_guid)
         {
             Regions[current_guid].ShowWidget(false);
-            Regions[current_guid].ShowActor(Rwc.RenderWindow, false);
+            Regions[current_guid].ShowActor(RWC.RenderWindow, false);
             Regions[current_guid].CleanUp();
             Regions.Remove(current_guid);
         }
@@ -2014,42 +1686,12 @@ namespace DaphneGui
         {
             get { return ecsController; }
         }
-#if ALL_GRAPHICS
 
-        /// <summary>
-        /// Access a cell track by key; if it doesn't exist create it
-        /// This routine will check the VTK Track data in VTKDataBasket
-        /// (which internally tries to load data from the database)
-        /// and generate the final VTK GraphicsProp objects to display
-        /// in the VTK render window.
-        /// </summary>
-        /// <param name="key">the cell id is the key</param>
-        /// <returns></returns>
-        public VTKCellTrack GetCellTrack(int key)
+        public VTKCellTrackController CreateVTKCellTrackController()
         {
-            if (CellTracks.ContainsKey(key) == false)
-            {
-                CellTracks.Add(key, new VTKCellTrack(rw));
-            }
-            // VTKDataBasket will make sure we're connected to an experiment
-            VTKCellTrackData data = MainWindow.VTKBasket.GetCellTrack(key);
-            // Generate track polydata and actors for all available track data
-            // but don't regenerate if already done
-            if (data.ActualTrack.GetNumberOfPoints() > 0 && CellTracks[key].ActualTrack.Prop == null)
-            {
-                CellTracks[key].GenerateActualPathProp(key);
-            }
-            if (data.StandardTrack.GetNumberOfPoints() > 0 && CellTracks[key].StandardTrack.Prop == null)
-            {
-                CellTracks[key].GenerateTubeFitPathProp(key, false);
-            }
-            if (data.ZeroForceTrack.GetNumberOfPoints() > 0 && CellTracks[key].ZeroForceTrack.Prop == null)
-            {
-                CellTracks[key].GenerateTubeFitPathProp(key, true);
-            }
-            return CellTracks[key];
+            return new VTKCellTrackController(rw);
         }
-#endif
+
         /// <summary>
         /// render a simulation frame
         /// </summary>

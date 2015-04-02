@@ -788,6 +788,24 @@ namespace Daphne
             }
         }
     }
+
+    /// <summary>
+    /// data structure for single cell track data
+    /// </summary>
+    public class CellTrackData
+    {
+        public List<double> Times { get; set; }
+        public List<double[]> Positions { get; set; }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public CellTrackData(int key)
+        {
+            Times = new List<double>();
+            Positions = new List<double[]>();
+        }
+    }
 }
 
 
