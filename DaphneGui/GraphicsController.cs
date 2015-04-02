@@ -1470,9 +1470,19 @@ namespace DaphneGui
 
                             if (data == null)
                             {
-                                MessageBox.Show("The data needed to generate tracks is not present in the report.\n" +
-                                                "Cell positions must be reported for cell population " + MainWindow.selectedCell.Population_id + ".",
-                                                "Track warning", MessageBoxButton.OK);
+                                string detail;
+
+                                if (((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulation_dict.ContainsKey(MainWindow.selectedCell.Population_id) == true)
+                                {
+                                    detail = "Cell positions must be reported for cell population " +
+                                             ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulation_dict[MainWindow.selectedCell.Population_id].cellpopulation_name + ".";
+                                }
+                                else
+                                {
+                                    detail = "Cell population " + MainWindow.selectedCell.Population_id + " does not exist.";
+                                }
+
+                                MessageBox.Show("The data needed to generate tracks is not present in the report.\n" + detail, "Track warning", MessageBoxButton.OK);
                                 return;
                             }
                             trackTool.InitializeCellTrack(data, cellID);
