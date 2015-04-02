@@ -138,9 +138,17 @@ namespace DaphneGui
                     MolecularPopulation mp = kvpair.Value;
                     cell_state.addMolPopulation(kvpair.Key, mp);
                 }
+
+                if (SimulationBase.cellManager.DeadDict.ContainsKey(cell.Cell_id) == true)
+                {
+                    cell_state.setRemovalState(SimulationBase.cellManager.DeadDict[cell.Cell_id]);
+                }
+
                 target_cp.CellStates.Add(cell_state);
                 //target_cp.cell_list.Add(cell_state);
             }
+
+            ProtocolSaver.sim_params.globalRandomSeed = Daphne.Rand.MersenneTwister.Next();
 
             ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];
