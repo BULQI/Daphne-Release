@@ -673,7 +673,6 @@ namespace DaphneGui
         public bool WhArrowToolButton_IsChecked {get; set;}
         public bool HandToolButton_IsEnabled {get; set; }
         public bool HandToolButton_IsChecked { get; set; }
-        public bool PreviewButton_IsEnabled {get; set; }
         public bool ToolsToolbar_IsEnabled {get; set; }
         public System.Windows.Visibility ColorScaleSlider_IsEnabled { get; set; }
         public double ColorScaleMaxFactor {get; set; }
