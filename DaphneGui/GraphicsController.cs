@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Forms.Integration;
 
@@ -1467,6 +1468,13 @@ namespace DaphneGui
                         {
                             CellTrackData data = MainWindow.Sim.Reporter.ProvideTrackData(cellID, MainWindow.Sim.HDF5FileHandle);
 
+                            if (data == null)
+                            {
+                                MessageBox.Show("The data needed to generate tracks is not present in the report.\n" +
+                                                "Cell positions must be reported for cell population " + MainWindow.selectedCell.Population_id + ".",
+                                                "Track warning", MessageBoxButton.OK);
+                                return;
+                            }
                             trackTool.InitializeCellTrack(data, cellID);
                         }
                         trackTool.ToggleCellTrack(cellID);
