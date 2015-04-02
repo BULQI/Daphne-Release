@@ -7239,6 +7239,7 @@ namespace Daphne
         public int divisionDriverState;
         public int differentiationDriverState;
         public double[] deathDistrState;
+        public double[] removalDistrState;
         public Dictionary<int, double[]> divisionDistrState;
         public Dictionary<int, double[]> differentiationDistrState;
 
@@ -7334,6 +7335,11 @@ namespace Daphne
             cbState.deathDriverState = state;
         }
 
+        public void setRemovalState(double[] d)
+        {
+            cbState.removalDistrState = d;
+        }
+
         public void setDeathDriverState(ITransitionDriver behavior)
         {
             cbState.deathDriverState = behavior.CurrentState;
@@ -7345,6 +7351,7 @@ namespace Daphne
                     {
                         DistrTransitionDriverElement d = (DistrTransitionDriverElement)elements[1];
                         cbState.deathDistrState = new double[] { d.timeToNextEvent, d.clock };
+                        Console.WriteLine("death: {0}\t{1}\t{2}", behavior.CurrentState, d.timeToNextEvent, d.clock);
                     }
             }
         }
@@ -7360,19 +7367,20 @@ namespace Daphne
 
             if (behavior.Drivers.Count != 0)
             {
-                Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
-
-                foreach (KeyValuePair<int, TransitionDriverElement> kvp in elements)
+                if (behavior.Drivers.ContainsKey(behavior.CurrentState))
                 {
-                    if (kvp.Value.GetType() == typeof(DistrTransitionDriverElement))
+                    Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
+                    foreach (KeyValuePair<int, TransitionDriverElement> kvp in elements)
                     {
-                        DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
-                        cbState.divisionDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
+                        if (kvp.Value.GetType() == typeof(DistrTransitionDriverElement))
+                        {
+                            DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
+                            cbState.divisionDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
+                        }
                     }
                 }
             }
         }
-
 
         public void setDifferentiationDriverState(int state)
         {
@@ -7385,14 +7393,17 @@ namespace Daphne
 
             if (behavior.Drivers.Count != 0)
             {
-                Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
-
-                foreach (KeyValuePair<int, TransitionDriverElement> kvp in elements)
+                if (behavior.Drivers.ContainsKey(behavior.CurrentState))
                 {
-                    if (kvp.Value.GetType() == typeof(DistrTransitionDriverElement))
+                    Dictionary<int, TransitionDriverElement> elements = behavior.Drivers[behavior.CurrentState];
+                    foreach (KeyValuePair<int, TransitionDriverElement> kvp in elements)
                     {
-                        DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
-                        cbState.differentiationDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
+                        if (kvp.Value.GetType() == typeof(DistrTransitionDriverElement))
+                        {
+                            DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
+                            cbState.differentiationDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
+                            Console.WriteLine("diff: {0}\t{1}\t{2}", behavior.CurrentState, d.timeToNextEvent, d.clock);
+                        }
                     }
                 }
             }
