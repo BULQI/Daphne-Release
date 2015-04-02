@@ -1068,7 +1068,7 @@ namespace DaphneGui
                     analysisMenu.IsEnabled = false;
                     optionsMenu.IsEnabled = false;
 
-                    gc.DisableComponents();
+                    gc.DisableComponents(true);
                     VCR_Toolbar.IsEnabled = false;
                     menu_ActivateSimSetup.IsEnabled = false;
                     if (ToolWinType == ToolWindowType.Tissue)
@@ -2212,8 +2212,7 @@ namespace DaphneGui
             }
 
             VCR_Toolbar.IsEnabled = false;
-            //////////gc.ToolsToolbar_IsEnabled = true;
-            //////////gc.DisablePickingButtons();
+            gc.DisableComponents(false);
 
             loadSuccess = true;
         }

@@ -475,7 +475,18 @@
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
-                                               
+                                                <ContentControl>
+                                                    <ComboBox Margin="5,3,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black"
+                                                              Height="26"
+                                                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              HorizontalAlignment="Left" 
+                                                              ItemsSource="{Binding Path=CellSelectionToolModes}"
+                                                              IsEnabled="{Binding HandToolOption_IsEnabled}"
+                                                              SelectionChanged="CellSelectionToolCB_SelectionChanged"
+                                                              SelectedIndex="0" 
+                                                              MinWidth="50"
+                                                              ToolTip="White hand mode"/>
+                                                </ContentControl>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
 
                                                 <Grid>

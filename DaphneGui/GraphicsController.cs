@@ -700,7 +700,7 @@ namespace DaphneGui
         {
         }
 
-        public void DisableComponents()
+        public void DisableComponents(bool complete)
         {
         }
 
@@ -743,6 +743,7 @@ namespace DaphneGui
         private bool whArrowToolButton_IsEnabled = false;
         private bool whArrowToolButton_IsChecked = true;
         private bool handToolButton_IsEnabled = true;
+        private bool handToolOption_IsEnabled;
         private bool handToolButton_IsChecked = false;
         private bool toolsToolbar_IsEnabled = true;
         private bool resetCameraButton_IsChecked = false;
@@ -872,7 +873,7 @@ namespace DaphneGui
             this.CellSelectionToolModes = new ObservableCollection<string>();
             CellSelectionToolModes.Add("None");
             CellSelectionToolModes.Add("Tracks");
-            CellSelectionToolModes.Add("Molecular Concentrations");
+            CellSelectionToolModes.Add("Cell Information");
             CellSelectionToolMode = CellSelectionToolModes[0];
 
             trackTool = new CellTrackTool();
@@ -898,9 +899,12 @@ namespace DaphneGui
             // ColorScaleMaxFactor = 1.0;
         }
 
-        public void DisableComponents()
+        public void DisableComponents(bool complete)
         {
-            ToolsToolbar_IsEnabled = false;
+            if (complete == true)
+            {
+                ToolsToolbar_IsEnabled = false;
+            }
             DisablePickingButtons();
         }
 
@@ -1138,6 +1142,21 @@ namespace DaphneGui
             }
         }
 
+        public bool HandToolOption_IsEnabled
+        {
+            get { return handToolOption_IsEnabled; }
+            set
+            {
+                if (handToolOption_IsEnabled == value)
+                    return;
+                else
+                {
+                    handToolOption_IsEnabled = value;
+                    base.OnPropertyChanged("HandToolOption_IsEnabled");
+                }
+            }
+        }
+
         public bool HandToolButton_IsChecked
         {
             get { return handToolButton_IsChecked; }
@@ -1176,6 +1195,7 @@ namespace DaphneGui
         {
             ToolsToolbar_IsEnabled = true;
             HandToolButton_IsEnabled = true;
+            HandToolOption_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
             MW.CellOptionsExpander.IsEnabled = true;
             MW.ECMOptionsExpander.IsEnabled = true;
@@ -1188,6 +1208,7 @@ namespace DaphneGui
         {
             ToolsToolbar_IsEnabled = true;
             HandToolButton_IsEnabled = true;
+            HandToolOption_IsEnabled = true;
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
             MW.CellOptionsExpander.IsEnabled = true;
@@ -1235,6 +1256,7 @@ namespace DaphneGui
             WhArrowToolButton_IsEnabled = true;
             WhArrowToolButton_IsChecked = true;
             HandToolButton_IsEnabled = true;
+            HandToolOption_IsEnabled = true;
             HandToolButton_IsChecked = false;
             RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
         }
@@ -1243,7 +1265,8 @@ namespace DaphneGui
         {
             WhArrowToolButton_IsEnabled = false;
             WhArrowToolButton_IsChecked = true;
-            HandToolButton_IsEnabled = true;                //false;    //TEMPORARILY ENABLED ALL THE TIME
+            HandToolButton_IsEnabled = false;
+            HandToolOption_IsEnabled = false;
             HandToolButton_IsChecked = false;
             RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
         }
