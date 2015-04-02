@@ -526,6 +526,8 @@ namespace Daphne
             // create a factory container: shared factories reside here; not all instances of a class
             // need their own factory
             SimulationModule.kernel.Get<FactoryContainer>();
+
+            cellManager.DeadDict.Clear();
         }
 
         public CollisionManager CollisionManager
@@ -932,7 +934,7 @@ namespace Daphne
         public static DataBasket dataBasket;
         public static Protocol ProtocolHandle;
 
-        protected CellManager cellManager;
+        public static CellManager cellManager;
         protected CollisionManager collisionManager;
 
         protected byte runStatus;
