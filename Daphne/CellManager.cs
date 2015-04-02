@@ -9,7 +9,18 @@ namespace Daphne
     public class CellManager : IDynamic
     {
         private Dictionary<int, double[]> deadDict = null;
-        private int[] tempDeadKeys = null;
+        public Dictionary<int, double[]> DeadDict
+        {
+            get
+            {
+                return deadDict;
+            }
+
+            set
+            {
+                deadDict = value;
+            }
+        }
         public DistributedParameter Phagocytosis;
 
         public CellManager()
@@ -107,8 +118,7 @@ namespace Daphne
             // process death list
             if (deadDict != null)
             {
-                tempDeadKeys = deadDict.Keys.ToArray<int>();
-                foreach(int key in tempDeadKeys)
+                foreach (int key in deadDict.Keys.ToArray<int>())
                 {
                     // increment elapsed time since death
                     double[] d = deadDict[key];
