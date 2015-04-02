@@ -420,7 +420,7 @@ namespace DaphneGui
             bool first = true;
 
             // set up the pipeline
-            movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow);
+            movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).RWC.RenderWindow);
             movieWriter = new vtkAVIWriter();
             SetFlag(VCR_EXPORT);
             movieWriter.SetFileName(filename);

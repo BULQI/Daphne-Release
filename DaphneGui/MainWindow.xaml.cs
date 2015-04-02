@@ -149,7 +149,7 @@ namespace DaphneGui
                            MOUSE_LEFT_TRACK = 1,
                            MOUSE_LEFT_CELL_MOLCONCS = 2;
 
-        public static byte mouseLeftState = MOUSE_LEFT_CELL_MOLCONCS; //Temporary - until Tracks are working.  //MOUSE_LEFT_NONE;
+        public static byte mouseLeftState = MOUSE_LEFT_NONE;
 
         /// <summary>
         /// constants used in progress bar updating
@@ -503,9 +503,6 @@ namespace DaphneGui
             ProtocolToolWindow.MW = this;
             ComponentsToolWindow.MW = this;
 
-            // Hide fitting tab control until sim has ended
-            this.LPFittingToolWindow.Close();
-            this.menu_ActivateLPFitting.IsEnabled = false;
             this.ExportMenu.IsEnabled = false;
             // And hide stats results chart for now
             //this.ChartViewDocWindow.Close();
@@ -1071,7 +1068,7 @@ namespace DaphneGui
                     analysisMenu.IsEnabled = false;
                     optionsMenu.IsEnabled = false;
 
-                    gc.DisableComponents();
+                    gc.DisableComponents(true);
                     VCR_Toolbar.IsEnabled = false;
                     menu_ActivateSimSetup.IsEnabled = false;
                     if (ToolWinType == ToolWindowType.Tissue)
@@ -1080,8 +1077,6 @@ namespace DaphneGui
                     }
 
                     ImportSBML.IsEnabled = false;
-                    // prevent all fit/analysis-related things
-                    hideFit();
                     ExportMenu.IsEnabled = false;
                 }
             }
@@ -1147,11 +1142,8 @@ namespace DaphneGui
                 // reset cell tracks and free memory
                 //////////gc.CleanupTracks();
                 gc.ResetGraphics();
-                fitCellOpacitySlider.Value = 1.0;
                 UpdateGraphics();
 
-                // prevent all fit/analysis-related things
-                hideFit();
                 ExportMenu.IsEnabled = false;
             }
         }
@@ -1897,40 +1889,6 @@ namespace DaphneGui
             }
         }
 
-        private void fitZeroForceCheckBox_Click(object sender, RoutedEventArgs e)
-        {
-            //MainWindow.SetControlFlag(MainWindow.CONTROL_ZERO_FORCE, (bool)fitZeroForceCheckBox.IsChecked);
-            //if (sim != null)
-            //{
-            //    gc.ToggleCellFitTracks(MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE));
-            //    gc.DrawFrame(sim.GetProgressPercent());
-            //    if (selectedCell != null)
-            //    {
-            //        FitBoxUpdate();
-            //    }
-            //}
-            //// TODO: These Force calls will be a problem with multiple VTK windows...
-            //if (gc != null && gc.Rwc != null && this.LPFittingToolWindow.IsVisible)
-            //{
-            //    gc.Rwc.Focus();
-            //}
-        }
-
-        private void fitCellOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            cellOpacity = (double)fitCellOpacitySlider.Value;
-            //if (sim != null)
-            //{
-            //    gc.CellController.SetCellOpacities(cellOpacity);
-            //    gc.DrawFrame(sim.GetProgressPercent());
-            //}
-            //// TODO: These Force calls will be a problem with multiple VTK windows...
-            //if (gc != null && gc.Rwc != null)
-            //{
-            //    gc.Rwc.Focus();
-            //}
-        }
-
         public static void GUIInteractionToWidgetCallback(object sender, PropertyChangedEventArgs e)
         {
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
@@ -1964,7 +1922,7 @@ namespace DaphneGui
             {
                 ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
-                ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+                ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
             }
         }
 
@@ -1985,20 +1943,20 @@ namespace DaphneGui
 
             if (e.PropertyName == "gaussian_region_visibility")
             {
-                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.gaussian_region_visibility);
-                gcHandle.Rwc.Invalidate();
+                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.RWC.RenderWindow, gauss.gaussian_region_visibility);
+                gcHandle.RWC.Invalidate();
             }
             else if (e.PropertyName == "current_gaussian_region_visibility")
             {
-                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.current_gaussian_region_visibility);
-                gcHandle.Rwc.Invalidate();
+                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.RWC.RenderWindow, gauss.current_gaussian_region_visibility);
+                gcHandle.RWC.Invalidate();
             }
 
             if (e.PropertyName == "gaussian_spec_color")
             {
                 gcHandle.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
                 gcHandle.Regions[gauss.box_spec.box_guid].SetOpacity(gauss.gaussian_spec_color.ScA);
-                gcHandle.Rwc.Invalidate();
+                gcHandle.RWC.Invalidate();
             }
             return;
         }
@@ -2237,7 +2195,7 @@ namespace DaphneGui
                 {
                     gcHandle.recenterCamera();
                 }
-                gcHandle.Rwc.Invalidate();
+                gcHandle.RWC.Invalidate();
 
                 // TODO: Need to do this for all GCs eventually...
                 // Add the RegionControl interaction event handlers here for easier reference to callback method
@@ -2254,8 +2212,7 @@ namespace DaphneGui
             }
 
             VCR_Toolbar.IsEnabled = false;
-            //////////gc.ToolsToolbar_IsEnabled = true;
-            //////////gc.DisablePickingButtons();
+            gc.DisableComponents(false);
 
             loadSuccess = true;
         }
@@ -2537,9 +2494,6 @@ namespace DaphneGui
             if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
             {
                 analysisMenu.IsEnabled = true;
-                // NOTE: Uncomment this to open the LP Fitting ToolWindow after a run has completed
-                // this.LPFittingToolWindow.Activate();
-                this.menu_ActivateLPFitting.IsEnabled = true;
                 this.ExportMenu.IsEnabled = true;
                 // And show stats results chart
                 // NOTE: If the stats charts can be displayed without the database saving, then these
@@ -2591,7 +2545,7 @@ namespace DaphneGui
             // TODO: These Focus calls will be a problem with multiple GCs...
             if (gc is VTKFullGraphicsController == true)
             {
-                ((VTKFullGraphicsController)gc).Rwc.Focus();
+                ((VTKFullGraphicsController)gc).RWC.Focus();
             }
         }
 
@@ -3113,32 +3067,6 @@ namespace DaphneGui
 
             ToolWinCellInfo.Open();
             TabItemMolConcs.Visibility = System.Windows.Visibility.Visible;
-        }
-
-        private void hideFit()
-        {
-            // clear the fit text and hide all controls associated with the fitting
-            fitMessageBox.Text = "";
-
-            // immediate reset
-            fitStatus = PROGRESS_RESET;
-
-            // hide the fitting tab and clear all fit settings
-            this.LPFittingToolWindow.Close();
-            this.menu_ActivateLPFitting.IsEnabled = false;
-            // And hide stats results chart for now
-            //////////this.ChartViewDocWindow.Close();
-
-#if DATABASE_HOOKED_UP   
-            this.menu_ActivateAnalysisChart.IsEnabled = false;
-#endif
-
-            if (CheckMouseLeftState(MOUSE_LEFT_TRACK) == true)
-            {
-                SetMouseLeftState(MOUSE_LEFT_TRACK, false);
-                //////////gc.CellController.SetCellOpacities(1.0);
-                //////////gc.DisablePickingButtons();
-            }
         }
 
         // This sets whether the Open command can be executed, which enables/disables the menu item
@@ -3729,7 +3657,7 @@ namespace DaphneGui
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
-            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+            (gc as VTKFullGraphicsController).RWC.Invalidate();
         }
 
         private void CellRenderOnOffChanged(object sender, RoutedEventArgs e)
@@ -3739,7 +3667,7 @@ namespace DaphneGui
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
-            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+            (gc as VTKFullGraphicsController).RWC.Invalidate();
         }
 
         private void btnShowCellInfoById_Click(object sender, RoutedEventArgs e)
@@ -3764,7 +3692,7 @@ namespace DaphneGui
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
-            (gc as VTKFullGraphicsController).Rwc.Invalidate();
+            (gc as VTKFullGraphicsController).RWC.Invalidate();
         }
 
         private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)

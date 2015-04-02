@@ -22,7 +22,7 @@ namespace Daphne
         void Cleanup();
         void CreatePipelines();
         void DrawFrame(int progress);
-        void DisableComponents();
+        void DisableComponents(bool complete);
         void EnableComponents(bool finished);
         void ResetGraphics();
     }

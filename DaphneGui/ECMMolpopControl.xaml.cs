@@ -382,7 +382,7 @@ namespace DaphneGui
             ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
             ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((ToolWinBase)MainWindow.ToolWin).RegionFocusToGUISection));
             
-            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+            ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
         }
 
         /// <summary>
@@ -668,7 +668,7 @@ namespace DaphneGui
                         MolPopGaussian mpg = current_mol.mp_distribution as MolPopGaussian;
                         DeleteGaussianSpecification(mpg);
                         mpg.gauss_spec = null;
-                        ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+                        ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
                     }
                 }
                 switch (new_dist_type)
@@ -781,7 +781,7 @@ namespace DaphneGui
                     // Delete the Gaussian spec 
                     DeleteGaussianSpecification(mpg);
                     mpg.gauss_spec = null;
-                    ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+                    ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
                 }
                 else
                 {

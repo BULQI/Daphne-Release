@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 
 using System.IO;
-using System.IO.Compression;
 
 using ManifoldRing;
 using System.Globalization;
@@ -136,6 +135,19 @@ namespace Daphne
             return s;
         }
 
+        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
+        {
+            foreach (ConfigReaction cr in reactions)
+            {
+                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
+            }
+        }
+
+        public virtual CellTrackData ProvideTrackData(int cellID, HDF5FileBase hdf5File)
+        {
+            return null;
+        }
+
         public abstract void StartReporter(SimulationBase sim, string protocolFileName);
         public abstract void AppendReporter();
         public abstract void CloseReporter();
@@ -148,14 +160,6 @@ namespace Daphne
         public abstract void AppendExitEvent(int cell_id, int cellpop_id);
 
         public abstract void ReactionsReport();
-        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
-        {
-            foreach (ConfigReaction cr in reactions)
-            {
-                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
-            }
-        }
-
     }
 
     public abstract class SimulationReporterFiles
@@ -922,6 +926,81 @@ namespace Daphne
             hdf5File.closeGroup();
         }
 
+        /// <summary>
+        /// extracts and returns the track data for a cell
+        /// </summary>
+        /// <param name="cellID">the cell's id</param>
+        /// <returns>track data in a dictionary keyed by the time step with values position array</returns>
+        public override CellTrackData ProvideTrackData(int cellID, HDF5FileBase hdf5File)
+        {
+            CellTrackData data = null;
+
+            // does the cell exist?
+            if(SimulationBase.dataBasket.Cells.ContainsKey(cellID) == true)
+            {
+                Cell c = SimulationBase.dataBasket.Cells[cellID];
+                CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+
+                // is the needed data there?
+                if (cellPop.report_xvf.position == true && tsFiles.CellTypeReport.ContainsKey(c.Population_id) == true)
+                {
+                    string file = tsFiles.CellTypeReport[c.Population_id],
+                           path = hdf5File.FilePath,
+                           line;
+                    string[] parts;
+                    int cell_id = 0, time = 0, pos_x = 0, pos_y = 0, pos_z = 0, assigned = 0;
+                    StreamReader stream = new StreamReader(path + file);
+
+                    // read description
+                    stream.ReadLine();
+                    // read header
+                    line = stream.ReadLine();
+                    // find indices of interest
+                    parts = line.Split();
+                    for(int i = 0; i < parts.Length && assigned < 5; i++)
+                    {
+                        if(parts[i] == "cell_id")
+                        {
+                            cell_id = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "time")
+                        {
+                            time = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_x")
+                        {
+                            pos_x = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_y")
+                        {
+                            pos_y = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_z")
+                        {
+                            pos_z = i;
+                            assigned++;
+                        }
+                    }
+                    data = new CellTrackData(cellID);
+                    while (stream.Peek() >= 0)
+                    {
+                        line = stream.ReadLine();
+                        parts = line.Split('\t');
+                        if (Convert.ToInt32(parts[cell_id]) == cellID)
+                        {
+                            data.Times.Add(Convert.ToDouble(parts[time]));
+                            data.Positions.Add(new double[] { Convert.ToDouble(parts[pos_x]), Convert.ToDouble(parts[pos_y]), Convert.ToDouble(parts[pos_z]) });
+                        }
+                    }
+                    stream.Close();
+                }
+            }
+            return data;
+        }
     }
 
     public class CompartmentMolpopReporter

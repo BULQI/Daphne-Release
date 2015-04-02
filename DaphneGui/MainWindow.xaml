@@ -112,7 +112,7 @@
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
-                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" Visibility="Collapsed" />
+                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" />
                         <MenuItem Header="Restart opens last scenario" Name="openLastScenarioMenu" IsCheckable="True" IsChecked="False" Click="openLastScenario_click" />
                         <MenuItem Header="Cell summaries" Name="writeCellSummariesMenu" IsCheckable="True" IsChecked="False" Click="runCellSummaries_click" Visibility="Collapsed" />
                         <MenuItem Header="Run statistical summary" Name="runStatisticalSummaryMenu" IsCheckable="True" IsChecked="True" Click="runStatisticalSummary_click" Visibility="Collapsed" />
@@ -140,8 +140,6 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=VTKDisplayDocWindow}" />
-                    <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool" Visibility="Collapsed"
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
                     <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
@@ -477,12 +475,18 @@
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
-                                                <ToggleButton Name="PreviewButton" 
-                                                          IsChecked="{Binding PreviewButton_IsChecked}" 
-                                                          IsEnabled="{Binding PreviewButton_IsEnabled}"
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Track Preview Mode (fast)" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/preview_path.png" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
+                                                <ContentControl>
+                                                    <ComboBox Margin="5,3,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black"
+                                                              Height="26"
+                                                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              HorizontalAlignment="Left" 
+                                                              ItemsSource="{Binding Path=CellSelectionToolModes}"
+                                                              IsEnabled="{Binding HandToolOption_IsEnabled}"
+                                                              SelectionChanged="CellSelectionToolCB_SelectionChanged"
+                                                              SelectedIndex="0" 
+                                                              MinWidth="50"
+                                                              ToolTip="White hand mode"/>
+                                                </ContentControl>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
 
                                                 <Grid>
@@ -864,42 +868,6 @@
                             </ScrollViewer>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
-
-                    <!-- Bottom right panel -->
-                    <docking:ToolWindowContainer x:Name="bottomTWContainer">
-                        <docking:ToolWindow x:Name="LPFittingToolWindow" Title="LP Fitting" Description="Langevin Process fitting tools">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <DockPanel Grid.Column="0">
-                                    <CheckBox Name="fitZeroForceCheckBox" Content="zero force" 
-                                          DockPanel.Dock="Top" HorizontalAlignment="Left"
-                                          Margin="10" 
-                                          Click="fitZeroForceCheckBox_Click"
-                                          />
-                                    <TextBlock DockPanel.Dock="Top" Margin="5,0" HorizontalAlignment="Center">Cell opacity</TextBlock>
-                                    <Slider Name="fitCellOpacitySlider"
-                                        Orientation="Horizontal"
-                                        RenderTransform="1.0,0,0,0.5,0,4"
-                                        Width="70"
-                                        Minimum="0.0" 
-                                        Maximum="1.0" 
-                                        Value="1.0" 
-                                        ValueChanged="fitCellOpacitySlider_ValueChanged"
-                                        DockPanel.Dock="Top"
-                                        />
-                                    <ProgressBar Name="fitProgressBar" DockPanel.Dock="Bottom" Margin="10" Height="15"/>
-                                    <ContentControl />
-                                </DockPanel>
-                                <TextBox Grid.Column="1" Name="fitMessageBox" 
-                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
-                                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsReadOnly="True" />
-                            </Grid>
-                        </docking:ToolWindow>
-                    </docking:ToolWindowContainer>
-
                 </docking:SplitContainer>
                 
             </docking:SplitContainer>
