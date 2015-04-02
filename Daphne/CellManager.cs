@@ -9,7 +9,18 @@ namespace Daphne
     public class CellManager : IDynamic
     {
         private Dictionary<int, double[]> deadDict = null;
-        private int[] tempDeadKeys = null;
+        public Dictionary<int, double[]> DeadDict
+        {
+            get
+            {
+                return deadDict;
+            }
+
+            set
+            {
+                deadDict = value;
+            }
+        }
         public DistributedParameter Phagocytosis;
 
         public CellManager()
@@ -30,10 +41,10 @@ namespace Daphne
                     kvp.Value.Step(dt);
                 }
 
-                // motile cells
-                if (kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
+                // still alive and motile
+                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
                 {
-                    if (kvp.Value.IsChemotactic && kvp.Value.Alive == true)
+                    if (kvp.Value.IsChemotactic)
                     {
                         // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
                         // add the chemotactic force (accumulate it into the force variable)
@@ -107,8 +118,7 @@ namespace Daphne
             // process death list
             if (deadDict != null)
             {
-                tempDeadKeys = deadDict.Keys.ToArray<int>();
-                foreach(int key in tempDeadKeys)
+                foreach (int key in deadDict.Keys.ToArray<int>())
                 {
                     // increment elapsed time since death
                     double[] d = deadDict[key];

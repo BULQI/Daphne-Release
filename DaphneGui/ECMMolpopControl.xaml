@@ -65,13 +65,25 @@
             <DataTemplate DataType="{x:Type daph:MolPopLinear}">
             <StackPanel>    
                     <StackPanel  Grid.Column="0" Grid.Row="4">
-                        <TextBlock Text="impose gradient" Margin="60,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="100">
-                        </TextBlock>
+                    <TextBlock Text="impose gradient" Margin="60,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="100" ToolTipService.ShowDuration="80000">
+                            <TextBlock.ToolTip>
+                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                        This option creates a linear profile along the selected dimension of the simulation space for the selected molecular population. 
+                                    </TextBlock>                                
+                            </TextBlock.ToolTip>
+                       </TextBlock>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="0,-4">
                         <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
                                            Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="100">
+                                           Width="100" ToolTipService.ShowDuration="80000">
+                                <!--<TextBlock.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            This option creates a linear profile along the selected dimension of the simulation space for the selected molecular population. 
+                                            Use the combo box to the right to select the spatial dimension along which the linear profile will be established. 
+                                            You can refer to the axes in the lower left portion of the 3D graphics window for the orientation of the simulation space.
+                                        </TextBlock>                                
+                                </TextBlock.ToolTip>-->                            
                         </TextBlock>
                         <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
@@ -87,8 +99,15 @@
                                     </Style.Triggers>
                                 </Style>
                             </ComboBox.ItemContainerStyle>
+                            <ComboBox.ToolTip>
+                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap" ToolTipService.ShowDuration="80000">
+                                                This option creates a linear profile along the selected dimension of the simulation space for the selected molecular population. 
+                                                Use this selector to change the spatial dimension along which the linear profile will be established. 
+                                                You can refer to the axes in the lower left portion of the 3D graphics window for the orientation of the simulation space.
+                                </TextBlock>
+                            </ComboBox.ToolTip>
 
-                        </ComboBox>
+                    </ComboBox>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
                         <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
@@ -96,7 +115,7 @@
                                            Width="160"/>
                     </StackPanel>
                     <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
-                        <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                    <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100" ToolTipService.ShowDuration="80000">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
@@ -112,16 +131,32 @@
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
+                             <!--<TextBlock.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The value of the molecular concentration at the face of the simulation cube corresponding to the minimum value of the selected spatial component.
+                                </TextBlock>
+                            </TextBlock.ToolTip>-->
                         </TextBlock>
                         <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
                                         Number="{Binding Path=boundaryCondition[0].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         SNLowerThreshold="0.001"
                                         SNUpperThreshold="1000"
                                         SliderEnabled="False">
-                        </uc:DoublesBox>
+
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The value of the molecular concentration at the face of the simulation cube corresponding to the minimum value of the selected spatial component.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+
+                    </uc:DoublesBox>
                     </StackPanel>
                     <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
-                        <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                    <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100" ToolTipService.ShowDuration="80000">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
@@ -137,13 +172,30 @@
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
+                            <!--<TextBlock.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    The value of the molecular concentration at the face of the simulation cube corresponding to the maximum value of the selected spatial component.
+                                </TextBlock>
+                            </TextBlock.ToolTip>-->
+                            
                         </TextBlock>
                         <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
                                         Number="{Binding Path=boundaryCondition[1].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                        
                                         SNLowerThreshold="0.001"
                                         SNUpperThreshold="1000"
                                         SliderEnabled="False">
-                        </uc:DoublesBox>
+
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        The value of the molecular concentration at the face of the simulation cube corresponding to the maximum value of the selected spatial component.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                            
+                    </uc:DoublesBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -201,7 +253,14 @@
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
                                         IsChecked="{Binding Path=box_spec.current_box_visibility, UpdateSourceTrigger=PropertyChanged}"                                      
-                                        />
+                                        >
+                            <CheckBox.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    Toggle the visibility of the guide box for the Gaussian distribution. 
+                                    The half-widths of the box indicate 1-sigma of the initial Gaussian distribution of the molecular population.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
                     </Grid>
                     <Grid VerticalAlignment="Center">
                         <Rectangle Fill="LightPink"
@@ -217,7 +276,14 @@
                                     IsChecked="{Binding Path=current_gaussian_region_visibility, UpdateSourceTrigger=PropertyChanged}"
                                       Click="gaussian_region_actor_checkbox_clicked"
                                       CommandParameter="{Binding}"
-                                    />
+                                    >
+                            <CheckBox.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    Toggle the visibility of the blob. 
+                                    The half-widths of the blob indicate 1-sigma of the initial Gaussian distribution of the molecular population.
+                                </TextBlock>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
                     </Grid>
                 </StackPanel>
                 <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
@@ -232,7 +298,16 @@
                                    SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
-
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                           The x-coordinate of the center of the Gaussian distribution.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                    
                 </uc:DoublesBox>
                 <uc:DoublesBox x:Name="dbl_x_scale"
                                    Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
@@ -243,7 +318,17 @@
                                    SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
-
+                    
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The standard deviation of the Gaussian distribution in the x-direction.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                    
                 </uc:DoublesBox>
 
                 <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
@@ -256,7 +341,15 @@
                                    SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
-
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                               The y-coordinate of the center of the Gaussian distribution.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
                 </uc:DoublesBox>
 
                 <uc:DoublesBox x:Name="dbl_y_scale"
@@ -268,7 +361,17 @@
                                    SNUpperThreshold="1000"
                                    Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
-
+                    
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The standard deviation of the Gaussian distribution in the y-direction.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                    
                 </uc:DoublesBox>
 
                 <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
@@ -282,6 +385,17 @@
                                    Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                    
+                        <uc:DoublesBox.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                The z-coordinate of the center of the Gaussian distribution.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </uc:DoublesBox.ToolTip>
+                    
                 </uc:DoublesBox>
                 <uc:DoublesBox x:Name="dbl_z_scale"
                                    Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
@@ -293,6 +407,16 @@
                                    Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
+                    <uc:DoublesBox.ToolTip>
+                        <ToolTip>
+                            <StackPanel Width="200" Orientation="Horizontal">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                    The standard deviation of the Gaussian distribution in the z-direction.
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </uc:DoublesBox.ToolTip>
+                    
                 </uc:DoublesBox>
 
             </Grid>
@@ -383,11 +507,18 @@
                     />
                     <!-- buttons for adding, deleting molpops -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                        <Button Name="AddEcmMolButton"  Width="50" Content="Add" Click="AddEcmMolButton_Click"
-                                ToolTip="Add another molecular population to the extracellular medium. "
-                                />
+                        <Button Name="AddEcmMolButton"  Width="50" Content="Add" Click="AddEcmMolButton_Click">
+                            <Button.ToolTip>
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        Add another molecular population to the extracellular medium.  
+                                        The molecule type will default to the first unused molecule type in the Molecules Library. 
+                                        The default value can be modified using the molecule type selector.  
+                                </TextBlock>                               
+                            </Button.ToolTip>
+                        </Button>
+                                                                               
                         <Button Name="RemoveEcmMolButton" Width="50" Content="Remove" Click="RemoveEcmMolButton_Click" 
-                                ToolTip="Remove a molecular population from the extracellular medium."/>
+                                ToolTip="Remove the selected molecular population from the extracellular medium."/>
                     </StackPanel>
 
                     <!-- molecular population details -->
@@ -416,16 +547,16 @@
                                         <!-- display molpop name -->
                                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                             <TextBlock Text="population name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60" TextWrapping="Wrap">
-                                                <TextBlock.ToolTip>
+                                                <!--<TextBlock.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        The name for the molecular population. Defaults to the molecule name.
+                                                        A user-defined name for the molecular population. The default is the name of the molecule.
                                                     </TextBlock>
-                                                </TextBlock.ToolTip>
+                                                </TextBlock.ToolTip>-->
                                             </TextBlock>
                                             <TextBox Text="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
                                                 <TextBox.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        The name for the molecular population. Defaults to the molecule name.
+                                                        A user-defined name for the molecular population. The default is the name of the molecule.
                                                     </TextBlock>
                                                 </TextBox.ToolTip>
                                             </TextBox>
@@ -433,11 +564,12 @@
                                         <!-- Display and allow selection of molecule type -->
                                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                             <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60">
-                                                <TextBlock.ToolTip>
+                                                <!--<TextBlock.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        The molecule type. Use the combo box to the right to change the molecule type or to create a new molecule.
+                                                        The type of molecule comprising the selected population. 
+                                                        Use the selector to the right to change the molecule type or to create a new molecule.
                                                    </TextBlock>
-                                                </TextBlock.ToolTip>
+                                                </TextBlock.ToolTip>-->
                                             </TextBlock>
                                             <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0"                                                        
                                                 DisplayMemberPath="Name"
@@ -455,7 +587,8 @@
                                                 
                                                 <ComboBox.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                            The molecule type. Use this combo box to change the molecule type or to create a new molecule.
+                                                            The type of molecule comprising the selected population. 
+                                                        Use this selector to change the molecule type or to create a new molecule.
                                                     </TextBlock>
                                                 </ComboBox.ToolTip>
                                                 
@@ -478,12 +611,12 @@
                                         <!-- initial distribution -->
                                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
                                             <TextBlock Text="initial distribution" Margin="0,10" HorizontalAlignment="Right" VerticalAlignment="Center" >
-                                                <TextBlock.ToolTip>
+                                                <!--<TextBlock.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        The distribution of the molecular population in the extracellular medium.
-                                                        Use the combo box to select a different distribution.
+                                                        The initial distribution of the selected molecular population in the extracellular medium.
+                                                        Use the selector to the right to select a different distribution.
                                                    </TextBlock>
-                                                </TextBlock.ToolTip>
+                                                </TextBlock.ToolTip>-->
                                             </TextBlock>
                                             <!-- select molpop distribution type -->
                                             <ComboBox Margin="10,10" 
@@ -517,7 +650,7 @@
 
                                                 <ComboBox.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                            Use this combo box to change the distribution of the molecule in the extracellular medium.
+                                                        Use this selector to change the initial distribution of the selected molecular population in the extracellular medium.
                                                     </TextBlock>
                                                 </ComboBox.ToolTip>
                                                 
@@ -555,7 +688,13 @@
                                     Margin="6"/>
 
                             <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushEcmMoleculeButton_Click">
-
+                                <Button.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200">
+                                    Any changes to properties of the selected molecule only apply to this instance of the molecule in the extracellular medium. 
+                                    Select this option to save the changes to the Protocol Library in order to make the modified molecule available for use elsewhere in the simulation scenario
+                                    or to make the the modified molecule available for saving as permanent user default.
+                                    </TextBlock>
+                                </Button.ToolTip>
                             </Button>
                         </StackPanel>
 
@@ -585,7 +724,7 @@
                 <StackPanel>
                     
                     <!-- Reactions -->
-                    <StackPanel>
+                    <!--<StackPanel>
                         <StackPanel.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
@@ -595,12 +734,19 @@
                         </StackPanel.ToolTip>
                         <TextBlock Text="Reactions in ECM" FontWeight="Bold" Margin="0,-10,0,0" >
                         </TextBlock>
-                    </StackPanel>
+                    </StackPanel>-->
 
                     <ListView x:Name="lvEcsReactions"
                               ItemsSource="{Binding Path=Protocol.scenario.environment.comp.Reactions}"
-                              SelectedIndex="-1">
+                              SelectedIndex="-1" ToolTipService.ShowDuration="80000">
 
+                        <ListView.ToolTip>
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200" >
+                                    This is a list of the reactions involving molecules in the extracellular medium. 
+                                    Some of these reactions may involve molecules in the cell membrane.
+                                </TextBlock>
+                        </ListView.ToolTip>
+                        
                         <ListView.View>
                             <GridView>
                                 <GridView.ColumnHeaderContainerStyle>
@@ -646,8 +792,23 @@
                     </ListView>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                        <Button Name="PushEcmReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushEcmReacButton_Click" />
-                        <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
+                        <Button Name="PushEcmReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushEcmReacButton_Click" ToolTipService.ShowDuration="80000">
+                            <Button.ToolTip>
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200">
+                                    If you change the reaction rate constant in the selected reaction, 
+                                    that change only applies to this instance of the reaction in the extracellular medium. 
+                                    Select this option to save the change to the Protocol Library in order to make the modified reaction available for use elsewhere in the simulation scenario
+                                    or to make the the modified reaction available for saving as a permanent user default.                                
+                                </TextBlock>
+                            </Button.ToolTip>
+                        </Button>
+                        <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" >
+                            <Button.ToolTip>
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200">
+                                    Remove the selected reaction from the extracellular medium in this simulation. 
+                                </TextBlock>
+                            </Button.ToolTip>
+                        </Button>
                     </StackPanel>
 
                     <Expander ExpandDirection="Down"
@@ -663,7 +824,7 @@
                             <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
                                                 ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
                                                 SelectedIndex="0"
-                                                MinHeight="50" MaxHeight="150"
+                                                MinHeight="50" MaxHeight="150" ToolTipService.ShowDuration="80000"
                                     >
                                 <ListView.View>
                                     <GridView>
@@ -707,9 +868,24 @@
                                         </GridViewColumn>
                                     </GridView>
                                 </ListView.View>
+                                
+                                <ListView.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200" >
+                                        This is a list of reactions that can be added to the extracellular medium. 
+                                        More reactions can be obtained by selecting Stores and Reactions in the main menu, 
+                                        selecting the desired reactions, and adding them to the Protocol.
+                                    </TextBlock>
+                                </ListView.ToolTip>
+
                             </ListView>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddEcmReacButton"  Width="50" Content="Add" Click="AddEcmReacButton_Click"/>
+                                <Button Name="AddEcmReacButton"  Width="50" Content="Add" Click="AddEcmReacButton_Click">
+                                    <Button.ToolTip>
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200">
+                                            Add the selected reaction to the extracellular medium in this simulation.
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                     </Expander>
@@ -752,7 +928,7 @@
                         <StackPanel.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
+                                    Add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel.ToolTip>
@@ -770,7 +946,13 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                         <Button Name="EcsSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="EcsSaveReacCompToProtocolButton_Click" />
-                        <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" />
+                        <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" >
+                            <Button.ToolTip>
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200">
+                                    Remove the selected reaction complex from the extracellular medium in this simulation.
+                                </TextBlock>
+                            </Button.ToolTip>
+                        </Button>
                     </StackPanel>
 
                     <Expander ExpandDirection="Down"

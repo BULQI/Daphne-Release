@@ -141,9 +141,9 @@ namespace DaphneGui
                 else
                 {
                     speedFactor = value;
-                    fps = (int)(speedFactor * E_FPS);
                 }
-            }
+                fps = (int)(speedFactor * E_FPS);
+           }
             get { return speedFactor; }
         }
 

@@ -81,7 +81,7 @@ namespace Daphne
     {
         public ParameterDistribution distr { get; set; }
         public double timeToNextEvent { get; set; }
-        private double clock;
+        public double clock;
 
         public DistrTransitionDriverElement()
         {
@@ -91,6 +91,12 @@ namespace Daphne
         {
             timeToNextEvent = distr.Sample();
             clock = 0;
+        }
+
+        public void Restore(double[] vals)
+        {
+            timeToNextEvent = vals[0];
+            clock = vals[1];
         }
 
         public override bool TransitionOccurred(double dt)

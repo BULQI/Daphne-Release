@@ -746,7 +746,7 @@ namespace DaphneGui
         private bool handToolButton_IsChecked = false;
         private bool toolsToolbar_IsEnabled = true;
         private bool resetCameraButton_IsChecked = false;
-        private bool orientationMarker_IsChecked = false;
+        private bool orientationMarker_IsChecked = true;
         private bool scalarBarMarker_IsChecked = false;
         private System.Windows.Visibility colorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
         private double colorScaleMaxFactor = 1.0;
@@ -785,7 +785,8 @@ namespace DaphneGui
         /// constructor
         /// </summary>
         public VTKFullGraphicsController(MainWindow mw)
-        {
+        {            
+
             // Trying to get a link to the main window so can activate toolwindow from a callback here...
             MW = mw;
 
@@ -838,7 +839,7 @@ namespace DaphneGui
             axesTool = new vtkOrientationMarkerWidget();
             axesTool.SetOrientationMarker(axesActor);
             axesTool.SetInteractor(rwc.RenderWindow.GetInteractor());
-            axesTool.SetEnabled(0);
+            axesTool.SetEnabled(1);
 
             this.scalarBar = vtkScalarBarWidget.New();
             this.scalarBar.SetInteractor(rwc.RenderWindow.GetInteractor());
@@ -1415,13 +1416,14 @@ namespace DaphneGui
                 return;
             }
 
-            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+            // for testing only
+            //vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
 
             leftButtonPressed = false;
-            if (interactor.GetMTime() - leftButtonPressTimeStamp > 100)
-            {
-                return;
-            }
+            //if (interactor.GetMTime() - leftButtonPressTimeStamp > 100)
+            //{
+            //    return;
+            //}
 
             //int[] x = interactor.GetEventPosition();
             int[] x = leftButtonPressPostion;
