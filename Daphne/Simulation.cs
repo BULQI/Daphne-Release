@@ -1207,8 +1207,6 @@ namespace Daphne
             // general parameters
             Pair.Phi1 = protocol.sim_params.phi1;
             Pair.Phi2 = protocol.sim_params.phi2;
-            Nt_CellPair.Phi1 = protocol.sim_params.phi1;
-            Nt_CellPair.Phi2 = protocol.sim_params.phi2;
 
             // distribution governing time-to-removal for apoptotic cells
             cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();

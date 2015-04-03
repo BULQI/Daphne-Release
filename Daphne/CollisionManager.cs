@@ -32,6 +32,7 @@ namespace Daphne
             }
 
             nt_collisionManager = new Nt_CollisionManager(gridSize.ToArray(), gridStep, toroidal);
+            nt_collisionManager.set_parameter_Ph1(SimulationBase.ProtocolHandle.sim_params.phi1);
         }
 
         public void Step(double dt)

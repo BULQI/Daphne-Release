@@ -1,13 +1,20 @@
 #pragma once
 
+
 #include <errno.h>
+#include <unordered_map>
+
 #include "Nt_DArray.h"
 #include "Nt_CellPair.h"
 #include "Nt_Grid.h"
+#include "Utility.h"
+#include "NtCollisionManager.h"
 
+using namespace std;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Security;
+using namespace NativeDaphneLibrary;
 
 namespace NativeDaphne 
 {
@@ -18,7 +25,11 @@ namespace NativeDaphne
 
 	public:
 
-		static bool isToroidal;
+		static bool isToroidal = false;
+		
+		bool initialized;
+		NtCollisionManager *native_collisionManager;
+
 
 		/// <summary>
         /// constructor
@@ -30,8 +41,12 @@ namespace NativeDaphne
             grid = gcnew array<Dictionary<int, Nt_Cell^>^, 3>(gridPts[0], gridPts[1], gridPts[2]);
 			remove_key_pair_lock = gcnew Object();
 			isToroidal = _isEcsToroidal;
-			Nt_CellPair::gridSize = gridSize;
-			Nt_CellPair::isECSToroidal = isToroidal;
+			
+			pin_ptr<double> gs_ptr = &gridSize[0];
+			native_collisionManager = new NtCollisionManager(gs_ptr, gridStep, _isEcsToroidal);
+			//this->pairs = native_collisionManager->pairs;
+			tmp_idx = gcnew array<int>(3);
+			initialized = false;
         }
 
         void Step(double dt)
@@ -39,43 +54,12 @@ namespace NativeDaphne
             update(dt);
         }
 
+		void set_parameter_Ph1(double p)
+		{
+			NtCollisionManager::Phi1 = p;
+		}
+
 	private:
-
-        bool clearSeparation(Nt_CellPair^ p)
-        {
-             int maxSep = (int)Math::Ceiling((p->Cell[0]->Radius + p->Cell[1]->Radius) / gridStep);
-
-            int dx, dy, dz;
-
-            // correction for periodic boundary conditions
-            if (isToroidal == true)
-            {
-                dx = p->GridIndex_dx;
-                if (dx > 0.5 * gridPts[0])
-                {
-                    dx = gridPts[0] - dx;
-                }
-                if (dx > maxSep) return true;
-                dy = p->GridIndex_dy;
-                if (dy > 0.5 * gridPts[1])
-                {
-                    dy = gridPts[1] - dy;
-                }
-                if (dy > maxSep) return true;
-                dz = p->GridIndex_dz;
-                if (dz > 0.5 * gridPts[2])
-                {
-                    dz = gridPts[2] - dz;
-                }
-                return dz > maxSep;
-            }
-            //dx = Math.Abs(p.Cell(0).GridIndex[0] - p.Cell(1).GridIndex[0]);
-
-            return (p->GridIndex_dx > maxSep || p->GridIndex_dy > maxSep || p->GridIndex_dz > maxSep);
-
-            // the separation distance in units of voxels
-            //return Math.Max(Math.Max(dx, dy), dz) > maxSep;
-        }
 
         // think high and low byte but using integer logic
         int pairHash(int idx1, int idx2)
@@ -84,7 +68,7 @@ namespace NativeDaphne
         }
 
         // find a neighbor index of a grid tile; return -1 for illegal index
-        array<int>^ neighbor(array<int>^ current, int dx, int dy, int dz)
+        array<int>^ neighbor(int* current, int dx, int dy, int dz)
         {
 
 			array<int>^ idx = gcnew array<int>{ current[0], current[1], current[2] }; 
@@ -186,33 +170,24 @@ namespace NativeDaphne
         /// <summary>
         /// recalculates and updates the distance for existing pairs
         /// </summary>
-        void updateExistingPairs()
-        {
-            if (pairs != nullptr)
-            {
-                for each (KeyValuePair<int, Nt_CellPair^>^ kvp in pairs)
-                {
-                    // recalculate the distance for pairs
-                    //kvp.Value.distance(gridSize);
-                    kvp->Value->distance();
-                }
-            }
-        }
+        //void updateExistingPairs()
+        //{
+        //    if (pairs != nullptr)
+        //    {
+        //        for each (KeyValuePair<int, Nt_CellPair^>^ kvp in pairs)
+        //        {
+        //            // recalculate the distance for pairs
+        //            //kvp.Value.distance(gridSize);
+        //            kvp->Value->distance();
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// this version of the function avoids excessive loops
         /// </summary>
         void updateGridAndPairs();
         
-        void pairInteractions(double dt)
-        {
-            // compute interaction forces for all pairs and apply to the cells in the pairs (accumulate)
-            for each (KeyValuePair<int, Nt_CellPair^>^ kvp in pairs)
-            {
-                kvp->Value->pairInteract(dt);
-            }
-        }
-
         /// <summary>
         /// update and apply the grid state, pairs, and forces
         /// </summary>
@@ -222,13 +197,17 @@ namespace NativeDaphne
             // update cell locations in the grid tiles and update pairs
             updateGridAndPairs();
             // handle all pairs and find the forces
-            pairInteractions(dt);
+			native_collisionManager->pairInteract(dt);
         }
 
-        Dictionary<int, Nt_CellPair^>^ pairs;
+		//unordered_map<int, NtCellPair *> *pairs;
+
+        //Dictionary<int, Nt_CellPair^>^ pairs;
         int pairKeyMultiplier;
 		int fastMultiplierDecide;
 		array<Dictionary<int, Nt_Cell^>^, 3>^ grid;
+
         Object^ remove_key_pair_lock;
+		array<int>^ tmp_idx;
     };
 }

@@ -6,13 +6,19 @@
 #define DllExport __declspec(dllimport)
 #endif
 
+#include <stdlib.h>
+#include <xmmintrin.h>
 
 namespace NativeDaphneLibrary
 {
 	class DllExport Utility
 	{
+	//private:
+	//	static int tmp_arr[4];
+	//	static __m128* pDest;
 	public:
-
+		static int tmp_arr[4];
+		static __m128* pDest;
 		//same as Daxpy
 		static int NtDaxpy(int n, double alpha, double *x, int incx,  double *y, int incy);
 
@@ -40,7 +46,6 @@ namespace NativeDaphneLibrary
 		static void Utility::acml_setnumthreads(int numthreads);
 
 		static void Utility::test_performance();
-
 
 	};
 }

@@ -279,46 +279,36 @@ namespace NativeDaphneLibrary
 	int NtInterpolatedRectangularPrism::Laplacian(double *, double *, int){ return 0;}
 
 	///each position * is for one cell
-	int NtInterpolatedRectangularPrism::NativeRestrict(double *sfarray, double** position, int n, double **_output)
+	int NtInterpolatedRectangularPrism::NativeRestrict_v0(double *sfarray, double** position, int n, double **_output)
 	{
 		
-		double node_vals[20];
-		double node_coeffs[20];
-		double dx, dy, dz, ddx, ddy, ddz;
+		double dx, dy, dz, ddx, ddy, ddz, tmpval;
 		for (int p= 0; p < n; p++)
 		{
 			double *pos = position[p];
 			double *output = _output[p];
-			double idxval = pos[0]/StepSize;
-			int idx = (int)idxval;
-			if (idx == NodesPerSide0m1)idx--;
-			dx = idxval - idx;
+
+			tmpval = pos[0]/StepSize;
+			int idx = (int)tmpval;
+			if (idx == NodesPerSide0 - 1)idx--;
+			dx = tmpval - idx;
 			ddx = 1 - dx;
 
-			double idyval = pos[1]/StepSize;
-			int idy = (int)idyval;
-			if (idy == NodesPerSide1m1)idy--;
-			dy = idyval - idy;
+			tmpval = pos[1]/StepSize;
+			int idy = (int)tmpval;
+			if (idy == NodesPerSide1 - 1)idy--;
+			dy = tmpval - idy;
 			ddy = 1 - dy;
 
-			double idzval = pos[2]/StepSize;
-			int idz = (int)idzval;
-			if (idz == NodesPerSide2m1)idz--;
-			dz = idzval - idz;
+			tmpval = pos[2]/StepSize;
+			int idz = (int)tmpval;
+			if (idz == NodesPerSide2 - 1)idz--;
+			dz = tmpval - idz;
 			ddz = 1 - dz;
 
 			int index = idx + idy * NodesPerSide0 + idz * NPS01;
 			
 			double coeffs[8];
-			//coeffs[0] = (1-delta[0])*(1-delta[1])*(1-delta[2]); //0 0 0
-			//coeffs[1] = (1-delta[0])*(1-delta[1])*delta[2];		//0 0 1
-			//coeffs[2] = (1-delta[0])*delta[1]*(1-delta[2]);		//0 1 0
-			//coeffs[3] = (1-delta[0])*delta[1]*delta[2];			//0 1 1
-			//coeffs[4] = delta[0]*(1-delta[1])*(1-delta[2]);		//1 0 0
-			//coeffs[5] = delta[0]*(1-delta[1])*delta[2];			//1 0 1
-			//coeffs[6] = delta[0]*delta[1]*(1-delta[2]);			//1 1 0
-			//coeffs[7] = delta[0]*delta[1]*delta[2];				//1 1 1
-
 			coeffs[0] = ddx * ddy * ddz;	//0 0 0
 			coeffs[1] = ddx * ddy * dz;		//0 0 1
 			coeffs[2] = ddx * dy * ddz;		//0 1 0
@@ -332,300 +322,429 @@ namespace NativeDaphneLibrary
 			int boundFlag = lm->boundFlag;
 
 			//0th element
-			int *indexArray = lm->indexArray0;
-			//for (int i= 0; i< 8; i++)
-			//{
-			//	node_vals[i] = sfarray[indexArray[i]];
-			//}
-			double *node_ptr = node_vals;
-			double *ptr_stop = node_ptr + 8;
-			int *index_ptr = indexArray;
-			while (node_ptr != ptr_stop)
+			double sumval = 0;
+			int *index_ptr = lm->indexArray0;
+			int *ptr_stop = index_ptr + 8;
+			double *coeff_ptr = coeffs;
+			while (index_ptr != ptr_stop)
 			{
-				*node_ptr++ = sfarray[*index_ptr++];
-				*node_ptr++ = sfarray[*index_ptr++];
-				*node_ptr++ = sfarray[*index_ptr++];
-				*node_ptr++ = sfarray[*index_ptr++];
+				sumval += sfarray[*index_ptr++] * (*coeff_ptr++);
 			}
-
-			output[0] = ddot(8, node_vals, 1, coeffs, 1);
-
+			output[0] = sumval;
 
 			//1th element
-			indexArray = lm->indexArray1;
-			int nn = 0;
-			//fprintf(stderr, "in restricting...\n");
+			index_ptr = lm->indexArray1;
+			sumval = 0;
 			if ((boundFlag & XBOUND) == 0)
 			{
-				//for (int i = 0; i< 8; i++)
-				//{
-				//	node_vals[nn] = sfarray[indexArray[nn]];
-				//	node_coeffs[nn++] = coeffs[i];					
-				//	node_vals[nn] = sfarray[indexArray[nn]];
-				//	node_coeffs[nn++] = -coeffs[i];
-				//}
-
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 16;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
+				ptr_stop = index_ptr + 16;
+				coeff_ptr = coeffs;
+				while (index_ptr != ptr_stop)
 				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
-				for (int i = 0; i< 8; i++)
-				{
-					node_coeffs[nn++] = coeffs[i];					
-					node_coeffs[nn++] = -coeffs[i];
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
 				}
 			}
 			else if ((boundFlag & XLEFT) != 0)
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 20;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
-				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
-
-				int nn = 0;
 				for (int i=0; i< 4; i++)
 				{
-					node_coeffs[nn++] = coeffs[i] * (-3);
-					node_coeffs[nn++] = coeffs[i] * (4);
-					node_coeffs[nn++] = coeffs[i] * (-1);
+					tmpval = sfarray[*index_ptr++] * (-3);
+					tmpval += sfarray[*index_ptr++] * 4;
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
 				}
 				for (int i=4; i< 8; i++)
 				{
-					node_coeffs[nn++] = coeffs[i];
-					node_coeffs[nn++] = -coeffs[i];
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
 				}
 			} 
 			else //right bound
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 20;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
-				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
 				for (int i=0; i< 4; i++)
 				{
-					node_coeffs[nn++] = coeffs[i];
-					node_coeffs[nn++] = -coeffs[i];
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
 				}
-				for (int i=4; i< 8; i++)
+				for (int i=4; i< 8; ++i)
 				{
-					node_coeffs[nn++] = coeffs[i] * (3);
-					node_coeffs[nn++] = coeffs[i] * (-4);
-					node_coeffs[nn++] = coeffs[i];
+					tmpval = sfarray[*index_ptr++] * 3;
+					tmpval -= sfarray[*index_ptr++] * 4;
+					tmpval += sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
 				}
 			}
-			output[1] = ddot(nn, node_vals, 1, node_coeffs, 1);
-			output[1] /= (2 * StepSize);
+			output[1] = sumval/(2 * StepSize);
 
 			//2th element
-			indexArray = lm->indexArray2;
-			nn = 0;
+			index_ptr = lm->indexArray2;
+			sumval = 0;
 			if ((boundFlag & YBOUND) == 0)
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 16;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
+				ptr_stop = index_ptr + 16;
+				coeff_ptr = coeffs;
+				while (index_ptr != ptr_stop)
 				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
-				for (int i = 0; i< 8; i++)
-				{
-					node_coeffs[nn++] = coeffs[i];					
-					node_coeffs[nn++] = -coeffs[i];
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
 				}
 			}
 			else if ((boundFlag & YLEFT) != 0) //3 3 2 2 3 3 2 2
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 20;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
-				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
-				node_ptr = node_coeffs;
-				*node_ptr++ = coeffs[0] * (-3);
-				*node_ptr++ = coeffs[0] * (4);
-				*node_ptr++ = coeffs[0] * (-1);
-				*node_ptr++ = coeffs[1] * (-3);
-				*node_ptr++ = coeffs[1] * (4);
-				*node_ptr++ = coeffs[1] * (-1);
-				*node_ptr++ = coeffs[2];
-				*node_ptr++ = -coeffs[2];
-				*node_ptr++ = coeffs[3];
-				*node_ptr++ = -coeffs[3];
-				*node_ptr++ = coeffs[4] * (-3);
-				*node_ptr++ = coeffs[4] * (4);
-				*node_ptr++ = coeffs[4] * (-1);
-				*node_ptr++ = coeffs[5] * (-3);
-				*node_ptr++ = coeffs[5] * (4);
-				*node_ptr++ = coeffs[5] * (-1);
-				*node_ptr++ = coeffs[6];
-				*node_ptr++ = -coeffs[6];
-				*node_ptr++ = coeffs[7];
-				*node_ptr++ = -coeffs[7];
-				nn = 20;
+				//20 elements
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[0];
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[1];
+
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[2];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[3];
+			
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[4];
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[5];
+
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[6];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[7];
 			} 
 			else //right bound: 2 2 3 3 2 2 3 3
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 20;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
-				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
-				node_ptr = node_coeffs;
-				*node_ptr++ = coeffs[0];
-				*node_ptr++ = -coeffs[0];
-				*node_ptr++ = coeffs[1];
-				*node_ptr++ = -coeffs[1];
-				*node_ptr++ = coeffs[2] * (3);
-				*node_ptr++ = coeffs[2] * (-4);
-				*node_ptr++ = coeffs[2] * (1);
-				*node_ptr++ = coeffs[3] * (3);
-				*node_ptr++ = coeffs[3] * (-4);
-				*node_ptr++ = coeffs[3] * (1);
-				*node_ptr++ = coeffs[4];
-				*node_ptr++ = -coeffs[4];
-				*node_ptr++ = coeffs[5];
-				*node_ptr++ = -coeffs[5];
-				*node_ptr++ = coeffs[6] * (3);
-				*node_ptr++ = coeffs[6] * (-4);
-				*node_ptr++ = coeffs[6] * (1);
-				*node_ptr++ = coeffs[7] * (3);
-				*node_ptr++ = coeffs[7] * (-4);
-				*node_ptr++ = coeffs[7] * (1);
-				nn= 20;
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[0];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[1];
+
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[2];
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[3];
+
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[4];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[5];
+
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[6];
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[7];
 			}
-			output[2] = ddot(nn, node_vals, 1, node_coeffs, 1);
-			output[2] /= (2 * StepSize);
+			output[2] = sumval / (2 * StepSize);
 
 			//3th element
-			indexArray = lm->indexArray3;
-			nn = 0;
+			index_ptr = lm->indexArray3;
+			sumval = 0;
 			if ((boundFlag & ZBOUND) == 0)
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 16;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
+				ptr_stop = index_ptr + 16;
+				coeff_ptr = coeffs;
+				while (index_ptr != ptr_stop)
 				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-				}
-				for (int i = 0; i< 8; i++)
-				{
-					node_coeffs[nn++] = coeffs[i];					
-					node_coeffs[nn++] = -coeffs[i];
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
 				}
 			}
 			else if ((boundFlag & ZLEFT) != 0) //3 2 3 2 3 2 3 2
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 20;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
+				coeff_ptr = coeffs;
+				for (int i= 0; i<4; ++i)
 				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
+					tmpval = sfarray[*index_ptr++] *(-3);
+					tmpval += sfarray[*index_ptr++] * 4;
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
 				}
-				node_ptr = node_coeffs;
-				*node_ptr++ = coeffs[0] * (-3);
-				*node_ptr++ = coeffs[0] * (4);
-				*node_ptr++ = coeffs[0] * (-1);
-				*node_ptr++ = coeffs[1];
-				*node_ptr++ = -coeffs[1];
-				*node_ptr++ = coeffs[2] * (-3);
-				*node_ptr++ = coeffs[2] * (4);
-				*node_ptr++ = coeffs[2] * (-1);
-				*node_ptr++ = coeffs[3];
-				*node_ptr++ = -coeffs[3];
-				*node_ptr++ = coeffs[4] * (-3);
-				*node_ptr++ = coeffs[4] * (4);
-				*node_ptr++ = coeffs[4] * (-1);
-				*node_ptr++ = coeffs[5];
-				*node_ptr++ = -coeffs[5];
-				*node_ptr++ = coeffs[6] * (-3);
-				*node_ptr++ = coeffs[6] * (4);
-				*node_ptr++ = coeffs[6] * (-1);
-				*node_ptr++ = coeffs[7];
-				*node_ptr++ = -coeffs[7];
-				nn = 20;
 			} 
 			else //right bound: 2 3 2 3 2 3 2 3
 			{
-				node_ptr = node_vals;
-				ptr_stop = node_ptr + 20;
-				index_ptr = indexArray;
-				while (node_ptr != ptr_stop)
+				coeff_ptr = coeffs;
+				for (int i = 0; i < 4; ++i)
 				{
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
-					*node_ptr++ = sfarray[*index_ptr++];
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
+					tmpval = sfarray[*index_ptr++] *(3);
+					tmpval += sfarray[*index_ptr++] * (-4);
+					tmpval += sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
 				}
-
-				node_ptr = node_coeffs;
-				*node_ptr++ = coeffs[0];
-				*node_ptr++ = -coeffs[0];
-				*node_ptr++ = coeffs[1] * (3);
-				*node_ptr++ = coeffs[1] * (-4);
-				*node_ptr++ = coeffs[1] * (1);
-				*node_ptr++ = coeffs[2];
-				*node_ptr++ = -coeffs[2];
-				*node_ptr++ = coeffs[3] * (3);
-				*node_ptr++ = coeffs[3] * (-4);
-				*node_ptr++ = coeffs[3] * (1);
-
-				*node_ptr++ = coeffs[4];
-				*node_ptr++ = -coeffs[4];
-				*node_ptr++ = coeffs[5] * (3);
-				*node_ptr++ = coeffs[5] * (-4);
-				*node_ptr++ = coeffs[5] * (1);
-				*node_ptr++ = coeffs[6];
-				*node_ptr++ = -coeffs[6];
-				*node_ptr++ = coeffs[7] * (3);
-				*node_ptr++ = coeffs[7] * (-4);
-				*node_ptr++ = coeffs[7] * (1);
-				
 			}
-			output[3] = ddot(nn, node_vals, 1, node_coeffs, 1);	
-			output[3] /= (2 * StepSize);
+			output[3] = sumval / (2 * StepSize);
 		}
 		return 0;
 	}
+
+	int NtInterpolatedRectangularPrism::NativeRestrict(double *sfarray, double** position, int n, double **_output)
+	{
+		
+		double dx, dy, dz, ddx, ddy, ddz, tmpval;
+		for (int p= 0; p < n; p++)
+		{
+			double *pos = position[p];
+			double *output = _output[p];
+
+			tmpval = pos[0]/StepSize;
+			int idx = (int)tmpval;
+			if (idx == NodesPerSide0 - 1)idx--;
+			dx = tmpval - idx;
+			ddx = 1 - dx;
+
+			tmpval = pos[1]/StepSize;
+			int idy = (int)tmpval;
+			if (idy == NodesPerSide1 - 1)idy--;
+			dy = tmpval - idy;
+			ddy = 1 - dy;
+
+			tmpval = pos[2]/StepSize;
+			int idz = (int)tmpval;
+			if (idz == NodesPerSide2 - 1)idz--;
+			dz = tmpval - idz;
+			ddz = 1 - dz;
+
+			int index = idx + idy * NodesPerSide0 + idz * NPS01;
+			
+			double coeffs[8];
+			coeffs[0] = ddx * ddy * ddz;	//0 0 0
+			coeffs[1] = ddx * ddy * dz;		//0 0 1
+			coeffs[2] = ddx * dy * ddz;		//0 1 0
+			coeffs[3] = ddx * dy * dz;		//0 1 1
+			coeffs[4] = dx * ddy * ddz;		//1 0 0
+			coeffs[5] = dx * ddy * dz;		//1 0 1
+			coeffs[6] = dx * dy * ddz;		//1 1 0
+			coeffs[7] = dx * dy * dz;		//1 1 1
+
+			NtIndexMatrix *lm = localMatrixArray[index];
+			int boundFlag = lm->boundFlag;
+
+			//0th element
+			double sumval = 0;
+			int *index_ptr = lm->indexArray0;
+			int *ptr_stop = index_ptr + 8;
+			double *coeff_ptr = coeffs;
+			while (index_ptr != ptr_stop)
+			{
+				sumval += sfarray[*index_ptr++] * (*coeff_ptr++);
+			}
+			output[0] = sumval;
+
+			//1th element
+			index_ptr = lm->indexArray1;
+			sumval = 0;
+			if ((boundFlag & XBOUND) == 0)
+			{
+				sumval = (sfarray[index_ptr[0]] - sfarray[index_ptr[1]]) * coeffs[0];
+				sumval += (sfarray[index_ptr[2]] - sfarray[index_ptr[3]]) * coeffs[1];
+				sumval += (sfarray[index_ptr[4]] - sfarray[index_ptr[5]]) * coeffs[2];
+				sumval += (sfarray[index_ptr[6]] - sfarray[index_ptr[7]]) * coeffs[3];
+				sumval += (sfarray[index_ptr[8]] - sfarray[index_ptr[9]]) * coeffs[4];
+				sumval += (sfarray[index_ptr[10]] - sfarray[index_ptr[11]]) * coeffs[5];
+				sumval += (sfarray[index_ptr[12]] - sfarray[index_ptr[13]]) * coeffs[6];
+				sumval += (sfarray[index_ptr[14]] - sfarray[index_ptr[15]]) * coeffs[7];
+			}
+			else if ((boundFlag & XLEFT) != 0)
+			{
+				for (int i=0; i< 4; i++)
+				{
+					tmpval = sfarray[*index_ptr++] * (-3);
+					tmpval += sfarray[*index_ptr++] * 4;
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
+				}
+				for (int i=4; i< 8; i++)
+				{
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
+				}
+			} 
+			else //right bound
+			{
+				for (int i=0; i< 4; i++)
+				{
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
+				}
+				for (int i=4; i< 8; ++i)
+				{
+					tmpval = sfarray[*index_ptr++] * 3;
+					tmpval -= sfarray[*index_ptr++] * 4;
+					tmpval += sfarray[*index_ptr++];
+					sumval += tmpval * coeffs[i];
+				}
+			}
+			output[1] = sumval/(2 * StepSize);
+
+			//2th element
+			index_ptr = lm->indexArray2;
+			sumval = 0;
+			if ((boundFlag & YBOUND) == 0)
+			{
+				sumval = (sfarray[index_ptr[0]] - sfarray[index_ptr[1]]) * coeffs[0];
+				sumval += (sfarray[index_ptr[2]] - sfarray[index_ptr[3]]) * coeffs[1];
+				sumval += (sfarray[index_ptr[4]] - sfarray[index_ptr[5]]) * coeffs[2];
+				sumval += (sfarray[index_ptr[6]] - sfarray[index_ptr[7]]) * coeffs[3];
+				sumval += (sfarray[index_ptr[8]] - sfarray[index_ptr[9]]) * coeffs[4];
+				sumval += (sfarray[index_ptr[10]] - sfarray[index_ptr[11]]) * coeffs[5];
+				sumval += (sfarray[index_ptr[12]] - sfarray[index_ptr[13]]) * coeffs[6];
+				sumval += (sfarray[index_ptr[14]] - sfarray[index_ptr[15]]) * coeffs[7];
+			}
+			else if ((boundFlag & YLEFT) != 0) //3 3 2 2 3 3 2 2
+			{
+				//20 elements
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[0];
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[1];
+
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[2];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[3];
+			
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[4];
+				tmpval = sfarray[*index_ptr++] *(-3);
+				tmpval += sfarray[*index_ptr++] * 4;
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[5];
+
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[6];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[7];
+			} 
+			else //right bound: 2 2 3 3 2 2 3 3
+			{
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[0];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[1];
+
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[2];
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[3];
+
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[4];
+				tmpval = sfarray[*index_ptr++];
+				tmpval -= sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[5];
+
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[6];
+				tmpval = sfarray[*index_ptr++] *(3);
+				tmpval += sfarray[*index_ptr++] * (-4);
+				tmpval += sfarray[*index_ptr++];
+				sumval += tmpval * coeffs[7];
+			}
+			output[2] = sumval / (2 * StepSize);
+
+			//3th element
+			index_ptr = lm->indexArray3;
+			sumval = 0;
+			if ((boundFlag & ZBOUND) == 0)
+			{
+				sumval = (sfarray[index_ptr[0]] - sfarray[index_ptr[1]]) * coeffs[0];
+				sumval += (sfarray[index_ptr[2]] - sfarray[index_ptr[3]]) * coeffs[1];
+				sumval += (sfarray[index_ptr[4]] - sfarray[index_ptr[5]]) * coeffs[2];
+				sumval += (sfarray[index_ptr[6]] - sfarray[index_ptr[7]]) * coeffs[3];
+				sumval += (sfarray[index_ptr[8]] - sfarray[index_ptr[9]]) * coeffs[4];
+				sumval += (sfarray[index_ptr[10]] - sfarray[index_ptr[11]]) * coeffs[5];
+				sumval += (sfarray[index_ptr[12]] - sfarray[index_ptr[13]]) * coeffs[6];
+				sumval += (sfarray[index_ptr[14]] - sfarray[index_ptr[15]]) * coeffs[7];
+			}
+			else if ((boundFlag & ZLEFT) != 0) //3 2 3 2 3 2 3 2
+			{
+				coeff_ptr = coeffs;
+				for (int i= 0; i<4; ++i)
+				{
+					tmpval = sfarray[*index_ptr++] *(-3);
+					tmpval += sfarray[*index_ptr++] * 4;
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
+				}
+			} 
+			else //right bound: 2 3 2 3 2 3 2 3
+			{
+				coeff_ptr = coeffs;
+				for (int i = 0; i < 4; ++i)
+				{
+					tmpval = sfarray[*index_ptr++];
+					tmpval -= sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
+					tmpval = sfarray[*index_ptr++] *(3);
+					tmpval += sfarray[*index_ptr++] * (-4);
+					tmpval += sfarray[*index_ptr++];
+					sumval += tmpval * (*coeff_ptr++);
+				}
+			}
+			output[3] = sumval / (2 * StepSize);
+		}
+		return 0;
+	}
+
 
 	int NtInterpolatedRectangularPrism::MultithreadNativeRestrict(double *sfarray, double** position, int n, double **_output)
 	{
@@ -639,6 +758,8 @@ namespace NativeDaphneLibrary
 			if (numThreads < 0)numThreads = 0;
 		}
 
+		//temparily disable thread
+		//numThreads = 0;
 		//start job
 		::InterlockedExchange(&AcitveJobCount, numThreads);
 		int n0, nn;

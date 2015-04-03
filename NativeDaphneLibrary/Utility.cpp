@@ -16,7 +16,9 @@ using namespace std;
 namespace NativeDaphneLibrary
 {
 	
-	
+	int Utility::tmp_arr[4];
+	__m128* Utility::pDest;
+
 	int Utility::NtDaxpy(int n, double alpha, double *x, int incx, double *y, int incy)
 	{
 		daxpy(n, alpha, x, incx, y, incy);

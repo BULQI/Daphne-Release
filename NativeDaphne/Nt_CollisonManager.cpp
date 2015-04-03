@@ -13,10 +13,11 @@ using namespace System::Collections::Generic;
 
 namespace NativeDaphne
 {
+	typedef std::unordered_map<int, NtCellPair *> PairMap;
 
 	void Nt_CollisionManager::RemoveAllPairsContainingCell(Nt_Cell^ del)
 	{
-            if (pairs != nullptr && pairs->Count > 0 && del != nullptr)
+            if (!native_collisionManager->isEmpty() && del != nullptr)
             {
                 for each (KeyValuePair<int, Nt_Cell^>^ kvp in Nt_CellManager::cellDictionary)
                 {
@@ -27,19 +28,19 @@ namespace NativeDaphne
                     }
 
                     int hash = pairHash(del->Cell_id, kvp->Value->Cell_id);
-
+					native_collisionManager->removePair(hash);
                     // remove the pair; will only act if the pair exists
-                    if (pairs->Remove(hash))
-                    {
-                        //Console.WriteLine("removal of pair " + del.Index + " " + kvp.Value.Index);
-                    }
+                    //if (pairs->erase(hash))
+                    //{
+                    //    //Console.WriteLine("removal of pair " + del.Index + " " + kvp.Value.Index);
+                    //}
                 }
             }
 	}
 
 	void Nt_CollisionManager::RekeyAllPairsContainingCell(Nt_Cell ^cell, int oldKey)
 	{
-            if (pairs != nullptr && pairs->Count > 0 && cell != nullptr)
+            if (!native_collisionManager->isEmpty() && cell != nullptr)
             {
                 for each (KeyValuePair<int, Nt_Cell^>^ kvp in Nt_CellManager::cellDictionary)
                 {
@@ -52,13 +53,19 @@ namespace NativeDaphne
                     int hash = pairHash(oldKey, kvp->Value->Cell_id);
 
                     // remove the pair; will only act if the pair exists
-                    if (pairs->ContainsKey(hash) == true)
-                    {
+					if (native_collisionManager->itemExists(hash) == true)
+					{
+						NtCellPair *p = native_collisionManager->getPair(hash);
+						native_collisionManager->removePair(hash);
                         // insert with new key
-                        pairs->Add(pairHash(cell->Cell_id, kvp->Value->Cell_id), pairs[hash]);
-                        // remove old key
-                        pairs->Remove(hash);
-                        //Console.WriteLine("rekeying of pair " + oldKey + " " + kvp.Value.Index);
+						//std::pair<int, NtCellPair *> p(pairHash(cell->Cell_id, kvp->Value->Cell_id), *pi);
+						int key = pairHash(cell->Cell_id, kvp->Value->Cell_id);
+						native_collisionManager->addCellPair(key, p);
+
+                        //pairs->insert(make_pair(key, pi->second));
+                        //// remove old key
+                        //pairs->erase(hash);
+                        ////Console.WriteLine("rekeying of pair " + oldKey + " " + kvp.Value.Index);
                     }
                 }
             }
@@ -71,12 +78,14 @@ namespace NativeDaphne
             List<int>^ removalPairKeys = nullptr;
 
             array<double>^ gridSizeArr = gridSize;
+
             // create the pairs dictionary
-            if (pairs == nullptr)
+            if (initialized == false)
             {
-                pairs = gcnew Dictionary<int, Nt_CellPair^>();
                 pairKeyMultiplier = multiplier();
                 fastMultiplierDecide = Nt_Cell::SafeCell_id;
+				native_collisionManager->ClearPairs();
+				initialized = true;
             }
             else
             {
@@ -92,36 +101,14 @@ namespace NativeDaphne
                     }
                 }
 
-                for each (KeyValuePair<int, Nt_CellPair^>^ kvp in pairs)
-                {
-					Nt_CellPair^ p = kvp->Value;
-                    if (p->isCriticalPair() == false && clearSeparation(p) == true || legalIndex(p->Cell[0]->GridIndex) == false || legalIndex(p->Cell[1]->GridIndex) == false)
-                    {
-                        if (removalPairKeys == nullptr)
-                        {
-                            removalPairKeys = gcnew List<int>();
-                        }
-                        removalPairKeys->Add(kvp->Key);
-                    }
-                    else
-                    {
-                        // recalculate the distance for pairs that stay
-                        //kvp.Value.distance(gridSize);
-                        p->distance();
-                    }
-                }
-
-                if (removalPairKeys != nullptr)
-                {
-                    for each (int key in removalPairKeys)
-                    {
-                        pairs->Remove(key);
-                    }
-                }
+				//remove non-critical pairs
+				int num_removed = native_collisionManager->removeNonCriticalPairs();
             }
 
-            array<int>^ idx = gcnew array<int>(3);
+            array<int>^ idx = tmp_idx;
             // look at all cells to see if they changed in the grid
+			Dictionary<int, Nt_Cell^>^ tmp_dict = Nt_CellManager::cellDictionary;
+			int nn3 = tmp_dict->Count;
             for each (KeyValuePair<int, Nt_Cell^>^ kvpc in Nt_CellManager::cellDictionary)
             {
 				Nt_Cell^ cell = kvpc->Value;
@@ -145,7 +132,6 @@ namespace NativeDaphne
                     cell->GridIndex[0] = idx[0];
                     cell->GridIndex[1] = idx[1];
                     cell->GridIndex[2] = idx[2];
-
                     // insert into grid and determine critical cells
                     if (legalIndex(idx) == true)
                     {
@@ -163,6 +149,11 @@ namespace NativeDaphne
                         }
                         criticalCells->Add(cell);
                     }
+					else 
+					{
+						//keep this so that we don't need to compute later
+						cell->nt_cell->isLegalIndex = false;
+					}
                 }
             }
 
@@ -194,16 +185,12 @@ namespace NativeDaphne
                                         int hash = pairHash(cell->Cell_id, kvpg->Value->Cell_id);
 
                                         // not already inserted
-                                        if (pairs->ContainsKey(hash) == false)
-                                        {
-                                            // create the pair
-                                            Nt_CellPair^ p = gcnew Nt_CellPair(cell, kvpg->Value);
 
-                                            // calculate the distance
-                                            //p.distance(gridSize);
-                                            p->distance();
-                                            // insert the pair
-                                            pairs->Add(hash, p);
+                                        if (native_collisionManager->itemExists(hash) == false)
+                                        {
+                                            NtCellPair* pair1 = new NtCellPair(cell->nt_cell, kvpg->Value->nt_cell);
+											pair1->set_distance();
+											native_collisionManager->addCellPair(hash, pair1);
                                         }
                                     }
                                 }

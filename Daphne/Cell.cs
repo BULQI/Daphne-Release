@@ -154,7 +154,7 @@ namespace Daphne
 
             //C++/Cli instance
             ntCell = new Nt_Cell(Cell_id, Radius);
-            ntCell.spatialState = new Nt_CellSpatialState(SpatialState.X, SpatialState.V, SpatialState.F);
+            ntCell.SpatialState = new Nt_CellSpatialState(SpatialState.X, SpatialState.V, SpatialState.F);
             Nt_Cell.SafeCell_id = SafeCell_id;
         }
 

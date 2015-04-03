@@ -90,10 +90,15 @@ namespace NativeDaphne
         /// </summary>
         /// <param name="idx">tuple to test</param>
         /// <returns>true or false</returns>
-        bool legalIndex(array<int>^ idx)
+        bool legalIndex(int *idx)
         {
             return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];
         }
+
+		bool legalIndex(array<int>^ idx)
+		{
+			return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];
+		}
 
 		//default voxel = false;
 		double Volume()

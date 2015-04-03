@@ -138,6 +138,8 @@ namespace NativeDaphneLibrary
 
 		int NativeRestrict(double *sfarray, double** pos, int n, double **output);
 
+		int NativeRestrict_v0(double *sfarray, double** pos, int n, double **output);
+
 		int NtInterpolatedRectangularPrism::thread_restrict( void* arg);
 
 		int MultithreadNativeRestrict(double *sfarray, double** position, int n, double **_output);

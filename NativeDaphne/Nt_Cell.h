@@ -5,10 +5,12 @@
 #include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
 #include "Nt_DArray.h"
+#include "NtCellPair.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Security;
+using namespace NativeDaphneLibrary;
 
 namespace NativeDaphne 
 {
@@ -41,6 +43,8 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_Cell
 	{
+	private:
+		Nt_CellSpatialState ^spatialState;
 	public:
 		//how to get this updated??
 		static int SafeCell_id = 0;
@@ -60,8 +64,8 @@ namespace NativeDaphne
 		bool IsChemotactic;
 		bool IsStochastic;
 		bool cytokinetic;
-		Nt_CellSpatialState ^spatialState;
-		array<int>^ GridIndex;
+		int* GridIndex;
+
 
 		static int count = 0;
 
@@ -70,11 +74,15 @@ namespace NativeDaphne
 
 		List<Nt_Cell^>^ ComponentCells;
 
+		NtCell *nt_cell;
+
 		Nt_Cell()
 		{
 			cellIds = gcnew List<int>();
-			GridIndex = gcnew array<int>{-1, -1, -1};
+			//only need 3, but 4 needed when using ssc2
+			GridIndex = (int*)malloc(4 *sizeof(int));
 			allocedItemCount = 0;
+			nt_cell = new NtCell(radius, GridIndex);
 		}
 
 		Nt_Cell(int cid, double r)
@@ -82,9 +90,11 @@ namespace NativeDaphne
 			Cell_id = cid;
 			radius = r;
 			cellIds = gcnew List<int>();
-			GridIndex = gcnew array<int>{-1, -1, -1};
+			GridIndex = (int*)malloc(4 *sizeof(int));
 			allocedItemCount = 0;
+			nt_cell = new NtCell(radius, GridIndex);
 		}
+
 
 		~Nt_Cell()
 		{
@@ -100,6 +110,8 @@ namespace NativeDaphne
 				free(_X);
 				free(_V);
 				free(_F);
+				free(GridIndex);
+				delete nt_cell;
 			}
 		}
 
@@ -122,7 +134,8 @@ namespace NativeDaphne
 			void set(Nt_CellSpatialState^ value)
 			{
 				spatialState = value;
-
+				nt_cell->X = spatialState->X->NativePointer;
+				nt_cell->F = spatialState->F->NativePointer;
 			}
         }
 
@@ -169,8 +182,11 @@ namespace NativeDaphne
 				for (int i=0; i< itemCount; i++)
 				{
 					ComponentCells[i]->spatialState->X->NativePointer = _X + i * 3;
+					ComponentCells[i]->nt_cell->X = _X + i * 3;
 					ComponentCells[i]->spatialState->V->NativePointer = _V + i * 3;
 					ComponentCells[i]->spatialState->F->NativePointer = _F + i * 3;
+					ComponentCells[i]->nt_cell->F = _F + i * 3;
+
 				}
 			}
 			//copy new values
@@ -184,8 +200,10 @@ namespace NativeDaphne
 				_fptr[i] = cell->spatialState->F[i];
 			}
 			cell->spatialState->X->NativePointer = _xptr;
+			cell->nt_cell->X = _xptr;
 			cell->spatialState->V->NativePointer = _vptr;
 			cell->spatialState->F->NativePointer = _fptr;
+			cell->nt_cell->F = _fptr;
 			ComponentCells->Add(cell);
 			cellIds->Add(cell->Cell_id);
 			array_length = ComponentCells->Count * 3;
