@@ -45,6 +45,13 @@ namespace NativeDaphneLibrary
         double x = a_X[0] - b_X[0];
         double y = a_X[1] - b_X[1];
         double z = a_X[2] - b_X[2];
+		double tmp = x * x + y * y + z * z;
+		//when the distance is large than squre, no use to do sqrt.
+		if (tmp > sumRadius2)
+		{
+			distance = tmp;
+			return;
+		}
         distance = sqrt(x * x + y * y + z * z);
 	}
 

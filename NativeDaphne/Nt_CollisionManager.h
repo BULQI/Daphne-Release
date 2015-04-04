@@ -71,11 +71,13 @@ namespace NativeDaphne
         array<int>^ neighbor(int* current, int dx, int dy, int dz)
         {
 
-			array<int>^ idx = gcnew array<int>{ current[0], current[1], current[2] }; 
+			//using tmp rather allocate
+			//array<int>^ idx = gcnew array<int>{ current[0], current[1], current[2] }; 
 
-            idx[0] += dx;
-            idx[1] += dy;
-            idx[2] += dz;
+			array<int>^ idx = tmp_idx;
+			idx[0] = current[0] + dx;
+			idx[1] = current[1] + dy;
+            idx[2] = current[2] + dz;
 
             if (legalIndex(idx) == false)
             {

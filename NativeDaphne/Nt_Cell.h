@@ -65,6 +65,7 @@ namespace NativeDaphne
 		bool IsStochastic;
 		bool cytokinetic;
 		int* GridIndex;
+		int* PreviousGridIndex;
 
 
 		static int count = 0;
@@ -81,6 +82,8 @@ namespace NativeDaphne
 			cellIds = gcnew List<int>();
 			//only need 3, but 4 needed when using ssc2
 			GridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex[0] = -1; //evaludate into invalid
 			allocedItemCount = 0;
 			nt_cell = new NtCell(radius, GridIndex);
 		}
@@ -91,6 +94,9 @@ namespace NativeDaphne
 			radius = r;
 			cellIds = gcnew List<int>();
 			GridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex[0] = -1;
+			PreviousGridIndex[3] = 0; //indicate invalid
 			allocedItemCount = 0;
 			nt_cell = new NtCell(radius, GridIndex);
 		}

@@ -102,7 +102,7 @@ namespace NativeDaphne
                 }
 
 				//remove non-critical pairs
-				int num_removed = native_collisionManager->removeNonCriticalPairs();
+				//int num_removed = native_collisionManager->removeNonCriticalPairs();
             }
 
             array<int>^ idx = tmp_idx;
@@ -123,12 +123,15 @@ namespace NativeDaphne
                     // was inserted before? we have to remove it
                     // NOTE: if fdcs were to start moving we would need special case handling for that here
                     // where the whole array of voxels that had an fdc gets cleared
-                    if (legalIndex(cell->GridIndex) == true && grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]] != nullptr)
-                    {
-                        grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Remove(cell->Cell_id);
-                    }
+                    //if (legalIndex(cell->GridIndex) == true && grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]] != nullptr)
+                    //{
+                    //    grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Remove(cell->Cell_id);
+                    //}
 
                     // have the cell remember its position in the grid
+					cell->PreviousGridIndex[0] = cell->GridIndex[0];
+					cell->PreviousGridIndex[1] = cell->GridIndex[1];
+					cell->PreviousGridIndex[2] = cell->GridIndex[2];
                     cell->GridIndex[0] = idx[0];
                     cell->GridIndex[1] = idx[1];
                     cell->GridIndex[2] = idx[2];
@@ -140,7 +143,7 @@ namespace NativeDaphne
                             grid[idx[0], idx[1], idx[2]] = gcnew Dictionary<int, Nt_Cell^>();
                         }
                         // use the cell's list index as key
-                        grid[idx[0], idx[1], idx[2]]->Add(cell->Cell_id, cell);
+                        //grid[idx[0], idx[1], idx[2]]->Add(cell->Cell_id, cell);
 
                         // schedule to find any new pairs
                         if (criticalCells == nullptr)
@@ -149,17 +152,72 @@ namespace NativeDaphne
                         }
                         criticalCells->Add(cell);
                     }
-					else 
-					{
-						//keep this so that we don't need to compute later
-						cell->nt_cell->isLegalIndex = false;
-					}
                 }
             }
 
-            // now find the new pairs
             if (criticalCells != nullptr)
             {
+				//remove old pairs
+				for each (Nt_Cell^ cell in criticalCells)
+                {
+					if (legalIndex(cell->PreviousGridIndex) == false)continue;
+					//if (cell->Cell_id == 0 && cell->GridIndex[2] == 22 && cell->GridIndex[0] == 21 && cell->GridIndex[1] == 20)
+					//{
+					//	int check_here = true;
+					//}
+					bool curIndexLegal = legalIndex(cell->GridIndex);
+                    for (int i = -1; i <= 1; i++)
+                    {
+                        for (int j = -1; j <= 1; j++)
+                        {
+                            for (int k = -1; k <= 1; k++)
+                            {
+                                array<int>^ test = neighbor(cell->PreviousGridIndex, i, j, k);
+
+                                // don't go outside the grid
+                                if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != nullptr)
+                                {
+                                    // add all pairs in the test grid location
+                                    for each (KeyValuePair<int, Nt_Cell^>^ kvpg in grid[test[0], test[1], test[2]])
+                                    {
+                                        // do not allow self-collisions
+                                        if (cell == kvpg->Value)
+                                        {
+                                            continue;
+                                        }
+                                        int hash = pairHash(cell->Cell_id, kvpg->Value->Cell_id);
+										if (curIndexLegal == true)
+										{
+											//if exist and clear-separated - rmeove
+											native_collisionManager->removePairOnClearSeparation(hash);
+										}
+										else 
+										{
+											//remove if exist
+											native_collisionManager->removePair(hash);
+										}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+				//move the cells to new slots.
+				for each (Nt_Cell^ cell in criticalCells)
+                {
+					if (legalIndex(cell->PreviousGridIndex) == true)
+					{
+						Dictionary<int, Nt_Cell^>^ cell_dict = grid[cell->PreviousGridIndex[0], cell->PreviousGridIndex[1], cell->PreviousGridIndex[2]];
+						if (cell_dict != nullptr)
+						{
+							cell_dict->Remove(cell->Cell_id);
+						}
+					}
+					grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Add(cell->Cell_id, cell);
+				}
+
+				// now find the new pairs
                 for each (Nt_Cell^ cell in criticalCells)
                 {
                     for (int i = -1; i <= 1; i++)
@@ -188,6 +246,7 @@ namespace NativeDaphne
 
                                         if (native_collisionManager->itemExists(hash) == false)
                                         {
+											Nt_Cell^ cell2 = kvpg->Value;
                                             NtCellPair* pair1 = new NtCellPair(cell->nt_cell, kvpg->Value->nt_cell);
 											pair1->set_distance();
 											native_collisionManager->addCellPair(hash, pair1);

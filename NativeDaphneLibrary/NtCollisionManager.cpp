@@ -19,7 +19,7 @@ namespace NativeDaphneLibrary
 	double NtCollisionManager::GridStep = 0;
 	bool NtCollisionManager::IsToroidal = false;
 	double NtCollisionManager::Phi1 = 0;
-	int NtCollisionManager::max_removal = 0;
+	int NtCollisionManager::max_pair_count = 0;
 
 	typedef std::unordered_map<int, NtCellPair *> PairMap;
 
@@ -108,9 +108,88 @@ namespace NativeDaphneLibrary
 
 	void NtCollisionManager::pairInteract(double dt)
 	{
+
+		if (IsToroidal)
+		{
+			pairInteractToroidal(dt);
+			return;
+		}
+
+		//if (max_pair_count < 20000 && pairs->size() > max_pair_count)
+		//{
+		//	max_pair_count = pairs->size();
+		//	fprintf(stderr, "maximum pair count = %d\n", max_pair_count);
+
+
+		//	if (max_pair_count == 13086)
+		//	{
+		//		FILE *fp = fopen("pair.log", "w");
+		//		double min_distance = 10000;
+		//		for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
+		//		{
+		//			int key = it->first;
+		//			if (pairs->count(key) > 1)
+		//			{
+		//				fprintf(stderr, "This key %d has %d items\n", key, pairs->count(key));
+		//			}
+		//			NtCellPair *pair = it->second;
+		//			fprintf(fp, "id= %d distance = %f\n", key, pair->distance);
+		//			if (pair->distance < min_distance)min_distance = pair->distance;
+		//		}
+		//		fprintf(fp, "min distance = %f\n", min_distance);
+		//		fclose (fp);
+		//		fprintf(stderr, "min distance = %f\n", min_distance);
+		//		max_pair_count += 100000; //not writing anymore
+		//	}		
+		//}
+
 		for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
 		{
 			NtCellPair *pair = it->second;
+
+			double *a_X = pair->a->X;
+			double *b_X = pair->b->X;
+
+			double dx = b_X[0] - a_X[0];
+			double dy = b_X[1] - a_X[1];
+			double dz = b_X[2] - a_X[2];
+			double sum_squares = dx * dx + dy * dy + dz * dz;
+			if (sum_squares > pair->sumRadius2 || sum_squares == 0)continue;
+
+			double dist_inverse = 1.0/sqrt(sum_squares);
+			
+			//divide by pair->distance is for normalize 
+			//double force = Phi1 * (1.0/pair->distance - 1.0/pair->sumRadius)/pair->distance;
+			//this is not actullay force, but combined normalization step.
+			double force = Phi1 * (dist_inverse - pair->sumRadiusInverse) * dist_inverse; 
+			
+			//double *a_X = pair->a->X;
+			//double *b_X = pair->b->X;
+			 
+			dx *= force;
+            dy *= force;
+            dz *= force;
+
+			double *a_F = pair->a->F;
+			double *b_F = pair->b->F;
+			a_F[0] -= dx;
+			a_F[1] -= dy;
+			a_F[2] -= dz;
+
+			b_F[0] += dx;
+			b_F[1] += dy;
+			b_F[2] += dz;
+		}
+	}
+
+
+	void NtCollisionManager::pairInteractToroidal(double dt)
+	{
+		for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
+		{
+			NtCellPair *pair = it->second;
+			pair->set_distance_toroidal();
+
 			int b_ij = pair->b_ij = pair->distance > pair->sumRadius ? 0 : 1;
 			if (b_ij == 0 || pair->distance == 0 || pair->distance == pair->sumRadius)continue;
 
@@ -137,7 +216,8 @@ namespace NativeDaphneLibrary
 	}
 
 	//this check if the pair is to be removed, if not, compute distance
-	int NtCollisionManager::removeNonCriticalPairs()
+	//this is being eliminated
+	/*int NtCollisionManager::removeNonCriticalPairs()
 	{
 		int n = 0;
 		if (!IsToroidal)
@@ -181,10 +261,12 @@ namespace NativeDaphneLibrary
 
 		for (int i=0; i< n; i++)
 		{
+			NtCellPair *pair = (*pairs)[nodes_to_remove[i]];
+			bool is_reallly = ClearSeperation(pair);
 			pairs->erase(nodes_to_remove[i]);
 		}
 		return n;
-	}
+	}*/
 
 
 }

@@ -125,6 +125,22 @@ namespace NativeDaphneLibrary
             }
         }
 
+		//this will check clear sepration
+		//irrespective its bond status
+		bool ClearSeperation_nobond(NtCellPair * pair)
+		{
+			int *a = pair->a->gridIndex;
+			int *b = pair->b->gridIndex;
+			int maxSep = pair->MaxSeparation;
+			int d1 = a[0] - b[0];
+			if (d1 > maxSep || d1 < -maxSep) return true;
+			d1 = a[1] - b[1];
+			if (d1 > maxSep || d1 < - maxSep) return true;
+			d1 = a[2] - b[2];
+			if (d1 > maxSep || d1 < -maxSep) return true;
+			return !legalIndex(pair->a->gridIndex) || !legalIndex(pair->a->gridIndex);
+		}
+
 		bool ClearSeperation(NtCellPair * pair)
 		{
 			if (pair->b_ij == 0)
@@ -139,7 +155,7 @@ namespace NativeDaphneLibrary
 				d1 = a[2] - b[2];
 				if (d1 > maxSep || d1 < -maxSep) return true;
 			}
-			return (!pair->a->isLegalIndex || !pair->b->isLegalIndex);
+			return !legalIndex(pair->a->gridIndex) || !legalIndex(pair->a->gridIndex);
 		}
 
 		bool ClearSeparaitonToroidal(NtCellPair *pair)
@@ -148,7 +164,7 @@ namespace NativeDaphneLibrary
 			{
 				return true;
 			}
-			return (!pair->a->isLegalIndex || !pair->b->isLegalIndex);
+			return !legalIndex(pair->a->gridIndex) || !legalIndex(pair->a->gridIndex);
 		}
 
 		bool ClearSeperation(int *a, int *b, int maxSep)

@@ -19,7 +19,7 @@ namespace NativeDaphneLibrary
 	{
 	public:
 		double radius;
-		bool isLegalIndex;
+		//bool isLegalIndex;
 		int *gridIndex;
 		double *X;
 		double *F;
@@ -27,7 +27,7 @@ namespace NativeDaphneLibrary
 		{
 			radius = _r;
 			gridIndex = g;
-			isLegalIndex = true;
+			//isLegalIndex = true;
 		}
 	};
 
