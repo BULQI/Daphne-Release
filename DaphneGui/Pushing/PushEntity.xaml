@@ -13,7 +13,7 @@
             ReactionTemplate="{StaticResource editReactionTemplate}" 
             MoleculeTemplate="{StaticResource readonlyMoleculeTemplate}" 
             GeneTemplate="{StaticResource editGeneTemplate}"
-            CellTemplate="{StaticResource editCellTemplate}"
+            CellTemplate="{StaticResource readonlyCellTemplate}"
             RCTemplate="{StaticResource reactionComplexTemplate}"
             DiffSchemeTemplate="{StaticResource diffSchemeTemplate}"
             TransDrivTemplate="{StaticResource transitionDriverTemplate}"

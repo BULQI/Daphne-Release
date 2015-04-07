@@ -300,7 +300,7 @@
                          </TextBlock.Style>
                     </TextBlock>
 
-                    <DataGrid x:Name="dgReacs" AutoGenerateColumns="False" CanUserAddRows="False"
+                    <DataGrid x:Name="dgReacs" AutoGenerateColumns="False" CanUserAddRows="False" IsEnabled="False"
                               MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight}"
                                 ItemsSource="{Binding ElementName=dgReacComp, Path=SelectedItem.reactions}"  >
                         <DataGrid.CommandBindings>
