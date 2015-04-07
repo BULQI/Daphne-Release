@@ -229,7 +229,7 @@
 
     <DataTemplate x:Key="readonlyCellTemplate">
         <StackPanel>
-            <local:CellPropertiesControl DataContext="{Binding}"/>
+            <local:CellPropertiesControl DataContext="{Binding}" IsEnabled="False"/>
             <local:CellDetailsReadOnlyControl DataContext="{Binding}"/>
         </StackPanel>
     </DataTemplate>

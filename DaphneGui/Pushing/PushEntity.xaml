@@ -43,7 +43,7 @@
                 
                 <GroupBox Grid.Row="1" Grid.Column="0" >
                     
-                    <ContentControl Name="EntityLevelDetails" IsEnabled="False"
+                    <ContentControl Name="EntityLevelDetails" 
                             Content="{Binding}" 
                             ContentTemplateSelector="{StaticResource entityTemplateSelector}"
                             Margin="6"/>
