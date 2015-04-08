@@ -6200,22 +6200,29 @@ namespace Daphne
 
             //remove molpops whose molecules are not in the remaining reactions
             ObservableCollection<ConfigMolecularPopulation> newmolpops = new ObservableCollection<ConfigMolecularPopulation>();
+            ObservableCollection<ConfigGene> newgenes = new ObservableCollection<ConfigGene>();
 
             //Create a new molpops collection from the current reactions in the complex (molpops)
             //We cannot lose the attributes of the existing mol pops so we have to do it this way
             foreach (ConfigReaction reac in reactions)
             {
-                AddMolPop(newmolpops, reac.reactants_molecule_guid_ref);
-                AddMolPop(newmolpops, reac.products_molecule_guid_ref);
-                AddMolPop(newmolpops, reac.modifiers_molecule_guid_ref);
+                AddMolPop(newmolpops, newgenes, reac.reactants_molecule_guid_ref);
+                AddMolPop(newmolpops, newgenes, reac.products_molecule_guid_ref);
+                AddMolPop(newmolpops, newgenes, reac.modifiers_molecule_guid_ref);
             }
             molpops = newmolpops;
+            genes = newgenes;
 
-            //recreate molecules_dict
             molecules_dict.Clear();
             foreach (ConfigMolecularPopulation molpop in molpops)
             {               
                 molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+            }
+
+            genes_dict.Clear();
+            foreach (ConfigGene gene in genes)
+            {
+                genes_dict.Add(gene.entity_guid, gene);
             }
             
         }
@@ -6226,13 +6233,27 @@ namespace Daphne
         /// </summary>
         /// <param name="newmolpops"></param>
         /// <param name="guid_refs"></param>
-        private void AddMolPop(ObservableCollection<ConfigMolecularPopulation> newmolpops, ObservableCollection<string> guid_refs)
+        private void AddMolPop(ObservableCollection<ConfigMolecularPopulation> newmolpops, ObservableCollection<ConfigGene> newgenes, ObservableCollection<string> guid_refs)
         {
             foreach (string guid in guid_refs)
             {
-                ConfigMolecularPopulation cmp = molpops.Where(m => m.molecule.entity_guid == guid).First();
-                if (newmolpops.Contains(cmp) == false)
-                    newmolpops.Add(cmp);
+                ConfigMolecularPopulation cmp = molpops.Where(m => m.molecule.entity_guid == guid).FirstOrDefault();
+                if (cmp != null)
+                {
+                    if (newmolpops.Contains(cmp) == false)
+                        newmolpops.Add(cmp);
+                }
+                else
+                {
+                    ConfigGene cg = genes.Where(g => g.entity_guid == guid).FirstOrDefault();
+                    if (cg != null)
+                    {
+                        if (newgenes.Contains(cg) == false)
+                        {
+                            newgenes.Add(cg);
+                        }
+                    }
+                }
             }
         }
 
