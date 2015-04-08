@@ -1186,10 +1186,10 @@ namespace DaphneGui
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
             // if the file is open we'll have to close it
-            if (DataBasket.hdf5file.isOpen() == true)
+            if (sim.HDF5FileHandle.isOpen() == true)
             {
                 // close the file and all open groups
-                DataBasket.hdf5file.close(true);
+                sim.HDF5FileHandle.close(true);
             }
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -1204,10 +1204,14 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                DataBasket.hdf5file.initialize(dlg.FileName);
+                sim.HDF5FileHandle.initialize(dlg.FileName);
+            }
+            else
+            {
+                return;
             }
 
-            if (DataBasket.hdf5file.openRead() == false)
+            if (sim.HDF5FileHandle.openRead() == false)
             {
                 MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
                 return;
@@ -1216,11 +1220,11 @@ namespace DaphneGui
             string protocolString = null;
 
             // open the experiment parent group
-            DataBasket.hdf5file.openGroup("/Experiment_VCR/");
+            sim.HDF5FileHandle.openGroup("/Experiment");
             // read the protocol string
-            DataBasket.hdf5file.readString("Protocol", ref protocolString);
+            sim.HDF5FileHandle.readString("Protocol", ref protocolString);
             // close the file and all groups
-            DataBasket.hdf5file.close(true);
+            sim.HDF5FileHandle.close(true);
 
             // do the loading
             MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
@@ -1230,11 +1234,15 @@ namespace DaphneGui
                 return;
             }
             MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+
+            // open, read reporter file names, close hdf5
+            sim.HDF5FileHandle.ReadReporterFileNamesFromClosedFile(dlg.FileName);
+
             // this function does not exist currently, do we need this call?
             //sim.runStatSummary();
             vcrControl.LastFrame = false;
             GUIUpdate(true, true);
-            displayTitle("Loaded past run " + DataBasket.hdf5file.FileName);
+            displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
         }
 
         private void ExportAVI(object sender, RoutedEventArgs e)
@@ -1246,13 +1254,13 @@ namespace DaphneGui
 
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-            dlg.InitialDirectory = DataBasket.hdf5file.FilePath;
+            dlg.InitialDirectory = sim.HDF5FileHandle.FilePath;
             // Default file extension
             dlg.DefaultExt = ".avi";
             // Filter files by extension
             dlg.Filter = "VCR export movie (.avi)|*.avi";
             // set the suggested file name
-            dlg.FileName = System.IO.Path.GetFileNameWithoutExtension(DataBasket.hdf5file.FileName);
+            dlg.FileName = System.IO.Path.GetFileNameWithoutExtension(sim.HDF5FileHandle.FileName);
 
             // Show save file dialog box
             if (dlg.ShowDialog() == true)
@@ -2233,9 +2241,9 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
-                if (DataBasket.hdf5file != null)
+                if (sim.HDF5FileHandle != null)
                 {
-                    DataBasket.hdf5file.close(true);
+                    sim.HDF5FileHandle.close(true);
                 }
                 vcrControl.ReleaseVCR();
                 exportAVI.IsEnabled = false;
@@ -2337,12 +2345,21 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// finishing hdf5: write the reporter file group, close the hdf5 file
+        /// </summary>
+        private void finishHDF5()
+        {
+            sim.HDF5FileHandle.WriteReporterFileNames();
+            sim.HDF5FileHandle.close(true);
+        }
+
+        /// <summary>
         /// utility to close output files, reporter, hdf5
         /// </summary>
         private void closeOutputFiles()
         {
             sim.Reporter.CloseReporter();
-            DataBasket.hdf5file.close(true);
+            finishHDF5();
         }
 
         /// <summary>
@@ -2497,31 +2514,40 @@ namespace DaphneGui
             runSim(false);
         }
 
+        private void prepareVCR()
+        {
+            // we only currently handle the vcr for the tissue simulation
+            if (sim is TissueSimulation && sim.HDF5FileHandle != null && sim.HDF5FileHandle.openRead() == true)
+            {
+                vcrControl.FrameNames.Clear();
+                // find the frame names and with them the number of frames
+                vcrControl.FrameNames = sim.HDF5FileHandle.subGroupNames("/Experiment/VCR_Frames");
+
+                if (vcrControl.FrameNames.Count > 0)
+                {
+                    // open the parent group for this experiment
+                    sim.HDF5FileHandle.openGroup("/Experiment");
+
+                    // open the group that holds the frames for this experiment
+                    sim.HDF5FileHandle.openGroup("VCR_Frames");
+
+                    vcrControl.OpenVCR();
+                    VCR_Toolbar.IsEnabled = true;
+                    VCR_Toolbar.DataContext = vcrControl;
+                    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                    exportAVI.IsEnabled = true;
+                }
+            }
+        }
+
         // re-enable the gui elements that got disabled during a simulation run
         private void GUIUpdate(bool handleVCR, bool force)
         {
-            if (handleVCR == true && skipDataWriteMenu.IsChecked == false)
+            if (skipDataWriteMenu.IsChecked == false)
             {
-                if (DataBasket.hdf5file != null && DataBasket.hdf5file.openRead() == true)
+                if(handleVCR == true)
                 {
-                    vcrControl.FrameNames.Clear();
-                    // find the frame names and with them the number of frames
-                    vcrControl.FrameNames = DataBasket.hdf5file.subGroupNames("/Experiment_VCR/VCR_Frames");
-
-                    if (vcrControl.FrameNames.Count > 0)
-                    {
-                        // open the parent group for this experiment
-                        DataBasket.hdf5file.openGroup("/Experiment_VCR");
-
-                        // open the group that holds the frames for this experiment
-                        DataBasket.hdf5file.openGroup("VCR_Frames");
-
-                        vcrControl.OpenVCR();
-                        VCR_Toolbar.IsEnabled = true;
-                        VCR_Toolbar.DataContext = vcrControl;
-                        VCRslider.Maximum = vcrControl.TotalFrames() - 1;
-                        exportAVI.IsEnabled = true;
-                    }
+                    prepareVCR();
                 }
             }
 
@@ -2913,19 +2939,7 @@ namespace DaphneGui
                     if (Properties.Settings.Default.skipDataWrites == false)
                     {
                         sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
-
-                        if (DataBasket.hdf5file.assembleFullPath(sim.Reporter.UniquePath, sim.Reporter.FileNameBase, "vcr", ".hdf5", true) == false)
-                        {
-                            MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                        DataBasket.hdf5file.openWrite(true);
-                        // group for this experiment
-                        DataBasket.hdf5file.createGroup("/Experiment_VCR");
-
-                        // the protocol as string; needed to reload arbitrary past experiments
-                        DataBasket.hdf5file.writeString("Protocol", sop.Protocol.SerializeToString());
-                        // frames group
-                        DataBasket.hdf5file.createGroup("VCR_Frames");
+                        sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString());
                     }
 
                     runButton.Content = "Pause";
@@ -2963,6 +2977,7 @@ namespace DaphneGui
                 if (Properties.Settings.Default.skipDataWrites == false)
                 {
                     sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
+                    sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString());
                 }
                 runFinishedEvent.Reset();
                 sim.RunStatus = SimulationBase.RUNSTAT_RUN;
@@ -3228,10 +3243,6 @@ namespace DaphneGui
             // clear the vcr cache
             if (vcrControl != null)
             {
-                if (DataBasket.hdf5file != null)
-                {
-                    DataBasket.hdf5file.close(true);
-                }
                 vcrControl.ReleaseVCR();
             }
 

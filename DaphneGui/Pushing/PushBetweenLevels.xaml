@@ -286,7 +286,7 @@
                         </DataGrid.CommandBindings>
 
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="colRCName" Header="Name" Width="150" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colRCName" Header="Name" MinWidth="300" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
