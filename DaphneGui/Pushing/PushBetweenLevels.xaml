@@ -42,6 +42,7 @@
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
+                              CanUserDeleteRows="False"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -111,6 +112,7 @@
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
+                              CanUserDeleteRows="False"
                               SelectionChanged="datagrid_SelectionChanged">
 
                         <DataGrid.CommandBindings>
@@ -170,6 +172,7 @@
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
+                              CanUserDeleteRows="False"
                               SelectionChanged="datagrid_SelectionChanged">
 
                         <!--MaxHeight="{Binding ElementName=PushWindow, Path=MaxHeight}"-->
@@ -220,6 +223,7 @@
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
+                              CanUserDeleteRows="False"
                               >
 
                         <DataGrid.CommandBindings>
@@ -273,6 +277,7 @@
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
+                              CanUserDeleteRows="False"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"

@@ -29,14 +29,14 @@
         <local:DaphneStackPanel x:Name="panelCellDetails" Orientation="Vertical">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Horizontal" Width="310" >
+                    <StackPanel Orientation="Horizontal" Width="300" >
                         <TextBlock Text="cell name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="70" TextWrapping="Wrap" />
-                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="230" LostFocus="CellTextBox_LostFocus" />
+                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="200" LostFocus="CellTextBox_LostFocus" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0">
                         <TextBlock Text="radius" Margin="2,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
-                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="2,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Margin="2,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         </uc:DoublesBox>
 
                         <!--This code is test code for using Validator-->

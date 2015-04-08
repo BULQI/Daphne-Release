@@ -539,7 +539,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <uc:DoublesBox  IsEnabled="False" x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left"/>
+                                            <uc:DoublesBox  IsEnabled="False" x:Name="txtGeneActLevel" SliderEnabled="False" Margin="4"  Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="90" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
