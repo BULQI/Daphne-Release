@@ -27,18 +27,48 @@ namespace NativeDaphne
 			double radius_inverse = 1.0/radius;
 			double PairPhi1 = Nt_CellManager::PairPhi1;
 			double dist = 0;
-			for (int i=0; i< array_length; i++)
+			for (int i=0; i< array_length; ++i)
 			{
 				//check left boundary
 				if (_X[i] < radius)
 				{
-					if (_X[i] == 0)continue;
-					_F[i] += PairPhi1 *(1.0/_X[i] - radius_inverse); //1.0/radius
+					if (_X[i] != 0)
+					{
+						_F[i] += PairPhi1 *(1.0/_X[i] - radius_inverse); //1.0/radius
+					}
 				}
 				//check right boundary
-				else if ( (dist= extent[i%3] - _X[i]) < radius)
+				else if ( (dist= extent[0] - _X[i]) < radius && dist != 0)
 				{
-					//normal would be (-1) for the right bound!
+					_F[i] -= PairPhi1 *(1.0/dist - radius_inverse);
+				}
+				++i;
+
+				if (_X[i] < radius)
+				{
+					if (_X[i] != 0)
+					{
+						_F[i] += PairPhi1 *(1.0/_X[i] - radius_inverse); //1.0/radius
+					}
+				}
+				//check right boundary
+				else if ( (dist= extent[1] - _X[i]) < radius && dist != 0)
+				{
+					_F[i] -= PairPhi1 *(1.0/dist - radius_inverse);
+				}
+
+				++i;
+
+				if (_X[i] < radius)
+				{
+					if (_X[i] != 0)
+					{
+						_F[i] += PairPhi1 *(1.0/_X[i] - radius_inverse); //1.0/radius
+					}
+				}
+				//check right boundary
+				else if ( (dist= extent[2] - _X[i]) < radius && dist != 0)
+				{
 					_F[i] -= PairPhi1 *(1.0/dist - radius_inverse);
 				}
 			}

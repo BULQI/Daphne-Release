@@ -162,6 +162,7 @@ namespace NativeDaphneLibrary
 					_endthread();
 				}
 				arg->owner->NativeRestrict(arg->sfarray, arg->position, arg->n, arg->_output);
+				//fprintf(stderr, "restrict thread %d run once\n", tid);
 				if (::InterlockedDecrement(&owner->AcitveJobCount) == 0)
 				{
 					//SetEvent(owner->JobFinishedSignal);

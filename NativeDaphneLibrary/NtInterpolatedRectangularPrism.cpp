@@ -37,7 +37,7 @@ namespace NativeDaphneLibrary
 		}
 
 		//thread related setup
-		MaxNumThreads = acmlgetnumthreads()-4; 
+		MaxNumThreads = acmlgetnumthreads()-2; 
 		if (MaxNumThreads <= 0)MaxNumThreads = 1;
 		jobHandles = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
 		JobReadyEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
@@ -764,6 +764,7 @@ namespace NativeDaphneLibrary
 		::InterlockedExchange(&AcitveJobCount, numThreads);
 		int n0, nn;
 		n0 = nn = n - NumItemsPerThread * numThreads;
+		//fprintf(stderr, "**** ready to run restrict****\n");
 		for (int i=0; i< numThreads; i++)
 		{
 			EcsRestrictArg *arg = EcsArgs[i];

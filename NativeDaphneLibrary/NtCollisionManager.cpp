@@ -24,87 +24,38 @@ namespace NativeDaphneLibrary
 	typedef std::unordered_map<int, NtCellPair *> PairMap;
 
 
-//	void NtCollisionManager::updateExistingPairs()
-//	{
-//		if (pairs == NULL)return;
-//		if (IsToroidal)
-//		{
-//			updateExistingPairs_toroidal();
-//			return;
-//		}
-//
-//#if UseSSE2
-//		double dst_arr[3];
-//		__m128 m1, m2, m3, m4;
-//		__m128* pSrc1;
-//		__m128* pSrc2;
-//		__m128* pDst = (__m128*)dst_arr;
-//#endif
-//
-//		for (PairMap::iterator it = pairs->begin(); it != pairs->end(); ++it)
-//		{
-//			NtCellPair *pair = it->second;
-//
-//			double *a_X = pair->a->X;
-//			double *b_X = pair->b->X;
-//
-//            double x = a_X[0] - b_X[0];
-//            double y = a_X[1] - b_X[1];
-//            double z = a_X[2] - b_X[2];
-//            pair->distance = sqrt(x * x + y * y + z * z);
-//
-//#if UseSSE2
-//			pSrc1 = (__m128*)(pair->a->X);
-//			pSrc2 = (__m128*)(pair->b->X);
-//			m1 = _mm_sub_ss(*pSrc1, *pSrc2);
-//			*pDst = _mm_mul_ps(m1, m1);
-//			pSrc1++;
-//			pSrc2++;
-//			pDst++;
-//			m1 = _mm_sub_ss(*pSrc1, *pSrc2);
-//			*pDst = _mm_mul_ps(m1, m1);
-//			pair->distance2 = dst_arr[0] + dst_arr[1] + dst_arr[2];
-//#endif
-//		}
-//	}
-//
-//	void NtCollisionManager::updateExistingPairs_toroidal()
-//	{
-//		if (pairs == NULL)return;
-//
-//#if UseSSE2
-//		double dst_arr[3];
-//		__m128 m1, m2, m3, m4;
-//		__m128* pSrc1;
-//		__m128* pSrc2;
-//		__m128* pDst = (__m128*)dst_arr;
-//#endif
-//
-//		double half_gridSize0 = GridSize[0] * 0.5;
-//		double half_gridSize1 = GridSize[1] * 0.5;
-//		double half_gridSize2 = GridSize[2] * 0.5;
-//
-//		for (PairMap::iterator it = pairs->begin(); it != pairs->end(); ++it)
-//		{
-//			NtCellPair *pair = it->second;
-//
-//			double *a_X = pair->a->X;
-//			double *b_X = pair->b->X;
-//
-//            double x = a_X[0] - b_X[0];
-//            double y = a_X[1] - b_X[1];
-//            double z = a_X[2] - b_X[2];
-//
-//			double dx = x > 0 ? x : -x;
-//			double dy = y > 0 ? y : -y;
-//			double dz = z > 0 ? z : -z;
-//
-//			if (dx > half_gridSize0) x = GridSize[0] - dx;
-//			if (dy > half_gridSize1) y = GridSize[1] - dy;
-//			if (dz > half_gridSize2) z = GridSize[2] - dz;
-//            pair->distance = sqrt(x * x + y * y + z * z);
-//		}
-//	}
+	NtCollisionManager::NtCollisionManager(double *gsize, double gstep, bool gtoroidal) : NtGrid(gsize, gstep, gtoroidal)
+		{
+
+			GridSize = gsize;
+			GridStep = gstep;
+			IsToroidal = gtoroidal;
+			GridSize = gridSize;
+
+			pairs = new unordered_map<int, NtCellPair *>();
+			//hard coded for now.
+			//nodes_to_remove = (int *)malloc(50000*sizeof(int));
+			max_pair_count = 0;
+			pairArray = (NtCellPair **)malloc(100000 * sizeof(NtCellPair *));
+
+			//testing thread
+			MaxNumThreads = acmlgetnumthreads()-2; 
+			if (MaxNumThreads <= 0)MaxNumThreads = 1;
+			jobHandles = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+			JobReadyEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
+
+			pairInteractArgs = (PairInteractArg **)malloc(MaxNumThreads * sizeof(PairInteractArg*));
+			for (int i=0; i< MaxNumThreads; i++)
+			{
+				unsigned int tid;
+				pairInteractArgs[i] = new PairInteractArg();
+				pairInteractArgs[i]->owner = this;
+				pairInteractArgs[i]->threadId = i;
+				pairInteractArgs[i]->n = 0;
+				JobReadyEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+				jobHandles[i] = (HANDLE)_beginthreadex(0, 0, &PairInteractThreadEntry, pairInteractArgs[i], 0, &tid);
+			}
+		}
 
 	void NtCollisionManager::pairInteract(double dt)
 	{
@@ -115,37 +66,15 @@ namespace NativeDaphneLibrary
 			return;
 		}
 
-		//if (max_pair_count < 20000 && pairs->size() > max_pair_count)
-		//{
-		//	max_pair_count = pairs->size();
-		//	fprintf(stderr, "maximum pair count = %d\n", max_pair_count);
+		pairInteractEx(0, pairs->size(), dt);
+	}
 
-
-		//	if (max_pair_count == 13086)
-		//	{
-		//		FILE *fp = fopen("pair.log", "w");
-		//		double min_distance = 10000;
-		//		for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
-		//		{
-		//			int key = it->first;
-		//			if (pairs->count(key) > 1)
-		//			{
-		//				fprintf(stderr, "This key %d has %d items\n", key, pairs->count(key));
-		//			}
-		//			NtCellPair *pair = it->second;
-		//			fprintf(fp, "id= %d distance = %f\n", key, pair->distance);
-		//			if (pair->distance < min_distance)min_distance = pair->distance;
-		//		}
-		//		fprintf(fp, "min distance = %f\n", min_distance);
-		//		fclose (fp);
-		//		fprintf(stderr, "min distance = %f\n", min_distance);
-		//		max_pair_count += 100000; //not writing anymore
-		//	}		
-		//}
-
-		for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
+	//non-toroidal only
+	void NtCollisionManager::pairInteractEx(int start_index, int n, double dt)
+	{
+		for (int i=start_index, end=start_index+n; i < end; ++i)
 		{
-			NtCellPair *pair = it->second;
+			NtCellPair *pair = pairArray[i];
 
 			double *a_X = pair->a->X;
 			double *b_X = pair->b->X;
@@ -215,59 +144,42 @@ namespace NativeDaphneLibrary
 		}
 	}
 
-	//this check if the pair is to be removed, if not, compute distance
-	//this is being eliminated
-	/*int NtCollisionManager::removeNonCriticalPairs()
+	int NtCollisionManager::MultiThreadPairInteract(double dt)
 	{
-		int n = 0;
-		if (!IsToroidal)
+		int n = pairs->size();
+		int numThreads = MaxNumThreads; //total cores -4
+		int NumItemsPerThread = n /(numThreads + 2);
+		if (NumItemsPerThread < 100)
 		{
-			for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
-			{
-				NtCellPair *pair = it->second;
-				if (!ClearSeperation(pair) )
-				{
-					pair->set_distance();
-				}
-				else 
-				{
-					nodes_to_remove[n] = it->first;
-					n++;
-				}
-			}
-		}
-		else 
-		{
-			for (PairMap::iterator it = pairs->begin(), end= pairs->end(); it != end; ++it)
-			{
-				NtCellPair *pair = it->second;
-				if ( !ClearSeparaitonToroidal(pair) )
-				{
-					pair->set_distance_toroidal();
-				}
-				else 
-				{
-					nodes_to_remove[n] = it->first;
-					n++;
-				}
-			}
+			NumItemsPerThread = 100;
+			numThreads = n/100 - 2;
+			if (numThreads < 0)numThreads = 0;
 		}
 
-		if (n > max_removal)
+		//fprintf(stderr, "+++++ ready to run pair interact ++++ \n");
+		//temparily disable thread
+		//numThreads = 0;
+		//start job
+		::InterlockedExchange(&AcitveJobCount, numThreads);
+		int n0, nn;
+		n0 = nn = n - NumItemsPerThread * numThreads;
+		for (int i=0; i< numThreads; i++)
 		{
-			max_removal = n;
-			fprintf(stderr, "maximum removal = %d currnt map item count = %d\n", n, pairs->size());
+			PairInteractArg *arg = pairInteractArgs[i];
+			arg->start_index = nn;
+			arg->n = NumItemsPerThread;
+			nn += NumItemsPerThread;
+			::SetEvent(JobReadyEvents[i]);
 		}
 
-		for (int i=0; i< n; i++)
+		pairInteractEx(0, n0, dt);
+		//wait for job finish
+		if (numThreads > 0)
 		{
-			NtCellPair *pair = (*pairs)[nodes_to_remove[i]];
-			bool is_reallly = ClearSeperation(pair);
-			pairs->erase(nodes_to_remove[i]);
+			while (::InterlockedCompareExchange(&AcitveJobCount, 1, 0) != 0);
 		}
-		return n;
-	}*/
-
+		return 0;
+	}
 
 }
 

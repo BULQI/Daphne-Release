@@ -30,7 +30,6 @@ namespace NativeDaphne
 		bool initialized;
 		NtCollisionManager *native_collisionManager;
 
-
 		/// <summary>
         /// constructor
         /// </summary>
@@ -48,6 +47,16 @@ namespace NativeDaphne
 			tmp_idx = gcnew array<int>(3);
 			initialized = false;
         }
+
+		~Nt_CollisionManager()
+		{
+			this->!Nt_CollisionManager();
+		}
+
+		!Nt_CollisionManager()
+		{
+			delete native_collisionManager;
+		}
 
         void Step(double dt)
         {
@@ -198,8 +207,10 @@ namespace NativeDaphne
         {
             // update cell locations in the grid tiles and update pairs
             updateGridAndPairs();
-            // handle all pairs and find the forces
-			native_collisionManager->pairInteract(dt);
+
+			//native_collisionManager->pairInteract(dt);
+			native_collisionManager->MultiThreadPairInteract(dt);
+
         }
 
 		//unordered_map<int, NtCellPair *> *pairs;

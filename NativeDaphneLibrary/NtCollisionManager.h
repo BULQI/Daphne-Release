@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <xmmintrin.h>
+#include <process.h>
 #include "NtGrid.h"
 #include "NtCellPair.h"
 
@@ -16,6 +17,18 @@ using namespace std;
 
 namespace NativeDaphneLibrary
 {
+	typedef std::unordered_map<int, NtCellPair *> PairMap;
+
+	class NtCollisionManager;
+	class DllExport PairInteractArg
+	{
+	public:
+		NtCollisionManager *owner;
+		int start_index;
+		int n; //number of items
+		double dt; 
+		int threadId;
+	};
 
 	class DllExport NtCollisionManager : public NtGrid
 	{
@@ -26,23 +39,21 @@ namespace NativeDaphneLibrary
 		static double Phi1;
 
 		static int max_pair_count;
-
 		unordered_map<int, NtCellPair *> *pairs;
-		//int *nodes_to_remove;
 
-		NtCollisionManager(double *gsize, double gstep, bool gtoroidal) : NtGrid(gsize, gstep, gtoroidal)
-		{
+		NtCellPair **pairArray;
+		//testing thread stuff
+		//thread stuff
+		int MaxNumThreads;
+		HANDLE* jobHandles;
+		HANDLE* JobReadyEvents;
+		HANDLE* JobFinishedEvents;
 
-			GridSize = gsize;
-			GridStep = gstep;
-			IsToroidal = gtoroidal;
-			GridSize = gridSize;
+		PairInteractArg** pairInteractArgs;
+		unsigned long AcitveJobCount;
 
-			pairs = new unordered_map<int, NtCellPair *>();
-			//hard coded for now.
-			//nodes_to_remove = (int *)malloc(50000*sizeof(int));
-			max_pair_count = 0;
-		}
+
+		NtCollisionManager(double *gsize, double gstep, bool gtoroidal);
 
 		~NtCollisionManager()
 		{
@@ -51,15 +62,49 @@ namespace NativeDaphneLibrary
 				//free(GridSize);
 				GridSize = NULL;
 			}
-			//delete pairs;
-			//free(nodes_to_remove);
+
+			delete pairs;
+
+			//step threads
+			for (int i=0; i<MaxNumThreads; i++)
+			{
+				PairInteractArg *arg = pairInteractArgs[i];
+				arg->n = -1;
+				::SetEvent(JobReadyEvents[i]);
+			}
+
+		}
+
+
+		static unsigned __stdcall PairInteractThreadEntry(void* pUserData) 
+		{
+			PairInteractArg *arg = (PairInteractArg *)pUserData;
+			int tid = arg->threadId;
+			NtCollisionManager *owner = arg->owner;
+
+			while (true)
+			{
+				WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
+				if (arg->n == -1) //signal to end thread
+				{
+					_endthread();
+				}
+				arg->owner->pairInteractEx(arg->start_index, arg->n, arg->dt);
+				//fprintf(stderr, "pari_interact thread %d run once\n", arg->threadId);
+				::InterlockedDecrement(&owner->AcitveJobCount);
+			}
 		}
 
 		//void updateExistingPairs();
 
 		void pairInteract(double dt);
 
+		//this is implemented for non-toroidal for testing...
+		void pairInteractEx(int start_index, int num_items, double dt);
+
 		void pairInteractToroidal(double dt);
+
+		int MultiThreadPairInteract(double dt);
 
 		//this check if a pair needs to ber removed.
 		//int removeNonCriticalPairs();
@@ -93,6 +138,34 @@ namespace NativeDaphneLibrary
 			return true;
 		}
 
+		int iterator_test1()
+		{
+			double max = 0;
+			int n = pairs->size();
+			for (int i=0; i< 100; i++)
+			{
+				double max = 0;
+				for (int j = 0; j< n; j++)
+				{
+					max += pairArray[j]->distance;
+				}
+			}
+			return max;
+		}
+
+		int iterator_test2()
+		{
+			for (int i=0; i< 10; i++)
+			{
+				double max = 0;
+				for (PairMap::iterator it = pairs->begin(), end = pairs->end(); it != end; ++it)
+				{
+					max += it->second->distance;
+				}
+			}
+			return 1;
+		}
+
 		//return if removed.
 		bool removePairOnClearSeparation(int key)
 		{
@@ -123,6 +196,18 @@ namespace NativeDaphneLibrary
 		{
 			pairs->clear();
 		}
+
+		//this update the pairArray after insertion/deletion of entry.
+		void update_iterator()
+		{
+			int n= 0;
+			for (PairMap::iterator it = pairs->begin(), end = pairs->end(); it != end; ++it)
+			{
+				pairArray[n] = it->second;
+				n++;
+			}
+		}
+
 	};
 }
 

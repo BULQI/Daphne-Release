@@ -257,6 +257,7 @@ namespace NativeDaphne
                         }
                     }
                 }
+				native_collisionManager->update_iterator();
             }
 	}
 
