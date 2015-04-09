@@ -6363,9 +6363,9 @@ namespace Daphne
             CellName = "Default Cell";
             CellRadius = 5.0;
 
-            TransductionConstant = new DistributedParameter(0.0);
+            TransductionConstant = new DistributedParameter(100.0);
             DragCoefficient = new DistributedParameter(1.0);
-            Sigma = new DistributedParameter(0.0);
+            Sigma = new DistributedParameter(4.0);
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -6842,7 +6842,7 @@ namespace Daphne
             {
                 "Specify cell coordinates",
                 "Uniform",
-                "Gaussian"
+                "Normal"
             };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
