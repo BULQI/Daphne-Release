@@ -294,7 +294,7 @@ namespace DaphneGui
             vtkActor actor = vtkActor.New();
             actor.SetMapper(mapper);
             actor.GetProperty().SetColor(0.5, 0.5, 1.0);
-            ((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
+            ((VTKFullGraphicsController)MainWindow.GC).RWC.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
         }
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace DaphneGui
             //actor.GetProperty().SetRepresentationToWireframe();
             actor.GetProperty().SetRepresentationToSurface();
             // TODO: This should not be dependent on any given render window control...
-            ((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
+            ((VTKFullGraphicsController)MainWindow.GC).RWC.RenderWindow.GetRenderers().GetFirstRenderer().AddViewProp(actor);
         }
 
         /// <summary>
