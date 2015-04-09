@@ -164,8 +164,8 @@
                     <StackPanel.ToolTip>
                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                         The diffusion coefficient of the molecule. 
-                        Setting this value to zero will prevent the molecule from diffusing in the extacellular medium. 
-                        This can be helpful for maintaining inhomogeneous distributions of molecules, such as is needed for the chemokines in the germinal center.
+                        Setting this value to zero will prevent the molecule from diffusing. 
+                        This can be helpful for maintaining inhomogeneous distributions of molecules, such as are needed for the chemokines in the germinal center.
                         </TextBlock>
                     </StackPanel.ToolTip>              
                     <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> </uc:DoublesBox>
