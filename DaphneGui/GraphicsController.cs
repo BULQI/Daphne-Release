@@ -1614,7 +1614,9 @@ namespace DaphneGui
 
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             leftButtonPressed = false;
-            if (interactor.GetMTime() - leftButtonPressTimeStamp > 100) return;
+
+            //Removed this line - found out it was for testing only
+            //if (interactor.GetMTime() - leftButtonPressTimeStamp > 100) return;
 
             //int[] x = interactor.GetEventPosition();
             int[] x = leftButtonPressPostion;
