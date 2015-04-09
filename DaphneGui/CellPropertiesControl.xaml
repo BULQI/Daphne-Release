@@ -109,6 +109,18 @@
                                                     <daph:ConfigMolecule Name="None" entity_guid=""/>
                                                 </CompositeCollection>
                                             </ComboBox.ItemsSource>
+
+                                            <ComboBox.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        REDSOX
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </ComboBox.ToolTip>
+
+
                                         </ComboBox>
 
                                     </StackPanel>
