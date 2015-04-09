@@ -157,11 +157,22 @@
                 <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Weight"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Radius"></TextBlock>
             </StackPanel>
+            
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
-                <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
-                <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.ToolTip>
+                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                        The diffusion coefficient of the molecule. 
+                        Setting this value to zero will prevent the molecule from diffusing in the extacellular medium. 
+                        This can be helpful for maintaining inhomogeneous distributions of molecules, such as is needed for the chemokines in the germinal center.
+                        </TextBlock>
+                    </StackPanel.ToolTip>              
+                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> </uc:DoublesBox>
+                    <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                    <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                </StackPanel>
+                
             </StackPanel>
         </StackPanel>
     </DataTemplate>
