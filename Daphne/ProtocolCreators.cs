@@ -46,7 +46,7 @@ namespace Daphne
             PredefinedMoleculesCreator(store);
 
             // differentiation schemes
-            PredefinedDiffSchemesCreator(store);
+            PredefinedTransitionSchemesCreator(store);
 
             // template reactions
             PredefinedReactionTemplatesCreator(store);
@@ -54,11 +54,11 @@ namespace Daphne
             //code to create reactions
             PredefinedReactionsCreator(store);
 
-            //cells
-            PredefinedCellsCreator(store);
-
             //reaction complexes
             PredefinedReactionComplexesCreator(store);
+
+            //cells
+            PredefinedCellsCreator(store);
         }
 
  
@@ -148,7 +148,7 @@ namespace Daphne
                     if (configReaction != null)
                     {
                         ConfigReaction newReac = configReaction.Clone(true);
-                        protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
+                        protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM, userstore, true);
                         itemsLoaded++;
                     }
                 }
@@ -182,7 +182,7 @@ namespace Daphne
                 if (configCell != null)
                 {
                     ConfigCell newcell = configCell.Clone(true);
-                    protocol.repositoryPush(newcell, Level.PushStatus.PUSH_CREATE_ITEM);
+                    protocol.repositoryPush(newcell, Level.PushStatus.PUSH_CREATE_ITEM, userstore, true);
                     itemsLoaded++;
                 }
             }
@@ -200,7 +200,7 @@ namespace Daphne
                 {
                     if (ent.Name == RCName[i])
                     {
-                        protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM);
+                        protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM, userstore, true);
                         itemsLoaded++;
                         break;
                     }
@@ -428,30 +428,40 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.integrator_step = 0.001;
             
-            //GENES
-            string[] item = new string[1] { "gApop" };
-            int itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol genes.");
-            }
+            ////GENES
+            //string[] item = new string[1] { "gApop" };
+            //int itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol genes.");
+            //}
 
-            //MOLECULES
-            item = new string[4] { "CXCL13", "A", "A*", "sApop" };
-            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            //ECM REACTIONS - recursive
+            string[] item = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                            "CXCL13:CXCR5| -> CXCL13 + CXCR5|" };
+            int itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
-                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-            }
-
-            item = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
-            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
             } 
 
-            //CELLS
+            ////ECM MOLECULES
+            ////item = new string[4] { "CXCL13", "A", "A*", "sApop" };
+            //string[] item = new string[] { "CXCL13" };
+            //int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            //}
+
+            //item = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            //itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
+            //} 
+
+            //CELLS - recursive
             item = new string[1] { "Leukocyte_staticReceptor_motile" };
             itemsLoaded = LoadProtocolCells(protocol, item, userstore);
             if (itemsLoaded != item.Length)
@@ -459,18 +469,19 @@ namespace Daphne
                 System.Windows.MessageBox.Show("Unable to load all protocol cells.");
             } 
 
-            //REACTIONS
-            item = new string[6] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-                                    "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-                                    "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-                                    "A* -> A",
-                                    "gApop -> sApop + gApop",
-                                    "sApop ->"};
-            itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-            } 
+            ////REACTIONS
+            //item = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+            //                        "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
+            //                        "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+            //                        "A* -> A",
+            //                        "gApop -> sApop + gApop",
+            //                        "sApop ->"
+            //};
+            //itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            //} 
 
             // ECS
 
@@ -1072,31 +1083,6 @@ namespace Daphne
 
         private static void PredefinedCellsCreator(Level store)
         {
-            // Generic death transition driver - move to PredefinedTransitionDriversCreator() ?
-            // Cell cytoplasm must contain sApop molecular population
-            ConfigTransitionDriver config_td = new ConfigTransitionDriver();
-            config_td.Name = "generic apoptosis";
-            string[] stateName = new string[] { "alive", "dead" };
-            string[,] signal = new string[,] { { "", "sApop" }, { "", "" } };
-            double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
-            double[,] beta = new double[,] { { 0, 0.002}, { 0, 0 } };
-            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
-            config_td.StateName = config_td.states[(int)config_td.CurrentState.ConstValue];
-            store.entity_repository.transition_drivers.Add(config_td);
-            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
-
-            // generic division driver
-            config_td = new ConfigTransitionDriver();
-            config_td.Name = "generic division";
-            stateName = new string[] { "quiescent", "mitotic" };
-            signal = new string[,] { { "", "sDiv" }, { "", "" } };
-            alpha = new double[,] { { 0, 0 }, { 0, 0 } };
-            beta = new double[,] { { 0, 0.002 }, { 0, 0 } };
-            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
-            config_td.StateName = config_td.states[(int)config_td.CurrentState.ConstValue];
-            store.entity_repository.transition_drivers.Add(config_td);
-            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
-
             ConfigCell gc;
             double[] conc;
             //ReactionType[] reacType;
@@ -1331,118 +1317,118 @@ namespace Daphne
 
             store.entity_repository.cells.Add(gc);
 
-            ///////////////////////////////////
-            // B cell
-            // B cell with differentiation states: 
-            //      Naive, Activated, Short-lived plasmacyte, Long-lived plasmacyte, Centroblast, Centrocyte, Memory
+            /////////////////////////////////////
+            //// B cell
+            //// B cell with differentiation states: 
+            ////      Naive, Activated, Short-lived plasmacyte, Long-lived plasmacyte, Centroblast, Centrocyte, Memory
 
-            gc = new ConfigCell();
-            gc.CellName = "B";
-            gc.CellRadius = 5.0;
+            //gc = new ConfigCell();
+            //gc.CellName = "B";
+            //gc.CellRadius = 5.0;
 
-            //MOLECULES IN MEMBRANE
-            conc = new double[4] { cxcr5Conc_5umRadius, 0, 0, 0};
-            type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
+            ////MOLECULES IN MEMBRANE
+            //conc = new double[4] { cxcr5Conc_5umRadius, 0, 0, 0};
+            //type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
+            //for (int i = 0; i < type.Length; i++)
+            //{
+            //    cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+            //    if (cm != null)
+            //    {
+            //        gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            //        gmp.molecule = cm.Clone(null);
+            //        gmp.Name = cm.Name;
 
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.membrane.molpops.Add(gmp);
-                }
-            }
+            //        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+            //        hl.concentration = conc[i];
+            //        gmp.mp_distribution = hl;
+            //        gc.membrane.molpops.Add(gmp);
+            //    }
+            //}
 
-            //MOLECULES IN Cytosol
-            conc = new double[19] { 250,  0,     0,       0,       0,       0,        0,      0,       0,     0,        0,
-                                    0,          0,      0,    0,    0,      0,      0,      0 };
-            type = new string[19] { "A", "A*", "sDif1", "sDif2", "sDif3", "sDif4", "sDif5", "sDif6", "sDif7", "sApop", "sDiv",
-                                    "CXCR4", "CXCR5", "IgH", "IgL", "IgS", "AID", "BL1", "MHCII" };
+            ////MOLECULES IN Cytosol
+            //conc = new double[19] { 250,  0,     0,       0,       0,       0,        0,      0,       0,     0,        0,
+            //                        0,          0,      0,    0,    0,      0,      0,      0 };
+            //type = new string[19] { "A", "A*", "sDif1", "sDif2", "sDif3", "sDif4", "sDif5", "sDif6", "sDif7", "sApop", "sDiv",
+            //                        "CXCR4", "CXCR5", "IgH", "IgL", "IgS", "AID", "BL1", "MHCII" };
 
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
+            //for (int i = 0; i < type.Length; i++)
+            //{
+            //    cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+            //    if (cm != null)
+            //    {
+            //        gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            //        gmp.molecule = cm.Clone(null);
+            //        gmp.Name = cm.Name;
 
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.cytosol.molpops.Add(gmp);
-                }
-            }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
+            //        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+            //        hl.concentration = conc[i];
+            //        gmp.mp_distribution = hl;
+            //        gc.cytosol.molpops.Add(gmp);
+            //    }
+            //}
+            //gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
-            // Genes
-            type = new string[17] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII", "gApop",
-                                    "gDif1", "gDif2", "gDif3", "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                gc.genes.Add(findGene(type[i], store));
-            }
+            //// Genes
+            //type = new string[17] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII", "gApop",
+            //                        "gDif1", "gDif2", "gDif3", "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
+            //for (int i = 0; i < type.Length; i++)
+            //{
+            //    gc.genes.Add(findGene(type[i], store));
+            //}
 
-            // Reactions in Cytosol
-            type = new string[34] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-                                    "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
-                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
-                                    "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
-                                    "gDif1 -> sDif1 + gDif1", "gDif2 -> sDif2 + gDif2", "gDif3 -> sDif3 + gDif3", "gDif4 -> sDif4 + gDif4",
-                                    "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv", "sApop ->",
-                                    "sDif1 ->", "sDif2 ->", "sDif3 ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->",
-                                    "IgH ->", "IgL ->", "IgS ->", "AID ->", "BL1 ->", "MHCII ->", "sDiv ->"
-                                  };
-            for (int i = 0; i < type.Length; i++)
-            {
-                reac = findReaction(type[i], store);
-                if (reac != null)
-                {
-                    gc.cytosol.Reactions.Add(reac.Clone(true));
-                }
-            }
+            //// Reactions in Cytosol
+            //type = new string[34] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
+            //                        "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
+            //                        "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
+            //                        "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
+            //                        "gDif1 -> sDif1 + gDif1", "gDif2 -> sDif2 + gDif2", "gDif3 -> sDif3 + gDif3", "gDif4 -> sDif4 + gDif4",
+            //                        "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv", "sApop ->",
+            //                        "sDif1 ->", "sDif2 ->", "sDif3 ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->",
+            //                        "IgH ->", "IgL ->", "IgS ->", "AID ->", "BL1 ->", "MHCII ->", "sDiv ->"
+            //                      };
+            //for (int i = 0; i < type.Length; i++)
+            //{
+            //    reac = findReaction(type[i], store);
+            //    if (reac != null)
+            //    {
+            //        gc.cytosol.Reactions.Add(reac.Clone(true));
+            //    }
+            //}
 
-            gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(4.0);
+            //gc.DragCoefficient = new DistributedParameter(1.0);
+            //gc.TransductionConstant = new DistributedParameter(100.0);
+            //gc.Sigma = new DistributedParameter(4.0);
 
-            // Add differentiatior
-            // Assumes all genes and signal molecules are present
-            string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", store);
+            //// Add differentiatior
+            //// Assumes all genes and signal molecules are present
+            //string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", store);
 
-            if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
-            {
-                gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
-            }
+            //if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
+            //{
+            //    gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
+            //}
 
-            // Add apoptosis
-            string death_driver_guid = findTransitionDriverGuid("generic apoptosis", store);
+            //// Add apoptosis
+            //string death_driver_guid = findTransitionDriverGuid("generic apoptosis", store);
 
-            if (store.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
-            {
-                gc.death_driver = store.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
-            }
+            //if (store.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
+            //{
+            //    gc.death_driver = store.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
+            //}
 
-            // add division
+            //// add division
 
-            store.entity_repository.cells.Add(gc);
+            //store.entity_repository.cells.Add(gc);
 
             ///////////////////////////////////
             // GC B cell
             // B cell with differentiation states: 
-            //      Centroblast, Centrocyte, Memory, and Long-lived plasmacyte
-
-
+            //      Activated, Initialization, Centroblast, Centrocyte states       
+    
             gc = new ConfigCell();
             gc.CellName = "GC B";
             gc.CellRadius = 5.0;
+            gc.description = "Preliminary germinal center B cell.";
 
             //MOLECULES IN MEMBRANE
             conc = new double[4] { cxcr5Conc_5umRadius, 0, 0, 0 };
@@ -1455,7 +1441,6 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
-
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1464,11 +1449,11 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[16] { 250,  0,     0,       0,       0,       0,       0,       0,
-                                    0,          0,      0,    0,    0,      0,      0,      0 };
-            type = new string[16] { "A", "A*", "sDif4", "sDif5", "sDif6", "sDif7", "sApop", "sDiv",
-                                    "CXCR4", "CXCR5", "IgH", "IgL", "IgS", "AID", "BL1", "MHCII" };
-
+            type = new string[] {   "A", "A*", 
+                                    "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5",
+                                    "W", "Wp", "E1", "E2", "W:E1", "Wp:E2",
+                                    "sDif1", "sApop" };
+            conc = new double[type.Count()];
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -1477,32 +1462,22 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
-
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
                     gc.cytosol.molpops.Add(gmp);
                 }
             }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Genes
-            type = new string[14] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII", "gApop",
-                                    "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
+            type = new string[] { "gCXCR4", "gCXCR5", "gW", "gE1", "gE2", "gDif1", "gA", "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
-            type = new string[28] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-                                    "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
-                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
-                                    "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
-                                    "gDif4 -> sDif4 + gDif4", "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv",
-                                    "sApop ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->", "sDiv ->",
-                                    "IgH ->", "IgL ->", "IgS ->", "AID ->", "BL1 ->", "MHCII ->"
-                                  };
+            type = new string[] {   "gApop -> sApop + gApop", "sApop ->", "sDif1 ->"  };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], store);
@@ -1512,27 +1487,48 @@ namespace Daphne
                 }
             }
 
+            // CYTOSOL REACTION COMPLEXES 
+            type = new string[] {   "CXCR5 receptor production and recycling", 
+                                    "CXCR4 receptor production and recycling", 
+                                    "GC B cell chemotaxis: cytosol reactions",
+                                    "Goldbeter-Koshland switch reactions",
+                                    "Goldbeter-Koshland molecule homeostasis"
+                                };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReactionComplex crc = findReactionComplexByName(type[i], store);
+                if (crc != null)
+                {
+                    gc.cytosol.reaction_complexes.Add(crc.Clone(true));
+                }
+            }
+
+            // CELL MOTILITY
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100.0);
             gc.Sigma = new DistributedParameter(4.0);
 
-            // Add differentiator
-            // Assumes all genes and signal molecules are present
-            diff_scheme_guid = findDiffSchemeGuid("GC B cell", store);
-            if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
+            // DIFFERENTIATOR
+            string guid = findDiffSchemeGuid("GC B cell differentiation scheme", store);
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(guid) == true)
             {
-                gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
+                gc.diff_scheme = store.entity_repository.diff_schemes_dict[guid].Clone(true);
             }
 
-            // Add apoptosis
-            death_driver_guid = findTransitionDriverGuid("generic apoptosis", store);
-            if (store.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
+            // DIVISION
+            guid = findDiffSchemeGuid("GC B cell division scheme", store);
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(guid) == true)
             {
-                gc.death_driver = store.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
+                gc.div_scheme = store.entity_repository.diff_schemes_dict[guid].Clone(true);
             }
 
-            // add division
-            //div_driver changed to div_scheme now, need to add div_scheme for this part?
+            // DEATH DRIVER
+            guid = findTransitionDriverGuid("GC B cell apoptosis", store);
+            if (store.entity_repository.transition_drivers_dict.ContainsKey(guid) == true)
+            {
+                gc.death_driver = store.entity_repository.transition_drivers_dict[guid].Clone(true);
+            }
 
             store.entity_repository.cells.Add(gc);
 
@@ -1704,7 +1700,7 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[] { 250,  0,     0,       0,         0,                0 };
+            conc = new double[] { 250, 0, 0, 0, 0, 0 };
             type = new string[] { "A", "A*", "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -1746,10 +1742,10 @@ namespace Daphne
                 }
             }
 
-            diff_scheme_guid = findDiffSchemeGuid("cycling cb-cc diff scheme", store);
-            if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
+            guid = findDiffSchemeGuid("cycling cb-cc diff scheme", store);
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(guid) == true)
             {
-                gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
+                gc.diff_scheme = store.entity_repository.diff_schemes_dict[guid].Clone(true);
             }
 
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
@@ -1760,132 +1756,181 @@ namespace Daphne
             store.entity_repository.cells.Add(gc);
         }
 
-        private static void PredefinedDiffSchemesCreator(Level store)
+        private static void PredefinedTransitionSchemesCreator(Level store)
         {
+            // Generic death transition driver - move to PredefinedTransitionDriversCreator() ?
+            // Cell cytoplasm must contain sApop molecular population
+            ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+            config_td.Name = "generic apoptosis";
+            string[] stateName = new string[] { "alive", "dead" };
+            string[,] signal = new string[,] { { "", "sApop" }, { "", "" } };
+            double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+            double[,] beta = new double[,] { { 0, 0.002 }, { 0, 0 } };
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
+            config_td.StateName = config_td.states[(int)config_td.CurrentState.ConstValue];
+            store.entity_repository.transition_drivers.Add(config_td);
+            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
+
+            // generic division driver
+            config_td = new ConfigTransitionDriver();
+            config_td.Name = "generic division";
+            stateName = new string[] { "quiescent", "mitotic" };
+            signal = new string[,] { { "", "sDiv" }, { "", "" } };
+            alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+            beta = new double[,] { { 0, 0.002 }, { 0, 0 } };
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
+            config_td.StateName = config_td.states[(int)config_td.CurrentState.ConstValue];
+            store.entity_repository.transition_drivers.Add(config_td);
+            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
+
             // These can be reused to create other differentiation schemes
             ConfigTransitionDriver driver;
             ConfigTransitionScheme diffScheme;
             ConfigActivationRow actRow;
             string[] stateNames, geneNames;
-            double[,] activations, alpha, beta;
-            string[,] signal;
+            double[,] activations; //, alpha, beta;
+            //string[,] signal;
+
+            //////////////////////////////
+            //// B cell differentiatior 
+            //////////////////////////////
+
+            //stateNames = new string[] { "naive", "activated", "short-lived plasmacyte", "centroblast", "centrocyte", "long-lived plasmacyte", "memory" };
+            //geneNames = new string[]             { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII" };
+            //activations = new double[,]          { { 0,        1,       1,      1,      0,       0,      0,      0 },  // naive
+            //                                       { 0,        1,       1,      1,      0,       0,      1,      1 },  // activated
+            //                                       { 0,        1,       1,      1,      1,       0,      0,      0 },  // slplasmacyte
+            //                                       { 1,        0,       0,      0,      0,       1,      0,      0 },  // centroblast
+            //                                       { 0,        1,       1,      1,      0,       0,      1,      1 },  // centrocyte
+            //                                       { 0,        0,       1,      1,      1,       0,      0,      0 },  // llplasmacyte
+            //                                       { 0,        0,       1,      1,      0,       0,      1,      1 },  // memory
+            //                                    };
+            ////                                     naive    act       slp      cb       cc    llp     memory
+            //signal = new string[,]          {     { "",   "sDif1",    "",     "",      "",    "",       ""      },  // naive
+            //                                       { "",     "",     "sDif2", "sDif3",  "",    "",       ""      },  // activated
+            //                                       { "",     "",       "",      "",     "",    "",       ""      },  // slplasmacyte
+            //                                       { "",     "",       "",      "",   "sDif4", "",       ""      },  // centroblast
+            //                                       { "",     "",       "",   "sDif5",   "",   "sDif6",  "sDif7"  },  // centrocyte
+            //                                       { "",     "",       "",      "",     "",    "",       ""     },  // llplasmacyte
+            //                                       { "",     "",       "",      "",     "",    "",       ""     },  // memory
+            //                                    };
+            ////  no spontaneous transitions        naive    act       slp      cb       cc    llp     memory
+            //alpha = new double[,]          {       { 0,     0,        0,       0,      0,    0,       0   },  // naive
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // activated
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // slplasmacyte
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // centroblast
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // centrocyte
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // llplasmacyte
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // memory
+            //                                    };
+            ////  need better values here             naive    act       slp      cb       cc    llp     memory
+            //beta = new double[,]           {       { 0,     1,        0,       0,      0,    0,       0   },  // naive
+            //                                       { 0,     0,        1,       1,      0,    0,       0   },  // activated
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // slplasmacyte
+            //                                       { 0,     0,        0,       0,      1,    0,       0   },  // centroblast
+            //                                       { 0,     0,        0,       1,      0,    1,       1   },  // centrocyte
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // llplasmacyte
+            //                                       { 0,     0,        0,       0,      0,    0,       0   },  // memory
+            //                                    };
+
+            //diffScheme = new ConfigTransitionScheme();
+            //diffScheme.Name = "B cell 7 state";
+            //driver = new ConfigTransitionDriver();
+            //driver.Name = "B cell 7 state driver";
+            //driver.CurrentState = new DistributedParameter(0);
+            //driver.StateName = stateNames[(int)driver.CurrentState.Sample()];
+
+            //// Attach transition driver to differentiation scheme
+            //diffScheme.Driver = driver;
+
+            //// Add genes
+            //diffScheme.genes = new ObservableCollection<string>();
+            //for (int j = 0; j < activations.GetLength(1); j++)
+            //{
+            //    diffScheme.genes.Add(findGeneGuid(geneNames[j], store));
+            //}
+
+            //// Add epigenetic map of genes and activations
+            //diffScheme.activationRows = new ObservableCollection<ConfigActivationRow>();
+            //for (int i = 0; i < activations.GetLength(0); i++)
+            //{
+            //    actRow = new ConfigActivationRow();
+            //    for (int j = 0; j < activations.GetLength(1); j++)
+            //    {
+            //        actRow.activations.Add(activations[i, j]);
+            //    }
+            //    diffScheme.activationRows.Add(actRow);
+            //}
+
+            //// Add DriverElements to TransitionDriver
+            //LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
+
+            //// Add to Entity Repository
+            //store.entity_repository.transition_drivers.Add(driver);
+            //store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
+            //store.entity_repository.diff_schemes.Add(diffScheme);
+            //store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+
 
             ////////////////////////////
-            // B cell differentiatior 
+            // GC B cell death
             ////////////////////////////
+            
+            config_td = new ConfigTransitionDriver();
+            config_td.Name = "GC B cell apoptosis";
+            stateName = new string[] { "alive", "dead" };
+            signal = new string[2, 2];
+            alpha = new double[2, 2];
+            beta = new double[2, 2];
+            // sApop equil value = 0.8
+            // mean transition time = 1/(beta * equil_value)
+            beta[0, 1] = 6.9e-4;
+            signal[0, 1] = "sApop";
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
+            config_td.StateName = config_td.states[0];
 
-            stateNames = new string[] { "naive", "activated", "short-lived plasmacyte", "centroblast", "centrocyte", "long-lived plasmacyte", "memory" };
-            geneNames = new string[]             { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII" };
-            activations = new double[,]          { { 0,        1,       1,      1,      0,       0,      0,      0 },  // naive
-                                                   { 0,        1,       1,      1,      0,       0,      1,      1 },  // activated
-                                                   { 0,        1,       1,      1,      1,       0,      0,      0 },  // slplasmacyte
-                                                   { 1,        0,       0,      0,      0,       1,      0,      0 },  // centroblast
-                                                   { 0,        1,       1,      1,      0,       0,      1,      1 },  // centrocyte
-                                                   { 0,        0,       1,      1,      1,       0,      0,      0 },  // llplasmacyte
-                                                   { 0,        0,       1,      1,      0,       0,      1,      1 },  // memory
-                                                };
-            //                                     naive    act       slp      cb       cc    llp     memory
-            signal = new string[,]          {     { "",   "sDif1",    "",     "",      "",    "",       ""      },  // naive
-                                                   { "",     "",     "sDif2", "sDif3",  "",    "",       ""      },  // activated
-                                                   { "",     "",       "",      "",     "",    "",       ""      },  // slplasmacyte
-                                                   { "",     "",       "",      "",   "sDif4", "",       ""      },  // centroblast
-                                                   { "",     "",       "",   "sDif5",   "",   "sDif6",  "sDif7"  },  // centrocyte
-                                                   { "",     "",       "",      "",     "",    "",       ""     },  // llplasmacyte
-                                                   { "",     "",       "",      "",     "",    "",       ""     },  // memory
-                                                };
-            //  no spontaneous transitions        naive    act       slp      cb       cc    llp     memory
-            alpha = new double[,]          {       { 0,     0,        0,       0,      0,    0,       0   },  // naive
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // activated
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // slplasmacyte
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // centroblast
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // centrocyte
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // llplasmacyte
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // memory
-                                                };
-            //  need better values here             naive    act       slp      cb       cc    llp     memory
-            beta = new double[,]           {       { 0,     1,        0,       0,      0,    0,       0   },  // naive
-                                                   { 0,     0,        1,       1,      0,    0,       0   },  // activated
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // slplasmacyte
-                                                   { 0,     0,        0,       0,      1,    0,       0   },  // centroblast
-                                                   { 0,     0,        0,       1,      0,    1,       1   },  // centrocyte
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // llplasmacyte
-                                                   { 0,     0,        0,       0,      0,    0,       0   },  // memory
-                                                };
+            //ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
+            //distrTdE1.Distr = new DistributedParameter();
+            //distrTdE1.Distr.DistributionType = ParameterDistributionType.GAMMA;
+            //distrTdE1.Distr.ParamDistr = new GammaParameterDistribution();
+            //((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Rate = 36;
+            //((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 5.0;
+            //config_td.DriverElements[0].elements[1] = distrTdE1;
+            //distrTdE1.CurrentState = 0;
+            //distrTdE1.DestState = 1;
 
-            diffScheme = new ConfigTransitionScheme();
-            diffScheme.Name = "B cell 7 state";
-            driver = new ConfigTransitionDriver();
-            driver.Name = "B cell 7 state driver";
-            driver.CurrentState = new DistributedParameter(0);
-            driver.StateName = stateNames[(int)driver.CurrentState.Sample()];
-
-            // Attach transition driver to differentiation scheme
-            diffScheme.Driver = driver;
-
-            // Add genes
-            diffScheme.genes = new ObservableCollection<string>();
-            for (int j = 0; j < activations.GetLength(1); j++)
-            {
-                diffScheme.genes.Add(findGeneGuid(geneNames[j], store));
-            }
-
-            // Add epigenetic map of genes and activations
-            diffScheme.activationRows = new ObservableCollection<ConfigActivationRow>();
-            for (int i = 0; i < activations.GetLength(0); i++)
-            {
-                actRow = new ConfigActivationRow();
-                for (int j = 0; j < activations.GetLength(1); j++)
-                {
-                    actRow.activations.Add(activations[i, j]);
-                }
-                diffScheme.activationRows.Add(actRow);
-            }
-
-            // Add DriverElements to TransitionDriver
-            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
-
-            // Add to Entity Repository
-            store.entity_repository.transition_drivers.Add(driver);
-            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
-            store.entity_repository.diff_schemes.Add(diffScheme);
-            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+            store.entity_repository.transition_drivers.Add(config_td.Clone(true));
+            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td.Clone(true));
 
             ////////////////////////////
             // GC B cell differentiatior 
             ////////////////////////////
 
-            stateNames = new string[] {  "centroblast", "centrocyte", "long-lived plasmacyte", "memory" };
-            geneNames = new string[] {           "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII" };
-            activations = new double[,]          { { 1,        0,       0,      0,      0,       1,      0,      0 },  // centroblast
-                                                   { 0,        1,       1,      1,      0,       0,      1,      1 },  // centrocyte
-                                                   { 0,        0,       1,      1,      1,       0,      0,      0 },  // llplasmacyte
-                                                   { 0,        0,       1,      1,      0,       0,      1,      1 },  // memory
-                                                };
-            //                                           cb       cc     llp     memory
-            signal = new string[,]          {      {      "",   "sDif4", "",       ""      },  // centroblast
-                                                   {  "sDif5",   "",   "sDif6",  "sDif7"  },  // centrocyte
-                                                   {      "",     "",    "",       ""     },  // llplasmacyte
-                                                   {      "",     "",    "",       ""     },  // memory
-                                                };
-            //  no spontaneous transitions          cb       cc    llp     memory
-            alpha = new double[,]          {       { 0,      0,    0,       0   },  // centroblast
-                                                   { 0,      0,    0,       0   },  // centrocyte
-                                                   { 0,      0,    0,       0   },  // llplasmacyte
-                                                   { 0,      0,    0,       0   },  // memory
-                                                };
-            //  need better values here             cb       cc    llp     memory
-            beta = new double[,]           {       { 0,      1,    0,       0   },  // centroblast
-                                                   { 0.5,    0,   1.0,     0.25   },  // centrocyte
-                                                   { 0,      0,    0,       0   },  // llplasmacyte
-                                                   { 0,      0,    0,       0   },  // memory
+            diffScheme = new ConfigTransitionScheme();
+            diffScheme.Name = "GC B cell differentiation scheme";
+
+            stateNames = new string[] {  "activated", "initialization", "centroblast", "centrocyte" };
+            geneNames = new string[] {             "gCXCR4", "gCXCR5", "gE1", "gW", "gE2",  "gDif1", "gApop", "gA" };
+            activations = new double[,]          { { 0,        0,       1,      0,      0,       0,     0 ,   0 },  // activated
+                                                   { 0,        0,       0,      1,      1,       0,     0 ,   1 },  // initialization            
+                                                   { 1,        0,       0,      0,      0,       0,     0 ,   0 },  // centroblast
+                                                   { 0,        1,       0,      0,      0,       1,     1 ,   0 },  // centrocyte
                                                 };
 
-            diffScheme = new ConfigTransitionScheme();
-            diffScheme.Name = "GC B cell";
+            // Driver
             driver = new ConfigTransitionDriver();
-            driver.Name = "GC B Cell driver";
+            driver.Name = "GC B cell differentiation driver";
             driver.CurrentState = new DistributedParameter(0);
-            driver.StateName = stateNames[(int)driver.CurrentState.Sample()];
+            driver.StateName = stateNames[0];
+            // Molecule driver elements
+            signal = new string[stateNames.Count(), stateNames.Count()];
+            alpha = new double[stateNames.Count(), stateNames.Count()];
+            beta = new double[stateNames.Count(), stateNames.Count()];
+            // centroblast to centrocyte transition driven by molecule W
+            signal[2, 3] = "W";
+            beta[2, 3] = 3e-3;
+            // Add DriverElements to TransitionDriver
+            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
 
             // Attach transition driver to differentiation scheme
             diffScheme.Driver = driver;
@@ -1909,14 +1954,179 @@ namespace Daphne
                 diffScheme.activationRows.Add(actRow);
             }
 
+            // Add distribution driver elements
+
+            // activated to initialization 
+            ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
+            distrTdE1.Distr = new DistributedParameter();
+            distrTdE1.Distr.DistributionType = ParameterDistributionType.WEIBULL;
+            distrTdE1.Distr.ParamDistr = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Scale = 1577;
+            ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 10.0;
+            distrTdE1.CurrentState = 0;
+            distrTdE1.DestState = 1;
+            distrTdE1.CurrentStateName = stateNames[0];
+            distrTdE1.DestStateName = stateNames[1];
+            diffScheme.Driver.DriverElements[0].elements[1] = distrTdE1;
+            
+            //ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
+            //distrTdE1.Distr = new DistributedParameter();
+            //distrTdE1.Distr.DistributionType = ParameterDistributionType.GAMMA;
+            //distrTdE1.Distr.ParamDistr = new GammaParameterDistribution();
+            //((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Rate = 1.0/65.1;
+            //((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 20;
+            //distrTdE1.CurrentState = 0;
+            //distrTdE1.DestState = 1;
+            //distrTdE1.CurrentStateName = stateNames[0];
+            //distrTdE1.DestStateName = stateNames[1];
+            //diffScheme.Driver.DriverElements[0].elements[1] = distrTdE1;
+
+            // initialization to centroblast 
+            ConfigDistrTransitionDriverElement distrTdE2 = new ConfigDistrTransitionDriverElement();
+            distrTdE2.Distr = new DistributedParameter();
+            distrTdE2.Distr.DistributionType = ParameterDistributionType.WEIBULL;
+            distrTdE2.Distr.ParamDistr = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Scale = 10;
+            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 100;
+            distrTdE2.CurrentState = 1;
+            distrTdE2.DestState = 2;
+            distrTdE2.CurrentStateName = stateNames[1];
+            distrTdE2.DestStateName = stateNames[2];
+            diffScheme.Driver.DriverElements[1].elements[2] = distrTdE2;
+
+            //ConfigDistrTransitionDriverElement distrTdE2 = new ConfigDistrTransitionDriverElement();
+            //distrTdE2.Distr = new DistributedParameter();
+            //distrTdE2.Distr.DistributionType = ParameterDistributionType.GAMMA;
+            //distrTdE2.Distr.ParamDistr = new GammaParameterDistribution();
+            //((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Rate = 1.0/9.9;
+            //((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 20;
+            //distrTdE2.CurrentState = 1;
+            //distrTdE2.DestState = 2;
+            //distrTdE2.CurrentStateName = stateNames[1];
+            //distrTdE2.DestStateName = stateNames[2];
+            //diffScheme.Driver.DriverElements[1].elements[2] = distrTdE2;
+
+            // centrocyte to centroblast 
+            ConfigDistrTransitionDriverElement distrTdE3 = new ConfigDistrTransitionDriverElement();
+            distrTdE3.Distr = new DistributedParameter();
+            distrTdE3.Distr.DistributionType = ParameterDistributionType.GAMMA;
+            distrTdE3.Distr.ParamDistr = new GammaParameterDistribution();
+            ((GammaParameterDistribution)distrTdE3.Distr.ParamDistr).Rate = 1.0/36;
+            ((GammaParameterDistribution)distrTdE3.Distr.ParamDistr).Shape = 5.0;
+            distrTdE3.CurrentState = 3;
+            distrTdE3.DestState = 2;
+            distrTdE3.CurrentStateName = stateNames[3];
+            distrTdE3.DestStateName = stateNames[2];
+            diffScheme.Driver.DriverElements[3].elements[2] = distrTdE3;
+
+            // Add to Entity Repository
+            store.entity_repository.transition_drivers.Add(driver.Clone(true));
+            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver.Clone(true));
+            store.entity_repository.diff_schemes.Add(diffScheme.Clone(true));
+            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme.Clone(true));
+
+            ////////////////////////////
+            // GC B cell division
+            ////////////////////////////
+
+            diffScheme = new ConfigTransitionScheme();
+            diffScheme.Name = "GC B cell division scheme";
+
+            stateNames = new string[] { "G0", "G1", "S-G2-M", "initialization", "cytokinetic" };
+            geneNames = new string[]            { "gW", "gE2", "gA" };
+            activations = new double[,]          { { 0,     0,   0 },  // G0
+                                                   { 0,     0,   0 },   // G1            
+                                                   { 0,     0,   0  },  // S-G2-M
+                                                   { 1,     1,   1  },  // initializatoin
+                                                   { 0,     0,   0  },  // cytokinetic
+                                                };
+
+            // Driver
+            driver = new ConfigTransitionDriver();
+            driver.Name = "GC B cell division driver";
+            driver.CurrentState = new DistributedParameter(0);
+            driver.StateName = stateNames[0];
+            // Molecule driver elements
+            signal = new string[stateNames.Count(), stateNames.Count()];
+            alpha = new double[stateNames.Count(), stateNames.Count()];
+            beta = new double[stateNames.Count(), stateNames.Count()];
+            // G0 to G1 transition driven by molecule Wp
+            signal[0, 1] = "Wp";
+            beta[0, 1] = 0.1;
             // Add DriverElements to TransitionDriver
             LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
 
+            // Attach transition driver to differentiation scheme
+            diffScheme.Driver = driver;
+
+            // Add genes
+            diffScheme.genes = new ObservableCollection<string>();
+            for (int j = 0; j < activations.GetLength(1); j++)
+            {
+                diffScheme.genes.Add(findGeneGuid(geneNames[j], store));
+            }
+
+            // Add epigenetic map of genes and activations
+            diffScheme.activationRows = new ObservableCollection<ConfigActivationRow>();
+            for (int i = 0; i < activations.GetLength(0); i++)
+            {
+                actRow = new ConfigActivationRow();
+                for (int j = 0; j < activations.GetLength(1); j++)
+                {
+                    actRow.activations.Add(activations[i, j]);
+                }
+                diffScheme.activationRows.Add(actRow);
+            }
+
+            // Add distribution driver elements
+
+            // G1 to S-G2-M 
+            distrTdE1 = new ConfigDistrTransitionDriverElement();
+            distrTdE1.Distr = new DistributedParameter();
+            distrTdE1.Distr.DistributionType = ParameterDistributionType.GAMMA;
+            distrTdE1.Distr.ParamDistr = new GammaParameterDistribution();
+            ((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Rate = 1.0/3.95;
+            ((GammaParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 50;
+            distrTdE1.CurrentState = 1;
+            distrTdE1.DestState = 2;
+            distrTdE1.CurrentStateName = stateNames[1];
+            distrTdE1.DestStateName = stateNames[2];
+            diffScheme.Driver.DriverElements[1].elements[2] = distrTdE1;
+
+            // S-G2-M to initialization
+            distrTdE2 = new ConfigDistrTransitionDriverElement();
+            distrTdE2.Distr = new DistributedParameter();
+            distrTdE2.Distr.DistributionType = ParameterDistributionType.GAMMA;
+            distrTdE2.Distr.ParamDistr = new GammaParameterDistribution();
+            ((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Rate = 1.0/10.69;
+            ((GammaParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 50;
+            distrTdE2.CurrentState = 2;
+            distrTdE2.DestState = 3;
+            distrTdE2.CurrentStateName = stateNames[2];
+            distrTdE2.DestStateName = stateNames[3];
+            diffScheme.Driver.DriverElements[2].elements[3] = distrTdE2;
+
+
+            // initialization to cytokinetic
+            distrTdE3 = new ConfigDistrTransitionDriverElement();
+            distrTdE3.Distr = new DistributedParameter();
+            distrTdE3.Distr.DistributionType = ParameterDistributionType.WEIBULL;
+            distrTdE3.Distr.ParamDistr = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)distrTdE3.Distr.ParamDistr).Scale = 10;
+            ((WeibullParameterDistribution)distrTdE3.Distr.ParamDistr).Shape = 100;
+            distrTdE3.CurrentState = 3;
+            distrTdE3.DestState = 4;
+            distrTdE3.CurrentStateName = stateNames[3];
+            distrTdE3.DestStateName = stateNames[4];
+            diffScheme.Driver.DriverElements[3].elements[4] = distrTdE3;
+
             // Add to Entity Repository
-            store.entity_repository.transition_drivers.Add(driver);
-            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
-            store.entity_repository.diff_schemes.Add(diffScheme);
-            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+            store.entity_repository.transition_drivers.Add(driver.Clone(true));
+            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver.Clone(true));
+            store.entity_repository.diff_schemes.Add(diffScheme.Clone(true));
+            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme.Clone(true));
+
+
 
             ////////////////////////////////////////
             // cycling cb-cc cell differentiatior 
@@ -1940,14 +2150,6 @@ namespace Daphne
             // Then make the mean transition time of centrocyte/centroblast transition ~4320 minutes.
             // Weibull distribution with s=4312 and shape=6 gives a broad distribution with mean 4000 minutes.
             //
-            ParameterDistribution pd01 = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)pd01).Scale = 4000;
-            ((WeibullParameterDistribution)pd01).Shape = 6.0;
-
-            ParameterDistribution pd10 = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)pd10).Scale = 1000;
-            ((WeibullParameterDistribution)pd10).Shape = 8.0;
-
             diffScheme = new ConfigTransitionScheme();
             diffScheme.Name = "cycling cb-cc diff scheme";
             driver = new ConfigTransitionDriver();
@@ -1998,27 +2200,32 @@ namespace Daphne
                 diffScheme.Driver.DriverElements.Add(row);
             }
 
-            ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
+            // Distribution driver elements
+            distrTdE1 = new ConfigDistrTransitionDriverElement();
             distrTdE1.Distr = new DistributedParameter();
             distrTdE1.Distr.DistributionType = ParameterDistributionType.WEIBULL;
-            distrTdE1.Distr.ParamDistr = pd01;
+            distrTdE1.Distr.ParamDistr = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Scale = 400;
+            ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 6.0;
             diffScheme.Driver.DriverElements[0].elements[1] = distrTdE1;
             distrTdE1.CurrentState = 0;
             distrTdE1.DestState = 1;
 
-            ConfigDistrTransitionDriverElement distrTdE2 = new ConfigDistrTransitionDriverElement();
+            distrTdE2 = new ConfigDistrTransitionDriverElement();
             distrTdE2.Distr = new DistributedParameter();
             distrTdE2.Distr.DistributionType = ParameterDistributionType.WEIBULL;
-            distrTdE2.Distr.ParamDistr = pd10;
+            distrTdE2.Distr.ParamDistr = new WeibullParameterDistribution();
+            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Scale = 1000;
+            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 8.0;
             diffScheme.Driver.DriverElements[1].elements[0] = distrTdE2;
             distrTdE2.CurrentState = 1;
             distrTdE2.DestState = 0;
 
             // Add to Entity Repository
-            store.entity_repository.transition_drivers.Add(driver);
-            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
-            store.entity_repository.diff_schemes.Add(diffScheme);
-            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+            store.entity_repository.transition_drivers.Add(driver.Clone(true));
+            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver.Clone(true));
+            store.entity_repository.diff_schemes.Add(diffScheme.Clone(true));
+            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme.Clone(true));
         }
 
         private static void PredefinedGenesCreator(Level store)
@@ -2088,6 +2295,29 @@ namespace Daphne
                 store.entity_repository.genes.Add(gene);
                 store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
             }
+
+            // Goldbeter-Koshland system 
+            gene = new ConfigGene("gW", 2, 1.0);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            gene = new ConfigGene("gE1", 2, 1.0);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            gene = new ConfigGene("gE2", 2, 1.0);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+
+            // Production of pseudo-molecule A. Needed after cell division.
+            gene = new ConfigGene("gA", 2, 1.0);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+
+            // Housekeeping enzyme gene
+            gene = new ConfigGene("gH", 2, 1.0);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+
+
         }
 
         private static void PredefinedMoleculesCreator(Level store)
@@ -2245,6 +2475,37 @@ namespace Daphne
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("MHCII", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+
+            // molecules for Goldbeter-Koshland system of reactions
+            cm = new ConfigMolecule("W", 1.0, 1.0, 1e-7);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            
+            cm = new ConfigMolecule("Wp", 1.0, 1.0, 1e-7);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("E1", 1.0, 1.0, 1e-7);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("E2", 1.0, 1.0, 1e-7);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm); 
+            store.entity_repository.molecules.Add(cm);
+
+            cm = new ConfigMolecule("W:E1", 1.0, 1.0, 1e-7);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("Wp:E2", 1.0, 1.0, 1e-7);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            // housekeeping molecule
+            cm = new ConfigMolecule("H", 1.0, 1.0, 1e-7);
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
@@ -2911,17 +3172,266 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////
+            
+            /////////////////////////////////////
+            // Housekeeping molecule reactions
+            ////////////////////////////////////
+
+            double house_transcription = 0.5;
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gH", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            cr.rate_const = house_transcription;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            double house_equil = 1.0;
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            cr.rate_const = 2 * house_transcription / house_equil;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            ////////////////////////////////////////////
+            // Reactions for Goldbeter-Koshland system
+            ////////////////////////////////////////////
+
+            // Transcription of Goldbeter-Koshland molecules
+            double initialization_period = 10;
+            double WT = 1.0;
+            double W_transcription = WT / (2 * initialization_period);
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gW", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            cr.rate_const = W_transcription;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            double E2T = 1e-2;
+            double E2_transcription = E2T / (2 * initialization_period);
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gE2", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            cr.rate_const = E2_transcription;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            double E1_transcription = 0.06 / (2 * 1500);
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gE1", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            cr.rate_const = E1_transcription;
+            cr.GetTotalReactionString(store.entity_repository);
+            cr.description = "This rate is computed to achieve a mean concentration of 0.06 after a mean activation period of 1500 minutes with 2 active copies of the gene.";
+            store.entity_repository.reactions.Add(cr);
+
+            //// degradation of Goldbeter-Koshland molecules 
+
+            //double targetValue = 1.0; // Set a value lower than actual target (1), because some W stored in Wp and W:E1 and Wp:E2 complexes.
+            ////cr = new ConfigReaction();
+            ////cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            ////// reactants
+            ////cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            ////cr.rate_const = copyNumber * transcriptionRate / targetValue;
+            ////cr.GetTotalReactionString(store.entity_repository);
+            ////store.entity_repository.reactions.Add(cr);
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 2*W_transcription/(targetValue*house_equil);
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 2 * W_transcription / (targetValue * house_equil);
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W:E1", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 2 * W_transcription / (targetValue * house_equil);
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 2 * W_transcription / (targetValue * house_equil);
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //targetValue = 1e-2; // Set a value lower than actual target (1e-2), because some E2 stored in Wp:E2 complex.
+            ////cr = new ConfigReaction();
+            ////cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            ////// reactants
+            ////cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            ////cr.rate_const = copyNumber * transcriptionRate / targetValue;
+            ////cr.GetTotalReactionString(store.entity_repository);
+            ////store.entity_repository.reactions.Add(cr);
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 2 * E2_transcription / (targetValue * house_equil);
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("sDif1", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //cr.rate_const = cytoDefaultDegradRate;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            // Switch dynamics
+
+            double k = 10;
+            double d = 1;
+            double a = 110;
+            // Association: W + E1 -> W:E1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("W:E1", MoleculeLocation.Bulk, store));
+            cr.rate_const = a;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Association: Wp + E2 -> Wp:E2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            cr.rate_const = a;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Dissociation: W:E1 -> W + E1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W:E1", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            cr.rate_const = d;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Dissociation: Wp:E2 -> Wp + E2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            cr.rate_const = d;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Dissociation: W:E1 -> Wp + E1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W:E1", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            cr.rate_const = k;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Dissociation: Wp:E2 -> W + E2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            cr.rate_const = k;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            //////////////////////////////////////////////////////////////
+            // Homeostasis reactions for pseudo-molecule A
+            /////////////////////////////////////////////////////////////
+
+            double AT = 250;
+            double A_transcription =  AT / (2 * initialization_period);
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gA", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
+            cr.rate_const = A_transcription;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            //// degradation of A
+            //targetValue = 250.0;
+            ////cr = new ConfigReaction();
+            ////cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            ////// reactants
+            ////cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
+            ////cr.rate_const = copyNumber * transcriptionRate / targetValue;
+            ////cr.GetTotalReactionString(store.entity_repository);
+            ////store.entity_repository.reactions.Add(cr);
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 2 * A_transcription / (targetValue * house_equil);
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
 
         }
 
         private static void PredefinedReactionComplexesCreator(Level store)
         {
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
-
             //MOLECULES
             double[] conc = new double[3] { 2, 1, 0 };
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -2945,8 +3455,6 @@ namespace Daphne
             }
 
             //REACTIONS
-
-            // Reaction strings
             type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
@@ -2962,13 +3470,10 @@ namespace Daphne
             store.entity_repository.reaction_complexes.Add(crc);
 
             ////////////////////////////////////////////////////////////////
-
             crc = new ConfigReactionComplex("CXCL12/CXCR4 binding");
-
             //MOLECULES
             conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL12", "CXCR4", "CXCL12:CXCR4" };
-
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -2990,12 +3495,8 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
-
             //REACTIONS
-
-            // Reaction strings
             type = new string[2] { "CXCL12:CXCR4 -> CXCL12 + CXCR4", "CXCL12 + CXCR4 -> CXCL12:CXCR4" };
-
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -3005,17 +3506,13 @@ namespace Daphne
                     crc.reactions.Add(reac.Clone(true));
                 }
             }
-
             store.entity_repository.reaction_complexes.Add(crc);
 
             ////////////////////////////////////////////////////////////////
-
             crc = new ConfigReactionComplex("CXCL13/CXCR5 binding");
-
             //MOLECULES
             conc = new double[3] { 2, 1, 0 };
             type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -3037,10 +3534,7 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
-
             //REACTIONS
-
-            // Reaction strings
             type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5" };
 
             for (int i = 0; i < type.Length; i++)
@@ -3052,19 +3546,13 @@ namespace Daphne
                     crc.reactions.Add(reac.Clone(true));
                 }
             }
-
             store.entity_repository.reaction_complexes.Add(crc);
-
 
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCR5 receptor production and recycling");
-
             // Bulk MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR5", "CXCL13:CXCR5" };
-            //conc = new double[] { 0, 0};
-            //type = new string[] { "CXCR5", "CXCL13:CXCR5" };
-
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -3086,13 +3574,9 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
-
             // Boundary MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR5|", "CXCL13:CXCR5|" };
-            //conc = new double[] { 0, 0};
-            //type = new string[] { "CXCR5", "CXCL13:CXCR5" };
-
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
@@ -3114,7 +3598,6 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
-
             //GENES
             type = new string[] { "gCXCR5" };
             for (int i = 0; i < type.Length; i++)
@@ -3125,9 +3608,7 @@ namespace Daphne
                     crc.genes.Add(cg.Clone(null));
                 }
             }
-
             //REACTIONS
-            // Reaction strings
             type = new string[] { "gCXCR5 -> CXCR5 + gCXCR5", 
                                   "CXCR5 ->", "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
                                   "CXCL13:CXCR5| -> CXCL13:CXCR5",  "CXCL13:CXCR5 ->" }; 
@@ -3140,13 +3621,11 @@ namespace Daphne
                     crc.reactions.Add(reac.Clone(true));
                 }
             }
-
             store.entity_repository.reaction_complexes.Add(crc);
 
 
             ////////////////////////////////////////////////////////////////
             crc = new ConfigReactionComplex("CXCR4 receptor production and recycling");
-
             // Bulk MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR4", "CXCL12:CXCR4" };
@@ -3171,7 +3650,6 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
-
             // Boundary MOLECULES
             conc = new double[] { 0, 0 };
             type = new string[] { "CXCR4|", "CXCL12:CXCR4|" };
@@ -3196,8 +3674,6 @@ namespace Daphne
                     crc.molpops.Add(configMolPop);
                 }
             }
-
-
             //GENES
             type = new string[] { "gCXCR4" };
             for (int i = 0; i < type.Length; i++)
@@ -3208,12 +3684,243 @@ namespace Daphne
                     crc.genes.Add(cg.Clone(null));
                 }
             }
-
             //REACTIONS
-            // Reaction strings
             type = new string[] { "gCXCR4 -> CXCR4 + gCXCR4", 
                                   "CXCR4 ->", "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
                                   "CXCL12:CXCR4| -> CXCL12:CXCR4",  "CXCL12:CXCR4 ->" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+            store.entity_repository.reaction_complexes.Add(crc);
+
+            ////////////////////////////////////////////////////////////////
+            crc = new ConfigReactionComplex("Goldbeter-Koshland switch reactions");
+            crc.description = "Goldbeter A, Koshland DE. An amplified sensitivity arising from covalent modification in biological systems. Proc Natl Acad Sci USA 1981, 78:6840-6844.";
+            crc.description = crc.description + "With these parameter choices and W_total=W+Wp >> E1_total and E2_total, the reactions will produce switch-like behavior for W and Wp around the point when E1_total/E2_total=1.";
+            //MOLECULES
+            type = new string[] { "W", "Wp", "E1", "E2" };
+            conc = new double[type.Count()];
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.VAT_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+            //REACTIONS
+            type = new string[] {   "W + E1 -> W:E1", "Wp + E2 -> Wp:E2", 
+                                    "W:E1 -> W + E1", "Wp:E2 -> Wp + E2", 
+                                    "W:E1 -> Wp + E1", "Wp:E2 -> W + E2" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+            store.entity_repository.reaction_complexes.Add(crc);
+
+            //////////////////////////////////////////////////////////////////////////////
+            crc = new ConfigReactionComplex("Goldbeter-Koshland molecule homeostasis");
+            //BULK MOLECULES
+             type = new string[] { "W", "E1", "E2", "sDif1"};
+             conc = new double[type.Count()];
+             for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+            //GENES
+            type = new string[] { "gW", "gE1", "gE2", "gDif1" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigGene cg = store.entity_repository.genes_dict[findGeneGuid(type[i], store)];
+                if (cg != null)
+                {
+                    crc.genes.Add(cg.Clone(null));
+                }
+            }
+            //REACTIONS
+            type = new string[] {   "gW -> W + gW", "gE1 -> E1 + gE1", "gE2 -> E2 + gE2", 
+                                    "gDif1 -> sDif1 + gDif1", "E1 + sDif1 -> sDif1" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+            store.entity_repository.reaction_complexes.Add(crc);
+
+            //////////////////////////////////////////////////////////////////////////////
+            crc = new ConfigReactionComplex("GC B cell chemotaxis: cytosol reactions");
+            //BULK MOLECULES
+            type = new string[] { "A", "A*" };
+            conc = new double[type.Count()]; 
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+            //BOUNDARY MOLECULES
+            conc = new double[] { 0, 0 };
+            type = new string[] { "CXCL12:CXCR4|", "CXCL13:CXCR5|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+            //GENES
+            type = new string[] { "gA" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigGene cg = store.entity_repository.genes_dict[findGeneGuid(type[i], store)];
+                if (cg != null)
+                {
+                    crc.genes.Add(cg.Clone(null));
+                }
+            }
+            //REACTIONS
+            type = new string[] { "gA -> A + gA", 
+                                  "A* -> A", 
+                                  "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|",  "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+            store.entity_repository.reaction_complexes.Add(crc);
+
+            //////////////////////////////////////////////////////////////////////////////
+            crc = new ConfigReactionComplex("GC B cell chemotaxis: ECM reactions");
+            //BULK MOLECULES
+            type = new string[] { "CXCL12", "CXCL13" };
+            conc = new double[type.Count()]; 
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+            //BOUNDARY MOLECULES
+            //conc = new double[] { 33, 33, 0, 0 };
+            type = new string[] { "CXCR4|", "CXCR5|", "CXCL12:CXCR4|", "CXCL13:CXCR5|" };
+            conc = new double[type.Count()];
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.LEAN;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+            //REACTIONS
+            type = new string[] { "CXCL13:CXCR5| -> CXCL13 + CXCR5|",  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                    "CXCL12:CXCR4| -> CXCL12 + CXCR4|",  "CXCL12 + CXCR4| -> CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
@@ -3640,6 +4347,20 @@ namespace Daphne
             return null;
         }
 
+        // given a string description of a reaction complex, return the ConfigReactionComplex that matches
+        public static ConfigReactionComplex findReactionComplexByName(string crc_name, Level store)
+        {
+            foreach (ConfigReactionComplex crc in store.entity_repository.reaction_complexes)
+            {
+                if (crc.Name == crc_name) 
+                {
+                    return crc;
+                }
+            }
+            return null;
+        }
+
+
         /// <summary>
         /// Add ConfigTransitionDriverElements to a ConfigTransitionDriver.
         /// Null transition elements are included to facilitate use in the GUI.
@@ -3668,6 +4389,7 @@ namespace Daphne
                     driverElement.CurrentStateName = stateName[i];
                     driverElement.DestStateName = stateName[j];
 
+                    //if (signal[i, j] != "" && signal[i, j] != null)
                     if (signal[i, j] != "")
                     {
                         driverElement.Alpha = alpha[i, j];
@@ -3700,89 +4422,120 @@ namespace Daphne
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             //EXPERIMENT
-            protocol.experiment_name = "Simple GC cycling Scenario";
+            protocol.experiment_name = "Simple GC scenario";
             protocol.experiment_description = "CXCL12 Gaussian distribution (LZ), CXCL13 Gaussian distribution (DZ), cb-cc cells";
-            protocol.scenario.time_config.duration = 6000.0;
-            protocol.scenario.time_config.rendering_interval = 6.0;
-            protocol.scenario.time_config.sampling_interval = 6.0;
+            protocol.scenario.time_config.duration = 10000.0;
+            protocol.scenario.time_config.rendering_interval = 30.0;
+            protocol.scenario.time_config.sampling_interval = 5.0;
             protocol.scenario.time_config.integrator_step = 0.001;
-            protocol.reporter_file_name = "gc_cycling";
+            protocol.reporter_file_name = "centroblast_centrocyte_cycling";
+
+            //// mean time for removal = shape/rate
+            //double mean_removal_time = 922.0; // min, from Feng's model of Victora et al
+            //double shape = 10.0;
+            //double rate = shape/mean_removal_time;
+            //protocol.sim_params.Phagocytosis.ParamDistr = new GammaParameterDistribution();
+            //((GammaParameterDistribution)protocol.sim_params.Phagocytosis.ParamDistr).Rate = rate;
+            //((GammaParameterDistribution)protocol.sim_params.Phagocytosis.ParamDistr).Shape = shape;
 
             envHandle.extent_x = 260;
             envHandle.extent_y = 260;
             envHandle.extent_z = 260;
             envHandle.gridstep = 10;
 
-            //ECS MOLECULES
-            string[] ecs_mols = new string[] { "CXCL13", "CXCL12" };
-            int itemsLoaded = LoadProtocolMolecules(protocol, ecs_mols, MoleculeLocation.Bulk, userstore);
-            if (itemsLoaded != ecs_mols.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-            }
-
-            //GENES
-            string[] item = new string[] { "gCXCR5", "gCXCR4" };
-            itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol genes.");
-            }
-
-            //CELL MOLECULES
-            item = new string[] { "A", "A*", "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5" };
-            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
-            }
-
-            item = new string[] { "CXCR4|", "CXCL12:CXCR4|", "CXCR5|", "CXCL13:CXCR5|" };
-            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
-            }
-
-            //ECS REACTIONS
-            string[] ecsReacs = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-                                    "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-                                    "CXCL12 + CXCR4| -> CXCL12:CXCR4|",
-                                    "CXCL12:CXCR4| -> CXCL12 + CXCR4|" };
-            itemsLoaded = LoadProtocolReactions(protocol, ecsReacs, userstore);
-            if (itemsLoaded != ecsReacs.Length)
+            //ECS REACTION COMPLEXES - recursive
+            string[] ecsReacComplex = new string[] { "GC B cell chemotaxis: ECM reactions" };
+            int itemsLoaded = LoadProtocolRCs(protocol, ecsReacComplex, userstore);
+            if (itemsLoaded != ecsReacComplex.Length)
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
             }
 
-            //CELL CYTOSOL REACTIONS
-            item = new string[] {  "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-                                    "A* -> A",
-                                    "CXCL13:CXCR5 ->",
-                                    "CXCR5 ->",
-                                    "CXCL12:CXCR4 ->",
-                                    "CXCR4 ->",
-                                    "gCXCR4 -> CXCR4 + gCXCR4",
-                                    "gCXCR5 -> CXCR5 + gCXCR5",
-                                    "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
-                                    "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
-                                    "CXCL12:CXCR4| -> CXCL12:CXCR4", "CXCL13:CXCR5| -> CXCL13:CXCR5",
-            };
-            itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
-            if (itemsLoaded != item.Length)
-            {
-                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
-            }
+            ////ECS MOLECULES
+            //string[] ecs_mols = new string[] { "CXCL13", "CXCL12" };
+            //int itemsLoaded = LoadProtocolMolecules(protocol, ecs_mols, MoleculeLocation.Bulk, userstore);
+            //if (itemsLoaded != ecs_mols.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            //}
 
-            //CELLS - cell reactions will load with cell
-            item = new string[] { "cb-cc_cycling" };
-            itemsLoaded = LoadProtocolCells(protocol, item, userstore);
-            if (itemsLoaded != item.Length)
+            ////GENES
+            //string[] item = new string[] { "gCXCR5", "gCXCR4", "gA", "gW", "gE1", "gE2", "gDif1" };
+            //itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol genes.");
+            //}
+
+            ////CELL MOLECULES
+            //item = new string[] {   "A", "A*", 
+            //                        "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5",
+            //                        "W", "Wp", "E1", "E2", "W:E1", "Wp:E2",
+            //                        "sDif1" };
+            //itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            //}
+
+            //item = new string[] { "CXCR4|", "CXCL12:CXCR4|", "CXCR5|", "CXCL13:CXCR5|" };
+            //itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
+            //}
+
+            ////ECS REACTIONS
+            //string[] ecsReacs = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+            //                        "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
+            //                        "CXCL12 + CXCR4| -> CXCL12:CXCR4|",
+            //                        "CXCL12:CXCR4| -> CXCL12 + CXCR4|" };
+            //itemsLoaded = LoadProtocolReactions(protocol, ecsReacs, userstore);
+            //if (itemsLoaded != ecsReacs.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            //}
+
+            //CELLS - recursive
+            string[] cells = new string[] { "GC B" };
+            itemsLoaded = itemsLoaded = LoadProtocolCells(protocol, cells, userstore);
+            if (itemsLoaded != cells.Length)
             {
                 System.Windows.MessageBox.Show("Unable to load all protocol cells.");
             }
 
-            //ECS
+            ////CELL CYTOSOL REACTIONS
+            //item = new string[] {   "gDif1 -> sDif1 + gDif1",
+            //                        "E1 + sDif1 -> sDif1",
+            //                      };
+            //itemsLoaded = LoadProtocolReactions(protocol, item, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            //}
+
+            ////CYTOSOL REACTION COMPLEXES
+            //string[] cytosolReacComplex = new string[] {   "CXCR5 receptor production and recycling", 
+            //                                                "CXCR4 receptor production and recycling", 
+            //                                                "GC B cell chemotaxis: cytosol reactions",
+            //                                                "Goldbeter-Koshland switch reactions",
+            //                                                "Goldbeter-Koshland molecule production"
+            //                                            };
+            //itemsLoaded = LoadProtocolRCs(protocol, ecsReacComplex, userstore);
+            //if (itemsLoaded != ecsReacComplex.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            //}
+
+            ////CELLS - cell reactions will load with cell
+            //item = new string[] { "GC B" };
+            //itemsLoaded = LoadProtocolCells(protocol, item, userstore);
+            //if (itemsLoaded != item.Length)
+            //{
+            //    System.Windows.MessageBox.Show("Unable to load all protocol cells.");
+            //}
+
+            //ECM
             double sep = 130;
             double d = sep * Math.Cos(Math.PI/4.0);
             double[] c = new double[] { envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2 };
@@ -3795,7 +4548,8 @@ namespace Daphne
             System.Windows.Media.Color[] box_color = new System.Windows.Media.Color[] { System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.0f, 0.3f), 
                                                                                         System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 1.0f, 0.0f) };
             ConfigMolecularPopulation configMolPop = null;
-            // ECS
+            // ECM molecules
+            string[] ecs_mols = new string[] { "CXCL13", "CXCL12" };
             for (int i = 0; i < ecs_mols.Count(); i++)
             {
                 ConfigMolecule cm = userstore.entity_repository.molecules_dict[findMoleculeGuid(ecs_mols[i], MoleculeLocation.Bulk, userstore)];
@@ -3844,29 +4598,23 @@ namespace Daphne
                 }
             }
 
-
-            //ECS REACTIONS
-            ConfigReaction reac;
-            for (int j = 0; j < ecsReacs.Length; j++)
+            //ECM reaction complexes
+            foreach (string s in ecsReacComplex)
             {
-                reac = findReaction(ecsReacs[j], protocol);
-                if (reac != null)
-                {
-                    protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
-                }
+                ConfigReactionComplex crc = findReactionComplexByName(s, userstore);
+                protocol.scenario.environment.comp.reaction_complexes.Add(crc.Clone(true));
             }
 
             //CELLS
 
-            // Add cell
-            //This code will add the cell and the predefined ConfigCell already has the molecules needed
-            ConfigCell configCell = findCell("cb-cc_cycling", protocol);
+            // GC B cell
+            ConfigCell configCell = findCell("GC B", protocol);
 
             // Cell placement
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
-            cellPop.number = 10;
+            cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
@@ -3874,9 +4622,9 @@ namespace Daphne
             cellPop.cellPopDist.Initialize(); 
 
             // Cell reporting
-            cellPop.report_xvf.position = true;
-            cellPop.report_xvf.velocity = true;
-            cellPop.report_xvf.force = true;
+            cellPop.report_xvf.position = false;
+            cellPop.report_xvf.velocity = false;
+            cellPop.report_xvf.force = false;
 
             foreach (ConfigMolecularPopulation cmp in cellPop.Cell.membrane.molpops)
             {
@@ -3897,6 +4645,8 @@ namespace Daphne
             }
 
             cellPop.reportStates.Differentiation = true;
+            cellPop.reportStates.Division = true;
+            cellPop.reportStates.Death = true;
             cellPop.reportStates.Exit = true;
 
             //rendering
