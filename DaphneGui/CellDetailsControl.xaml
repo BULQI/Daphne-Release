@@ -71,7 +71,7 @@
                     <ToolTip>
                         <StackPanel Width="200" Orientation="Horizontal">
                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                    REDSOX
+                                The molecular concentration that drives apoptosis for the cells in the selected population.
                             </TextBlock>
                         </StackPanel>
                     </ToolTip>
@@ -142,7 +142,21 @@
         <!-- Mol_Death_TDE_Template: Molecular Transition driver element Template for death driver -->
         <DataTemplate x:Key="Mol_Death_TDE_Template">
             <StackPanel x:Name="spConfigMolTransitionDriverTemplate" Orientation="Vertical">
+                <!--<StackPanel.ToolTip>
+                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                        At each time step, the probability that a cell becomes apoptotic is given by \n\r
+                        (constant parameter) + (linear parameter)*(mean molecular concentration)*(time step)
+                    </TextBlock>
+                </StackPanel.ToolTip>-->
 
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" MinWidth="200">
+                        At each time step, the probability that a cell becomes apoptotic is given by
+                </TextBlock>
+
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                        (constant probability) + (linear coefficient)*(mean molecular concentration)*(time step)
+                </TextBlock>
+                
                 <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
                 <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
                             ItemsSource="{Binding Path=cytosol.molpops}"
@@ -156,7 +170,7 @@
                         <ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                    The molecular concentration that drives apoptosis for the cells in the selected population.
                                 </TextBlock>
                             </StackPanel>
                         </ToolTip>
@@ -167,24 +181,22 @@
                 <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
                             Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }" >
-
-                    <TextBox.ToolTip>
-                        <StackPanel Width="200" Orientation="Horizontal">
-                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                    REDSOX
-                            </TextBlock>
-                        </StackPanel>
-                    </TextBox.ToolTip>
-                    
+                                <TextBox.ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            The constant probability of transition.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </TextBox.ToolTip>              
                 </TextBox>
 
                 <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
-                    <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,10,-4,10" VerticalAlignment="Bottom" Width="196"
+                    <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
                             Text="{Binding Path=death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }">
                     <TextBox.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                    The linear coefficient for the transition probability.
                                 </TextBlock>
                             </StackPanel>
                     </TextBox.ToolTip>
@@ -291,7 +303,7 @@
 
                     <Button.ToolTip>
                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                            Remove this apoptosis transition from the cells in the selected population.
                         </TextBlock>
                     </Button.ToolTip>
 
@@ -299,9 +311,18 @@
                 
                 <!-- starting state -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,5">
-                    <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" />
+                    <TextBlock Text="Starting death state" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Top" MinWidth="50" >
+                        <TextBlock.ToolTip>
+                           <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                               Specify the intial death state for the cells in this population: 0=alive, 1=dead. 
+                               The cells can all start in the same intial state, the default Constant option in the selector to the right, 
+                               or the starting states of the cells in the population can be distributed by using the selector to choose
+                               a probability distribution.
+                            </TextBlock>                            
+                        </TextBlock.ToolTip>
+                    </TextBlock>
                     <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding death_driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" 
-                                             HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                             HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </StackPanel>
 
                 <StackPanel Name="spTransitionDriverElementDetailsContentControl" HorizontalAlignment="Left">
@@ -311,7 +332,7 @@
 
                         <Button.ToolTip>
                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                Pressing this button toggles between two methods for driving apoptotic transitions: by molecular concentration or by probability distribution.
                             </TextBlock>
                         </Button.ToolTip>
 
@@ -331,7 +352,7 @@
                 New Death Driver
                 <Button.ToolTip>
                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                        Add an apoptotic transition to the cells in the selected population.
                     </TextBlock>
                 </Button.ToolTip>
             </Button>
@@ -370,7 +391,7 @@
 
                     <Button.ToolTip>
                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                            Pressing this button toggles between two methods for driving apoptotic transitions: by molecular concentration or by probability distribution.                         
                         </TextBlock>
                     </Button.ToolTip>
                 </Button>
@@ -428,14 +449,16 @@
                                         <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Add another molecular population to the cell membrane.  
+                                                    The molecule type will default to the first unused membrane-bound molecule type in the Molecules Library. 
+                                                    The default value can be modified using the molecule type selector.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button> 
                                         <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected membrane molecular population from the selected cell type in this simulation.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
@@ -477,7 +500,7 @@
                                                             <ToolTip>
                                                                 <StackPanel Width="200" Orientation="Horizontal">
                                                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                        The molecule type of the selected molecular population.
                                                                     </TextBlock>
                                                                 </StackPanel>
                                                             </ToolTip>
@@ -493,7 +516,7 @@
                                                             <ToolTip>
                                                                 <StackPanel Width="200" Orientation="Horizontal">
                                                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                        A user-defined name for the molecular population.
                                                                     </TextBlock>
                                                                 </StackPanel>
                                                             </ToolTip>
@@ -550,7 +573,9 @@
                                             <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click">
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Any changes to properties of the selected molecule only apply to this cell type in this simulation. 
+                                                    Select this option to save the changes to the Protocol Library in order to make the modified molecule available for use elsewhere in the simulation scenario
+                                                    or to make the the modified molecule available for saving as permanent user default.
                                                     </TextBlock>
                                                 </Button.ToolTip>
                                             </Button>
@@ -579,14 +604,16 @@
                                         <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Add another molecular population to the cell cytosol.  
+                                                    The molecule type will default to the first unused bulk molecule type in the Molecules Library. 
+                                                    The default value can be modified using the molecule type selector.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
                                         <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected cytosol molecular population from the selected cell type in this simulation.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
@@ -630,7 +657,7 @@
                                                                 <ToolTip>
                                                                     <StackPanel Width="200" Orientation="Horizontal">
                                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                            The molecule type of the selected molecular population.
                                                                         </TextBlock>
                                                                     </StackPanel>
                                                                 </ToolTip>
@@ -645,7 +672,7 @@
                                                                 <ToolTip>
                                                                     <StackPanel Width="200" Orientation="Horizontal">
                                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                            The user-defined name for the selected molecular population. The default name is the name of the molecule.
                                                                         </TextBlock>
                                                                     </StackPanel>
                                                                 </ToolTip>
@@ -704,7 +731,9 @@
                                                 <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click">
                                                     <Button.ToolTip>
                                                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                            Any changes to properties of the selected molecule only apply to this cell type in this simulation. 
+                                                            Select this option to save the changes to the Protocol Library in order to make the modified molecule available for use elsewhere in the simulation scenario
+                                                            or to make the the modified molecule available for saving as permanent user default.
                                                         </TextBlock>
                                                     </Button.ToolTip>
                                                 </Button>
@@ -736,7 +765,7 @@
                                         <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Create a new gene in the cell nucleus.
                                                 </TextBlock>
                                             </Button.ToolTip>
 
@@ -744,14 +773,14 @@
                                         <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Add another gene to the cell nucleus.  
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
                                         <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected gene from the cell nucleus.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
@@ -766,7 +795,7 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                The name of the selected gene.
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -780,7 +809,7 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                The number of copies of the selected gene.
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -794,7 +823,8 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                The default activation level of the selected gene. The user can modify this value for selected differentiation 
+                                                                or division ce;; states.
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -803,7 +833,9 @@
                                             <Button Name="NucPushGeneButton" HorizontalAlignment="Right" Margin="20" Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click">
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                        Any changes to properties of the selected gene only apply to this cell type in this simulation. 
+                                                        Select this option to save the changes to the Protocol Library in order to make the modified gene available for use elsewhere in the simulation scenario
+                                                        or to make the the modified gene available for saving as permanent user default.
                                                     </TextBlock>
                                                 </Button.ToolTip>
                                             </Button>
@@ -867,14 +899,17 @@
                                         <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Any changes to properties of the selected reaction only apply to this cell type in this simulation. 
+                                                    Select this option to save the changes to the Protocol Library in order to make the modified reaction 
+                                                    available for use elsewhere in the simulation scenario
+                                                    or to make the the modified reaction available for saving as permanent user default.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
                                         <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected reaction from the cells in the selected population for this simulation.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
@@ -943,7 +978,9 @@
                                                     <Button Name="MembraneAddReacButton"  Width="120" Content="Add" Click="MembraneAddReacButton_Click">
                                                         <Button.ToolTip>
                                                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                                Add the selected reaction to the cells in this populatoin for this simulation. 
+                                                                Choose the Stores option in the main menu to get more reactions or create a new reaction below if
+                                                                you cannot find the reaction that you are looking for. 
                                                             </TextBlock>
                                                         </Button.ToolTip>
                                                     </Button>
@@ -991,14 +1028,17 @@
                                         <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Any changes to properties of the selected reaction only apply to this cell type in this simulation. 
+                                                    Select this option to save the changes to the Protocol Library in order to make the modified reaction 
+                                                    available for use elsewhere in the simulation scenario
+                                                    or to make the the modified reaction available for saving as permanent user default.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button>
                                         <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click">
                                             <Button.ToolTip>
                                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected reaction from the cells in the selected cell population for this simulation.
                                                 </TextBlock>
                                             </Button.ToolTip>
                                         </Button> 
@@ -1069,7 +1109,10 @@
                                                     <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click">
                                                         <Button.ToolTip>
                                                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                                Add the selected reaction to the cells in this populationn for this simulation. 
+                                                                Choose the Stores option in the main menu to get more reactions or create a new reaction below
+                                                                or create a new reaction below if
+                                                                you cannot find the reaction that you are looking for.
                                                             </TextBlock>
                                                         </Button.ToolTip>
                                                     </Button>
@@ -1148,14 +1191,17 @@
                                     <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click">
                                         <Button.ToolTip>
                                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Any changes to properties of the selected reaction complex only apply to this cell type in this simulation. 
+                                                    Select this option to save the changes to the Protocol Library in order to make the modified reaction complex
+                                                    available for use elsewhere in the simulation scenario
+                                                    or to make the the modified reaction complex available for saving as permanent user default.
                                             </TextBlock>
                                         </Button.ToolTip>
                                     </Button> 
                                     <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click">
                                         <Button.ToolTip>
                                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected reaction complex from this cell population for this simulation.
                                             </TextBlock>
                                         </Button.ToolTip>
                                     </Button>
@@ -1182,7 +1228,7 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                A list of reaction complexes in the cell membrane. 
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -1240,7 +1286,7 @@
                                             <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click">
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                        Add the selected reaction complex to the selected cell population for this simulation.
                                                     </TextBlock>
                                                 </Button.ToolTip>
                                             </Button>
@@ -1285,14 +1331,17 @@
                                     <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click">
                                         <Button.ToolTip>
                                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Any changes to properties of the selected reaction complex only apply to this cell type in this simulation. 
+                                                    Select this option to save the changes to the Protocol Library in order to make the modified reaction complex 
+                                                    available for use elsewhere in the simulation scenario
+                                                    or to make the the modified reaction complex available for saving as permanent user default.
                                             </TextBlock>
                                         </Button.ToolTip>
                                     </Button>                                   
                                     <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click">
                                         <Button.ToolTip>
                                             <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                    Remove the selected reaction complex from this cell population for this simulation.
                                             </TextBlock>
                                         </Button.ToolTip>
                                     </Button>
@@ -1319,7 +1368,7 @@
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
                                                             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                    A list of reaction complexes in the cell cytosol.
                                                             </TextBlock>
                                                         </StackPanel>
                                                     </ToolTip>
@@ -1376,7 +1425,7 @@
                                             <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click" >
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                                        Add the selected reaction complex to this cell population for this simulation.
                                                     </TextBlock>
                                                 </Button.ToolTip>
                                             </Button>
@@ -1447,7 +1496,7 @@
                                     </StackPanel>
                                 </DataTemplate>
 
-                                <DataTemplate x:Key="cellState2ListItemTemplate">
+                                <!--<DataTemplate x:Key="cellState2ListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="20" Text="{Binding Path=Name}" />
                                         <TextBlock Width="10" Text="" />
@@ -1456,7 +1505,7 @@
                                                 <ToolTip>
                                                     <StackPanel Width="200" Orientation="Horizontal">
                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                            (unused)
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </ToolTip>
@@ -1464,7 +1513,7 @@
                                         </TextBox>
                                         
                                     </StackPanel>
-                                </DataTemplate>
+                                </DataTemplate>-->
 
                                 <DataTemplate x:Key="divStatesListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
@@ -1500,7 +1549,7 @@
                                     Delete Division Scheme
                                     <Button.ToolTip>
                                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                            Remove cell division for this cell population in this simulation.
                                         </TextBlock>
                                     </Button.ToolTip>
                                 </Button>
@@ -1513,7 +1562,7 @@
                                     New Division Scheme
                                     <Button.ToolTip>
                                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                            Add cell division to the cells in the selected cell population for this simulation.
                                         </TextBlock>
                                     </Button.ToolTip>
                                 </Button>
@@ -1568,7 +1617,7 @@
                                     </StackPanel>
                                 </DataTemplate>
 
-                                <DataTemplate x:Key="cellState2ListItemTemplate">
+                                <!--<DataTemplate x:Key="cellState2ListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="20" Text="{Binding Path=Name}" />
                                         <TextBlock Width="10" Text="" />
@@ -1577,7 +1626,7 @@
                                                 <ToolTip>
                                                     <StackPanel Width="200" Orientation="Horizontal">
                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        REDSOX
+                                                                       (unused)
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </ToolTip>
@@ -1585,7 +1634,7 @@
                                         </TextBox>
 
                                     </StackPanel>
-                                </DataTemplate>
+                                </DataTemplate>-->
 
                                 <DataTemplate x:Key="diffStatesListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
@@ -1620,7 +1669,7 @@
                                     Delete Differentiation Scheme
                                     <Button.ToolTip>
                                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                            Remove cell differentiation for this cell population in this simulation.
                                         </TextBlock>
                                     </Button.ToolTip>
                                 </Button>
@@ -1632,7 +1681,7 @@
                                     New Differentiation Scheme
                                     <Button.ToolTip>
                                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    REDSOX
+                                            Add cell differentiation to the cells in the selected cell population for this simulation.
                                         </TextBlock>
                                     </Button.ToolTip>
                                 </Button>

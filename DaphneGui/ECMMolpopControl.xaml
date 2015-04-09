@@ -507,9 +507,16 @@
                     />
                     <!-- buttons for adding, deleting molpops -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                        <Button Name="AddEcmMolButton"  Width="50" Content="Add" Click="AddEcmMolButton_Click"
-                                ToolTip="Add another molecular population to the extracellular medium. "
-                                />
+                        <Button Name="AddEcmMolButton"  Width="50" Content="Add" Click="AddEcmMolButton_Click">
+                            <Button.ToolTip>
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        Add another molecular population to the extracellular medium.  
+                                        The molecule type will default to the first unused molecule type in the Molecules Library. 
+                                        The default value can be modified using the molecule type selector.  
+                                </TextBlock>                               
+                            </Button.ToolTip>
+                        </Button>
+                                                                               
                         <Button Name="RemoveEcmMolButton" Width="50" Content="Remove" Click="RemoveEcmMolButton_Click" 
                                 ToolTip="Remove the selected molecular population from the extracellular medium."/>
                     </StackPanel>
