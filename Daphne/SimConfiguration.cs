@@ -2737,8 +2737,8 @@ namespace Daphne
         {
             // default value
             phi1 = 100;
-            deathConstant = 1e-3;
-            deathOrder = 1;
+            //deathConstant = 1e-3;
+            //deathOrder = 1;
             globalRandomSeed = RandomSeed.Robust();
 
             // Default is Constant parameter distribution with ConstValue = 0
@@ -2747,8 +2747,8 @@ namespace Daphne
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
-        public double deathConstant { get; set; }
-        public int deathOrder { get; set; }
+        //public double deathConstant { get; set; }
+        //public int deathOrder { get; set; }
 
         private int randomSeed;
         public int globalRandomSeed
