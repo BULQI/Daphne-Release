@@ -2482,7 +2482,7 @@ namespace DaphneGui
                             // reporter and hdf5 close
                             closeOutputFiles();
                         }
-                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateOneArg(updateGraphicsAndGUI), true);
+                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateOneArg(updateGraphicsAndGUI), false);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
                     else if (vcrControl != null && vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
