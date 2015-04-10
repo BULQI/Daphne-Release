@@ -957,7 +957,7 @@ namespace Daphne
         {
             dataBasket = new DataBasket(this);
             //integratorStep = 0.001;
-            reporter = new TissueSimulationReporter();
+            reporter = new TissueSimulationReporter(this);
             hdf5file = new TissueSimulationHDF5File(this);
             frameData = new TissueSimulationFrameData((TissueSimulationHDF5File)hdf5file);
             reset();
@@ -1158,7 +1158,7 @@ namespace Daphne
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
-            reporter = new VatReactionComplexReporter();
+            reporter = new VatReactionComplexReporter(this);
             hdf5file = new VatReactionComplexHDF5File(this);
             reset();
             listTimes = new List<double>();

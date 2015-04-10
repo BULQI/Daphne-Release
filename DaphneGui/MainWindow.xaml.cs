@@ -1205,8 +1205,7 @@ namespace DaphneGui
 
             // this function does not exist currently, do we need this call?
             //sim.runStatSummary();
-            vcrControl.LastFrame = false;
-            GUIUpdate(true, true);
+            GUIUpdate(0, true);
             displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
         }
 
@@ -1339,7 +1338,7 @@ namespace DaphneGui
 
         private void VCRbutton_Last_Click(object sender, RoutedEventArgs e)
         {
-            vcrControl.MoveToFrame(vcrControl.TotalFrames() - 1);
+            vcrControl.MoveToFrame(vcrControl.TotalFrames - 1);
         }
 
         private void VCRSlider_LeftMouse_Down(object sender, MouseButtonEventArgs e)
@@ -1779,7 +1778,7 @@ namespace DaphneGui
             saveStoreFiles();
             saveTempFiles();
             // don't handle the vcr
-            updateGraphicsAndGUI(false);
+            updateGraphicsAndGUI(-1);
         }
 
 
@@ -2286,6 +2285,11 @@ namespace DaphneGui
         /// </summary>
         private void finishHDF5()
         {
+            // write the number of frames
+            if (sim.Reporter.NeedsFileNameWrite == true)
+            {
+                sim.HDF5FileHandle.writeInt(sim.FrameNumber, "Framenumber");
+            }
             sim.HDF5FileHandle.WriteReporterFileNames();
             sim.HDF5FileHandle.close(true);
         }
@@ -2344,58 +2348,54 @@ namespace DaphneGui
                             }
                         }
 
-                        if (sim.RunStatus != SimulationBase.RUNSTAT_ABORT)
+                        // check for flags and execute applicable task(s)
+                        if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
                         {
-                            // check for flags and execute applicable task(s)
-                            if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
+                            if (Properties.Settings.Default.skipDataWrites == false)
                             {
+                                if (sim.FrameData != null)
+                                {
+                                    sim.FrameData.writeData(sim.FrameNumber - 1);
+                                }
+                            }
+                            UpdateGraphics();
+                        }
+                        if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataWrites == false)
+                        {
+                            sim.Reporter.AppendReporter();
+                        }
+
+                        if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
+                        {
+                            // handle reruns
+                            if (repeatInProgress() == true)
+                            {
+                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
+                            }
+                            else
+                            {
+                                //signal run finished if any one is waiting
+                                runFinishedEvent.Set();
+                                // autosave the state
+                                if (argSave == true)
+                                {
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
+                                }
+                                // close the reporter
                                 if (Properties.Settings.Default.skipDataWrites == false)
                                 {
-                                    if (sim.FrameData != null)
-                                    {
-                                        sim.FrameData.writeData(sim.FrameNumber - 1);
-                                    }
+                                    // reporter and hdf5 close
+                                    closeOutputFiles();
                                 }
-                                UpdateGraphics();
-                            }
-                            if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataWrites == false)
-                            {
-                                sim.Reporter.AppendReporter();
-                            }
-
-                            if (sim.RunStatus != SimulationBase.RUNSTAT_RUN)
-                            {
-                                // never rerun the simulation if the simulation was aborted
-                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repeatInProgress() == true)
+                                // for profiling: close the application after a completed experiment
+                                if (ControlledProfiling() == true && repeatInProgress() == false)
                                 {
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
+                                    return;
                                 }
-                                else if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
-                                {
-                                    //signal run finished if any one is waiting
-                                    runFinishedEvent.Set();
-                                    // autosave the state
-                                    if (argSave == true)
-                                    {
-                                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
-                                    }
-                                    // close the reporter
-                                    if (Properties.Settings.Default.skipDataWrites == false)
-                                    {
-                                        // reporter and hdf5 close
-                                        closeOutputFiles();
-                                    }
-                                    // for profiling: close the application after a completed experiment
-                                    if (ControlledProfiling() == true && repeatInProgress() == false)
-                                    {
-                                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
-                                        return;
-                                    }
 
-                                    // update the gui; this is a non-issue if an application close just got requested, so may get skipped
-                                    vcrControl.LastFrame = true;
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), true, false);
-                                }
+                                // update the gui; this is a non-issue if an application close just got requested, so may get skipped
+                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateIntBool(GUIUpdate), sim.FrameNumber - 1, false);
                             }
                         }
                     }
@@ -2406,7 +2406,7 @@ namespace DaphneGui
                             // reporter and hdf5 close
                             closeOutputFiles();
                         }
-                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateOneArg(updateGraphicsAndGUI), false);
+                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateInt(updateGraphicsAndGUI), -1);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
                     else if (vcrControl != null && vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
@@ -2434,8 +2434,10 @@ namespace DaphneGui
 
         // gui update delegate; needed because we can't access the gui elements directly; they are part of a different thread
         private delegate void GUIDelegateNoArgs();
-        private delegate void GUIDelegateOneArg(bool bArg);
-        private delegate void GUIDelegateTwoArgs(bool bArg1, bool bArg2);
+        private delegate void GUIDelegateBool(bool bArg);
+        private delegate void GUIDelegateInt(int bArg);
+        private delegate void GUIDelegateBoolBool(bool bArg1, bool bArg2);
+        private delegate void GUIDelegateIntBool(int bArg1, bool bArg2);
 
         // close the application
         private void CloseApp()
@@ -2451,40 +2453,44 @@ namespace DaphneGui
             runSim(false);
         }
 
-        private void prepareVCR()
+        private void prepareVCR(int frame)
         {
             // we only currently handle the vcr for the tissue simulation
             if (sim is TissueSimulation && sim.HDF5FileHandle != null && sim.HDF5FileHandle.openRead() == true)
             {
-                vcrControl.FrameNames.Clear();
-                // find the frame names and with them the number of frames
-                vcrControl.FrameNames = sim.HDF5FileHandle.subGroupNames("/Experiment/VCR_Frames");
+                // open the parent group for this experiment
+                sim.HDF5FileHandle.openGroup("/Experiment");
+                // open the group that holds the frames for this experiment
+                sim.HDF5FileHandle.openGroup("VCR_Frames");
+                // read the number of frames
+                vcrControl.TotalFrames = sim.HDF5FileHandle.readInt("Framenumber");
 
-                if (vcrControl.FrameNames.Count > 0)
+                if (vcrControl.TotalFrames > 0 && frame >= 0 && frame < vcrControl.TotalFrames)
                 {
-                    // open the parent group for this experiment
-                    sim.HDF5FileHandle.openGroup("/Experiment");
-
-                    // open the group that holds the frames for this experiment
-                    sim.HDF5FileHandle.openGroup("VCR_Frames");
-
-                    vcrControl.OpenVCR();
+                    vcrControl.OpenVCR(frame);
                     VCR_Toolbar.IsEnabled = true;
                     VCR_Toolbar.DataContext = vcrControl;
-                    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+                    VCRslider.Maximum = vcrControl.TotalFrames - 1;
                     exportAVI.IsEnabled = true;
+                }
+                else
+                {
+                    // vcr_frames
+                    sim.HDF5FileHandle.closeGroup();
+                    // experiment
+                    sim.HDF5FileHandle.closeGroup();
                 }
             }
         }
 
         // re-enable the gui elements that got disabled during a simulation run
-        private void GUIUpdate(bool handleVCR, bool force)
+        private void GUIUpdate(int frame, bool force)
         {
             if (skipDataWriteMenu.IsChecked == false)
             {
-                if (handleVCR == true)
+                if (frame > -1)
                 {
-                    prepareVCR();
+                    prepareVCR(frame);
                 }
             }
 
@@ -2508,7 +2514,7 @@ namespace DaphneGui
             }
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
-            if (vcrControl.LastFrame == false && VCR_Toolbar.IsEnabled == true)
+            if (frame == 0 && VCR_Toolbar.IsEnabled == true)
             {
                 applyButton.IsEnabled = false;
                 saveButton.IsEnabled = false;
@@ -2720,12 +2726,10 @@ namespace DaphneGui
             return true;
         }
 
-        private void updateGraphicsAndGUI(bool handleVCR)
+        private void updateGraphicsAndGUI(int frame)
         {
             lockAndResetSim(false, ReadJson(""));
-            // pass current experiment id to allow vcr playback even for partial runs
-            vcrControl.LastFrame = true;
-            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), handleVCR, false);
+            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateIntBool(GUIUpdate), frame, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
             this.VTKDisplayDocWindow.Open();
@@ -2762,7 +2766,6 @@ namespace DaphneGui
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
-
                 abortButton.IsEnabled = true;
                 sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
 
@@ -2842,6 +2845,7 @@ namespace DaphneGui
                 else
                 {
                     MessageBoxResult result = toolWin.ScenarioContentChanged();
+
                     // Process message box results
                     switch (result)
                     {
@@ -2855,6 +2859,7 @@ namespace DaphneGui
                         case MessageBoxResult.No:
                             if (saveScenarioUsingDialog() == true)
                             {
+                                lockSaveStartSim(true);
                                 tempFileContent = false;
                             }
                             break;
@@ -2872,8 +2877,8 @@ namespace DaphneGui
                 {
                     if (Properties.Settings.Default.skipDataWrites == false)
                     {
-                        sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
-                        sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString());
+                        sim.Reporter.StartReporter(sop.Protocol.FileName);
+                        sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString(), true);
                     }
 
                     runButton.Content = "Pause";
@@ -2910,8 +2915,8 @@ namespace DaphneGui
             {
                 if (Properties.Settings.Default.skipDataWrites == false)
                 {
-                    sim.Reporter.StartReporter(sim, sop.Protocol.FileName);
-                    sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString());
+                    sim.Reporter.StartReporter(sop.Protocol.FileName);
+                    sim.HDF5FileHandle.StartHDF5File(sim, sop.Protocol.SerializeToString(), true);
                 }
                 runFinishedEvent.Reset();
                 sim.RunStatus = SimulationBase.RUNSTAT_RUN;

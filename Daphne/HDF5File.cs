@@ -551,7 +551,7 @@ namespace Daphne
             close(true);
         }
 
-        public abstract void StartHDF5File(SimulationBase sim, string protocolString);
+        public abstract void StartHDF5File(SimulationBase sim, string protocolString, bool trunc);
         public abstract void WriteReporterFileNames();
         public abstract void ReadReporterFileNames();
     }
@@ -565,13 +565,13 @@ namespace Daphne
             hSim = sim;
         }
 
-        public override void StartHDF5File(SimulationBase sim, string protocolString)
+        public override void StartHDF5File(SimulationBase sim, string protocolString, bool trunc)
         {
             if (assembleFullPath(hSim.Reporter.UniquePath, hSim.Reporter.FileNameBase, "rep", ".hdf5", true) == false)
             {
                 MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            openWrite(true);
+            openWrite(trunc);
             // group for this experiment
             createGroup("/Experiment");
 
@@ -599,13 +599,13 @@ namespace Daphne
             hSim = sim;
         }
 
-        public override void StartHDF5File(SimulationBase sim, string protocolString)
+        public override void StartHDF5File(SimulationBase sim, string protocolString, bool trunc)
         {
             if (assembleFullPath(hSim.Reporter.UniquePath, hSim.Reporter.FileNameBase, "vcr", ".hdf5", true) == false)
             {
                 MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            openWrite(true);
+            openWrite(trunc);
             // group for this experiment
             createGroup("/Experiment");
 
