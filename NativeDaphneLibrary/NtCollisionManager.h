@@ -72,6 +72,14 @@ namespace NativeDaphneLibrary
 				arg->n = -1;
 				::SetEvent(JobReadyEvents[i]);
 			}
+			
+			//WaitForMultipleObjects(MaxNumThreads, jobHandles, true, INFINITE);
+			//for (int i=0; i <MaxNumThreads; i++)
+			//{
+			//	CloseHandle(jobHandles[i]);
+			//}
+
+			//close events too.
 
 		}
 

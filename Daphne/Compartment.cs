@@ -141,7 +141,7 @@ namespace Daphne
         public Dictionary<int, Transform> NaturalBoundaryTransforms { get; private set; }
     }
 
-    public abstract class EnvironmentBase
+    public abstract class EnvironmentBase : IDisposable
     {
         protected Compartment comp;
 
@@ -156,6 +156,22 @@ namespace Daphne
 
         public virtual void Step(double dt)
         { }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+            disposed = true;
+        }
+
+        bool disposed = false;
+
     }
 
     public class PointEnvironment : EnvironmentBase
@@ -266,6 +282,7 @@ namespace Daphne
         private Dictionary<string, int> sides;
         public bool toroidal { get; private set; }
         public Nt_ECS native_ecs;
+        private bool disposed = false;
 
         public ECSEnvironment(int[] numGridPts, double gridStep, bool toroidal)
         {
@@ -424,6 +441,22 @@ namespace Daphne
             //    kvp.Value.UpdateECSMembraneBoundary();
             //}
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                native_ecs.Dispose();
+            }
+
+            disposed = true;
+            // Call base class implementation. 
+            base.Dispose(disposing);
+        }
+
     }
 
 }

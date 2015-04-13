@@ -1028,6 +1028,10 @@ namespace Daphne
                 return;
             }
 
+            if (dataBasket.Environment != null)
+            {
+                dataBasket.Environment.Dispose();
+            }
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.Environment = SimulationModule.kernel.Get<ECSEnvironment>();
 
