@@ -278,10 +278,11 @@ namespace DaphneGui
             InitializeComponent();
 
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
-            //ST_RenderSkinWindow = renderSkinWindow;
+            ST_RenderSkinWindow = renderSkinWindow;
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
+            ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
 
             this.ToolWinCellInfo.Close();
 
