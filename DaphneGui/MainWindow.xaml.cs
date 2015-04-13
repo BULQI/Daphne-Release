@@ -278,7 +278,7 @@ namespace DaphneGui
             InitializeComponent();
 
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
-            ST_RenderSkinWindow = renderSkinWindow;
+            //ST_RenderSkinWindow = renderSkinWindow;
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
@@ -2084,7 +2084,7 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_VTKDisplayDocWindow);
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
-                        MdiTabContainer.Items.Add(ST_RenderSkinWindow);
+                        //MdiTabContainer.Items.Add(ST_RenderSkinWindow);
                         ST_VTKDisplayDocWindow.Activate();
 
                     }
@@ -2607,24 +2607,24 @@ namespace DaphneGui
 
         private void saveStore(Level store, string storeName)
         {
-            string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
-            string caption = storeName + " Changed";
-            MessageBoxButton button = MessageBoxButton.YesNoCancel;
-            MessageBoxImage icon = MessageBoxImage.Warning;
+            ////string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
+            ////string caption = storeName + " Changed";
+            ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            ////MessageBoxImage icon = MessageBoxImage.Warning;
 
-            // Display message box
-            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+            ////// Display message box
+            ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
 
-            if (result == MessageBoxResult.Cancel)
-            {
-                return;
-            }
-            else if (result == MessageBoxResult.No)
-            {
-                saveStoreUsingDialog(store, store.FileName);
-            }
-            else
-            {
+            ////if (result == MessageBoxResult.Cancel)
+            ////{
+            ////    return;
+            ////}
+            ////else if (result == MessageBoxResult.No)
+            ////{
+            ////    saveStoreUsingDialog(store, store.FileName);
+            ////}
+            ////else
+            ////{
                 FileInfo info = new FileInfo(store.FileName);
                 if (info.IsReadOnly == false || !info.Exists)
                 {
@@ -2640,13 +2640,13 @@ namespace DaphneGui
                 }
                 else
                 {
-                    messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                    caption = "File write protected";
-                    button = MessageBoxButton.OK;
-                    icon = MessageBoxImage.Warning;
+                    string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                    string caption = "File write protected";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
                     MessageBox.Show(messageBoxText, caption, button, icon);
                 }
-            }
+            ////}
         }
 
         private void saveStoreFiles()
@@ -3134,6 +3134,18 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            //If we're in UserStore or DaphneStore mode, do this and return.
+            if (CellStudioToolWindow.DataContext == SOP.UserStore)
+            {
+                saveStore(sop.UserStore, "UserStore");
+                return;
+            }
+            else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
+            {
+                saveStore(sop.DaphneStore, "DaphneStore");
+                return;
+            }
+
             ToolWin.Apply();
 
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
@@ -3509,7 +3521,16 @@ namespace DaphneGui
 
         private void menuUserStore_Click(object sender, RoutedEventArgs e)
         {
-            //readStores();
+            prepareForUserStore();
+        }
+
+        private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
+        {
+            prepareForDaphneStore();
+        }
+
+        private void prepareForUserStore()
+        {
             statusBarMessagePanel.Content = "Ready:  User Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3519,13 +3540,14 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.UserStore;
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
+            applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
-            pushMenu.Visibility = Visibility.Collapsed;
+            menuAdminSave.Visibility = Visibility.Visible;
+            menuAdminSaveAs.Visibility = Visibility.Visible;
         }
 
-        private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
+        private void prepareForDaphneStore()
         {
-            //readStores();
             statusBarMessagePanel.Content = "Ready:  Daphne Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3535,10 +3557,12 @@ namespace DaphneGui
             CellStudioToolWindow.DataContext = SOP.DaphneStore;
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
+            applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
-            pushMenu.Visibility = Visibility.Collapsed;
+            menuAdminSave.Visibility = Visibility.Visible;
+            menuAdminSaveAs.Visibility = Visibility.Visible;
         }
-
+        
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
@@ -3546,9 +3570,11 @@ namespace DaphneGui
             LevelContext = SOP.Protocol;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
+            applyButton.IsEnabled = true;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
-            pushMenu.Visibility = Visibility.Visible;
+            menuAdminSave.Visibility = Visibility.Collapsed;
+            menuAdminSaveAs.Visibility = Visibility.Collapsed;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3558,6 +3584,11 @@ namespace DaphneGui
             {
                 ReacComplexChartWindow.Activate();
             }
+        }
+
+        private void menuAdminSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            saveStoreUsingDialog(sop.UserStore, "UserStore");
         }
 
         private void pushMol_Click(object sender, RoutedEventArgs e)

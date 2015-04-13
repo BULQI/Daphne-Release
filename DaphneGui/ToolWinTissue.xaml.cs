@@ -257,9 +257,9 @@ namespace DaphneGui
 
         private void skinChoiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (MainWindow.ST_RenderSkinWindow.Visibility != System.Windows.Visibility.Visible) return;
-            var item = skinChoiceComboBox.SelectedItem;
-            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            ////if (MainWindow.ST_RenderSkinWindow.Visibility != System.Windows.Visibility.Visible) return;
+            ////var item = skinChoiceComboBox.SelectedItem;
+            ////MainWindow.ST_RenderSkinWindow.DataContext = item;
             //MainWindow.ST_RenderSkinWindow.Activate();
         }
 

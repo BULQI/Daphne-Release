@@ -68,8 +68,8 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol.scenario == null)
                 return;
 
-            if (MainWindow.SOP.Protocol.scenario.time_config.sampling_interval > sampling_interval_slider.Maximum)
-                MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+            if (MainWindow.SOP.Protocol.scenario.time_config.sampling_interval > MainWindow.SOP.Protocol.scenario.time_config.duration)
+                MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = MainWindow.SOP.Protocol.scenario.time_config.duration;
         }
 
         private void rendering_interval_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -83,8 +83,8 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol.scenario == null)
                 return;
 
-            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > render_interval_slider.Maximum)
-                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = render_interval_slider.Value;
+            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > MainWindow.SOP.Protocol.scenario.time_config.duration)
+                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = MainWindow.SOP.Protocol.scenario.time_config.duration;
         }
 
         public void SelectSimSetupInGUISetExpName(string exp_name)
