@@ -2566,7 +2566,9 @@ namespace DaphneGui
             if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
                 // check if there were changes
-                if (sop != null && sop.Protocol.SerializeToString() != orig_content)
+                string refs = sop.Protocol.SerializeToStringSkipDeco();
+
+                if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
                 {
                     sop.Protocol.SerializeToFile(true);
                     tempFileContent = true;
