@@ -128,9 +128,7 @@ namespace NativeDaphneLibrary
 		unsigned long NumJobStarted;
 
 		CONDITION_VARIABLE JobReady;
-		CRITICAL_SECTION CritSection;
-		
-
+		SRWLOCK srwLock;
 
 	public:
 
@@ -168,13 +166,13 @@ namespace NativeDaphneLibrary
 			{
 				//WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
 				//WaitForSingleObject(owner->JobReadyEvent, INFINITE);
-				EnterCriticalSection(&owner->CritSection);
+				AcquireSRWLockShared(&owner->srwLock);
 				//if already started.
 				while (::InterlockedCompareExchange(&arg->JobToken, 0, 1) == 0)
 				{
-					SleepConditionVariableCS(&owner->JobReady, &owner->CritSection, INFINITE);
+					SleepConditionVariableSRW(&owner->JobReady, &owner->srwLock, INFINITE, CONDITION_VARIABLE_LOCKMODE_SHARED);
 				}
-				LeaveCriticalSection(&owner->CritSection);
+				ReleaseSRWLockShared(&owner->srwLock);
 				::InterlockedIncrement(&owner->NumJobStarted);
 
 				if (arg->n == -1)break;

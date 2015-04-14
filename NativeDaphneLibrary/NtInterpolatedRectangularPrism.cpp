@@ -47,9 +47,7 @@ namespace NativeDaphneLibrary
 		JobReadyEvent = CreateEvent(NULL, true, false, (LPTSTR)"JobRead");
 
 		InitializeConditionVariable(&JobReady);
-		InitializeCriticalSection (&CritSection);
-
-
+		InitializeSRWLock(&srwLock);
 
 		EcsArgs = (EcsRestrictArg **)malloc(MaxNumThreads * sizeof(EcsRestrictArg*));
 		for (int i=0; i< MaxNumThreads; i++)
@@ -86,7 +84,7 @@ namespace NativeDaphneLibrary
 	{
 		//terminate thread
 		::InterlockedExchange(&NumJobStarted, 0);
-		EnterCriticalSection(&CritSection);
+		AcquireSRWLockExclusive(&srwLock);
 		for (int i=0; i<MaxNumThreads; i++)
 		{
 			EcsRestrictArg *arg = EcsArgs[i];
@@ -98,8 +96,8 @@ namespace NativeDaphneLibrary
 		//::SetEvent(JobReadyEvent);
 		//WaitForMultipleObjects(MaxNumThreads, jobHandles, true, INFINITE);
 		//::ResetEvent(JobReadyEvent);
+		ReleaseSRWLockExclusive(&srwLock);
 		WakeAllConditionVariable(&JobReady);
-		LeaveCriticalSection(&CritSection);
 
 		while (::InterlockedCompareExchange(&NumJobStarted, 0, MaxNumThreads) != MaxNumThreads);
 		//wait for finish
@@ -792,13 +790,10 @@ namespace NativeDaphneLibrary
 		//fprintf(stderr, "**** ready to run restrict****\n");
 		if (numThreads > 0)
 		{
-			EnterCriticalSection(&CritSection);
+			AcquireSRWLockExclusive(&srwLock);
 			for (int i=0; i< numThreads; i++)
 			{
 				EcsRestrictArg *arg = EcsArgs[i];
-
-				int x = sizeof(EcsRestrictArg);
-
 				arg->sfarray = sfarray;
 				arg->position = position + nn;
 				arg->_output = _output + nn;
@@ -806,8 +801,8 @@ namespace NativeDaphneLibrary
 				::InterlockedExchange(&arg->JobToken, 1);
 				nn += NumItemsPerThread;
 			}
-			LeaveCriticalSection(&CritSection);
-			WakeAllConditionVariable(&JobReady);;
+			ReleaseSRWLockExclusive(&srwLock);
+			WakeAllConditionVariable(&JobReady);
 			while (::InterlockedCompareExchange(&NumJobStarted, 0, numThreads) != numThreads);
 		}
 		//ResetEvent(JobReadyEvent); //stop possible thread spin
