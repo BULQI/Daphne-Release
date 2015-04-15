@@ -6,7 +6,6 @@
 #define DllExport __declspec(dllimport)
 #endif
 
-#include <Windows.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <process.h>
@@ -60,10 +59,7 @@ namespace NativeDaphneLibrary
 		double** position; 
 		int n; 
 		double **_output;
-
-		unsigned long JobToken; 
 		int threadId;
-		char tmp[16];
 	};
 
 	class DllExport NtInterpolatedRectangularPrism
@@ -124,11 +120,7 @@ namespace NativeDaphneLibrary
 		unsigned long AcitveJobCount;
 		HANDLE JobFinishedSignal;
 
-		HANDLE JobReadyEvent;
-		unsigned long NumJobStarted;
 
-		CONDITION_VARIABLE JobReady;
-		SRWLOCK srwLock;
 
 	public:
 
@@ -164,26 +156,17 @@ namespace NativeDaphneLibrary
 
 			while (true)
 			{
-				//WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
-				//WaitForSingleObject(owner->JobReadyEvent, INFINITE);
-				AcquireSRWLockShared(&owner->srwLock);
-				//if already started.
-				while (::InterlockedCompareExchange(&arg->JobToken, 0, 1) == 0)
+				WaitForSingleObject(owner->JobReadyEvents[tid], INFINITE); 
+				if (arg->n == -1) //signal to end thread
 				{
-					SleepConditionVariableSRW(&owner->JobReady, &owner->srwLock, INFINITE, CONDITION_VARIABLE_LOCKMODE_SHARED);
+					_endthread();
 				}
-				ReleaseSRWLockShared(&owner->srwLock);
-				::InterlockedIncrement(&owner->NumJobStarted);
-
-				if (arg->n == -1)break;
-
 				arg->owner->NativeRestrict(arg->sfarray, arg->position, arg->n, arg->_output);
-				//fprintf(stderr, "restrict thread %d run once\n", tid);
-				::InterlockedDecrement(&owner->AcitveJobCount);
+				if (::InterlockedDecrement(&owner->AcitveJobCount) == 0)
+				{
+					//SetEvent(owner->JobFinishedSignal);
+				}
 			}
-			_endthread();
-			return 0;
-
 		}
 
 	};

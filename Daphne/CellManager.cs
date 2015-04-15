@@ -48,8 +48,7 @@ namespace Daphne
             threadList = new List<Thread>();
             threadArgs = new List<CellStepThreadArg>();
             //these are the number threads created and available to use.
-            numWorkerThreads = Environment.ProcessorCount - 2; //half if 8
-            numWorkerThreads = 0;
+            numWorkerThreads = Environment.ProcessorCount - 4; //half if 8
             //jobDoneEvent = new object();
             for (int i = 0; i < numWorkerThreads; i++)
             {

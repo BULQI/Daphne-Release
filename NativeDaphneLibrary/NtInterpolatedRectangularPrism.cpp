@@ -37,17 +37,12 @@ namespace NativeDaphneLibrary
 		}
 
 		//thread related setup
-		MaxNumThreads = acmlgetnumthreads()-2; 
+		MaxNumThreads = acmlgetnumthreads()-4; 
 		if (MaxNumThreads <= 0)MaxNumThreads = 1;
 		jobHandles = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
 		JobReadyEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
 		//JobFinishedEvents = (HANDLE *)malloc(MaxNumThreads * sizeof(HANDLE));
-		//JobFinishedSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
-
-		JobReadyEvent = CreateEvent(NULL, true, false, (LPTSTR)"JobRead");
-
-		InitializeConditionVariable(&JobReady);
-		InitializeSRWLock(&srwLock);
+		JobFinishedSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 		EcsArgs = (EcsRestrictArg **)malloc(MaxNumThreads * sizeof(EcsRestrictArg*));
 		for (int i=0; i< MaxNumThreads; i++)
@@ -56,7 +51,7 @@ namespace NativeDaphneLibrary
 			EcsArgs[i] = new EcsRestrictArg();
 			EcsArgs[i]->owner = this;
 			EcsArgs[i]->threadId = i;
-			EcsArgs[i]->JobToken = 0;
+			JobReadyEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 			jobHandles[i] = (HANDLE)_beginthreadex(0, 0, &RestrictThreadEntry, EcsArgs[i], 0, &tid);
 		}
 
@@ -83,29 +78,12 @@ namespace NativeDaphneLibrary
 	NtInterpolatedRectangularPrism::~NtInterpolatedRectangularPrism()
 	{
 		//terminate thread
-		::InterlockedExchange(&NumJobStarted, 0);
-		AcquireSRWLockExclusive(&srwLock);
 		for (int i=0; i<MaxNumThreads; i++)
 		{
 			EcsRestrictArg *arg = EcsArgs[i];
 			arg->n = -1;
-			::InterlockedExchange(&arg->JobToken, 1);
-			
-			//::SetEvent(JobReadyEvents[i]);
+			::SetEvent(JobReadyEvents[i]);
 		}
-		//::SetEvent(JobReadyEvent);
-		//WaitForMultipleObjects(MaxNumThreads, jobHandles, true, INFINITE);
-		//::ResetEvent(JobReadyEvent);
-		ReleaseSRWLockExclusive(&srwLock);
-		WakeAllConditionVariable(&JobReady);
-
-		while (::InterlockedCompareExchange(&NumJobStarted, 0, MaxNumThreads) != MaxNumThreads);
-		//wait for finish
-		for (int i=0; i <MaxNumThreads; i++)
-		{
-			CloseHandle(jobHandles[i]);
-		}
-		CloseHandle(JobReadyEvent);
 
 		//todo: free allocated memory
 	}
@@ -784,28 +762,18 @@ namespace NativeDaphneLibrary
 		//numThreads = 0;
 		//start job
 		::InterlockedExchange(&AcitveJobCount, numThreads);
-		::InterlockedExchange(&NumJobStarted, 0);
 		int n0, nn;
 		n0 = nn = n - NumItemsPerThread * numThreads;
-		//fprintf(stderr, "**** ready to run restrict****\n");
-		if (numThreads > 0)
+		for (int i=0; i< numThreads; i++)
 		{
-			AcquireSRWLockExclusive(&srwLock);
-			for (int i=0; i< numThreads; i++)
-			{
-				EcsRestrictArg *arg = EcsArgs[i];
-				arg->sfarray = sfarray;
-				arg->position = position + nn;
-				arg->_output = _output + nn;
-				arg->n = NumItemsPerThread;
-				::InterlockedExchange(&arg->JobToken, 1);
-				nn += NumItemsPerThread;
-			}
-			ReleaseSRWLockExclusive(&srwLock);
-			WakeAllConditionVariable(&JobReady);
-			while (::InterlockedCompareExchange(&NumJobStarted, 0, numThreads) != numThreads);
+			EcsRestrictArg *arg = EcsArgs[i];
+			arg->sfarray = sfarray;
+			arg->position = position + nn;
+			arg->_output = _output + nn;
+			arg->n = NumItemsPerThread;
+			nn += NumItemsPerThread;
+			::SetEvent(JobReadyEvents[i]);
 		}
-		//ResetEvent(JobReadyEvent); //stop possible thread spin
 
 		NativeRestrict(sfarray, position, n0, _output);
 		//wait for job finish
