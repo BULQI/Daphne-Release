@@ -17,7 +17,7 @@ namespace Daphne
     /// Distributions and random number sources.
     /// This code was copied from Plaza Sur.
     /// </summary>
-    class Rand
+    public class Rand
     {
         public static MersenneTwister MersenneTwister;
         public static MathNet.Numerics.Distributions.Normal NormalDist;

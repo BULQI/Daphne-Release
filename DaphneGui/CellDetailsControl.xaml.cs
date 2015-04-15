@@ -47,13 +47,11 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            Level level = MainWindow.SOP.Protocol;
-
             //if user picked 'new molecule' then create new molecule in ER
             if (nIndex == (cb.Items.Count - 1))
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = DataContext as ConfigCell;
@@ -71,8 +69,8 @@ namespace DaphneGui
                     }
                     return;
                 }
-                newLibMol.ValidateName(level);
-                level.entity_repository.molecules.Add(newLibMol);
+                newLibMol.ValidateName(MainWindow.SOP.Protocol);
+                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
 

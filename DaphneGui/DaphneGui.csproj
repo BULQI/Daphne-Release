@@ -204,6 +204,7 @@
     <Compile Include="CellStudioToolWindow.xaml.cs">
       <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellTrackTool.cs" />
     <Compile Include="ComponentsToolWindow.xaml.cs">
       <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
     </Compile>

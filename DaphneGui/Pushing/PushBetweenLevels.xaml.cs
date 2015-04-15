@@ -858,4 +858,24 @@ namespace DaphneGui.Pushing
         }
     }
 
+    public class PushLevelIsDaphneStoreConverter : IValueConverter
+    {                
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (Enum.IsDefined(value.GetType(), value) == false)
+                return DependencyProperty.UnsetValue;
+
+            PushLevel enumValue = (PushLevel)value;
+
+            if (enumValue == PushLevel.DaphneStore)
+                return true;
+
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return PushLevel.Protocol;
+        }
+    }
 }

@@ -239,19 +239,48 @@ namespace Daphne
             if (state.cbState.deathDriverState != -1)
             {
                 Alive = state.cbState.deathDriverState == 0;
+                DeathBehavior.CurrentState = state.cbState.deathDriverState;
+                if (state.cbState.deathDistrState != null)
+                {
+                    Dictionary<int, TransitionDriverElement> drivers = DeathBehavior.Drivers[DeathBehavior.CurrentState];
+                    ((DistrTransitionDriverElement)drivers[1]).Restore(state.cbState.deathDistrState);
+                }
             }
             if (state.cbState.divisionDriverState != -1)
             {
-                DividerState = state.cbState.divisionDriverState;
+                DividerState = Divider.CurrentState = Divider.Behavior.CurrentState = state.cbState.divisionDriverState;
+
+                if (state.cbState.divisionDistrState.Count > 0)
+                {
+                    Dictionary<int, TransitionDriverElement> drivers = Divider.Behavior.Drivers[DividerState];
+                    foreach (KeyValuePair<int, double[]> kvp in state.cbState.divisionDistrState)
+                    {
+                        ((DistrTransitionDriverElement)drivers[kvp.Key]).Restore(kvp.Value);
+                    }
+                }
             }
             if (state.cbState.differentiationDriverState != -1)
             {
-                DifferentiationState = state.cbState.differentiationDriverState;
+                DifferentiationState = Differentiator.CurrentState = Differentiator.Behavior.CurrentState = state.cbState.differentiationDriverState;
+
+                if (state.cbState.differentiationDistrState.Count > 0)
+                {
+                    Dictionary<int, TransitionDriverElement> drivers = Differentiator.Behavior.Drivers[DifferentiationState];
+                    foreach (KeyValuePair<int, double[]> kvp in state.cbState.differentiationDistrState)
+                    {
+                        ((DistrTransitionDriverElement)drivers[kvp.Key]).Restore(kvp.Value);
+                    }
+                }
             }
             // genes
             SetGeneActivities(state.cgState.geneDict);
             // molecules
             SetMolPopConcentrations(state.cmState.molPopDict);
+            // dead cell removal
+            if (state.cbState.removalDistrState != null)
+            {
+                SimulationBase.cellManager.DeadDict.Add(Cell_id, state.cbState.removalDistrState);
+            }
         }
 
         public void setSpatialState(CellSpatialState s)
@@ -786,6 +815,24 @@ namespace Daphne
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// data structure for single cell track data
+    /// </summary>
+    public class CellTrackData
+    {
+        public List<double> Times { get; set; }
+        public List<double[]> Positions { get; set; }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public CellTrackData(int key)
+        {
+            Times = new List<double>();
+            Positions = new List<double[]>();
         }
     }
 }

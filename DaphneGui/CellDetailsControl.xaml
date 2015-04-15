@@ -142,20 +142,12 @@
         <!-- Mol_Death_TDE_Template: Molecular Transition driver element Template for death driver -->
         <DataTemplate x:Key="Mol_Death_TDE_Template">
             <StackPanel x:Name="spConfigMolTransitionDriverTemplate" Orientation="Vertical">
-                <!--<StackPanel.ToolTip>
-                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                        At each time step, the probability that a cell becomes apoptotic is given by \n\r
-                        (constant parameter) + (linear parameter)*(mean molecular concentration)*(time step)
+                <StackPanel.ToolTip>
+                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="600">
+                        At each time step, the probability that a cell becomes apoptotic is given by 
+                        (constant parameter) + (linear parameter) * (mean molecular concentration) * (time step)
                     </TextBlock>
-                </StackPanel.ToolTip>-->
-
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" MinWidth="200">
-                        At each time step, the probability that a cell becomes apoptotic is given by
-                </TextBlock>
-
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                        (constant probability) + (linear coefficient)*(mean molecular concentration)*(time step)
-                </TextBlock>
+                </StackPanel.ToolTip>
                 
                 <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
                 <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"

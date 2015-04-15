@@ -526,6 +526,8 @@ namespace Daphne
             // create a factory container: shared factories reside here; not all instances of a class
             // need their own factory
             SimulationModule.kernel.Get<FactoryContainer>();
+
+            cellManager.DeadDict.Clear();
         }
 
         public CollisionManager CollisionManager
@@ -932,7 +934,7 @@ namespace Daphne
         public static DataBasket dataBasket;
         public static Protocol ProtocolHandle;
 
-        protected CellManager cellManager;
+        public static CellManager cellManager;
         protected CollisionManager collisionManager;
 
         protected byte runStatus;
@@ -955,7 +957,7 @@ namespace Daphne
         {
             dataBasket = new DataBasket(this);
             //integratorStep = 0.001;
-            reporter = new TissueSimulationReporter();
+            reporter = new TissueSimulationReporter(this);
             hdf5file = new TissueSimulationHDF5File(this);
             frameData = new TissueSimulationFrameData((TissueSimulationHDF5File)hdf5file);
             reset();
@@ -1156,7 +1158,7 @@ namespace Daphne
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
-            reporter = new VatReactionComplexReporter();
+            reporter = new VatReactionComplexReporter(this);
             hdf5file = new VatReactionComplexHDF5File(this);
             reset();
             listTimes = new List<double>();
