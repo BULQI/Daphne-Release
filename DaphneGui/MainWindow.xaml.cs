@@ -2057,6 +2057,7 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
+                        ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
                         ST_VTKDisplayDocWindow.Activate();
 
                     }
