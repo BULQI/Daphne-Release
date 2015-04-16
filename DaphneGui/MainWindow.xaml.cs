@@ -494,7 +494,7 @@ namespace DaphneGui
                     // allow one repetition with the blank scenario
                     if (repeat < 1)
                     {
-                        file = "blank_scenario.json";
+                        file = "blank_protocol.json";
                     }
                 }
                 repeat++;
@@ -657,8 +657,8 @@ namespace DaphneGui
         /// </summary>
         public void CreateDaphneAndUserStores()
         {
-            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            var userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            var daphnestore = new Level("Config\\daphnestore.json", "Config\\temp_daphnestore.json");
             ProtocolCreators.CreateDaphneAndUserStores(daphnestore, userstore);
         }
 
@@ -668,7 +668,7 @@ namespace DaphneGui
         public void CreateAndSerializeDaphneProtocols()
         {
             //BLANK SCENARIO
-            var protocol = new Protocol("Config\\blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            var protocol = new Protocol("Config\\blank_protocol.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateBlankProtocol(protocol);
             protocol.SerializeToFile();
 
@@ -695,17 +695,17 @@ namespace DaphneGui
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\vatRC_blank.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
             protocol.SerializeToFile();
 
             // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_vatRC_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\vatRC_ligand_receptor.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
             protocol.SerializeToFile();
 
             // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
-            protocol = new Protocol("Config\\daphne_vatRC_2SiteAbBinding_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\vatRC_2SiteAbBinding.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
             protocol.SerializeToFile();
 
@@ -2025,9 +2025,9 @@ namespace DaphneGui
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     ////      Do this once up front instead of doing each time user clicks Userstore or Daphnestore.
                     string storesPath = new Uri(appPath).LocalPath;
-                    sop.UserStore.FileName = storesPath + @"\Config\daphne_userstore.json";
+                    sop.UserStore.FileName = storesPath + @"\Config\userstore.json";
                     sop.UserStore.TempFile = storesPath + "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = storesPath + @"\Config\daphne_daphnestore.json";
+                    sop.DaphneStore.FileName = storesPath + @"\Config\daphnestore.json";
                     sop.DaphneStore.TempFile = storesPath + "Config\\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
@@ -3240,14 +3240,14 @@ namespace DaphneGui
             }
 
             //Grab the blank scenario
-            string file = "blank_scenario.json";
+            string file = "blank_protocol.json";
             string filename = appPath + @"\Config\" + file;
             Uri uri_path = new Uri(filename);
 
             bool file_exists = File.Exists(uri_path.LocalPath);
             if (!file_exists)
             {
-                MessageBox.Show("Blank scenario file not found.");
+                MessageBox.Show("Blank protocol file not found.");
                 return;
             }
 
