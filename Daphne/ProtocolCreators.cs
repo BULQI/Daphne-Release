@@ -75,7 +75,7 @@ namespace Daphne
             if (protocol == null)
                 return;
 
-            Level store = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level store = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             store = store.Deserialize();
 
             var Settings = new JsonSerializerSettings();
@@ -246,7 +246,7 @@ namespace Daphne
             }
 
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -407,7 +407,7 @@ namespace Daphne
             }
 
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -566,7 +566,7 @@ namespace Daphne
             }
 
             //Load needed entities from User Store 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -661,7 +661,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
             // Load reaction templates from userstore
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
             LoadProtocolReactionTemplates(protocol, userstore);
 
@@ -685,7 +685,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
             
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -709,7 +709,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -795,7 +795,7 @@ namespace Daphne
         //    protocol.scenario.time_config.integrator_step = 0.001;
 
         //    //Load needed entities from User Store
-        //    Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+        //    Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
         //    userstore = userstore.Deserialize();
 
         //    // bulk molecules
@@ -843,7 +843,7 @@ namespace Daphne
             }
 
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates
@@ -3747,7 +3747,7 @@ namespace Daphne
             crc.description = "Goldbeter A, Koshland DE. An amplified sensitivity arising from covalent modification in biological systems. Proc Natl Acad Sci USA 1981, 78:6840-6844.";
             crc.description = crc.description + "With these parameter choices and W_total=W+Wp >> E1_total and E2_total, the reactions will produce switch-like behavior for W and Wp around the point when E1_total/E2_total=1.";
             //MOLECULES
-            type = new string[] { "W", "Wp", "E1", "E2" };
+            type = new string[] { "W", "Wp", "E1", "E2", "W:E1", "Wp:E2" };
             conc = new double[type.Count()];
             for (int i = 0; i < type.Length; i++)
             {
@@ -4471,7 +4471,7 @@ namespace Daphne
             }
 
             //Load needed entities from User Store 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
