@@ -669,7 +669,7 @@
                                                                 <GridViewColumn Width="120" Header="Concentration">
                                                                     <GridViewColumn.CellTemplate>
                                                                         <DataTemplate>
-                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
+                                                                            <uc:DoublesBox SliderEnabled="False" ZeroEpsilon="1e-6" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
@@ -695,8 +695,8 @@
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
-
-                                                            </GridView>
+                                                                
+                                                                </GridView>
                                                         </ListView.View>
                                                     </ListView>
                                                 </Grid>
