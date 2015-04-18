@@ -32,11 +32,13 @@
         <daph:PushLevelToStringConverter x:Key="PushLevelToStringConv" />
         <push:PushLevelIsDaphneStoreConverter x:Key="PushLevelIsDaphneStoreConv" />
 
+        <!-- Molecules -->
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
-            <StackPanel Orientation="Vertical">
+            <StackPanel Name="spMols" Orientation="Vertical">
                 <StackPanel>
                     
                     <DataGrid x:Name="EntityDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                              MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight, UpdateSourceTrigger=PropertyChanged}"
                               ItemsSource="{Binding}" 
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
@@ -104,10 +106,13 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
+
+        <!-- Genes -->
         <DataTemplate x:Name="templGenes" x:Key="pushLevelGeneTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="EntityDataGrid" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                    <DataGrid x:Name="EntityDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                              MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight}"
                               ItemsSource="{Binding}"
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
@@ -162,10 +167,10 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- Reactions -->
         <DataTemplate x:Name="templReactions" x:Key="pushLevelReactionTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <!--MaxHeight="{Binding ElementName=PushWindow, Path=MaxHeight}"-->
                     <DataGrid x:Name="ReacsDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" 
                               MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight}"
                               ItemsSource="{Binding}" 
@@ -175,7 +180,6 @@
                               CanUserDeleteRows="False"
                               SelectionChanged="datagrid_SelectionChanged">
 
-                        <!--MaxHeight="{Binding ElementName=PushWindow, Path=MaxHeight}"-->
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
                                             Executed="PushCommandExecuted"
@@ -214,6 +218,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- Cells -->
         <DataTemplate x:Name="templCells" x:Key="pushLevelCellTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -256,17 +261,17 @@
                                 </Style>
                          </TextBlock.Style>
                     </TextBlock>
-
-                    <StackPanel x:Name="spUserControls">
+                 
+                    <StackPanel x:Name="spUserControls">                         
                         <local:CellPropertiesControl IsEnabled="False" Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
                         <local:CellDetailsReadOnlyControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
-                        <!--<local:CellDetailsControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>-->
-                    </StackPanel>
-
+                    </StackPanel>    
+                    
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
 
+        <!-- Reaction Complexes -->
         <DataTemplate x:Name="templReacComplexes" x:Key="pushLevelReacComplexTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -335,6 +340,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- ReactionTemplate: Currently unused? -->
         <DataTemplate x:Name="templReacTemplate" x:Key="pushLeveReacTemplateTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -350,6 +356,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- DiffSchemes: currently unused -->
         <DataTemplate x:Name="templDiffSchemes" x:Key="pushLevelDiffSchemeTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -364,6 +371,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- Transition drivers: currently unused -->
         <DataTemplate x:Name="templTransDrivers" x:Key="pushLevelTransDriverTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -377,7 +385,6 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
-
 
         <push:PushLevelEntityTemplateSelector x:Key="pushLevelEntityTemplateSelector"
             PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
@@ -393,7 +400,6 @@
         
     </Window.Resources>
 
-
     <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,0,0,20" >
 
         <ScrollViewer.CommandBindings>
@@ -402,8 +408,8 @@
                                             CanExecute="PushCommandCanExecute"/>
 
         </ScrollViewer.CommandBindings>
-        
-        <Grid x:Name="MainGrid" >
+
+        <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -445,6 +451,7 @@
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
+            
             <!--Button showing big right arrow-->
             <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel" VerticalAlignment="Center">
                 <Button x:Name="PushButtonArrow" Height="48" Width="48" Visibility="Visible"
