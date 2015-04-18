@@ -17,10 +17,6 @@
 
     <Window.Resources>
 
-        <CollectionViewSource x:Key="pushMoleculesListView"
-                Source="{Binding Path=LeftList}"
-                Filter="pushMoleculesListView_Filter"/>
-
         <ObjectDataProvider x:Key="pushLevelsList"
             MethodName="GetValues" 
             ObjectType="{x:Type sys:Enum}">
@@ -39,7 +35,7 @@
                     
                     <DataGrid x:Name="EntityDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
                               MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight, UpdateSourceTrigger=PropertyChanged}"
-                              ItemsSource="{Binding}" 
+                              ItemsSource="{Binding UpdateSourceTrigger=PropertyChanged}" 
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
@@ -127,28 +123,50 @@
                         </DataGrid.CommandBindings>
                         
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="150" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="90" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=CopyNumber, Mode=OneWay}" 
-                            />
-                            <DataGridTemplateColumn x:Name="colAct" Header="Weight" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False" >
+                            >
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>                         
+                            <DataGridTemplateColumn x:Name="colAct" Header="Default Activation" Width="70" IsReadOnly="True"
+                                                    ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
                                         <uc:DoublesBox SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   
                                                        Number="{Binding Path=ActivationLevel, Mode=OneWay}" />
                                     </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn.CellTemplate>                            
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>                                
                             </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="colGeneGuid" Header="GUID" Width="100" IsReadOnly="True" Visibility="Collapsed"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=entity_guid, Mode=OneWay}" 
                             />
-
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="No genes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
@@ -482,7 +500,7 @@
                 <GroupBox.Header>
                     <TextBlock Text="To" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
-                <StackPanel>
+                <StackPanel x:Name="RightGridStackPanel">
                     <ComboBox x:Name="LevelBComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
                           ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
@@ -504,7 +522,7 @@
                     </ComboBox>
 
                     <ContentControl Name="RightContent" 
-                        Content="{Binding}" 
+                        Content="{Binding UpdateSourceTrigger=PropertyChanged}" 
                         ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
                         Margin="6"/>
                 </StackPanel>
