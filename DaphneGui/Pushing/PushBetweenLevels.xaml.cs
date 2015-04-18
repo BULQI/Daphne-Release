@@ -32,9 +32,11 @@ namespace DaphneGui.Pushing
         public PushLevel PushLevelB { get; set; }
         public Level LevelA { get; set; }
         public Level LevelB { get; set; }
-
         public object LeftList { get; set; }
         public object RightList { get; set; }
+        public DataGrid LeftDataGrid { get; set; }
+        public DataGrid RightDataGrid { get; set; }
+
         public List<string> equalGuids { get; set; }
 
         public double GridHeight { get; set; }
@@ -46,15 +48,17 @@ namespace DaphneGui.Pushing
             PushEntityType = type;
             PushLevelA = PushLevel.UserStore;
             PushLevelB = PushLevel.Protocol;
+            CurrentLevel = currLevel;
             LeftList = null;
             RightList = null;
             equalGuids = new List<string>();
             InitializeComponent();
 
-            
-            CurrentLevel = currLevel;
-            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
-            GridHeight = MaxHeight * 0.85;
+            // Keep this window within the bounds of MainWindow. This will help with making movies.
+            this.Height = Application.Current.MainWindow.Height;
+            this.MaxHeight = Application.Current.MainWindow.Height;
+            GridHeight = this.Height * 0.85;
+            this.Left = Application.Current.MainWindow.Left;
 
             if (type == PushLevelEntityType.Molecule)
             {
@@ -92,35 +96,24 @@ namespace DaphneGui.Pushing
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {            
-            //MaxHeight = SystemParameters.PrimaryScreenHeight * 0.9;
-            var desktopWorkingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-            this.Left = desktopWorkingArea.Left + 20;
-            this.Top = desktopWorkingArea.Top + 20;
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
         }
 
-        public static List<T> GetLogicalChildCollection<T>(object parent) where T : DependencyObject
+        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : DependencyObject
         {
-            List<T> logicalCollection = new List<T>();
-            GetLogicalChildCollection(parent as DependencyObject, logicalCollection);
-            return logicalCollection;
-        }
-
-        private static void GetLogicalChildCollection<T>(DependencyObject parent, List<T> logicalCollection) where T : DependencyObject
-        {
-            IEnumerable children = LogicalTreeHelper.GetChildren(parent);
-            foreach (object child in children)
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
             {
-                if (child is DependencyObject)
+                // Retrieve child visual at specified index value.
+                Visual childVisual = (Visual)VisualTreeHelper.GetChild(parent, i);
+
+                // Do processing of the child visual object. 
+                if (childVisual is T)
                 {
-                    DependencyObject depChild = child as DependencyObject;
-                    if (child is T)
-                    {
-                        logicalCollection.Add(child as T);
-                    }
-                    GetLogicalChildCollection(depChild, logicalCollection);
+                    visualCollection.Add(childVisual as T);
                 }
+                // recursive
+                GetVisualChildCollection(childVisual, visualCollection);
             }
         }
 
@@ -203,12 +196,37 @@ namespace DaphneGui.Pushing
             GetEqualEntities();
 
             RightGroup.DataContext = LevelB.entity_repository;
-            RightContent.DataContext = RightList;   //must do this first (??)
+            RightContent.DataContext = RightList;  
             LeftGroup.DataContext = LevelA.entity_repository;
-            //LeftContent.DataContext = LeftList;  
-            
-            LeftContent.DataContext = null;
             LeftContent.DataContext = LeftList;
+
+            AssignDataGrids();
+            LeftDataGrid.Items.Refresh();
+            RightDataGrid.Items.Refresh();
+        }
+
+        private void AssignDataGrids()
+        {
+            List<UIElement> elementsVis = new List<UIElement>();
+            GetVisualChildCollection(LeftGridStackPanel, elementsVis);
+            foreach (UIElement child in elementsVis)
+            {
+                Type t = child.GetType();
+                if (child.GetType() == typeof(DataGrid))
+                {
+                    LeftDataGrid = child as DataGrid;
+                }
+            }
+
+            GetVisualChildCollection(RightGridStackPanel, elementsVis);
+            foreach (UIElement child in elementsVis)
+            {
+                Type t = child.GetType();
+                if (child.GetType() == typeof(DataGrid))
+                {
+                    RightDataGrid = child as DataGrid;
+                }
+            }
         }
 
         /// <summary>
@@ -236,18 +254,6 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigMolecule mol in molright)
-                    {
-                        ConfigMolecule mol2 = FindMolInList(molleft, mol);
-                        if (mol2 != null)
-                        {
-                            if (mol.Equals(mol2))
-                            {
-                                if (equalGuids.Contains(mol.entity_guid) == false)
-                                    equalGuids.Add(mol.entity_guid);
-                            }
-                        }
-                    }
                     break;
                 case PushLevelEntityType.Gene:
                     ObservableCollection<ConfigGene> geneleft = (ObservableCollection<ConfigGene>)LeftList;
@@ -265,18 +271,6 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigGene gene in generight)
-                    {
-                        ConfigGene gene2 = FindGeneInList(geneleft, gene);
-                        if (gene2 != null)
-                        {
-                            if (gene.Equals(gene2))
-                            {
-                                if (equalGuids.Contains(gene.entity_guid) == false)
-                                    equalGuids.Add(gene.entity_guid);
-                            }
-                        }
-                    }
                     break;
                 case PushLevelEntityType.Reaction:
                     ObservableCollection<ConfigReaction> reacleft = (ObservableCollection<ConfigReaction>)LeftList;
@@ -285,17 +279,6 @@ namespace DaphneGui.Pushing
                     foreach (ConfigReaction reac in reacleft)
                     {
                         ConfigReaction reac2 = FindReactionInList(reacright, reac);
-                        if (reac2 != null)
-                        {
-                            if (reac.Equals(reac2))
-                            {
-                                //equalGuids.Add(reac.entity_guid);
-                            }
-                        }
-                    }
-                    foreach (ConfigReaction reac in reacright)
-                    {
-                        ConfigReaction reac2 = FindReactionInList(reacleft, reac);
                         if (reac2 != null)
                         {
                             if (reac.Equals(reac2))
@@ -320,17 +303,17 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigCell cell in cellright)
-                    {
-                        ConfigCell cell2 = FindCellInList(cellleft, cell);
-                        if (cell2 != null)
-                        {
-                            if (cell.Equals(cell2))
-                            {
-                                equalGuids.Add(cell.entity_guid);
-                            }
-                        }
-                    }
+                    //foreach (ConfigCell cell in cellright)
+                    //{
+                    //    ConfigCell cell2 = FindCellInList(cellleft, cell);
+                    //    if (cell2 != null)
+                    //    {
+                    //        if (cell.Equals(cell2))
+                    //        {
+                    //            equalGuids.Add(cell.entity_guid);
+                    //        }
+                    //    }
+                    //}
                     break;
                 case PushLevelEntityType.ReactionComplex:
                     ObservableCollection<ConfigReactionComplex> rcleft = (ObservableCollection<ConfigReactionComplex>)LeftList;
@@ -346,17 +329,17 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigReactionComplex rc in rcright)
-                    {
-                        ConfigReactionComplex rc2 = FindReacCompInList(rcleft, rc);
-                        if (rc2 != null)
-                        {
-                            if (rc.Equals(rc2))
-                            {
-                                equalGuids.Add(rc.entity_guid);
-                            }
-                        }
-                    }
+                    //foreach (ConfigReactionComplex rc in rcright)
+                    //{
+                    //    ConfigReactionComplex rc2 = FindReacCompInList(rcleft, rc);
+                    //    if (rc2 != null)
+                    //    {
+                    //        if (rc.Equals(rc2))
+                    //        {
+                    //            equalGuids.Add(rc.entity_guid);
+                    //        }
+                    //    }
+                    //}
                     break;
                 case PushLevelEntityType.ReactionTemplate:
                     ObservableCollection<ConfigReactionTemplate> rtleft = (ObservableCollection<ConfigReactionTemplate>)LeftList;
@@ -372,17 +355,17 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigReactionTemplate rt in rtright)
-                    {
-                        ConfigReactionTemplate rt2 = FindReacTempInList(rtleft, rt);
-                        if (rt2 != null)
-                        {
-                            if (rt.Equals(rt2))
-                            {
-                                equalGuids.Add(rt.entity_guid);
-                            }
-                        }
-                    }
+                    //foreach (ConfigReactionTemplate rt in rtright)
+                    //{
+                    //    ConfigReactionTemplate rt2 = FindReacTempInList(rtleft, rt);
+                    //    if (rt2 != null)
+                    //    {
+                    //        if (rt.Equals(rt2))
+                    //        {
+                    //            equalGuids.Add(rt.entity_guid);
+                    //        }
+                    //    }
+                    //}
                     break;
                 case PushLevelEntityType.TransDriver:
                     ObservableCollection<ConfigTransitionDriver> tdleft = (ObservableCollection<ConfigTransitionDriver>)LeftList;
@@ -413,17 +396,17 @@ namespace DaphneGui.Pushing
                             }
                         }
                     }
-                    foreach (ConfigTransitionScheme ds in dsright)
-                    {
-                        ConfigTransitionScheme ds2 = FindDiffSchemeInList(dsleft, ds);
-                        if (ds2 != null)
-                        {
-                            if (ds.Equals(ds2))
-                            {
-                                equalGuids.Add(ds.entity_guid);
-                            }
-                        }
-                    }
+                    //foreach (ConfigTransitionScheme ds in dsright)
+                    //{
+                    //    ConfigTransitionScheme ds2 = FindDiffSchemeInList(dsleft, ds);
+                    //    if (ds2 != null)
+                    //    {
+                    //        if (ds.Equals(ds2))
+                    //        {
+                    //            equalGuids.Add(ds.entity_guid);
+                    //        }
+                    //    }
+                    //}
                     break;
                 default:
                     break;
@@ -521,49 +504,28 @@ namespace DaphneGui.Pushing
             return null;
         }
 
-        private void pushMoleculesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigMolecule source_mol = e.Item as ConfigMolecule;
-            ConfigMolecule dest_mol = null;
-
-            if (source_mol == null)
-                return;
-
-            ObservableCollection<ConfigMolecule> dest_collection = (ObservableCollection<ConfigMolecule>)RightList;
-
-            foreach (ConfigMolecule mol in dest_collection)
-            {
-                if (mol.entity_guid == source_mol.entity_guid)
-                {
-                    dest_mol = mol;
-                    break;
-                }
-            }
-            if (dest_mol == null) {
-                e.Accepted = true;
-                return;
-            }
-            e.Accepted = true;
-        }
-
         private void LevelAComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
             PushLevel level = (PushLevel)combo.SelectedItem;
-
             PushLevelA = level;
 
-            //if (PushLevelA == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Right")
             if (PushLevelA == PushLevel.Protocol)
             {
                 PushLevelB = PushLevel.UserStore;
                 LevelBComboBox.SelectedIndex = 1;
             }
-            //else if (PushLevelA == PushLevel.UserStore)
-            //{
-            //    PushLevelB = PushLevel.Protocol;
-            //    LevelBComboBox.SelectedIndex = 0;
-            //}
+            else
+            {
+                if (PushLevelA == PushLevel.UserStore && PushLevelB == PushLevel.UserStore)
+                {
+                    PushLevelB = PushLevel.Protocol;
+                    if (LevelBComboBox != null)
+                    {
+                        LevelBComboBox.SelectedIndex = 0;
+                    }
+                }
+            }
 
             if (LeftGroup == null)
                 return;
@@ -575,21 +537,23 @@ namespace DaphneGui.Pushing
         {
             ComboBox combo = sender as ComboBox;
             PushLevel level = (PushLevel)combo.SelectedItem;
-
             PushLevelB = level;
 
-            //if (PushLevelB == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Left")
-            //{
-            //    PushLevelA = PushLevel.UserStore;
-            //}
+            if (PushLevelB == PushLevel.Protocol)
+            {
+                if (PushLevelA == PushLevel.Protocol)
+                {
+                    PushLevelA = PushLevel.UserStore;
+                    LevelAComboBox.SelectedIndex = 1;
+                }
+            }
 
             if (RightGroup == null)
                 return;
 
             ResetGrids();
         }
-
-        
+       
         /// <summary>
         /// can execute command handler for delete db - enables/disables the Push button
         /// </summary>
@@ -625,9 +589,14 @@ namespace DaphneGui.Pushing
             
         }
 
+        /// <summary>
+        /// Find the DataGrid associated with the left side and call PushDialog.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            PushDialog(sender as DataGrid);
+            PushDialog(LeftDataGrid);
         }
 
         private void PushDialog(DataGrid grid)
@@ -683,8 +652,6 @@ namespace DaphneGui.Pushing
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
         {
-            //ConfigEntity newEntity = null;
-            //bool UserWantsNewEntity = false;
             Level.PushStatus status = levelB.pushStatus(entity);
             if (status == Level.PushStatus.PUSH_INVALID)
             {
@@ -692,7 +659,8 @@ namespace DaphneGui.Pushing
                 return;
             }
 
-            //If the entity is new, must clone it here and then push
+            // Clone the entity and push it
+            bool recursive = true;
             switch (PushEntityType)
             {
                 case PushLevelEntityType.Molecule:
@@ -706,24 +674,24 @@ namespace DaphneGui.Pushing
                     break;
                 case PushLevelEntityType.Reaction:
                     ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
-                    levelB.repositoryPush(newreac, status, levelA, true);
+                    levelB.repositoryPush(newreac, status, levelA, recursive);
                     break;
                 case PushLevelEntityType.Cell:
                     ConfigCell newcell = ((ConfigCell)entity).Clone(true);
-                    levelB.repositoryPush(newcell, status, levelA, true);
+                    levelB.repositoryPush(newcell, status, levelA, recursive);
                     MainWindow.SOP.SelectedRenderSkin.AddRenderCell(newcell.renderLabel, newcell.CellName);
                     break;
                 case PushLevelEntityType.DiffScheme:
                     ConfigTransitionScheme newscheme = ((ConfigTransitionScheme)entity).Clone(true);
-                    levelB.repositoryPush(newscheme, status, levelA, true);
+                    levelB.repositoryPush(newscheme, status, levelA, recursive);
                     break;
                 case PushLevelEntityType.ReactionTemplate:
                     ConfigReactionTemplate newreactemp = ((ConfigReactionTemplate)entity).Clone(true);
-                    levelB.repositoryPush(newreactemp, status, levelA, true);
+                    levelB.repositoryPush(newreactemp, status, levelA, recursive);
                     break;
                 case PushLevelEntityType.ReactionComplex:
                     ConfigReactionComplex newrc = ((ConfigReactionComplex)entity).Clone(true);
-                    levelB.repositoryPush(newrc, status, levelA, true);
+                    levelB.repositoryPush(newrc, status, levelA, recursive);
                     break;
                 default:
                     break;
@@ -771,92 +739,65 @@ namespace DaphneGui.Pushing
 
         private void datagrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ////This does not have any effect because of the command binding stuff
-            //DataGrid grid = sender as DataGrid;
-            
-            //PushButtonArrow.IsEnabled = true;
-            //if (grid.SelectedItems.Count <= 0)
-            //    PushButtonArrow.IsEnabled = false;
         }
 
         private void LeftContent_Loaded(object sender, RoutedEventArgs e)
         {
-            ContentControl cc = sender as ContentControl;
-            DataTemplateSelector dts = cc.ContentTemplateSelector;
-
-            //DataTemplate temp = PushLevelEntityTemplateSelector.PushLevelCellTemplate;
-            //if (dts is PushLevel)
-            //{
-            //}
-            
-
-            List<UIElement> elements = new List<UIElement>();
-            GetLogicalChildCollection(cc, elements);
-
-            foreach (UIElement child in elements)
-            {
-                Type t = child.GetType();
-                if (child.GetType() == typeof(CellDetailsControl))
-                {
-                    MessageBox.Show("Found celldetailscontrol");
-                    //((CellDetailsControl)child).IsEnabled = false;
-                }
-            }
         }
 
     }  //End of PushBetweenLevels class
 
+    // Unused
+    //public class DataGridBehavior
+    //{
+    //    #region Get Visuals
 
-    public class DataGridBehavior
-    {
-        #region Get Visuals
+    //    private static T GetVisualChild<T>(Visual parent) where T : Visual
+    //    {
+    //        T child = default(T);
+    //        int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+    //        for (int i = 0; i < numVisuals; i++)
+    //        {
+    //            Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+    //            child = v as T;
+    //            if (child == null)
+    //            {
+    //                child = GetVisualChild<T>(v);
+    //            }
+    //            if (child != null)
+    //            {
+    //                break;
+    //            }
+    //        }
+    //        return child;
+    //    }
 
-        private static T GetVisualChild<T>(Visual parent) where T : Visual
-        {
-            T child = default(T);
-            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < numVisuals; i++)
-            {
-                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
-                child = v as T;
-                if (child == null)
-                {
-                    child = GetVisualChild<T>(v);
-                }
-                if (child != null)
-                {
-                    break;
-                }
-            }
-            return child;
-        }
+    //    public static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
+    //    {
+    //        List<T> visualCollection = new List<T>();
+    //        GetVisualChildCollection(parent as DependencyObject, visualCollection);
+    //        return visualCollection;
+    //    }
 
-        public static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
-        {
-            List<T> visualCollection = new List<T>();
-            GetVisualChildCollection(parent as DependencyObject, visualCollection);
-            return visualCollection;
-        }
+    //    private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
+    //    {
+    //        int count = VisualTreeHelper.GetChildrenCount(parent);
+    //        for (int i = 0; i < count; i++)
+    //        {
+    //            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+    //            if (child is T)
+    //            {
+    //                visualCollection.Add(child as T);
+    //            }
+    //            if (child != null)
+    //            {
+    //                GetVisualChildCollection(child, visualCollection);
+    //            }
+    //        }
+    //    }
 
-        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
-        {
-            int count = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < count; i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T)
-                {
-                    visualCollection.Add(child as T);
-                }
-                if (child != null)
-                {
-                    GetVisualChildCollection(child, visualCollection);
-                }
-            }
-        }
-
-        #endregion // Get Visuals
-    }
+    //    #endregion // Get Visuals
+    //}
 
     public static class MyCommands
     {
@@ -920,79 +861,100 @@ namespace DaphneGui.Pushing
             return PushLevel.Protocol;
         }
     }
-    /// <summary>
-    /// Extension methods to the DependencyObject class.
-    /// </summary>
-    public static class ViewExtensions
-    {
-        public static T GetChildOfType<T>(this DependencyObject depObj)
-        where T : DependencyObject
-        {
-            if (depObj == null) return null;
 
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-            {
-                var child = VisualTreeHelper.GetChild(depObj, i);
+    // Unused
+    ///// <summary>
+    ///// Extension methods to the DependencyObject class.
+    ///// </summary>
+    //public static class ViewExtensions
+    //{
+    //    public static T GetChildOfType<T>(this DependencyObject depObj)
+    //    where T : DependencyObject
+    //    {
+    //        if (depObj == null) return null;
 
-                var result = (child as T) ?? GetChildOfType<T>(child);
-                if (result != null) return result;
-            }
-            return null;
-        }
+    //        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+    //        {
+    //            var child = VisualTreeHelper.GetChild(depObj, i);
 
-        /// <summary>
-        /// Finds a Child of a given item in the visual tree. 
-        /// </summary>
-        /// <param name="parent">A direct parent of the queried item.</param>
-        /// <typeparam name="T">The type of the queried item.</typeparam>
-        /// <param name="childName">x:Name or Name of child. </param>
-        /// <returns>The first parent item that matches the submitted type parameter. 
-        /// If not matching item can be found, 
-        /// a null parent is being returned.</returns>
-        public static T FindChildByName<T>(this DependencyObject parent, string childName) 
-        where T : DependencyObject
-        {    
-          // Confirm parent and childName are valid. 
-          if (parent == null) return null;
+    //            var result = (child as T) ?? GetChildOfType<T>(child);
+    //            if (result != null) return result;
+    //        }
+    //        return null;
+    //    }
 
-          T foundChild = null;
+    //    /// <summary>
+    //    /// Finds a Child of a given item in the visual tree. 
+    //    /// </summary>
+    //    /// <param name="parent">A direct parent of the queried item.</param>
+    //    /// <typeparam name="T">The type of the queried item.</typeparam>
+    //    /// <param name="childName">x:Name or Name of child. </param>
+    //    /// <returns>The first parent item that matches the submitted type parameter. 
+    //    /// If not matching item can be found, 
+    //    /// a null parent is being returned.</returns>
+    //    public static T FindChildByName<T>(this DependencyObject parent, string childName) 
+    //    where T : DependencyObject
+    //    {    
+    //      // Confirm parent and childName are valid. 
+    //      if (parent == null) return null;
 
-          int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
-          for (int i = 0; i < childrenCount; i++)
-          {
-            var child = VisualTreeHelper.GetChild(parent, i);
-            // If the child is not of the request child type child
-            T childType = child as T;
-            if (childType == null)
-            {
-              // recursively drill down the tree
-                foundChild = FindChildByName<T>(child, childName);
+    //      T foundChild = null;
 
-              // If the child is found, break so we do not overwrite the found child. 
-              if (foundChild != null) break;
-            }
-            else if (!string.IsNullOrEmpty(childName))
-            {
-              var frameworkElement = child as FrameworkElement;
-              // If the child's name is set for search
-              if (frameworkElement != null && frameworkElement.Name == childName)
-              {
-                // if the child's name is of the request name
-                foundChild = (T)child;
-                break;
-              }
-            }
-            else
-            {
-              // child element found.
-              foundChild = (T)child;
-              break;
-            }
-          }
+    //      int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+    //      for (int i = 0; i < childrenCount; i++)
+    //      {
+    //        var child = VisualTreeHelper.GetChild(parent, i);
+    //        // If the child is not of the request child type child
+    //        T childType = child as T;
+    //        if (childType == null)
+    //        {
+    //          // recursively drill down the tree
+    //            foundChild = FindChildByName<T>(child, childName);
 
-          return foundChild;
-        }
+    //          // If the child is found, break so we do not overwrite the found child. 
+    //          if (foundChild != null) break;
+    //        }
+    //        else if (!string.IsNullOrEmpty(childName))
+    //        {
+    //          var frameworkElement = child as FrameworkElement;
+    //          // If the child's name is set for search
+    //          if (frameworkElement != null && frameworkElement.Name == childName)
+    //          {
+    //            // if the child's name is of the request name
+    //            foundChild = (T)child;
+    //            break;
+    //          }
+    //        }
+    //        else
+    //        {
+    //          // child element found.
+    //          foundChild = (T)child;
+    //          break;
+    //        }
+    //      }
 
-    }
+    //      return foundChild;
+    //    }
+        
+    //    public static T GetVisualChild<T>(Visual parent) where T : Visual
+    //    {
+    //        T child = default(T);
+    //        int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+    //        for (int i = 0; i < numVisuals; i++)
+    //        {
+    //            Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+    //            child = v as T;
+    //            if (child == null)
+    //            {
+    //                child = GetVisualChild<T>(v);
+    //            }
+    //            if (child != null)
+    //            {
+    //                break;
+    //            }
+    //        }
+    //        return child;
+    //    }
+    //}
 
 }
