@@ -446,7 +446,7 @@ namespace DaphneGui
             //if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol) && wasAdded)
             if (!level.findReactionByTotalString(cr.TotalReactionString, level) && wasAdded)
             {
-                level.entity_repository.reactions.Add(cr);
+                level.entity_repository.reactions.Add(cr.Clone(true));
             }
 
             txtReac.Text = "";
