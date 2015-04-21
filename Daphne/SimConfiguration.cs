@@ -1758,29 +1758,6 @@ namespace Daphne
         }
 
         /// <summary>
-        /// serialize the protocol to a string, skip the 'decorations', i.e. experiment name and description
-        /// </summary>
-        /// <returns>the protocol serialized to a string</returns>
-        public string SerializeToStringSkipDeco()
-        {
-            // remember name and description
-            string exp_name = experiment_name,
-                   exp_desc = experiment_description,
-                   ret;
-
-            // temporarily set name and description to empty strings
-            experiment_name = "";
-            experiment_description = "";
-            // serialize to string
-            ret = SerializeToString();
-            // reset to the remembered string values
-            experiment_name = exp_name;
-            experiment_description = exp_desc;
-            // return serialized string
-            return ret;
-        }
-
-        /// <summary>
         /// override deserialization for the protocol; needs to handle extra data only contained in the protocol level
         /// </summary>
         /// <param name="tempFiles">true to indicate deserialization of the temporary file(s)</param>

@@ -988,7 +988,7 @@ namespace DaphneGui
                 sop.Protocol.FileName = filename;
                 sop.Protocol.SerializeToFile();
 
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                orig_content = sop.Protocol.SerializeToString();
                 protocol_path = new Uri(filename);
                 orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 displayTitle();
@@ -1053,7 +1053,7 @@ namespace DaphneGui
                     //skip reserialize when user dragging 
                     if (ToolWinType != ToolWindowType.VatRC && !completeReset)
                     {
-                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_content = sop.Protocol.SerializeToString();
                     }
 
                     // this needs to come after setting orig_content
@@ -2018,7 +2018,7 @@ namespace DaphneGui
                     {
                         //sop = new SystemOfPersistence();
                         sop.Protocol = protocol;
-                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_content = sop.Protocol.SerializeToString();
                         orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                     }
 
@@ -2252,7 +2252,7 @@ namespace DaphneGui
             sop.Protocol = new Protocol();
             sop.Protocol.experiment_name = "";
             sop.Protocol.experiment_description = "";
-            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+            orig_content = sop.Protocol.SerializeToString();
             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
             //ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
@@ -2567,9 +2567,9 @@ namespace DaphneGui
             if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
                 // check if there were changes
-                string refs = sop.Protocol.SerializeToStringSkipDeco();
+                string refs = sop.Protocol.SerializeToString();
 
-                if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+                if (sop != null && refs != orig_content)
                 {
                     sop.Protocol.SerializeToFile(true);
                     tempFileContent = true;
@@ -2702,7 +2702,7 @@ namespace DaphneGui
                 {
                     // save into the same file
                     sop.Protocol.SerializeToFile();
-                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    orig_content = sop.Protocol.SerializeToString();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
                 else if (result == MessageBoxResult.No)
@@ -2837,7 +2837,7 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToString() == orig_content)
                 {
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
                     // after a run or vcr playback
@@ -2852,7 +2852,7 @@ namespace DaphneGui
                     {
                         case MessageBoxResult.Yes:
                             sop.Protocol.SerializeToFile();
-                            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                            orig_content = sop.Protocol.SerializeToString();
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             lockSaveStartSim(true);
                             tempFileContent = false;
@@ -3114,7 +3114,7 @@ namespace DaphneGui
             if (fi.IsReadOnly == false || !fi.Exists)
             {
                 sop.Protocol.SerializeToFile();
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                orig_content = sop.Protocol.SerializeToString();
             }
             else
             {
