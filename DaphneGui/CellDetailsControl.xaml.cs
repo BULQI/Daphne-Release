@@ -358,7 +358,7 @@ namespace DaphneGui
                 level = CurrentLevel;
             }
             //Create a new default gene
-            ConfigGene gene = new ConfigGene("g", 0, 0);
+            ConfigGene gene = new ConfigGene("g", 2, 1.0);
             //gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "New");
             gene.Name = gene.GenerateNewName(level, "New");
 
