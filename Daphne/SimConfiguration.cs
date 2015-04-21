@@ -1376,78 +1376,52 @@ namespace Daphne
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
                 repositoryPush(molpop.molecule.Clone(null), s2);
-                //PushStatus s2 = pushStatus(molpop.molecule);
-                //if (s2 != PushStatus.PUSH_INVALID)
-                //{
-                //    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                //    repositoryPush(newmol, s2);
-                //}
             }
 
             //Membrane molecules
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
                 repositoryPush(molpop.molecule.Clone(null), s2);
-
-                //PushStatus s2 = pushStatus(molpop.molecule);
-                //if (s2 != PushStatus.PUSH_INVALID)
-                //{
-                //    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                //    repositoryPush(newmol, s2);
-                //}
             }
 
             //Genes
             foreach (ConfigGene gene in cell.genes)
             {
                 repositoryPush(gene.Clone(null), s2);
-
-                //PushStatus s2 = pushStatus(gene);
-                //if (s2 != PushStatus.PUSH_INVALID)
-                //{
-                //    ConfigGene newgene = gene.Clone(null);
-                //    repositoryPush(newgene, s2);
-                //}
             }
 
             //Cytosol reactions
             foreach (ConfigReaction reac in cell.cytosol.Reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Membrane reactions
             foreach (ConfigReaction reac in cell.membrane.Reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Cytosol reaction complexes
             foreach (ConfigReactionComplex reac in cell.cytosol.reaction_complexes)
             {
-                ReactionComplexPusher(reac, sourceLevel, s);
+                ReactionComplexPusher(reac, sourceLevel, s2);
             }
 
             //Membrane reaction complexes
             foreach (ConfigReactionComplex reac in cell.membrane.reaction_complexes)
             {
-                ReactionComplexPusher(reac, sourceLevel, s);
+                ReactionComplexPusher(reac, sourceLevel, s2);
             }
 
             //Differentiation scheme
-            SchemePusher(cell.diff_scheme, sourceLevel, s);
+            SchemePusher(cell.diff_scheme, sourceLevel, s2);
 
             //Division scheme
-            SchemePusher(cell.div_scheme, sourceLevel, s);
+            SchemePusher(cell.div_scheme, sourceLevel, s2);
 
             //Now push the cell itself
             repositoryPush(cell, s);
-
-            ////Now push the cell itself
-            //if (s != PushStatus.PUSH_INVALID)
-            //{
-            //    repositoryPush(cell, s);
-            //}
         }
 
         private void ReactionPusher(ConfigReaction reac, Level sourceLevel, PushStatus s)
@@ -3942,6 +3916,13 @@ namespace Daphne
         {
             //Start with original name
             string TempMolName = Name;
+            string locationSuffix = "";
+
+            //If membrane bound, add a pipe at the end
+            if (molecule_location == MoleculeLocation.Boundary)
+            {
+                locationSuffix += "|";
+            }
 
             //Get the base name, i.e. the text before the ending (which is "_New" or "_Copy")
             //For example, this would convert "Molecule_New001" to "Molecule".
@@ -3950,23 +3931,17 @@ namespace Daphne
             //If pipe is there, remove it, although it probably already got removed.
             TempMolName = RemovePipe(TempMolName);
 
-            //Now the new molecule name is going to be TempMolName + ending + suffix
+            //Now the new molecule name is going to be TempMolName + ending + suffix + locationSuffix
             int nSuffix = 1;
             string rightSide = ending + string.Format("{0:000}", nSuffix);
-            string NewMolName = TempMolName + rightSide;
+            string NewMolName = TempMolName + rightSide + locationSuffix;
 
             //Check the ordinal part and make sure the number is unique 
             while (FindMoleculeByName(level.entity_repository, NewMolName) == true)
             {
                 nSuffix++;
                 rightSide = ending + string.Format("{0:000}", nSuffix);
-                NewMolName = TempMolName + rightSide;
-            }
-
-            //If membrane bound, add a pipe at the end
-            if (molecule_location == MoleculeLocation.Boundary)
-            {
-                NewMolName += "|";
+                NewMolName = TempMolName + rightSide + locationSuffix;
             }
 
             return NewMolName;
