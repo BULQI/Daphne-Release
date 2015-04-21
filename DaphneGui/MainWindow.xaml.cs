@@ -3369,108 +3369,55 @@ namespace DaphneGui
                 return;
             }
 
+            PushEntity pm = new PushEntity();
+            pm.DataContext = MainWindow.SOP;
+            pm.EntityLevelDetails.DataContext = source;
+            pm.ComponentLevelDetails.DataContext = null;
+
             if (source is ConfigMolecule)
             {
-                //LET'S TRY A GENERIC PUSHER
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
-                pm.ComponentLevelDetails.DataContext = null;
-
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erMol;
                     newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
-
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                    return;
-
-                UserWantsNewEntity = pm.UserWantsNewEntity;
-
             }
             else if (source is ConfigReaction)
             {
-                //Use generic pusher
-                PushEntity pr = new PushEntity();
-                pr.EntityLevelDetails.DataContext = source;
-                pr.ComponentLevelDetails.DataContext = null;
-
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
-                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+                    pm.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
                     newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
-
-                if (pr.ShowDialog() == false)
-                    return;
-
-                UserWantsNewEntity = pr.UserWantsNewEntity;
             }
             else if (source is ConfigCell)
             {
-                PushEntity pcell = new PushEntity();
-                pcell.EntityLevelDetails.DataContext = source;
-                pcell.ComponentLevelDetails.DataContext = null;
-
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
-                    pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                    pm.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
                     newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
+                    ((ConfigCell)newEntity).CellName = ((ConfigCell)newEntity).GenerateNewName(MainWindow.SOP.Protocol, "_Copy");
                 }
-
-                if (pcell.ShowDialog() == false)
-                    return;
-
-                UserWantsNewEntity = pcell.UserWantsNewEntity;
-
             }
             else if (source is ConfigGene)
             {
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
-                pm.ComponentLevelDetails.DataContext = null;
-
                 ConfigGene erGene = MainWindow.SOP.Protocol.FindGene(((ConfigGene)source).Name);
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
                     newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
-
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                {
-                    return;
-                }
-
-                UserWantsNewEntity = pm.UserWantsNewEntity;
-
             }
             else if (source is ConfigReactionComplex)
             {
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
-                pm.ComponentLevelDetails.DataContext = null;
-
                 if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid))
                 {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
                     newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
+                    ((ConfigReactionComplex)newEntity).Name = ((ConfigReactionComplex)newEntity).GenerateNewName(MainWindow.SOP.Protocol, " Copy");
                 }
-
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                {
-                    return;
-                }
-
-                UserWantsNewEntity = pm.UserWantsNewEntity;
             }
             else if (source is ConfigTransitionScheme)
             {
@@ -3488,6 +3435,13 @@ namespace DaphneGui
                 return;
             }
 
+
+            //Show the confirmation dialog
+            if (pm.ShowDialog() == false)
+            {
+                return;
+            }
+            UserWantsNewEntity = pm.UserWantsNewEntity;
 
             //If we get here, then the user confirmed a PUSH
 
@@ -3512,7 +3466,6 @@ namespace DaphneGui
                 }
                 else //push as new
                 {
-                    source.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                     B.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
                 }
 
@@ -3701,6 +3654,7 @@ namespace DaphneGui
             LevelContext = SOP.Protocol;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
+            applyButton.IsEnabled = true;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
             pushMenu.Visibility = Visibility.Visible;
