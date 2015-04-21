@@ -13,7 +13,7 @@
             ReactionTemplate="{StaticResource editReactionTemplate}" 
             MoleculeTemplate="{StaticResource readonlyMoleculeTemplate}" 
             GeneTemplate="{StaticResource editGeneTemplate}"
-            CellTemplate="{StaticResource editCellTemplate}"
+            CellTemplate="{StaticResource readonlyCellTemplate}"
             RCTemplate="{StaticResource reactionComplexTemplate}"
             DiffSchemeTemplate="{StaticResource diffSchemeTemplate}"
             TransDrivTemplate="{StaticResource transitionDriverTemplate}"
@@ -43,7 +43,7 @@
                 
                 <GroupBox Grid.Row="1" Grid.Column="0" >
                     
-                    <ContentControl Name="EntityLevelDetails" IsEnabled="False"
+                    <ContentControl Name="EntityLevelDetails" 
                             Content="{Binding}" 
                             ContentTemplateSelector="{StaticResource entityTemplateSelector}"
                             Margin="6"/>
@@ -61,8 +61,7 @@
                     <TextBlock FontWeight="Bold" FontSize="16">To</TextBlock>
                 </StackPanel>
                 <GroupBox Grid.Column="2" Grid.Row="1" >
-                    
-                    <ContentControl Name="ComponentLevelDetails" IsEnabled="False"
+                    <ContentControl Name="ComponentLevelDetails" 
                                 Content="{Binding}" 
                                 ContentTemplateSelector="{StaticResource entityTemplateSelector}" 
                                 Margin="6"/>

@@ -241,7 +241,9 @@ namespace DaphneGui
 
             IdentifyModifiers();
 
-            Level level = MainWindow.SOP.Protocol;  //MainWindow.ST_CurrentLevel;
+            //Level level = MainWindow.SOP.Protocol;
+            Level level = MainWindow.GetLevelContext(this);
+
             string geneGuid = "";
             ConfigReaction cr = new ConfigReaction();
             cr.rate_const = inputRateConstant;
@@ -371,8 +373,9 @@ namespace DaphneGui
             string reacEnvironment = Tag as string;
 
             switch(reacEnvironment)
-            {
+            {                  
                 case "ecs":
+                    //Dont need to use "level" for ecs - cannot come here if user or daphne store
                     TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
                     ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
                     if (configEcs.ValidateReaction(cr, MainWindow.SOP.Protocol) == false)
@@ -409,11 +412,17 @@ namespace DaphneGui
                     }
                     else
                     {
-                        VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
-                        ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
-                        crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
-                        s.InitializeAllMols();
-                        s.InitializeAllReacs();
+                        if (level is Protocol)
+                        {
+                            VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
+                            ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
+
+                            //crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
+                            crc.AddReactionMolPopsAndGenes(cr, level.entity_repository);
+
+                            s.InitializeAllMols();
+                            s.InitializeAllReacs();
+                        }
                     }
                     break;
 
@@ -421,7 +430,8 @@ namespace DaphneGui
                     break;
 
                 case "component_rc":
-                    this.CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
+                    //this.CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
+                    this.CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, level.entity_repository);
                     break;
 
                 default:
@@ -432,9 +442,11 @@ namespace DaphneGui
             wasAdded = true;
 
             //Add the reaction to repository collection if it doesn't already exist there.
-            if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol) && wasAdded)
+
+            //if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol) && wasAdded)
+            if (!level.findReactionByTotalString(cr.TotalReactionString, level) && wasAdded)
             {
-                level.entity_repository.reactions.Add(cr);
+                level.entity_repository.reactions.Add(cr.Clone(true));
             }
 
             txtReac.Text = "";
@@ -451,7 +463,9 @@ namespace DaphneGui
             }
 
             // If this reaction already exists in the ObservableCollection, then don't add
-            if (MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, reactions) == true)
+            //if (MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, reactions) == true)
+            Level level = MainWindow.GetLevelContext(this);
+            if (level.findReactionByTotalString(cr.TotalReactionString, reactions) == true)
             {
                 MessageBox.Show("This reaction already exists in this environment.");
                 return true;
@@ -616,7 +630,8 @@ namespace DaphneGui
 
         private bool ValidateMoleculeName(string sMol)
         {
-            Level level = MainWindow.SOP.Protocol;    //MainWindow.ST_CurrentLevel;
+            //Level level = MainWindow.SOP.Protocol;
+            Level level = MainWindow.GetLevelContext(this);
 
             string molGuid = level.findMoleculeGuidByName(sMol);
             string geneGuid = level.findGeneGuidByName(sMol);
@@ -656,7 +671,8 @@ namespace DaphneGui
 
         private bool HasMoleculeType(Dictionary<string, int> inputList, MoleculeLocation molLoc)
         {
-            Level level = MainWindow.SOP.Protocol;   //MainWindow.ST_CurrentLevel;
+            //Level level = MainWindow.SOP.Protocol;
+            Level level = MainWindow.GetLevelContext(this);
 
             foreach (KeyValuePair<string, int> kvp in inputList)
             {
@@ -684,12 +700,13 @@ namespace DaphneGui
         {
             CompositeCollection coll = new CompositeCollection();
             CollectionContainer cc = new CollectionContainer();
-            Protocol protocol;
+            //Protocol protocol;
             Level level;
             string reacEnvironment = Tag as string;
             switch (reacEnvironment)
             {
                 case "ecs":
+                    //For ecs, don't need to use "level"
                     TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
                     ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
                     ARCComp = configEcs.comp;
@@ -744,7 +761,8 @@ namespace DaphneGui
                     ARCCell = null;
                     ARCComp = null;                  
                     ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
-                    if (crc != null)
+                    level = MainWindow.GetLevelContext(this);
+                    if (crc != null  && level is Protocol)
                     {
                         ARCReactions = crc.reactions;
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
@@ -836,7 +854,9 @@ namespace DaphneGui
                 return;
             }
 
-            Level level = MainWindow.SOP.Protocol;
+            //Level level = MainWindow.SOP.Protocol;
+            Level level = MainWindow.GetLevelContext(this);
+
             ConfigMolecule newLibMol = new ConfigMolecule();
             newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
             AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
@@ -846,7 +866,8 @@ namespace DaphneGui
             if (aem.ShowDialog() == true)
             {
                 //Add new mol to the correct entity_repository
-                newLibMol.ValidateName(MainWindow.SOP.Protocol);
+                //newLibMol.ValidateName(MainWindow.SOP.Protocol);
+                newLibMol.ValidateName(level);
                 level.entity_repository.molecules.Add(newLibMol);
                 
                 //Need to add a mol pop to cell also
@@ -909,7 +930,9 @@ namespace DaphneGui
         private void btnCreateNewGene_Click(object sender, RoutedEventArgs e)
         {
             string environment = this.Tag as string;
-            Level level = MainWindow.SOP.Protocol;
+
+            //Level level = MainWindow.SOP.Protocol;
+            Level level = MainWindow.GetLevelContext(this);
 
             //Create a new gene with default name
             ConfigGene newGene = new ConfigGene("g", 0, 0);

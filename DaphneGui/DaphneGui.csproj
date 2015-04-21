@@ -191,6 +191,9 @@
     <Compile Include="CellDetailsControl.xaml.cs">
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellDetailsReadOnlyControl.xaml.cs">
+      <DependentUpon>CellDetailsReadOnlyControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
@@ -212,6 +215,9 @@
     <Compile Include="DiffSchemeDataGrid.xaml.cs">
       <DependentUpon>DiffSchemeDataGrid.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DiffSchemeReadOnlyDataGrid.xaml.cs">
+      <DependentUpon>DiffSchemeReadOnlyDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
@@ -230,6 +236,9 @@
     </Compile>
     <Compile Include="ParamDistrControl.xaml.cs">
       <DependentUpon>ParamDistrControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ParamDistrReadOnlyControl.xaml.cs">
+      <DependentUpon>ParamDistrReadOnlyControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
@@ -316,6 +325,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CellDetailsReadOnlyControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="CellOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -344,6 +357,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="DiffSchemeReadOnlyDataGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -365,6 +382,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ParamDistrControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ParamDistrReadOnlyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

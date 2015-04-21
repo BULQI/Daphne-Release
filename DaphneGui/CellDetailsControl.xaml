@@ -810,7 +810,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="140" HorizontalAlignment="Left">
+                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="90" HorizontalAlignment="Left">
                                                 <uc:DoublesBox.ToolTip>
                                                     <ToolTip>
                                                         <StackPanel Width="200" Orientation="Horizontal">
@@ -822,7 +822,7 @@
                                                     </ToolTip>
                                                 </uc:DoublesBox.ToolTip>
                                             </uc:DoublesBox>
-                                            <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click">
+                                            <Button Name="NucPushGeneButton" HorizontalAlignment="Right" Margin="20" Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click">
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                         Any changes to properties of the selected gene only apply to this cell type in this simulation. 
@@ -1562,7 +1562,7 @@
                         </Grid>
                     </StackPanel>
 
-                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid"
+                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid" 
                             Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}"
                                         Tag="div"/>
                     

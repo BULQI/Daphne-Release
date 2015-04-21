@@ -37,7 +37,11 @@ namespace DaphneGui
         private void AddLibCellButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = new ConfigCell();
-            MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
+
+            //MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
+            Level level = MainWindow.GetLevelContext(this);
+            level.entity_repository.cells.Add(cc);
+
             MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cc.renderLabel, cc.CellName);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
         }
@@ -50,7 +54,10 @@ namespace DaphneGui
             {
                 ConfigCell cell = (ConfigCell)CellsListBox.SelectedValue;
                 MessageBoxResult res;
-                if (MainWindow.SOP.Protocol.scenario.HasCell(cell))
+
+                Level level = MainWindow.GetLevelContext(this);
+
+                if ((level is Protocol) && MainWindow.SOP.Protocol.scenario.HasCell(cell) )
                 {
                     res = MessageBox.Show("If you delete this cell, corresponding cell populations will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
                 }
@@ -61,8 +68,9 @@ namespace DaphneGui
 
                 if (res == MessageBoxResult.Yes)
                 {
-                    //MainWindow.SOP.Protocol.scenario.RemoveCellPopulation(cell);
-                    MainWindow.SOP.Protocol.entity_repository.cells.Remove(cell);
+                    ////MainWindow.SOP.Protocol.scenario.RemoveCellPopulation(cell);
+                    //MainWindow.SOP.Protocol.entity_repository.cells.Remove(cell);
+                   level.entity_repository.cells.Remove(cell);
 
                     CellsListBox.SelectedIndex = nIndex;
 
@@ -89,7 +97,10 @@ namespace DaphneGui
             //Generate a new cell name
             cellNew.CellName = GenerateNewCellName(cell, "_Copy");
 
-            MainWindow.SOP.Protocol.entity_repository.cells.Add(cellNew);
+            //MainWindow.SOP.Protocol.entity_repository.cells.Add(cellNew);
+            Level level = MainWindow.GetLevelContext(this);
+            level.entity_repository.cells.Add(cellNew);
+
             MainWindow.SOP.SelectedRenderSkin.AddRenderCell(cellNew.renderLabel, cellNew.CellName);
 
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
@@ -104,7 +115,10 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            cell.ValidateName(MainWindow.SOP.Protocol);
+            //cell.ValidateName(MainWindow.SOP.Protocol);
+            Level level = MainWindow.GetLevelContext(this);
+            cell.ValidateName(level);
+
             MainWindow.SOP.SelectedRenderSkin.SetRenderCellName(cell.renderLabel, cell.CellName);
         }
 
@@ -113,7 +127,9 @@ namespace DaphneGui
             int nSuffix = 1;
             string sSuffix = string.Format("_Copy{0:000}", nSuffix);
             string TempCellName = cell.CellName;
-            while (FindCellBySuffix(sSuffix) == true)
+            Level level = MainWindow.GetLevelContext(this);
+            //while (FindCellBySuffix(sSuffix, level) == true)
+            while (FindCellByPrefixAndSuffix(TempCellName, sSuffix, level) == true)
             {
                 TempCellName = cell.CellName.Replace(sSuffix, "");
                 nSuffix++;
@@ -128,7 +144,10 @@ namespace DaphneGui
             int nSuffix = 1;
             string sSuffix = ending + string.Format("{0:000}", nSuffix);
             string TempCellName = cell.CellName;
-            while (FindCellBySuffix(sSuffix) == true)
+
+            Level level = MainWindow.GetLevelContext(this);
+            //while (FindCellBySuffix(sSuffix, level) == true)
+            while (FindCellByPrefixAndSuffix(TempCellName, sSuffix, level) == true)
             {
                 TempCellName = cell.CellName.Replace(sSuffix, "");
                 nSuffix++;
@@ -139,11 +158,24 @@ namespace DaphneGui
         }
 
         // given a cell type name, check if it exists in repos
-        private static bool FindCellBySuffix(string suffix)
+        private static bool FindCellBySuffix(string suffix, Level level)
         {
-            foreach (ConfigCell cc in MainWindow.SOP.Protocol.entity_repository.cells)
+            //foreach (ConfigCell cc in MainWindow.SOP.Protocol.entity_repository.cells)
+            foreach (ConfigCell cc in level.entity_repository.cells)
             {
                 if (cc.CellName.EndsWith(suffix))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool FindCellByPrefixAndSuffix(string prefix, string suffix, Level level)
+        {
+            foreach (ConfigCell cc in level.entity_repository.cells)
+            {
+                if (cc.CellName.EndsWith(suffix) && cc.CellName.StartsWith(prefix))
                 {
                     return true;
                 }

@@ -245,6 +245,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -406,6 +408,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -565,6 +569,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store 
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -660,21 +666,21 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.InitializeStorageClasses();
+
             // Load reaction templates from userstore
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
             LoadProtocolReactionTemplates(protocol, userstore);
 
             // Experiment
-            protocol.experiment_name = "Blank Tissue Simulation Scenario";
-            protocol.experiment_description = "Libraries only.";
+            protocol.experiment_name = "Blank Tissue Simulation";
+            protocol.experiment_description = "";
             protocol.scenario.time_config.duration = 100;
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
             protocol.scenario.time_config.integrator_step = 0.001;
-
-            // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
 
         }
 
@@ -684,6 +690,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.InitializeStorageClasses();
             
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -708,6 +716,9 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.InitializeStorageClasses();
+
 
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -842,6 +853,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -861,23 +874,15 @@ namespace Daphne
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
-            // Add items to protocol ER
-            //
-
-
             // Create new molecules and add to the protocol ER
             // Don't want to make these more permanent by adding to the user store
             //
 
             string[] item = new string[] { "R1", "R2", "L", "C1", "C2" };
-            //string[] molguids = new string[item.Length];
-            //int molcnt = 0;
             foreach (string s in item)
             {
                 ConfigMolecule cm = new ConfigMolecule(s, 1.0, 1.0, 1.0);
                 protocol.entity_repository.molecules.Add(cm);
-                protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
-                //molguids[molcnt++] = cm.entity_guid;
             }
 
             // Create new reactions and add to the protocol ER
@@ -4469,6 +4474,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 
             Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
