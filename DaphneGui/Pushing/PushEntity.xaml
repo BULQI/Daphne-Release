@@ -61,8 +61,7 @@
                     <TextBlock FontWeight="Bold" FontSize="16">To</TextBlock>
                 </StackPanel>
                 <GroupBox Grid.Column="2" Grid.Row="1" >
-                    
-                    <ContentControl Name="ComponentLevelDetails" IsEnabled="False"
+                    <ContentControl Name="ComponentLevelDetails" 
                                 Content="{Binding}" 
                                 ContentTemplateSelector="{StaticResource entityTemplateSelector}" 
                                 Margin="6"/>
