@@ -3594,114 +3594,53 @@ namespace DaphneGui
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
             Level tempLevel = GetLevelContext(this);
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
 
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushTransDriver_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushReacComplex_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-            
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         /// <summary>
