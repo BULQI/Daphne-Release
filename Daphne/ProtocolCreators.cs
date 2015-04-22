@@ -75,7 +75,7 @@ namespace Daphne
             if (protocol == null)
                 return;
 
-            Level store = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level store = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             store = store.Deserialize();
 
             var Settings = new JsonSerializerSettings();
@@ -245,8 +245,10 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -406,8 +408,10 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -565,8 +569,10 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -660,21 +666,21 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.InitializeStorageClasses();
+
             // Load reaction templates from userstore
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
             LoadProtocolReactionTemplates(protocol, userstore);
 
             // Experiment
-            protocol.experiment_name = "Blank Tissue Simulation Scenario";
-            protocol.experiment_description = "Libraries only.";
+            protocol.experiment_name = "Blank Tissue Simulation";
+            protocol.experiment_description = "";
             protocol.scenario.time_config.duration = 100;
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
             protocol.scenario.time_config.integrator_step = 0.001;
-
-            // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
 
         }
 
@@ -684,8 +690,10 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.InitializeStorageClasses();
             
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -709,7 +717,10 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            protocol.InitializeStorageClasses();
+
+
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -795,7 +806,7 @@ namespace Daphne
         //    protocol.scenario.time_config.integrator_step = 0.001;
 
         //    //Load needed entities from User Store
-        //    Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+        //    Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
         //    userstore = userstore.Deserialize();
 
         //    // bulk molecules
@@ -842,8 +853,10 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates
@@ -861,23 +874,15 @@ namespace Daphne
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
-            // Add items to protocol ER
-            //
-
-
             // Create new molecules and add to the protocol ER
             // Don't want to make these more permanent by adding to the user store
             //
 
             string[] item = new string[] { "R1", "R2", "L", "C1", "C2" };
-            //string[] molguids = new string[item.Length];
-            //int molcnt = 0;
             foreach (string s in item)
             {
                 ConfigMolecule cm = new ConfigMolecule(s, 1.0, 1.0, 1.0);
                 protocol.entity_repository.molecules.Add(cm);
-                protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
-                //molguids[molcnt++] = cm.entity_guid;
             }
 
             // Create new reactions and add to the protocol ER
@@ -3747,7 +3752,7 @@ namespace Daphne
             crc.description = "Goldbeter A, Koshland DE. An amplified sensitivity arising from covalent modification in biological systems. Proc Natl Acad Sci USA 1981, 78:6840-6844.";
             crc.description = crc.description + "With these parameter choices and W_total=W+Wp >> E1_total and E2_total, the reactions will produce switch-like behavior for W and Wp around the point when E1_total/E2_total=1.";
             //MOLECULES
-            type = new string[] { "W", "Wp", "E1", "E2" };
+            type = new string[] { "W", "Wp", "E1", "E2", "W:E1", "Wp:E2" };
             conc = new double[type.Count()];
             for (int i = 0; i < type.Length; i++)
             {
@@ -4470,8 +4475,10 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.InitializeStorageClasses();
+
             //Load needed entities from User Store 
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore

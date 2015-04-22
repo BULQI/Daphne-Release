@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 
 using System.IO;
-using System.IO.Compression;
 
 using ManifoldRing;
 using System.Globalization;
@@ -15,13 +14,13 @@ namespace Daphne
     {
         protected DateTime startTime;
         protected string fileNameBase, fileNameAssembled;
-        protected bool needsFileNameWrite;
+        public bool NeedsFileNameWrite { get; set; }
         public string AppPath { get; set; } // non uri
         public string UniquePath { get; set; }
 
         public ReporterBase()
         {
-            needsFileNameWrite = false;
+            NeedsFileNameWrite = false;
         }
 
         /// <summary>
@@ -136,7 +135,20 @@ namespace Daphne
             return s;
         }
 
-        public abstract void StartReporter(SimulationBase sim, string protocolFileName);
+        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
+        {
+            foreach (ConfigReaction cr in reactions)
+            {
+                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
+            }
+        }
+
+        public virtual CellTrackData ProvideTrackData(int cellID)
+        {
+            return null;
+        }
+
+        public abstract void StartReporter(string protocolFileName);
         public abstract void AppendReporter();
         public abstract void CloseReporter();
 
@@ -148,14 +160,6 @@ namespace Daphne
         public abstract void AppendExitEvent(int cell_id, int cellpop_id);
 
         public abstract void ReactionsReport();
-        protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
-        {
-            foreach (ConfigReaction cr in reactions)
-            {
-                writer.WriteLine("{0:G4}\t{1}", cr.rate_const, cr.TotalReactionString);
-            }
-        }
-
     }
 
     public abstract class SimulationReporterFiles
@@ -239,8 +243,14 @@ namespace Daphne
         private Dictionary<int, TransitionEventReporter> exitEvents;
         private TissueSimulationReporterFiles tsFiles;
 
-        public TissueSimulationReporter()
+        public TissueSimulationReporter(SimulationBase sim)
         {
+            if (sim is TissueSimulation == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            hSim = sim as TissueSimulation;
             cell_files = new Dictionary<int, StreamWriter>();
             deathEvents = new Dictionary<int, TransitionEventReporter>();
             divisionEvents = new Dictionary<int, TransitionEventReporter>();
@@ -248,16 +258,10 @@ namespace Daphne
             tsFiles = new TissueSimulationReporterFiles();
         }
 
-        public override void StartReporter(SimulationBase sim, string protocolFileName)
+        public override void StartReporter(string protocolFileName)
         {
-            if (sim is TissueSimulation == false)
-            {
-                throw new InvalidCastException();
-            }
-
-            needsFileNameWrite = true;
+            NeedsFileNameWrite = true;
             tsFiles.clearFileStrings();
-            hSim = sim as TissueSimulation;
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             CloseReporter();
             createUniqueFolderName(protocolFileName, false);
@@ -731,11 +735,11 @@ namespace Daphne
         public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File)
         {
             // write only once
-            if (needsFileNameWrite == false)
+            if (NeedsFileNameWrite == false)
             {
                 return;
             }
-            needsFileNameWrite = false;
+            NeedsFileNameWrite = false;
 
             int i;
 
@@ -922,6 +926,80 @@ namespace Daphne
             hdf5File.closeGroup();
         }
 
+        /// <summary>
+        /// extracts and returns the track data for a cell
+        /// </summary>
+        /// <param name="cellID">the cell's id</param>
+        /// <returns>track data in a dictionary keyed by the time step with values position array</returns>
+        public override CellTrackData ProvideTrackData(int cellID)
+        {
+            CellTrackData data = null;
+
+            // does the cell exist?
+            if(SimulationBase.dataBasket.Cells.ContainsKey(cellID) == true)
+            {
+                Cell c = SimulationBase.dataBasket.Cells[cellID];
+                CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+
+                // is the needed data there?
+                if (cellPop.report_xvf.position == true && tsFiles.CellTypeReport.ContainsKey(c.Population_id) == true)
+                {
+                    string file = tsFiles.CellTypeReport[c.Population_id],
+                           path = hSim.HDF5FileHandle.FilePath,
+                           line;
+                    string[] parts;
+                    int cell_id = 0, time = 0, pos_x = 0, pos_y = 0, pos_z = 0, assigned = 0;
+                    StreamReader stream = new StreamReader(path + file);
+
+                    // read description
+                    stream.ReadLine();
+                    // read header
+                    line = stream.ReadLine();
+                    // find indices of interest
+                    parts = line.Split();
+                    for(int i = 0; i < parts.Length && assigned < 5; i++)
+                    {
+                        if(parts[i] == "cell_id")
+                        {
+                            cell_id = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "time")
+                        {
+                            time = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_x")
+                        {
+                            pos_x = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_y")
+                        {
+                            pos_y = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_z")
+                        {
+                            pos_z = i;
+                            assigned++;
+                        }
+                    }
+                    data = new CellTrackData(cellID);
+                    while ((line = stream.ReadLine()) != null)
+                    {
+                        parts = line.Split('\t');
+                        if (Convert.ToInt32(parts[cell_id]) == cellID)
+                        {
+                            data.Times.Add(Convert.ToDouble(parts[time]));
+                            data.Positions.Add(new double[] { Convert.ToDouble(parts[pos_x]), Convert.ToDouble(parts[pos_y]), Convert.ToDouble(parts[pos_z]) });
+                        }
+                    }
+                    stream.Close();
+                }
+            }
+            return data;
+        }
     }
 
     public class CompartmentMolpopReporter
@@ -1000,23 +1078,23 @@ namespace Daphne
         private VatReactionComplexReporterFiles vatRCfiles;
         public bool reportOn;
 
-        public VatReactionComplexReporter()
-        {
-            compMolpopReporter = new CompartmentMolpopReporter();
-            vatRCfiles = new VatReactionComplexReporterFiles();
-            reportOn = false;
-        }
-
-        public override void StartReporter(SimulationBase sim, string protocolFileName)
+        public VatReactionComplexReporter(SimulationBase sim)
         {
             if (sim is VatReactionComplex == false)
             {
                 throw new InvalidCastException();
             }
 
-            needsFileNameWrite = true;
-            vatRCfiles.clearFileStrings();
             hSim = sim as VatReactionComplex;
+            compMolpopReporter = new CompartmentMolpopReporter();
+            vatRCfiles = new VatReactionComplexReporterFiles();
+            reportOn = false;
+        }
+
+        public override void StartReporter(string protocolFileName)
+        {
+            NeedsFileNameWrite = true;
+            vatRCfiles.clearFileStrings();
             createUniqueFolderName(protocolFileName, reportOn == false);
 
             if (reportOn == false)
@@ -1148,11 +1226,11 @@ namespace Daphne
         public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File)
         {
             // only write once
-            if (needsFileNameWrite == false)
+            if (NeedsFileNameWrite == false)
             {
                 return;
             }
-            needsFileNameWrite = false;
+            NeedsFileNameWrite = false;
 
             // create group
             hdf5File.createGroup("ReporterFiles");

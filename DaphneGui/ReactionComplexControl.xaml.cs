@@ -62,33 +62,42 @@ namespace DaphneGui
                 return;
 
             ConfigCompartment comp = null;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            Level level = MainWindow.GetLevelContext(this);
+
             if (this.DataContext.GetType() == typeof(ConfigCompartment))
             {
                 comp = (ConfigCompartment)this.DataContext;
             }
 
-            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, comp, er);          
+            NewEditReacComplex arc = new NewEditReacComplex(ReactionComplexDialogType.EditComplex, crc, comp, level);          
             arc.ShowDialog();
         }
 
         private void ButtonAddComplex_Click(object sender, RoutedEventArgs e)
-        {            
+        {
+            Level level = MainWindow.GetLevelContext(this);
+
             ReactionComplexesInStore rcis = new ReactionComplexesInStore();
-            rcis.DataContext = MainWindow.SOP.Protocol.entity_repository;
-            rcis.Tag = MainWindow.SOP.Protocol.scenario.environment.comp;
-            if (rcis.ShowDialog() == true)
+            rcis.DataContext = level.entity_repository;
+            if (level is Protocol)
             {
-                ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
-                if (ListBoxReactionComplexes.SelectedIndex < 0 || ListBoxReactionComplexes.SelectedIndex > ListBoxReactionComplexes.Items.Count)
+                rcis.Tag = MainWindow.SOP.Protocol.scenario.environment.comp;
+                if (rcis.ShowDialog() == true)
                 {
-                    ListBoxReactionComplexes.SelectedIndex = 0;
+                    ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
+                    if (ListBoxReactionComplexes.SelectedIndex < 0 || ListBoxReactionComplexes.SelectedIndex > ListBoxReactionComplexes.Items.Count)
+                    {
+                        ListBoxReactionComplexes.SelectedIndex = 0;
+                    }
                 }
             }
         }
 
         private void ButtonCopyComplex_Click(object sender, RoutedEventArgs e)
         {
+            Level level = MainWindow.GetLevelContext(this);
+
             if (ListBoxReactionComplexes.SelectedIndex < 0)
             {
                 MessageBox.Show("Select a reaction complex to copy from.");
@@ -98,9 +107,11 @@ namespace DaphneGui
             //Need to add rc to the compartment plus the entity repository
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)ListBoxReactionComplexes.SelectedItem;
             ConfigReactionComplex crcCopy = crcCurr.Clone(false);
-            crcCopy.Name = crcCopy.GenerateNewName(MainWindow.SOP.Protocol, "_Copy");            
-            crcCopy.ValidateName(MainWindow.SOP.Protocol);
-            MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcCopy);
+            crcCopy.Name = crcCopy.GenerateNewName(level, "_Copy");            
+            crcCopy.ValidateName(level);
+            
+            //MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcCopy);
+            level.entity_repository.reaction_complexes.Add(crcCopy);
 
             ConfigCompartment cc = this.DataContext as ConfigCompartment;
             if (cc != null)
@@ -115,13 +126,17 @@ namespace DaphneGui
         private void ButtonNewReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             ConfigCompartment comp = null;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            Level level = MainWindow.GetLevelContext(this);
+
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            EntityRepository er = level.entity_repository;
+
             if (this.DataContext.GetType() == typeof(ConfigCompartment))
             {
                 comp = (ConfigCompartment)this.DataContext;               
             }
 
-            NewEditReacComplex dlg = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, comp, er);
+            NewEditReacComplex dlg = new NewEditReacComplex(ReactionComplexDialogType.NewComplex, comp, level);
             if (dlg.ShowDialog() == true)
                 ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
         }

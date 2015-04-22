@@ -85,10 +85,10 @@
             <Menu x:Name="MainMenu">
                 <!--><MenuItem Header="Edit"/>-->
                 <MenuItem Header="File" Name="fileMenu">
-                    <MenuItem Header="New Scenario" Name="newScenario" Click="newScenario_Click"></MenuItem>
-                    <MenuItem Header="Load Scenario..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
-                    <MenuItem Header="Save Scenario" Name="saveScenario" Command="ApplicationCommands.Save" />
-                    <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
+                    <MenuItem Header="New Protocol" Name="newScenario" Click="newScenario_Click"></MenuItem>
+                    <MenuItem Header="Load Protocol..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
+                    <MenuItem Header="Save Protocol" Name="saveScenario" Command="ApplicationCommands.Save" />
+                    <MenuItem Header="Save Protocol As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
                     <Separator />
                     <MenuItem Header="Export in SBML" Name="ExportSBML">
@@ -112,8 +112,8 @@
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
-                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" Visibility="Collapsed" />
-                        <MenuItem Header="Restart opens last scenario" Name="openLastScenarioMenu" IsCheckable="True" IsChecked="False" Click="openLastScenario_click" />
+                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" />
+                        <MenuItem Header="Restart opens last Protocol" Name="openLastScenarioMenu" IsCheckable="True" IsChecked="False" Click="openLastScenario_click" />
                         <MenuItem Header="Cell summaries" Name="writeCellSummariesMenu" IsCheckable="True" IsChecked="False" Click="runCellSummaries_click" Visibility="Collapsed" />
                         <MenuItem Header="Run statistical summary" Name="runStatisticalSummaryMenu" IsCheckable="True" IsChecked="True" Click="runStatisticalSummary_click" Visibility="Collapsed" />
                         <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" Visibility="Collapsed" />
@@ -140,8 +140,6 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=VTKDisplayDocWindow}" />
-                    <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool" Visibility="Collapsed"
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
                     <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
@@ -184,6 +182,8 @@
                 <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
                     <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
+                    <MenuItem Header="Save" Name="menuAdminSave" Command="ApplicationCommands.Save" Visibility="Collapsed" />
+                    <MenuItem Header="Save As..." Name="menuAdminSaveAs" Click="menuAdminSaveAs_Click" Visibility="Collapsed" />
                     <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
                 </MenuItem>
                 <MenuItem Header="Help">
@@ -233,7 +233,7 @@
                                 <StackPanel Width="200" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
                                                         VerticalAlignment="Top" Padding="5" Width="200">
-                                            Refresh the 3D visualization with the current scenario options while setting up the simulated experiment (before hitting run).
+                                            Refresh the 3D visualization with the current Protocol options while setting up the simulated experiment (before hitting run).
                                     </TextBlock>
                                 </StackPanel>
                             </ToolTip>
@@ -477,12 +477,18 @@
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
-                                                <ToggleButton Name="PreviewButton" 
-                                                          IsChecked="{Binding PreviewButton_IsChecked}" 
-                                                          IsEnabled="{Binding PreviewButton_IsEnabled}"
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Track Preview Mode (fast)" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/preview_path.png" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
+                                                <ContentControl>
+                                                    <ComboBox Margin="5,3,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black"
+                                                              Height="26"
+                                                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                              HorizontalAlignment="Left" 
+                                                              ItemsSource="{Binding Path=CellSelectionToolModes}"
+                                                              IsEnabled="{Binding HandToolOption_IsEnabled}"
+                                                              SelectionChanged="CellSelectionToolCB_SelectionChanged"
+                                                              SelectedIndex="0" 
+                                                              MinWidth="50"
+                                                              ToolTip="White hand mode"/>
+                                                </ContentControl>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
 
                                                 <Grid>
@@ -592,7 +598,7 @@
                                 <local:RenderSkinWindow x:Name="renderSkinWindow" Title="Render Scheme"
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                        Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                        ConverterParameter=renderSkinWindow}"                 
+                                        ConverterParameter=renderSkinWindow}"             
                                                         />
                             </docking:TabbedMdiContainer>
                         </docking:TabbedMdiHost>
@@ -663,7 +669,7 @@
                                                                 <GridViewColumn Width="120" Header="Concentration">
                                                                     <GridViewColumn.CellTemplate>
                                                                         <DataTemplate>
-                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" ZeroEpsilon="0.000001"  IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
@@ -864,42 +870,6 @@
                             </ScrollViewer>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
-
-                    <!-- Bottom right panel -->
-                    <docking:ToolWindowContainer x:Name="bottomTWContainer">
-                        <docking:ToolWindow x:Name="LPFittingToolWindow" Title="LP Fitting" Description="Langevin Process fitting tools">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <DockPanel Grid.Column="0">
-                                    <CheckBox Name="fitZeroForceCheckBox" Content="zero force" 
-                                          DockPanel.Dock="Top" HorizontalAlignment="Left"
-                                          Margin="10" 
-                                          Click="fitZeroForceCheckBox_Click"
-                                          />
-                                    <TextBlock DockPanel.Dock="Top" Margin="5,0" HorizontalAlignment="Center">Cell opacity</TextBlock>
-                                    <Slider Name="fitCellOpacitySlider"
-                                        Orientation="Horizontal"
-                                        RenderTransform="1.0,0,0,0.5,0,4"
-                                        Width="70"
-                                        Minimum="0.0" 
-                                        Maximum="1.0" 
-                                        Value="1.0" 
-                                        ValueChanged="fitCellOpacitySlider_ValueChanged"
-                                        DockPanel.Dock="Top"
-                                        />
-                                    <ProgressBar Name="fitProgressBar" DockPanel.Dock="Bottom" Margin="10" Height="15"/>
-                                    <ContentControl />
-                                </DockPanel>
-                                <TextBox Grid.Column="1" Name="fitMessageBox" 
-                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
-                                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsReadOnly="True" />
-                            </Grid>
-                        </docking:ToolWindow>
-                    </docking:ToolWindowContainer>
-
                 </docking:SplitContainer>
                 
             </docking:SplitContainer>

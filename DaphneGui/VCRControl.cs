@@ -17,12 +17,10 @@ namespace DaphneGui
     /// </summary>
     public class VCRControl : INotifyPropertyChanged
     {
-        private List<string> frameNames;
-        private List<int> frames;
         private int frame;
         private byte vcrFlags, savedFlags;
         private long lastFramePlayed;
-        public bool LastFrame { get; set; }
+        public int TotalFrames { get; set; }
         // reference frame time in milliseconds, 30fps
         private const double E_FPS = 30, E_DT = 1000 / E_FPS;
         private double speedFactor, speedFactorExp;
@@ -47,49 +45,18 @@ namespace DaphneGui
         {
             frame = -1;
             SetInactive();
-            frameNames = new List<string>();
-            LastFrame = true;
+            TotalFrames = 0;
             vcrFlags = savedFlags = 0;
         }
 
         /// <summary>
-        /// accessor for the frame names list
+        /// open the vcr
         /// </summary>
-        public List<string> FrameNames
-        {
-            get
-            {
-                return frameNames;
-            }
-            set
-            {
-                frameNames = value;
-            }
-        }
-
-        /// <summary>
-        /// create a data reader object
-        /// </summary>
-        public void OpenVCR()
+        /// <param name="frame">open it at this frame</param>
+        public void OpenVCR(int frame)
         {
             SetFlag(VCR_OPEN);
-
-            // build the list of frames
-            frames = new List<int>();
-
-            for (int i = 0; i < frameNames.Count; i++)
-            {
-                frames.Add(i);
-            }
-
-            if (LastFrame == true)
-            {
-                CurrentFrame = frames.Count - 1;
-            }
-            else
-            {
-                CurrentFrame = 0;
-            }
+            CurrentFrame = frame;
             SetInactive();
             speedFactor = 1.0;
             speedFactorExp = 0.0;
@@ -194,11 +161,7 @@ namespace DaphneGui
         /// </summary>
         public void ReleaseVCR()
         {
-            if (frames != null)
-            {
-                frames.Clear();
-                frames = null;
-            }
+            TotalFrames = 0;
             SetInactive();
             clearFlag(VCR_OPEN);
         }
@@ -235,15 +198,15 @@ namespace DaphneGui
         /// </summary>
         public double CurrentTime
         {
-            get { return frame < TotalFrames() - 1 ? frames[frame] * MainWindow.SOP.Protocol.scenario.time_config.rendering_interval : MainWindow.SOP.Protocol.scenario.time_config.duration; }
+            get { return frame < TotalFrames - 1 ? frame * MainWindow.SOP.Protocol.scenario.time_config.rendering_interval : MainWindow.SOP.Protocol.scenario.time_config.duration; }
             set
             {
                 int tmp = (int)((double)value / MainWindow.SOP.Protocol.scenario.time_config.rendering_interval);
 
                 // find the frame that qualifies as first one to include the time passed in
-                for (int i = 0; i < frames.Count; i++)
+                for (int i = 0; i < TotalFrames; i++)
                 {
-                    if (frames[i] >= tmp)
+                    if (i >= tmp)
                     {
                         CurrentFrame = i;
                         break;
@@ -254,19 +217,6 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// returns the total number of frames
-        /// </summary>
-        /// <returns>total number of frames</returns>
-        public int TotalFrames()
-        {
-            if (frames == null)
-            {
-                return -1;
-            }
-            return frames.Count;
-        }
-
-        /// <summary>
         /// read the current frame
         /// <returns>frame read</returns>
         /// </summary>
@@ -274,9 +224,9 @@ namespace DaphneGui
         {
             lock (frameLock)
             {
-                if (frame >= 0 && frame < frames.Count)
+                if (frame >= 0 && frame < TotalFrames)
                 {
-                    MainWindow.Sim.FrameData.readData(frames[frame]);
+                    MainWindow.Sim.FrameData.readData(frame);
                     return MainWindow.Sim.FrameData;
                 }
                 return null;
@@ -297,7 +247,7 @@ namespace DaphneGui
 
             int tmp = frame + delta;
 
-            if (0 <= tmp && tmp < TotalFrames())
+            if (0 <= tmp && tmp < TotalFrames)
             {
                 CurrentFrame = tmp;
             }
@@ -305,9 +255,9 @@ namespace DaphneGui
             {
                 CurrentFrame = 0;
             }
-            else if (tmp >= TotalFrames())
+            else if (tmp >= TotalFrames)
             {
-                CurrentFrame = TotalFrames() - 1;
+                CurrentFrame = TotalFrames - 1;
             }
         }
 
@@ -323,7 +273,7 @@ namespace DaphneGui
                 SetInactive();
             }
 
-            if (0 <= toFrame && toFrame < TotalFrames())
+            if (0 <= toFrame && toFrame < TotalFrames)
             {
                 CurrentFrame = toFrame;
             }
@@ -331,9 +281,9 @@ namespace DaphneGui
             {
                 CurrentFrame = 0;
             }
-            else if (toFrame >= TotalFrames())
+            else if (toFrame >= TotalFrames)
             {
-                CurrentFrame = TotalFrames() - 1;
+                CurrentFrame = TotalFrames - 1;
             }
         }
 
@@ -371,7 +321,7 @@ namespace DaphneGui
                     Delay();
 
                     // end of simulation? roll around to the beginning and start playing
-                    if (frame >= TotalFrames() - 1)
+                    if (frame >= TotalFrames - 1)
                     {
                         MoveToFrame(0, false);
                     }
@@ -379,7 +329,7 @@ namespace DaphneGui
                     {
                         Advance(1, false);
                         // if playing reached the last frame then pause the player
-                        if (frame == TotalFrames() - 1)
+                        if (frame == TotalFrames - 1)
                         {
                             SetInactive();
                         }
@@ -394,7 +344,7 @@ namespace DaphneGui
         /// <returns>integer indicating the percent state of playback</returns>
         public int GetPlaybackPercent()
         {
-            return (int)(Math.Min(100, TotalFrames() <= 1 ? 0 : 100 * frame / (TotalFrames() - 1)));
+            return (int)(Math.Min(100, TotalFrames <= 1 ? 0 : 100 * frame / (TotalFrames - 1)));
         }
 
         /// <summary>
@@ -420,7 +370,7 @@ namespace DaphneGui
             bool first = true;
 
             // set up the pipeline
-            movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).Rwc.RenderWindow);
+            movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).RWC.RenderWindow);
             movieWriter = new vtkAVIWriter();
             SetFlag(VCR_EXPORT);
             movieWriter.SetFileName(filename);
@@ -446,7 +396,7 @@ namespace DaphneGui
                 }
                 movieSource.Modified();
                 movieWriter.Write();
-                if (frame >= TotalFrames() - 1)
+                if (frame >= TotalFrames - 1)
                 {
                     clearFlag(VCR_EXPORT);
                 }

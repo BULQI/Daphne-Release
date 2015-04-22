@@ -35,7 +35,9 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            cell.ValidateName(MainWindow.SOP.Protocol);
+            //cell.ValidateName(MainWindow.SOP.Protocol);
+            Level level = MainWindow.GetLevelContext(this);
+            cell.ValidateName(level);
         }
 
         private void cbLocoDriver_SelectionChanged(object sender, SelectionChangedEventArgs e)

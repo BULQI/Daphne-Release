@@ -64,6 +64,7 @@ namespace DaphneGui.Pushing
             if (left.Equals(right) == true)
             {
                 btnSave.IsEnabled = false;
+                btnSaveAsNew.IsEnabled = false;
             }
             
         }

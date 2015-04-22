@@ -74,7 +74,7 @@ namespace DaphneGui
         private void btnAddGene_Click(object sender, RoutedEventArgs e)
         {
             Level level = (Level)(this.DataContext);
-            ConfigGene gm = new ConfigGene("g", 0, 0);
+            ConfigGene gm = new ConfigGene("g", 2, 1);
             gm.Name = gm.GenerateNewName(level, "New");
             
             level.entity_repository.genes.Add(gm);
