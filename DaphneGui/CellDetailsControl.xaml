@@ -841,6 +841,7 @@
                 </StackPanel>
 
             </Expander>
+            
             <!-- Reactions in this cell and their location -->
             <Expander   Padding="5" 
                         ExpandDirection="Down"
@@ -1132,6 +1133,7 @@
 
                 </StackPanel>
             </Expander>
+            
             <!-- ReactionComplexes in this cell and their location -->
             <Expander
                         Visibility="Visible"
@@ -1434,26 +1436,125 @@
                     </TabControl>
                 </StackPanel>
             </Expander>
+            
+            <!-- Differentiation -->
+            <Expander   
+                    Padding="5" ExpandDirection="Down"
+                    IsExpanded="False"
+                    Header="Differentiation"                                                  
+                    x:Name="DiffSchemeExpander"
+                    Margin="0,4,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                    Expanded="DiffSchemeExpander_Expanded"
+                >
 
-            <!-- Cell Death -->
-            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
-                                                Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
-                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                Expanded="CellDeathExpander_Expanded">
-                <StackPanel>
-                    <StackPanel x:Name="spDeath" Orientation="Vertical" >
+                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
+                    <StackPanel>
+                        <Grid >
+                            <Grid.Resources>
+                                <DataTemplate x:Key="diffSchemeListItemTemplate2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Path=Hello}" />
+                                    </StackPanel>
+                                </DataTemplate>
 
-                        <!-- switch between new death driver or death driver content -->
-                        <StackPanel Name="spNewDriverSwitch" >
-                            <ContentControl x:Name="NewDriverSwitch"
-                                            Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                                            Style="{StaticResource Death_NewButton_or_TDE_details_SelectableStyle}"
-                                            />
-                        </StackPanel>
-                                             
+                                <DataTemplate x:Key="geneListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
+                                        <CheckBox IsChecked="{Binding Path=Active}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="stateListItemTemplate">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
+                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
+                                                            ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
+                                                            ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <!--<DataTemplate x:Key="cellState2ListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="20" Text="{Binding Path=Name}" />
+                                        <TextBlock Width="10" Text="" />
+                                        <TextBox Width="50" Text="{Binding Path=MolName}">
+                                            <TextBox.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Width="200" Orientation="Horizontal">
+                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                       (unused)
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </TextBox.ToolTip>
+                                        </TextBox>
+
+                                    </StackPanel>
+                                </DataTemplate>-->
+
+                                <DataTemplate x:Key="diffStatesListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="cellStateGridItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Grid.Resources>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- DIFFERENTIATION SCHEME -->
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}" >
+                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">
+                                    Delete Differentiation Scheme
+                                    <Button.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            Remove cell differentiation for this cell population in this simulation.
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}">
+                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">
+                                    New Differentiation Scheme
+                                    <Button.ToolTip>
+                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            Add cell differentiation to the cells in the selected cell population for this simulation.
+                                        </TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
+
+                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
+                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
+
                 </StackPanel>
             </Expander>
+          
             <!-- Division -->
             <Expander   Header="Division"
                         Padding="5" ExpandDirection="Down"
@@ -1569,123 +1670,27 @@
                     
                 </StackPanel>
             </Expander>
-            <!-- Differentiation -->
-            <Expander   
-                    Padding="5" ExpandDirection="Down"
-                    IsExpanded="False"
-                    Header="Differentiation"                                                  
-                    x:Name="DiffSchemeExpander"
-                    Margin="0,4,0,0" 
-                    Canvas.ZIndex="1"
-                    BorderThickness="1"
-                    BorderBrush="Black"
-                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                    Expanded="DiffSchemeExpander_Expanded"
-                >
 
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
-                    <StackPanel>
-                        <Grid >
-                            <Grid.Resources>
-                                <DataTemplate x:Key="diffSchemeListItemTemplate2">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Path=Hello}" />
-                                    </StackPanel>
-                                </DataTemplate>
+            <!-- Cell Death -->
+            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
+                                                Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                Expanded="CellDeathExpander_Expanded">
+                <StackPanel>
+                    <StackPanel x:Name="spDeath" Orientation="Vertical" >
 
-                                <DataTemplate x:Key="geneListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
-                                        <CheckBox IsChecked="{Binding Path=Active}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                        <!-- switch between new death driver or death driver content -->
+                        <StackPanel Name="spNewDriverSwitch" >
+                            <ContentControl x:Name="NewDriverSwitch"
+                                            Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                            Style="{StaticResource Death_NewButton_or_TDE_details_SelectableStyle}"
+                                            />
+                        </StackPanel>
 
-                                <DataTemplate x:Key="stateListItemTemplate">
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
-                                                            ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
-                                                            ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <!--<DataTemplate x:Key="cellState2ListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="20" Text="{Binding Path=Name}" />
-                                        <TextBlock Width="10" Text="" />
-                                        <TextBox Width="50" Text="{Binding Path=MolName}">
-                                            <TextBox.ToolTip>
-                                                <ToolTip>
-                                                    <StackPanel Width="200" Orientation="Horizontal">
-                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                       (unused)
-                                                        </TextBlock>
-                                                    </StackPanel>
-                                                </ToolTip>
-                                            </TextBox.ToolTip>
-                                        </TextBox>
-
-                                    </StackPanel>
-                                </DataTemplate>-->
-
-                                <DataTemplate x:Key="diffStatesListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <DataTemplate x:Key="cellStateGridItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Grid.Resources>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
-
-                            <!-- DIFFERENTIATION SCHEME -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}" >
-                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">
-                                    Delete Differentiation Scheme
-                                    <Button.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                            Remove cell differentiation for this cell population in this simulation.
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                </Button>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}">        
-                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">
-                                    New Differentiation Scheme
-                                    <Button.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                            Add cell differentiation to the cells in the selected cell population for this simulation.
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
                     </StackPanel>
-                    
-                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
-                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
-
                 </StackPanel>
             </Expander>
+             
         </local:DaphneStackPanel>
     </Grid>
     
