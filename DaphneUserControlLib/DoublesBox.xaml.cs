@@ -317,7 +317,7 @@ namespace DaphneUserControlLib
                 SetMinMax();
             }
 
-            tb.Text = ToFormatted(ToDisplayNumber());
+            FNumber = ToFormatted(ToDisplayNumber());
         }
 
         private string GetNumericChars(string input)
@@ -360,9 +360,7 @@ namespace DaphneUserControlLib
 
                 if (currval != newval)
                 {
-                    //slFNumber.Value = newval;
                     SetValue(NumberProperty, newval);
-                    //OnPropertyChanged("Number");
                 }
                 FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
