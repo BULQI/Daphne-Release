@@ -45,13 +45,6 @@
         </TabControl.Resources>
 
         
-        <!-- SIM SETUP -->
-        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>                     
-                </ScrollViewer>
-            </TabItem>
-
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" Loaded="ECMTabItem_Loaded" AutomationProperties.AutomationId="DaphneECMTab" >
             <TabItem.Resources>
@@ -241,6 +234,13 @@
 
                 </StackPanel>
 
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- SIM SETUP -->
+        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>
             </ScrollViewer>
         </TabItem>
 

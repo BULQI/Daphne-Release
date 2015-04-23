@@ -110,11 +110,17 @@ namespace DaphneGui
             {
                 if (toolWinTissue.EcmMolpopControl.lbAvailableReacCx != null)
                 {
-                    CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource).Refresh();
+                    if (toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource != null)
+                    {
+                        CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource).Refresh();
+                    }
                 }
                 if (toolWinTissue.EcmMolpopControl.lvAvailableReacs != null)
                 {
-                    CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource).Refresh();
+                    if (toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource != null)
+                    {
+                        CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource).Refresh();
+                    }
                 }
             }
         }
