@@ -213,7 +213,9 @@ namespace DaphneGui.Pushing
                 Type t = child.GetType();
                 if (child.GetType() == typeof(DataGrid))
                 {
+                    //Note that this will work only if the relevant data grid is the first grid in the content control
                     LeftDataGrid = child as DataGrid;
+                    break;
                 }
             }
 
@@ -223,7 +225,9 @@ namespace DaphneGui.Pushing
                 Type t = child.GetType();
                 if (child.GetType() == typeof(DataGrid))
                 {
+                    //Note that this will work only if the relevant data grid is the first grid in the content control
                     RightDataGrid = child as DataGrid;
+                    break;
                 }
             }
         }

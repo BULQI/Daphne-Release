@@ -23,13 +23,10 @@ namespace DaphneGui
         public ConfigCell SelectedCell { get; set; }
         public EntityRepository er { get; set; }
 
-        public AddGeneToCell(ConfigCell cell)
+        public AddGeneToCell(ConfigCell cell, Level level)
         {
             InitializeComponent();
             this.Owner = Application.Current.MainWindow;
-
-            //er = MainWindow.SOP.Protocol.entity_repository;
-            Level level = MainWindow.GetLevelContext(this);
             er = level.entity_repository;
 
             //Protocol = sc;
