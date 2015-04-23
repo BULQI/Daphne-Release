@@ -395,7 +395,7 @@ namespace DaphneGui
                 return;
 
             //Show a dialog that gets the new gene's name
-            AddGeneToCell ads = new AddGeneToCell(cell);
+            AddGeneToCell ads = new AddGeneToCell(cell, MainWindow.GetLevelContext(this));
 
             if (ads.GeneComboBox.Items.Count == 0)
             {
