@@ -87,7 +87,6 @@
                         x:Name="MotionPropertiesExpander"
                         Margin="0,5,0,0" 
                         Canvas.ZIndex="1"     
-                        HorizontalAlignment="Left"
                         Visibility="Visible"
                         BorderThickness="1"
                         BorderBrush="Black"
