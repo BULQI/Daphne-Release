@@ -89,7 +89,7 @@
 
                         <local:DaphneStackPanel x:Name="CellPropertiesPanel">
 
-                            <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
+                            <StackPanel x:Name="PropertyHost" Margin="10,0">
                                 <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
                                         DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
                                         
