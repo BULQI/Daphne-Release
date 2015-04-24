@@ -220,7 +220,7 @@
                 <TextBlock Width="90" Margin="20,0" Text="Activation Level"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
+                <TextBox Width="150" Text="{Binding Path=Name}" ></TextBox>
                 <TextBox Width="80" Margin="20,0" Text="{Binding Path=CopyNumber, Mode=TwoWay}"></TextBox>
                 <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Margin="20,0" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
@@ -238,10 +238,10 @@
         </StackPanel>
     </DataTemplate>
 
-    <DataTemplate x:Key="editCellTemplate">
+    <DataTemplate x:Key="readonlyCellTemplate">
         <StackPanel>
-            <local:CellPropertiesControl DataContext="{Binding}"/>
-            <local:CellDetailsControl DataContext="{Binding}"/>
+            <local:CellPropertiesControl DataContext="{Binding}" IsEnabled="False"/>
+            <local:CellDetailsReadOnlyControl DataContext="{Binding}"/>
         </StackPanel>
     </DataTemplate>
 

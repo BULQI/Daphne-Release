@@ -522,12 +522,6 @@ namespace DaphneGui
         {
             int nPoints = data.Times.Count();
 
-            // we can't draw a tube (line) segment with less than two points
-            if (nPoints < 2)
-            {
-                return;
-            }
-
             vtkPoints points = vtkPoints.New();
             vtkPolyLine line = vtkPolyLine.New();
 

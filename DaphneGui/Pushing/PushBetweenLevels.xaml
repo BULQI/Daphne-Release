@@ -9,16 +9,13 @@
         Title="Get/Save entities between stores"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"  
+        WindowStartupLocation="CenterOwner"
         MinHeight="120"
         x:Name="PushWindow"
         Margin="10,10"
         >
 
     <Window.Resources>
-
-        <CollectionViewSource x:Key="pushMoleculesListView"
-                Source="{Binding Path=LeftList}"
-                Filter="pushMoleculesListView_Filter"/>
 
         <ObjectDataProvider x:Key="pushLevelsList"
             MethodName="GetValues" 
@@ -31,16 +28,19 @@
         <daph:PushLevelToStringConverter x:Key="PushLevelToStringConv" />
         <push:PushLevelIsDaphneStoreConverter x:Key="PushLevelIsDaphneStoreConv" />
 
+        <!-- Molecules -->
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
-            <StackPanel Orientation="Vertical">
+            <StackPanel Name="spMols" Orientation="Vertical">
                 <StackPanel>
                     
                     <DataGrid x:Name="EntityDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                              ItemsSource="{Binding}" 
+                              MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding UpdateSourceTrigger=PropertyChanged}" 
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
+                              CanUserDeleteRows="False"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -102,14 +102,18 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
+
+        <!-- Genes -->
         <DataTemplate x:Name="templGenes" x:Key="pushLevelGeneTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="EntityDataGrid" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                    <DataGrid x:Name="EntityDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                              MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight}"
                               ItemsSource="{Binding}"
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
+                              CanUserDeleteRows="False"
                               SelectionChanged="datagrid_SelectionChanged">
 
                         <DataGrid.CommandBindings>
@@ -119,28 +123,50 @@
                         </DataGrid.CommandBindings>
                         
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="150" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="90" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=CopyNumber, Mode=OneWay}" 
-                            />
-                            <DataGridTemplateColumn x:Name="colAct" Header="Weight" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False" >
+                            >
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>                         
+                            <DataGridTemplateColumn x:Name="colAct" Header="Default Activation" Width="70" IsReadOnly="True"
+                                                    ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
                                         <uc:DoublesBox SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   
                                                        Number="{Binding Path=ActivationLevel, Mode=OneWay}" />
                                     </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn.CellTemplate>                            
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>                                
                             </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="colGeneGuid" Header="GUID" Width="100" IsReadOnly="True" Visibility="Collapsed"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=entity_guid, Mode=OneWay}" 
                             />
-
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="No genes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
@@ -159,19 +185,19 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- Reactions -->
         <DataTemplate x:Name="templReactions" x:Key="pushLevelReactionTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <!--MaxHeight="{Binding ElementName=PushWindow, Path=MaxHeight}"-->
                     <DataGrid x:Name="ReacsDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" 
                               MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight}"
                               ItemsSource="{Binding}" 
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
+                              CanUserDeleteRows="False"
                               SelectionChanged="datagrid_SelectionChanged">
 
-                        <!--MaxHeight="{Binding ElementName=PushWindow, Path=MaxHeight}"-->
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
                                             Executed="PushCommandExecuted"
@@ -210,6 +236,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- Cells -->
         <DataTemplate x:Name="templCells" x:Key="pushLevelCellTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -219,6 +246,7 @@
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
+                              CanUserDeleteRows="False"
                               >
 
                         <DataGrid.CommandBindings>
@@ -251,16 +279,17 @@
                                 </Style>
                          </TextBlock.Style>
                     </TextBlock>
-
-                    <StackPanel>
-                        <local:CellPropertiesControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
-                        <local:CellDetailsControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
-                    </StackPanel>
-
+                 
+                    <StackPanel x:Name="spUserControls">                         
+                        <local:CellPropertiesControl IsEnabled="False" Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                        <local:CellDetailsReadOnlyControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                    </StackPanel>    
+                    
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
 
+        <!-- Reaction Complexes -->
         <DataTemplate x:Name="templReacComplexes" x:Key="pushLevelReacComplexTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -271,6 +300,7 @@
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
+                              CanUserDeleteRows="False"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -298,7 +328,7 @@
                          </TextBlock.Style>
                     </TextBlock>
 
-                    <DataGrid x:Name="dgReacs" AutoGenerateColumns="False" CanUserAddRows="False"
+                    <DataGrid x:Name="dgReacs" AutoGenerateColumns="False" CanUserAddRows="False" IsEnabled="False"
                               MaxHeight="{Binding ElementName=PushWindow, Path=GridHeight}"
                                 ItemsSource="{Binding ElementName=dgReacComp, Path=SelectedItem.reactions}"  >
                         <DataGrid.CommandBindings>
@@ -328,6 +358,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- ReactionTemplate: Currently unused? -->
         <DataTemplate x:Name="templReacTemplate" x:Key="pushLeveReacTemplateTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -343,6 +374,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- DiffSchemes: currently unused -->
         <DataTemplate x:Name="templDiffSchemes" x:Key="pushLevelDiffSchemeTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -357,6 +389,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- Transition drivers: currently unused -->
         <DataTemplate x:Name="templTransDrivers" x:Key="pushLevelTransDriverTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -370,7 +403,6 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
-
 
         <push:PushLevelEntityTemplateSelector x:Key="pushLevelEntityTemplateSelector"
             PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
@@ -386,7 +418,6 @@
         
     </Window.Resources>
 
-
     <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,0,0,20" >
 
         <ScrollViewer.CommandBindings>
@@ -395,8 +426,8 @@
                                             CanExecute="PushCommandCanExecute"/>
 
         </ScrollViewer.CommandBindings>
-        
-        <Grid x:Name="MainGrid" >
+
+        <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -422,7 +453,7 @@
                 <GroupBox.Header>
                     <TextBlock Text="From" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
-                <StackPanel Margin="0,0,0,0">
+                <StackPanel x:Name="spLevelACombo" Margin="0,0,0,0">
                     <ComboBox x:Name="LevelAComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
                           ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
@@ -433,10 +464,12 @@
                         <ContentControl Name="LeftContent"
                             Content="{Binding}"
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}" 
-                            Margin="6"/>                        
+                            Margin="6"
+                            Loaded="LeftContent_Loaded"/>                        
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
+            
             <!--Button showing big right arrow-->
             <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel" VerticalAlignment="Center">
                 <Button x:Name="PushButtonArrow" Height="48" Width="48" Visibility="Visible"
@@ -467,14 +500,14 @@
                 <GroupBox.Header>
                     <TextBlock Text="To" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
-                <StackPanel>
+                <StackPanel x:Name="RightGridStackPanel">
                     <ComboBox x:Name="LevelBComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
                           ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
                           SelectedIndex="0"
                           SelectionChanged="LevelBComboBox_SelectionChanged">
 
-                        <!--This hides the DaphneStore in the "To" combo box-->
+                        <!--This hides the DaphneStore choice in the "To" combo box-->
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ComboBoxItem}">
                                 <Setter Property="IsEnabled" Value="True" />
@@ -489,7 +522,7 @@
                     </ComboBox>
 
                     <ContentControl Name="RightContent" 
-                        Content="{Binding}" 
+                        Content="{Binding UpdateSourceTrigger=PropertyChanged}" 
                         ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
                         Margin="6"/>
                 </StackPanel>

@@ -7,7 +7,6 @@
                     xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
-                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     ImageSource="Images/Properties16.png"
                     x:Name="toolWinTissue"
@@ -45,13 +44,6 @@
         </TabControl.Resources>
 
         
-        <!-- SIM SETUP -->
-        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>                     
-                </ScrollViewer>
-            </TabItem>
-
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" Loaded="ECMTabItem_Loaded" AutomationProperties.AutomationId="DaphneECMTab" >
             <TabItem.Resources>
@@ -241,6 +233,13 @@
 
                 </StackPanel>
 
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- SIM SETUP -->
+        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>
             </ScrollViewer>
         </TabItem>
 

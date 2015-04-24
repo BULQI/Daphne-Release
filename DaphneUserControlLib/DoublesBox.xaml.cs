@@ -241,7 +241,7 @@ namespace DaphneUserControlLib
             int sign = Math.Sign(Number);
             double absNumber = Math.Abs(Number);
 
-            if (absNumber == 0)
+            if (absNumber == 0 || absNumber < ZeroEpsilon)
             {
                 return 0.0;
             }
@@ -317,7 +317,7 @@ namespace DaphneUserControlLib
                 SetMinMax();
             }
 
-            tb.Text = ToFormatted(ToDisplayNumber());
+            FNumber = ToFormatted(ToDisplayNumber());
         }
 
         private string GetNumericChars(string input)
@@ -360,9 +360,7 @@ namespace DaphneUserControlLib
 
                 if (currval != newval)
                 {
-                    //slFNumber.Value = newval;
                     SetValue(NumberProperty, newval);
-                    //OnPropertyChanged("Number");
                 }
                 FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
@@ -697,7 +695,28 @@ namespace DaphneUserControlLib
             uc.AbsMaximum = (double)(e.NewValue);
         }
 
+
+        //ZEROEPSILON - A THRESHOLD - AN ABSOLUTE VALUE - ANY NUMBER WHOSE ABSOLUTE VALUE IS SMALLER THAN THIS SHOULD BE DISPLAYED AS ZERO.   
+        public static DependencyProperty ZeroEpsilonProperty = DependencyProperty.Register("ZeroEpsilon", typeof(double), typeof(DoublesBox), new UIPropertyMetadata(0.0, ZeroEpsilonPropertyChanged));
+        public double ZeroEpsilon
+        {
+            get { return (double)GetValue(ZeroEpsilonProperty); }
+            set
+            {
+                SetValue(ZeroEpsilonProperty, value);
+                OnPropertyChanged("ZeroEpsilon");
+                FNumber = ToFormatted(ToDisplayNumber());
+            }
+        }
+        private static void ZeroEpsilonPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.ZeroEpsilon = (double)(e.NewValue);
+        }
+
         
+
 
 
 

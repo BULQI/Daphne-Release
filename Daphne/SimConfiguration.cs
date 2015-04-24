@@ -322,7 +322,7 @@ namespace Daphne
         /// <param name="name"></param>
         /// <param name="protocol"></param>
         /// <returns></returns>
-        public string findGeneGuid(string name, Protocol protocol)
+        public string findGeneGuid(string name, Level protocol)
         {
             foreach (ConfigGene gene in protocol.entity_repository.genes)
             {
@@ -397,6 +397,54 @@ namespace Daphne
             List<string> listRight = new List<string>(products);
             listRight.Sort();
             return listRight;
+        }
+
+        /// <summary>
+        /// Given a total reaction string, find it in the reactions list.
+        /// Return true if found, false otherwise.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="Reacs"></param>
+        /// <returns></returns>
+        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
+        {
+            //Get left and right side molecules of new reaction
+            List<string> newReactants = getReacLeftSide(total);
+            List<string> newProducts = getReacRightSide(total);
+
+            //Loop through all existing reactions
+            foreach (ConfigReaction reac in Reacs)
+            {
+                //Get left and right side molecules of each reaction in er
+                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+
+                //Key step! 
+                //Check if the list of reactants and products in new reaction equals 
+                //the list of reactants and products in this current reaction
+                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Given a total reaction string and a level, find out if the level's entity_repository
+        /// contains this reaction.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="protocol"></param>
+        /// <returns></returns>
+        public bool findReactionByTotalString(string total, Level protocol)
+        {
+            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -586,7 +634,7 @@ namespace Daphne
         /// <summary>
         /// enum for push status
         /// </summary>
-        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_EXISTING_ITEM };
+        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_EXISTING_ITEM, PUSH_IF_MISSING };
 
         /// <summary>
         /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
@@ -696,15 +744,20 @@ namespace Daphne
         /// <param name="s">the push status of e</param>
         public void repositoryPush(ConfigEntity e, PushStatus s)
         {
+            // Dictionaries are updated automatically when an entity is added to an entity repository list.
+
             if (e is ConfigGene)
             {
                 // insert
-                if (s == PushStatus.PUSH_CREATE_ITEM)
+                if (s == PushStatus.PUSH_CREATE_ITEM )
                 {
                     entity_repository.genes.Add(e as ConfigGene);
+                }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
                     if (entity_repository.genes_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.genes_dict.Add(e.entity_guid, e as ConfigGene);
+                        entity_repository.genes.Add(e as ConfigGene);
                     }
                 }
                 // update
@@ -716,10 +769,10 @@ namespace Daphne
                         if (entity_repository.genes[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.genes[i] = e as ConfigGene;
+                            entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
                 }
             }
             else if (e is ConfigMolecule)
@@ -728,9 +781,12 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
+                }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
                     if (entity_repository.molecules_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                        entity_repository.molecules.Add(e as ConfigMolecule);
                     }
                 }
                 // update
@@ -742,10 +798,10 @@ namespace Daphne
                         if (entity_repository.molecules[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.molecules[i] = e as ConfigMolecule;
+                            entity_repository.molecules_dict[e.entity_guid] = e as ConfigMolecule;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.molecules_dict[e.entity_guid] = e as ConfigMolecule;
                 }
             }
             else if (e is ConfigTransitionDriver)
@@ -768,10 +824,10 @@ namespace Daphne
                         if (entity_repository.transition_drivers[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.transition_drivers[i] = e as ConfigTransitionDriver;
+                            entity_repository.transition_drivers_dict[e.entity_guid] = e as ConfigTransitionDriver;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.transition_drivers_dict[e.entity_guid] = e as ConfigTransitionDriver;
                 }
             }
             else if (e is ConfigTransitionScheme)
@@ -794,10 +850,10 @@ namespace Daphne
                         if (entity_repository.diff_schemes[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.diff_schemes[i] = e as ConfigTransitionScheme;
+                            entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigTransitionScheme;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigTransitionScheme;
                 }
             }
             else if (e is ConfigReaction)
@@ -806,9 +862,12 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reactions.Add(e as ConfigReaction);
+                }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
                     if (entity_repository.reactions_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                        entity_repository.reactions.Add(e as ConfigReaction);
                     }
                 }
                 // update
@@ -820,10 +879,10 @@ namespace Daphne
                         if (entity_repository.reactions[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.reactions[i] = e as ConfigReaction;
+                            entity_repository.reactions_dict[e.entity_guid] = e as ConfigReaction;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.reactions_dict[e.entity_guid] = e as ConfigReaction;
                 }
             }
             else if (e is ConfigReactionTemplate)
@@ -846,10 +905,10 @@ namespace Daphne
                         if (entity_repository.reaction_templates[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.reaction_templates[i] = e as ConfigReactionTemplate;
+                            entity_repository.reaction_templates_dict[e.entity_guid] = e as ConfigReactionTemplate;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.reaction_templates_dict[e.entity_guid] = e as ConfigReactionTemplate;
                 }
             }
             else if (e is ConfigCell)
@@ -863,6 +922,13 @@ namespace Daphne
                         entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
                     }
                 }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
+                    if (entity_repository.cells_dict.ContainsKey(e.entity_guid) == false)
+                    {
+                        entity_repository.cells.Add(e as ConfigCell);
+                    }
+                }
                 // update
                 else
                 {
@@ -872,10 +938,10 @@ namespace Daphne
                         if (entity_repository.cells[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.cells[i] = e as ConfigCell;
+                            entity_repository.cells_dict[e.entity_guid] = e as ConfigCell;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.cells_dict[e.entity_guid] = e as ConfigCell;
                 }
             }
             else if (e is ConfigReactionComplex)
@@ -889,6 +955,13 @@ namespace Daphne
                         entity_repository.reaction_complexes_dict.Add(e.entity_guid, e as ConfigReactionComplex);
                     }
                 }
+                if (s == PushStatus.PUSH_IF_MISSING)
+                {
+                    if (entity_repository.reaction_complexes_dict.ContainsKey(e.entity_guid) == false)
+                    {
+                        entity_repository.reaction_complexes.Add(e as ConfigReactionComplex);
+                    }
+                }
                 // update
                 else
                 {
@@ -898,10 +971,10 @@ namespace Daphne
                         if (entity_repository.reaction_complexes[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.reaction_complexes[i] = e as ConfigReactionComplex;
+                            entity_repository.reaction_complexes_dict[e.entity_guid] = e as ConfigReactionComplex;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.reaction_complexes_dict[e.entity_guid] = e as ConfigReactionComplex;
                 }
             }
         }
@@ -1274,7 +1347,7 @@ namespace Daphne
             {
                 if (e is ConfigCell)
                 {
-                    CellPusher(e as ConfigCell, sourceLevel, s);    //Or could add this in ConfigCell - cell = e as ConfigCell; cell.Pusher(sourceLevel, this);
+                    CellPusher(e as ConfigCell, sourceLevel, s);
                 }
                 else if (e is ConfigReaction)
                 {
@@ -1297,74 +1370,58 @@ namespace Daphne
 
         private void CellPusher(ConfigCell cell, Level sourceLevel, PushStatus s)
         {
+            PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+
             //Cytosol molecules
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
-                PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                    repositoryPush(newmol, s2);
-                }
+                repositoryPush(molpop.molecule.Clone(null), s2);
             }
 
             //Membrane molecules
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
-                PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                    repositoryPush(newmol, s2);
-                }
+                repositoryPush(molpop.molecule.Clone(null), s2);
             }
 
             //Genes
             foreach (ConfigGene gene in cell.genes)
             {
-                PushStatus s2 = pushStatus(gene);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigGene newgene = gene.Clone(null);
-                    repositoryPush(newgene, s2);
-                }
+                repositoryPush(gene.Clone(null), s2);
             }
 
             //Cytosol reactions
             foreach (ConfigReaction reac in cell.cytosol.Reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Membrane reactions
             foreach (ConfigReaction reac in cell.membrane.Reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Cytosol reaction complexes
             foreach (ConfigReactionComplex reac in cell.cytosol.reaction_complexes)
             {
-                ReactionComplexPusher(reac, sourceLevel, s);
+                ReactionComplexPusher(reac, sourceLevel, s2);
             }
 
             //Membrane reaction complexes
             foreach (ConfigReactionComplex reac in cell.membrane.reaction_complexes)
             {
-                ReactionComplexPusher(reac, sourceLevel, s);
+                ReactionComplexPusher(reac, sourceLevel, s2);
             }
 
             //Differentiation scheme
-            SchemePusher(cell.diff_scheme, sourceLevel, s);
+            SchemePusher(cell.diff_scheme, sourceLevel, s2);
 
             //Division scheme
-            SchemePusher(cell.div_scheme, sourceLevel, s);
+            SchemePusher(cell.div_scheme, sourceLevel, s2);
 
             //Now push the cell itself
-            if (s != PushStatus.PUSH_INVALID)
-            {
-                repositoryPush(cell, s);
-            }
+            repositoryPush(cell, s);
         }
 
         private void ReactionPusher(ConfigReaction reac, Level sourceLevel, PushStatus s)
@@ -1374,17 +1431,6 @@ namespace Daphne
             {
                 ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
             }
-            //else
-            //{
-            //    foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
-            //    {
-            //        if (crt.entity_guid == reac.reaction_template_guid_ref)
-            //        {
-            //            ReactionTemplatePusher(crt);
-            //            break;
-            //        }
-            //    }
-            //}
 
             //Molecules and Genes
             foreach (string guid in reac.reactants_molecule_guid_ref)
@@ -1401,16 +1447,15 @@ namespace Daphne
             {
                 MoleculeGenePusher(guid, sourceLevel);
             }
-
-            //Now push the reaction itself
-            PushStatus s2 = pushStatus(reac);
-            if (s2 != PushStatus.PUSH_INVALID)
-            {
-                ConfigReaction newreac = reac.Clone(true);
-                repositoryPush(newreac, s2);
-            }
+            repositoryPush(reac.Clone(true), s);
         }
 
+        /// <summary>
+        /// Push a molecule or gene from a compound entity. 
+        /// Create the molecule or gene if it doesn't exist, but don't overwrite.
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <param name="sourceLevel"></param>
         private void MoleculeGenePusher(string guid, Level sourceLevel)
         {
             ConfigEntity entity = null;
@@ -1425,83 +1470,55 @@ namespace Daphne
                 entity = sourceLevel.entity_repository.genes_dict[guid];
             }
 
-            //foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
-            //{
-            //    if (mol.entity_guid == guid)
-            //    {
-            //        entity = mol;
-            //        break;
-            //    }
-            //}
-
-            //if (entity == null)
-            //{
-            //    foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
-            //    {
-            //        if (gene.entity_guid == guid)
-            //        {
-            //            entity = gene;
-            //            break;
-            //        }
-            //    }
-            //}
-
             //Now if entity is not null, we have the entity and must push it unless it is already in target ER
             if (entity != null)
             {
-                PushStatus s2 = this.pushStatus(entity);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
+                PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+                //if (s2 != PushStatus.PUSH_INVALID)
+                //{
                     if (entity is ConfigGene)
                     {
-                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
-                        repositoryPush(newgene, s2);
+                        repositoryPush(((ConfigGene)entity).Clone(null), s2);
                     }
                     else
                     {
-                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
-                        repositoryPush(newmol, s2);
+                        repositoryPush(((ConfigMolecule)entity).Clone(null), s2);
                     }
-                }
+                //}
             }
         }
 
+        /// <summary>
+        /// Push a reaction complex, including sub-entities.
+        /// Create sub-entities that don't exist, but don't overwrite.
+        /// </summary>
+        /// <param name="rc"></param>
+        /// <param name="sourceLevel"></param>
+        /// <param name="s"></param>
         private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
         {
+            PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+
             //Genes
             foreach (ConfigGene gene in rc.genes)
             {
-                PushStatus s2 = pushStatus(gene);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigGene newgene = gene.Clone(null);
-                    repositoryPush(newgene, s2);
-                }
+                repositoryPush(gene.Clone(null), s2);
             }
 
-            //Reactions
+            //Reactions - recursive
             foreach (ConfigReaction reac in rc.reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Molecules
             foreach (ConfigMolecularPopulation molpop in rc.molpops)
             {
-                PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                    repositoryPush(newmol, s2);
-                }
+                repositoryPush(molpop.molecule.Clone(null), s2);
             }
 
             //Push the reaction complex itself
-            if (s != PushStatus.PUSH_INVALID)
-            {
-                repositoryPush(rc, s);
-            }
-
+            repositoryPush(rc, s);
         }
 
         private void SchemePusher(ConfigTransitionScheme scheme, Level sourceLevel, PushStatus s)
@@ -1509,37 +1526,33 @@ namespace Daphne
             if (scheme == null)
                 return;
 
+            PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+
             foreach (string guid in scheme.genes)
             {
                 ConfigGene gene = FindGene(guid, sourceLevel);
                 if (gene != null)
                 {
-                    PushStatus s2 = pushStatus(gene);
-                    if (s2 != PushStatus.PUSH_INVALID)
-                    {
-                        ConfigGene newgene = gene.Clone(null);
-                        repositoryPush(newgene, s2);
-                    }
+                    repositoryPush(gene.Clone(null), s2);
                 }
             }
 
             //Now push the scheme itself
-            PushStatus s3 = pushStatus(scheme);
-            if (s3 != PushStatus.PUSH_INVALID)
-            {
-                ConfigTransitionScheme newscheme = scheme.Clone(true);
-                repositoryPush(newscheme, s3);
-            }
+            repositoryPush(scheme.Clone(true), s);
+            //PushStatus s3 = pushStatus(scheme);
+            //if (s3 != PushStatus.PUSH_INVALID)
+            //{
+            //    ConfigTransitionScheme newscheme = scheme.Clone(true);
+            //    repositoryPush(newscheme, s3);
+            //}
         }
-
 
         private void ReactionTemplatePusher(ConfigReactionTemplate crt)
         {
             PushStatus s2 = pushStatus(crt);
             if (s2 != PushStatus.PUSH_INVALID)
             {
-                ConfigReactionTemplate newcrt = crt.Clone(true);
-                repositoryPush(newcrt, s2);
+                repositoryPush(crt.Clone(true), s2);
             }
         }
 
@@ -1547,14 +1560,6 @@ namespace Daphne
         {
             if (level.entity_repository.genes_dict.ContainsKey(guid))
                 return level.entity_repository.genes_dict[guid];
-
-            //foreach (ConfigGene g in level.entity_repository.genes)
-            //{
-            //    if (g.entity_guid == guid)
-            //    {
-            //        return g;
-            //    }
-            //}
 
             return null;
         }
@@ -1758,29 +1763,6 @@ namespace Daphne
         }
 
         /// <summary>
-        /// serialize the protocol to a string, skip the 'decorations', i.e. experiment name and description
-        /// </summary>
-        /// <returns>the protocol serialized to a string</returns>
-        public string SerializeToStringSkipDeco()
-        {
-            // remember name and description
-            string exp_name = experiment_name,
-                   exp_desc = experiment_description,
-                   ret;
-
-            // temporarily set name and description to empty strings
-            experiment_name = "";
-            experiment_description = "";
-            // serialize to string
-            ret = SerializeToString();
-            // reset to the remembered string values
-            experiment_name = exp_name;
-            experiment_description = exp_desc;
-            // return serialized string
-            return ret;
-        }
-
-        /// <summary>
         /// override deserialization for the protocol; needs to handle extra data only contained in the protocol level
         /// </summary>
         /// <param name="tempFiles">true to indicate deserialization of the temporary file(s)</param>
@@ -1935,47 +1917,53 @@ namespace Daphne
 
         
         
-        /// <summary>
-        /// Given a total reaction string, find it in the reactions list.
-        /// Return true if found, false otherwise.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <param name="Reacs"></param>
-        /// <returns></returns>
-        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
-        {
-            //Get left and right side molecules of new reaction
-            List<string> newReactants = getReacLeftSide(total);
-            List<string> newProducts = getReacRightSide(total);
+        /////// <summary>
+        /////// Given a total reaction string, find it in the reactions list.
+        /////// Return true if found, false otherwise.
+        /////// </summary>
+        /////// <param name="total"></param>
+        /////// <param name="Reacs"></param>
+        /////// <returns></returns>
+        ////public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
+        ////{
+        ////    //Get left and right side molecules of new reaction
+        ////    List<string> newReactants = getReacLeftSide(total);
+        ////    List<string> newProducts = getReacRightSide(total);
 
-            //Loop through all existing reactions
-            foreach (ConfigReaction reac in Reacs)
-            {
-                //Get left and right side molecules of each reaction in er
-                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
-                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+        ////    //Loop through all existing reactions
+        ////    foreach (ConfigReaction reac in Reacs)
+        ////    {
+        ////        //Get left and right side molecules of each reaction in er
+        ////        List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+        ////        List<string> currProducts = getReacRightSide(reac.TotalReactionString);
 
-                //Key step! 
-                //Check if the list of reactants and products in new reaction equals 
-                //the list of reactants and products in this current reaction
-                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        ////        //Key step! 
+        ////        //Check if the list of reactants and products in new reaction equals 
+        ////        //the list of reactants and products in this current reaction
+        ////        if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+        ////        {
+        ////            return true;
+        ////        }
+        ////    }
+        ////    return false;
+        ////}
 
-        // given a total reaction string, find the ConfigCell object
-        public bool findReactionByTotalString(string total, Protocol protocol)
-        {
-            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
-            {
-                return true;
-            }
+        /////// <summary>
+        /////// Given a total reaction string and a level, find out if the level's entity_repository
+        /////// contains this reaction.
+        /////// </summary>
+        /////// <param name="total"></param>
+        /////// <param name="protocol"></param>
+        /////// <returns></returns>
+        ////public bool findReactionByTotalString(string total, Level protocol)
+        ////{
+        ////    if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+        ////    {
+        ////        return true;
+        ////    }
 
-            return false;
-        }
+        ////    return false;
+        ////}
 
         /// <summary>
         /// Select transcription reactions in the compartment.
@@ -3905,6 +3893,13 @@ namespace Daphne
         {
             //Start with original name
             string TempMolName = Name;
+            string locationSuffix = "";
+
+            //If membrane bound, add a pipe at the end
+            if (molecule_location == MoleculeLocation.Boundary)
+            {
+                locationSuffix += "|";
+            }
 
             //Get the base name, i.e. the text before the ending (which is "_New" or "_Copy")
             //For example, this would convert "Molecule_New001" to "Molecule".
@@ -3913,23 +3908,17 @@ namespace Daphne
             //If pipe is there, remove it, although it probably already got removed.
             TempMolName = RemovePipe(TempMolName);
 
-            //Now the new molecule name is going to be TempMolName + ending + suffix
+            //Now the new molecule name is going to be TempMolName + ending + suffix + locationSuffix
             int nSuffix = 1;
             string rightSide = ending + string.Format("{0:000}", nSuffix);
-            string NewMolName = TempMolName + rightSide;
+            string NewMolName = TempMolName + rightSide + locationSuffix;
 
             //Check the ordinal part and make sure the number is unique 
             while (FindMoleculeByName(level.entity_repository, NewMolName) == true)
             {
                 nSuffix++;
                 rightSide = ending + string.Format("{0:000}", nSuffix);
-                NewMolName = TempMolName + rightSide;
-            }
-
-            //If membrane bound, add a pipe at the end
-            if (molecule_location == MoleculeLocation.Boundary)
-            {
-                NewMolName += "|";
+                NewMolName = TempMolName + rightSide + locationSuffix;
             }
 
             return NewMolName;
@@ -4053,7 +4042,7 @@ namespace Daphne
             return ret;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempMolName = Name;
@@ -6123,7 +6112,7 @@ namespace Daphne
             return true;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempRCName = Name;
@@ -6522,7 +6511,7 @@ namespace Daphne
         /// If it is a duplicate, a suffix like "_Copy" is added
         /// </summary>
         /// <param name="sc"></param>
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string newCellName = CellName;

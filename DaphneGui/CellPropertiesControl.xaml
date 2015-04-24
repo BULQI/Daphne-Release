@@ -29,9 +29,9 @@
         <local:DaphneStackPanel x:Name="panelCellDetails" Orientation="Vertical">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Horizontal" Width="310" >
+                    <StackPanel Orientation="Horizontal" Width="300" >
                         <TextBlock Text="cell name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="70" TextWrapping="Wrap" />
-                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="230" LostFocus="CellTextBox_LostFocus">
+                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="200" LostFocus="CellTextBox_LostFocus">
                             <TextBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="200" Orientation="Horizontal">
@@ -46,7 +46,7 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0">
                         <TextBlock Text="radius" Margin="2,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="40"/>
-                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="200" Margin="2,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Margin="2,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 
                             <uc:DoublesBox.ToolTip>
                                 <ToolTip>
@@ -134,15 +134,13 @@
 
                                             <ComboBox.ToolTip>
                                                 <ToolTip>
-                                                    <StackPanel Width="400" Orientation="Horizontal">
-                                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="400">
-                                                            The cytosol molecule that will produce the chemotactic force. 
+                                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                            The cytosol molecular that will produce the chemotactic force. 
                                                             The chemotactic force that the cell experiences is proportional to the gradient (polarity) of the distribution of this molecule in the cytosol. 
-                                                            Gradients in molecular distributions can be produced through interactions with non-uniform distributions of membrane molecules,
-                                                            which, in turn, can be generated throught binding with non-uniform distributions of chemokines in the extracellular medium. 
-                                                            Load the predefined simple_chemotaxis scenario for an example of chemotaxis. 
+                                                            Gradients in molecular distributions can be produced through interactions with non-uniform distributions of membrane-bound molecules,
+                                                            which are, in turn, can be generated throught binding with non-uniform distributions of chemokines in the extracellular medium. 
+                                                            Load the simple_chemotaxis scenario for an example of chemotaxis. 
                                                         </TextBlock>
-                                                    </StackPanel>
                                                 </ToolTip>
                                             </ComboBox.ToolTip>
 

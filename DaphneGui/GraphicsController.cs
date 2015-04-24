@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Forms.Integration;
 
@@ -673,7 +674,6 @@ namespace DaphneGui
         public bool WhArrowToolButton_IsChecked {get; set;}
         public bool HandToolButton_IsEnabled {get; set; }
         public bool HandToolButton_IsChecked { get; set; }
-        public bool PreviewButton_IsEnabled {get; set; }
         public bool ToolsToolbar_IsEnabled {get; set; }
         public System.Windows.Visibility ColorScaleSlider_IsEnabled { get; set; }
         public double ColorScaleMaxFactor {get; set; }
@@ -1466,9 +1466,40 @@ namespace DaphneGui
                     {
                         if (trackTool.IsInitialized(cellID) == false)
                         {
-                            CellTrackData data = MainWindow.Sim.Reporter.ProvideTrackData(cellID, MainWindow.Sim.HDF5FileHandle);
+                            CellTrackData data = MainWindow.Sim.Reporter.ProvideTrackData(cellID);
 
-                            trackTool.InitializeCellTrack(data, cellID);
+                            if (data == null)
+                            {
+                                string detail;
+
+                                if (((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulation_dict.ContainsKey(MainWindow.selectedCell.Population_id) == true)
+                                {
+                                    detail = "Cell positions must be reported for cell population " +
+                                             ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulation_dict[MainWindow.selectedCell.Population_id].cellpopulation_name + ".";
+                                }
+                                else
+                                {
+                                    detail = "Cell population " + MainWindow.selectedCell.Population_id + " does not exist.";
+                                }
+
+                                MessageBox.Show("The data needed to generate tracks is not present in the report.\n" + detail, "Track warning", MessageBoxButton.OK);
+                                return;
+                            }
+                            trackTool.FilterData(data);
+                            // there must be at least 2 points
+                            if (data.Times.Count >= 2)
+                            {
+                                trackTool.InitializeCellTrack(data, cellID);
+                            }
+                            else
+                            {
+                                MessageBox.Show("The track data has less than two points. A track cannot get generated for this cell.\n" +
+                                                "Possible reasons:\n" +
+                                                "-the number of simulation steps is too small.\n" + 
+                                                "-the cell does not move significantly: identical points along a track must get removed for computational reasons, " +
+                                                "reducing the number of track points.", "Track warning", MessageBoxButton.OK);
+                                return;
+                            }
                         }
                         trackTool.ToggleCellTrack(cellID);
                     }
