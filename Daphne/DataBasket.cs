@@ -304,9 +304,9 @@ namespace Daphne
             }
         }
 
-        public void DivisionEvent(int mother_id, int pop_id, int daughter_id)
+        public void DivisionEvent(int mother_id, int pop_id, int daughter_id, int generation)
         {
-            hSim.Reporter.AppendDivisionEvent(mother_id, pop_id, daughter_id);
+            hSim.Reporter.AppendDivisionEvent(mother_id, pop_id, daughter_id, generation);
         }
 
         public void ExitEvent(int key)

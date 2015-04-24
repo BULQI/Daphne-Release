@@ -156,7 +156,7 @@ namespace Daphne
         public abstract void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File);
 
         public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
-        public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id);
+        public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id, int generation);
         public abstract void AppendExitEvent(int cell_id, int cellpop_id);
 
         public abstract void ReactionsReport();
@@ -413,6 +413,11 @@ namespace Daphne
                         create = true;
                     }
                 }
+                if (cp.reportStates.Generation == true)
+                {
+                        header += "\tgeneration";
+                        create = true;
+                }
                 if (cp.reportStates.Death == true)
                 {
                     if (cp.Cell.death_driver != null)
@@ -515,6 +520,10 @@ namespace Daphne
                     {
                         cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
                     }
+                    if (cp.reportStates.Generation == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.generation);
+                    }
                     if (cp.reportStates.Death == true)
                     {
                         cell_files[cp.cellpopulation_id].Write("\t{0}", c.DeathBehavior.CurrentState);
@@ -605,7 +614,7 @@ namespace Daphne
 
                     tsFiles.CellTypeDivision.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);                
-                    writer.WriteLine("cell_id\ttime\tdaughter_id");
+                    writer.WriteLine("cell_id\ttime\tdaughter_id\tgeneration");
                     divisionEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
                 if (cp.reportStates.Exit == true)
@@ -651,13 +660,13 @@ namespace Daphne
             }
         }
 
-        public override void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id)
+        public override void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id, int generation)
         {
             if (divisionEvents != null)
             {
                 if (divisionEvents.ContainsKey(cellpop_id))
                 {
-                    divisionEvents[cellpop_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell_id, daughter_id));
+                    divisionEvents[cellpop_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell_id, daughter_id, generation));
                 }
             }
         }
@@ -1184,7 +1193,7 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
-        public override void AppendDivisionEvent(int mother_id, int cellpop_id, int daughter_id)
+        public override void AppendDivisionEvent(int mother_id, int cellpop_id, int daughter_id, int generation)
         {
             throw new NotImplementedException();
         }
@@ -1336,16 +1345,18 @@ namespace Daphne
     public class DivisionEvent : TransitionEvent
     {
         public int daughter_id;
+        public int generation;
 
-        public DivisionEvent(double _time, int _cell_id, int _daughter_id)
+        public DivisionEvent(double _time, int _cell_id, int _daughter_id, int _generation)
             : base(_time, _cell_id)
         {
             daughter_id = _daughter_id;
+            generation = _generation;
         }
 
         public override void WriteLine(StreamWriter writer)
         {
-            writer.WriteLine("{0}\t{1}\t{2}", this.cell_id, this.time, this.daughter_id);
+            writer.WriteLine("{0}\t{1}\t{2}\t{3}", this.cell_id, this.time, this.daughter_id, this.generation);
         }
     }
 }
