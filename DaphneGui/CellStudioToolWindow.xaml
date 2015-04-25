@@ -55,7 +55,7 @@
                                 <local:CellPropertiesControl x:Name="ucCellPropertiesControl" DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"/>
                             </StackPanel>
  
-                            <StackPanel Margin="10,6">
+                            <StackPanel Margin="10,0">
                                 <local:CellDetailsControl x:Name="ucCellDetails" DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"/>
                             </StackPanel>
                             

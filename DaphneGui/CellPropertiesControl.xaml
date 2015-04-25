@@ -62,7 +62,7 @@
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5">
+                <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5">
                     <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." 
                                         DataContext="{Binding}"
                                         Click="PushCellButton_Click2" ToolTipService.ShowDuration="8000">
@@ -77,7 +77,7 @@
                             </ToolTip>
                         </Button.ToolTip>
                     </Button>
-                </StackPanel>
+                </StackPanel>-->
                     
                 <StackPanel>
                 <!--Width="{Binding ElementName=panelCellDetails, Path=Width}"-->
