@@ -89,14 +89,7 @@
 
                         <local:DaphneStackPanel x:Name="CellPropertiesPanel">
 
-                            <StackPanel x:Name="PropertyHost" Margin="10,0">
-                                <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
-                                        DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
-                                        
-                                        />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0" Height="32">
                                 <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." 
                                         DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
                                         Click="PushCellButton_Click" ToolTipService.ShowDuration="8000">
@@ -113,6 +106,13 @@
                                     </Button.ToolTip>
 
                                 </Button>
+                            </StackPanel>
+                            
+                            <StackPanel x:Name="PropertyHost" Margin="10,0">
+                                <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
+                                        DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
+                                        
+                                        />
                             </StackPanel>
 
                             <StackPanel Margin="10,0">
