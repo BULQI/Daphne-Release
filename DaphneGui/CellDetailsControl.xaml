@@ -401,35 +401,50 @@
     <Grid x:Name="CellDetailsGrid">
         <Grid.Resources>
         </Grid.Resources>
-        
-        <local:DaphneStackPanel x:Name="panelCellMolPops" >
-            <!-- Mol Pops in this cell by their location, i.e. cytoplasm or membrane -->
-            <Expander   Padding="5" 
+
+        <StackPanel Orientation="Vertical">
+            
+            <Expander  Padding="5"
                         ExpandDirection="Down"
                         IsExpanded="False"
-                        Header="Molecules and Genes"                                              
-                        x:Name="CellMolPopsExpander"
-                        Margin="0,10,0,0" 
+                        Header="Chemistry"                                              
+                        x:Name="CellChemistryExpander"
+                        Margin="0,5,0,0" 
                         Canvas.ZIndex="1"
                         BorderThickness="1"
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
-                        Expanded="CellMolPopsExpander_Expanded">
+                        >
 
-                <!-- Cell Molecular Populations -->
-                <StackPanel>
-                    <StackPanel>
+                <local:DaphneStackPanel x:Name="panelCellMolPops" >
 
-                        <TabControl x:Name="tcMembMolPops">
+                    <!-- Mol Pops in this cell by their location, i.e. cytoplasm or membrane -->
+                    <Expander   Padding="5" 
+                            ExpandDirection="Down"
+                            IsExpanded="False"
+                            Header="Molecules and Genes"                                              
+                            x:Name="CellMolPopsExpander"
+                            Margin="0,10,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                            Expanded="CellMolPopsExpander_Expanded">
 
-                            <!-- Cell Membrane Mol Pops -->
-                            <TabItem >
-                                <TabItem.Header>
-                                    <TextBlock Text="Membrane" FontWeight="Bold" />
-                                </TabItem.Header>
+                        <!-- Cell Molecular Populations -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <StackPanel>
+                        <StackPanel>
 
-                                <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="20" MaxHeight="100"
+                            <TabControl x:Name="tcMembMolPops">
+
+                                <!-- Cell Membrane Mol Pops -->
+                                <TabItem >
+                                    <TabItem.Header>
+                                        <TextBlock Text="Membrane" FontWeight="Bold" />
+                                    </TabItem.Header>
+
+                                    <StackPanel Orientation="Vertical">
+                                        <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="20" MaxHeight="100"
                                             ItemsSource="{Binding Path=membrane.molpops}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="0" 
@@ -437,184 +452,26 @@
                                             IsSynchronizedWithCurrentItem="True"
                                             />
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                            <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Add another molecular population to the cell membrane.  
                                                     The molecule type will default to the first unused membrane-bound molecule type in the Molecules Library. 
                                                     The default value can be modified using the molecule type selector.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button> 
-                                        <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Remove the selected membrane molecular population from the selected cell type in this simulation.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal" DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}">
-                                        <StackPanel>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                </Grid.RowDefinitions>
-
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
-                                                    <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-
-                                                    <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                                    DisplayMemberPath="Name"    
-                                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                                                    SelectedValuePath="entity_guid"
-                                                                    SelectionChanged="memb_molecule_combo_box_SelectionChanged"
-                                                                    GotFocus="memb_molecule_combo_box_GotFocus">
-
-                                                            <ComboBox.ItemsSource>
-                                                            <CompositeCollection>
-                                                                <CollectionContainer Collection="{Binding Source={StaticResource availableBoundaryMoleculesListView}}" />
-                                                                <daph:ConfigMolecule Name="New Molecule"/>
-                                                            </CompositeCollection>
-                                                        </ComboBox.ItemsSource>
-
-                                                        <ComboBox.ToolTip>
-                                                            <ToolTip>
-                                                                <StackPanel Width="200" Orientation="Horizontal">
-                                                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        The molecule type of the selected molecular population.
-                                                                    </TextBlock>
-                                                                </StackPanel>
-                                                            </ToolTip>
-                                                        </ComboBox.ToolTip>
-
-                                                    </ComboBox>
-                                                </StackPanel>
-
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
-                                                    <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
-                                                    <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
-                                                        <TextBox.ToolTip>
-                                                            <ToolTip>
-                                                                <StackPanel Width="200" Orientation="Horizontal">
-                                                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        A user-defined name for the molecular population.
-                                                                    </TextBlock>
-                                                                </StackPanel>
-                                                            </ToolTip>
-                                                        </TextBox.ToolTip>
-                                                    </TextBox>
-                                                </StackPanel>
-
-                                            </Grid>
-                                        </StackPanel>
-                                        <StackPanel Margin="10,0">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                </Grid.RowDefinitions>
-                                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-                                                    <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="28,10">
-                                                        <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                                        <TextBlock Text="molec/µm^2" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                                                        <TextBlock Text=")" VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
-                                                    <ContentControl Name="membraneMolPopDistributionDetails"
-                                                                    Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
-                                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                                    Margin="6,2"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </StackPanel>
-                                    </StackPanel>
-
-                                    <Expander x:Name="membMolPropExpander" ExpandDirection="Down"
-                                                IsExpanded="False"
-                                                Header="Molecule Properties"
-                                                Margin="0,0,0,0" 
-                                                Canvas.ZIndex="1"
-                                                DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem, Mode=TwoWay}"
-                                                >
-
-                                        <StackPanel>
-                                            <ContentControl Name="membMoleculeDetails"
-                                                                    Content="{Binding Path=molecule}" 
-                                                                    ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                                                    Margin="6"/>
-
-                                            <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click">
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                            <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click">
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Any changes to properties of the selected molecule only apply to this cell type in this simulation. 
-                                                    Select this option to save the changes to the Protocol Library in order to make the modified molecule available for use elsewhere in the simulation scenario
-                                                    or to make the the modified molecule available for saving as permanent user default.
+                                                    Remove the selected membrane molecular population from the selected cell type in this simulation.
                                                     </TextBlock>
                                                 </Button.ToolTip>
                                             </Button>
                                         </StackPanel>
-                                    </Expander>
 
-                                </StackPanel>
-                            </TabItem>
-
-                            <!-- Cell Cytosol Mol Pops -->
-                            <TabItem >
-                                <TabItem.Header>
-                                    <TextBlock Text="Cytosol" FontWeight="Bold" />
-                                </TabItem.Header>
-
-                                <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="20" MaxHeight="100" 
-                                                ItemsSource="{Binding Path=cytosol.molpops}" 
-                                                DisplayMemberPath="Name"     
-                                                SelectedIndex="0"
-                                                SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"
-                                                IsSynchronizedWithCurrentItem="True"
-                                                />
-                                    
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Add another molecular population to the cell cytosol.  
-                                                    The molecule type will default to the first unused bulk molecule type in the Molecules Library. 
-                                                    The default value can be modified using the molecule type selector.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                        <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Remove the selected cytosol molecular population from the selected cell type in this simulation.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                    </StackPanel>
-                                    
-                                    <!-- Cell Cytosol Mol Pop Details-->
-                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}">
- 
-                                        <local:DaphneStackPanel x:Name="cytosolMolPopDetails" Orientation="Horizontal" >
+                                        <StackPanel Orientation="Horizontal" DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}">
                                             <StackPanel>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
@@ -628,19 +485,20 @@
                                                         <RowDefinition />
                                                         <RowDefinition />
                                                     </Grid.RowDefinitions>
+
                                                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                                         <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                                        <ComboBox   x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                                    DisplayMemberPath="Name"            
+
+                                                        <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                                                    DisplayMemberPath="Name"    
                                                                     SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                     SelectedValuePath="entity_guid"
-                                                                    SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
-                                                                    GotFocus="cyto_molecule_combo_box_GotFocus"
-                                                                    >
+                                                                    SelectionChanged="memb_molecule_combo_box_SelectionChanged"
+                                                                    GotFocus="memb_molecule_combo_box_GotFocus">
 
                                                             <ComboBox.ItemsSource>
                                                                 <CompositeCollection>
-                                                                    <CollectionContainer Collection="{Binding Source={StaticResource availableBulkMoleculesListView}}" />
+                                                                    <CollectionContainer Collection="{Binding Source={StaticResource availableBoundaryMoleculesListView}}" />
                                                                     <daph:ConfigMolecule Name="New Molecule"/>
                                                                 </CompositeCollection>
                                                             </ComboBox.ItemsSource>
@@ -649,14 +507,15 @@
                                                                 <ToolTip>
                                                                     <StackPanel Width="200" Orientation="Horizontal">
                                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                            The molecule type of the selected molecular population.
+                                                                        The molecule type of the selected molecular population.
                                                                         </TextBlock>
                                                                     </StackPanel>
                                                                 </ToolTip>
                                                             </ComboBox.ToolTip>
-                                                            
+
                                                         </ComboBox>
                                                     </StackPanel>
+
                                                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                         <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                                         <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
@@ -664,7 +523,7 @@
                                                                 <ToolTip>
                                                                     <StackPanel Width="200" Orientation="Horizontal">
                                                                         <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                            The user-defined name for the selected molecular population. The default name is the name of the molecule.
+                                                                        A user-defined name for the molecular population.
                                                                         </TextBlock>
                                                                     </StackPanel>
                                                                 </ToolTip>
@@ -684,166 +543,322 @@
                                                         <RowDefinition />
                                                         <RowDefinition />
                                                         <RowDefinition />
-                                                        <RowDefinition />
                                                     </Grid.RowDefinitions>
                                                     <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
                                                         <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                         <StackPanel Orientation="Horizontal" Margin="28,10">
                                                             <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                                            <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                                                            <TextBlock Text="molec/µm^2" VerticalAlignment="Center" Margin="0,0,0,0"/>
                                                             <TextBlock Text=")" VerticalAlignment="Center" />
                                                         </StackPanel>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
-                                                        <ContentControl Name="MolPopDistributionDetails"
+                                                        <ContentControl Name="membraneMolPopDistributionDetails"
+                                                                    Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
+                                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                                                    Margin="6,2"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Expander x:Name="membMolPropExpander" ExpandDirection="Down"
+                                                IsExpanded="False"
+                                                Header="Molecule Properties"
+                                                Margin="0,0,0,0" 
+                                                Canvas.ZIndex="1"
+                                                DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem, Mode=TwoWay}"
+                                                >
+
+                                            <StackPanel>
+                                                <ContentControl Name="membMoleculeDetails"
+                                                                    Content="{Binding Path=molecule}" 
+                                                                    ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                                                    Margin="6"/>
+
+                                                <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click">
+                                                    <Button.ToolTip>
+                                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    Any changes to properties of the selected molecule only apply to this cell type in this simulation. 
+                                                    Select this option to save the changes to the Protocol Library in order to make the modified molecule available for use elsewhere in the simulation scenario
+                                                    or to make the the modified molecule available for saving as permanent user default.
+                                                        </TextBlock>
+                                                    </Button.ToolTip>
+                                                </Button>
+                                            </StackPanel>
+                                        </Expander>
+
+                                    </StackPanel>
+                                </TabItem>
+
+                                <!-- Cell Cytosol Mol Pops -->
+                                <TabItem >
+                                    <TabItem.Header>
+                                        <TextBlock Text="Cytosol" FontWeight="Bold" />
+                                    </TabItem.Header>
+
+                                    <StackPanel Orientation="Vertical" >
+                                        <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="20" MaxHeight="100" 
+                                                ItemsSource="{Binding Path=cytosol.molpops}" 
+                                                DisplayMemberPath="Name"     
+                                                SelectedIndex="0"
+                                                SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"
+                                                IsSynchronizedWithCurrentItem="True"
+                                                />
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                            <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    Add another molecular population to the cell cytosol.  
+                                                    The molecule type will default to the first unused bulk molecule type in the Molecules Library. 
+                                                    The default value can be modified using the molecule type selector.
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                            <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    Remove the selected cytosol molecular population from the selected cell type in this simulation.
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                        </StackPanel>
+
+                                        <!-- Cell Cytosol Mol Pop Details-->
+                                        <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}">
+
+                                            <local:DaphneStackPanel x:Name="cytosolMolPopDetails" Orientation="Horizontal" >
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                        </Grid.RowDefinitions>
+                                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
+                                                            <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                            <ComboBox   x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                                                    DisplayMemberPath="Name"            
+                                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                                    SelectedValuePath="entity_guid"
+                                                                    SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
+                                                                    GotFocus="cyto_molecule_combo_box_GotFocus"
+                                                                    >
+
+                                                                <ComboBox.ItemsSource>
+                                                                    <CompositeCollection>
+                                                                        <CollectionContainer Collection="{Binding Source={StaticResource availableBulkMoleculesListView}}" />
+                                                                        <daph:ConfigMolecule Name="New Molecule"/>
+                                                                    </CompositeCollection>
+                                                                </ComboBox.ItemsSource>
+
+                                                                <ComboBox.ToolTip>
+                                                                    <ToolTip>
+                                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                            The molecule type of the selected molecular population.
+                                                                            </TextBlock>
+                                                                        </StackPanel>
+                                                                    </ToolTip>
+                                                                </ComboBox.ToolTip>
+
+                                                            </ComboBox>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+                                                            <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
+                                                            <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
+                                                                <TextBox.ToolTip>
+                                                                    <ToolTip>
+                                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                            The user-defined name for the selected molecular population. The default name is the name of the molecule.
+                                                                            </TextBlock>
+                                                                        </StackPanel>
+                                                                    </ToolTip>
+                                                                </TextBox.ToolTip>
+                                                            </TextBox>
+                                                        </StackPanel>
+
+                                                    </Grid>
+                                                </StackPanel>
+                                                <StackPanel Margin="10,0">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                            <RowDefinition />
+                                                        </Grid.RowDefinitions>
+                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                                            <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                            <StackPanel Orientation="Horizontal" Margin="28,10">
+                                                                <TextBlock Text="concentration (" VerticalAlignment="Center" />
+                                                                <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                                                                <TextBlock Text=")" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
+                                                            <ContentControl Name="MolPopDistributionDetails"
                                         Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
                                         ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
                                         Margin="6,2"/>
-                                                    </StackPanel>
+                                                        </StackPanel>
 
-                                                </Grid>
+                                                    </Grid>
 
-                                            </StackPanel>
+                                                </StackPanel>
 
-                                        </local:DaphneStackPanel>
-                                        
-                                        <Expander x:Name="cytoMolPropExpander" ExpandDirection="Down"
+                                            </local:DaphneStackPanel>
+
+                                            <Expander x:Name="cytoMolPropExpander" ExpandDirection="Down"
                                                               IsExpanded="False"
                                                               Header="Molecule Properties"
                                                               Margin="0,0,0,0" 
                                                               Canvas.ZIndex="1"
                                                               DataContext="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"
                                                               >
-                                        <StackPanel>
-                                            <ContentControl Name="cytoMoleculeDetails"
+                                                <StackPanel>
+                                                    <ContentControl Name="cytoMoleculeDetails"
                                                                     Content="{Binding Path=molecule}" 
                                                                     ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                                                     Margin="6"/>
-                                                <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click">
-                                                    <Button.ToolTip>
-                                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click">
+                                                        <Button.ToolTip>
+                                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                             Any changes to properties of the selected molecule only apply to this cell type in this simulation. 
                                                             Select this option to save the changes to the Protocol Library in order to make the modified molecule available for use elsewhere in the simulation scenario
                                                             or to make the the modified molecule available for saving as permanent user default.
-                                                        </TextBlock>
-                                                    </Button.ToolTip>
-                                                </Button>
+                                                            </TextBlock>
+                                                        </Button.ToolTip>
+                                                    </Button>
+                                                </StackPanel>
+
+                                            </Expander>
+
                                         </StackPanel>
-                                    
-                                    </Expander>
 
                                     </StackPanel>
+                                </TabItem>
 
-                                </StackPanel>
-                            </TabItem>
+                                <!-- Cytosol Genes -->
+                                <TabItem >
+                                    <TabItem.Header>
+                                        <TextBlock Text="Nucleus" FontWeight="Bold" />
+                                    </TabItem.Header>
 
-                            <!-- Cytosol Genes -->
-                            <TabItem >
-                                <TabItem.Header>
-                                    <TextBlock Text="Nucleus" FontWeight="Bold" />
-                                </TabItem.Header>
-
-                                <StackPanel Orientation="Vertical" >
-                                    <StackPanel.Resources>
-                                    </StackPanel.Resources>
-                                    <ListBox x:Name="CellNucleusGenesListBox" MinHeight="20" MaxHeight="100" 
+                                    <StackPanel Orientation="Vertical" >
+                                        <StackPanel.Resources>
+                                        </StackPanel.Resources>
+                                        <ListBox x:Name="CellNucleusGenesListBox" MinHeight="20" MaxHeight="100" 
                                                 ItemsSource="{Binding Path=genes}" 
                                                 DisplayMemberPath="Name"                                                    
                                                 SelectedIndex="0"
                                                 SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
-                                    
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Create a new gene in the cell nucleus.
-                                                </TextBlock>
-                                            </Button.ToolTip>
 
-                                        </Button>
-                                        <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Add another gene to the cell nucleus.  
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                        <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                    Remove the selected gene from the cell nucleus.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem}">
-                                        <StackPanel Orientation="Horizontal" Margin="10,4">
-                                            <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <TextBox x:Name="txtGeneName" IsEnabled="False" Margin="4,2" MinWidth="140" HorizontalAlignment="Left"
-                                                                     Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
-                                                <TextBox.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel Width="200" Orientation="Horizontal">
-                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                The name of the selected gene.
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </TextBox.ToolTip>
-                                            </TextBox>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="10,4">
-                                            <TextBlock Text="Copy Number" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <TextBox x:Name="txtGeneCopyNum" Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
-                                                <TextBox.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel Width="200" Orientation="Horizontal">
-                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                The number of copies of the selected gene.
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </TextBox.ToolTip>
-                                            </TextBox>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="10,4">
-                                            <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="90" HorizontalAlignment="Left">
-                                                <uc:DoublesBox.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel Width="200" Orientation="Horizontal">
-                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                The default activation level of the selected gene. The user can modify this value for selected differentiation 
-                                                                or division ce;; states.
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </uc:DoublesBox.ToolTip>
-                                            </uc:DoublesBox>
-                                            <Button Name="NucPushGeneButton" HorizontalAlignment="Right" Margin="20" Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                            <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click">
                                                 <Button.ToolTip>
                                                     <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        Any changes to properties of the selected gene only apply to this cell type in this simulation. 
-                                                        Select this option to save the changes to the Protocol Library in order to make the modified gene available for use elsewhere in the simulation scenario
-                                                        or to make the the modified gene available for saving as permanent user default.
+                                                    Create a new gene in the cell nucleus.
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+
+                                            </Button>
+                                            <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    Add another gene to the cell nucleus.
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                            <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    Remove the selected gene from the cell nucleus.
                                                     </TextBlock>
                                                 </Button.ToolTip>
                                             </Button>
                                         </StackPanel>
+
+                                        <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem}">
+                                            <StackPanel Orientation="Horizontal" Margin="10,4">
+                                                <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                <TextBox x:Name="txtGeneName" IsEnabled="False" Margin="4,2" MinWidth="140" HorizontalAlignment="Left"
+                                                                     Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                                    <TextBox.ToolTip>
+                                                        <ToolTip>
+                                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                The name of the selected gene.
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </TextBox.ToolTip>
+                                                </TextBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="10,4">
+                                                <TextBlock Text="Copy Number" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                <TextBox x:Name="txtGeneCopyNum" Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
+                                                    <TextBox.ToolTip>
+                                                        <ToolTip>
+                                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                The number of copies of the selected gene.
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </TextBox.ToolTip>
+                                                </TextBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="10,4">
+                                                <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                <uc:DoublesBox x:Name="txtGeneActLevel" SliderEnabled="False" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  TextFieldWidth="90" HorizontalAlignment="Left">
+                                                    <uc:DoublesBox.ToolTip>
+                                                        <ToolTip>
+                                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                The default activation level of the selected gene. The user can modify this value for selected differentiation 
+                                                                or division ce;; states.
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </uc:DoublesBox.ToolTip>
+                                                </uc:DoublesBox>
+                                                <Button Name="NucPushGeneButton" HorizontalAlignment="Right" Margin="20" Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click">
+                                                    <Button.ToolTip>
+                                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                        Any changes to properties of the selected gene only apply to this cell type in this simulation. 
+                                                        Select this option to save the changes to the Protocol Library in order to make the modified gene available for use elsewhere in the simulation scenario
+                                                        or to make the the modified gene available for saving as permanent user default.
+                                                        </TextBlock>
+                                                    </Button.ToolTip>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </TabItem>
-                        </TabControl>
+                                </TabItem>
+                            </TabControl>
+                        </StackPanel>
+
                     </StackPanel>
 
-                </StackPanel>
+                    </Expander>
 
-            </Expander>
-            
-            <!-- Reactions in this cell and their location -->
-            <Expander   Padding="5" 
+                    <!-- Reactions in this cell and their location -->                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+                    <Expander   Padding="5" 
                         ExpandDirection="Down"
                         IsExpanded="False"
                         Header="Reactions"                                              
@@ -856,102 +871,102 @@
                         Expanded="CellReacExpander_Expanded"
                         >
 
-                <StackPanel>
-                    <!-- Reactions in cell -->
-                    <StackPanel.Resources>
-                        <DataTemplate x:Key="cellReacListItemTemplate">
-                            <StackPanel Orientation="Horizontal">
-                                <uc:DoublesBox Width="60" MinWidth="40" SliderEnabled="False" Number="{Binding rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-                                <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </StackPanel.Resources>
-
                     <StackPanel>
-                        <TabControl SelectionChanged="TabControl_SelectionChanged">
-                            <!-- Reactions in cell Membrane -->
-                            <TabItem >
-                                <TabItem.Header>
-                                    <TextBlock Text="Membrane" FontWeight="Bold" />
-                                </TabItem.Header>
-                                <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
+                        <!-- Reactions in cell -->
+                        <StackPanel.Resources>
+                            <DataTemplate x:Key="cellReacListItemTemplate">
+                                <StackPanel Orientation="Horizontal">
+                                    <uc:DoublesBox Width="60" MinWidth="40" SliderEnabled="False" Number="{Binding rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                                    <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </StackPanel.Resources>
+
+                        <StackPanel>
+                            <TabControl SelectionChanged="TabControl_SelectionChanged">
+                                <!-- Reactions in cell Membrane -->
+                                <TabItem >
+                                    <TabItem.Header>
+                                        <TextBlock Text="Membrane" FontWeight="Bold" />
+                                    </TabItem.Header>
+                                    <StackPanel Orientation="Vertical">
+                                        <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
 
 
-                                        <ListBox.ContextMenu>
-                                            <ContextMenu >
-                                                <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
-                                                <MenuItem Header="Pull from Potocol level" Name="menuMembPullReacFromProto" Click="menuMembPullReacFromProto_Click"></MenuItem>
-                                            </ContextMenu>
-                                        </ListBox.ContextMenu>
-                                    </ListBox>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            <ListBox.ContextMenu>
+                                                <ContextMenu >
+                                                    <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
+                                                    <MenuItem Header="Pull from Potocol level" Name="menuMembPullReacFromProto" Click="menuMembPullReacFromProto_Click"></MenuItem>
+                                                </ContextMenu>
+                                            </ListBox.ContextMenu>
+                                        </ListBox>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                            <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Any changes to properties of the selected reaction only apply to this cell type in this simulation. 
                                                     Select this option to save the changes to the Protocol Library in order to make the modified reaction 
                                                     available for use elsewhere in the simulation scenario
                                                     or to make the the modified reaction available for saving as permanent user default.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                        <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                            <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Remove the selected reaction from the cells in the selected population for this simulation.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                    </StackPanel>
-                                    <StackPanel>
-                                        <Expander x:Name="CellAddReacExpander" ExpandDirection="Down"  IsExpanded="False"
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <Expander x:Name="CellAddReacExpander" ExpandDirection="Down"  IsExpanded="False"
                                                     Header="Add a reaction"
                                                     Margin="0,0,0,0" 
                                                     Canvas.ZIndex="1"
                                                     Expanded="CellAddReacExpander_Expanded"
                                                     >
-                                            <StackPanel Orientation="Vertical" Margin="10,0">
-                                                <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
-                                                <ListView x:Name="lvCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
+                                                <StackPanel Orientation="Vertical" Margin="10,0">
+                                                    <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
+                                                    <ListView x:Name="lvCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
                                                                                 ItemsSource="{Binding Source={StaticResource membraneAvailableReactionsListView}}"
                                                                                 SelectedIndex="-1"
                                                                                 MinHeight="50" MaxHeight="150"
                                                                                 >
 
 
-                                                    <ListView.View>
-                                                        <GridView>
-                                                            <GridView.ColumnHeaderContainerStyle>
-                                                                <Style TargetType="GridViewColumnHeader">
-                                                                    <Setter Property="Height" Value="Auto"></Setter>
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Offset="0.0" Color="White" />
-                                                                                <GradientStop Offset="1.0" Color="Beige" />
-                                                                            </LinearGradientBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </Style>
-                                                            </GridView.ColumnHeaderContainerStyle>
+                                                        <ListView.View>
+                                                            <GridView>
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
 
-                                                            <GridViewColumn Width="80" Header="Rate constant">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
+                                                                <GridViewColumn Width="80" Header="Rate constant">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
                                                                                                     Number="{Binding rate_const}">
-                                                                        </uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-                                                            <GridViewColumn Width="300" Header="Reaction" >
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBlock Text="{Binding TotalReactionString}">
+                                                                            </uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                                <GridViewColumn Width="300" Header="Reaction" >
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding TotalReactionString}">
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
@@ -959,28 +974,28 @@
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
-                                                                        </TextBlock>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
 
-                                                            </GridViewColumn>
-                                                        </GridView>
-                                                    </ListView.View>
-                                                </ListView>
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                    <Button Name="MembraneAddReacButton"  Width="120" Content="Add" Click="MembraneAddReacButton_Click">
-                                                        <Button.ToolTip>
-                                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                                </GridViewColumn>
+                                                            </GridView>
+                                                        </ListView.View>
+                                                    </ListView>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                        <Button Name="MembraneAddReacButton"  Width="120" Content="Add" Click="MembraneAddReacButton_Click">
+                                                            <Button.ToolTip>
+                                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                                 Add the selected reaction to the cells in this populatoin for this simulation. 
                                                                 Choose the Stores option in the main menu to get more reactions or create a new reaction below if
-                                                                you cannot find the reaction that you are looking for. 
-                                                            </TextBlock>
-                                                        </Button.ToolTip>
-                                                    </Button>
+                                                                you cannot find the reaction that you are looking for.
+                                                                </TextBlock>
+                                                            </Button.ToolTip>
+                                                        </Button>
+                                                    </StackPanel>
                                                 </StackPanel>
-                                            </StackPanel>
-                                        </Expander>
-                                        <Expander x:Name="MembCreateNewReaction"
+                                            </Expander>
+                                            <Expander x:Name="MembCreateNewReaction"
                                                     ExpandDirection="Down"
                                                     IsExpanded="False"
                                                     Header="Create New Reaction"                                                  
@@ -988,57 +1003,57 @@
                                                     Canvas.ZIndex="1"
                                                    Expanded="MembCreateNewReaction_Expanded"
                                                     >
-                                            <Grid>
-                                                <local:AddReactionControl Margin="0,6" Tag="membrane" />
-                                            </Grid>
-                                        </Expander>
+                                                <Grid>
+                                                    <local:AddReactionControl Margin="0,6" Tag="membrane" />
+                                                </Grid>
+                                            </Expander>
 
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+                                </TabItem>
 
-                            <!-- Reactions in cell Cytosol -->
-                            <TabItem >
-                                <TabItem.Header>
-                                    <TextBlock Text="Cytosol" FontWeight="Bold" />
-                                </TabItem.Header>
-                                <StackPanel Orientation="Vertical" >
-                                    <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
+                                <!-- Reactions in cell Cytosol -->
+                                <TabItem >
+                                    <TabItem.Header>
+                                        <TextBlock Text="Cytosol" FontWeight="Bold" />
+                                    </TabItem.Header>
+                                    <StackPanel Orientation="Vertical" >
+                                        <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
                                                              >
 
-                                        <ListBox.ContextMenu>
-                                            <ContextMenu >
-                                                <MenuItem Header="Save to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
-                                                <MenuItem Header="Get from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
-                                            </ContextMenu>
-                                        </ListBox.ContextMenu>
+                                            <ListBox.ContextMenu>
+                                                <ContextMenu >
+                                                    <MenuItem Header="Save to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
+                                                    <MenuItem Header="Get from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
+                                                </ContextMenu>
+                                            </ListBox.ContextMenu>
 
-                                    </ListBox>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                        <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                        </ListBox>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                            <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Any changes to properties of the selected reaction only apply to this cell type in this simulation. 
                                                     Select this option to save the changes to the Protocol Library in order to make the modified reaction 
                                                     available for use elsewhere in the simulation scenario
                                                     or to make the the modified reaction available for saving as permanent user default.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button>
-                                        <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click">
-                                            <Button.ToolTip>
-                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                            <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click">
+                                                <Button.ToolTip>
+                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Remove the selected reaction from the cells in the selected cell population for this simulation.
-                                                </TextBlock>
-                                            </Button.ToolTip>
-                                        </Button> 
-                                    </StackPanel>
-                                    <StackPanel>
-                     
-                                        <Expander x:Name="CellAddReacExpander2" 
+                                                    </TextBlock>
+                                                </Button.ToolTip>
+                                            </Button>
+                                        </StackPanel>
+                                        <StackPanel>
+
+                                            <Expander x:Name="CellAddReacExpander2" 
                                                     ExpandDirection="Down"
                                                     IsExpanded="False"
                                                     Header="Add a reaction"
@@ -1046,43 +1061,43 @@
                                                     Canvas.ZIndex="1"
                                                             Expanded="CellAddReacExpander2_Expanded"
                                                     >
-                                            <StackPanel Orientation="Vertical" Margin="10,0">
-                                                <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
-                                                <ListView x:Name="lvCytosolAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
+                                                <StackPanel Orientation="Vertical" Margin="10,0">
+                                                    <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
+                                                    <ListView x:Name="lvCytosolAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
                                                             ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionsListView}}"
                                                             SelectedIndex="-1"
                                                             MinHeight="50" MaxHeight="150"
                                                             >
 
-                                                    <ListView.View>
-                                                        <GridView>
-                                                            <GridView.ColumnHeaderContainerStyle>
-                                                                <Style TargetType="GridViewColumnHeader">
-                                                                    <Setter Property="Height" Value="Auto"></Setter>
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Offset="0.0" Color="White" />
-                                                                                <GradientStop Offset="1.0" Color="Beige" />
-                                                                            </LinearGradientBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </Style>
-                                                            </GridView.ColumnHeaderContainerStyle>
+                                                        <ListView.View>
+                                                            <GridView>
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
 
-                                                            <GridViewColumn Width="80" Header="Rate constant">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
+                                                                <GridViewColumn Width="80" Header="Rate constant">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
                                                                                                     Number="{Binding rate_const}">
-                                                                        </uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-                                                            <GridViewColumn Width="300" Header="Reaction" >
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBlock Text="{Binding TotalReactionString}">
+                                                                            </uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                                <GridViewColumn Width="300" Header="Reaction" >
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding TotalReactionString}">
                                                                                     <TextBlock.Style>
                                                                                         <Style>
                                                                                             <Setter Property="TextBlock.Foreground" 
@@ -1090,52 +1105,52 @@
                                                                                             </Setter>
                                                                                         </Style>
                                                                                     </TextBlock.Style>
-                                                                        </TextBlock>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
 
-                                                            </GridViewColumn>
-                                                        </GridView>
-                                                    </ListView.View>
-                                                </ListView>
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                    <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click">
-                                                        <Button.ToolTip>
-                                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                                </GridViewColumn>
+                                                            </GridView>
+                                                        </ListView.View>
+                                                    </ListView>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                        <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click">
+                                                            <Button.ToolTip>
+                                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                                 Add the selected reaction to the cells in this populationn for this simulation. 
                                                                 Choose the Stores option in the main menu to get more reactions or create a new reaction below
                                                                 or create a new reaction below if
                                                                 you cannot find the reaction that you are looking for.
-                                                            </TextBlock>
-                                                        </Button.ToolTip>
-                                                    </Button>
+                                                                </TextBlock>
+                                                            </Button.ToolTip>
+                                                        </Button>
+                                                    </StackPanel>
                                                 </StackPanel>
-                                            </StackPanel>
-                                        </Expander>
+                                            </Expander>
 
-                                        <Expander x:Name="CytoCreateNewReaction"
+                                            <Expander x:Name="CytoCreateNewReaction"
                                                     ExpandDirection="Down"
                                                     IsExpanded="False"
                                                     Header="Create New Reaction"                                                  
                                                     Margin="0,0,0,0" 
                                                     Canvas.ZIndex="1"
                                             >
-                                            <Grid>
-                                                <local:AddReactionControl Margin="0,6" Tag="cytosol" />
-                                            </Grid>
-                                        </Expander>
+                                                <Grid>
+                                                    <local:AddReactionControl Margin="0,6" Tag="cytosol" />
+                                                </Grid>
+                                            </Expander>
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+                                </TabItem>
 
-                        </TabControl>
+                            </TabControl>
+                        </StackPanel>
+
                     </StackPanel>
+                </Expander>
 
-                </StackPanel>
-            </Expander>
-            
-            <!-- ReactionComplexes in this cell and their location -->
-            <Expander
+                    <!-- ReactionComplexes in this cell and their location -->                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                    <Expander
                         Visibility="Visible"
                         Padding="5" 
                         ExpandDirection="Down"
@@ -1149,59 +1164,59 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                         Expanded="ReacCompExpander_Expanded">
 
-                <StackPanel>
+                    <StackPanel>
 
-                    <TabControl SelectionChanged="TabControl_SelectionChanged">
-                        <!-- Reaction Complexes in cell Membrane -->
-                        <TabItem >
-                            <TabItem.Header>
-                                <TextBlock Text="Membrane" FontWeight="Bold" />
-                            </TabItem.Header>
-
-                            <StackPanel>
-                                <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
-
+                        <TabControl SelectionChanged="TabControl_SelectionChanged">
+                            <!-- Reaction Complexes in cell Membrane -->
+                            <TabItem >
+                                <TabItem.Header>
+                                    <TextBlock Text="Membrane" FontWeight="Bold" />
+                                </TabItem.Header>
 
                                 <StackPanel>
+                                    <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
 
-                                    <StackPanel.ToolTip>
-                                        <StackPanel Width="200" Orientation="Horizontal">
-                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+
+                                    <StackPanel>
+
+                                        <StackPanel.ToolTip>
+                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
                                                         Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </StackPanel.ToolTip>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel.ToolTip>
 
 
-                                    <ListBox x:Name="MembReactionComplexListBox" MinHeight="50" 
+                                        <ListBox x:Name="MembReactionComplexListBox" MinHeight="50" 
                                             ItemsSource="{Binding Path=membrane.reaction_complexes}" 
                                             DisplayMemberPath="Name"
                                             SelectedIndex="-1"
                                     />
 
-                                </StackPanel>
+                                    </StackPanel>
 
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                    <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click">
-                                        <Button.ToolTip>
-                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                        <Button Name="MembSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="MembSaveReacCompToProtocolButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Any changes to properties of the selected reaction complex only apply to this cell type in this simulation. 
                                                     Select this option to save the changes to the Protocol Library in order to make the modified reaction complex
                                                     available for use elsewhere in the simulation scenario
                                                     or to make the the modified reaction complex available for saving as permanent user default.
-                                            </TextBlock>
-                                        </Button.ToolTip>
-                                    </Button> 
-                                    <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click">
-                                        <Button.ToolTip>
-                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                        <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Remove the selected reaction complex from this cell population for this simulation.
-                                            </TextBlock>
-                                        </Button.ToolTip>
-                                    </Button>
-                                </StackPanel>
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                    </StackPanel>
 
-                                <Expander ExpandDirection="Down"
+                                    <Expander ExpandDirection="Down"
                                     IsExpanded="False"
                                     Header="Details"
                                     x:Name="MembRCDetailsExpander"
@@ -1212,44 +1227,44 @@
                                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                                           Expanded="MembRCDetailsExpander_Expanded">
 
-                                    <StackPanel Orientation="Vertical" >
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                            <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" Width="400" MinWidth="100"
+                                        <StackPanel Orientation="Vertical" >
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" Width="400" MinWidth="100"
                                                 Text="{Binding  ElementName=MembReactionComplexListBox, 
                                                                 Path=SelectedItem.Name}">
-                                                <TextBox.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel Width="200" Orientation="Horizontal">
-                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                A list of reaction complexes in the cell membrane. 
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </TextBox.ToolTip>
-                                            </TextBox>
-                                        </StackPanel >
-                                        <StackPanel x:Name="spReacComp"  >
-                                            <StackPanel.Resources>
-                                                <DataTemplate x:Key="cellReacListItemTemplate">
-                                                    <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                    <TextBox.ToolTip>
+                                                        <ToolTip>
+                                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                A list of reaction complexes in the cell membrane.
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </TextBox.ToolTip>
+                                                </TextBox>
+                                            </StackPanel >
+                                            <StackPanel x:Name="spReacComp"  >
+                                                <StackPanel.Resources>
+                                                    <DataTemplate x:Key="cellReacListItemTemplate">
+                                                        <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                    </TextBlock>
-                                                </DataTemplate>
-                                            </StackPanel.Resources>
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </StackPanel.Resources>
 
-                                            <TextBlock Text="Reactions" Margin="6,0"  />
+                                                <TextBlock Text="Reactions" Margin="6,0"  />
 
-                                            <ContentControl
+                                                <ContentControl
                                             Content="{Binding ElementName=MembReactionComplexListBox, Path=SelectedItem}" 
                                                               ContentTemplate="{StaticResource reacListViewTemplate}">
-                                            </ContentControl>
+                                                </ContentControl>
 
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Expander>
+                                    </Expander>
 
-                                <Expander ExpandDirection="Down"
+                                    <Expander ExpandDirection="Down"
                                 IsExpanded="False"
                                 Header="Add reaction complex"
                                 x:Name="MembAddReacCxExpander"
@@ -1260,88 +1275,88 @@
                                 Expanded="MembAddReacCxExpander_Expanded"
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                                    <StackPanel Orientation="Vertical" Margin="10,0">
-                                        <StackPanel.Resources>
-                                            <DataTemplate x:Key="reacCxListItemTemplate">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Path=Name}" />
-                                                </StackPanel>
-                                            </DataTemplate>
+                                        <StackPanel Orientation="Vertical" Margin="10,0">
+                                            <StackPanel.Resources>
+                                                <DataTemplate x:Key="reacCxListItemTemplate">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Path=Name}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
 
-                                        </StackPanel.Resources>
+                                            </StackPanel.Resources>
 
-                                        <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
-                                        <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
+                                            <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                                            <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
                                             ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
                                             ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                             SelectedIndex="-1" >
-                                        </ListBox>
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                            <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click">
-                                                <Button.ToolTip>
-                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            </ListBox>
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
+                                                <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click">
+                                                    <Button.ToolTip>
+                                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                         Add the selected reaction complex to the selected cell population for this simulation.
-                                                    </TextBlock>
-                                                </Button.ToolTip>
-                                            </Button>
-                                        </StackPanel>
+                                                        </TextBlock>
+                                                    </Button.ToolTip>
+                                                </Button>
+                                            </StackPanel>
 
-                                        <ContentControl Name="AddReactionComplexDetails1"
+                                            <ContentControl Name="AddReactionComplexDetails1"
                                             Content="{Binding ElementName=lbMembAvailableReacCx, Path=SelectedItem}" 
                                             ContentTemplate="{StaticResource reacListViewTemplate}" 
                                             Margin="6"/>
 
-                                    </StackPanel>
-                                </Expander>
-                            </StackPanel>
-                        </TabItem>
-                        
-                        <!-- Reaction Complexes in cell Cytosol -->
-                        <TabItem >
-                            <TabItem.Header>
-                                <TextBlock Text="Cytosol" FontWeight="Bold" />
-                            </TabItem.Header>
-
-                            <StackPanel>
-                                <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
-                                <StackPanel>                                    
-                                    <StackPanel.ToolTip>
-                                        <StackPanel Width="200" Orientation="Horizontal">
-                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
-                                            </TextBlock>
                                         </StackPanel>
-                                    </StackPanel.ToolTip>
+                                    </Expander>
+                                </StackPanel>
+                            </TabItem>
 
-                                    <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
+                            <!-- Reaction Complexes in cell Cytosol -->
+                            <TabItem >
+                                <TabItem.Header>
+                                    <TextBlock Text="Cytosol" FontWeight="Bold" />
+                                </TabItem.Header>
+
+                                <StackPanel>
+                                    <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
+                                    <StackPanel>
+                                        <StackPanel.ToolTip>
+                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel.ToolTip>
+
+                                        <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
                                         ItemsSource="{Binding Path=cytosol.reaction_complexes}" 
                                         DisplayMemberPath="Name"
                                         SelectedIndex="-1"
                                      />
 
-                                </StackPanel>
+                                    </StackPanel>
 
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                    <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click">
-                                        <Button.ToolTip>
-                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                        <Button Name="CytoSaveReacCompToProtocolButton" Content="Save to Subcellular Components Library" Click="CytoSaveReacCompToProtocolButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Any changes to properties of the selected reaction complex only apply to this cell type in this simulation. 
                                                     Select this option to save the changes to the Protocol Library in order to make the modified reaction complex 
                                                     available for use elsewhere in the simulation scenario
                                                     or to make the the modified reaction complex available for saving as permanent user default.
-                                            </TextBlock>
-                                        </Button.ToolTip>
-                                    </Button>                                   
-                                    <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click">
-                                        <Button.ToolTip>
-                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                        <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click">
+                                            <Button.ToolTip>
+                                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                     Remove the selected reaction complex from this cell population for this simulation.
-                                            </TextBlock>
-                                        </Button.ToolTip>
-                                    </Button>
-                                </StackPanel>
+                                                </TextBlock>
+                                            </Button.ToolTip>
+                                        </Button>
+                                    </StackPanel>
 
-                                <Expander ExpandDirection="Down"
+                                    <Expander ExpandDirection="Down"
                                     IsExpanded="False"
                                     Expanded="CytoRCDetailsExpander_Expanded"
                                     Header="Details"
@@ -1353,43 +1368,43 @@
                                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                                           >
 
-                                    <StackPanel Orientation="Vertical" >
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                            <TextBox Margin="0,2" x:Name="txtCytoReacComplexName" IsReadOnly="True" 
+                                        <StackPanel Orientation="Vertical" >
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                <TextBox Margin="0,2" x:Name="txtCytoReacComplexName" IsReadOnly="True" 
                                                 Text="{Binding  ElementName=CytoReactionComplexListBox, Path=SelectedItem.Name}">
-                                                <TextBox.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel Width="200" Orientation="Horizontal">
-                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                    <TextBox.ToolTip>
+                                                        <ToolTip>
+                                                            <StackPanel Width="200" Orientation="Horizontal">
+                                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
                                                                     A list of reaction complexes in the cell cytosol.
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </TextBox.ToolTip>
-                                            </TextBox>
-                                        </StackPanel >
-                                        <StackPanel x:Name="spCytoReacComp"  >
-                                            <StackPanel.Resources>
-                                                <DataTemplate x:Key="cellReacListItemTemplate">
-                                                    <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </TextBox.ToolTip>
+                                                </TextBox>
+                                            </StackPanel >
+                                            <StackPanel x:Name="spCytoReacComp"  >
+                                                <StackPanel.Resources>
+                                                    <DataTemplate x:Key="cellReacListItemTemplate">
+                                                        <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                    </TextBlock>
-                                                </DataTemplate>
-                                            </StackPanel.Resources>
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </StackPanel.Resources>
 
-                                            <TextBlock Text="Reactions" Margin="6,0"  />
+                                                <TextBlock Text="Reactions" Margin="6,0"  />
 
-                                            <ContentControl
+                                                <ContentControl
                                                     Content="{Binding ElementName=CytoReactionComplexListBox, Path=SelectedItem}" 
                                                     ContentTemplate="{StaticResource reacListViewTemplate}">
-                                            </ContentControl>
+                                                </ContentControl>
+                                            </StackPanel>
+
                                         </StackPanel>
+                                    </Expander>
 
-                                    </StackPanel>
-                                </Expander>
-
-                                <Expander ExpandDirection="Down"
+                                    <Expander ExpandDirection="Down"
                                 IsExpanded="False"
                                 Expanded="AddReacCxExpander_Expanded"
                                 Header="Add reaction complex"
@@ -1400,45 +1415,62 @@
                                 BorderBrush="Black"
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                                    <StackPanel Orientation="Vertical" Margin="10,0">
-                                        <StackPanel.Resources>
-                                            <DataTemplate x:Key="reacCxListItemTemplate">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Path=Name}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </StackPanel.Resources>
+                                        <StackPanel Orientation="Vertical" Margin="10,0">
+                                            <StackPanel.Resources>
+                                                <DataTemplate x:Key="reacCxListItemTemplate">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Path=Name}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </StackPanel.Resources>
 
-                                        <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
-                                        <ListBox x:Name="lbCytoAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"     
+                                            <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                                            <ListBox x:Name="lbCytoAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"     
                                                  ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionComplexesListView}}"
                                                 ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                                 SelectedIndex="-1" >
-                                        </ListBox>
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                            <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click" >
-                                                <Button.ToolTip>
-                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                            </ListBox>
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
+                                                <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click" >
+                                                    <Button.ToolTip>
+                                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                                         Add the selected reaction complex to this cell population for this simulation.
-                                                    </TextBlock>
-                                                </Button.ToolTip>
-                                            </Button>
-                                        </StackPanel>
-                                        <ContentControl Name="AddCytoReactionComplexDetails"
+                                                        </TextBlock>
+                                                    </Button.ToolTip>
+                                                </Button>
+                                            </StackPanel>
+                                            <ContentControl Name="AddCytoReactionComplexDetails"
                                             Content="{Binding ElementName=lbCytoAvailableReacCx, Path=SelectedItem}" 
                                             ContentTemplate="{StaticResource reacListViewTemplate}" 
                                             Margin="6"/>
 
-                                    </StackPanel>
-                                </Expander>
-                            </StackPanel>
-                        </TabItem>
-                    </TabControl>
-                </StackPanel>
+                                        </StackPanel>
+                                    </Expander>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </StackPanel>
+                </Expander>
+
+                </local:DaphneStackPanel>
             </Expander>
-            
-            <!-- Differentiation -->
-            <Expander   
+
+            <Expander  Padding="5"
+                        ExpandDirection="Down"
+                        IsExpanded="False"
+                        Header="Transitions"                                              
+                        x:Name="CellTransitionExpander"
+                        Margin="0,5,0,0" 
+                        Canvas.ZIndex="1"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        >
+
+                <local:DaphneStackPanel x:Name="panelCellTransitions" >
+                
+                    <!-- Differentiation -->          
+                    <Expander   
                     Padding="5" ExpandDirection="Down"
                     IsExpanded="False"
                     Header="Differentiation"                                                  
@@ -1451,33 +1483,33 @@
                     Expanded="DiffSchemeExpander_Expanded"
                 >
 
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
-                    <StackPanel>
-                        <Grid >
-                            <Grid.Resources>
-                                <DataTemplate x:Key="diffSchemeListItemTemplate2">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Path=Hello}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                    <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
+                        <StackPanel>
+                            <Grid >
+                                <Grid.Resources>
+                                    <DataTemplate x:Key="diffSchemeListItemTemplate2">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Path=Hello}" />
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <DataTemplate x:Key="geneListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
-                                        <CheckBox IsChecked="{Binding Path=Active}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                                    <DataTemplate x:Key="geneListItemTemplate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="50" Text="{Binding Path=Name}" />
+                                            <CheckBox IsChecked="{Binding Path=Active}" />
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <DataTemplate x:Key="stateListItemTemplate">
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
+                                    <DataTemplate x:Key="stateListItemTemplate">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
+                                            <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
                                                             ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
                                                             ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <!--<DataTemplate x:Key="cellState2ListItemTemplate">
+                                    <!--<DataTemplate x:Key="cellState2ListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="20" Text="{Binding Path=Name}" />
                                         <TextBlock Width="10" Text="" />
@@ -1496,67 +1528,67 @@
                                     </StackPanel>
                                 </DataTemplate>-->
 
-                                <DataTemplate x:Key="diffStatesListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                                    <DataTemplate x:Key="diffStatesListItemTemplate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="80" Text="{Binding Path=Name}" />
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <DataTemplate x:Key="cellStateGridItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Grid.Resources>
+                                    <DataTemplate x:Key="cellStateGridItemTemplate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="80" Text="{Binding Path=MolName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Grid.Resources>
 
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="130" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
 
-                            <!-- DIFFERENTIATION SCHEME -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                <!-- DIFFERENTIATION SCHEME -->
+                                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                     Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}" >
-                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">
-                                    Delete Differentiation Scheme
-                                    <Button.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">
+                                        Delete Differentiation Scheme
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                             Remove cell differentiation for this cell population in this simulation.
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                </Button>
-                            </StackPanel>
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                     Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}">
-                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">
-                                    New Differentiation Scheme
-                                    <Button.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">
+                                        New Differentiation Scheme
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                             Add cell differentiation to the cells in the selected cell population for this simulation.
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
 
-                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
+                        <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
                             Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
 
-                </StackPanel>
-            </Expander>
-          
-            <!-- Division -->
-            <Expander   Header="Division"
+                    </StackPanel>
+                </Expander>
+
+                    <!-- Division -->
+                    <Expander   Header="Division"
                         Padding="5" ExpandDirection="Down"
                         IsExpanded="False"                                                  
                         x:Name="DivSchemeExpander"
@@ -1567,29 +1599,29 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
                         Expanded="DivSchemeExpander_Expanded" >
 
-                <!--Expanded="DivSchemeExpander_Expanded"-->
-                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
+                    <!--Expanded="DivSchemeExpander_Expanded"-->
+                    <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
                             x:Name="spDivScheme">
-                    <StackPanel>
-                        <Grid >
-                            <Grid.Resources>
-                                <DataTemplate x:Key="geneListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
-                                        <CheckBox IsChecked="{Binding Path=Active}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                        <StackPanel>
+                            <Grid >
+                                <Grid.Resources>
+                                    <DataTemplate x:Key="geneListItemTemplate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="50" Text="{Binding Path=Name}" />
+                                            <CheckBox IsChecked="{Binding Path=Active}" />
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <DataTemplate x:Key="stateListItemTemplate">
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
+                                    <DataTemplate x:Key="stateListItemTemplate">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
+                                            <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
                                                             ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
                                                             ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <!--<DataTemplate x:Key="cellState2ListItemTemplate">
+                                    <!--<DataTemplate x:Key="cellState2ListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="20" Text="{Binding Path=Name}" />
                                         <TextBlock Width="10" Text="" />
@@ -1608,90 +1640,94 @@
                                     </StackPanel>
                                 </DataTemplate>-->
 
-                                <DataTemplate x:Key="divStatesListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
+                                    <DataTemplate x:Key="divStatesListItemTemplate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="80" Text="{Binding Path=Name}" />
+                                        </StackPanel>
+                                    </DataTemplate>
 
-                                <DataTemplate x:Key="cellStateGridItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Grid.Resources>
+                                    <DataTemplate x:Key="cellStateGridItemTemplate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="80" Text="{Binding Path=MolName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Grid.Resources>
 
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                                <ColumnDefinition Width="120" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="130" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
 
-                            <!-- DIVISION SCHEME -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                <!-- DIVISION SCHEME -->
+                                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                         Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}}"
                                         >
-                                <Button x:Name="btnDelDivScheme" Click="btnDelDiffScheme_Click" Tag="Division">
-                                    Delete Division Scheme
-                                    <Button.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    <Button x:Name="btnDelDivScheme" Click="btnDelDiffScheme_Click" Tag="Division">
+                                        Delete Division Scheme
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                             Remove cell division for this cell population in this simulation.
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                </Button>
-                            </StackPanel>
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
                                         Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}"
                                         >
-                                <Button x:Name="btnNewDivScheme" Click="btnNewDiffScheme_Click" Tag="Division">
-                                    New Division Scheme
-                                    <Button.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                    <Button x:Name="btnNewDivScheme" Click="btnNewDiffScheme_Click" Tag="Division">
+                                        New Division Scheme
+                                        <Button.ToolTip>
+                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                             Add cell division to the cells in the selected cell population for this simulation.
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
+                                            </TextBlock>
+                                        </Button.ToolTip>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
 
-                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid" 
+                        <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid" 
                             Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}"
                                         Tag="div"/>
-                    
-                    
-                </StackPanel>
-            </Expander>
 
-            <!-- Cell Death -->
-            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
+
+                    </StackPanel>
+                </Expander>
+
+                    <!-- Cell Death -->
+                    <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Death" x:Name="CellDeathExpander" 
                                                 Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                                                 Expanded="CellDeathExpander_Expanded">
-                <StackPanel>
-                    <StackPanel x:Name="spDeath" Orientation="Vertical" >
+                    <StackPanel>
+                        <StackPanel x:Name="spDeath" Orientation="Vertical" >
 
-                        <!-- switch between new death driver or death driver content -->
-                        <StackPanel Name="spNewDriverSwitch" >
-                            <ContentControl x:Name="NewDriverSwitch"
+                            <!-- switch between new death driver or death driver content -->
+                            <StackPanel Name="spNewDriverSwitch" >
+                                <ContentControl x:Name="NewDriverSwitch"
                                             Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                             Style="{StaticResource Death_NewButton_or_TDE_details_SelectableStyle}"
                                             />
-                        </StackPanel>
+                            </StackPanel>
 
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Expander>
+              
+                </local:DaphneStackPanel>
             </Expander>
-             
-        </local:DaphneStackPanel>
+            
+        </StackPanel>
+        
     </Grid>
     
 </UserControl>

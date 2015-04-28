@@ -1451,6 +1451,15 @@ namespace DaphneGui
             //int[] x = interactor.GetEventPosition();
             int[] x = leftButtonPressPostion;
 
+
+            // Increase the tolerance for locating cells for tracking and display of cell information
+            // when cells are rendered as points or polygons.
+            double orig_tolerance = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetTolerance();
+            if (cellRenderMethod != CellRenderMethod.CELL_RENDER_SPHERES)
+            {
+                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(0.01);
+            }
+
             int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
 
             if (p > 0)
@@ -1483,6 +1492,7 @@ namespace DaphneGui
                                 }
 
                                 MessageBox.Show("The data needed to generate tracks is not present in the report.\n" + detail, "Track warning", MessageBoxButton.OK);
+                                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
                                 return;
                             }
                             trackTool.FilterData(data);
@@ -1498,6 +1508,7 @@ namespace DaphneGui
                                                 "-the number of simulation steps is too small.\n" + 
                                                 "-the cell does not move significantly: identical points along a track must get removed for computational reasons, " +
                                                 "reducing the number of track points.", "Track warning", MessageBoxButton.OK);
+                                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
                                 return;
                             }
                         }
@@ -1511,10 +1522,12 @@ namespace DaphneGui
                     }
                     else
                     {
+                        ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
                         return;
                     }
                 }
             }
+            ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
         }
 
         public void zoomToPath(vtkProp p)
