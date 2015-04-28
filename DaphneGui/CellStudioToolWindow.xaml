@@ -50,12 +50,12 @@
 
                         <local:DaphneStackPanel x:Name="panelCellMolPops" >
 
-                            <StackPanel x:Name="CellPropertyStackPanel" Orientation="Horizontal" Margin="10,0">
+                            <StackPanel x:Name="CellPropertyStackPanel" Margin="10,0">
                                 <!--Tag ="{Binding ElementName=CellPropertyStackPanel, Path=DataContext}"-->
                                 <local:CellPropertiesControl x:Name="ucCellPropertiesControl" DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"/>
                             </StackPanel>
  
-                            <StackPanel Margin="10,6">
+                            <StackPanel Margin="10,0">
                                 <local:CellDetailsControl x:Name="ucCellDetails" DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"/>
                             </StackPanel>
                             
