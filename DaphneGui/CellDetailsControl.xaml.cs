@@ -1198,7 +1198,15 @@ namespace DaphneGui
                 }
 
                 ConfigGene newgene = gene1.Clone(null);
-                scheme.AddGene(newgene.entity_guid); 
+                scheme.AddGene(newgene.entity_guid);
+
+                // The default activation level is 1
+                int i = scheme.genes.IndexOf(newgene.entity_guid);
+                foreach (ConfigActivationRow row in scheme.activationRows)
+                {
+                    row.activations[i] = 0.0;
+                }
+                
 
                 //HERE, WE NEED TO ADD THE GENE TO THE CELL ALSO
                 if (cell.HasGene(gene1.entity_guid) == false)

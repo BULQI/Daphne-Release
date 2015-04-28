@@ -7445,6 +7445,7 @@ namespace Daphne
         public bool Division { get; set; }
         public bool Differentiation { get; set; }
         public bool Exit { get; set; }
+        public bool Generation { get; set; }
     }
 
     public class CellPopulation : EntityModelBase

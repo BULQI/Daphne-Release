@@ -101,7 +101,7 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
-                    SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id);
+                    SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id, kvp.Value.generation);
                 }
            }
 

@@ -110,11 +110,17 @@ namespace DaphneGui
             {
                 if (toolWinTissue.EcmMolpopControl.lbAvailableReacCx != null)
                 {
-                    CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource).Refresh();
+                    if (toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource != null)
+                    {
+                        CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource).Refresh();
+                    }
                 }
                 if (toolWinTissue.EcmMolpopControl.lvAvailableReacs != null)
                 {
-                    CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource).Refresh();
+                    if (toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource != null)
+                    {
+                        CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource).Refresh();
+                    }
                 }
             }
         }
@@ -290,7 +296,9 @@ namespace DaphneGui
         protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
             // gmk - re-evaluate this section. Not sure if it is doing anything useful.
-            toolWinTissue.lbRptCellPops.SelectedItem = 0;
+            //skg - this line selects the first cell in the list
+            toolWinTissue.lbRptCellPops.SelectedIndex = 0;
+
             //toolWinTissue.dgEcmMols.SelectedItem = 0;
             //toolWinTissue.dgCellDetails.SelectedItem = 0;
             //toolWinTissue.dgCellStates.SelectedItem = 0;

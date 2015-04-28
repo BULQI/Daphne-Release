@@ -1805,6 +1805,8 @@ namespace DaphneGui
         {
             runButton.IsEnabled = false;
             mutex = true;
+            pushMenu.IsEnabled = true;
+            AdminMenu.IsEnabled = true;
 
             saveStoreFiles();
             saveTempFiles();
@@ -1824,6 +1826,8 @@ namespace DaphneGui
             saveButton.IsEnabled = false;
             CellOptionsExpander.IsExpanded = false;
             ECMOptionsExpander.IsExpanded = false;
+            pushMenu.IsEnabled = false;
+            AdminMenu.IsEnabled = false;
             mutex = true;
 
             runSim(true);
