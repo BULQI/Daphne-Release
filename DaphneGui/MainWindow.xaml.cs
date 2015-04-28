@@ -2369,16 +2369,43 @@ namespace DaphneGui
                 {
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
                     {
-                        // run the simulation forward to the next task
+                        // run the simulation forward to the next task; also handle burn in
                         if (postConstruction == true && AssumeIDE() == true)
                         {
-                            sim.RunForward();
+                            if (sim.Burn_inExec() == true)
+                            {
+                                sim.Burn_inStep();
+                                if (sim.Burn_inExec() == false)
+                                {
+                                    sim.Burn_inCleanup();
+                                    // no need to render this, will be taken care of by the start of the run
+                                    if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
+                                    {
+                                        sim.ClearFlag(SimulationBase.SIMFLAG_ALL);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                sim.RunForward();
+                            }
                         }
                         else
                         {
                             try
                             {
-                                sim.RunForward();
+                                if (sim.Burn_inExec() == true)
+                                {
+                                    sim.Burn_inStep();
+                                    if (sim.Burn_inExec() == false)
+                                    {
+                                        sim.Burn_inCleanup();
+                                    }
+                                }
+                                else
+                                {
+                                    sim.RunForward();
+                                }
                             }
                             catch (Exception e)
                             {
@@ -2392,7 +2419,7 @@ namespace DaphneGui
                         {
                             if (Properties.Settings.Default.skipDataWrites == false)
                             {
-                                if (sim.FrameData != null)
+                                if (sim.Burn_inExec() == false && sim.FrameData != null)
                                 {
                                     sim.FrameData.writeData(sim.FrameNumber - 1);
                                 }
@@ -2966,8 +2993,8 @@ namespace DaphneGui
         public MessageBoxResult saveDialog()
         {
             // Configure the message box to be displayed
-            string messageBoxText = "Scenario parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
-            string caption = "Scenario Changed";
+            string messageBoxText = "Protocol parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
+            string caption = "Protocol changed";
             MessageBoxButton button = MessageBoxButton.YesNoCancel;
             MessageBoxImage icon = MessageBoxImage.Warning;
 

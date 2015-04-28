@@ -1782,10 +1782,19 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.RepeatingRun() == true)
+                if (MainWindow.Sim.RunStatus == SimulationBase.RUNSTAT_OFF)
+                {
+                    ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "");
+                }
+                else if (MainWindow.Sim.Burn_inExec() == true)
+                {
+                    ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Equilibrating...");
+                }
+                else if (MainWindow.RepeatingRun() == true)
                 {
                     int rep = MainWindow.Repetition;
                     int reps = MainWindow.SOP.Protocol.experiment_reps;
+
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Rep: " + rep + "/" + reps + " Progress: " + progress + "%");
                 }
                 else

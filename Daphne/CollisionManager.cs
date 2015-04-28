@@ -27,14 +27,13 @@ namespace Daphne
 
         public void Step(double dt)
         {
-            update(dt);
+            update();
         }
 
         private bool clearSeparation(Pair p)
         {
-             int maxSep = (int)Math.Ceiling((p.Cell(0).Radius + p.Cell(1).Radius) / gridStep);
-
-            int dx, dy, dz;
+            int maxSep = (int)Math.Ceiling((p.Cell(0).Radius + p.Cell(1).Radius) / gridStep),
+                dx, dy, dz;
 
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && (SimulationBase.dataBasket.Environment as ECSEnvironment).toroidal == true)
@@ -44,13 +43,19 @@ namespace Daphne
                 {
                     dx = gridPts[0] - dx;
                 }
-                if (dx > maxSep) return true;
+                if (dx > maxSep)
+                {
+                    return true;
+                }
                 dy = p.GridIndex_dy;
                 if (dy > 0.5 * gridPts[1])
                 {
                     dy = gridPts[1] - dy;
                 }
-                if (dy > maxSep) return true;
+                if (dy > maxSep)
+                {
+                    return true;
+                }
                 dz = p.GridIndex_dz;
                 if (dz > 0.5 * gridPts[2])
                 {
@@ -225,8 +230,7 @@ namespace Daphne
                 foreach (KeyValuePair<int, Pair> kvp in pairs)
                 {
                     // recalculate the distance for pairs
-                    //kvp.Value.distance(gridSize);
-                    kvp.Value.distance(gridSize.ToArray());
+                    kvp.Value.calcDistance(gridSize.ToArray());
                 }
             }
         }
@@ -238,8 +242,8 @@ namespace Daphne
         {
             List<Cell> criticalCells = null;
             List<int> removalPairKeys = null;
-
             double[] gridSizeArr = gridSize.ToArray();
+
             // create the pairs dictionary
             if (pairs == null)
             {
@@ -260,37 +264,10 @@ namespace Daphne
                         pairKeyMultiplier = tmp;
                     }
                 }
-
-                // only keep the critical pairs and update their distance;
-                // remove the ones that are no longer critical,
-                // i.e. are 'clearly separated' and a) were critical but never became overlapping or b) have broken their bond
-                foreach (KeyValuePair<int, Pair> kvp in pairs)
-                {
-                    if (kvp.Value.isCriticalPair() == false && clearSeparation(kvp.Value) == true || legalIndex(kvp.Value.Cell(0).GridIndex) == false || legalIndex(kvp.Value.Cell(1).GridIndex) == false)
-                    {
-                        if (removalPairKeys == null)
-                        {
-                            removalPairKeys = new List<int>();
-                        }
-                        removalPairKeys.Add(kvp.Key);
-                    }
-                    else
-                    {
-                        // recalculate the distance for pairs that stay
-                        //kvp.Value.distance(gridSize);
-                        kvp.Value.distance(gridSizeArr);
-                    }
-                }
-                if (removalPairKeys != null)
-                {
-                    foreach (int key in removalPairKeys)
-                    {
-                        pairs.Remove(key);
-                    }
-                }
             }
 
             int[] idx = new int[3];
+
             // look at all cells to see if they changed in the grid
             foreach (KeyValuePair<int, Cell> kvpc in SimulationBase.dataBasket.Cells)
             {
@@ -303,8 +280,6 @@ namespace Daphne
                 if (idx[0] != kvpc.Value.GridIndex[0] || idx[1] != kvpc.Value.GridIndex[1] || idx[2] != kvpc.Value.GridIndex[2])
                 {
                     // was inserted before? we have to remove it
-                    // NOTE: if fdcs were to start moving we would need special case handling for that here
-                    // where the whole array of voxels that had an fdc gets cleared
                     if (legalIndex(kvpc.Value.GridIndex) == true && grid[kvpc.Value.GridIndex[0], kvpc.Value.GridIndex[1], kvpc.Value.GridIndex[2]] != null)
                     {
                         grid[kvpc.Value.GridIndex[0], kvpc.Value.GridIndex[1], kvpc.Value.GridIndex[2]].Remove(kvpc.Value.Cell_id);
@@ -382,6 +357,34 @@ namespace Daphne
                         criticalCells.Add(kvpc.Value);
                     }
 #endif
+                }
+            }
+
+            // only keep the critical pairs and update their distance;
+            // remove the ones that are no longer critical,
+            // i.e. are 'clearly separated' and a) were critical but never became overlapping or b) have broken their bond
+            foreach (KeyValuePair<int, Pair> kvp in pairs)
+            {
+                if (kvp.Value.isCriticalPair() == false && clearSeparation(kvp.Value) == true || legalIndex(kvp.Value.Cell(0).GridIndex) == false || legalIndex(kvp.Value.Cell(1).GridIndex) == false)
+                {
+                    if (removalPairKeys == null)
+                    {
+                        removalPairKeys = new List<int>();
+                    }
+                    removalPairKeys.Add(kvp.Key);
+                }
+                else
+                {
+                    // recalculate the distance for pairs that stay
+                    kvp.Value.calcDistance(gridSizeArr);
+                }
+            }
+            // remove the pairs that got scheduled for removal
+            if (removalPairKeys != null)
+            {
+                foreach (int key in removalPairKeys)
+                {
+                    pairs.Remove(key);
                 }
             }
 
@@ -472,8 +475,7 @@ namespace Daphne
 #endif
 
                                             // calculate the distance
-                                            //p.distance(gridSize);
-                                            p.distance(gridSizeArr);
+                                            p.calcDistance(gridSizeArr);
                                             // insert the pair
                                             pairs.Add(hash, p);
                                         }
@@ -486,12 +488,12 @@ namespace Daphne
             }
         }
 
-        private void pairInteractions(double dt)
+        private void pairInteractions()
         {
             // compute interaction forces for all pairs and apply to the cells in the pairs (accumulate)
             foreach (KeyValuePair<int, Pair> kvp in pairs)
             {
-                kvp.Value.pairInteract(dt);
+                kvp.Value.pairInteract();
             }
         }
 #if ALL_COLLISIONS
@@ -506,13 +508,12 @@ namespace Daphne
         /// <summary>
         /// update and apply the grid state, pairs, and forces
         /// </summary>
-        /// <param name="dt">time step for this integration step</param>
-        private void update(double dt)
+        private void update()
         {
-            // update cell locations in the grid tiles and update pairs
+            // update cell locations in the grid voxels and update pairs
             updateGridAndPairs();
             // handle all pairs and find the forces
-            pairInteractions(dt);
+            pairInteractions();
         }
 #if ALL_COLLISIONS
         /// <summary>
@@ -525,6 +526,15 @@ namespace Daphne
             pairInteractionsIntermediateRK(dt);
         }
 #endif
+
+        /// <summary>
+        /// accessor for pairs
+        /// </summary>
+        public Dictionary<int, Pair> Pairs
+        {
+            get { return pairs; }
+        }
+
         private Dictionary<int, Pair> pairs;
         private int pairKeyMultiplier, fastMultiplierDecide;
         private Dictionary<int, Cell>[, ,] grid;

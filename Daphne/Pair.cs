@@ -46,14 +46,14 @@ namespace Daphne
         /// <summary>
         /// calculate the distance for this pair of cells
         /// </summary>
-        public virtual void distance(double[] gridSize)
+        public virtual void calcDistance(double[] gridSize)
         {
             //Vector tmp = new DenseVector(a.SpatialState.X);
             //tmp = (DenseVector)tmpArr.Subtract(new DenseVector(b.SpatialState.X));
-
             double x = a.SpatialState.X[0] - b.SpatialState.X[0];
             double y = a.SpatialState.X[1] - b.SpatialState.X[1];
             double z = a.SpatialState.X[2] - b.SpatialState.X[2];
+
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
@@ -115,10 +115,24 @@ namespace Daphne
             return b_ij == 1;
         }
 
+        /// <summary>
+        /// accessor for the force
+        /// </summary>
+        public double Force
+        {
+            get { return force; }
+        }
+
+        // accessor for the distance
+        public double Distance
+        {
+            get { return dist; }
+        }
+
         // abstract member functions
 
         protected abstract void bond();
-        public abstract void pairInteract(double dt);
+        public abstract void pairInteract();
 #if ALL_PAIRS
         public abstract void pairInteractIntermediateRK(double dt);
 
@@ -126,10 +140,9 @@ namespace Daphne
         protected PairVariety variety;
 #endif
         protected Cell a, b;
-        protected double dist;
+        protected double dist, force;
         protected int b_ij;
         public static double Phi1, Phi2;
-
     }
 
     /// <summary>
@@ -174,15 +187,13 @@ namespace Daphne
         /// <summary>
         /// choose the normal to point from a to b: a feels a negative force, b positive
         /// </summary>
-        /// <param name="dt">time step for this integration step</param>
-        public override void pairInteract(double dt)
+        public override void pairInteract()
         {
             bond();
 
+            force = 0.0;
             if (b_ij != 0)
             {
-                double force = 0.0;
-
                 if (dist > 0)
                 {
                     force = Phi1 * (1.0 / dist - 1.0 / (a.Radius + b.Radius));
@@ -222,69 +233,10 @@ namespace Daphne
                     tmp_arr[1] = dy;
                     tmp_arr[2] = dz;
                     b.addForce(tmp_arr);
-
                 }
             }
         }
 
-        //NOTE: following is the old PlazaSur version that has adhesive and repulsive forces
-        ///// <summary>
-        ///// calculate the bond variable for a pair
-        ///// </summary>
-        //protected override void bond()
-        //{
-        //    //Console.WriteLine(String.Format("distance pair " + a.CellIndex + " " + b.CellIndex + " = " + dist + ", b = {0:N}", b_ij));
-        //    if (b_ij == 0 && dist <= a.Radius + b.Radius)
-        //    {
-        //        b_ij = 1;
-        //        //Console.WriteLine(String.Format("pair " + a.CellIndex + " " + b.CellIndex + " becomes critical, b = {0:N}", b_ij));
-        //    }
-        //    else if (b_ij == 1 && dist > 2 * DeltaM - a.Radius - b.Radius)
-        //    {
-        //        b_ij = 0;
-        //        //Console.WriteLine(String.Format("pair " + a.CellIndex + " " + b.CellIndex + " is no longer critical, b = {0:N}", b_ij));
-        //    }
-        //}
-
-        ///// <summary>
-        ///// choose the normal to point from a to b: a feels a negative force, b positive
-        ///// </summary>
-        ///// <param name="dt">time step for this integration step</param>
-        //public override void pairInteract(double dt)
-        //{
-        //    bond();
-
-        //    if (b_ij != 0)
-        //    {
-        //        double force = 0.0;
-
-        //        if (dist < a.Radius + b.Radius)
-        //        {
-        //            if (dist > 0)
-        //            {
-        //                force = Phi1 * (1.0 / dist - 1.0 / (a.Radius + b.Radius));
-        //            }
-        //        }
-        //        else
-        //        {
-        //            force = Phi2 * (Math.Pow(dist - DeltaM, 2.0) - Math.Pow(a.Radius + b.Radius - DeltaM, 2.0));
-        //        }
-
-        //        if (force != 0.0)
-        //        {
-        //            Vector normal = new Vector(b.State.X);
-
-        //            normal -= a.State.X;
-        //            normal = normal.Normalize();
-
-        //            //Console.WriteLine(String.Format("Distance: {2:N}, Force: {0:N}, B: {1:N}", force, b_ij, dist));
-
-        //            // F_a = -F_b
-        //            a.addForce(normal * -force);
-        //            b.addForce(normal * force);
-        //        }
-        //    }
-        //}
 #if ALL_PAIRS
         /// <summary>
         /// apply the pair force but do not change b_ij

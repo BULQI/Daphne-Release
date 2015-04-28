@@ -2775,6 +2775,9 @@ namespace Daphne
         }
 
         public ConfigCompartment comp { get; set; }
+
+        [JsonIgnore]
+        public static bool Toroidal_Global_Access = false;
     }
 
     public class ConfigPointEnvironment : ConfigEnvironmentBase
@@ -2885,6 +2888,7 @@ namespace Daphne
                 else
                 {
                     _toroidal = value;
+                    Toroidal_Global_Access = _toroidal;
                     OnPropertyChanged("toroidal");
                 }
             }
@@ -3052,6 +3056,7 @@ namespace Daphne
                 else
                 {
                     _toroidal = value;
+                    Toroidal_Global_Access = _toroidal;
                     OnPropertyChanged("toroidal");
                 }
             }
@@ -6848,20 +6853,16 @@ namespace Daphne
             get { return extents; }
             set { extents = value; }
         }
-        // Separation distance from boundaries
-        private double wallDis;
+        // NOTE: possibly completely remove this in some time after no more protocols depend on it, 4/24/15
         // Minimum separation (squared) for cells
         private double minDisSquared;
+        [JsonIgnore]
         public double MinDisSquared
         {
             get { return minDisSquared; }
             set
             {
                 minDisSquared = value;
-                //// Generally, minDisSquared is the square of the cell diameter.
-                //// Then, center of cell can be one radius from the ECS boundary.
-                // wallDis = Math.Sqrt(minDisSquared) / 2.0;
-                wallDis = 0;
             }
         }
 
@@ -6872,7 +6873,7 @@ namespace Daphne
             MinDisSquared = _minDisSquared;
 
             // null case when deserializing Json
-            // correct CellPopulation pointer added in Protocoluration.InitCellPopulationIDCellPopulationDict
+            // correct CellPopulation pointer added in Protocol.InitCellPopulationIDCellPopulationDict
             if (_cellPop != null)
             {
                 cellPop = _cellPop;
@@ -6886,6 +6887,17 @@ namespace Daphne
         /// <returns></returns>
         protected bool inBounds(double[] pos)
         {
+            double wallDis;
+
+            if (ConfigEnvironmentBase.Toroidal_Global_Access == true || cellPop == null)
+            {
+                wallDis = Cell.SafetySlab;
+            }
+            else
+            {
+                wallDis = cellPop.Cell.CellRadius;
+            }
+            
             if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
                 (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
                 (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
@@ -6907,29 +6919,6 @@ namespace Daphne
                 cellPop.CellStates.Clear();
                 AddByDistr(cellPop.number);
             }
-
-        }
-
-        /// <summary>
-        /// Return true if the position of the new cell doesn't overlap with existing cell positions.
-        /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
-        /// </summary>
-        /// <param name="pos">the position of the next cell</param>
-        /// <returns></returns>
-        protected bool noOverlap(double[] pos)
-        {
-            double disSquared = 0;
-            foreach (CellState cellState in this.cellPop.CellStates)
-            {
-                disSquared = (cellState.X - pos[0]) * (cellState.X - pos[0])
-                           + (cellState.Y - pos[1]) * (cellState.Y - pos[1])
-                           + (cellState.Z - pos[2]) * (cellState.Z - pos[2]);
-                if (disSquared < minDisSquared)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         /// <summary>
@@ -6940,7 +6929,7 @@ namespace Daphne
         /// <returns></returns>
         public bool AddByPosition(double[] pos)
         {
-            if (inBounds(pos) && noOverlap(pos))
+            if (inBounds(pos) == true)
             {
                 cellPop.CellStates.Add(new CellState(pos[0], pos[1], pos[2]));
                 return true;
@@ -6955,13 +6944,10 @@ namespace Daphne
         public void AddByDistr(int n)
         {
             // NOTE: The maxTry settings has been arbitrarily chosen and may need to be adjusted.
-            int maxTry = 1000;
-            int i = 0;
+            int maxTry = 1000, i = 0, tries = 0;
 
-            int tries = 0;
             while (i < n)
             {
-
                 if (AddByPosition(nextPosition()))
                 {
                     i++;
@@ -7027,7 +7013,7 @@ namespace Daphne
                 for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
                     pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                    if (!inBounds(pos))
+                    if (inBounds(pos) == false)
                     {
                         cellPop.CellStates.RemoveAt(i);
                     }
