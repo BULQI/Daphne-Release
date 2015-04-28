@@ -77,7 +77,7 @@ namespace DaphneGui
             IsXLogarithmic = false;
             IsYLogarithmic = false;
             DrawLine = true;
-            LabelX = "Time (linear)";
+            LabelX = "Time [minutes] (linear)";
             LabelY = "Concentration (linear)";
 
             MouseDown += new MouseEventHandler(this.Chart_MouseDown);
@@ -405,7 +405,7 @@ namespace DaphneGui
             ChartAreas.First().AxisY.Minimum = 0;
             ChartAreas.First().AxisY.Maximum = 5;
 
-            LabelX = "Time (linear)";
+            LabelX = "Time [minutes] (linear)";
             LabelY = "Concentration (linear)";
             chartAreaBlank.AxisX.Title = LabelX;
             chartAreaBlank.AxisY.Title = LabelY;
@@ -463,7 +463,7 @@ namespace DaphneGui
                 SetYAxisLimits();
             }
 
-            LabelX = "Time (linear)";
+            LabelX = "Time [minutes] (linear)";
             LabelY = "Concentration (linear)";
 
             //LOGARITHMIC Y Axis
@@ -478,7 +478,7 @@ namespace DaphneGui
             {
                 chartArear1.AxisX.IsLogarithmic = IsXLogarithmic; // true;
                 chartArear1.AxisX.LogarithmBase = 10;
-                LabelX = "Time (log)";
+                LabelX = "Time [minutes] (log)";
             }
 
             chartArear1.AxisX.Title = LabelX;
