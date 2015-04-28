@@ -28,6 +28,22 @@ namespace Daphne
             deadDict = new Dictionary<int, double[]>();
         }
 
+        /// <summary>
+        /// have all cells take a step forward according to the burn-in update x += mu * f * dt
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="mu"></param>
+        public void Burn_inStep(double dt, double mu)
+        {
+            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
+            {
+                for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
+                {
+                    kvp.Value.SpatialState.X[i] += mu * kvp.Value.SpatialState.F[i] * dt;
+                }
+            }
+        }
+
         public void Step(double dt)
         {
             List<int> removalList = null;
