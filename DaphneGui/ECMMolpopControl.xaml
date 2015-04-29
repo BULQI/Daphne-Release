@@ -939,7 +939,6 @@
                                     ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                     DisplayMemberPath="Name"
                                     SelectedIndex="0"
-                                    ToolTip="{Binding Path=description}"
                                  />
 
                     </StackPanel>
