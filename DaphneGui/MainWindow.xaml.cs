@@ -513,7 +513,7 @@ namespace DaphneGui
                         string messageBoxText = "Opening the last protocol failed. Starting up with blank window.\nFunction only supported for files in the \\Config folder.";
                         string caption = "Protocol load failure";
                         MessageBoxButton button = MessageBoxButton.OK;
-                        MessageBoxImage icon = MessageBoxImage.Error;
+                        MessageBoxImage icon = MessageBoxImage.Warning;
 
                         // Display message box
                         MessageBox.Show(messageBoxText, caption, button, icon);
@@ -1014,6 +1014,12 @@ namespace DaphneGui
                 // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
 
                 sop.Protocol.FileName = filename;
+
+                //If folder changed, this updates the tempfile path.
+                string folder = System.IO.Path.GetDirectoryName(filename);
+                string tempfilename = System.IO.Path.GetFileName(sop.Protocol.TempFile);
+                sop.Protocol.TempFile = folder + "\\" + tempfilename;
+
                 sop.Protocol.SerializeToFile();
 
                 orig_content = sop.Protocol.SerializeToString();
