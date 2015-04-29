@@ -16,6 +16,7 @@
             <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
             <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150"
                             ItemsSource="{Binding reaction_complexes}"
+                            ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                             DisplayMemberPath="Name"
                             IsSynchronizedWithCurrentItem="True"
                             SelectionChanged="ListBoxReactionComplexes_SelectionChanged">

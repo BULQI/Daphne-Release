@@ -255,6 +255,17 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate x:Key="reacCxListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" > 
+                <TextBlock.ToolTip>
+                    <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
+                    </TextBlock>
+                </TextBlock.ToolTip>
+            </TextBlock>
+        </StackPanel>
+    </DataTemplate>
+
     <!-- ConfigTransitionScheme properties template : DataContext must be ConfigTransitionScheme -->
     <DataTemplate x:Key="diffSchemeTemplate">
         <StackPanel Orientation="Vertical">
