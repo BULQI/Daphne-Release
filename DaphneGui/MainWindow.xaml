@@ -478,7 +478,11 @@
                                                     <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
                                                 <ContentControl>
-                                                    <ComboBox Margin="5,3,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black"
+                                                    
+                                                    <StackPanel Orientation="Vertical">
+                                                        <!--This is a hidden check box but we use it to figure out if tracks are active or not-->
+                                                        <CheckBox x:Name="chkTracks" IsChecked="{Binding Path=TracksActive}" Visibility="Collapsed"/>
+                                                        <ComboBox x:Name="ToolModesCombo" Margin="5,3,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black"
                                                               Height="26"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                                                               HorizontalAlignment="Left" 
@@ -487,7 +491,32 @@
                                                               SelectionChanged="CellSelectionToolCB_SelectionChanged"
                                                               SelectedIndex="0" 
                                                               MinWidth="50"
-                                                              ToolTip="White hand mode"/>
+                                                              ToolTip="White hand mode">
+
+                                                            <!--For disabling combo box item-->
+                                                            <ComboBox.Resources>
+                                                                <local:ComboboxDisableMultiConverter x:Key="itemDisableMultiConverter"/>
+                                                            </ComboBox.Resources>
+                                                            
+                                                            <ComboBox.ItemContainerStyle>
+                                                                <Style TargetType="ComboBoxItem">
+                                                                    <Setter Property="IsEnabled" Value="True"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Value="False">
+                                                                                <DataTrigger.Binding>
+                                                                                    <MultiBinding Converter="{StaticResource itemDisableMultiConverter}">
+                                                                                            <Binding Path="Content" RelativeSource="{RelativeSource Self}"/>
+                                                                                            <Binding ElementName="chkTracks" Path="IsChecked" />
+                                                                                    </MultiBinding>
+                                                                                </DataTrigger.Binding>
+                                                                                <Setter Property="IsEnabled" Value="False"></Setter>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </ComboBox.ItemContainerStyle>
+
+                                                        </ComboBox>
+                                                    </StackPanel>
                                                 </ContentControl>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
 

@@ -263,9 +263,6 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
-
-
-
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
         private const int ATTACH_PARENT_PROCESS = -1;
@@ -282,7 +279,7 @@ namespace DaphneGui
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
-            ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
+            ST_RenderSkinWindow.Visibility = Visibility.Collapsed;            
 
             this.ToolWinCellInfo.Close();
 
@@ -2593,12 +2590,37 @@ namespace DaphneGui
                 newScenario.IsEnabled = true;
                 ImportSBML.IsEnabled = false;
                 ExportSBML.IsEnabled = false;
+
+                //Here, turn on Tracks option in White Hand ToolMode combo box
+                if (gc is VTKFullGraphicsController)
+                {
+                    ((VTKFullGraphicsController)gc).TracksActive = true;
+                }
             }
             else
             {
                 applyButton.IsEnabled = true;
                 saveButton.IsEnabled = true;
                 enableFileMenu(true);
+
+                //Here, turn off Tracks option in White Hand ToolMode combo box
+                if (gc is VTKFullGraphicsController)
+                {
+                    ((VTKFullGraphicsController)gc).TracksActive = false;
+
+                    if (ToolModesCombo.SelectedIndex == 1)
+                    {
+                        ((VTKFullGraphicsController)gc).CellSelectionToolMode = ((VTKFullGraphicsController)gc).CellSelectionToolModes[0];
+                        ((VTKFullGraphicsController)gc).TracksActive = false;
+                        ToolModesCombo.SelectedIndex = 0;
+                    }
+
+                    //But if finished, then turn on the Tracks option in White Hand ToolMode como box
+                    if (finished)
+                    {
+                        ((VTKFullGraphicsController)gc).TracksActive = true;
+                    }
+                }
             }
             abortButton.IsEnabled = false;
             runButton.Content = "Run";
@@ -2609,6 +2631,7 @@ namespace DaphneGui
             gc.EnableComponents(finished);
             toolWin.GUIUpdate(finished);
 
+
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
             ToolWin.Activate();
@@ -2617,7 +2640,7 @@ namespace DaphneGui
             // TODO: These Focus calls will be a problem with multiple GCs...
             if (gc is VTKFullGraphicsController == true)
             {
-                ((VTKFullGraphicsController)gc).RWC.Focus();
+                ((VTKFullGraphicsController)gc).RWC.Focus();                
             }
         }
 
@@ -2829,6 +2852,16 @@ namespace DaphneGui
 
         private void runSim_Tissue(bool repeat)
         {
+            //Whenever we run the simulation, the Tracks option should be turned off.
+            //If it was previously selected, then change it to None.
+            VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
+            if ((full != null) && ToolModesCombo.SelectedIndex == 1)
+            {
+                full.CellSelectionToolMode = full.CellSelectionToolModes[0];
+                full.TracksActive = false;
+                ToolModesCombo.SelectedIndex = 0;
+            }
+
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
@@ -3144,6 +3177,19 @@ namespace DaphneGui
         private void CommandBindingOpen_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
+
+            //Loading new protocol, so turn off Tracks option.
+
+            //Whenever we load a new protocol, the Tracks option should be turned off.
+            //If it was previously selected, then change it to None.
+            //Is this the right place for this or should it be in CommandBindingOpen_Executed method?
+            VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
+            if ((full != null) && ToolModesCombo.SelectedIndex == 1)
+            {
+                full.CellSelectionToolMode = full.CellSelectionToolModes[0];
+                //full.TracksActive = false;
+                ToolModesCombo.SelectedIndex = 0;
+            }
         }
 
         private void CommandBindingOpen_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -3284,6 +3330,11 @@ namespace DaphneGui
                 return;
             }
 
+            if (cb.SelectedIndex == 1 && chkTracks.IsChecked == false)
+            {
+                cb.SelectedIndex = 0;
+            }
+
             byte index = (byte)(cb.SelectedIndex);
 
             SetMouseLeftState(index, true);
@@ -3376,6 +3427,10 @@ namespace DaphneGui
             {
                 sim.RunStatus = SimulationBase.RUNSTAT_ABORT;
             }
+
+            //If simulation is aborted, then turn off Tracks option.
+            ((VTKFullGraphicsController)gc).TracksActive = false;
+
             // 1/14/15: this code seems to be legacy and no longer in use; remove in the future if no problems arise or reenable otherwise
             //else
             //{
@@ -3705,6 +3760,7 @@ namespace DaphneGui
                 ReacComplexChartWindow.Activate();
             }
         }
+
     }
 
 
@@ -3758,6 +3814,29 @@ namespace DaphneGui
             object parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
+        }
+    }
+
+    //Converter for disabling ComboboxItem
+    public class ComboboxDisableMultiConverter : IMultiValueConverter
+    { 
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (values[0] == null || values[1] == null)
+                return null;
+
+            string text = (string)values[0];
+            bool tracksActive = (bool)values[1];
+
+            if (text.Equals("Tracks") && tracksActive == false)
+                return false;
+
+            return true;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }
