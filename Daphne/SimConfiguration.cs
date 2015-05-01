@@ -19,6 +19,7 @@ using System.Windows.Markup;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
 using NativeDaphne;
+using Gene = NativeDaphne.Nt_Gene;
 using System.Runtime;
 
 
@@ -6995,7 +6996,7 @@ namespace Daphne
 
     public class CellState
     {
-        public CellSpatialState spState;
+        public Nt_CellSpatialState spState;
         public CellMolPopState cmState;
         public CellBehaviorState cbState;
         public CellGeneState cgState;
@@ -7024,6 +7025,7 @@ namespace Daphne
 
         public CellState()
         {
+            spState = new Nt_CellSpatialState();
             spState.X = new Nt_Darray(3);
             spState.V = new Nt_Darray(3);
             spState.F = new Nt_Darray(3);
@@ -7046,7 +7048,7 @@ namespace Daphne
             cgState = new CellGeneState();
         }
 
-        public void setSpatialState(CellSpatialState state)
+        public void setSpatialState(Nt_CellSpatialState state)
         {
             Nt_Darray.Copy(state.X, spState.X, 3);
             Nt_Darray.Copy(state.V, spState.V, 3);
@@ -8096,13 +8098,13 @@ namespace Daphne
             {
                 readconcs = readText.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(s => double.Parse(s)).ToArray();
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 MessageBox.Show(string.Format("This file contains invalid data. \nAll molecular concentrations set to zero."),
                    "Invalid data", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            catch (OverflowException ex)
+            catch (OverflowException)
             {
                 MessageBox.Show(string.Format("This file contains a value that is out of range. \nAll molecular concentrations set to zero."),
                    "Data out of range", MessageBoxButton.OK, MessageBoxImage.Warning);

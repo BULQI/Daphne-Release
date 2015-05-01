@@ -18,9 +18,9 @@ namespace Daphne
     /// Manages the chemical reactions that occur within the interior manifold of the compartment and between the interior and the boundaries. 
     /// All molecular populations must be defined on either the interior manifold or one of the boundary manifolds.
     /// </summary>
-    public class Compartment : IDynamic
+    public class Compartment : Nt_Compartment, IDynamic
     {
-        public Compartment(Manifold interior)
+        public Compartment(Manifold interior) : base(interior.nt_manifold)
         {
             Interior = interior;
             Populations = new Dictionary<string, MolecularPopulation>();
@@ -30,6 +30,7 @@ namespace Daphne
             BoundaryTransforms = new Dictionary<int, Transform>();
             NaturalBoundaries = new Dictionary<int, Manifold>();
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
+            
         }
 
         public void AddMolecularPopulation(Molecule mol, string moleculeKey, string type, double[] parameters)
@@ -48,7 +49,9 @@ namespace Daphne
 
             if (Populations.ContainsKey(moleculeKey) == false)
             {
+                mp.Compartment = this;
                 Populations.Add(moleculeKey, mp);
+                NtPopulations.Add(mp);
             }
             else
             {
@@ -87,6 +90,8 @@ namespace Daphne
         /// <param name="dt">The time interval.</param>
         public void Step(double dt)
         {
+
+            base.step(dt);
              //the step method may organize the reactions in a more sophisticated manner to account
              //for different rate constants etc.
             if (this.Interior is ManifoldRing.TinyBall == false)
@@ -129,6 +134,25 @@ namespace Daphne
 
             // add the reaction
             BoundaryReactions[key].Add(r);
+            
+            //for the middle layer.
+            int index = BoundaryReactions[key].Count-1;
+            var tmp = r as Nt_Reaction;
+            if (tmp == null)
+            {
+                throw new Exception("reaction casting error");
+            }
+            Nt_Reaction ntr = r as Nt_Reaction;
+            if (ntr == null)
+            {
+                throw new Exception("invalid reaction error");
+            }
+            base.AddBoundaryReaction(key, r as Nt_Reaction, index);
+        }
+
+        public void InitilizeBase()
+        {
+            base.initialize();
         }
 
         public Dictionary<string, MolecularPopulation> Populations { get; private set; }
@@ -144,6 +168,9 @@ namespace Daphne
     public abstract class EnvironmentBase : IDisposable
     {
         protected Compartment comp;
+
+        //for setting up environment data in the middle layer
+        //public Nt_Environment nt_environment;
 
         public EnvironmentBase()
         {

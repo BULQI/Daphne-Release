@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 
 using HDF5DotNet;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -632,9 +633,9 @@ namespace Daphne
             if (cellCount > 0)
             {
                 // create the data arrays if needed
-                if (cellStateSpatial == null || cellStateSpatial.Length != cellCount * CellSpatialState.Dim)
+                if (cellStateSpatial == null || cellStateSpatial.Length != cellCount * Nt_CellSpatialState.Dim)
                 {
-                    cellStateSpatial = new double[cellCount * CellSpatialState.Dim];
+                    cellStateSpatial = new double[cellCount * Nt_CellSpatialState.Dim];
                     cellGens = new int[cellCount];
                     cellPopIds = new int[cellCount];
                     cellBehaviors = new int[cellCount * B_COUNT];
@@ -652,11 +653,11 @@ namespace Daphne
                     int j;
 
                     // spatial state
-                    for (j = 0; j < CellSpatialState.SingleDim; j++)
+                    for (j = 0; j < Nt_CellSpatialState.SingleDim; j++)
                     {
-                        cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_POS + j] = c.SpatialState.X[j];
-                        cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + j] = c.SpatialState.V[j];
-                        cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_FORCE + j] = c.SpatialState.F[j];
+                        cellStateSpatial[i * Nt_CellSpatialState.Dim + Nt_CellSpatialState.SingleDim * S_POS + j] = c.SpatialState.X[j];
+                        cellStateSpatial[i * Nt_CellSpatialState.Dim + Nt_CellSpatialState.SingleDim * S_VEL + j] = c.SpatialState.V[j];
+                        cellStateSpatial[i * Nt_CellSpatialState.Dim + Nt_CellSpatialState.SingleDim * S_FORCE + j] = c.SpatialState.F[j];
                     }
                     // generation
                     cellGens[i] = c.generation;
@@ -715,11 +716,11 @@ namespace Daphne
             int i;
 
             // set the spatial state
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
-                state.spState.X[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_POS + i];
-                state.spState.V[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + i];
-                state.spState.F[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_FORCE + i];
+                state.spState.X[i] = cellStateSpatial[idx * Nt_CellSpatialState.Dim + Nt_CellSpatialState.SingleDim * S_POS + i];
+                state.spState.V[i] = cellStateSpatial[idx * Nt_CellSpatialState.Dim + Nt_CellSpatialState.SingleDim * S_VEL + i];
+                state.spState.F[i] = cellStateSpatial[idx * Nt_CellSpatialState.Dim + Nt_CellSpatialState.SingleDim * S_FORCE + i];
             }
             // set the generation
             state.setCellGeneration(cellGens[idx]);
@@ -805,7 +806,7 @@ namespace Daphne
 
                 // write the cell spatial states
                 dims[0] = cellCount;
-                dims[1] = CellSpatialState.Dim;
+                dims[1] = Nt_CellSpatialState.Dim;
                 DataBasket.hdf5file.writeDSDouble("SpatialState", dims, new H5Array<double>(cellStateSpatial));
             }
 

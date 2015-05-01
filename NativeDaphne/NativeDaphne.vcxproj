@@ -160,15 +160,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Nt_CellManager.h" />
     <ClInclude Include="Nt_CollisionManager.h" />
     <ClInclude Include="Nt_DArray.h" />
     <ClInclude Include="Nt_Cell.h" />
-    <ClInclude Include="Nt_CellManager.h" />
     <ClInclude Include="Nt_CellPopulation.h" />
     <ClInclude Include="Nt_Compartment.h" />
+    <ClInclude Include="Nt_Environment-nouse.h" />
     <ClInclude Include="Nt_Gene.h" />
     <ClInclude Include="Nt_Grid.h" />
     <ClInclude Include="Nt_InterpolatedRectangularPrism.h" />
+    <ClInclude Include="Nt_Manifold.h" />
     <ClInclude Include="Nt_MolecularPopulation.h" />
     <ClInclude Include="Nt_NormalDist.h" />
     <ClInclude Include="Nt_Reaction.h" />
@@ -181,9 +183,9 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Nt_CollisonManager.cpp" />
     <ClCompile Include="Nt_Darray.cpp" />
-    <ClCompile Include="Nt_CellManager.cpp" />
     <ClCompile Include="Nt_CellPopulation.cpp" />
     <ClCompile Include="Nt_Cell.cpp" />
+    <ClCompile Include="Nt_Environmnet.cpp" />
     <ClCompile Include="Nt_InterpolatedRectangularPrism.cpp" />
     <ClCompile Include="Nt_MolecularPopulation.cpp" />
     <ClCompile Include="Nt_NormalDist.cpp" />

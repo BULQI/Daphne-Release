@@ -318,7 +318,7 @@ namespace Daphne
                     continue;
                 }
 
-                foreach (Cell c in SimulationBase.dataBasket.Populations[cp.cellpopulation_id].Values)
+                foreach (Cell c in SimulationBase.dataBasket.Populations[cp.cellpopulation_id].cellDictionary.Values)
                 {
                     // cell_id time
                     cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, hSim.AccumulatedTime);

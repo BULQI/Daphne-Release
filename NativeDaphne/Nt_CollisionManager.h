@@ -138,9 +138,9 @@ namespace NativeDaphne
         void RemoveCellFromGrid(Nt_Cell^ del)
         {
             // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
-            if (legalIndex(del->GridIndex) == true && grid[del->GridIndex[0], del->GridIndex[1], del->GridIndex[2]] != nullptr)
+            if (legalIndex(del->gridIndex) == true && grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]] != nullptr)
             {
-                grid[del->GridIndex[0], del->GridIndex[1], del->GridIndex[2]]->Remove(del->Cell_id);
+                grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]]->Remove(del->Cell_id);
             }
         }
 
@@ -152,7 +152,7 @@ namespace NativeDaphne
         void RekeyCellInGrid(Nt_Cell^ cell, int oldKey)
         {
             // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
-            if (legalIndex(cell->GridIndex) == true && grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]] != nullptr)
+            if (legalIndex(cell->gridIndex) == true && grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]] != nullptr)
             {
                 grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Add(cell->Cell_id, cell);
                 grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Remove(oldKey);

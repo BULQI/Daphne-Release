@@ -34,7 +34,7 @@ namespace Daphne
     }
 
 
-    public class MolecularPopulation : IDynamic
+    public class MolecularPopulation : Nt_MolecularPopulation, IDynamic
     {
         // the individuals that make up this MolecularPopulation
         public Molecule Molecule { get; private set; }
@@ -50,7 +50,7 @@ namespace Daphne
         public bool IsDiffusing { get; set; }
         public Dictionary<int, MolBoundaryType> boundaryCondition;
         // the molecule guid reference
-        public string MoleculeKey { get; set; }
+        //public string MoleculeKey { get; set; }
 
         public Nt_MolecularPopulation nt_instance;
 
@@ -98,22 +98,43 @@ namespace Daphne
             get { return naturalBoundaryConcs; }
         }
 
-        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp)
+        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp) : base(moleculeKey, mol.DiffusionCoefficient)
         {
             concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+            base.molpopConc = concentration.array;
             manifold = comp.Interior;
             Molecule = mol;
             MoleculeKey = moleculeKey;
             compartment = comp;
+            base.Compartment = comp;
+
             boundaryCondition = new Dictionary<int, MolBoundaryType>();
 
             // true boundaries
             boundaryFluxes = new Dictionary<int, ScalarField>();
             boundaryConcs = new Dictionary<int, ScalarField>();
-            foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
+
+            if (compartment.Interior is InterpolatedRectangularPrism)
             {
-                AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
+                int check = 1;
+
             }
+
+            //the addition has to be in order in the middle layer
+            foreach (var kvp in compartment.NtBoundaries)
+            {
+                var compartment_list = kvp.Value;
+                foreach (Nt_Compartment nc in compartment_list)
+                {
+                    Compartment c = nc as Compartment;
+                    AddBoundaryFluxConc(c.Interior.Id, c.Interior);
+                }
+            }
+
+            //foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
+            //{
+            //    AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
+            //}
 
             // natural boundaries
             naturalBoundaryFluxes = new Dictionary<int, ScalarField>();
@@ -137,8 +158,8 @@ namespace Daphne
 
             boundaryFluxes.Add(key, boundFlux);
             boundaryConcs.Add(key, boundConc);
+            base.AddNtBoundaryFluxConc(key, boundConc.array, boundFlux.array);
         }
-
 
         public void Initialize(string type, double[] parameters)
         {

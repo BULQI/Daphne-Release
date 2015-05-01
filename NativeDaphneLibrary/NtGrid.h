@@ -82,7 +82,7 @@ namespace NativeDaphneLibrary
         /// <summary>
         /// based on a position, find a linear index in the grid
         /// </summary>
-        /// <param name="pos">position to test</param>
+        /// <param name="pos_ptr">position to test</param>
         /// <returns>tuple with indices; negative for out of bounds</returns>
         void findGridIndex(double* pos_ptr, int *idx)
         {

@@ -87,6 +87,7 @@ namespace Daphne
         // find a neighbor index of a grid tile; return -1 for illegal index
         private int[] neighbor(int[] current, int dx, int dy, int dz)
         {
+
             int[] idx = new int[] { current[0], current[1], current[2] };
 
             idx[0] += dx;
@@ -300,7 +301,8 @@ namespace Daphne
                 }
             }
 
-            int[] idx = new int[3];
+            Nt_Iarray idx = new Nt_Iarray(3);
+            //int[] idx = new int[3];
             // look at all cells to see if they changed in the grid
             foreach (KeyValuePair<int, Cell> kvpc in SimulationBase.dataBasket.Cells)
             {
@@ -406,7 +408,7 @@ namespace Daphne
                         {
                             for (int k = -1; k <= 1; k++)
                             {
-                                int[] test = neighbor(cell.GridIndex, i, j, k);
+                                int[] test = neighbor(cell.GridIndex.ToArray(), i, j, k);
 
                                 // don't go outside the grid
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != null)

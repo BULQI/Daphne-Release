@@ -165,7 +165,7 @@ namespace NativeDaphne
 					//{
 					//	int check_here = true;
 					//}
-					bool curIndexLegal = legalIndex(cell->GridIndex);
+					bool curIndexLegal = legalIndex(cell->gridIndex);
                     for (int i = -1; i <= 1; i++)
                     {
                         for (int j = -1; j <= 1; j++)
@@ -226,7 +226,7 @@ namespace NativeDaphne
                         {
                             for (int k = -1; k <= 1; k++)
                             {
-                                array<int>^ test = neighbor(cell->GridIndex, i, j, k);
+                                array<int>^ test = neighbor(cell->gridIndex, i, j, k);
 
                                 // don't go outside the grid
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != nullptr)

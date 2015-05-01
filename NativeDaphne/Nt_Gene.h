@@ -13,11 +13,26 @@ namespace NativeDaphne
 	public ref class Nt_Gene
 	{
 	public:
-		String^ Name; 
-		int CopyNumber;
-		int cellId;
-		double ActivationLevel;
+		property String^ Name; 
+		property int CopyNumber;
+		property double ActivationLevel;
 
+		Nt_Gene(String^ name, int copyNumber, double actLevel)
+		{
+			Name = name;
+			CopyNumber = copyNumber;
+			ActivationLevel = actLevel;
+
+
+			_activation = NULL;
+			cellId = -1;
+			allocedItemCount = 0;
+		}
+
+
+
+
+		int cellId;
 		List<Nt_Gene^> ^ComponentGenes;
 		List<int> ^cellIds;
 

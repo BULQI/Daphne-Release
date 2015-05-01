@@ -45,7 +45,7 @@ namespace NativeDaphne
 		}
 
 		//handle chemotaxis
-		if (this->IsChemotactic)
+		if (this->isChemotactic)
 		{
 			//we cannot use the driverConc directly here because 
 			//1) it is an array of all cells, not just live and !exiting cells.
@@ -65,7 +65,7 @@ namespace NativeDaphne
 		}
 
 		//stochastic
-		if (this->IsStochastic)
+		if (this->isStochastic)
 		{
 			Nt_CellManager::normalDist->Sample(array_length, _random_samples);
 			double factor = Sigma /Math::Sqrt(dt);

@@ -5,7 +5,7 @@
 #include "Nt_MolecularPopulation.h"
 #include "Nt_Reaction.h"
 #include "NtInterpolatedRectangularPrism.h"
-
+#include "Nt_Manifold.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -14,79 +14,273 @@ using namespace NativeDaphneLibrary;
 
 namespace NativeDaphne 
 {
-	public enum class Nt_ManifoldType {TinyBall, TinySphere, InterpolatedRectangularPrism};
+	//public enum class Nt_ManifoldType {TinyBall, TinySphere, InterpolatedRectangularPrism};
 
 	public ref class Nt_Compartment
     {
-	private:
+	protected:
 		bool initialized;
-	public:
 
-		List<Nt_MolecularPopulation ^> ^Populations;
-        List<Nt_Reaction^> ^BulkReactions;
-		List<Nt_Reaction^> ^BoundaryReactions;
+	internal:
 
-		//?? this is not being used.
-        Dictionary<int, Nt_Compartment ^> ^Boundaries;
-
-        Nt_Compartment(Nt_ManifoldType _manifold_type)
-        {
-            //manifoldType = _manifold_type;
-            Populations = gcnew List<Nt_MolecularPopulation^>();
-            BulkReactions = gcnew List<Nt_Reaction^>();
-            BoundaryReactions = gcnew List<Nt_Reaction^>();
-            Boundaries = gcnew Dictionary<int, Nt_Compartment^>();
-			initialized = false;
-        }
-
-        void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
-        {
-			for (int i= 0; i< Populations->Count; i++)
+		void AddBulkReaction(List<Nt_Reaction^>^ rxns)
+		{
+			//not initialized yet, initalize
+			if (NtBulkReactions->Count == 0)
 			{
-				if (Populations[i]->molguid == molpop->molguid)
+				for (int i=0; i< rxns->Count; i++)
 				{
-					Populations[i]->AddMolecularPopulation(molpop);
+					NtBulkReactions->Add(rxns[i]->CloneParent());
+				}
+			}
+			else 
+			{
+				if (rxns->Count != NtBulkReactions->Count)
+				{
+					throw gcnew Exception("reaction count error");
+				}
+				for (int i=0; i< NtBulkReactions->Count; i++)
+				{
+					NtBulkReactions[i]->AddReaction(rxns[i]);
+				}
+			}
+		}
+
+		//with default populaiton id = 0, like cytosol and plasmambrane boundaries
+		void AddBoundaryReaction(List<Nt_Reaction^>^ rxns)
+		{
+			for (int i=0; i< rxns->Count; i++)
+			{
+				Nt_Reaction^ rxn = rxns[i];
+				if (rxn->IsCollection())
+				{
+					if (rxn->ComponentReactions->Count != 1)
+					{
+						//this is used add cell's boundary reaciton
+						//it should only contain one component
+						throw gcnew Exception("reaciton count error");
+					}
+					AddBoundaryReaction(0, rxn->ComponentReactions[0], i);
+				}
+				else
+				{
+					AddBoundaryReaction(0, rxns[i], i);
+				}
+
+			}
+		}
+
+		void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
+        {
+			for (int i= 0; i< NtPopulations->Count; i++)
+			{
+				if (NtPopulations[i]->MoleculeKey == molpop->MoleculeKey)
+				{
+					NtPopulations[i]->AddMolecularPopulation(molpop);
 					return;
 				}
 			}
-			Populations->Add(molpop->CloneParent());
+			NtPopulations->Add(molpop->CloneParent());
         }
+
+		void AddMemberCompartment(Nt_Compartment^ comp)
+		{
+			//add molpops
+			for (int i= 0; i< comp->NtPopulations->Count; i++)
+			{
+				this->AddMolecularPopulation(comp->NtPopulations[i]);
+			}
+
+			this->AddBulkReaction(comp->NtBulkReactions);
+
+			if (comp->NtBoundaryReactions->Count > 0)
+			{
+				//default popid = 0
+				this->AddBoundaryReaction(comp->NtBoundaryReactions[0]->ReactionList);
+			}
+
+			if (this->Nt_interior == nullptr)
+			{
+				this->Nt_interior = comp->Nt_interior;
+			}
+		}
+
+		void RemoveMemberCompartment(Nt_Compartment^ comp)
+		{
+
+			throw gcnew Exception("not yet implemented");
+		}
+
+
+		//given boundaryId, return cellpopulationId
+		int GetCellPulationId(int boundary_id)
+		{
+			//debug 
+			if (BoundaryToCellpopMap != nullptr && boundary_id == 0)
+			{
+				for each (KeyValuePair<int, int>^ item in BoundaryToCellpopMap)
+				{
+					int key = item->Key;
+					int val = item->Value;
+				}
+			}
+
+			if (BoundaryToCellpopMap != nullptr && BoundaryToCellpopMap->ContainsKey(boundary_id) == true)
+			{
+				return BoundaryToCellpopMap[boundary_id];
+			}
+			return -1;
+		}
+
+	public:
+		Nt_ManifoldType manifoldType;
+		List<Nt_MolecularPopulation ^> ^NtPopulations;
+        List<Nt_Reaction^> ^NtBulkReactions;
+
+		//key - populaiton id; vlaue - boudnaryReactions
+		Dictionary<int, Nt_ReactionSet^>^ NtBoundaryReactions;
+
+		//one major difference between Nt_Compartment and upper level compartment
+		//is that in Nt_Compartment, the compartment is orgnanized by cell populaiton
+		//and within each cell pupulation, the "compartments" is ordered.
+		//with insertion is easy, remove can be difficult, to help this
+		//we create another dicitonary, which will "remember" the positon of the compartment
+		//of the array. the next two dictionary helps to handle this
+        Dictionary<int, List<Nt_Compartment^>^> ^NtBoundaries;
+
+		//given boundaryId, return the cellpopulation map if applicable
+		//if not in this dictionary, then assume 0
+		Dictionary<int, int>^ BoundaryToCellpopMap;
+
+		//map boundaryId to its array postion in NtBoundaries.
+		Dictionary<int, int>^ BoundaryPositionMap;
+
+		//this is the id of the interior in the upper level.
+		int InteriorId;
+
+		Nt_Manifold^ Nt_interior;
+
+		Nt_Compartment()
+        {
+            NtPopulations = gcnew List<Nt_MolecularPopulation^>();
+            NtBulkReactions = gcnew List<Nt_Reaction^>();
+            //NtBoundaryReactions = gcnew List<Nt_Reaction^>();
+			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+            NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
+			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
+			BoundaryPositionMap = gcnew Dictionary<int, int>();
+			Nt_interior = nullptr;
+			initialized = false;
+			InteriorId = -1;
+
+        }
+
+		Nt_Compartment(Nt_ManifoldType _manifold_type)
+        {
+            manifoldType = _manifold_type;
+            NtPopulations = gcnew List<Nt_MolecularPopulation^>();
+            NtBulkReactions = gcnew List<Nt_Reaction^>();
+            //NtBoundaryReactions = gcnew List<Nt_Reaction^>();
+			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+            NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
+			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
+			BoundaryPositionMap = gcnew Dictionary<int, int>();
+			Nt_interior = nullptr;
+			initialized = false;
+			InteriorId = -1;
+        }
+
+        Nt_Compartment(Nt_Manifold^ m)
+        {
+            //manifoldType = _manifold_type;
+            NtPopulations = gcnew List<Nt_MolecularPopulation^>();
+            NtBulkReactions = gcnew List<Nt_Reaction^>();
+            //NtBoundaryReactions = gcnew List<Nt_Reaction^>();
+			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+            NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
+			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
+			BoundaryPositionMap = gcnew Dictionary<int, int>();
+			Nt_interior = m;
+			InteriorId = -1;
+			initialized = false;
+        }
+
+		void AddNtBoundary(int population_id, int boundary_id, Nt_Compartment^ c)
+		{
+			if (NtBoundaries->ContainsKey(population_id) == false)
+			{
+				List<Nt_Compartment^>^ comp_list = gcnew List<Nt_Compartment^>();
+				comp_list->Add(c);
+				BoundaryPositionMap->Add(boundary_id, 0);
+				NtBoundaries->Add(population_id, comp_list);
+			}
+			else 
+			{
+				List<Nt_Compartment^>^ comp_list = NtBoundaries[population_id];
+				BoundaryPositionMap->Add(boundary_id, comp_list->Count);
+				comp_list->Add(c);
+			}
+			BoundaryToCellpopMap->Add(boundary_id, population_id);
+		}
 
         /// <summary>
         /// Carries out the dynamics in-place for its molecular populations over time interval dt.
         /// </summary>
         /// <param name="dt">The time interval.</param>
-        void step(double dt)
+        virtual void step(double dt)
         {
 			if (!initialized)initialize();
 
-            for (int i=0; i< BulkReactions->Count; i++)
+            for (int i=0; i< NtBulkReactions->Count; i++)
 			{
-				BulkReactions[i]->step(dt);
+				NtBulkReactions[i]->Step(dt);
 			}
 
-			for (int i=0; i< BoundaryReactions->Count; i++)
+			for each (KeyValuePair<int, Nt_ReactionSet^>^ kvp in NtBoundaryReactions)
 			{
-				BoundaryReactions[i]->step(dt);
+				 List<Nt_Reaction^>^ ReactionList = kvp->Value->ReactionList;
+				 for (int i= 0; i< ReactionList->Count; i++)
+				 {
+					 ReactionList[i]->Step(dt);
+				 }
 			}
 
-            for (int i=0; i< Populations->Count; i++)
+            for (int i=0; i< NtPopulations->Count; i++)
 			{
-				Populations[i]->step(dt);
+				NtPopulations[i]->step(dt);
 			}
         }
 
 		void AddReaction(Nt_Reaction ^rxn)
 		{
-			int index = rxn->reaction_index;
-			List<Nt_Reaction^> ^reactions = rxn->isBulkReaction ? BulkReactions : BoundaryReactions;
-			if (index >= reactions->Count)
+
+			throw gcnew Exception("wrong place");
+		}
+
+		//add boundary reaction, here key is the manifold id of the boundary.
+		//for a given boundary, there is a list of reactions, here 
+		//we neeed to form arrays for same reaction, and we are assuming
+		//that the "same" reaction will have same index in the list of reactions
+		//for that boundary. if not, we will need some kind of key
+		//to identify the reaction.
+		void AddBoundaryReaction(int key, Nt_Reaction^ rxn, int _index)
+		{
+			//note if the key is in the CellToCellPopMap, dictionary, then it is cells.
+			int population_id = 0;
+			if (this->BoundaryToCellpopMap->ContainsKey(key) == true)
 			{
-				reactions->Add(rxn->CloneParent());
+				population_id = this->BoundaryToCellpopMap[key];
+			}
+
+			if (NtBoundaryReactions->ContainsKey(population_id) == false)
+			{
+				Nt_ReactionSet^ dst_set = gcnew Nt_ReactionSet(population_id);
+				dst_set->AddReaction(rxn, _index);
+				NtBoundaryReactions->Add(population_id, dst_set);
 			}
 			else 
 			{
-				reactions[index]->AddReaction(rxn);
+				NtBoundaryReactions[population_id]->AddReaction(rxn, _index);
 			}
 		}
 
@@ -97,53 +291,59 @@ namespace NativeDaphne
 		}
     };
 
-
-	//the distinction here between Nt_Cytosol and Nt_Plasmamembrane does not seem to be necessary
-	//consider to remove
 	public ref class Nt_Cytosol : Nt_Compartment
 	{
 	public:
+		double CellRadius;
+		//Nt_Compartment^ Boundary;
+
 		Nt_Cytosol() : Nt_Compartment(Nt_ManifoldType::TinyBall)
 		{
 		}
 
 		~Nt_Cytosol(){}
 
+		virtual void step(double dt) override
+        {
+			if (initialized == false)initialize();
+
+			//for now, this is doing update ecs/membrane boundary
+			for (int i=0; i< NtPopulations->Count; i++)
+			{
+				NtPopulations[i]->step(this, dt);
+			}
+		}
+
 	};
 
+
+	//Nt_Cytosol and Nt_PlasmaMembrane is very similar
 	public ref class Nt_PlasmaMembrane : Nt_Compartment
 	{
 	public:
+		double CellRadius;
+
 		Nt_PlasmaMembrane() : Nt_Compartment(Nt_ManifoldType::TinySphere)
 		{}
 
 		~Nt_PlasmaMembrane(){}
 
-	};
 
-	public ref class Nt_ReactionSet
-	{
-	public:
-		List<Nt_Reaction^>^ ReactionList;
+		virtual void step(double dt) override
+        {
+			if (initialized == false)initialize();
 
-		Nt_ReactionSet()
-		{
-			ReactionList = gcnew List<Nt_Reaction^>();
-		}
-
-		void AddReaction(Nt_Reaction ^rxn)
-		{
-			int index = rxn->reaction_index;
-			if (index >= ReactionList->Count)
+			//for now, this is doing update ecs/membrane boundary
+			for (int i=0; i< NtPopulations->Count; i++)
 			{
-				ReactionList->Add(rxn->CloneParent());
-			}
-			else 
-			{
-				ReactionList[index]->AddReaction(rxn);
+				NtPopulations[i]->step(dt);
 			}
 		}
+
+
 	};
+
+
 
 	public ref class Nt_ECS : Nt_Compartment
 	{
@@ -161,9 +361,10 @@ namespace NativeDaphne
 		//<cell_population_id, List<interior->id, transformation>>
 		Dictionary<int, Nt_Darray^>^ BoundaryTransforms;
 		double **Positions;
+
 		List<int>^ BoundaryKeys; //to keep sync with boundary in molpop
 
-		Nt_ECS(array<int> ^extents, double step_size, bool toroidal) : Nt_Compartment(Nt_ManifoldType::InterpolatedRectangularPrism)
+		Nt_ECS(array<int> ^extents, double step_size, bool toroidal) : Nt_Compartment()
 		{
 			NodesPerSide = (int *)malloc(3 * sizeof(int));
 			NodesPerSide[0] = extents[0];
@@ -189,21 +390,21 @@ namespace NativeDaphne
 			delete ir_prism;
 		}
 
-		void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
-        {
-			Nt_ECSMolecularPopulation^ mp = dynamic_cast<Nt_ECSMolecularPopulation ^>(molpop);
-			mp->ECS = this;
-			Populations->Add(molpop);
-        }
+		//void AddMolecularPopulation(Nt_MolecularPopulation ^molpop)
+		//{
+		//	Nt_ECSMolecularPopulation^ mp = dynamic_cast<Nt_ECSMolecularPopulation ^>(molpop);
+		//	mp->ECS = this;
+		//	NtPopulations->Add(molpop);
+		//  }
 
-		Nt_MolecularPopulation^ findEcsMolecularPopulation(String^ molguid)
-		{
-			for (int i=0; i< Populations->Count; i++)
-			{
-				if (Populations[i]->molguid == molguid) return Populations[i];
-			}
-			return nullptr;
-		}
+		//Nt_MolecularPopulation^ findEcsMolecularPopulation(String^ molguid)
+		//{
+		//	for (int i=0; i< NtPopulations->Count; i++)
+		//	{
+		//		if (NtPopulations[i]->MoleculeKey == molguid) return NtPopulations[i];
+		//	}
+		//	return nullptr;
+		//}
 
 
 		//here key is membrane's interor id
@@ -215,62 +416,49 @@ namespace NativeDaphne
 
 		void AddReaction(Nt_Reaction ^rxn)
 		{
+			throw gcnew Exception("wrong place");
+			/*
 			int cellpop_id = rxn->boundaryId;
 			if (boundaryReactions->ContainsKey(cellpop_id) == false)
 			{
 				Nt_ReactionSet^ rset = gcnew Nt_ReactionSet();
 				boundaryReactions->Add(cellpop_id, rset);
 			}
-			boundaryReactions[cellpop_id]->AddReaction(rxn);
+			boundaryReactions[cellpop_id]->AddReaction(rxn);*/
 		}
 
 		void initialize()
 		{
-			BoundaryKeys->Clear();
-			int items_count = BoundaryTransforms->Count;
-			Positions = (double **)realloc(Positions, items_count * sizeof(double *));
-			int n = 0;
-			for each (KeyValuePair<int, Nt_Darray^>^ kvp in BoundaryTransforms)
-			{
-				BoundaryKeys->Add(kvp->Key);
-				Positions[n++] = kvp->Value->NativePointer;
-			}
-			for (int i=0; i< Populations->Count; i++)
-			{
-				Nt_ECSMolecularPopulation^ pop = dynamic_cast<Nt_ECSMolecularPopulation^>(Populations[i]);
-				pop->initialize();
-			}
+			//BoundaryKeys->Clear();
+			//int items_count = BoundaryTransforms->Count;
+			//Positions = (double **)realloc(Positions, items_count * sizeof(double *));
+			//int n = 0;
+			//for each (KeyValuePair<int, Nt_Darray^>^ kvp in BoundaryTransforms)
+			//{
+			//	BoundaryKeys->Add(kvp->Key);
+			//	Positions[n++] = kvp->Value->NativePointer;
+			//}
+			//for (int i=0; i< NtPopulations->Count; i++)
+			//{
+			//	Nt_ECSMolecularPopulation^ pop = dynamic_cast<Nt_ECSMolecularPopulation^>(NtPopulations[i]);
+			//	pop->initialize();
+			//}
 
 			initialized = true;
 		}
 
-		void step(double dt)
+		virtual void step(double dt) override
         {
 			if (initialized == false)initialize();
 
-			//bulk reactions -- not implemented yet
-			//foreach (Reaction r in BulkReactions)
-			//{
-			//	r.Step(dt);
-			//}
-
-			//for boundary reactions
-			for each (KeyValuePair<int, Nt_ReactionSet^>^ kvp in boundaryReactions)
-			{
-				 List<Nt_Reaction^>^ ReactionList = kvp->Value->ReactionList;
-				 for (int i= 0; i< ReactionList->Count; i++)
-				 {
-					 ReactionList[i]->step(dt);
-				 }
-			}
-
 			//for now, this is doing update ecs/membrane boundary
-			for (int i=0; i< Populations->Count; i++)
+			for (int i=0; i< NtPopulations->Count; i++)
 			{
-				Populations[i]->step(dt);
+				NtPopulations[i]->step(dt);
 			}
 		}
+		
 
 	};
-
+	
 }

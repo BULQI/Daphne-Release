@@ -16,8 +16,25 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_CellPopulation
 	{
+
+	private:
+		void AddGene(Nt_Gene ^gene)
+		{
+			for (int i=0; i< genes->Count; i++)
+			{
+				if (genes[i]->Name == gene->Name)
+				{
+					genes[i]->AddGene(gene);
+					return;
+				}
+			}
+			Nt_Gene^ container = gene->CloneParent();
+			genes->Add(container);
+		}
+
 	
 	public:
+		int PopulationId;
 
 		/// <summary>
 		/// create a new instance of Nt_CellManger
@@ -25,19 +42,19 @@ namespace NativeDaphne
 		/// <returns>none</returns>
 		Nt_CellPopulation(void)
 		{
-			MotileCells = nullptr;
-			Cytosol = gcnew Nt_Cytosol();
-			PlasmaMembrane = gcnew Nt_PlasmaMembrane();
+			masterCell = nullptr;
+			Cytosol = gcnew Nt_Compartment();
+			PlasmaMembrane = gcnew Nt_Compartment();
 			genes = gcnew List<Nt_Gene ^>();
-
 			initialized = false;
+			ntCellDictionory = gcnew Dictionary<int, Nt_Cell^>();
 		}
 
 		~Nt_CellPopulation(void){}
-
+				
 		/// <summary>
 		/// Add an reaction to be handled by the Nt_CellManager instance.
-		/// </summary
+		/// </summary>
 		/// <param name="reaction">an instance of Nt_Reaction</param>
 		/// <returns>void</returns>
 		void AddReaction(bool isCytosol,  Nt_Reaction^ reaction)
@@ -64,47 +81,61 @@ namespace NativeDaphne
 			}
 		}
 
-		void AddGene(Nt_Gene ^gene)
-		{
-			for (int i=0; i< genes->Count; i++)
-			{
-				if (genes[i]->Name == gene->Name)
-				{
-					genes[i]->AddGene(gene);
-					return;
-				}
-			}
-			Nt_Gene^ container = gene->CloneParent();
-			genes->Add(container);
-		}
-
 		void AddCell(Nt_Cell ^cell)
 		{
-			if (cell->isMotile)
+			//??? here we should have a boundary id for the plasmamembrane.
+			Cytosol->AddNtBoundary(0, cell->plasmaMembrane->InteriorId, cell->plasmaMembrane);
+			if (masterCell == nullptr)
 			{
-				if (MotileCells == nullptr)
-				{
-					MotileCells = cell->CloneParent();
-				}
-				else
-				{
-					MotileCells->AddCell(cell);
-				}
+				masterCell = cell->CloneParent();
 			}
+			else 
+			{
+				masterCell->AddCell(cell);
+			}
+			//things to add here...
+			//1. add genes
+			//2. add molecularPopulation (cytosol & membrane)
+			//3. add reacitons both cytosol & mebrane
+			for each (KeyValuePair<String^, Nt_Gene^>^ kvp in cell->Genes)
+			{
+				this->AddGene(kvp->Value);
+			}
+			this->Cytosol->AddMemberCompartment(cell->cytosol);
+			this->PlasmaMembrane->AddMemberCompartment(cell->plasmaMembrane);
+			ntCellDictionory->Add(cell->Cell_id, cell);
 		}
+
+		void RemoveCell(int cell_id)
+		{
+			Nt_Cell^ cell = ntCellDictionory[cell_id];
+			if (cell == nullptr)
+			{
+				throw gcnew Exception("Error mid layer RemoveCell");
+			}
+			masterCell->RemoveCell(cell);
+			//at this point, remove the cells data from molpop, reactions etc. etc.
+			this->Cytosol->RemoveMemberCompartment(cell->cytosol);
+			this->PlasmaMembrane->RemoveMemberCompartment(cell->plasmaMembrane);
+
+			ntCellDictionory->Remove(cell_id);
+			//handle other things here
+			throw gcnew Exception("lots ot be done here");
+		}
+
 
 		/// <summary>
 		/// remove all reactions
 		/// </summary>
-		/// <param name="reaction">an instance of Nt_Reaction</param>
 		/// <returns>void</returns>	
 		void Clear()
 		{
 			initialized = false;
 			//cell special states information
-			MotileCells = nullptr;
-			Cytosol = gcnew Nt_Cytosol();
-			PlasmaMembrane = gcnew Nt_PlasmaMembrane();
+			//todo check disopose of these objects
+			masterCell = nullptr;
+			Cytosol = gcnew Nt_Compartment();
+			PlasmaMembrane = gcnew Nt_Compartment();
 		}
 
 		void step(double dt)
@@ -120,9 +151,9 @@ namespace NativeDaphne
 
 			//check_value();
 
-			if (MotileCells != nullptr)
+			if (masterCell != nullptr)
 			{
-				MotileCells->step(dt);
+				masterCell->step(dt);
 			}
 
 			//check_value();
@@ -147,24 +178,19 @@ namespace NativeDaphne
 		//	double tmp = x->_molpopConc[4];
 		//	Console::WriteLine("xxx vlaue = {0}", tmp);
 		//}
-
-
-
 	private:
 
-		//all cells goes to the dictionary
-		//only motile cess go to the collection???
-		//consider how to handle exiting/non motile cells
-		Nt_Cell^ MotileCells;
+		//this will handle the cells force etcs.
+		Nt_Cell^ masterCell;
 
-		Nt_Cytosol ^Cytosol;
+		Nt_Compartment ^Cytosol;
 
-		Nt_PlasmaMembrane ^PlasmaMembrane;
+		Nt_Compartment ^PlasmaMembrane;
 
 		List<Nt_Gene^> ^genes;
 
-		//need this???
-		Dictionary<int, Nt_Cell^> ^cellIdDictionary;
+		//we are not sure if we need this, and how this is going to work.
+		Dictionary<int, Nt_Cell^>^ ntCellDictionory;
 
 		bool initialized;
 	};

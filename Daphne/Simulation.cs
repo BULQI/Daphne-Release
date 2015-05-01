@@ -15,6 +15,7 @@ using Ninject.Parameters;
 
 using System.Diagnostics;
 using NativeDaphne;
+using Gene = NativeDaphne.Nt_Gene;
 
 namespace Daphne
 {
@@ -648,7 +649,6 @@ namespace Daphne
             // 
             // When comp is ECS then ECS boundary reactions may not apply to some cell types. 
             // The continue statements below catch these cases.
-
             for (int i = 0; i < config_reacs.Count; i++)
             {
                 ConfigReaction cr = config_reacs[i];
@@ -844,12 +844,13 @@ namespace Daphne
             }
 
             dataBasket.AddCell(c);
-            cellMangerHandle.AddNtCell(c);
             
             // no cell rotation currently
             Transform t = new Transform(false);
 
             dataBasket.Environment.Comp.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
+            dataBasket.Environment.Comp.AddNtBoundary(c.Population_id, c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
+
             // set translation by reference: when the cell moves then the transform gets updated automatically
             t.setTranslationByReference(c.SpatialState.X);
             dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
@@ -1018,7 +1019,6 @@ namespace Daphne
             scenarioHandle = (TissueScenario)protocol.scenario;
             envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
-            cellManager.threadDataInitialized = false;
             // call the base
             base.Load(protocol, completeReset);
 
@@ -1038,8 +1038,8 @@ namespace Daphne
             // clear the databasket dictionaries
             dataBasket.Clear();
 
-            CellManager.nt_cellManager.Clear();
-
+            //remove any cells in the cell dictionary
+            cellManager.Clear();
 
             // set up the collision manager
             //MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
@@ -1054,6 +1054,14 @@ namespace Daphne
             double[] extent = new double[] { dataBasket.Environment.Comp.Interior.Extent(0), 
                                              dataBasket.Environment.Comp.Interior.Extent(1), 
                                              dataBasket.Environment.Comp.Interior.Extent(2) };
+
+            //set up middle layer environment parameter
+            //Nt_Environment ntenv = new Nt_Environment();
+            //bool boundary_force_flag = ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false;
+            //ntenv.SetEnvironmentExtents(extent[0], extent[1], extent[2], boundary_force_flag, protocol.sim_params.phi1);
+            //int seed = SimulationBase.ProtocolHandle.sim_params.globalRandomSeed;
+            //ntenv.InitializeNormalDistributionSampler(0.0, 1.0, seed);
+            //dataBasket.Environment.nt_environment = ntenv;
 
             // ADD CELLS            
             // convenience arrays to reduce code length
@@ -1076,43 +1084,6 @@ namespace Daphne
 
             // ADD ECS MOLECULAR POPULATIONS
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
-
-            //add ecs molpop to native side
-            //need membrane to cell map
-            Dictionary<int, Cell> memid_to_cell_map = new Dictionary<int, Cell>();
-            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
-            {
-                foreach (var item in SimulationBase.dataBasket.Cells)
-                {
-                    Cell c = item.Value;
-                    memid_to_cell_map.Add(c.PlasmaMembrane.Interior.Id, c);
-                }
-                ECSEnvironment ecs = SimulationBase.dataBasket.Environment as ECSEnvironment;
-                Nt_ECS native_ecs = ecs.native_ecs;
-                foreach (var item in ecs.Comp.Populations)
-                {
-                    var mp = item.Value;
-                    double diffCoeff = mp.IsDiffusing ? mp.Molecule.DiffusionCoefficient : 0.0;
-                    var nt_molpop = new Nt_ECSMolecularPopulation(item.Key,diffCoeff, mp.Conc.array);
-                    //here mp.BoundaryConc and BoundaryFlux are dictionary, so their order is undefined.
-                    //but we will need them to be ordered (synced with cell_manager in order to use them
-                    List<int> boundary_list = CellManager.nt_cellManager.MembraneIdList;
-                    int n = 0;
-                    for (int i = 0; i < boundary_list.Count; i++)
-                    {
-                        int boundId = boundary_list[i];
-                        if (mp.BoundaryConcs.ContainsKey(boundId) == false) continue;
-                        int population_id = memid_to_cell_map[boundId].Population_id;
-                        nt_molpop.AddBoundaryConcAndFlux(population_id, boundId, mp.BoundaryConcs[boundId].array, mp.BoundaryFluxes[boundId].array);
-                        n++;
-                    }
-                    if (n != mp.BoundaryConcs.Count)
-                    {
-                        throw new Exception("molpop boundary count mimsatch");
-                    }
-                    native_ecs.AddMolecularPopulation(nt_molpop);
-                }
-            }
 
             // ECS molpops boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment)
@@ -1155,56 +1126,16 @@ namespace Daphne
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
 
             prepareBoundaryReactionReport(reacs.Count, ref result);
+
+            //add cell data in order
+            //pass populationId into this -- how...
+
+
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
                 AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs, result);
             }
    
-            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
-            {
-                ECSEnvironment ecs = SimulationBase.dataBasket.Environment as ECSEnvironment;
-                Nt_ECS native_ecs = ecs.native_ecs;
-                List<int> boundary_list = CellManager.nt_cellManager.MembraneIdList;
-                foreach(int boundId in boundary_list)
-                {
-                    int population_id = CellManager.nt_cellManager.findCellPopulationId(boundId);
-                    if (ecs.Comp.BoundaryReactions.ContainsKey(boundId) == false)continue;
-                    List<Reaction> reactions = ecs.Comp.BoundaryReactions[boundId];
-                    for (int i= 0; i<reactions.Count; i++)
-                    {
-                        Reaction r = reactions[i];
-                        if (r is BoundaryAssociation)
-                        {
-                            BoundaryAssociation bar = r as BoundaryAssociation;
-                            Nt_BoundaryAssociation rxn = new Nt_BoundaryAssociation(boundId, r.RateConstant);
-                            rxn.receptor = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.receptor.MoleculeKey);
-                            rxn.complex = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.complex.MoleculeKey);
-                            rxn.ligand = native_ecs.findEcsMolecularPopulation(bar.ligand.MoleculeKey);
-                            rxn.reaction_index = i;
-                            rxn.cellId = boundId; //todo: this is bound id.
-                            rxn.boundaryId = population_id;
-                            native_ecs.AddReaction(rxn);
-                        }
-                        else if (r is BoundaryDissociation)
-                        {
-                            BoundaryDissociation bar = r as BoundaryDissociation;
-                            Nt_BoundaryDissociation rxn = new Nt_BoundaryDissociation(boundId, r.RateConstant);
-                            rxn.receptor = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.receptor.MoleculeKey);
-                            rxn.complex = CellManager.nt_cellManager.findMembraneMolecularPopulation(boundId, bar.complex.MoleculeKey);
-                            rxn.ligand = native_ecs.findEcsMolecularPopulation(bar.ligand.MoleculeKey);
-                            rxn.reaction_index = i;
-                            rxn.cellId = boundId; //todo: this is bound id.
-                            rxn.boundaryId = population_id;
-                            native_ecs.AddReaction(rxn);
-                        }
-                        else
-                        {
-                            throw new NotImplementedException("boundary reaciton not implementd");
-                        }
-                    }
-                }   
-            }
-
             // report if a reaction could not be inserted
             boundaryReactionReport(reacs, result, "the ECS");
 
@@ -1215,7 +1146,10 @@ namespace Daphne
             // distribution governing time-to-removal for apoptotic cells
             cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();
 
+
             cellManager.InitializeNtCellManger();
+
+            dataBasket.Environment.Comp.InitilizeBase();
         }
 
         public override void Step(double dt)

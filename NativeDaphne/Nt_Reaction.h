@@ -12,71 +12,175 @@ using namespace System::Security;
 namespace NativeDaphne 
 {
 
-	public enum class Nt_ReactionType {Annihilation, Association, AutocatalyticTransformation, BoundaryAssociation,
-		BoundaryDissociation, BoundaryTransportFrom, BoundaryTransportTo, CatalyzedAnnihilation, CatalyzedAssociation,
-		CatalyzedBoundaryActivation, CatalyzedCreation, CatalyzedDimerDissociation, CatalyzedDimerization,
-		CatalyzedDissociation, CatalyzedTransformation, DimerDissociation, Dimerization, Dissociation, GeneralizedReaction,
-		Transcription, Transformation};
+	//public enum class Nt_ReactionType {Annihilation, Association, AutocatalyticTransformation, BoundaryAssociation,
+	//	BoundaryDissociation, BoundaryTransportFrom, BoundaryTransportTo, CatalyzedAnnihilation, CatalyzedAssociation,
+	//	CatalyzedBoundaryActivation, CatalyzedCreation, CatalyzedDimerDissociation, CatalyzedDimerization,
+	//	CatalyzedDissociation, CatalyzedTransformation, DimerDissociation, Dimerization, Dissociation, GeneralizedReaction,
+	//	Transcription, Transformation};
 
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_Reaction
 	{
 	public:
-	
-		Nt_ReactionType reactionType;
+		property double RateConstant;
 
+		//indicate if the reaction should/should not perform step()
+		property bool Steppable;
+
+		virtual void Step(double dt);
+
+	internal:
+		
 		Nt_Reaction(){}
 
-		Nt_Reaction(Nt_ReactionType type, int cell_id, double rate_const);
+		Nt_Reaction(double rate_const);
 
-		Dictionary<int, bool> ^cellIdDictionary;
-
-		int cellId;
-		double rateConstant;
-
-		//stores the list of component reactions.
 		List<Nt_Reaction ^> ^ComponentReactions;
-		List<int>^ cellIds;
-
-
-		//since we don't have a key for reactions
-		//this is the index of the reaction in List<Reaction>
-		int reaction_index;
-		int boundaryId; //in the context of ECS boundaryReaction, this is the cellPopulaitonId
-		bool isBulkReaction;
-
 
 	    virtual void AddReaction(Nt_Reaction ^ rxn);
-
-		virtual void step(double dt);
 
 		//clone this reaction and return reaction servers as placeholder
 		virtual Nt_Reaction ^CloneParent()
 		{
-			Nt_Reaction^ rxn = gcnew Nt_Reaction(this->reactionType, this->cellIds[0], this->rateConstant);
+			Nt_Reaction^ rxn = gcnew Nt_Reaction(this->RateConstant);
 			return rxn;
+		}	
+
+		virtual Nt_Reaction ^CloneParent(int population_id)
+		{
+			throw gcnew Exception("NotImplementedException");
 		}
-	protected:	
-		
+
+		bool IsCollection()
+		{
+			return ComponentReactions != nullptr;
+		}
+	};
+
+
+	public ref class Nt_ReactionSet
+	{
+	public:
+		int populationId;
+		List<Nt_Reaction^>^ ReactionList;
+
+		Nt_ReactionSet()
+		{
+			populationId = 0;
+			ReactionList = gcnew List<Nt_Reaction^>();
+		}
+
+		Nt_ReactionSet(int pid)
+		{
+			populationId = pid;
+			ReactionList = gcnew List<Nt_Reaction^>();
+		}
+
+		void AddReaction(Nt_Reaction ^rxn, int index)
+		{
+			if (index >= ReactionList->Count)
+			{
+				ReactionList->Add(rxn->CloneParent(populationId));
+			}
+			else 
+			{
+				ReactionList[index]->AddReaction(rxn);
+			}
+		}
+	};
+
+	//Fundamental reactions
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_Annihilation : public Nt_Reaction
+	{
+	public:
+
+		Nt_Annihilation(double rate_const);
+
+		Nt_Annihilation(Nt_MolecularPopulation^ reactant, double rate_const);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation^ Reactant;
+	private:
+		double *_reactant;
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
-	public ref class Nt_Transformation: public Nt_Reaction
+	public ref class Nt_Association: public Nt_Reaction
 	{
 
 	public:
-		Nt_Transformation();
-
-		Nt_Transformation(int cell_id, double rate_const);
+		Nt_Association(double rate_const);
+		
+		Nt_Association(Nt_MolecularPopulation^ _reactant1, Nt_MolecularPopulation^ _reactant2, Nt_MolecularPopulation^ _product, double rate_const);
 
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void step(double dt) override;
+		virtual void Step(double dt) override;
 
-		Nt_MolecularPopulation ^reactant;
-		Nt_MolecularPopulation ^product;
+		Nt_MolecularPopulation ^Reactant1;
+		Nt_MolecularPopulation ^Reactant2;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_reactant1;
+		double *_reactant2;
+		double *_product;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_Dimerization: public Nt_Reaction
+	{
+
+	public:
+		Nt_Dimerization(double _RateConst);
+
+		Nt_Dimerization(Nt_MolecularPopulation^ _reactant, Nt_MolecularPopulation^ _product, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_reactant;
+		double *_product;
+		int array_length; //the "active" data length of the array
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_DimerDissociation: public Nt_Reaction
+	{
+
+	public:
+		Nt_DimerDissociation(double _RateConst);
+
+		Nt_DimerDissociation(Nt_MolecularPopulation^ _reactant, Nt_MolecularPopulation^ _product, double _RateConst);
+
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Product;
 
 	private:
 		double *_reactant;
@@ -86,19 +190,300 @@ namespace NativeDaphne
 	};
 
 	[SuppressUnmanagedCodeSecurity]
-	public ref class Nt_Transcription: public Nt_Reaction
+	public ref class Nt_Dissociation: public Nt_Reaction
 	{
+
 	public:
-		Nt_Transcription(int cell_id, double rate_const);
+		Nt_Dissociation(double _RateConst);
+
+		Nt_Dissociation(Nt_MolecularPopulation^ _reactant, Nt_MolecularPopulation^ _product1, Nt_MolecularPopulation^ _product2, double _RateConst);
 
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void step(double dt) override;
+		virtual void Step(double dt) override;
 
-		Nt_Gene ^gene;
-		Nt_MolecularPopulation^ product;
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Product1;
+		Nt_MolecularPopulation ^Product2;
+
+	private:
+		double *_reactant;
+		double *_product1;
+		double *_product2;
+		int array_length;
+		
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_Transformation: public Nt_Reaction
+	{
+
+	public:
+		Nt_Transformation(double rate_const);
+
+		Nt_Transformation(Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product, double rate_const);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_reactant;
+		double *_product;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedAnnihilation: public Nt_Reaction
+	{
+
+	public:
+		Nt_CatalyzedAnnihilation(double _RateConst);
+
+		Nt_CatalyzedAnnihilation(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ reactant, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Catalyst;
+
+	private:
+		double *_reactant;
+		double *_catalyst;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedAssociation: public Nt_Reaction
+	{
+
+	public:
+		Nt_CatalyzedAssociation(double RateConst);
+
+		Nt_CatalyzedAssociation(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ reactant1, Nt_MolecularPopulation^ reactant2, Nt_MolecularPopulation^ product, double RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Catalyst;
+		Nt_MolecularPopulation ^Reactant1;
+		Nt_MolecularPopulation ^Reactant2;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_catalyst;
+		double *_reactant1;
+		double *_reactant2;
+		double *_product;
+		double *_intensity;
+		double *_intensity2;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+
+	//to be implemented
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedCreation: public Nt_Reaction
+	{
+
+	public:
+
+		Nt_CatalyzedCreation(double _RateConst);
+
+		Nt_CatalyzedCreation(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ _product, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Catalyst;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_catalyst;
+		double *_product;
+		int array_length;
+		
+	};
+
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedDimerization: public Nt_Reaction
+	{
+
+	public:
+		Nt_CatalyzedDimerization(double _RateConst);
+
+		Nt_CatalyzedDimerization(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Catalyst;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_reactant;
+		double *_catalyst;
+		double *_product;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedDimerDissociation: public Nt_Reaction
+	{
+
+	public:
+		Nt_CatalyzedDimerDissociation(double _RateConst);
+
+		Nt_CatalyzedDimerDissociation(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Catalyst;
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_catalyst;
+		double *_reactant;
+		double *_product;
+		double *_intensity;
+		int array_length;
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedDissociation: public Nt_Reaction
+	{
+
+	public:
+		Nt_CatalyzedDissociation(double _RateConst);
+
+		Nt_CatalyzedDissociation(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product1, Nt_MolecularPopulation^ product2, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Catalyst;
+		Nt_MolecularPopulation ^Reactant;		
+		Nt_MolecularPopulation ^Product1;
+		Nt_MolecularPopulation ^Product2;
+
+	private:
+		double *_catalyst;
+		double *_reactant;
+		double *_product1;
+		double *_product2;
+		double *_intensity;
+		int array_length; //the "active" data length of the array		
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_CatalyzedTransformation: public Nt_Reaction
+	{
+
+	public:
+		Nt_CatalyzedTransformation(double _RateConst);
+
+		Nt_CatalyzedTransformation(Nt_MolecularPopulation^ catalyst, Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Catalyst;
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Product;
+
+	private:
+		double *_catalyst;
+		double *_reactant;
+		double *_product;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_AutocatalyticTransformation: public Nt_Reaction
+	{
+
+	public:
+		Nt_AutocatalyticTransformation(double _RateConst);
+
+		Nt_AutocatalyticTransformation(Nt_MolecularPopulation^ reactant1, Nt_MolecularPopulation^ reactant2, Nt_MolecularPopulation^ product, double _RateConst);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation ^Reactant;
+		Nt_MolecularPopulation ^Catalyst;
+
+	private:
+		double *_reactant;
+		double *_catalyst;
+		double *_intensity;
+		int array_length; //the "active" data length of the array
+		
+	};
+
+
+	[SuppressUnmanagedCodeSecurity]
+	public ref class Nt_Transcription: public Nt_Reaction
+	{
+	public:
+		Nt_Transcription(double rate_const);
+
+		Nt_Transcription(Nt_Gene^ gene, Nt_MolecularPopulation^ product, double rate_const);
+
+		virtual void AddReaction(Nt_Reaction^ rxn) override;
+
+		virtual Nt_Reaction^ CloneParent() override;
+
+		virtual void Step(double dt) override;
+
+		Nt_Gene ^Gene;
+		Nt_MolecularPopulation^ Product;
 	private:
 		double *_product;
 		double *_activation;
@@ -110,17 +495,22 @@ namespace NativeDaphne
 	public ref class Nt_CatalyzedBoundaryActivation : public Nt_Reaction
 	{
 	public:
-		Nt_CatalyzedBoundaryActivation(int cell_id, double rate_const);
+		Nt_CatalyzedBoundaryActivation(double rate_const);
+
+		Nt_CatalyzedBoundaryActivation(Nt_MolecularPopulation^ bulk, Nt_MolecularPopulation^ bulkActivated, Nt_MolecularPopulation^ receptor, double rate_const);
 
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
 		virtual Nt_Reaction^ CloneParent() override;
 
-		virtual void step(double dt) override;
+		virtual Nt_Reaction^ CloneParent(int boundary_id) override;
 
-		Nt_MolecularPopulation^ bulk;
-		Nt_MolecularPopulation^ bulkActivated;
-		Nt_MolecularPopulation^ receptor;
+		virtual void Step(double dt) override;
+
+		Nt_MolecularPopulation^ Bulk;
+		Nt_MolecularPopulation^ BulkActivated;
+		Nt_MolecularPopulation^ Receptor;
+		int boundaryId;
 
 	private:
 		double *_bulk_BoundaryConc;
@@ -131,34 +521,23 @@ namespace NativeDaphne
 		int array_length;
 	};
 
-	[SuppressUnmanagedCodeSecurity]
-	public ref class Nt_Annihilation : public Nt_Reaction
-	{
-	public:
-		Nt_Annihilation(int cell_id, double rate_const);
-		virtual void AddReaction(Nt_Reaction^ rxn) override;
-
-		virtual Nt_Reaction^ CloneParent() override;
-		virtual void step(double dt) override;
-
-		Nt_MolecularPopulation^ reactant;
-	private:
-		double *_reactant;
-		int array_length;
-	};
 
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_BoundaryTransportTo : public Nt_Reaction
 	{
 	public:
-		Nt_BoundaryTransportTo(int cell_id, double rate_const);
+		Nt_BoundaryTransportTo(double rate_const);
+
+		Nt_BoundaryTransportTo(Nt_MolecularPopulation^ bulk, Nt_MolecularPopulation^ membrane, double rate_const);
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 		virtual Nt_Reaction^ CloneParent() override;
+		virtual Nt_Reaction^ CloneParent(int boundary_id) override;
 
-		virtual void step(double dt) override;
+		virtual void Step(double dt) override;
 	
-		Nt_MolecularPopulation^ bulk;
-		Nt_MolecularPopulation^ membrane;
+		Nt_MolecularPopulation^ Bulk;
+		Nt_MolecularPopulation^ Membrane;
+		int boundaryId;
 	private:
 		double *_bulk_BoundaryConc;
 		double *_bulk_BoundaryFlux;
@@ -170,14 +549,17 @@ namespace NativeDaphne
 	public ref class Nt_BoundaryTransportFrom : public Nt_Reaction
 	{
 	public:
-		Nt_BoundaryTransportFrom(int cell_id, double rate_const);
+
+		Nt_BoundaryTransportFrom(double rate_const);
+
+		Nt_BoundaryTransportFrom(Nt_MolecularPopulation^ membrane, Nt_MolecularPopulation^ bulk, double rate_const);
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
-		virtual Nt_Reaction^ CloneParent() override;
+		virtual Nt_Reaction^ CloneParent(int boundary_id) override;
+		virtual void Step(double dt) override;
 
-		virtual void step(double dt) override;
-
-		Nt_MolecularPopulation^ bulk;
-		Nt_MolecularPopulation^ membrane;
+		Nt_MolecularPopulation^ Bulk;
+		Nt_MolecularPopulation^ Membrane;
+		int boundaryId;
 	private:
 		double *_bulk_BoundaryFlux;
 		double *_membraneConc;
@@ -190,21 +572,27 @@ namespace NativeDaphne
 	{
 
 	public:
-		Nt_BoundaryAssociation(){};
+		Nt_BoundaryAssociation(double rate_const);
 
-		Nt_BoundaryAssociation(int cell_id, double rate_const);
+		Nt_BoundaryAssociation(Nt_MolecularPopulation ^receptor, Nt_MolecularPopulation ^ligand, Nt_MolecularPopulation ^complex, double rate_const);
 
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
-		virtual Nt_Reaction^ CloneParent() override;
+		virtual Nt_Reaction^ CloneParent() override
+		{
+			throw gcnew Exception("BoundaryAssociaiton.CloneParent needs populationId");
+		}
 
-		virtual void step(double dt) override;
+		virtual Nt_Reaction^ CloneParent(int population_id) override;
+
+		virtual void Step(double dt) override;
 
 		//void initialize();
 
-		Nt_MolecularPopulation ^receptor;
-		Nt_MolecularPopulation ^ligand;
-		Nt_MolecularPopulation ^complex;
+		Nt_MolecularPopulation ^Receptor;
+		Nt_MolecularPopulation ^Ligand;
+		Nt_MolecularPopulation ^Complex;
+		int boundaryId;
 
 	private:
 		double *_ligand_BoundaryConc; //from bulk
@@ -221,21 +609,20 @@ namespace NativeDaphne
 	{
 
 	public:
-		Nt_BoundaryDissociation(){};
+		Nt_BoundaryDissociation(double rate_const);
 
-		Nt_BoundaryDissociation(int cell_id, double rate_const);
+		Nt_BoundaryDissociation(Nt_MolecularPopulation ^receptor, Nt_MolecularPopulation ^ligand, Nt_MolecularPopulation ^complex, double rate_const);
 
 		virtual void AddReaction(Nt_Reaction^ rxn) override;
 
-		virtual Nt_Reaction^ CloneParent() override;
+		virtual Nt_Reaction^ CloneParent(int pop_id) override;
 
-		virtual void step(double dt) override;
+		virtual void Step(double dt) override;
 
-		//void initialize();
-
-		Nt_MolecularPopulation ^receptor;
-		Nt_MolecularPopulation ^ligand;
-		Nt_MolecularPopulation ^complex;
+		Nt_MolecularPopulation ^Receptor;
+		Nt_MolecularPopulation ^Ligand;
+		Nt_MolecularPopulation ^Complex;
+		int boundaryId; //manifold->Id
 
 	private:
 		double *_ligand_BoundaryConc; //from bulk
@@ -244,7 +631,7 @@ namespace NativeDaphne
 		double* _receptor;
 		double* _complex;
 		double *_intensity;
-		int array_length; //the "active" data length of the array
+		int array_length;
 	};
 
 }

@@ -79,11 +79,30 @@ namespace Daphne
             }
         }
 
+        public void findGridIndex(Nt_Darray pos, ref Nt_Iarray idx)
+        {
+            //save one allocation
+            for (int i = 0; i < pos.Length; i++)
+            {
+                idx[i] = (int)(pos[i] / gridStep);
+                if (idx[i] < 0 || idx[i] > gridPts[i] - 1)
+                {
+                    idx[0] = idx[1] = idx[2] = -1;
+                    return;
+                }
+            }
+        }
+
         /// <summary>
         /// test an index tuple regaring whether it specifies legal indices
         /// </summary>
         /// <param name="idx">tuple to test</param>
         /// <returns>true or false</returns>
+        public bool legalIndex(Nt_Iarray idx)
+        {
+            return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];
+        }
+
         public bool legalIndex(int[] idx)
         {
             return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];

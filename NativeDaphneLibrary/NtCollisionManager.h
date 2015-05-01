@@ -66,7 +66,7 @@ namespace NativeDaphneLibrary
 
 		int getPairCount()
 		{
-			return pairs->size();
+			return (int)pairs->size();
 		}
 
 		bool itemExists(int key)

@@ -9,6 +9,7 @@ using System.Text;
 //using LangProcLib;
 using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
+using Gene = NativeDaphne.Nt_Gene;
 
 namespace Daphne
 {
@@ -28,7 +29,7 @@ namespace Daphne
         /// <summary>
         /// cell populations
         /// </summary>
-        private Dictionary<int, Dictionary<int, Cell>> populations;
+        private Dictionary<int, CellsPopulation> populations;
         /// <summary>
         /// dictionary of molecules
         /// </summary>
@@ -69,7 +70,7 @@ namespace Daphne
         {
             hSim = s;
             cells = new Dictionary<int,Cell>();
-            populations = new Dictionary<int, Dictionary<int, Cell>>();
+            populations = new Dictionary<int, CellsPopulation>();
             molecules = new Dictionary<string, Molecule>();
             genes = new Dictionary<string, Gene>();
             // create the hdf5 object
@@ -112,7 +113,7 @@ namespace Daphne
         /// <summary>
         /// accessor for the populations
         /// </summary>
-        public Dictionary<int, Dictionary<int, Cell>> Populations
+        public Dictionary<int, CellsPopulation> Populations
         {
             get { return populations; }
         }
@@ -432,7 +433,7 @@ namespace Daphne
         {
             if (populations.ContainsKey(id) == false)
             {
-                populations.Add(id, new Dictionary<int, Cell>());
+                populations.Add(id, new CellsPopulation(id));
                 return true;
             }
             return false;
@@ -451,8 +452,13 @@ namespace Daphne
                 cell.GridIndex[0] = cell.GridIndex[1] = cell.GridIndex[2] = -1;
                 // add the cell
                 cells.Add(cell.Cell_id, cell);
-                // add it to the population
-                populations[cell.Population_id].Add(cell.Cell_id, cell);
+
+                //add the cell to the population, which have a middle layer instance
+                populations[cell.Population_id].AddCell(cell.Cell_id, cell);
+
+                //the is for global access in the middle layer, this is needed since the
+                //middle layer does not have access to the databasket.
+                CellManager.cellDictionary.Add(cell.Cell_id, cell);
                 return true;
             }
             return false;
@@ -474,7 +480,7 @@ namespace Daphne
                 // remove the cell from the grid
                 hSim.CollisionManager.RemoveCellFromGrid(cell);
                 // remove the cell from the population
-                populations[cell.Population_id].Remove(cell.Cell_id);
+                populations[cell.Population_id].RemoveCell(cell.Cell_id);
                 // remove the cell itself
                 hSim.RemoveCell(cell);
                 return true;
@@ -498,9 +504,9 @@ namespace Daphne
                 // rekey the cell in the grid
                 hSim.CollisionManager.RekeyCellInGrid(cell, oldKey);
                 // add the new key in the population
-                populations[cell.Population_id].Add(cells[oldKey].Cell_id, cell);
+                populations[cell.Population_id].AddCell(cells[oldKey].Cell_id, cell);
                 // remove the old key from the population
-                populations[cell.Population_id].Remove(oldKey);
+                populations[cell.Population_id].RemoveCell(oldKey);
                 // add the new key
                 cells.Add(cells[oldKey].Cell_id, cell);
                 // remove the old key

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using MathNet.Numerics.LinearAlgebra.Double;
+using NativeDaphne;
 
 namespace ManifoldRing
 {
@@ -39,6 +40,7 @@ namespace ManifoldRing
 
         protected const double E_BOUNDARY_THICKNESS = 0.001;
 
+        public Nt_Manifold nt_manifold;
         /// <summary>
         /// manifold extent
         /// </summary>
@@ -279,6 +281,7 @@ namespace ManifoldRing
             }
 
             radius = data[0];
+            nt_manifold = Nt_ManifoldFactory.Instance.GetManifold(Nt_ManifoldType.TinySphere, data);
         }
 
         /// <summary>
@@ -464,7 +467,7 @@ namespace ManifoldRing
             : base(3)
         {
             laplacian = new ScalarField(this);
-            diffusionField = new ScalarField(this);    
+            diffusionField = new ScalarField(this);  
         }
 
         /// <summary>
@@ -479,6 +482,7 @@ namespace ManifoldRing
             }
 
             radius = data[0];
+            nt_manifold = Nt_ManifoldFactory.Instance.GetManifold(Nt_ManifoldType.TinyBall, data);
         }
 
         /// <summary>
@@ -968,10 +972,6 @@ namespace ManifoldRing
             {
                 return new double[Dim];
             }
-            if (double.IsNaN(x[0]))
-            {
-                int y = 1;
-            }
             return interpolator.Gradient(x, sf);
         }
 
@@ -1305,6 +1305,7 @@ namespace ManifoldRing
         public override void Initialize(double[] data)
         {
             // no initialization needed
+            nt_manifold = Nt_ManifoldFactory.Instance.GetManifold(Nt_ManifoldType.InterpolatedRectangularPrism, data);
             return;
         }
 

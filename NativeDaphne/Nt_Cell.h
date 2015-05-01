@@ -6,6 +6,8 @@
 #include "Nt_MolecularPopulation.h"
 #include "Nt_DArray.h"
 #include "NtCellPair.h"
+#include "Nt_Gene.h"
+#include "Nt_Compartment.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -26,6 +28,11 @@ namespace NativeDaphne
 		static int SingleDim = 3;
 		static int Dim = 9;
 
+		Nt_CellSpatialState()
+		{
+			_X = _V = _F = NULL;
+		}
+
 		Nt_CellSpatialState(Nt_Darray^ x, Nt_Darray^ v, Nt_Darray^ f)
 		{
 			X = x;
@@ -43,82 +50,96 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_Cell
 	{
-	private:
-		Nt_CellSpatialState ^spatialState;
-	public:
-		//how to get this updated??
-		static int SafeCell_id = 0;
-
-		int Cell_id;
-		int Population_id;
-		int Membrane_id;
-		double radius;
-
+	protected:
+		/// <summary>
+        /// A flag that signals to the cell manager whether the cell is alive or dead.
+        /// </summary>
 		bool alive;
-		bool exiting;
-		bool isMotile;
-		Nt_MolecularPopulation^ Driver; //point cells->cytosol->puplulaiton[driver-key]
-		double TransductionConstant;
-		double DragCoefficient;
-		double Sigma;
-		bool IsChemotactic;
-		bool IsStochastic;
-		bool cytokinetic;
-		int* GridIndex;
+
+		/// <summary>
+        /// A flag that signals to the cell manager whether the cell is ready to divide. 
+        /// </summary>
+        bool cytokinetic;
+
+		/// <summary>
+        /// a flag that signals that the cell is motile
+        /// </summary>
+        bool isMotile;
+
+		/// <summary>
+        /// a flag that signals that the cell responds to chemokine gradients
+        /// </summary>
+        bool isChemotactic;
+
+        /// <summary>
+        /// a flag that signals that the cell is subject to stochastic forces
+        /// </summary>
+        bool isStochastic;
+
+		/// <summary>
+        /// A flag that signals to the cell manager whether the cell is exiting the simulation space.
+        /// </summary>
+        bool exiting;
+
+		/// <summary>
+        /// The radius of the cell
+        /// </summary>
+        double radius;
+
+		Nt_CellSpatialState ^spatialState;
+
+		Dictionary<String^, Nt_Gene^>^ genes;
+
+	internal:
+		int *gridIndex;
 		int* PreviousGridIndex;
+		//to be remvoed
+		int Membrane_id;
+
+	public:
+		int Cell_id;
+		static int SafeCell_id = 0;
+		static double defaultRadius = 5.0;
+		property int Population_id;
+
+		Nt_Compartment^ cytosol;
+		Nt_Compartment^ plasmaMembrane;
 
 
-		static int count = 0;
-
-
-		List<int> ^cellIds;
-
-		List<Nt_Cell^>^ ComponentCells;
-
-		NtCell *nt_cell;
-
-		Nt_Cell()
+		property bool IsMotile
 		{
-			cellIds = gcnew List<int>();
-			//only need 3, but 4 needed when using ssc2
-			GridIndex = (int*)malloc(4 *sizeof(int));
-			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
-			PreviousGridIndex[0] = -1; //evaludate into invalid
-			allocedItemCount = 0;
-			nt_cell = new NtCell(radius, GridIndex);
+			bool get(){ return isMotile;}
+			void set(bool value){ isMotile = value;}
 		}
 
-		Nt_Cell(int cid, double r)
+		property bool IsChemotactic
 		{
-			Cell_id = cid;
-			radius = r;
-			cellIds = gcnew List<int>();
-			GridIndex = (int*)malloc(4 *sizeof(int));
-			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
-			PreviousGridIndex[0] = -1;
-			PreviousGridIndex[3] = 0; //indicate invalid
-			allocedItemCount = 0;
-			nt_cell = new NtCell(radius, GridIndex);
+			bool get(){ return isChemotactic;}
+			void set(bool value){ isChemotactic = value;}
 		}
 
-
-		~Nt_Cell()
+		property bool IsStochastic
 		{
-			this->!Nt_Cell();
+			bool get(){ return isStochastic;}
+			void set(bool value){ isStochastic = value;}
 		}
 
-		!Nt_Cell()
+		property bool Alive
 		{
-			if (allocedItemCount > 0)
-			{
-				free(_random_samples);
-				free(_driver_gradient);
-				free(_X);
-				free(_V);
-				free(_F);
-				free(GridIndex);
-				delete nt_cell;
-			}
+			bool get(){ return alive;}
+			void set(bool value){ alive = value;}
+		}
+
+		property bool Cytokinetic
+		{
+			bool get(){ return cytokinetic;}
+			void set(bool value){ cytokinetic = value;}
+		}
+
+		property bool Exiting
+		{
+			bool get(){ return exiting;}
+			void set(bool value){ exiting = value;}
 		}
 
 		property double Radius
@@ -145,10 +166,98 @@ namespace NativeDaphne
 			}
         }
 
+		property Nt_Iarray^ GridIndex;
+
+
+		property Dictionary<String^, Nt_Gene^>^ Genes
+		{
+			Dictionary<String^, Nt_Gene^>^ get()
+			{
+				return genes;
+			}
+			void set(Dictionary<String^, Nt_Gene^>^ g)
+			{
+				genes = g;
+			}
+		}
+
+		void AddGene(String^ gene_guid, Nt_Gene^ gene)
+		{
+			genes->Add(gene_guid, gene);
+		}
+
+
+		Nt_MolecularPopulation^ Driver; //point cells->cytosol->puplulaiton[driver-key]
+		double TransductionConstant;
+		double DragCoefficient;
+		double Sigma;
+
+		static int count = 0;
+
+
+		List<int> ^cellIds;
+
+		List<Nt_Cell^>^ ComponentCells;
+
+		NtCell *nt_cell;
+
+		Nt_Cell()
+		{
+			
+			cellIds = gcnew List<int>();
+			//only need 3, but 4 needed when using ssc2
+			GridIndex = gcnew Nt_Iarray(3);
+			GridIndex[0] = -1;
+			GridIndex[1] = -1;
+			GridIndex[2] = -1;
+			gridIndex = GridIndex->NativePointer;
+			gridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex[0] = -1; //evaludate into invalid
+			allocedItemCount = 0;
+			nt_cell = new NtCell(radius, gridIndex);
+		}
+
+		///to be removed.
+		Nt_Cell(double r, int cid)
+		{
+			radius = r;
+			Cell_id = cid;
+			cellIds = gcnew List<int>();
+			gridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
+			PreviousGridIndex[0] = -1;
+			PreviousGridIndex[3] = 0; //indicate invalid
+			allocedItemCount = 0;
+			nt_cell = new NtCell(radius, gridIndex);
+		}
+
+
+		~Nt_Cell()
+		{
+			this->!Nt_Cell();
+		}
+
+		!Nt_Cell()
+		{
+			if (allocedItemCount > 0)
+			{
+				free(_random_samples);
+				free(_driver_gradient);
+				free(_X);
+				free(_V);
+				free(_F);
+				free(gridIndex);
+				delete nt_cell;
+			}
+		}
+
+
+
 
 		Nt_Cell^ CloneParent()
 		{
-			Nt_Cell ^cell = gcnew Nt_Cell(-1, radius);
+			Nt_Cell ^cell = gcnew Nt_Cell(radius, -1);
 			cell->Population_id = this->Population_id;
 			cell->TransductionConstant = this->TransductionConstant;
 			cell->DragCoefficient = this->DragCoefficient;
@@ -156,8 +265,8 @@ namespace NativeDaphne
 			cell->TransductionConstant;
 			cell->DragCoefficient = this->DragCoefficient;
 
-			cell->IsChemotactic = this->IsChemotactic;
-			cell->IsStochastic = this->IsStochastic;
+			cell->isChemotactic = this->isChemotactic;
+			cell->isStochastic = this->isStochastic;
 			cell->cytokinetic = this->cytokinetic;
 			cell->ComponentCells = gcnew List<Nt_Cell^>();
 			cell->cellIds = gcnew List<int>();
@@ -223,6 +332,11 @@ namespace NativeDaphne
         }
 
 		void step(double dt);
+
+		void RemoveCell(Nt_Cell ^c)
+		{
+			RemoveCell(c->Cell_id);
+		}
 
 		void RemoveCell(int cell_id)
 		{

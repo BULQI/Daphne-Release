@@ -11,88 +11,28 @@ using NativeDaphne;
 
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Gene = NativeDaphne.Nt_Gene;
+
 
 
 namespace Daphne
 {
-    public struct CellSpatialState
-    {
-        public Nt_Darray X;
-        public Nt_Darray V;
-        public Nt_Darray F;
+    //public struct CellSpatialState
+    //{
+    //    public Nt_Darray X;
+    //    public Nt_Darray V;
+    //    public Nt_Darray F;
 
-        public static int SingleDim = 3, Dim = 3 * SingleDim;
-    }
-
-    public class Gene
-    {
-        public Nt_Gene nt_gene; //unmanged instance
-        public string Name { get; private set; }
-        public int CopyNumber { get; private set; }
-        // Activation level may be adjusted depending on cell state 
-        public double _activationLevel;
-        public double ActivationLevel 
-        {
-            get
-            {
-                return _activationLevel;
-            }
-            set
-            {
-                _activationLevel = value;
-                if (nt_gene != null)
-                {
-                    nt_gene.SetActivationLevel(value);
-                }
-            }
-        }
-
-        public Gene(string name, int copyNumber, double actLevel)
-        {
-            Name = name;
-            CopyNumber = copyNumber;
-            ActivationLevel = actLevel;
-        }
-    }
-
+    //    public static int SingleDim = 3, Dim = 3 * SingleDim;
+    //}
     public class Cytosol : Attribute { }
     public class Membrane : Attribute { }
 
     /// <summary>
     /// The basic representation of a biological cell. 
     /// </summary>
-    public class Cell : IDynamic
+    public class Cell : Nt_Cell, IDynamic
     {
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is alive or dead.
-        /// </summary>
-        private bool alive;
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is ready to divide. 
-        /// </summary>
-        private bool cytokinetic;
-        /// <summary>
-        /// a flag that signals that the cell is motile
-        /// </summary>
-        private bool isMotile = true;
-        /// <summary>
-        /// a flag that signals that the cell responds to chemokine gradients
-        /// </summary>
-        private bool isChemotactic = true;
-        /// <summary>
-        /// a flag that signals that the cell is subject to stochastic forces
-        /// </summary>
-        private bool isStochastic = true;
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is exiting the simulation space.
-        /// </summary>
-        private bool exiting;
-
-        /// <summary>
-        /// The radius of the cell
-        /// </summary>
-        private double radius;
-
         /// <summary>
         /// the cell's behaviors (death, division, differentiation)
         /// </summary>
@@ -106,38 +46,25 @@ namespace Daphne
         public string renderLabel;
         public int generation;
 
-        public Nt_Cell ntCell;
-
-        /// <summary>
-        /// the genes in a cell
-        /// NOTE: should these be in the cytoplasm
-        /// </summary>
-        //public List<Gene> genes;
-        private Dictionary<string, Gene> genes;
-        public Dictionary<string, Gene> Genes
-        {
-            get { return genes; }
-        }
-        public void AddGene(string gene_guid, Gene gene)
-        {
-            genes.Add(gene_guid, gene);
-        }
-
         public Cell(double radius, int id)
         {
             if (radius <= 0)
             {
                 throw new Exception("Cell radius must be greater than zero.");
             }
+            isMotile = true;
+            isChemotactic = true;
+            isStochastic = true;
             alive = true;
             cytokinetic = false;
             this.radius = radius;
             genes = new Dictionary<string, Gene>();
             exiting = false;
 
-            spatialState.X = new Nt_Darray(CellSpatialState.SingleDim);
-            spatialState.V = new Nt_Darray(CellSpatialState.SingleDim);
-            spatialState.F = new Nt_Darray(CellSpatialState.SingleDim);
+            spatialState = new Nt_CellSpatialState();
+            spatialState.X = new Nt_Darray(Nt_CellSpatialState.SingleDim);
+            spatialState.V = new Nt_Darray(Nt_CellSpatialState.SingleDim);
+            spatialState.F = new Nt_Darray(Nt_CellSpatialState.SingleDim);
             
             if (id > -1)
             {
@@ -153,9 +80,9 @@ namespace Daphne
             }
 
             //C++/Cli instance
-            ntCell = new Nt_Cell(Cell_id, Radius);
-            ntCell.SpatialState = new Nt_CellSpatialState(SpatialState.X, SpatialState.V, SpatialState.F);
-            Nt_Cell.SafeCell_id = SafeCell_id;
+            //ntCell = new Nt_Cell(Radius,Cell_id);
+            //ntCell.SpatialState = new Nt_CellSpatialState(SpatialState.X, SpatialState.V, SpatialState.F);
+            //Nt_Cell.SafeCell_id = SafeCell_id;
         }
 
         [Inject]
@@ -221,11 +148,13 @@ namespace Daphne
             // boundary and position
             Cytosol.Boundaries.Add(PlasmaMembrane.Interior.Id, PlasmaMembrane);
             Cytosol.BoundaryTransforms.Add(PlasmaMembrane.Interior.Id, new Transform(false));
+
+            Cytosol.AddNtBoundary(0, PlasmaMembrane.Interior.Id, PlasmaMembrane);
         }
 
         public void setSpatialState(double[] s)
         {
-            if(s.Length != CellSpatialState.Dim)
+            if (s.Length != Nt_CellSpatialState.Dim)
             {
                 throw new Exception("Cell state length implausible.");
             }
@@ -233,19 +162,19 @@ namespace Daphne
             int i;
 
             // position
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.X[i] = s[i];
             }
             // velocity
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
-                spatialState.V[i] = s[i + CellSpatialState.SingleDim];
+                spatialState.V[i] = s[i + Nt_CellSpatialState.SingleDim];
             }
             // force
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
-                spatialState.F[i] = s[i + 2 * CellSpatialState.SingleDim];
+                spatialState.F[i] = s[i + 2 * Nt_CellSpatialState.SingleDim];
             }
         }
 
@@ -267,22 +196,22 @@ namespace Daphne
             SetGeneActivities(state.cgState.geneDict);
         }
 
-        public void setSpatialState(CellSpatialState s)
+        public void setSpatialState(Nt_CellSpatialState s)
         {
             int i;
 
             // position
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.X[i] = s.X[i];
             }
             // velocity
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.V[i] = s.V[i];
             }
             // force
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.F[i] = s.F[i];
             }
@@ -592,78 +521,47 @@ namespace Daphne
 
         public int DifferentiationState, DividerState;
 
-        public Locomotor Locomotor { get; set; }
-        public Compartment Cytosol { get; private set; }
-        public Compartment PlasmaMembrane { get; private set; }
-        private CellSpatialState spatialState;
-        public double DragCoefficient { get; set; }
-        public StochLocomotor StochLocomotor { get; set; } 
-
-        public int Cell_id { get; private set; }
-        public static int SafeCell_id = 0;
-        public int Population_id { get; set; }
-        protected int[] gridIndex = { -1, -1, -1 };
-        public static double defaultRadius = 5.0;
-
-        public CellSpatialState SpatialState
+        private Locomotor locomotor;
+        public Locomotor Locomotor 
         {
-            get { return spatialState; }
-            set { spatialState = value; }
-        }
-
-        public bool IsMotile
-        {
-            get { return isMotile; }
-            set { isMotile = value; }
-        }
-        public bool IsChemotactic
-        {
-            get { return isChemotactic; }
-            set { isChemotactic = value; }
-
-        }
-        public bool IsStochastic
-        {
-            get { return isStochastic; }
-            set { isStochastic = value; }
-
-        }
-        public bool Alive
-        {
-            get { return alive; }
-            set { alive = value; }
-        }
-
-        public bool Cytokinetic
-        {
-            get { return cytokinetic; }
-            set { cytokinetic = value; }
-        }
-
-        public double Radius
-        {
-            get { return radius; }
-        }
-
-        /// <summary>
-        /// retrieve the cell's grid index
-        /// </summary>
-        public int[] GridIndex
-        {
-            get 
+            get
             {
-                return gridIndex; 
+                return locomotor;
+            }
+            set
+            {
+                locomotor = value;
+                this.Driver = locomotor.Driver;
             }
         }
 
-        public bool Exiting
+        public Compartment Cytosol 
         {
-            get { return exiting; }
-            set 
-            { 
-                exiting = value; 
+            get
+            {
+                return cytosol as Compartment;
+            }
+            private set
+            {
+                cytosol = value;
+                cytosol.InteriorId = value.Interior.Id;
+                
             }
         }
+        public Compartment PlasmaMembrane 
+        {
+            get
+            {
+                return plasmaMembrane as Compartment;
+            }
+            private set
+            {
+                plasmaMembrane = value;
+                plasmaMembrane.InteriorId = value.Interior.Id;
+            }
+        }
+        
+        public StochLocomotor StochLocomotor { get; set; } 
 
         /// <summary>
         /// set force to zero
@@ -671,17 +569,6 @@ namespace Daphne
         public void resetForce()
         {
             spatialState.F[0] = spatialState.F[1] = spatialState.F[2] = 0;
-        }
-
-        /// <summary>
-        /// accumulate the force vector
-        /// </summary>
-        /// <param name="f"></param>
-        public void addForce(double[] f)
-        {
-            spatialState.F[0] += f[0];
-            spatialState.F[1] += f[1];
-            spatialState.F[2] += f[2];
         }
 
         /// <summary>

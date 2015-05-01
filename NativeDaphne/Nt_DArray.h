@@ -148,6 +148,103 @@ namespace NativeDaphne
 		}	
 	};
 
+
+
+
+	///int type array
+	[SuppressUnmanagedCodeSecurity]
+	[JsonConverter(DoubleArraySerializer::typeid)]
+	public ref class Nt_Iarray
+	{
+	private:
+		int length;
+		//indicate pointer is replaced with external pointer
+		bool is_pointer_owner;
+		int *_array;
+	public:
+
+		Nt_Iarray()
+		{
+			length = 0;
+			is_pointer_owner = true;
+			_array = NULL;
+		}
+
+		Nt_Iarray(int len)
+		{
+			_array = (int *)malloc(len *sizeof(int));
+			memset(_array, 0, len *sizeof(int));
+			length = len;
+			is_pointer_owner = true;
+		}
+
+		~Nt_Iarray()
+		{
+			this->!Nt_Iarray();
+		}
+
+		!Nt_Iarray()
+		{
+			if (is_pointer_owner == true && _array != NULL)
+			{
+				//there might be a problem for this free
+				free(_array);
+			}
+			_array = NULL;
+		}
+
+		[JsonIgnore]
+		property int default[int]
+		{
+			int get(int index)
+			{
+				if (index <0 || index >= length)
+				{
+					throw gcnew Exception("Error: index out of range");
+				}
+				return _array[index];
+			}
+			void set(int index, int value)
+			{
+				if (index <0 || index >= length)
+				{
+					throw gcnew Exception("Error: index out of range");
+				} 
+				_array[index] = value;
+			}
+		}
+
+		property int Length
+		{
+			int get()
+			{
+				return length;
+			}
+		}
+
+		array<int>^ ToArray()
+		{
+			array<int>^ arr = gcnew array<int>(length);
+			for (int i=0; i< length; i++)
+			{
+				arr[i] = _array[i];
+			}
+			return arr;
+		}
+
+	internal:
+		[JsonIgnore]
+		property int *NativePointer
+		{
+			int *get()
+			{
+				return _array;
+			}
+		}
+	};
+
+
+
 }
 
 
