@@ -112,7 +112,7 @@
                                 -->
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel Orientation="Vertical" HorizontalAlignment="Left" x:Name="panelLocoDriver">
-                                        <TextBlock Text="chemotactic driver molecule" Margin="6,5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100"/>
+                                        <TextBlock Text="chemotactic driver molecule" Margin="6,5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="160"/>
                                         <ComboBox   x:Name="cbLocomotorDriver1" MinWidth="100" Width="160" Margin="6,0"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=OneWay}"

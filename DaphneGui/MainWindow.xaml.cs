@@ -3189,12 +3189,15 @@ namespace DaphneGui
             //Whenever we load a new protocol, the Tracks option should be turned off.
             //If it was previously selected, then change it to None.
             //Is this the right place for this or should it be in CommandBindingOpen_Executed method?
-            VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
-            if ((full != null) && ToolModesCombo.SelectedIndex == 1)
+            if (MainWindow.GC.GetType() == typeof(VTKFullGraphicsController))
             {
-                full.CellSelectionToolMode = full.CellSelectionToolModes[0];
-                //full.TracksActive = false;
-                ToolModesCombo.SelectedIndex = 0;
+                VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
+                if ((full != null) && ToolModesCombo.SelectedIndex == 1)
+                {
+                    full.CellSelectionToolMode = full.CellSelectionToolModes[0];
+                    //full.TracksActive = false;
+                    ToolModesCombo.SelectedIndex = 0;
+                }
             }
         }
 

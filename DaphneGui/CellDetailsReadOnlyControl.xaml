@@ -642,6 +642,7 @@
                                 <StackPanel>
                                     <ListBox x:Name="MembReactionComplexListBox" MinHeight="50" 
                                             ItemsSource="{Binding Path=membrane.reaction_complexes}" 
+                                            ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                             DisplayMemberPath="Name"
                                             SelectedIndex="-1"
                                     />
@@ -701,6 +702,7 @@
                                 <StackPanel>                                                                        
                                     <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
                                         ItemsSource="{Binding Path=cytosol.reaction_complexes}" 
+                                        ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                         DisplayMemberPath="Name"
                                         SelectedIndex="-1"
                                      />
