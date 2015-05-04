@@ -762,6 +762,23 @@ namespace DaphneGui
         public ObservableCollection<string> CellSelectionToolModes { get; set; }
         private string cellSelectionToolMode;
 
+        private bool tracksActive;
+        public bool TracksActive
+        {
+            get
+            {
+                return tracksActive;
+            }
+            set
+            {
+                if (value != tracksActive)
+                {
+                    tracksActive = value;
+                    OnPropertyChanged("TracksActive");
+                }
+            }
+        }
+
         private bool leftButtonPressed = false;
         private uint leftButtonPressTimeStamp = 0;
         private int[] leftButtonPressPostion = new int[2];
@@ -877,6 +894,7 @@ namespace DaphneGui
             CellSelectionToolMode = CellSelectionToolModes[0];
 
             trackTool = new CellTrackTool();
+            TracksActive = false;
         }
 
         /// <summary>
@@ -1259,6 +1277,7 @@ namespace DaphneGui
             HandToolOption_IsEnabled = true;
             HandToolButton_IsChecked = false;
             RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
+            TracksActive = true;
         }
 
         public void DisablePickingButtons()
@@ -1269,6 +1288,7 @@ namespace DaphneGui
             HandToolOption_IsEnabled = false;
             HandToolButton_IsChecked = false;
             RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
+            TracksActive = false;
         }
 
         public RenderWindowControl RWC

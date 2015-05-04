@@ -20,6 +20,7 @@
             <TextBlock Text="Reaction Complexes" />
             <ListBox x:Name="ListBoxReactionComplexes" MinHeight="50" MaxHeight="150" SelectionMode="Multiple"
                     ItemsSource="{Binding Source={StaticResource availableReactionComplexesListView}}"
+                    ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                     DisplayMemberPath="Name"
                     IsSynchronizedWithCurrentItem="True"
                     SelectedIndex="0">

@@ -44,6 +44,18 @@
     <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
     <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
+
+    <!--This is used to diaplay a tooltip for a grid cell-->
+    <Style TargetType="DataGridCell" x:Key="gridCellTextStyle">
+        <Setter Property="ToolTip">
+            <Setter.Value>
+                <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
+                </TextBlock>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ToolTipService.ShowOnDisabled" Value="true"></Setter>
+    </Style>
+    
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
     <!-- transitionDriverElementTypeTemplate -->
@@ -252,6 +264,17 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
             </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="reacCxListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" ToolTipService.ShowOnDisabled="True" > 
+                <TextBlock.ToolTip>
+                    <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
+                    </TextBlock>
+                </TextBlock.ToolTip>
+            </TextBlock>
         </StackPanel>
     </DataTemplate>
 

@@ -5,6 +5,7 @@
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:local="clr-namespace:DaphneGui"
+        xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Get/Save entities between stores"
         SizeToContent="WidthAndHeight"
@@ -279,9 +280,22 @@
                                 </Style>
                          </TextBlock.Style>
                     </TextBlock>
-                 
-                    <StackPanel x:Name="spUserControls">                         
-                        <local:CellPropertiesControl IsEnabled="False" Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+
+                    <StackPanel x:Name="spUserControls">
+                        <Expander   Padding="6" ExpandDirection="Down"
+                                    Header="Movement"                                                  
+                                    x:Name="MotionPropertiesExpander"
+                                    Margin="0,5,0,0" 
+                                    Canvas.ZIndex="1"   
+                                    Visibility="Visible"
+                                    BorderThickness="1"
+                                    BorderBrush="Black"
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}">
+                            
+                                <local:CellPropertiesControl IsEnabled="False"  Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                            
+                        </Expander>
+                        
                         <local:CellDetailsReadOnlyControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
                     </StackPanel>    
                     
@@ -310,9 +324,9 @@
 
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colRCName" Header="Name" MinWidth="300" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=Name, Mode=OneWay}" 
-                            />
+                                 ScrollViewer.CanContentScroll ="False"                                 
+                                 Binding="{Binding Path=Name, Mode=OneWay}" CellStyle="{StaticResource gridCellTextStyle}">
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="No reaction complexes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
@@ -320,7 +334,7 @@
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=dgCell, Path=Items.Count}" Value="0">
+                                        <DataTrigger Binding="{Binding ElementName=dgReacComp, Path=Items.Count}" Value="0">
                                             <Setter Property="TextBlock.Visibility" Value="Visible" />
                                         </DataTrigger>        
                                     </Style.Triggers>
