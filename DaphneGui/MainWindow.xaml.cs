@@ -263,6 +263,7 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
+
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
         private const int ATTACH_PARENT_PROCESS = -1;
@@ -2297,7 +2298,6 @@ namespace DaphneGui
             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
             //ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
-
 
             ComponentsToolWindow.DataContext = sop.Protocol;
             //////////gc.Cleanup();

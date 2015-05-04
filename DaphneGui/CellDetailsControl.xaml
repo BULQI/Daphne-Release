@@ -831,7 +831,7 @@
                                                             <StackPanel Width="200" Orientation="Horizontal">
                                                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
                                                                 The default activation level of the selected gene. The user can modify this value for selected differentiation 
-                                                                or division ce;; states.
+                                                                or division cell states.
                                                                 </TextBlock>
                                                             </StackPanel>
                                                         </ToolTip>

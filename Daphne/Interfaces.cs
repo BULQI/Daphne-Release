@@ -35,4 +35,17 @@ namespace Daphne
         void readData(int i);
         void readData(string groupName);
     }
+
+    public interface ProbDistribution3D
+    {
+        /// <summary>
+        /// Return x,y,z coordinates for the next cell using the appropriate probability density distribution.
+        /// </summary>
+        /// <returns>double[3] {x,y,z}</returns>
+        double[] nextPosition();
+        /// <summary>
+        /// Update extents of ECS and other distribution-specific tasks.
+        /// </summary>
+        void Resize(double[] newExtents);
+    }
 }
