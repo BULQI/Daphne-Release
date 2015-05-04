@@ -650,7 +650,7 @@ namespace ManifoldRing
                         {
                             if (toroidal)
                             {
-                                gradientMatrix2[n2].Index = node_index - (NodePerSide2 - 2) * nps01;; 
+                                gradientMatrix2[n2].Index = node_index - (NodePerSide2 - 2) * nps01;
                                 gradientMatrix2[n2++].Coefficient = coeff;
                                 gradientMatrix2[n2].Index = node_index - nps01;
                                 gradientMatrix2[n2++].Coefficient = -coeff;
