@@ -109,7 +109,7 @@
                             </Style>
                         </GridView.ColumnHeaderContainerStyle>
 
-                        <GridViewColumn Width="80" Header="Rate constant">
+                        <GridViewColumn Width="120" Header="Rate constant">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
