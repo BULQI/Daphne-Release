@@ -6887,11 +6887,9 @@ namespace Daphne
         }
 
         /// <summary>
-        /// Check that the new cell position is within the specified bounds.
+        /// find the distance to the wall required according to the boundary condition
         /// </summary>
-        /// <param name="pos">the position of the next cell</param>
-        /// <returns></returns>
-        protected bool inBounds(double[] pos)
+        private void findWallDis()
         {
             if (wallDis == 0.0 && SystemOfPersistence.HProtocol.scenario is TissueScenario)
             {
@@ -6906,6 +6904,17 @@ namespace Daphne
                     wallDis = Cell.SafetySlab;
                 }
             }
+        }
+
+        /// <summary>
+        /// Check that the new cell position is within the specified bounds.
+        /// </summary>
+        /// <param name="pos">the position of the next cell</param>
+        /// <returns></returns>
+        protected bool inBounds(double[] pos)
+        {
+            // if this is not assigned yet, find it
+            findWallDis();
 
             if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
                 (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
@@ -6967,7 +6976,10 @@ namespace Daphne
                        factor = Math.PI / (3.0 * Math.Sqrt(2.0)),
                        // for safety, this much of the ecm should stay unoccupied (percent)
                        safety = 0.1;
-                
+
+                // if this is not assigned yet, find it
+                findWallDis();
+
                 // the boundary conditions will not allow filling the whole volume, subtract the cell-free zone close to the wall
                 ecmVolume = (Extents[0] - 2 * wallDis) * (Extents[1] - 2 * wallDis) * (Extents[2] - 2 * wallDis);
 
