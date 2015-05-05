@@ -63,7 +63,7 @@ namespace Daphne
         /// indicates whether burn in needs to run, only should ever return true for multiple cell simulations
         /// </summary>
         /// <returns>true when burn in needs to run a step</returns>
-        public virtual bool Burn_inExec()
+        public virtual bool Burn_inActive()
         {
             return false;
         }
@@ -1174,7 +1174,7 @@ namespace Daphne
                 }
             }
 
-            // find mu such that it allows maximally 10% of (r1 + r2) movement for the pair with fmax
+            // find mu such that it allows maximally 10% of (r1 + r2) movement for the pair with f_max
             if(pmax != null)
             {
                 double tmp = 0.1 * (pmax.Cell(0).Radius + pmax.Cell(1).Radius) / (f_max * integratorStep);
@@ -1200,7 +1200,7 @@ namespace Daphne
         /// indicates whether burn in needs to run
         /// </summary>
         /// <returns>true when burn in needs to run a step</returns>
-        public override bool Burn_inExec()
+        public override bool Burn_inActive()
         {
             return f_max >= alpha || burn_in_iter == 0;
         }

@@ -2375,10 +2375,10 @@ namespace DaphneGui
                         // run the simulation forward to the next task; also handle burn in
                         if (postConstruction == true && AssumeIDE() == true)
                         {
-                            if (sim.Burn_inExec() == true)
+                            if (sim.Burn_inActive() == true)
                             {
                                 sim.Burn_inStep();
-                                if (sim.Burn_inExec() == false)
+                                if (sim.Burn_inActive() == false)
                                 {
                                     sim.Burn_inCleanup();
                                     // no need to render this, will be taken care of by the start of the run
@@ -2397,10 +2397,10 @@ namespace DaphneGui
                         {
                             try
                             {
-                                if (sim.Burn_inExec() == true)
+                                if (sim.Burn_inActive() == true)
                                 {
                                     sim.Burn_inStep();
-                                    if (sim.Burn_inExec() == false)
+                                    if (sim.Burn_inActive() == false)
                                     {
                                         sim.Burn_inCleanup();
                                     }
@@ -2422,7 +2422,7 @@ namespace DaphneGui
                         {
                             if (Properties.Settings.Default.skipDataWrites == false)
                             {
-                                if (sim.Burn_inExec() == false && sim.FrameData != null)
+                                if (sim.Burn_inActive() == false && sim.FrameData != null)
                                 {
                                     sim.FrameData.writeData(sim.FrameNumber - 1);
                                 }

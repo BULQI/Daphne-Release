@@ -1806,7 +1806,7 @@ namespace DaphneGui
                 {
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "");
                 }
-                else if (MainWindow.Sim.Burn_inExec() == true)
+                else if (MainWindow.Sim.Burn_inActive() == true)
                 {
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Equilibrating...");
                 }
