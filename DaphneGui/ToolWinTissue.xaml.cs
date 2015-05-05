@@ -296,15 +296,15 @@ namespace DaphneGui
         protected override void ReportsTabItem_Loaded(object sender, RoutedEventArgs e)
         {
             // gmk - re-evaluate this section. Not sure if it is doing anything useful.
-            //skg - this line selects the first cell in the list
+            //skg - This line selects the first cell in the list - must use SelectedIndex, not SelectedItem.
             toolWinTissue.lbRptCellPops.SelectedIndex = 0;
 
-            //toolWinTissue.dgEcmMols.SelectedItem = 0;
-            //toolWinTissue.dgCellDetails.SelectedItem = 0;
-            //toolWinTissue.dgCellStates.SelectedItem = 0;
-            //toolWinTissue.dgEcmProbeMols.SelectedItem = 0;
-            //toolWinTissue.dgCellMembMols.SelectedItem = 0;
-            //toolWinTissue.dgCellCytosolMols.SelectedItem = 0;
+            //toolWinTissue.dgEcmMols.SelectedIndex = 0;
+            //toolWinTissue.dgCellDetails.SelectedIndex = 0;
+            //toolWinTissue.dgCellStates.SelectedIndex = 0;
+            //toolWinTissue.dgEcmProbeMols.SelectedIndex = 0;
+            //toolWinTissue.dgCellMembMols.SelectedIndex = 0;
+            //toolWinTissue.dgCellCytosolMols.SelectedIndex = 0;
         }
 
         private void CellDeathParamsExpander_Expanded(object sender, RoutedEventArgs e)
