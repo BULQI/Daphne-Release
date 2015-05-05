@@ -6884,7 +6884,16 @@ namespace Daphne
             }
 
             wallDis = 0.0;
-            if (SystemOfPersistence.HProtocol.scenario is TissueScenario)
+        }
+
+        /// <summary>
+        /// Check that the new cell position is within the specified bounds.
+        /// </summary>
+        /// <param name="pos">the position of the next cell</param>
+        /// <returns></returns>
+        protected bool inBounds(double[] pos)
+        {
+            if (wallDis == 0.0 && SystemOfPersistence.HProtocol.scenario is TissueScenario)
             {
                 TissueScenario scenario = (TissueScenario)SystemOfPersistence.HProtocol.scenario;
 
@@ -6897,15 +6906,7 @@ namespace Daphne
                     wallDis = Cell.SafetySlab;
                 }
             }
-        }
 
-        /// <summary>
-        /// Check that the new cell position is within the specified bounds.
-        /// </summary>
-        /// <param name="pos">the position of the next cell</param>
-        /// <returns></returns>
-        protected bool inBounds(double[] pos)
-        {
             if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
                 (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
                 (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
@@ -6949,8 +6950,8 @@ namespace Daphne
         /// determine the maximum number of new cells that can get added to the population underlying
         /// this distribution; assume densest sphere packing: find maximum number allowable and adjust
         /// n if needed maximum density = 0.74, only that much of the total volume gets occupied
-        /// by spheres (cells), and a sphere effectively occucies the volume V_cell / 0.74
-        /// n cells need a volume V_total = n * V_cell / 0.74, and n = V_total / (V_cell / 0.74)
+        /// by spheres (cells), V_cells = 0.74 * V_total, V_occupied + n * V_cell_to_add = 0.74 * V_total
+        /// solve for n = (0.74 * V_total - V_occupied) / V_cell_to_add
         /// </summary>
         /// <returns>number of cells that can get added for the tissue simulation, zero otherwise</returns>
         public int MaxCellsToAdd()
@@ -6964,8 +6965,8 @@ namespace Daphne
                        occupiedVolume = 0,
                        // use the exact factor instead of 0.74
                        factor = Math.PI / (3.0 * Math.Sqrt(2.0)),
-                       // this much of the ecm should stay unoccupied (percent)
-                       safety = 0.0;
+                       // for safety, this much of the ecm should stay unoccupied (percent)
+                       safety = 0.1;
                 
                 // the boundary conditions will not allow filling the whole volume, subtract the cell-free zone close to the wall
                 ecmVolume = (Extents[0] - 2 * wallDis) * (Extents[1] - 2 * wallDis) * (Extents[2] - 2 * wallDis);
@@ -6977,10 +6978,10 @@ namespace Daphne
                 // find the already occupied volume, sum up the effective volume of existing cells
                 foreach (CellPopulation cp in scenario.cellpopulations)
                 {
-                    occupiedVolume += cp.CellStates.Count * 4.0 / 3.0 * Math.PI * Math.Pow(cp.Cell.CellRadius, 3.0) / factor;
+                    occupiedVolume += cp.CellStates.Count * 4.0 / 3.0 * Math.PI * Math.Pow(cp.Cell.CellRadius, 3.0);
                 }
-                // for the cell type to be added, calculate max_n = freeVolume / effective_cellVolume
-                max_n = (int)((ecmVolume - occupiedVolume) / (4.0 / 3.0 * Math.PI * Math.Pow(cellPop.Cell.CellRadius, 3.0) / factor));
+                // for the cell type to be added, calculate max_n
+                max_n = (int)((factor * ecmVolume - occupiedVolume) / (4.0 / 3.0 * Math.PI * Math.Pow(cellPop.Cell.CellRadius, 3.0)));
             }
             return max_n;
         }
