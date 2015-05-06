@@ -3210,6 +3210,9 @@ namespace DaphneGui
 
             Nullable<bool> result = loadScenarioUsingDialog();
 
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
+
             // Process open file dialog box results
             if (result == true)
             {
@@ -3391,6 +3394,9 @@ namespace DaphneGui
 
             setScenarioPaths(filename);
             prepareProtocol(ReadJson(""));
+
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
         }
 
         private void prepareProtocol(Protocol protocol)
