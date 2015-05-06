@@ -15,7 +15,7 @@
         Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
         Name="mainWindow"
-        
+        LocationChanged="mainWindow_LocationChanged"
         >
 
     <Window.Resources>

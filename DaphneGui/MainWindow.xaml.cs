@@ -3776,6 +3776,30 @@ namespace DaphneGui
             }
         }
 
+        //This code moves the popup controls if main window moves
+        private void mainWindow_LocationChanged(object sender, EventArgs e)
+        {
+            if (CellOptionsPopup.IsOpen)
+            {
+                var offset = CellOptionsPopup.HorizontalOffset;
+                CellOptionsPopup.HorizontalOffset = offset + 1;
+                CellOptionsPopup.HorizontalOffset = offset;
+
+                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+
+            if (ECMOptionsPopup.IsOpen)
+            {
+                var offset = ECMOptionsPopup.HorizontalOffset;
+                ECMOptionsPopup.HorizontalOffset = offset + 1;
+                ECMOptionsPopup.HorizontalOffset = offset;
+
+                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;    
+                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+        }
+
     }
 
 
