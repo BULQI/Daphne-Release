@@ -93,12 +93,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4AEEFB65B23CBC8EF39A92E59C3CA966"
-        "OwnerKey" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_57BDE838D28C1B25427E1A514E7A6B0C"
         "OwnerKey" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
         "MsmSig" = "8:_UNDEFINED"
@@ -286,12 +280,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4AEEFB65B23CBC8EF39A92E59C3CA966"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_C36954AC723073D17FD1A3062F7904F7"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -400,7 +388,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_FCA79FA46B606D609F17FD8B13FE49BD"
+        "OwnerKey" = "8:_4AD1ECA89CCE0823AF68F934D94ED16C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -412,7 +400,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4AD1ECA89CCE0823AF68F934D94ED16C"
+        "OwnerKey" = "8:_FCA79FA46B606D609F17FD8B13FE49BD"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -714,37 +702,6 @@
                     }
                 }
             "SourcePath" = "8:libsbmlcsP.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_4AEEFB65B23CBC8EF39A92E59C3CA966"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Xceed.Wpf.Toolkit, Version=2.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_4AEEFB65B23CBC8EF39A92E59C3CA966"
-                    {
-                    "Name" = "8:Xceed.Wpf.Toolkit.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Xceed.Wpf.Toolkit.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
@@ -1676,7 +1633,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:DaphneInstall"
         "ProductCode" = "8:{69199841-3934-4040-A109-2B48AC3FA38E}"
-        "PackageCode" = "8:{6108872B-15FF-4812-AC11-B376FB86F010}"
+        "PackageCode" = "8:{A0D06475-76E0-41E0-81A8-83E88536C4B7}"
         "UpgradeCode" = "8:{642F6AE4-CB8E-48B2-B116-3AF0C7AD12C7}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -2267,7 +2224,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_892AE9FA56A74D73928B0A353AE7AEBA"
             {
-            "SourcePath" = "8:..\\DaphneGui\\obj\\x64\\Debug\\DaphneGui.exe"
+            "SourcePath" = "8:..\\DaphneGui\\obj\\x64\\Release\\DaphneGui.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
