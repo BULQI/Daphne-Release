@@ -831,7 +831,7 @@
                                                             <StackPanel Width="200" Orientation="Horizontal">
                                                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
                                                                 The default activation level of the selected gene. The user can modify this value for selected differentiation 
-                                                                or division ce;; states.
+                                                                or division cell states.
                                                                 </TextBlock>
                                                             </StackPanel>
                                                         </ToolTip>
@@ -1165,8 +1165,8 @@
                         Expanded="ReacCompExpander_Expanded">
 
                     <StackPanel>
-
-                        <TabControl SelectionChanged="TabControl_SelectionChanged">
+                        
+                            <TabControl SelectionChanged="TabControl_SelectionChanged">
                             <!-- Reaction Complexes in cell Membrane -->
                             <TabItem >
                                 <TabItem.Header>
@@ -1175,25 +1175,12 @@
 
                                 <StackPanel>
                                     <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
-
-
                                     <StackPanel>
-
-                                        <StackPanel.ToolTip>
-                                            <StackPanel Width="200" Orientation="Horizontal">
-                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </StackPanel.ToolTip>
-
-
                                         <ListBox x:Name="MembReactionComplexListBox" MinHeight="50" 
-                                            ItemsSource="{Binding Path=membrane.reaction_complexes}" 
+                                            ItemsSource="{Binding Path=membrane.reaction_complexes}"
+                                            ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                             DisplayMemberPath="Name"
-                                            SelectedIndex="-1"
-                                    />
-
+                                            SelectedIndex="-1" />
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -1275,21 +1262,12 @@
                                 Expanded="MembAddReacCxExpander_Expanded"
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                                        <StackPanel Orientation="Vertical" Margin="10,0">
-                                            <StackPanel.Resources>
-                                                <DataTemplate x:Key="reacCxListItemTemplate">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Path=Name}" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-
-                                            </StackPanel.Resources>
-
+                                        <StackPanel Orientation="Vertical" Margin="10,0">                                            
                                             <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                                             <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
-                                            ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
-                                            ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
-                                            SelectedIndex="-1" >
+                                                ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
+                                                ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
+                                                SelectedIndex="-1" >
                                             </ListBox>
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
                                                 <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click">
@@ -1319,20 +1297,13 @@
 
                                 <StackPanel>
                                     <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
-                                    <StackPanel>
-                                        <StackPanel.ToolTip>
-                                            <StackPanel Width="200" Orientation="Horizontal">
-                                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </StackPanel.ToolTip>
-
-                                        <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
-                                        ItemsSource="{Binding Path=cytosol.reaction_complexes}" 
-                                        DisplayMemberPath="Name"
-                                        SelectedIndex="-1"
-                                     />
+                                    <StackPanel>                                        
+                                            <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
+                                                ItemsSource="{Binding Path=cytosol.reaction_complexes}" 
+                                                ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
+                                                DisplayMemberPath="Name"
+                                                SelectedIndex="-1"
+                                            />
 
                                     </StackPanel>
 
@@ -1405,24 +1376,17 @@
                                     </Expander>
 
                                     <Expander ExpandDirection="Down"
-                                IsExpanded="False"
-                                Expanded="AddReacCxExpander_Expanded"
-                                Header="Add reaction complex"
-                                x:Name="CytoAddReacCxExpander"
-                                Margin="0,5,0,0" 
-                                Canvas.ZIndex="1"
-                                BorderThickness="1"
-                                BorderBrush="Black"
-                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                        IsExpanded="False"
+                                        Expanded="AddReacCxExpander_Expanded"
+                                        Header="Add reaction complex"
+                                        x:Name="CytoAddReacCxExpander"
+                                        Margin="0,5,0,0" 
+                                        Canvas.ZIndex="1"
+                                        BorderThickness="1"
+                                        BorderBrush="Black"
+                                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                                        <StackPanel Orientation="Vertical" Margin="10,0">
-                                            <StackPanel.Resources>
-                                                <DataTemplate x:Key="reacCxListItemTemplate">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Path=Name}" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </StackPanel.Resources>
+                                        <StackPanel Orientation="Vertical" Margin="10,0">                                           
 
                                             <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                                             <ListBox x:Name="lbCytoAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"     
@@ -1434,7 +1398,7 @@
                                                 <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click" >
                                                     <Button.ToolTip>
                                                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        Add the selected reaction complex to this cell population for this simulation.
+                                                            Add the selected reaction complex to this cell population for this simulation.
                                                         </TextBlock>
                                                     </Button.ToolTip>
                                                 </Button>

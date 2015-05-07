@@ -30,7 +30,19 @@ namespace Daphne
         /// <summary>
         /// Protocol level, contains Entity level
         /// </summary>
-        public Protocol Protocol { get; set; }
+        public Protocol Protocol
+        {
+            get
+            {
+                return protocol;
+            }
+            set
+            {
+                protocol = value;
+                HProtocol = protocol;
+            }
+        }
+
         /// <summary>
         /// Daphne level
         /// </summary>
@@ -39,6 +51,12 @@ namespace Daphne
         /// User level
         /// </summary>
         public Level UserStore { get; set; }
+
+        private Protocol protocol;
+        /// <summary>
+        /// allow static access to the protocol instead of modifying many functions by passing in the needed data
+        /// </summary>
+        public static Protocol HProtocol;
 
 
         public ObservableCollection<RenderSkin> SkinList { get; set; }
@@ -78,7 +96,6 @@ namespace Daphne
             UserStore = new Level("", "Config\\temp_userstore.json");
 
             SkinList = new ObservableCollection<RenderSkin>();
-
         }
 
         /// <summary>
@@ -127,7 +144,7 @@ namespace Daphne
         }
 
         /// <summary>
-        /// deserialize an external protocol (not the one part of this class)
+        /// deserialize an external protocol (not the one that is part of this class)
         /// </summary>
         /// <param name="tempFiles">true for handling temporary files</param>
         public static void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
@@ -2521,20 +2538,24 @@ namespace Daphne
         /// <param name="e"></param>
         public void environment_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Check that cells are still inside the simulation space.
-            foreach (CellPopulation cellPop in cellpopulations)
+            if (environment is ConfigECSEnvironment)
             {
-                cellPop.cellPopDist.Resize(new double[3] { ((ConfigECSEnvironment)environment).extent_x,
-                                                           ((ConfigECSEnvironment)environment).extent_y,
-                                                           ((ConfigECSEnvironment)environment).extent_z });
-            }
+                ConfigECSEnvironment env = (ConfigECSEnvironment)environment;
+                double[] newExtents = new double[] { env.extent_x, env.extent_y, env.extent_z };
+
+                // Check that cells are still inside the simulation space
+                foreach (CellPopulation cellPop in cellpopulations)
+                {
+                    cellPop.cellPopDist.Resize(newExtents);
+                }
 #if USE_BOX_LIMITS
-            // update all box min/max translation and scale
-            foreach (BoxSpecification box in box_guid_box_dict.Values)
-            {
-                box.SetBoxSpecExtents((ConfigECSEnvironment)environment);
-            }
+                // update all box min/max translation and scale
+                foreach (BoxSpecification box in box_guid_box_dict.Values)
+                {
+                    box.SetBoxSpecExtents(env);
+                }
 #endif
+            }
         }
 
         /// <summary>
@@ -6376,6 +6397,7 @@ namespace Daphne
                 {
                     _locomotor_mol_guid_ref = value;
                 }
+                OnPropertyChanged("locomotor_mol_guid_ref");
             }
         }
 
@@ -6802,20 +6824,6 @@ namespace Daphne
         }
     }
 
-    public interface ProbDistribution3D
-    {
-        /// <summary>
-        /// Return x,y,z coordinates for the next cell using the appropriate probability density distribution.
-        /// </summary>
-        /// <returns>double[3] {x,y,z}</returns>
-        double[] nextPosition();
-        /// <summary>
-        /// Update extents of ECS and other distribution-specific tasks.
-        /// </summary>
-        /// <param name="newExtents"></param>
-        void Resize(double[] newExtents);
-    }
-
     /// <summary>
     /// Contains information for positioning cells in the ECS according to specfied distributions.
     /// </summary>
@@ -6840,6 +6848,7 @@ namespace Daphne
         // We need to update (reduce) cellPop.number if we reach the maximum tries 
         // for cell placement before all the cells are placed
         public CellPopulation cellPop;
+        private double wallDis;
 
         // Limits for placing cells
         protected double[] extents;
@@ -6848,20 +6857,16 @@ namespace Daphne
             get { return extents; }
             set { extents = value; }
         }
-        // Separation distance from boundaries
-        private double wallDis;
+        // NOTE: possibly completely remove this in some time after no more protocols depend on it, 4/24/15
         // Minimum separation (squared) for cells
         private double minDisSquared;
+        [JsonIgnore]
         public double MinDisSquared
         {
             get { return minDisSquared; }
             set
             {
                 minDisSquared = value;
-                //// Generally, minDisSquared is the square of the cell diameter.
-                //// Then, center of cell can be one radius from the ECS boundary.
-                // wallDis = Math.Sqrt(minDisSquared) / 2.0;
-                wallDis = 0;
             }
         }
 
@@ -6872,10 +6877,32 @@ namespace Daphne
             MinDisSquared = _minDisSquared;
 
             // null case when deserializing Json
-            // correct CellPopulation pointer added in Protocoluration.InitCellPopulationIDCellPopulationDict
+            // correct CellPopulation pointer added in Protocol.InitCellPopulationIDCellPopulationDict
             if (_cellPop != null)
             {
                 cellPop = _cellPop;
+            }
+
+            wallDis = 0.0;
+        }
+
+        /// <summary>
+        /// find the distance to the wall required according to the boundary condition
+        /// </summary>
+        private void findWallDis()
+        {
+            if (wallDis == 0.0 && SystemOfPersistence.HProtocol.scenario is TissueScenario)
+            {
+                TissueScenario scenario = (TissueScenario)SystemOfPersistence.HProtocol.scenario;
+
+                if (scenario.environment is ConfigECSEnvironment && ((ConfigECSEnvironment)scenario.environment).toroidal == false && cellPop != null)
+                {
+                    wallDis = cellPop.Cell.CellRadius;
+                }
+                else
+                {
+                    wallDis = Cell.SafetySlab;
+                }
             }
         }
 
@@ -6886,6 +6913,9 @@ namespace Daphne
         /// <returns></returns>
         protected bool inBounds(double[] pos)
         {
+            // if this is not assigned yet, find it
+            findWallDis();
+
             if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
                 (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
                 (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
@@ -6907,29 +6937,6 @@ namespace Daphne
                 cellPop.CellStates.Clear();
                 AddByDistr(cellPop.number);
             }
-
-        }
-
-        /// <summary>
-        /// Return true if the position of the new cell doesn't overlap with existing cell positions.
-        /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
-        /// </summary>
-        /// <param name="pos">the position of the next cell</param>
-        /// <returns></returns>
-        protected bool noOverlap(double[] pos)
-        {
-            double disSquared = 0;
-            foreach (CellState cellState in this.cellPop.CellStates)
-            {
-                disSquared = (cellState.X - pos[0]) * (cellState.X - pos[0])
-                           + (cellState.Y - pos[1]) * (cellState.Y - pos[1])
-                           + (cellState.Z - pos[2]) * (cellState.Z - pos[2]);
-                if (disSquared < minDisSquared)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         /// <summary>
@@ -6940,7 +6947,7 @@ namespace Daphne
         /// <returns></returns>
         public bool AddByPosition(double[] pos)
         {
-            if (inBounds(pos) && noOverlap(pos))
+            if (inBounds(pos) == true)
             {
                 cellPop.CellStates.Add(new CellState(pos[0], pos[1], pos[2]));
                 return true;
@@ -6949,19 +6956,66 @@ namespace Daphne
         }
 
         /// <summary>
+        /// determine the maximum number of new cells that can get added to the population underlying
+        /// this distribution; assume densest sphere packing: find maximum number allowable and adjust
+        /// n if needed maximum density = 0.74, only that much of the total volume gets occupied
+        /// by spheres (cells), V_cells = 0.74 * V_total, V_occupied + n * V_cell_to_add = 0.74 * V_total
+        /// solve for n = (0.74 * V_total - V_occupied) / V_cell_to_add
+        /// </summary>
+        /// <returns>number of cells that can get added for the tissue simulation, zero otherwise</returns>
+        public int MaxCellsToAdd()
+        {
+            int max_n = 0;
+            
+            if (SystemOfPersistence.HProtocol.scenario is TissueScenario)
+            {
+                TissueScenario scenario = (TissueScenario)SystemOfPersistence.HProtocol.scenario;
+                double ecmVolume,
+                       occupiedVolume = 0,
+                       // use the exact factor instead of 0.74
+                       factor = Math.PI / (3.0 * Math.Sqrt(2.0)),
+                       // for safety, this much of the ecm should stay unoccupied (percent)
+                       safety = 0.1;
+
+                // if this is not assigned yet, find it
+                findWallDis();
+
+                // the boundary conditions will not allow filling the whole volume, subtract the cell-free zone close to the wall
+                ecmVolume = (Extents[0] - 2 * wallDis) * (Extents[1] - 2 * wallDis) * (Extents[2] - 2 * wallDis);
+
+                // the safety allows specifying a threshold for how much of the total volume has to stay unoccupied;
+                // even with the burn in, a perfectly aligned, squeezed in arrangement might be hard to achieve;
+                ecmVolume *= 1.0 - safety;
+
+                // find the already occupied volume, sum up the effective volume of existing cells
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    occupiedVolume += cp.CellStates.Count * 4.0 / 3.0 * Math.PI * Math.Pow(cp.Cell.CellRadius, 3.0);
+                }
+                // for the cell type to be added, calculate max_n
+                max_n = (int)((factor * ecmVolume - occupiedVolume) / (4.0 / 3.0 * Math.PI * Math.Pow(cellPop.Cell.CellRadius, 3.0)));
+            }
+            return max_n;
+        }
+
+        /// <summary>
         /// Add n cells using the appropriate probability density distribution.
         /// </summary>
-        /// <param name="n"></param>
+        /// <param name="n">number of cells to be added</param>
         public void AddByDistr(int n)
         {
             // NOTE: The maxTry settings has been arbitrarily chosen and may need to be adjusted.
-            int maxTry = 1000;
-            int i = 0;
+            int maxTry = 1000, i = 0, tries = 0,
+                max_n = MaxCellsToAdd();
 
-            int tries = 0;
+            if (max_n < n)
+            {
+                MessageBox.Show(String.Format("The free volume is not enough to accept {0} additional cells. Allowing only {1}.", n, max_n), "Cell density warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                n = max_n;
+            }
+
             while (i < n)
             {
-
                 if (AddByPosition(nextPosition()))
                 {
                     i++;
@@ -6977,7 +7031,7 @@ namespace Daphne
                         {
                             AddByPosition(new double[] { Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 });
                         }
-                        System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to " + cellPop.CellStates.Count + ".");
+                        MessageBox.Show(String.Format("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to {0}.", cellPop.CellStates.Count), "Cell density warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                         cellPop.number = cellPop.CellStates.Count;
                         return;
                     }
@@ -7006,11 +7060,11 @@ namespace Daphne
             }
         }
 
-        // <summary>
-        // Triggered by OnUpdate of ConfigEnvironment
-        // Update distributions accordingly.
-        // </summary>
-        // <param name="newextents"></param>
+        /// <summary>
+        /// Triggered by OnUpdate of ConfigEnvironment
+        /// Update distributions accordingly.
+        /// </summary>
+        /// <param name="newExtents">the new extents after the resize</param>
         public abstract void Resize(double[] newExtents);
 
         /// <summary>
@@ -7027,7 +7081,7 @@ namespace Daphne
                 for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
                     pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                    if (!inBounds(pos))
+                    if (inBounds(pos) == false)
                     {
                         cellPop.CellStates.RemoveAt(i);
                     }
@@ -7035,6 +7089,7 @@ namespace Daphne
 
                 // Replace removed cells
                 int cellsToAdd = number - cellPop.CellStates.Count;
+
                 if (cellsToAdd > 0)
                 {
                     AddByDistr(cellsToAdd);

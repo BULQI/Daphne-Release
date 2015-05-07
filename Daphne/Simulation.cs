@@ -37,7 +37,7 @@ namespace Daphne
             }
         }
 
-        protected void clearFlag(byte flag)
+        public void ClearFlag(byte flag)
         {
             simFlags &= (byte)~flag;
         }
@@ -47,9 +47,32 @@ namespace Daphne
             return (simFlags & flag) != 0;
         }
 
-        protected void setFlag(byte flag)
+        public void SetFlag(byte flag)
         {
             simFlags |= flag;
+        }
+
+        /// <summary>
+        /// for multiple cell simulations, find a non-overlapping initial configuration
+        /// </summary>
+        public virtual void Burn_inStep()
+        {
+        }
+
+        /// <summary>
+        /// indicates whether burn in needs to run, only should ever return true for multiple cell simulations
+        /// </summary>
+        /// <returns>true when burn in needs to run a step</returns>
+        public virtual bool Burn_inActive()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// finish burn in
+        /// </summary>
+        public virtual void Burn_inCleanup()
+        {
         }
 
         public virtual void reset()
@@ -849,13 +872,13 @@ namespace Daphne
                 // render and sample the initial state
                 if (renderCount == 0 && sampleCount == 0)
                 {
-                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    SetFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
                     renderCount++;
                     sampleCount++;
                     return;
                 }
                 // clear all flags
-                clearFlag(SIMFLAG_ALL);
+                ClearFlag(SIMFLAG_ALL);
 
                 // find the maximum allowable step (time until the next event occurs)
                 double dt;
@@ -863,21 +886,21 @@ namespace Daphne
                 // render to happen next
                 if (renderCount * renderStep < sampleCount * sampleStep)
                 {
-                    setFlag(SIMFLAG_RENDER);
+                    SetFlag(SIMFLAG_RENDER);
                     dt = renderCount * renderStep - accumulatedTime;
                     renderCount++;
                 }
                 // sample to happen next
                 else if (renderCount * renderStep > sampleCount * sampleStep)
                 {
-                    setFlag(SIMFLAG_SAMPLE);
+                    SetFlag(SIMFLAG_SAMPLE);
                     dt = sampleCount * sampleStep - accumulatedTime;
                     sampleCount++;
                 }
                 // both to happen simultaneously
                 else
                 {
-                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    SetFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
                     dt = renderCount * renderStep - accumulatedTime;
                     renderCount++;
                     sampleCount++;
@@ -897,7 +920,7 @@ namespace Daphne
                     {
                         sampleCount++;
                     }
-                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    SetFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
                 }
             }
         }
@@ -952,6 +975,9 @@ namespace Daphne
         // have a local pointer of the correct type for use within this class
         private TissueScenario scenarioHandle;
         private ConfigECSEnvironment envHandle;
+        // burn in variables
+        private double mu_max, alpha, f_max;
+        private int burn_in_iter;
 
         public TissueSimulation()
         {
@@ -961,6 +987,14 @@ namespace Daphne
             hdf5file = new TissueSimulationHDF5File(this);
             frameData = new TissueSimulationFrameData((TissueSimulationHDF5File)hdf5file);
             reset();
+        }
+
+        public override void reset()
+        {
+            base.reset();
+            mu_max = 1.0;
+            alpha = 2.0;
+            burn_in_iter = 0;
         }
 
         protected override int linearDistributionCase(int dim)
@@ -1026,7 +1060,7 @@ namespace Daphne
 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell c = instantiateCell(-1, cp, configComp, /*cp.CellStates[i], */bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
+                    Cell c = instantiateCell(-1, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
 
                     c.SetCellState(cp.CellStates[i]);
                 }
@@ -1091,6 +1125,95 @@ namespace Daphne
             cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();
         }
 
+        // Tom's burn in algorithm
+        // 1.	Zero cell forces.
+        // 2.	Identify overlapping cell pairs.
+        // 3.	Compute the total force F exerted on each cell due to collisions using the same methods as in the simulation.
+        // 4.	Update cell positions according to:
+        // a.	X += µ * F * dt ; where dt is the usual time step and µ is a parameter.
+        // 5.	Compute Fmax, the largest force among all the cells.
+        // 6.	Repeat steps 1-5 until Fmax < α, where α is a parameter.
+        // 7.	Zero cell forces and start the normal simulation.
+        // Empirically determine good values for µ and α. Try µ=0.1 and α=1 to start.
+
+        /// <summary>
+        /// find a non-overlapping starting configuration
+        /// </summary>
+        public override void Burn_inStep()
+        {
+            double mu = mu_max;
+            Pair pmax = null;
+
+            ClearFlag(SIMFLAG_ALL);
+            // render every 500 integration steps to show the progress
+            if(burn_in_iter % 500 == 0)
+            {
+                SetFlag((byte)SIMFLAG_RENDER);
+            }
+            burn_in_iter++;
+            // 1., zero forces
+            cellManager.ResetCellForces();
+            // 2. + 3., handle collisions, find and accumulate the forces per cell
+            if (collisionManager != null)
+            {
+                collisionManager.Step(integratorStep);
+            }
+            // add in the boundary force; has no effect for toroidal boundary condition
+            foreach (Cell c in dataBasket.Cells.Values)
+            {
+                c.BoundaryForce();
+            }
+            // 5., find the maximum force
+            f_max = 0;
+            foreach (KeyValuePair<int, Pair> kvp in collisionManager.Pairs)
+            {
+                if (kvp.Value.Force > f_max)
+                {
+                    f_max = kvp.Value.Force;
+                    pmax = kvp.Value;
+                }
+            }
+
+            // find mu such that it allows maximally 10% of (r1 + r2) movement for the pair with f_max
+            if(pmax != null)
+            {
+                double tmp = 0.1 * (pmax.Cell(0).Radius + pmax.Cell(1).Radius) / (f_max * integratorStep);
+
+                if (tmp < mu_max)
+                {
+                    mu = tmp;
+                }
+                else
+                {
+                    mu = mu_max;
+                }
+            }
+
+            // 4., cell movement
+            if (f_max > 0.0)
+            {
+                cellManager.Burn_inStep(integratorStep, mu);
+            }
+        }
+
+        /// <summary>
+        /// indicates whether burn in needs to run
+        /// </summary>
+        /// <returns>true when burn in needs to run a step</returns>
+        public override bool Burn_inActive()
+        {
+            return f_max >= alpha || burn_in_iter == 0;
+        }
+
+        /// <summary>
+        /// finish burn in
+        /// </summary>
+        public override void Burn_inCleanup()
+        {
+            // 7., zero forces
+            cellManager.ResetCellForces();
+        }
+
         public override void Step(double dt)
         {
             double t = 0, localStep;
@@ -1102,7 +1225,6 @@ namespace Daphne
                 //dataBasket.Environment.Comp.Step(localStep);
                 dataBasket.Environment.Step(localStep);
                 
-
                 // zero all cell forces; needs to happen first
                 cellManager.ResetCellForces();
                 // handle collisions
@@ -1110,7 +1232,7 @@ namespace Daphne
                 {
                     collisionManager.Step(localStep);
                 }
-                // cell force reset happens in cell manager at the end of the cell update
+                // cell movement
                 cellManager.Step(localStep);
                 t += localStep;
             }

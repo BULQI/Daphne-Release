@@ -920,10 +920,9 @@
                         BorderThickness="1"
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                        Expanded="ReacCompExpander_Expanded">
+                        Expanded="ReacCompExpander_Expanded">                               
 
                 <StackPanel>
-
                     <StackPanel>
                         <StackPanel.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
@@ -937,9 +936,9 @@
 
                         <ListBox x:Name="ReactionComplexListBox" MinHeight="20" 
                                     ItemsSource="{Binding Path=Protocol.scenario.environment.comp.reaction_complexes}" 
+                                    ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                     DisplayMemberPath="Name"
                                     SelectedIndex="0"
-                                    ToolTip="{Binding Path=description}"
                                  />
 
                     </StackPanel>
@@ -994,15 +993,7 @@
                                 BorderBrush="Black"
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
-                        <StackPanel Orientation="Vertical" Margin="10,0">
-                            <StackPanel.Resources>
-                                <DataTemplate x:Key="reacCxListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                            </StackPanel.Resources>
+                        <StackPanel Orientation="Vertical" Margin="10,0">                           
 
                             <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                             <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                                                                                             

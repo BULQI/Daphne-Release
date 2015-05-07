@@ -44,6 +44,18 @@
     <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
     <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
+
+    <!--This is used to diaplay a tooltip for a grid cell-->
+    <Style TargetType="DataGridCell" x:Key="gridCellTextStyle">
+        <Setter Property="ToolTip">
+            <Setter.Value>
+                <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
+                </TextBlock>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ToolTipService.ShowOnDisabled" Value="true"></Setter>
+    </Style>
+    
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
     <!-- transitionDriverElementTypeTemplate -->
@@ -255,6 +267,17 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate x:Key="reacCxListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" ToolTipService.ShowOnDisabled="True" > 
+                <TextBlock.ToolTip>
+                    <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
+                    </TextBlock>
+                </TextBlock.ToolTip>
+            </TextBlock>
+        </StackPanel>
+    </DataTemplate>
+
     <!-- ConfigTransitionScheme properties template : DataContext must be ConfigTransitionScheme -->
     <DataTemplate x:Key="diffSchemeTemplate">
         <StackPanel Orientation="Vertical">
@@ -297,7 +320,7 @@
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
 
-                    <GridViewColumn Width="80" Header="Rate constant">
+                    <GridViewColumn Width="120" Header="Rate constant">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>

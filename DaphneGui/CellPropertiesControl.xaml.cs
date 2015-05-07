@@ -105,6 +105,14 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            PropertiesGrid.IsEnabled = true;
+
+            if (Tag == null)
+                return;
+
+            string temp = Tag.ToString().ToLower();
+            if (temp == "false")
+                PropertiesGrid.IsEnabled = false;
         }
 
         bool isUserInteraction;

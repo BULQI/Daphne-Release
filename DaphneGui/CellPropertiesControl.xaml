@@ -93,7 +93,7 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
                         >
                     
-                        <Grid Width="Auto" >
+                        <Grid Width="Auto" x:Name="PropertiesGrid">
                         <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -102,8 +102,8 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                    
-                        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
+
+                            <StackPanel x:Name="spProps" Orientation="Vertical" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
                             <GroupBox >
                                 <!-- 
                                 cbLocomotorDriver1 binding needs to be OneWay.
@@ -112,7 +112,7 @@
                                 -->
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel Orientation="Vertical" HorizontalAlignment="Left" x:Name="panelLocoDriver">
-                                        <TextBlock Text="chemotactic driver molecule" Margin="6,5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100"/>
+                                        <TextBlock Text="chemotactic driver molecule" Margin="6,5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="160"/>
                                         <ComboBox   x:Name="cbLocomotorDriver1" MinWidth="100" Width="160" Margin="6,0"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=OneWay}"
@@ -160,7 +160,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
-                        </StackPanel>
+                            </StackPanel>
             
                         <GroupBox Grid.Row="1" Grid.Column="0">
                         <StackPanel Orientation="Vertical">
