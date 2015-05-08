@@ -857,10 +857,19 @@ namespace DaphneGui
                 return;
             }
 
-            //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
+            //If the cell cytosol already contains this reaction, exclude it from the available reactions list
             if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
             {
                 e.Accepted = false;
+            }
+
+            //skg 5/8/15 - MUST ALSO EXCLUDE REACTIONS THAT ARE IN THE REACTION COMPLEXES
+            foreach (ConfigReactionComplex crc in cc.cytosol.reaction_complexes)
+            {
+                if (crc.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    e.Accepted = false;
+                }
             }
         }
 
@@ -899,6 +908,16 @@ namespace DaphneGui
                 return;
             }
 
+            //skg 5/8/15 - MUST ALSO EXCLUDE REACTIONS THAT ARE IN THE REACTION COMPLEXES
+            foreach (ConfigReactionComplex crc in cc.membrane.reaction_complexes)
+            {
+                if (crc.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    e.Accepted = false;
+                    return;
+                }
+            }
+
             e.Accepted = true;
         }
 
@@ -915,7 +934,7 @@ namespace DaphneGui
                 return;
             }
 
-            //if already in cytosol, return
+            //if already in membrane, return
             if (cc.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid))
             {
                 e.Accepted = false;
