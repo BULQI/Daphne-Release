@@ -6,13 +6,12 @@
                     xmlns:daph="clr-namespace:Daphne;assembly=Daphne"                    
                     xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
-                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
+                                  
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     ImageSource="Images/Properties16.png"
                     x:Name="MyComponentsWindow"
                     Loaded="MyComponentsWindow_Loaded"
                     >
-
 
     <docking:ToolWindow.Resources>
         <!--<daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />-->
@@ -41,6 +40,12 @@
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
 
         <local:selectedRCToBoolConverter x:Key="selectedRCToBoolConv"/>
+
+        <!--<Style TargetType="DataGridColumnHeader">
+            <Setter Property="ToolTip" Value="{Binding RelativeSource Mode=FindAncestor AncestorType={x:Type DataGrid}, Path=Items.Count}}}" "/>
+        </Style>-->
+
+        <!--Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridCell}}, Path=Tag}"-->
 
     </docking:ToolWindow.Resources>
 
@@ -103,7 +108,9 @@
                                             </LinearGradientBrush>
                                         </Setter.Value>
                                     </Setter>
-                                </Style>
+                                <!--<Setter Property="ToolTip" Value="{Binding ElementName=dgLibGenes, Path=Items.Count}" />-->
+                                <Setter Property="ToolTip" Value="{Binding ElementName=dgLibGenes, Path=ItemsSource.Count}" />
+                            </Style>
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>

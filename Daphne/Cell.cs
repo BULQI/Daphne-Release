@@ -73,6 +73,10 @@ namespace Daphne
         /// The radius of the cell
         /// </summary>
         private double radius;
+        /// <summary>
+        /// used in toroidal boundary condition
+        /// </summary>
+        public static double SafetySlab = 1e-3;
 
         /// <summary>
         /// the cell's behaviors (death, division, differentiation)
@@ -789,13 +793,11 @@ namespace Daphne
             {
                 for (int i = 0; i < SimulationBase.dataBasket.Environment.Comp.Interior.Dim; i++)
                 {
-                    double safetySlab = 1e-3;
-
                     // displace the cell such that it wraps around
                     if (SpatialState.X[i] < 0.0)
                     {
-                        // use a small fudge factor to displace the cell just back into the grid
-                        SpatialState.X[i] = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i) - safetySlab;
+                        // use a small safety distance to displace the cell just back into the grid
+                        SpatialState.X[i] = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i) - SafetySlab;
                     }
                     else if (SpatialState.X[i] > SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i))
                     {

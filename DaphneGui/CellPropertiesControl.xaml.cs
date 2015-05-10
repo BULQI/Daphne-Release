@@ -35,7 +35,9 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            cell.ValidateName(MainWindow.SOP.Protocol);
+            //cell.ValidateName(MainWindow.SOP.Protocol);
+            Level level = MainWindow.GetLevelContext(this);
+            cell.ValidateName(level);
         }
 
         private void cbLocoDriver_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -103,6 +105,14 @@ namespace DaphneGui
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            PropertiesGrid.IsEnabled = true;
+
+            if (Tag == null)
+                return;
+
+            string temp = Tag.ToString().ToLower();
+            if (temp == "false")
+                PropertiesGrid.IsEnabled = false;
         }
 
         bool isUserInteraction;
@@ -110,7 +120,24 @@ namespace DaphneGui
         {
             isUserInteraction = true;
         }
-        
+
+        protected virtual void PushCellButton_Click2(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+
+            if (button == null)
+                return;
+
+            ConfigCell cell = button.DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Push cell
+            ConfigCell newcell = cell.Clone(true);
+            MainWindow.GenericPush(newcell);
+        }
+
     }
 
     public class RadiusValidator : ValidationRule

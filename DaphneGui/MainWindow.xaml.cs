@@ -85,6 +85,36 @@ namespace DaphneGui
         }
 
         /// <summary>
+        /// levelContext property - to pass level to various reusable controls
+        /// </summary>
+        public static readonly DependencyProperty LevelContextProperty =
+           DependencyProperty.RegisterAttached("LevelContext",
+           typeof(Level), typeof(MainWindow), new FrameworkPropertyMetadata(null,
+           FrameworkPropertyMetadataOptions.Inherits));
+
+        public static Level GetLevelContext(DependencyObject target)
+        {
+            return (Level)target.GetValue(LevelContextProperty);
+        }
+
+        public static void SetLevelContext(DependencyObject target, Level value)
+        {
+            target.SetValue(LevelContextProperty, value);
+        }
+
+        public Level LevelContext
+        {
+            get
+            {
+                return GetLevelContext(this);
+            }
+            set
+            {
+                SetLevelContext(this, value);
+            }
+        }
+
+        /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
         public static string appPath;
@@ -234,8 +264,6 @@ namespace DaphneGui
         public static RenderSkinWindow ST_RenderSkinWindow;
 
 
-
-
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
         private const int ATTACH_PARENT_PROCESS = -1;
@@ -252,6 +280,7 @@ namespace DaphneGui
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
+            ST_RenderSkinWindow.Visibility = Visibility.Collapsed;            
 
             this.ToolWinCellInfo.Close();
 
@@ -485,7 +514,7 @@ namespace DaphneGui
                         string messageBoxText = "Opening the last protocol failed. Starting up with blank window.\nFunction only supported for files in the \\Config folder.";
                         string caption = "Protocol load failure";
                         MessageBoxButton button = MessageBoxButton.OK;
-                        MessageBoxImage icon = MessageBoxImage.Error;
+                        MessageBoxImage icon = MessageBoxImage.Warning;
 
                         // Display message box
                         MessageBox.Show(messageBoxText, caption, button, icon);
@@ -494,7 +523,7 @@ namespace DaphneGui
                     // allow one repetition with the blank scenario
                     if (repeat < 1)
                     {
-                        file = "blank_scenario.json";
+                        file = "blank_protocol.json";
                     }
                 }
                 repeat++;
@@ -657,8 +686,8 @@ namespace DaphneGui
         /// </summary>
         public void CreateDaphneAndUserStores()
         {
-            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            var userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            var daphnestore = new Level("Config\\daphnestore.json", "Config\\temp_daphnestore.json");
             ProtocolCreators.CreateDaphneAndUserStores(daphnestore, userstore);
         }
 
@@ -668,7 +697,7 @@ namespace DaphneGui
         public void CreateAndSerializeDaphneProtocols()
         {
             //BLANK SCENARIO
-            var protocol = new Protocol("Config\\blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            var protocol = new Protocol("Config\\blank_protocol.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateBlankProtocol(protocol);
             protocol.SerializeToFile();
 
@@ -695,17 +724,17 @@ namespace DaphneGui
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\vatRC_blank.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
             protocol.SerializeToFile();
 
             // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_vatRC_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\vatRC_ligand_receptor.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
             protocol.SerializeToFile();
 
             // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
-            protocol = new Protocol("Config\\daphne_vatRC_2SiteAbBinding_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\vatRC_2SiteAbBinding.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
             protocol.SerializeToFile();
 
@@ -986,9 +1015,15 @@ namespace DaphneGui
                 // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
 
                 sop.Protocol.FileName = filename;
+
+                //If folder changed, this updates the tempfile path.
+                string folder = System.IO.Path.GetDirectoryName(filename);
+                string tempfilename = System.IO.Path.GetFileName(sop.Protocol.TempFile);
+                sop.Protocol.TempFile = folder + "\\" + tempfilename;
+
                 sop.Protocol.SerializeToFile();
 
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                orig_content = sop.Protocol.SerializeToString();
                 protocol_path = new Uri(filename);
                 orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 displayTitle();
@@ -1053,7 +1088,7 @@ namespace DaphneGui
                     //skip reserialize when user dragging 
                     if (ToolWinType != ToolWindowType.VatRC && !completeReset)
                     {
-                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_content = sop.Protocol.SerializeToString();
                     }
 
                     // this needs to come after setting orig_content
@@ -1774,6 +1809,8 @@ namespace DaphneGui
         {
             runButton.IsEnabled = false;
             mutex = true;
+            pushMenu.IsEnabled = true;
+            AdminMenu.IsEnabled = true;
 
             saveStoreFiles();
             saveTempFiles();
@@ -1793,6 +1830,8 @@ namespace DaphneGui
             saveButton.IsEnabled = false;
             CellOptionsExpander.IsExpanded = false;
             ECMOptionsExpander.IsExpanded = false;
+            pushMenu.IsEnabled = false;
+            AdminMenu.IsEnabled = false;
             mutex = true;
 
             runSim(true);
@@ -1978,6 +2017,7 @@ namespace DaphneGui
                 try
                 {
                     SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
+                    LevelContext = protocol;
                     return protocol;
                 }
                 catch
@@ -1995,6 +2035,7 @@ namespace DaphneGui
                     protocol.FileName = protocol_path.LocalPath;
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
                     SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
+                    LevelContext = protocol;
                     return protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
@@ -2018,16 +2059,16 @@ namespace DaphneGui
                     {
                         //sop = new SystemOfPersistence();
                         sop.Protocol = protocol;
-                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_content = sop.Protocol.SerializeToString();
                         orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                     }
 
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     ////      Do this once up front instead of doing each time user clicks Userstore or Daphnestore.
                     string storesPath = new Uri(appPath).LocalPath;
-                    sop.UserStore.FileName = storesPath + @"\Config\daphne_userstore.json";
+                    sop.UserStore.FileName = storesPath + @"\Config\userstore.json";
                     sop.UserStore.TempFile = storesPath + "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = storesPath + @"\Config\daphne_daphnestore.json";
+                    sop.DaphneStore.FileName = storesPath + @"\Config\daphnestore.json";
                     sop.DaphneStore.TempFile = storesPath + "Config\\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
@@ -2039,11 +2080,6 @@ namespace DaphneGui
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // GUI Resources
-                // Set the data context for the main tab control config GUI
-                this.CellStudioToolWindow.DataContext = sop.Protocol;
-                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
-                this.ComponentsToolWindow.DataContext = sop.Protocol;
-
                 if (newFile == true)
                 {
                     if (ToolWinType != ToolWindowType.Tissue)
@@ -2057,6 +2093,7 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
+                        ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
                         ST_VTKDisplayDocWindow.Activate();
 
                     }
@@ -2071,6 +2108,12 @@ namespace DaphneGui
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinTissue)ToolWin);
                 }
+
+                // Moved these lines down from above because ToolWin needs to be instantiated before making these calls.
+                // Set the data context for the main tab control config GUI
+                this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
+                this.ComponentsToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
@@ -2251,11 +2294,10 @@ namespace DaphneGui
             sop.Protocol = new Protocol();
             sop.Protocol.experiment_name = "";
             sop.Protocol.experiment_description = "";
-            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+            orig_content = sop.Protocol.SerializeToString();
             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
             //ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
-
 
             ComponentsToolWindow.DataContext = sop.Protocol;
             //////////gc.Cleanup();
@@ -2330,16 +2372,43 @@ namespace DaphneGui
                 {
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
                     {
-                        // run the simulation forward to the next task
+                        // run the simulation forward to the next task; also handle burn in
                         if (postConstruction == true && AssumeIDE() == true)
                         {
-                            sim.RunForward();
+                            if (sim.Burn_inActive() == true)
+                            {
+                                sim.Burn_inStep();
+                                if (sim.Burn_inActive() == false)
+                                {
+                                    sim.Burn_inCleanup();
+                                    // no need to render this, will be taken care of by the start of the run
+                                    if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
+                                    {
+                                        sim.ClearFlag(SimulationBase.SIMFLAG_ALL);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                sim.RunForward();
+                            }
                         }
                         else
                         {
                             try
                             {
-                                sim.RunForward();
+                                if (sim.Burn_inActive() == true)
+                                {
+                                    sim.Burn_inStep();
+                                    if (sim.Burn_inActive() == false)
+                                    {
+                                        sim.Burn_inCleanup();
+                                    }
+                                }
+                                else
+                                {
+                                    sim.RunForward();
+                                }
                             }
                             catch (Exception e)
                             {
@@ -2353,7 +2422,7 @@ namespace DaphneGui
                         {
                             if (Properties.Settings.Default.skipDataWrites == false)
                             {
-                                if (sim.FrameData != null)
+                                if (sim.Burn_inActive() == false && sim.FrameData != null)
                                 {
                                     sim.FrameData.writeData(sim.FrameNumber - 1);
                                 }
@@ -2527,12 +2596,37 @@ namespace DaphneGui
                 newScenario.IsEnabled = true;
                 ImportSBML.IsEnabled = false;
                 ExportSBML.IsEnabled = false;
+
+                //Here, turn on Tracks option in White Hand ToolMode combo box
+                if (gc is VTKFullGraphicsController)
+                {
+                    ((VTKFullGraphicsController)gc).TracksActive = true;
+                }
             }
             else
             {
                 applyButton.IsEnabled = true;
                 saveButton.IsEnabled = true;
                 enableFileMenu(true);
+
+                //Here, turn off Tracks option in White Hand ToolMode combo box
+                if (gc is VTKFullGraphicsController)
+                {
+                    ((VTKFullGraphicsController)gc).TracksActive = false;
+
+                    if (ToolModesCombo.SelectedIndex == 1)
+                    {
+                        ((VTKFullGraphicsController)gc).CellSelectionToolMode = ((VTKFullGraphicsController)gc).CellSelectionToolModes[0];
+                        ((VTKFullGraphicsController)gc).TracksActive = false;
+                        ToolModesCombo.SelectedIndex = 0;
+                    }
+
+                    //But if finished, then turn on the Tracks option in White Hand ToolMode como box
+                    if (finished)
+                    {
+                        ((VTKFullGraphicsController)gc).TracksActive = true;
+                    }
+                }
             }
             abortButton.IsEnabled = false;
             runButton.Content = "Run";
@@ -2543,6 +2637,7 @@ namespace DaphneGui
             gc.EnableComponents(finished);
             toolWin.GUIUpdate(finished);
 
+
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
             ToolWin.Activate();
@@ -2551,7 +2646,7 @@ namespace DaphneGui
             // TODO: These Focus calls will be a problem with multiple GCs...
             if (gc is VTKFullGraphicsController == true)
             {
-                ((VTKFullGraphicsController)gc).RWC.Focus();
+                ((VTKFullGraphicsController)gc).RWC.Focus();                
             }
         }
 
@@ -2566,9 +2661,9 @@ namespace DaphneGui
             if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
                 // check if there were changes
-                string refs = sop.Protocol.SerializeToStringSkipDeco();
+                string refs = sop.Protocol.SerializeToString();
 
-                if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
+                if (sop != null && refs != orig_content)
                 {
                     sop.Protocol.SerializeToFile(true);
                     tempFileContent = true;
@@ -2580,24 +2675,24 @@ namespace DaphneGui
 
         private void saveStore(Level store, string storeName)
         {
-            string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
-            string caption = storeName + " Changed";
-            MessageBoxButton button = MessageBoxButton.YesNoCancel;
-            MessageBoxImage icon = MessageBoxImage.Warning;
+            ////string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
+            ////string caption = storeName + " Changed";
+            ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            ////MessageBoxImage icon = MessageBoxImage.Warning;
 
-            // Display message box
-            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+            ////// Display message box
+            ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
 
-            if (result == MessageBoxResult.Cancel)
-            {
-                return;
-            }
-            else if (result == MessageBoxResult.No)
-            {
-                saveStoreUsingDialog(store, store.FileName);
-            }
-            else
-            {
+            ////if (result == MessageBoxResult.Cancel)
+            ////{
+            ////    return;
+            ////}
+            ////else if (result == MessageBoxResult.No)
+            ////{
+            ////    saveStoreUsingDialog(store, store.FileName);
+            ////}
+            ////else
+            ////{
                 FileInfo info = new FileInfo(store.FileName);
                 if (info.IsReadOnly == false || !info.Exists)
                 {
@@ -2613,13 +2708,13 @@ namespace DaphneGui
                 }
                 else
                 {
-                    messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                    caption = "File write protected";
-                    button = MessageBoxButton.OK;
-                    icon = MessageBoxImage.Warning;
+                    string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                    string caption = "File write protected";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
                     MessageBox.Show(messageBoxText, caption, button, icon);
                 }
-            }
+            ////}
         }
 
         private void saveStoreFiles()
@@ -2701,7 +2796,7 @@ namespace DaphneGui
                 {
                     // save into the same file
                     sop.Protocol.SerializeToFile();
-                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    orig_content = sop.Protocol.SerializeToString();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
                 else if (result == MessageBoxResult.No)
@@ -2763,6 +2858,16 @@ namespace DaphneGui
 
         private void runSim_Tissue(bool repeat)
         {
+            //Whenever we run the simulation, the Tracks option should be turned off.
+            //If it was previously selected, then change it to None.
+            VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
+            if ((full != null) && ToolModesCombo.SelectedIndex == 1)
+            {
+                full.CellSelectionToolMode = full.CellSelectionToolModes[0];
+                full.TracksActive = false;
+                ToolModesCombo.SelectedIndex = 0;
+            }
+
             VTKDisplayDocWindow.Activate();
             if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
@@ -2836,7 +2941,7 @@ namespace DaphneGui
                         }
                     }
                 }*/
-                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
+                if (repeat == true || tempFileContent == false && sop.Protocol.SerializeToString() == orig_content)
                 {
                     // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
                     // after a run or vcr playback
@@ -2851,7 +2956,7 @@ namespace DaphneGui
                     {
                         case MessageBoxResult.Yes:
                             sop.Protocol.SerializeToFile();
-                            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                            orig_content = sop.Protocol.SerializeToString();
                             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             lockSaveStartSim(true);
                             tempFileContent = false;
@@ -2927,8 +3032,8 @@ namespace DaphneGui
         public MessageBoxResult saveDialog()
         {
             // Configure the message box to be displayed
-            string messageBoxText = "Scenario parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
-            string caption = "Scenario Changed";
+            string messageBoxText = "Protocol parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
+            string caption = "Protocol changed";
             MessageBoxButton button = MessageBoxButton.YesNoCancel;
             MessageBoxImage icon = MessageBoxImage.Warning;
 
@@ -3078,6 +3183,22 @@ namespace DaphneGui
         private void CommandBindingOpen_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
+
+            //Loading new protocol, so turn off Tracks option.
+
+            //Whenever we load a new protocol, the Tracks option should be turned off.
+            //If it was previously selected, then change it to None.
+            //Is this the right place for this or should it be in CommandBindingOpen_Executed method?
+            if (MainWindow.GC.GetType() == typeof(VTKFullGraphicsController))
+            {
+                VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
+                if ((full != null) && ToolModesCombo.SelectedIndex == 1)
+                {
+                    full.CellSelectionToolMode = full.CellSelectionToolModes[0];
+                    //full.TracksActive = false;
+                    ToolModesCombo.SelectedIndex = 0;
+                }
+            }
         }
 
         private void CommandBindingOpen_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -3088,6 +3209,9 @@ namespace DaphneGui
             }
 
             Nullable<bool> result = loadScenarioUsingDialog();
+
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
 
             // Process open file dialog box results
             if (result == true)
@@ -3106,6 +3230,18 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            //If we're in UserStore or DaphneStore mode, do this and return.
+            if (CellStudioToolWindow.DataContext == SOP.UserStore)
+            {
+                saveStore(sop.UserStore, "UserStore");
+                return;
+            }
+            else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
+            {
+                saveStore(sop.DaphneStore, "DaphneStore");
+                return;
+            }
+
             ToolWin.Apply();
 
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
@@ -3113,7 +3249,7 @@ namespace DaphneGui
             if (fi.IsReadOnly == false || !fi.Exists)
             {
                 sop.Protocol.SerializeToFile();
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                orig_content = sop.Protocol.SerializeToString();
             }
             else
             {
@@ -3206,6 +3342,11 @@ namespace DaphneGui
                 return;
             }
 
+            if (cb.SelectedIndex == 1 && chkTracks.IsChecked == false)
+            {
+                cb.SelectedIndex = 0;
+            }
+
             byte index = (byte)(cb.SelectedIndex);
 
             SetMouseLeftState(index, true);
@@ -3240,19 +3381,22 @@ namespace DaphneGui
             }
 
             //Grab the blank scenario
-            string file = "blank_scenario.json";
+            string file = "blank_protocol.json";
             string filename = appPath + @"\Config\" + file;
             Uri uri_path = new Uri(filename);
 
             bool file_exists = File.Exists(uri_path.LocalPath);
             if (!file_exists)
             {
-                MessageBox.Show("Blank scenario file not found.");
+                MessageBox.Show("Blank protocol file not found.");
                 return;
             }
 
             setScenarioPaths(filename);
             prepareProtocol(ReadJson(""));
+
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
         }
 
         private void prepareProtocol(Protocol protocol)
@@ -3298,6 +3442,10 @@ namespace DaphneGui
             {
                 sim.RunStatus = SimulationBase.RUNSTAT_ABORT;
             }
+
+            //If simulation is aborted, then turn off Tracks option.
+            ((VTKFullGraphicsController)gc).TracksActive = false;
+
             // 1/14/15: this code seems to be legacy and no longer in use; remove in the future if no problems arise or reenable otherwise
             //else
             //{
@@ -3328,108 +3476,55 @@ namespace DaphneGui
                 return;
             }
 
+            PushEntity pm = new PushEntity();
+            pm.DataContext = MainWindow.SOP;
+            pm.EntityLevelDetails.DataContext = source;
+            pm.ComponentLevelDetails.DataContext = null;
+
             if (source is ConfigMolecule)
             {
-                //LET'S TRY A GENERIC PUSHER
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
-                pm.ComponentLevelDetails.DataContext = null;
-
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erMol;
                     newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
-
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                    return;
-
-                UserWantsNewEntity = pm.UserWantsNewEntity;
-
             }
             else if (source is ConfigReaction)
             {
-                //Use generic pusher
-                PushEntity pr = new PushEntity();
-                pr.EntityLevelDetails.DataContext = source;
-                pr.ComponentLevelDetails.DataContext = null;
-
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
-                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+                    pm.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
                     newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
-
-                if (pr.ShowDialog() == false)
-                    return;
-
-                UserWantsNewEntity = pr.UserWantsNewEntity;
             }
             else if (source is ConfigCell)
             {
-                PushEntity pcell = new PushEntity();
-                pcell.EntityLevelDetails.DataContext = source;
-                pcell.ComponentLevelDetails.DataContext = null;
-
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
-                    pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                    pm.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
                     newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
+                    ((ConfigCell)newEntity).CellName = ((ConfigCell)newEntity).GenerateNewName(MainWindow.SOP.Protocol, "_Copy");
                 }
-
-                if (pcell.ShowDialog() == false)
-                    return;
-
-                UserWantsNewEntity = pcell.UserWantsNewEntity;
-
             }
             else if (source is ConfigGene)
             {
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
-                pm.ComponentLevelDetails.DataContext = null;
-
                 ConfigGene erGene = MainWindow.SOP.Protocol.FindGene(((ConfigGene)source).Name);
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
                     newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
-
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                {
-                    return;
-                }
-
-                UserWantsNewEntity = pm.UserWantsNewEntity;
-
             }
             else if (source is ConfigReactionComplex)
             {
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
-                pm.ComponentLevelDetails.DataContext = null;
-
                 if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid))
                 {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
                     newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
+                    ((ConfigReactionComplex)newEntity).Name = ((ConfigReactionComplex)newEntity).GenerateNewName(MainWindow.SOP.Protocol, " Copy");
                 }
-
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                {
-                    return;
-                }
-
-                UserWantsNewEntity = pm.UserWantsNewEntity;
             }
             else if (source is ConfigTransitionScheme)
             {
@@ -3447,6 +3542,13 @@ namespace DaphneGui
                 return;
             }
 
+
+            //Show the confirmation dialog
+            if (pm.ShowDialog() == false)
+            {
+                return;
+            }
+            UserWantsNewEntity = pm.UserWantsNewEntity;
 
             //If we get here, then the user confirmed a PUSH
 
@@ -3471,7 +3573,6 @@ namespace DaphneGui
                 }
                 else //push as new
                 {
-                    source.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                     B.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
                 }
 
@@ -3481,40 +3582,60 @@ namespace DaphneGui
 
         private void menuUserStore_Click(object sender, RoutedEventArgs e)
         {
-            //readStores();
-            statusBarMessagePanel.Content = "Ready:  User Store";
-            ProtocolToolWindow.Close();
-            VTKDisplayDocWindow.Close();
-            ReacComplexChartWindow.Close();
-            ComponentsToolWindow.DataContext = SOP.UserStore;
-            CellStudioToolWindow.DataContext = SOP.UserStore;
-            ComponentsToolWindow.Refresh();
-            ReturnToProtocolButton.Visibility = Visibility.Visible;
-            menuProtocolStore.IsEnabled = true;
+            prepareForUserStore();
         }
 
         private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
         {
-            //readStores();
+            prepareForDaphneStore();
+        }
+
+        private void prepareForUserStore()
+        {
+            statusBarMessagePanel.Content = "Ready:  User Store";
+            ProtocolToolWindow.Close();
+            VTKDisplayDocWindow.Close();
+            ReacComplexChartWindow.Close();
+            LevelContext = SOP.UserStore;
+            ComponentsToolWindow.DataContext = SOP.UserStore;
+            CellStudioToolWindow.DataContext = SOP.UserStore;
+            ComponentsToolWindow.Refresh();
+            ReturnToProtocolButton.Visibility = Visibility.Visible;
+            applyButton.IsEnabled = false;
+            menuProtocolStore.IsEnabled = true;
+            menuAdminSave.Visibility = Visibility.Visible;
+            menuAdminSaveAs.Visibility = Visibility.Visible;
+        }
+
+        private void prepareForDaphneStore()
+        {
             statusBarMessagePanel.Content = "Ready:  Daphne Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
             ReacComplexChartWindow.Close();
+            LevelContext = SOP.DaphneStore;
             ComponentsToolWindow.DataContext = SOP.DaphneStore;
             CellStudioToolWindow.DataContext = SOP.DaphneStore;
             ComponentsToolWindow.Refresh();
             ReturnToProtocolButton.Visibility = Visibility.Visible;
+            applyButton.IsEnabled = false;
             menuProtocolStore.IsEnabled = true;
+            menuAdminSave.Visibility = Visibility.Visible;
+            menuAdminSaveAs.Visibility = Visibility.Visible;
         }
-
+        
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
             ProtocolToolWindow.Open();
+            LevelContext = SOP.Protocol;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
+            applyButton.IsEnabled = true;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
+            menuAdminSave.Visibility = Visibility.Collapsed;
+            menuAdminSaveAs.Visibility = Visibility.Collapsed;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3526,127 +3647,60 @@ namespace DaphneGui
             }
         }
 
-        //private void readStores()
-        //{
-        //    //Code to retrieve userstore and daphnestore - deserialize from files
-        //    sop.UserStore.FileName = "Config\\daphne_userstore.json";
-        //    sop.UserStore.TempFile = "Config\\temp_userstore.json";
-        //    sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
-        //    sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
-        //    sop.DaphneStore = sop.DaphneStore.Deserialize();
-        //    sop.UserStore = sop.UserStore.Deserialize();
-        //    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
-        //    orig_user_store_content = sop.UserStore.SerializeToString();
-        //}
+        private void menuAdminSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            saveStoreUsingDialog(sop.UserStore, "UserStore");
+        }
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell);
+            Level tempLevel = GetLevelContext(this);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
 
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushTransDriver_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         private void pushReacComplex_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            //readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex);
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex, GetLevelContext(this));
             pushWindow.DataContext = SOP;
-
             pushWindow.ShowDialog();
-
-            //if (pushWindow.ShowDialog() == true)
-            //{
-            //    saveStoreFiles();
-            //}
         }
 
         /// <summary>
@@ -3704,10 +3758,13 @@ namespace DaphneGui
         {
             statusBarMessagePanel.Content = "Ready:  Protocol";
             ProtocolToolWindow.Open();
+            LevelContext = SOP.Protocol;
             ComponentsToolWindow.DataContext = SOP.Protocol;
             CellStudioToolWindow.DataContext = SOP.Protocol;
+            applyButton.IsEnabled = true;
             ReturnToProtocolButton.Visibility = Visibility.Collapsed;
             menuProtocolStore.IsEnabled = false;
+            pushMenu.Visibility = Visibility.Visible;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3718,6 +3775,31 @@ namespace DaphneGui
                 ReacComplexChartWindow.Activate();
             }
         }
+
+        //This code moves the popup controls if main window moves
+        private void mainWindow_LocationChanged(object sender, EventArgs e)
+        {
+            if (CellOptionsPopup.IsOpen)
+            {
+                var offset = CellOptionsPopup.HorizontalOffset;
+                CellOptionsPopup.HorizontalOffset = offset + 1;
+                CellOptionsPopup.HorizontalOffset = offset;
+
+                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+
+            if (ECMOptionsPopup.IsOpen)
+            {
+                var offset = ECMOptionsPopup.HorizontalOffset;
+                ECMOptionsPopup.HorizontalOffset = offset + 1;
+                ECMOptionsPopup.HorizontalOffset = offset;
+
+                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;    
+                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+        }
+
     }
 
 
@@ -3771,6 +3853,29 @@ namespace DaphneGui
             object parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
+        }
+    }
+
+    //Converter for disabling ComboboxItem
+    public class ComboboxDisableMultiConverter : IMultiValueConverter
+    { 
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (values[0] == null || values[1] == null)
+                return null;
+
+            string text = (string)values[0];
+            bool tracksActive = (bool)values[1];
+
+            if (text.Equals("Tracks") && tracksActive == false)
+                return false;
+
+            return true;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

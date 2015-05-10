@@ -5,38 +5,46 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DaphneGui"
              mc:Ignorable="d" 
-             Title="Add a Reaction Complex from store" Width="600" MaxHeight="300"
+             SizeToContent="Height"
+             Title="Add a Reaction Complex from store" Width="600" 
              >
     <Window.Resources>
         <CollectionViewSource x:Key="availableReactionComplexesListView"
                               Source="{Binding Path=reaction_complexes}"
                               Filter="availableReactionComplexesListView_Filter"/>
     </Window.Resources>
-    
-    <StackPanel>        
-        <!--REACTION COMPLEX LIST-->
-        <!--ItemsSource="{Binding reaction_complexes}"-->
-        <StackPanel Margin="20,20,20,0">
-            <TextBlock Text="Reaction Complexes" />
-            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="50" MaxHeight="150" SelectionMode="Multiple"
-                    ItemsSource="{Binding Source={StaticResource availableReactionComplexesListView}}"
-                    DisplayMemberPath="Name"
-                    IsSynchronizedWithCurrentItem="True"
-                    SelectedIndex="0">
-            </ListBox>
-        </StackPanel>
-        <!--PUSH BUTTONS-->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10" Margin="20,0">
-            <Button x:Name="ButtonAdd" Width="50" Click="ButtonAdd_Click">Add</Button>
-            <Button x:Name="ButtonCancel" Width="50" Click="ButtonCancel_Click">Cancel</Button>
-        </StackPanel>
 
-        <StackPanel IsEnabled="False" Margin="20,20,20,0">
-            <ContentControl
-                    Content="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem}" 
-                    ContentTemplate="{StaticResource reacListViewTemplate}">
-            </ContentControl>
-        </StackPanel>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <StackPanel>        
+            <!--REACTION COMPLEX LIST-->
+            <!--ItemsSource="{Binding reaction_complexes}"-->
+            <StackPanel Margin="20,20,20,0">
+                <TextBlock Text="Reaction Complexes" />
+                <ListBox x:Name="ListBoxReactionComplexes"  SelectionMode="Multiple" MinHeight="25" MaxHeight="360"
+                        ItemsSource="{Binding Source={StaticResource availableReactionComplexesListView}}"
+                        ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
+                        DisplayMemberPath="Name"
+                        IsSynchronizedWithCurrentItem="True"
+                        SelectedIndex="0">
+                </ListBox>
+            </StackPanel>
+            <!--PUSH BUTTONS-->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10" Margin="20,0">
+                <Button x:Name="ButtonAdd" Width="50" Click="ButtonAdd_Click">Add</Button>
+                <Button x:Name="ButtonCancel" Width="50" Click="ButtonCancel_Click">Cancel</Button>
+            </StackPanel>
+
+            <StackPanel IsEnabled="False" Margin="20,20,20,0">
+                <ContentControl
+                        Content="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem}" 
+                        ContentTemplate="{StaticResource reacListViewTemplate}">
+                </ContentControl>
+            </StackPanel>
+            
+            <StackPanel>
+                <Button Visibility="Hidden" Height="50" Width="50">Empty</Button>
+            </StackPanel>
         
-    </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </Window>

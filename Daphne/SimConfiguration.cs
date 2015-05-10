@@ -30,7 +30,19 @@ namespace Daphne
         /// <summary>
         /// Protocol level, contains Entity level
         /// </summary>
-        public Protocol Protocol { get; set; }
+        public Protocol Protocol
+        {
+            get
+            {
+                return protocol;
+            }
+            set
+            {
+                protocol = value;
+                HProtocol = protocol;
+            }
+        }
+
         /// <summary>
         /// Daphne level
         /// </summary>
@@ -39,6 +51,12 @@ namespace Daphne
         /// User level
         /// </summary>
         public Level UserStore { get; set; }
+
+        private Protocol protocol;
+        /// <summary>
+        /// allow static access to the protocol instead of modifying many functions by passing in the needed data
+        /// </summary>
+        public static Protocol HProtocol;
 
 
         public ObservableCollection<RenderSkin> SkinList { get; set; }
@@ -78,7 +96,6 @@ namespace Daphne
             UserStore = new Level("", "Config\\temp_userstore.json");
 
             SkinList = new ObservableCollection<RenderSkin>();
-
         }
 
         /// <summary>
@@ -127,7 +144,7 @@ namespace Daphne
         }
 
         /// <summary>
-        /// deserialize an external protocol (not the one part of this class)
+        /// deserialize an external protocol (not the one that is part of this class)
         /// </summary>
         /// <param name="tempFiles">true for handling temporary files</param>
         public static void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
@@ -322,7 +339,7 @@ namespace Daphne
         /// <param name="name"></param>
         /// <param name="protocol"></param>
         /// <returns></returns>
-        public string findGeneGuid(string name, Protocol protocol)
+        public string findGeneGuid(string name, Level protocol)
         {
             foreach (ConfigGene gene in protocol.entity_repository.genes)
             {
@@ -397,6 +414,54 @@ namespace Daphne
             List<string> listRight = new List<string>(products);
             listRight.Sort();
             return listRight;
+        }
+
+        /// <summary>
+        /// Given a total reaction string, find it in the reactions list.
+        /// Return true if found, false otherwise.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="Reacs"></param>
+        /// <returns></returns>
+        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
+        {
+            //Get left and right side molecules of new reaction
+            List<string> newReactants = getReacLeftSide(total);
+            List<string> newProducts = getReacRightSide(total);
+
+            //Loop through all existing reactions
+            foreach (ConfigReaction reac in Reacs)
+            {
+                //Get left and right side molecules of each reaction in er
+                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+
+                //Key step! 
+                //Check if the list of reactants and products in new reaction equals 
+                //the list of reactants and products in this current reaction
+                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Given a total reaction string and a level, find out if the level's entity_repository
+        /// contains this reaction.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <param name="protocol"></param>
+        /// <returns></returns>
+        public bool findReactionByTotalString(string total, Level protocol)
+        {
+            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -586,7 +651,7 @@ namespace Daphne
         /// <summary>
         /// enum for push status
         /// </summary>
-        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_EXISTING_ITEM };
+        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_EXISTING_ITEM, PUSH_IF_MISSING };
 
         /// <summary>
         /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
@@ -696,15 +761,20 @@ namespace Daphne
         /// <param name="s">the push status of e</param>
         public void repositoryPush(ConfigEntity e, PushStatus s)
         {
+            // Dictionaries are updated automatically when an entity is added to an entity repository list.
+
             if (e is ConfigGene)
             {
                 // insert
-                if (s == PushStatus.PUSH_CREATE_ITEM)
+                if (s == PushStatus.PUSH_CREATE_ITEM )
                 {
                     entity_repository.genes.Add(e as ConfigGene);
+                }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
                     if (entity_repository.genes_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.genes_dict.Add(e.entity_guid, e as ConfigGene);
+                        entity_repository.genes.Add(e as ConfigGene);
                     }
                 }
                 // update
@@ -716,10 +786,10 @@ namespace Daphne
                         if (entity_repository.genes[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.genes[i] = e as ConfigGene;
+                            entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
                 }
             }
             else if (e is ConfigMolecule)
@@ -728,9 +798,12 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
+                }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
                     if (entity_repository.molecules_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                        entity_repository.molecules.Add(e as ConfigMolecule);
                     }
                 }
                 // update
@@ -742,10 +815,10 @@ namespace Daphne
                         if (entity_repository.molecules[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.molecules[i] = e as ConfigMolecule;
+                            entity_repository.molecules_dict[e.entity_guid] = e as ConfigMolecule;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.molecules_dict[e.entity_guid] = e as ConfigMolecule;
                 }
             }
             else if (e is ConfigTransitionDriver)
@@ -768,10 +841,10 @@ namespace Daphne
                         if (entity_repository.transition_drivers[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.transition_drivers[i] = e as ConfigTransitionDriver;
+                            entity_repository.transition_drivers_dict[e.entity_guid] = e as ConfigTransitionDriver;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.transition_drivers_dict[e.entity_guid] = e as ConfigTransitionDriver;
                 }
             }
             else if (e is ConfigTransitionScheme)
@@ -794,10 +867,10 @@ namespace Daphne
                         if (entity_repository.diff_schemes[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.diff_schemes[i] = e as ConfigTransitionScheme;
+                            entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigTransitionScheme;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigTransitionScheme;
                 }
             }
             else if (e is ConfigReaction)
@@ -806,9 +879,12 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reactions.Add(e as ConfigReaction);
+                }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
                     if (entity_repository.reactions_dict.ContainsKey(e.entity_guid) == false)
                     {
-                        entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                        entity_repository.reactions.Add(e as ConfigReaction);
                     }
                 }
                 // update
@@ -820,10 +896,10 @@ namespace Daphne
                         if (entity_repository.reactions[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.reactions[i] = e as ConfigReaction;
+                            entity_repository.reactions_dict[e.entity_guid] = e as ConfigReaction;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.reactions_dict[e.entity_guid] = e as ConfigReaction;
                 }
             }
             else if (e is ConfigReactionTemplate)
@@ -846,10 +922,10 @@ namespace Daphne
                         if (entity_repository.reaction_templates[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.reaction_templates[i] = e as ConfigReactionTemplate;
+                            entity_repository.reaction_templates_dict[e.entity_guid] = e as ConfigReactionTemplate;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.reaction_templates_dict[e.entity_guid] = e as ConfigReactionTemplate;
                 }
             }
             else if (e is ConfigCell)
@@ -863,6 +939,13 @@ namespace Daphne
                         entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
                     }
                 }
+                else if (s == PushStatus.PUSH_IF_MISSING)
+                {
+                    if (entity_repository.cells_dict.ContainsKey(e.entity_guid) == false)
+                    {
+                        entity_repository.cells.Add(e as ConfigCell);
+                    }
+                }
                 // update
                 else
                 {
@@ -872,10 +955,10 @@ namespace Daphne
                         if (entity_repository.cells[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.cells[i] = e as ConfigCell;
+                            entity_repository.cells_dict[e.entity_guid] = e as ConfigCell;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.cells_dict[e.entity_guid] = e as ConfigCell;
                 }
             }
             else if (e is ConfigReactionComplex)
@@ -889,6 +972,13 @@ namespace Daphne
                         entity_repository.reaction_complexes_dict.Add(e.entity_guid, e as ConfigReactionComplex);
                     }
                 }
+                if (s == PushStatus.PUSH_IF_MISSING)
+                {
+                    if (entity_repository.reaction_complexes_dict.ContainsKey(e.entity_guid) == false)
+                    {
+                        entity_repository.reaction_complexes.Add(e as ConfigReactionComplex);
+                    }
+                }
                 // update
                 else
                 {
@@ -898,10 +988,10 @@ namespace Daphne
                         if (entity_repository.reaction_complexes[i].entity_guid == e.entity_guid)
                         {
                             entity_repository.reaction_complexes[i] = e as ConfigReactionComplex;
+                            entity_repository.reaction_complexes_dict[e.entity_guid] = e as ConfigReactionComplex;
+                            break;
                         }
                     }
-                    // dict update
-                    entity_repository.reaction_complexes_dict[e.entity_guid] = e as ConfigReactionComplex;
                 }
             }
         }
@@ -1274,7 +1364,7 @@ namespace Daphne
             {
                 if (e is ConfigCell)
                 {
-                    CellPusher(e as ConfigCell, sourceLevel, s);    //Or could add this in ConfigCell - cell = e as ConfigCell; cell.Pusher(sourceLevel, this);
+                    CellPusher(e as ConfigCell, sourceLevel, s);
                 }
                 else if (e is ConfigReaction)
                 {
@@ -1297,74 +1387,58 @@ namespace Daphne
 
         private void CellPusher(ConfigCell cell, Level sourceLevel, PushStatus s)
         {
+            PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+
             //Cytosol molecules
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
-                PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                    repositoryPush(newmol, s2);
-                }
+                repositoryPush(molpop.molecule.Clone(null), s2);
             }
 
             //Membrane molecules
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
-                PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                    repositoryPush(newmol, s2);
-                }
+                repositoryPush(molpop.molecule.Clone(null), s2);
             }
 
             //Genes
             foreach (ConfigGene gene in cell.genes)
             {
-                PushStatus s2 = pushStatus(gene);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigGene newgene = gene.Clone(null);
-                    repositoryPush(newgene, s2);
-                }
+                repositoryPush(gene.Clone(null), s2);
             }
 
             //Cytosol reactions
             foreach (ConfigReaction reac in cell.cytosol.Reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Membrane reactions
             foreach (ConfigReaction reac in cell.membrane.Reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Cytosol reaction complexes
             foreach (ConfigReactionComplex reac in cell.cytosol.reaction_complexes)
             {
-                ReactionComplexPusher(reac, sourceLevel, s);
+                ReactionComplexPusher(reac, sourceLevel, s2);
             }
 
             //Membrane reaction complexes
             foreach (ConfigReactionComplex reac in cell.membrane.reaction_complexes)
             {
-                ReactionComplexPusher(reac, sourceLevel, s);
+                ReactionComplexPusher(reac, sourceLevel, s2);
             }
 
             //Differentiation scheme
-            SchemePusher(cell.diff_scheme, sourceLevel, s);
+            SchemePusher(cell.diff_scheme, sourceLevel, s2);
 
             //Division scheme
-            SchemePusher(cell.div_scheme, sourceLevel, s);
+            SchemePusher(cell.div_scheme, sourceLevel, s2);
 
             //Now push the cell itself
-            if (s != PushStatus.PUSH_INVALID)
-            {
-                repositoryPush(cell, s);
-            }
+            repositoryPush(cell, s);
         }
 
         private void ReactionPusher(ConfigReaction reac, Level sourceLevel, PushStatus s)
@@ -1374,17 +1448,6 @@ namespace Daphne
             {
                 ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
             }
-            //else
-            //{
-            //    foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
-            //    {
-            //        if (crt.entity_guid == reac.reaction_template_guid_ref)
-            //        {
-            //            ReactionTemplatePusher(crt);
-            //            break;
-            //        }
-            //    }
-            //}
 
             //Molecules and Genes
             foreach (string guid in reac.reactants_molecule_guid_ref)
@@ -1401,16 +1464,15 @@ namespace Daphne
             {
                 MoleculeGenePusher(guid, sourceLevel);
             }
-
-            //Now push the reaction itself
-            PushStatus s2 = pushStatus(reac);
-            if (s2 != PushStatus.PUSH_INVALID)
-            {
-                ConfigReaction newreac = reac.Clone(true);
-                repositoryPush(newreac, s2);
-            }
+            repositoryPush(reac.Clone(true), s);
         }
 
+        /// <summary>
+        /// Push a molecule or gene from a compound entity. 
+        /// Create the molecule or gene if it doesn't exist, but don't overwrite.
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <param name="sourceLevel"></param>
         private void MoleculeGenePusher(string guid, Level sourceLevel)
         {
             ConfigEntity entity = null;
@@ -1425,83 +1487,55 @@ namespace Daphne
                 entity = sourceLevel.entity_repository.genes_dict[guid];
             }
 
-            //foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
-            //{
-            //    if (mol.entity_guid == guid)
-            //    {
-            //        entity = mol;
-            //        break;
-            //    }
-            //}
-
-            //if (entity == null)
-            //{
-            //    foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
-            //    {
-            //        if (gene.entity_guid == guid)
-            //        {
-            //            entity = gene;
-            //            break;
-            //        }
-            //    }
-            //}
-
             //Now if entity is not null, we have the entity and must push it unless it is already in target ER
             if (entity != null)
             {
-                PushStatus s2 = this.pushStatus(entity);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
+                PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+                //if (s2 != PushStatus.PUSH_INVALID)
+                //{
                     if (entity is ConfigGene)
                     {
-                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
-                        repositoryPush(newgene, s2);
+                        repositoryPush(((ConfigGene)entity).Clone(null), s2);
                     }
                     else
                     {
-                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
-                        repositoryPush(newmol, s2);
+                        repositoryPush(((ConfigMolecule)entity).Clone(null), s2);
                     }
-                }
+                //}
             }
         }
 
+        /// <summary>
+        /// Push a reaction complex, including sub-entities.
+        /// Create sub-entities that don't exist, but don't overwrite.
+        /// </summary>
+        /// <param name="rc"></param>
+        /// <param name="sourceLevel"></param>
+        /// <param name="s"></param>
         private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
         {
+            PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+
             //Genes
             foreach (ConfigGene gene in rc.genes)
             {
-                PushStatus s2 = pushStatus(gene);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigGene newgene = gene.Clone(null);
-                    repositoryPush(newgene, s2);
-                }
+                repositoryPush(gene.Clone(null), s2);
             }
 
-            //Reactions
+            //Reactions - recursive
             foreach (ConfigReaction reac in rc.reactions)
             {
-                ReactionPusher(reac, sourceLevel, s);
+                ReactionPusher(reac, sourceLevel, s2);
             }
 
             //Molecules
             foreach (ConfigMolecularPopulation molpop in rc.molpops)
             {
-                PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 != PushStatus.PUSH_INVALID)
-                {
-                    ConfigMolecule newmol = molpop.molecule.Clone(null);
-                    repositoryPush(newmol, s2);
-                }
+                repositoryPush(molpop.molecule.Clone(null), s2);
             }
 
             //Push the reaction complex itself
-            if (s != PushStatus.PUSH_INVALID)
-            {
-                repositoryPush(rc, s);
-            }
-
+            repositoryPush(rc, s);
         }
 
         private void SchemePusher(ConfigTransitionScheme scheme, Level sourceLevel, PushStatus s)
@@ -1509,37 +1543,33 @@ namespace Daphne
             if (scheme == null)
                 return;
 
+            PushStatus s2 = PushStatus.PUSH_IF_MISSING;
+
             foreach (string guid in scheme.genes)
             {
                 ConfigGene gene = FindGene(guid, sourceLevel);
                 if (gene != null)
                 {
-                    PushStatus s2 = pushStatus(gene);
-                    if (s2 != PushStatus.PUSH_INVALID)
-                    {
-                        ConfigGene newgene = gene.Clone(null);
-                        repositoryPush(newgene, s2);
-                    }
+                    repositoryPush(gene.Clone(null), s2);
                 }
             }
 
             //Now push the scheme itself
-            PushStatus s3 = pushStatus(scheme);
-            if (s3 != PushStatus.PUSH_INVALID)
-            {
-                ConfigTransitionScheme newscheme = scheme.Clone(true);
-                repositoryPush(newscheme, s3);
-            }
+            repositoryPush(scheme.Clone(true), s);
+            //PushStatus s3 = pushStatus(scheme);
+            //if (s3 != PushStatus.PUSH_INVALID)
+            //{
+            //    ConfigTransitionScheme newscheme = scheme.Clone(true);
+            //    repositoryPush(newscheme, s3);
+            //}
         }
-
 
         private void ReactionTemplatePusher(ConfigReactionTemplate crt)
         {
             PushStatus s2 = pushStatus(crt);
             if (s2 != PushStatus.PUSH_INVALID)
             {
-                ConfigReactionTemplate newcrt = crt.Clone(true);
-                repositoryPush(newcrt, s2);
+                repositoryPush(crt.Clone(true), s2);
             }
         }
 
@@ -1547,14 +1577,6 @@ namespace Daphne
         {
             if (level.entity_repository.genes_dict.ContainsKey(guid))
                 return level.entity_repository.genes_dict[guid];
-
-            //foreach (ConfigGene g in level.entity_repository.genes)
-            //{
-            //    if (g.entity_guid == guid)
-            //    {
-            //        return g;
-            //    }
-            //}
 
             return null;
         }
@@ -1758,29 +1780,6 @@ namespace Daphne
         }
 
         /// <summary>
-        /// serialize the protocol to a string, skip the 'decorations', i.e. experiment name and description
-        /// </summary>
-        /// <returns>the protocol serialized to a string</returns>
-        public string SerializeToStringSkipDeco()
-        {
-            // remember name and description
-            string exp_name = experiment_name,
-                   exp_desc = experiment_description,
-                   ret;
-
-            // temporarily set name and description to empty strings
-            experiment_name = "";
-            experiment_description = "";
-            // serialize to string
-            ret = SerializeToString();
-            // reset to the remembered string values
-            experiment_name = exp_name;
-            experiment_description = exp_desc;
-            // return serialized string
-            return ret;
-        }
-
-        /// <summary>
         /// override deserialization for the protocol; needs to handle extra data only contained in the protocol level
         /// </summary>
         /// <param name="tempFiles">true to indicate deserialization of the temporary file(s)</param>
@@ -1935,47 +1934,53 @@ namespace Daphne
 
         
         
-        /// <summary>
-        /// Given a total reaction string, find it in the reactions list.
-        /// Return true if found, false otherwise.
-        /// </summary>
-        /// <param name="total"></param>
-        /// <param name="Reacs"></param>
-        /// <returns></returns>
-        public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
-        {
-            //Get left and right side molecules of new reaction
-            List<string> newReactants = getReacLeftSide(total);
-            List<string> newProducts = getReacRightSide(total);
+        /////// <summary>
+        /////// Given a total reaction string, find it in the reactions list.
+        /////// Return true if found, false otherwise.
+        /////// </summary>
+        /////// <param name="total"></param>
+        /////// <param name="Reacs"></param>
+        /////// <returns></returns>
+        ////public bool findReactionByTotalString(string total, ObservableCollection<ConfigReaction> Reacs)
+        ////{
+        ////    //Get left and right side molecules of new reaction
+        ////    List<string> newReactants = getReacLeftSide(total);
+        ////    List<string> newProducts = getReacRightSide(total);
 
-            //Loop through all existing reactions
-            foreach (ConfigReaction reac in Reacs)
-            {
-                //Get left and right side molecules of each reaction in er
-                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
-                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+        ////    //Loop through all existing reactions
+        ////    foreach (ConfigReaction reac in Reacs)
+        ////    {
+        ////        //Get left and right side molecules of each reaction in er
+        ////        List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+        ////        List<string> currProducts = getReacRightSide(reac.TotalReactionString);
 
-                //Key step! 
-                //Check if the list of reactants and products in new reaction equals 
-                //the list of reactants and products in this current reaction
-                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        ////        //Key step! 
+        ////        //Check if the list of reactants and products in new reaction equals 
+        ////        //the list of reactants and products in this current reaction
+        ////        if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
+        ////        {
+        ////            return true;
+        ////        }
+        ////    }
+        ////    return false;
+        ////}
 
-        // given a total reaction string, find the ConfigCell object
-        public bool findReactionByTotalString(string total, Protocol protocol)
-        {
-            if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
-            {
-                return true;
-            }
+        /////// <summary>
+        /////// Given a total reaction string and a level, find out if the level's entity_repository
+        /////// contains this reaction.
+        /////// </summary>
+        /////// <param name="total"></param>
+        /////// <param name="protocol"></param>
+        /////// <returns></returns>
+        ////public bool findReactionByTotalString(string total, Level protocol)
+        ////{
+        ////    if (findReactionByTotalString(total, protocol.entity_repository.reactions) == true)
+        ////    {
+        ////        return true;
+        ////    }
 
-            return false;
-        }
+        ////    return false;
+        ////}
 
         /// <summary>
         /// Select transcription reactions in the compartment.
@@ -2533,20 +2538,24 @@ namespace Daphne
         /// <param name="e"></param>
         public void environment_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Check that cells are still inside the simulation space.
-            foreach (CellPopulation cellPop in cellpopulations)
+            if (environment is ConfigECSEnvironment)
             {
-                cellPop.cellPopDist.Resize(new double[3] { ((ConfigECSEnvironment)environment).extent_x,
-                                                           ((ConfigECSEnvironment)environment).extent_y,
-                                                           ((ConfigECSEnvironment)environment).extent_z });
-            }
+                ConfigECSEnvironment env = (ConfigECSEnvironment)environment;
+                double[] newExtents = new double[] { env.extent_x, env.extent_y, env.extent_z };
+
+                // Check that cells are still inside the simulation space
+                foreach (CellPopulation cellPop in cellpopulations)
+                {
+                    cellPop.cellPopDist.Resize(newExtents);
+                }
 #if USE_BOX_LIMITS
-            // update all box min/max translation and scale
-            foreach (BoxSpecification box in box_guid_box_dict.Values)
-            {
-                box.SetBoxSpecExtents((ConfigECSEnvironment)environment);
-            }
+                // update all box min/max translation and scale
+                foreach (BoxSpecification box in box_guid_box_dict.Values)
+                {
+                    box.SetBoxSpecExtents(env);
+                }
 #endif
+            }
         }
 
         /// <summary>
@@ -3905,6 +3914,13 @@ namespace Daphne
         {
             //Start with original name
             string TempMolName = Name;
+            string locationSuffix = "";
+
+            //If membrane bound, add a pipe at the end
+            if (molecule_location == MoleculeLocation.Boundary)
+            {
+                locationSuffix += "|";
+            }
 
             //Get the base name, i.e. the text before the ending (which is "_New" or "_Copy")
             //For example, this would convert "Molecule_New001" to "Molecule".
@@ -3913,23 +3929,17 @@ namespace Daphne
             //If pipe is there, remove it, although it probably already got removed.
             TempMolName = RemovePipe(TempMolName);
 
-            //Now the new molecule name is going to be TempMolName + ending + suffix
+            //Now the new molecule name is going to be TempMolName + ending + suffix + locationSuffix
             int nSuffix = 1;
             string rightSide = ending + string.Format("{0:000}", nSuffix);
-            string NewMolName = TempMolName + rightSide;
+            string NewMolName = TempMolName + rightSide + locationSuffix;
 
             //Check the ordinal part and make sure the number is unique 
             while (FindMoleculeByName(level.entity_repository, NewMolName) == true)
             {
                 nSuffix++;
                 rightSide = ending + string.Format("{0:000}", nSuffix);
-                NewMolName = TempMolName + rightSide;
-            }
-
-            //If membrane bound, add a pipe at the end
-            if (molecule_location == MoleculeLocation.Boundary)
-            {
-                NewMolName += "|";
+                NewMolName = TempMolName + rightSide + locationSuffix;
             }
 
             return NewMolName;
@@ -4053,7 +4063,7 @@ namespace Daphne
             return ret;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempMolName = Name;
@@ -6123,7 +6133,7 @@ namespace Daphne
             return true;
         }
 
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string tempRCName = Name;
@@ -6387,6 +6397,7 @@ namespace Daphne
                 {
                     _locomotor_mol_guid_ref = value;
                 }
+                OnPropertyChanged("locomotor_mol_guid_ref");
             }
         }
 
@@ -6522,7 +6533,7 @@ namespace Daphne
         /// If it is a duplicate, a suffix like "_Copy" is added
         /// </summary>
         /// <param name="sc"></param>
-        public void ValidateName(Protocol protocol)
+        public void ValidateName(Level protocol)
         {
             bool found = false;
             string newCellName = CellName;
@@ -6813,20 +6824,6 @@ namespace Daphne
         }
     }
 
-    public interface ProbDistribution3D
-    {
-        /// <summary>
-        /// Return x,y,z coordinates for the next cell using the appropriate probability density distribution.
-        /// </summary>
-        /// <returns>double[3] {x,y,z}</returns>
-        double[] nextPosition();
-        /// <summary>
-        /// Update extents of ECS and other distribution-specific tasks.
-        /// </summary>
-        /// <param name="newExtents"></param>
-        void Resize(double[] newExtents);
-    }
-
     /// <summary>
     /// Contains information for positioning cells in the ECS according to specfied distributions.
     /// </summary>
@@ -6851,6 +6848,7 @@ namespace Daphne
         // We need to update (reduce) cellPop.number if we reach the maximum tries 
         // for cell placement before all the cells are placed
         public CellPopulation cellPop;
+        private double wallDis;
 
         // Limits for placing cells
         protected double[] extents;
@@ -6859,20 +6857,16 @@ namespace Daphne
             get { return extents; }
             set { extents = value; }
         }
-        // Separation distance from boundaries
-        private double wallDis;
+        // NOTE: possibly completely remove this in some time after no more protocols depend on it, 4/24/15
         // Minimum separation (squared) for cells
         private double minDisSquared;
+        [JsonIgnore]
         public double MinDisSquared
         {
             get { return minDisSquared; }
             set
             {
                 minDisSquared = value;
-                //// Generally, minDisSquared is the square of the cell diameter.
-                //// Then, center of cell can be one radius from the ECS boundary.
-                // wallDis = Math.Sqrt(minDisSquared) / 2.0;
-                wallDis = 0;
             }
         }
 
@@ -6883,10 +6877,32 @@ namespace Daphne
             MinDisSquared = _minDisSquared;
 
             // null case when deserializing Json
-            // correct CellPopulation pointer added in Protocoluration.InitCellPopulationIDCellPopulationDict
+            // correct CellPopulation pointer added in Protocol.InitCellPopulationIDCellPopulationDict
             if (_cellPop != null)
             {
                 cellPop = _cellPop;
+            }
+
+            wallDis = 0.0;
+        }
+
+        /// <summary>
+        /// find the distance to the wall required according to the boundary condition
+        /// </summary>
+        private void findWallDis()
+        {
+            if (wallDis == 0.0 && SystemOfPersistence.HProtocol.scenario is TissueScenario)
+            {
+                TissueScenario scenario = (TissueScenario)SystemOfPersistence.HProtocol.scenario;
+
+                if (scenario.environment is ConfigECSEnvironment && ((ConfigECSEnvironment)scenario.environment).toroidal == false && cellPop != null)
+                {
+                    wallDis = cellPop.Cell.CellRadius;
+                }
+                else
+                {
+                    wallDis = Cell.SafetySlab;
+                }
             }
         }
 
@@ -6897,6 +6913,9 @@ namespace Daphne
         /// <returns></returns>
         protected bool inBounds(double[] pos)
         {
+            // if this is not assigned yet, find it
+            findWallDis();
+
             if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
                 (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
                 (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
@@ -6918,29 +6937,6 @@ namespace Daphne
                 cellPop.CellStates.Clear();
                 AddByDistr(cellPop.number);
             }
-
-        }
-
-        /// <summary>
-        /// Return true if the position of the new cell doesn't overlap with existing cell positions.
-        /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
-        /// </summary>
-        /// <param name="pos">the position of the next cell</param>
-        /// <returns></returns>
-        protected bool noOverlap(double[] pos)
-        {
-            double disSquared = 0;
-            foreach (CellState cellState in this.cellPop.CellStates)
-            {
-                disSquared = (cellState.X - pos[0]) * (cellState.X - pos[0])
-                           + (cellState.Y - pos[1]) * (cellState.Y - pos[1])
-                           + (cellState.Z - pos[2]) * (cellState.Z - pos[2]);
-                if (disSquared < minDisSquared)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         /// <summary>
@@ -6951,7 +6947,7 @@ namespace Daphne
         /// <returns></returns>
         public bool AddByPosition(double[] pos)
         {
-            if (inBounds(pos) && noOverlap(pos))
+            if (inBounds(pos) == true)
             {
                 cellPop.CellStates.Add(new CellState(pos[0], pos[1], pos[2]));
                 return true;
@@ -6960,19 +6956,66 @@ namespace Daphne
         }
 
         /// <summary>
+        /// determine the maximum number of new cells that can get added to the population underlying
+        /// this distribution; assume densest sphere packing: find maximum number allowable and adjust
+        /// n if needed maximum density = 0.74, only that much of the total volume gets occupied
+        /// by spheres (cells), V_cells = 0.74 * V_total, V_occupied + n * V_cell_to_add = 0.74 * V_total
+        /// solve for n = (0.74 * V_total - V_occupied) / V_cell_to_add
+        /// </summary>
+        /// <returns>number of cells that can get added for the tissue simulation, zero otherwise</returns>
+        public int MaxCellsToAdd()
+        {
+            int max_n = 0;
+            
+            if (SystemOfPersistence.HProtocol.scenario is TissueScenario)
+            {
+                TissueScenario scenario = (TissueScenario)SystemOfPersistence.HProtocol.scenario;
+                double ecmVolume,
+                       occupiedVolume = 0,
+                       // use the exact factor instead of 0.74
+                       factor = Math.PI / (3.0 * Math.Sqrt(2.0)),
+                       // for safety, this much of the ecm should stay unoccupied (percent)
+                       safety = 0.1;
+
+                // if this is not assigned yet, find it
+                findWallDis();
+
+                // the boundary conditions will not allow filling the whole volume, subtract the cell-free zone close to the wall
+                ecmVolume = (Extents[0] - 2 * wallDis) * (Extents[1] - 2 * wallDis) * (Extents[2] - 2 * wallDis);
+
+                // the safety allows specifying a threshold for how much of the total volume has to stay unoccupied;
+                // even with the burn in, a perfectly aligned, squeezed in arrangement might be hard to achieve;
+                ecmVolume *= 1.0 - safety;
+
+                // find the already occupied volume, sum up the effective volume of existing cells
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    occupiedVolume += cp.CellStates.Count * 4.0 / 3.0 * Math.PI * Math.Pow(cp.Cell.CellRadius, 3.0);
+                }
+                // for the cell type to be added, calculate max_n
+                max_n = (int)((factor * ecmVolume - occupiedVolume) / (4.0 / 3.0 * Math.PI * Math.Pow(cellPop.Cell.CellRadius, 3.0)));
+            }
+            return max_n;
+        }
+
+        /// <summary>
         /// Add n cells using the appropriate probability density distribution.
         /// </summary>
-        /// <param name="n"></param>
+        /// <param name="n">number of cells to be added</param>
         public void AddByDistr(int n)
         {
             // NOTE: The maxTry settings has been arbitrarily chosen and may need to be adjusted.
-            int maxTry = 1000;
-            int i = 0;
+            int maxTry = 1000, i = 0, tries = 0,
+                max_n = MaxCellsToAdd();
 
-            int tries = 0;
+            if (max_n < n)
+            {
+                MessageBox.Show(String.Format("The free volume is not enough to accept {0} additional cells. Allowing only {1}.", n, max_n), "Cell density warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                n = max_n;
+            }
+
             while (i < n)
             {
-
                 if (AddByPosition(nextPosition()))
                 {
                     i++;
@@ -6988,7 +7031,7 @@ namespace Daphne
                         {
                             AddByPosition(new double[] { Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 });
                         }
-                        System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to " + cellPop.CellStates.Count + ".");
+                        MessageBox.Show(String.Format("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to {0}.", cellPop.CellStates.Count), "Cell density warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                         cellPop.number = cellPop.CellStates.Count;
                         return;
                     }
@@ -7017,11 +7060,11 @@ namespace Daphne
             }
         }
 
-        // <summary>
-        // Triggered by OnUpdate of ConfigEnvironment
-        // Update distributions accordingly.
-        // </summary>
-        // <param name="newextents"></param>
+        /// <summary>
+        /// Triggered by OnUpdate of ConfigEnvironment
+        /// Update distributions accordingly.
+        /// </summary>
+        /// <param name="newExtents">the new extents after the resize</param>
         public abstract void Resize(double[] newExtents);
 
         /// <summary>
@@ -7038,7 +7081,7 @@ namespace Daphne
                 for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
                     pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                    if (!inBounds(pos))
+                    if (inBounds(pos) == false)
                     {
                         cellPop.CellStates.RemoveAt(i);
                     }
@@ -7046,6 +7089,7 @@ namespace Daphne
 
                 // Replace removed cells
                 int cellsToAdd = number - cellPop.CellStates.Count;
+
                 if (cellsToAdd > 0)
                 {
                     AddByDistr(cellsToAdd);
@@ -7456,6 +7500,7 @@ namespace Daphne
         public bool Division { get; set; }
         public bool Differentiation { get; set; }
         public bool Exit { get; set; }
+        public bool Generation { get; set; }
     }
 
     public class CellPopulation : EntityModelBase

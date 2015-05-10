@@ -38,7 +38,7 @@ namespace DaphneGui
                 MessageBox.Show("Please select a reaction complex to add to the scenario.", "No items selected", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
+            
             foreach (var item in ListBoxReactionComplexes.SelectedItems)
             {
                 ConfigReactionComplex crc = (ConfigReactionComplex)item;
@@ -47,7 +47,6 @@ namespace DaphneGui
                 if (comp.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
                     comp.reaction_complexes.Add(crc.Clone(true));
             }
-
             DialogResult = true;
         }
 

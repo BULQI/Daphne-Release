@@ -20,82 +20,17 @@ using System.Collections.ObjectModel;
 namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for DiffSchemeDataGrid.xaml
+    /// Interaction logic for DiffSchemeReadOnlyDataGrid.xaml
     /// </summary>
-    public partial class DiffSchemeDataGrid : UserControl
+    public partial class DiffSchemeReadOnlyDataGrid : UserControl
     {
-        public DiffSchemeDataGrid()
+        public DiffSchemeReadOnlyDataGrid()
         {
             InitializeComponent();
         }
 
-        #region context_menus
-        private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
-        {
-            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            Level level = MainWindow.GetLevelContext(this);
-
-            DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-            if (diff_scheme == null) return;
-
-            foreach (DataGridTextColumn col in dataGrid.Columns.ToList())
-            {
-                bool isSelected = DataGridBehavior.GetHighlightColumn(col);
-                string gene_name = col.Header as string;
-                string guid = level.findGeneGuid(gene_name, level);
-                if (isSelected && guid != null && guid.Length > 0)
-                {
-                    //diff_scheme.genes.Remove(guid);
-                    diff_scheme.DeleteGene(guid);
-                }
-            }
-                    
-        }
-
-        private void ContextMenuDeleteStates_Click(object sender, RoutedEventArgs e)
-        {
-
-            DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-            if (diff_scheme == null) return;
-
-            List<int> rowsToDelete = new List<int>();   //will contain a list of row indices to delete (ascending order)
-            foreach (var n in dataGrid.SelectedItems)
-            {
-                var currentRowIndex = dataGrid.Items.IndexOf(n);
-                rowsToDelete.Add(currentRowIndex);
-            }
-
-            //Reverse the order to make it easy to delete states from diff_scheme
-            rowsToDelete.Sort();
-            rowsToDelete.Reverse();
-            
-
-            foreach (int i in rowsToDelete)
-            {
-                //Delete state from diff_scheme - the order of rows matches the order in diff_scheme
-                diff_scheme.DeleteState(i);
-            }
-
-            //Update row headers in both grids
-            DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
-            DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
-
-        }
-
-        private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
-        {
-            DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-
-            if (diff_scheme == null) 
-                return;
-
-            string stateName = diff_scheme.GenerateStateName();
-            diff_scheme.AddState(stateName);            
-        }
-
+        #region mouse_events
+        
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             // TODO: Add event handler implementation here.
@@ -131,86 +66,7 @@ namespace DaphneGui
         private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
         }
-
-        /// <summary>
-        /// This method is for drag-and-drop functionality. It allows the user to move a state up or down
-        /// in the epigenetic map grid. The corresponding changes happen in the regulators grid.
-        /// Remember that any time the rows are added/deleted/moved in the epigenetic grid, you must
-        /// call the update_datagrid_rowheaders method for both grids.
-        /// </summary>
-        private ConfigActivationRow DraggedItem;
-        private ConfigActivationRow TargetItem;
-
-        private void EpigeneticGrid_MouseMove(object sender, MouseEventArgs e)
-        {
-            DataGrid dgSource = sender as DataGrid;
-            if (dgSource.SelectedIndex < 0)
-                return;
-
-            ConfigActivationRow row = dgSource.SelectedItem as ConfigActivationRow;
-            DraggedItem = row;
-
-            if (row != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragDrop.DoDragDrop(dgSource,
-                             row,
-                             DragDropEffects.Copy);
-
-                if (TargetItem == null)
-                    return;
-
-                ConfigTransitionScheme scheme = DataContext as ConfigTransitionScheme;
-
-                //Get indices of the dragged and target rows
-                var draggedIndex = scheme.activationRows.IndexOf(DraggedItem);
-                var targetIndex = scheme.activationRows.IndexOf(TargetItem);
-
-                
-
-                //Call Move method
-                scheme.MoveState(draggedIndex, targetIndex);
-                dgSource.SelectedIndex = targetIndex;
-
-                //Update row headers in both grids
-                DiffSchemeDataGrid.update_datagrid_rowheaders(dgSource);
-                DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
-            }
-        }
-
-        /// <summary>
-        /// This method gets the item at the destination row of the dragged item.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void EpigeneticGrid_Drop(object sender, DragEventArgs e)
-        {
-            TargetItem = null;
-
-            DataGrid dgSource = sender as DataGrid;
-            if (dgSource.SelectedIndex < 0)
-                return;
-
-            DependencyObject dep = (DependencyObject)e.OriginalSource;
-
-            // iteratively traverse the visual tree
-            while ((dep != null) && !(dep is DataGridRow))
-            {
-                dep = VisualTreeHelper.GetParent(dep);
-            }
-
-            if (dep == null)
-                return;
-
-            
-            if (dep is DataGridRow)
-            {
-                TargetItem = (ConfigActivationRow)((dep as DataGridRow).Item);
-            }
-        }
-
-
-        ///************************************
-
+        
         #endregion
 
 
@@ -221,25 +77,25 @@ namespace DaphneGui
         /// </summary>
         public static readonly DependencyProperty DiffSchemeSourceProperty =
             DependencyProperty.RegisterAttached("DiffSchemeSource",
-            typeof(ConfigTransitionScheme), typeof(DiffSchemeDataGrid),
+            typeof(ConfigTransitionScheme), typeof(DiffSchemeReadOnlyDataGrid),
                 new FrameworkPropertyMetadata(null,
                     new PropertyChangedCallback(OnDiffSchemeChanged)));
 
         public static readonly DependencyProperty DiffSchemeTargetProperty =
             DependencyProperty.RegisterAttached("DiffSchemeTarget",
-            typeof(string), typeof(DiffSchemeDataGrid),
+            typeof(string), typeof(DiffSchemeReadOnlyDataGrid),
             new FrameworkPropertyMetadata(null,
             null));
 
         public static readonly DependencyProperty GeneListProperty =
             DependencyProperty.RegisterAttached("GeneList",
-            typeof(ObservableCollection<string>), typeof(DiffSchemeDataGrid),
+            typeof(ObservableCollection<string>), typeof(DiffSchemeReadOnlyDataGrid),
                 new FrameworkPropertyMetadata(null,
                 new PropertyChangedCallback(OnGeneListChanged)));
 
         public static readonly DependencyProperty StateListProperty =
             DependencyProperty.RegisterAttached("StateList",
-            typeof(ObservableCollection<string>), typeof(DiffSchemeDataGrid),
+            typeof(ObservableCollection<string>), typeof(DiffSchemeReadOnlyDataGrid),
             new FrameworkPropertyMetadata(null,
             new PropertyChangedCallback(OnStateListChanged)));
 
@@ -292,46 +148,58 @@ namespace DaphneGui
 
         private static void CreateGeneColumns(DataGrid dataGrid, ObservableCollection<string> genes)
         {
-            //foreach (var item in dataGrid.Columns)
-            //{
-            //    var col = item as DataGridTextColumn;
-            //    if (col != null) col.Binding = null;
-            //}
+            
             dataGrid.Columns.Clear();
             if (genes == null)return;
-            
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            
 
-            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
+            Level level = MainWindow.GetLevelContext(cdc);
+            if (level == null)
+            {
+                level = cdc.CurrentLevel;
+            }
 
-            ////Level level = MainWindow.GetLevelContext(cdc);
-            ////EntityRepository er = level.entity_repository;
+            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            //Level level = MainWindow.GetLevelContext(cdc);            
+            //EntityRepository er = level.entity_repository;
 
+            ConfigCell cell = cdc.DataContext as ConfigCell;
 
             //create columns
             int count = 0;
             foreach (var gene_guid in genes)
             {
-                if (!er.genes_dict.ContainsKey(gene_guid))
-                    continue;
-                ConfigGene gene = er.genes_dict[gene_guid];
-
-                DataGridTextColumn col = new DataGridTextColumn();
-                col.Header = gene.Name;
-                col.CanUserSort = false;
-                Binding b = new Binding(string.Format("activations[{0}]", count));
-                b.Mode = BindingMode.TwoWay;
-                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                col.Binding = b;
-                dataGrid.Columns.Add(col);
+                //if (!er.genes_dict.ContainsKey(gene_guid))
+                //    continue;
+                ConfigGene gene = cell.genes.First(g => g.entity_guid == gene_guid);
+                if (gene != null)
+                {
+                    DataGridTextColumn col = new DataGridTextColumn();
+                    col.IsReadOnly = true;
+                    col.Header = gene.Name;
+                    col.CanUserSort = false;
+                    Binding b = new Binding(string.Format("activations[{0}]", count));
+                    b.Mode = BindingMode.TwoWay;
+                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                    col.Binding = b;
+                    dataGrid.Columns.Add(col);
+                }
                 count++;
             }
             ConfigTransitionScheme currentScheme = GetDiffSchemeSource(dataGrid);
+
+            //////FOR NOW DON'T CREATE THE LAST COLUMN
+            return;
+
             DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn(currentScheme);
             dataGrid.Columns.Add(combobox_col);
         }
 
+        /// <summary>
+        /// This creates the columns in the Transition Regulators data grid, the lower one.
+        /// </summary>
+        /// <param name="dataGrid"></param>
+        /// <param name="states"></param>
         private static void CreateStateColumns(DataGrid dataGrid, ObservableCollection<string> states)
         {
             foreach (var item in dataGrid.Columns)
@@ -344,37 +212,20 @@ namespace DaphneGui
                     var textBlock = dt.VisualTree;
                     
                 }
-
             }
 
             dataGrid.Columns.Clear();
             if (states == null || states.Count == 0) return;
 
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            ////Level level = MainWindow.GetLevelContext(dataGrid);
-            ////EntityRepository er = level.entity_repository;
-
-            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
 
             int count = 0;
             ConfigTransitionScheme diffScheme = GetDiffSchemeSource(dataGrid);
             if (diffScheme == null) return;
             foreach (string s in states)
             {
-                DataGridTemplateColumn col = new DataGridTemplateColumn();
-                //column header binding
-                //Binding hb = new Binding(string.Format("states[{0}]", count));
-                //hb.Mode = BindingMode.OneWay;
-                //hb.Source = diffScheme.Driver;
-                //FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
-                //txtStateName.SetValue(TextBlock.StyleProperty, null);
-                ////txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
-                //txtStateName.SetBinding(TextBlock.TextProperty, hb);
-                //col.HeaderTemplate = new DataTemplate() { VisualTree = txtStateName };
-
+                DataGridTemplateColumn col = new DataGridTemplateColumn();                
                 col.Header = states[count];
-
-
                 col.CanUserSort = false;
                 Binding b = new Binding(string.Format("elements[{0}]", count));
 
@@ -447,7 +298,7 @@ namespace DaphneGui
 
             //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
-            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
             if (DiffSchemeTarget == "EpigeneticMap")
             {
                 //CreateGeneColumns(dataGrid, diffScheme.genes);
@@ -500,6 +351,7 @@ namespace DaphneGui
                 Binding binding = new Binding(string.Format("states[{0}]", index));
                 binding.NotifyOnTargetUpdated = true;
                 binding.Mode = BindingMode.TwoWay;
+                
                 binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
@@ -576,40 +428,34 @@ namespace DaphneGui
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
+            var diff_scheme = DiffSchemeReadOnlyDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
             int x = 0;
-            x++;
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, diff_scheme);
-
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
-            //DataContext = diff_scheme;
+            x++;            
         }
     }
 
 
     #region value converters
-    public class DataGridRowColumnIndexEqualValueConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (values == null || values.Length < 2) return true;
+    ////public class DataGridRowColumnIndexEqualValueConverter : IMultiValueConverter
+    ////{
+    ////    public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        if (values == null || values.Length < 2) return true;
 
-            DataGridRow row = values[0] as DataGridRow;
-            int row_index = row.GetIndex();
-            DataGridTemplateColumn col = values[1] as DataGridTemplateColumn;
-            int col_index = col.DisplayIndex;
-            return row_index == col_index;
-        }
+    ////        DataGridRow row = values[0] as DataGridRow;
+    ////        int row_index = row.GetIndex();
+    ////        DataGridTemplateColumn col = values[1] as DataGridTemplateColumn;
+    ////        int col_index = col.DisplayIndex;
+    ////        return row_index == col_index;
+    ////    }
 
 
-        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return null;
-        }
+    ////    public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        return null;
+    ////    }
 
-    }
+    ////}
 
     #endregion
 }

@@ -762,6 +762,23 @@ namespace DaphneGui
         public ObservableCollection<string> CellSelectionToolModes { get; set; }
         private string cellSelectionToolMode;
 
+        private bool tracksActive;
+        public bool TracksActive
+        {
+            get
+            {
+                return tracksActive;
+            }
+            set
+            {
+                if (value != tracksActive)
+                {
+                    tracksActive = value;
+                    OnPropertyChanged("TracksActive");
+                }
+            }
+        }
+
         private bool leftButtonPressed = false;
         private uint leftButtonPressTimeStamp = 0;
         private int[] leftButtonPressPostion = new int[2];
@@ -877,6 +894,7 @@ namespace DaphneGui
             CellSelectionToolMode = CellSelectionToolModes[0];
 
             trackTool = new CellTrackTool();
+            TracksActive = false;
         }
 
         /// <summary>
@@ -1259,6 +1277,7 @@ namespace DaphneGui
             HandToolOption_IsEnabled = true;
             HandToolButton_IsChecked = false;
             RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
+            TracksActive = true;
         }
 
         public void DisablePickingButtons()
@@ -1269,6 +1288,7 @@ namespace DaphneGui
             HandToolOption_IsEnabled = false;
             HandToolButton_IsChecked = false;
             RWC.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
+            TracksActive = false;
         }
 
         public RenderWindowControl RWC
@@ -1451,6 +1471,15 @@ namespace DaphneGui
             //int[] x = interactor.GetEventPosition();
             int[] x = leftButtonPressPostion;
 
+
+            // Increase the tolerance for locating cells for tracking and display of cell information
+            // when cells are rendered as points or polygons.
+            double orig_tolerance = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetTolerance();
+            if (cellRenderMethod != CellRenderMethod.CELL_RENDER_SPHERES)
+            {
+                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(0.01);
+            }
+
             int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
 
             if (p > 0)
@@ -1483,6 +1512,7 @@ namespace DaphneGui
                                 }
 
                                 MessageBox.Show("The data needed to generate tracks is not present in the report.\n" + detail, "Track warning", MessageBoxButton.OK);
+                                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
                                 return;
                             }
                             trackTool.FilterData(data);
@@ -1498,6 +1528,7 @@ namespace DaphneGui
                                                 "-the number of simulation steps is too small.\n" + 
                                                 "-the cell does not move significantly: identical points along a track must get removed for computational reasons, " +
                                                 "reducing the number of track points.", "Track warning", MessageBoxButton.OK);
+                                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
                                 return;
                             }
                         }
@@ -1511,10 +1542,12 @@ namespace DaphneGui
                     }
                     else
                     {
+                        ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
                         return;
                     }
                 }
             }
+            ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
         }
 
         public void zoomToPath(vtkProp p)
@@ -1769,10 +1802,19 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.RepeatingRun() == true)
+                if (MainWindow.Sim.RunStatus == SimulationBase.RUNSTAT_OFF)
+                {
+                    ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "");
+                }
+                else if (MainWindow.Sim.Burn_inActive() == true)
+                {
+                    ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Equilibrating...");
+                }
+                else if (MainWindow.RepeatingRun() == true)
                 {
                     int rep = MainWindow.Repetition;
                     int reps = MainWindow.SOP.Protocol.experiment_reps;
+
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Rep: " + rep + "/" + reps + " Progress: " + progress + "%");
                 }
                 else

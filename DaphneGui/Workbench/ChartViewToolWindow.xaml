@@ -42,12 +42,14 @@
             </StackPanel>
             
             <!--MOLECULES-->
+            <!-- ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600" -->
             <StackPanel Grid.Column="0" Grid.Row="0" Margin="30,0">
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
                 
                 <DataGrid x:Name="dgInitConcs" 
                         ItemsSource="{Binding Path=scenario.AllMols, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                        MaxHeight="160" MinWidth="150" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                        MaxHeight="160" MinWidth="150" Width="500" MinRowHeight="20" 
+                        MinColumnWidth="20" 
                         CanUserReorderColumns="False" CanUserResizeRows="False"
                         CanUserSortColumns="True" RowHeaderWidth="0"
                         HorizontalAlignment="Left"
@@ -81,7 +83,7 @@
                         <DataGridTextColumn x:Name="colMolName" Header="Molecule" Width="180" IsReadOnly="True"
                                  Binding="{Binding Path=molecule.Name, Mode=OneWay}" />
                         
-                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="300" MaxWidth="350">
+                        <DataGridTemplateColumn x:Name="colConc" Header="Initial Concentration" MinWidth="210" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -105,11 +107,14 @@
             </StackPanel>
             
             <!--REACTIONS-->
+            <!-- ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600" -->
             <StackPanel Grid.Column="0" Grid.Row="1" Margin="30,12">
                 <TextBlock>Reaction Rates</TextBlock>
                 <DataGrid x:Name="dgReactionRates" 
-                                ItemsSource="{Binding Path=scenario.AllReacs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                MaxHeight="160" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                                ItemsSource="{Binding Path=scenario.AllReacs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                AutoGenerateColumns="False" 
+                                MaxHeight="160" MinWidth="150" Width="500" MinRowHeight="20" RowHeight="28" 
+                                MinColumnWidth="20" 
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 HorizontalAlignment="Left"
@@ -139,8 +144,9 @@
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
 
+                    <!--Width="200" -->
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn x:Name="colReac" Header="Reaction"  Width="200" MinWidth="100" MaxWidth="300">
+                        <DataGridTemplateColumn x:Name="colReac" Header="Reaction"  MinWidth="250" MaxWidth="300">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
@@ -150,7 +156,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="250" MaxWidth="350">
+                        <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="210" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel>

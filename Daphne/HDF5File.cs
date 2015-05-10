@@ -289,6 +289,7 @@ namespace Daphne
                 H5D.write(dset, typeId, data);
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -301,8 +302,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(int);
 
                 if (data == null || data.Length != size)
@@ -311,6 +312,7 @@ namespace Daphne
                 }
                 H5D.read(dset, typeId, new H5Array<int>(data));
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
@@ -331,6 +333,7 @@ namespace Daphne
                 H5D.write(dset, typeId, data);
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -343,8 +346,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(long);
 
                 if (data == null || data.Length != size)
@@ -353,6 +356,7 @@ namespace Daphne
                 }
                 H5D.read(dset, typeId, new H5Array<long>(data));
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
@@ -373,6 +377,7 @@ namespace Daphne
                 H5D.write(dset, typeId, data);
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -385,8 +390,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(double);
 
                 if (data == null || data.Length != size)
@@ -395,6 +400,7 @@ namespace Daphne
                 }
                 H5D.read(dset, typeId, new H5Array<double>(data));
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
@@ -416,6 +422,7 @@ namespace Daphne
                 H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -428,8 +435,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(char);
 
                 char[] tmp = new char[size];
@@ -437,6 +444,7 @@ namespace Daphne
                 H5D.read(dset, typeId, new H5Array<char>(tmp));
                 data = new string(tmp);
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
