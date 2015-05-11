@@ -509,17 +509,15 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
-            //Level protocol = MainWindow.ST_CurrentLevel;
-            //Level protocol = MainWindow.SOP.Protocol;
             Level protocol = MainWindow.GetLevelContext(this);
 
-            string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
-            message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
-            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.No)
-            {
-                return;
-            }
+            //string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
+            //message = message + " Continue?";
+            //MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            //if (result == MessageBoxResult.No)
+            //{
+            //    return;
+            //}
 
             foreach (var item in lvCellAvailableReacs.SelectedItems)
             {
@@ -593,13 +591,13 @@ namespace DaphneGui
             //Level protocol = MainWindow.SOP.Protocol;
             Level protocol = MainWindow.GetLevelContext(this);
 
-            string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
-            message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
-            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.No)
-            {
-                return;
-            }
+            //string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
+            //message = message + " Continue?";
+            //MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            //if (result == MessageBoxResult.No)
+            //{
+            //    return;
+            //}
 
             foreach (var item in lvCytosolAvailableReacs.SelectedItems)
             {
