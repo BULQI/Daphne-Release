@@ -55,41 +55,41 @@ namespace DaphneGui.Pushing
 
             // Keep this window within the bounds of MainWindow. This will help with making movies.
             this.Height = Application.Current.MainWindow.Height;
-            this.MaxHeight = Application.Current.MainWindow.Height;
+            //this.MaxHeight = Application.Current.MainWindow.Height;
             GridHeight = this.Height * 0.85;
             this.Left = Application.Current.MainWindow.Left;
 
             if (type == PushLevelEntityType.Molecule)
             {
-                this.Title = "Save Molecules Between Levels";
+                this.Title = "Transfer Molecules Between Stores";
             }
             else if (type == PushLevelEntityType.Reaction)
             {
-                this.Title = "Save Reactions Between Levels";
+                this.Title = "Transfer Reactions Between Stores";
             }
             else if (type == PushLevelEntityType.Gene)
             {
-                this.Title = "Save Genes Between Levels";
+                this.Title = "Transfer Genes Between Stores";
             }
             else if (type == PushLevelEntityType.Cell)
             {
-                this.Title = "Save Cells Between Levels";
+                this.Title = "Transfer Cells Between Stores";
             }
             else if (type == PushLevelEntityType.ReactionComplex)
             {
-                this.Title = "Save Reaction Complexes Between Levels";
+                this.Title = "Transfer Reaction Complexes Between Stores";
             }
             else if (type == PushLevelEntityType.ReactionTemplate)
             {
-                this.Title = "Save Reaction Templates Between Levels";
+                this.Title = "Transfer Reaction Templates Between Levels";
             }
             else if (type == PushLevelEntityType.TransDriver)
             {
-                this.Title = "Save Transition Drivers Between Levels";
+                this.Title = "Transfer Transition Drivers Between Stores";
             }
             else if (type == PushLevelEntityType.DiffScheme)
             {
-                this.Title = "Save Differentiation Schemes Between Levels";
+                this.Title = "Transfer Differentiation Schemes Between Stores";
             }
         }
 

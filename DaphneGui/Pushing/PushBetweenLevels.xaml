@@ -29,7 +29,7 @@
         <push:PushLevelIsDaphneStoreConverter x:Key="PushLevelIsDaphneStoreConv" />
 
         <!-- Molecules -->
-        <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
+        <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate" >
             <StackPanel Name="spMols" Orientation="Vertical">
                 <StackPanel>
                     
@@ -86,7 +86,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <TextBlock Text="No molecules exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no molecules in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -169,7 +169,7 @@
                             />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="No genes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no genes in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -219,7 +219,7 @@
                             />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="No reactions exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no reactions in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -267,7 +267,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <TextBlock Text="No cells exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no cells in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -315,7 +315,7 @@
                             </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="No reaction complexes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no reaction complexes in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
