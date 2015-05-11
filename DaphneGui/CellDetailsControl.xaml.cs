@@ -1738,13 +1738,20 @@ namespace DaphneGui
         // UserControl methods
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            //Sort molecules in ascending order
+            System.ComponentModel.SortDescription sd = new System.ComponentModel.SortDescription();
+            sd.PropertyName = "Name";
+            sd.Direction = System.ComponentModel.ListSortDirection.Ascending;
+
             // cyto_molecule_combo_box
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BulkMolecules_Filter;
+            cvs.SortDescriptions.Insert(0, sd);
 
             // memb_molecule_combo_box
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BoundaryMolecules_Filter;
+            cvs.SortDescriptions.Insert(0, sd);
 
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
