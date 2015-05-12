@@ -17,6 +17,7 @@ using System.IO;
 using System.Globalization;
 using System.Data;
 using System.Collections;
+using System.ComponentModel;
 
 namespace DaphneGui.Pushing
 {
@@ -97,6 +98,16 @@ namespace DaphneGui.Pushing
         {            
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
+
+            ICollectionView molview = CollectionViewSource.GetDefaultView(LeftList);
+            molview.SortDescriptions.Clear();
+            SortDescription molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            molview.SortDescriptions.Add(molSort);
+
+            molview = CollectionViewSource.GetDefaultView(RightList);
+            molview.SortDescriptions.Clear();
+            molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            molview.SortDescriptions.Add(molSort); 
         }
 
         private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : DependencyObject
@@ -200,8 +211,16 @@ namespace DaphneGui.Pushing
             LeftContent.DataContext = LeftList;
 
             AssignDataGrids();
+
             LeftDataGrid.Items.Refresh();
             RightDataGrid.Items.Refresh();
+             
+        }
+
+        private void LeftDataGridLoaded(object sender, RoutedEventArgs e)
+        {
+            ResetGrids();
+            ActualButtonImage.Source = RightImage.Source;
         }
 
         private void AssignDataGrids()
@@ -660,6 +679,7 @@ namespace DaphneGui.Pushing
 
         private void grid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
+           
             ConfigEntity entity = e.Row.Item as ConfigEntity;
             e.Row.IsEnabled = true;
 
@@ -700,9 +720,31 @@ namespace DaphneGui.Pushing
         {
         }
 
-        private void LeftContent_Loaded(object sender, RoutedEventArgs e)
+        private void EntityDataGrid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-        }
+            DataGrid dg = sender as DataGrid;
+
+            ResetGrids();
+
+            if (dg == LeftDataGrid)
+            {
+                ICollectionView entview = CollectionViewSource.GetDefaultView(LeftList);
+                entview.SortDescriptions.Clear();
+                SortDescription entSort = new SortDescription("Name", ListSortDirection.Ascending);
+                entview.SortDescriptions.Add(entSort);
+            }
+            else if (dg == RightDataGrid)
+            {
+                ICollectionView entview = CollectionViewSource.GetDefaultView(RightList);
+                entview.SortDescriptions.Clear();
+                SortDescription entSort = new SortDescription("Name", ListSortDirection.Ascending);
+                entview.SortDescriptions.Add(entSort);
+            }
+
+            
+            if (dg != null && dg.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(dg.ItemsSource).Refresh();
+        } 
 
     }  //End of PushBetweenLevels class
 

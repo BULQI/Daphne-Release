@@ -39,8 +39,9 @@
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
-                              SelectionChanged="datagrid_SelectionChanged"
                               CanUserDeleteRows="False"
+                              SelectionChanged="datagrid_SelectionChanged"
+                              DataContextChanged="EntityDataGrid_DataContextChanged"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -465,7 +466,7 @@
                             Content="{Binding}"
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}" 
                             Margin="6"
-                            Loaded="LeftContent_Loaded"/>                        
+                            />                        
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
