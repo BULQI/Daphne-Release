@@ -103,11 +103,9 @@
             VirtualizingStackPanel.VirtualizationMode="Standard"
             VirtualizingStackPanel.IsVirtualizing="False" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
-            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
-            
+            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"            
             ItemsSource="{Binding activationRows}"
-                  
-            
+            Loaded="EpigeneticMapGridDiv_Loaded"
             >
             <!--Disable drag-and-drop for now - was problematic-->
             <!--MouseMove="EpigeneticGrid_MouseMove"
@@ -181,6 +179,14 @@
                         </Trigger>
                     </Style.Triggers>
                 </Style>
+                <!--<Style TargetType="{x:Type WPFToolkit:DataGridRow}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=order_date, Converter={StaticResource DateExpiredConverter}}" Value="True">
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="Foreground" Value="LightGray"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>-->
             </DataGrid.Resources>
 
             <DataGrid.RowHeaderStyle>

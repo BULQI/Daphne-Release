@@ -1256,6 +1256,7 @@ namespace DaphneGui
                 if (new_scheme == null)
                 {
                     cell.div_scheme = new_scheme = new ConfigTransitionScheme();
+                    cell.div_scheme.Name = "Division";
                 }
             }
             else if (schemeName == "Differentiation")
@@ -1264,6 +1265,7 @@ namespace DaphneGui
                 if (new_scheme == null)
                 {
                     cell.diff_scheme = new_scheme = new ConfigTransitionScheme();
+                    cell.diff_scheme.Name = "Differentiation";
                 }
             }
             else return;
@@ -1288,8 +1290,17 @@ namespace DaphneGui
 
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
-            AddDifferentiationState(schemeName, "State0");
-            AddDifferentiationState(schemeName, "State1");
+
+            if (schemeName == "Division")
+            {
+                AddDifferentiationState(schemeName, "State0");
+                AddDifferentiationState(schemeName, "State1");
+            }
+            else
+            {
+                AddDifferentiationState(schemeName, "State0");
+                AddDifferentiationState(schemeName, "cytokinetic");
+            }
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)
@@ -1738,13 +1749,19 @@ namespace DaphneGui
         // UserControl methods
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            System.ComponentModel.SortDescription sd = new System.ComponentModel.SortDescription();
+            sd.PropertyName = "Name";
+            sd.Direction = System.ComponentModel.ListSortDirection.Ascending;
+
             // cyto_molecule_combo_box
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BulkMolecules_Filter;
+            cvs.SortDescriptions.Insert(0, sd);
 
             // memb_molecule_combo_box
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BoundaryMolecules_Filter;
+            cvs.SortDescriptions.Insert(0, sd);
 
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)

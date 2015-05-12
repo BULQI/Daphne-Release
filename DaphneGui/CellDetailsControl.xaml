@@ -50,7 +50,7 @@
         <DataTemplate x:Key="Mol_TDE_dgCell_Editing" >
             <StackPanel Orientation="Vertical">
             <ComboBox Name="MolPopComboBox"
-                          DisplayMemberPath="Name"
+                          DisplayMemberPath="Name" 
                           >
 
                 <ComboBox.SelectedValue>
@@ -78,44 +78,47 @@
                 </ComboBox.ToolTip>
                 
                 </ComboBox>
-            <Expander Header="Transition rate values" ExpandDirection="Down" BorderBrush="White" IsExpanded="False" Background="White">
-                <Expander.Style>
-                    <Style TargetType="Expander">
-                        <Setter Property="IsEnabled" Value="True"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=driver_mol_guid_ref}" Value="">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Expander.Style>
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Background:  " ToolTip="Background production rate" Width="110"/>
-                        <TextBox Text="{Binding Path=Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" >
-                            <TextBox.ToolTip>
-                                <StackPanel Width="200" Orientation="Horizontal">
-                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                "Background production rate"
-                                    </TextBlock>
-                                </StackPanel>
-                            </TextBox.ToolTip>
-                        </TextBox>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Linear coefficient: " Width="110" ToolTip="Production rate linear coefficient"/>
-                            <TextBox Text="{Binding Path=Beta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50">
+                <StackPanel Margin="0,4">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=driver_mol_guid_ref}" Value="">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    
+                    <TextBlock Text="Transition rate values" />
+
+                    <StackPanel Orientation="Vertical" Margin="0,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Background:  " ToolTip="Background production rate" Width="110"/>
+                            <TextBox Text="{Binding Path=Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" >
                                 <TextBox.ToolTip>
-                                        <StackPanel Width="200" Orientation="Horizontal">
-                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                        Production rate linear coefficient
-                                            </TextBlock>
-                                        </StackPanel>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                "Background production rate"
+                                        </TextBlock>
+                                    </StackPanel>
                                 </TextBox.ToolTip>
                             </TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                            <TextBlock Text="Linear coefficient: " Width="110" ToolTip="Production rate linear coefficient"/>
+                            <TextBox Text="{Binding Path=Beta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50">
+                                <TextBox.ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                        Production rate linear coefficient
+                                        </TextBlock>
+                                    </StackPanel>
+                                </TextBox.ToolTip>
+                            </TextBox>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </Expander>
             </StackPanel>
         </DataTemplate>
 
