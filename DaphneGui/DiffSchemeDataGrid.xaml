@@ -91,7 +91,7 @@
             local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"               
             local:DiffSchemeDataGrid.DiffSchemeTarget ="EpigeneticMap" 
             local:DiffSchemeDataGrid.GeneList ="{Binding genes}"
-            MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
+            MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
             AutoGenerateColumns="False"
             IsReadOnly="False"
             CanUserAddRows="False"                                                                   
@@ -103,11 +103,8 @@
             VirtualizingStackPanel.VirtualizationMode="Standard"
             VirtualizingStackPanel.IsVirtualizing="False" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
-            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
-            
+            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"            
             ItemsSource="{Binding activationRows}"
-                  
-            
             >
             <!--Disable drag-and-drop for now - was problematic-->
             <!--MouseMove="EpigeneticGrid_MouseMove"
@@ -180,7 +177,7 @@
                             <Setter Property="Background"  Value="LightGray"/>
                         </Trigger>
                     </Style.Triggers>
-                </Style>
+                </Style>               
             </DataGrid.Resources>
 
             <DataGrid.RowHeaderStyle>
@@ -210,7 +207,7 @@
                 local:DiffSchemeDataGrid.DiffSchemeTarget ="Regulator"
                 local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"
                 local:DiffSchemeDataGrid.StateList ="{Binding Driver.states}"
-                MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
+                MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
                 AutoGenerateColumns="False"
                 IsReadOnly="False"
                 CanUserAddRows="False"
@@ -222,7 +219,7 @@
                 HorizontalGridLinesBrush="DarkBlue"
                 VirtualizingStackPanel.VirtualizationMode="Standard"
                 VirtualizingStackPanel.IsVirtualizing="False" 
-                  ItemsSource="{Binding Driver.DriverElements}"
+                ItemsSource="{Binding Driver.DriverElements}"
                 >
             <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
             <DataGrid.Resources>

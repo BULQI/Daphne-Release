@@ -201,7 +201,7 @@ namespace Daphne
         // correspond in length and index with the BoundaryFace enum...
         private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Protocol",
+                                    "Protocol Store",
                                     "User Store",
                                     "Daphne Store"
                                 };
@@ -4632,15 +4632,26 @@ namespace Daphne
                 row.activations.Add(1);
             }
 
-            Driver.states.Add(sname);
-            activationRows.Add(row);
+            //For division, need to add new state before cytokinetic state
+            if (Name == "Division" && sname != "cytokinetic")
+            {
+                int insertIndex = Driver.states.Count - 1;
+                if (insertIndex < 0) insertIndex = 0;
+                Driver.states.Insert(insertIndex, sname);
+                activationRows.Insert(insertIndex, row);
+            }
+            else
+            {
+                Driver.states.Add(sname);
+                activationRows.Add(row);
+            }
 
             OnPropertyChanged("activationRows");
 
             //Add a row AND a column in Differentiation Table
             ConfigTransitionDriverRow trow;
 
-            //Add a column to existing rows
+            //Add a column to existing rows - NEED TO SKIP LAST ONE?
             for (int k = 0; k < Driver.states.Count - 1; k++)
             {
                 trow = Driver.DriverElements[k];
@@ -4670,13 +4681,25 @@ namespace Daphne
                 trow.elements.Add(e);
             }
 
-            Driver.DriverElements.Add(trow);
+            //Driver.DriverElements.Add(trow);
+            int row_count = Driver.DriverElements.Count;
+            Driver.DriverElements.Insert(row_count, trow);
 
             OnPropertyChanged("Driver");
         }
 
         public void DeleteState(int index)
         {
+            //For division, do not allow deletion of last state. Should not even get here because last row will be disabled.
+            if (Name == "Division")
+            {
+                if (index == Driver.states.Count - 1)
+                {
+                    MessageBox.Show("Cannot delete cytokinetic state.", "State deletion error", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+            }
+
             activationRows.RemoveAt(index);
             Driver.states.RemoveAt(index);
             Driver.DriverElements.RemoveAt(index);
