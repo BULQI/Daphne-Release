@@ -1161,7 +1161,7 @@ namespace DaphneGui
             coll1.Add(cc1);
 
             FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
-            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
+            addGenesCombo.SetValue(ComboBox.WidthProperty, 85D);
             addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
             addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
             addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
