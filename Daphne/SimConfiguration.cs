@@ -4632,8 +4632,8 @@ namespace Daphne
                 row.activations.Add(1);
             }
 
-            //For differentiation, need to add new state before cytokinetic state
-            if (Name == "Differentiation" && sname != "cytokinetic")
+            //For division, need to add new state before cytokinetic state
+            if (Name == "Division" && sname != "cytokinetic")
             {
                 int insertIndex = Driver.states.Count - 1;
                 if (insertIndex < 0) insertIndex = 0;
@@ -4690,8 +4690,8 @@ namespace Daphne
 
         public void DeleteState(int index)
         {
-            //For differentiation, do not allow deletion of last state
-            if (Name == "Differentiation")
+            //For division, do not allow deletion of last state. Should not even get here because last row will be disabled.
+            if (Name == "Division")
             {
                 if (index == Driver.states.Count - 1)
                 {

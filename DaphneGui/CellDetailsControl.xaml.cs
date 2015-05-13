@@ -1289,7 +1289,7 @@ namespace DaphneGui
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
 
-            if (schemeName == "Division")
+            if (schemeName == "Differentiation")
             {
                 AddDifferentiationState(schemeName, "State0");
                 AddDifferentiationState(schemeName, "State1");

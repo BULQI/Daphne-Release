@@ -512,6 +512,10 @@ namespace DaphneGui
                 {
                     e.Row.IsEnabled = false;
                 }
+                if (dataGrid.Name == "DivRegGrid" && sname == "cytokinetic")
+                {
+                    e.Row.IsEnabled = false;
+                }
             }
 
         }
@@ -582,8 +586,8 @@ namespace DaphneGui
         }
 
         #endregion
-        
-        private void EpigeneticMapGridDiv_Loaded(object sender, RoutedEventArgs e)
+                
+        private void DivRegGrid_Loaded(object sender, RoutedEventArgs e)
         {
             DataGrid grid = sender as DataGrid;
             if (grid == null)
@@ -593,7 +597,7 @@ namespace DaphneGui
             if (count == 0)
                 return;
 
-            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(count-1);
+            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(count - 1);
 
             if (row != null)
                 row.IsEnabled = false;

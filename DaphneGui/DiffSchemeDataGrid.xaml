@@ -105,7 +105,6 @@
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"            
             ItemsSource="{Binding activationRows}"
-            Loaded="EpigeneticMapGridDiv_Loaded"
             >
             <!--Disable drag-and-drop for now - was problematic-->
             <!--MouseMove="EpigeneticGrid_MouseMove"
@@ -220,7 +219,8 @@
                 HorizontalGridLinesBrush="DarkBlue"
                 VirtualizingStackPanel.VirtualizationMode="Standard"
                 VirtualizingStackPanel.IsVirtualizing="False" 
-                  ItemsSource="{Binding Driver.DriverElements}"
+                ItemsSource="{Binding Driver.DriverElements}"
+                Loaded="DivRegGrid_Loaded"
                 >
             <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
             <DataGrid.Resources>
