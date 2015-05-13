@@ -133,16 +133,16 @@
                 </MenuItem>
 
                 <MenuItem Header="_Window">
-                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Daphne Protocol"  
+                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Protocol"  
 							  Command="docking:DockingCommands.ActivateWindow" 
                               CommandTarget="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentConv}}" />
                     <MenuItem x:Name="menu_ActivateVTKView" Header="3D View"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=VTKDisplayDocWindow}" />
-                    <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
+                    <MenuItem x:Name="menu_ComponentsLibrary" Header="Subcellular Components Store"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ComponentsToolWindow}" />
-                    <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
+                    <MenuItem x:Name="menu_CellsLibrary" Header="Cells Store"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=CellStudioToolWindow}" />
@@ -413,7 +413,7 @@
                             <Grid>
                                 <!--<Border BorderThickness="1" CornerRadius="4,4,4,4" BorderBrush="Lime"></Border>-->
                                 <!--<Image Source="Images/MyGreenCells.bmp" />-->
-                                <TextBlock Text="Cells Library" />
+                                <TextBlock Text="Cells Store" />
                             </Grid>
                         </DataTemplate>
 
@@ -615,10 +615,10 @@
                                         <ContentPresenter MinHeight="100" Content="{Binding Wfh}" />
                                     </DockPanel>
                                 </docking:DocumentWindow>
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Store" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ComponentsToolWindow}" />                                
-                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" Title="Cells Library" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" Title="Cells Store" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
                                     Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=CellStudioToolWindow}"/>
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 

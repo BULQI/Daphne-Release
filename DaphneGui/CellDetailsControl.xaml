@@ -1266,7 +1266,7 @@
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                                         <StackPanel Orientation="Vertical" Margin="10,0">                                            
-                                            <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                                            <TextBlock Text="Available Reaction Complexes"  Margin="0,0,6,0" />
                                             <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
                                                 ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
                                                 ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
@@ -1391,7 +1391,7 @@
 
                                         <StackPanel Orientation="Vertical" Margin="10,0">                                           
 
-                                            <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                                            <TextBlock Text="Available Reaction Complexes"  Margin="0,0,6,0" />
                                             <ListBox x:Name="lbCytoAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"     
                                                  ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionComplexesListView}}"
                                                 ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"

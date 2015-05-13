@@ -201,7 +201,7 @@ namespace Daphne
         // correspond in length and index with the BoundaryFace enum...
         private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Protocol",
+                                    "Protocol Store",
                                     "User Store",
                                     "Daphne Store"
                                 };

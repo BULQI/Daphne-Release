@@ -17,6 +17,7 @@ using System.IO;
 using System.Globalization;
 using System.Data;
 using System.Collections;
+using System.ComponentModel;
 
 namespace DaphneGui.Pushing
 {
@@ -55,41 +56,41 @@ namespace DaphneGui.Pushing
 
             // Keep this window within the bounds of MainWindow. This will help with making movies.
             this.Height = Application.Current.MainWindow.Height;
-            this.MaxHeight = Application.Current.MainWindow.Height;
+            //this.MaxHeight = Application.Current.MainWindow.Height;
             GridHeight = this.Height * 0.85;
             this.Left = Application.Current.MainWindow.Left;
 
             if (type == PushLevelEntityType.Molecule)
             {
-                this.Title = "Save Molecules Between Levels";
+                this.Title = "Transfer Molecules Between Stores";
             }
             else if (type == PushLevelEntityType.Reaction)
             {
-                this.Title = "Save Reactions Between Levels";
+                this.Title = "Transfer Reactions Between Stores";
             }
             else if (type == PushLevelEntityType.Gene)
             {
-                this.Title = "Save Genes Between Levels";
+                this.Title = "Transfer Genes Between Stores";
             }
             else if (type == PushLevelEntityType.Cell)
             {
-                this.Title = "Save Cells Between Levels";
+                this.Title = "Transfer Cells Between Stores";
             }
             else if (type == PushLevelEntityType.ReactionComplex)
             {
-                this.Title = "Save Reaction Complexes Between Levels";
+                this.Title = "Transfer Reaction Complexes Between Stores";
             }
             else if (type == PushLevelEntityType.ReactionTemplate)
             {
-                this.Title = "Save Reaction Templates Between Levels";
+                this.Title = "Transfer Reaction Templates Between Levels";
             }
             else if (type == PushLevelEntityType.TransDriver)
             {
-                this.Title = "Save Transition Drivers Between Levels";
+                this.Title = "Transfer Transition Drivers Between Stores";
             }
             else if (type == PushLevelEntityType.DiffScheme)
             {
-                this.Title = "Save Differentiation Schemes Between Levels";
+                this.Title = "Transfer Differentiation Schemes Between Stores";
             }
         }
 
@@ -97,6 +98,16 @@ namespace DaphneGui.Pushing
         {            
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
+
+            ICollectionView molview = CollectionViewSource.GetDefaultView(LeftList);
+            molview.SortDescriptions.Clear();
+            SortDescription molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            molview.SortDescriptions.Add(molSort);
+
+            molview = CollectionViewSource.GetDefaultView(RightList);
+            molview.SortDescriptions.Clear();
+            molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            molview.SortDescriptions.Add(molSort); 
         }
 
         private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : DependencyObject
@@ -200,8 +211,16 @@ namespace DaphneGui.Pushing
             LeftContent.DataContext = LeftList;
 
             AssignDataGrids();
+
             LeftDataGrid.Items.Refresh();
             RightDataGrid.Items.Refresh();
+             
+        }
+
+        private void LeftDataGridLoaded(object sender, RoutedEventArgs e)
+        {
+            ResetGrids();
+            ActualButtonImage.Source = RightImage.Source;
         }
 
         private void AssignDataGrids()
@@ -660,6 +679,7 @@ namespace DaphneGui.Pushing
 
         private void grid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
+           
             ConfigEntity entity = e.Row.Item as ConfigEntity;
             e.Row.IsEnabled = true;
 
@@ -700,9 +720,31 @@ namespace DaphneGui.Pushing
         {
         }
 
-        private void LeftContent_Loaded(object sender, RoutedEventArgs e)
+        private void EntityDataGrid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-        }
+            DataGrid dg = sender as DataGrid;
+
+            ResetGrids();
+
+            if (dg == LeftDataGrid)
+            {
+                ICollectionView entview = CollectionViewSource.GetDefaultView(LeftList);
+                entview.SortDescriptions.Clear();
+                SortDescription entSort = new SortDescription("Name", ListSortDirection.Ascending);
+                entview.SortDescriptions.Add(entSort);
+            }
+            else if (dg == RightDataGrid)
+            {
+                ICollectionView entview = CollectionViewSource.GetDefaultView(RightList);
+                entview.SortDescriptions.Clear();
+                SortDescription entSort = new SortDescription("Name", ListSortDirection.Ascending);
+                entview.SortDescriptions.Add(entSort);
+            }
+
+            
+            if (dg != null && dg.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(dg.ItemsSource).Refresh();
+        } 
 
     }  //End of PushBetweenLevels class
 
