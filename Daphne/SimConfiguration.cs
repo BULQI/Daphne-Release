@@ -9968,6 +9968,7 @@ namespace Daphne
         public DistributedParameter()
         {
             DistributionType = ParameterDistributionType.CONSTANT;
+
         }
 
         /// <summary>
@@ -10138,6 +10139,56 @@ namespace Daphne
         public abstract double Sample();
         public abstract bool Equals(ParameterDistribution pd);
         public abstract ParameterDistribution Clone();
+    }
+
+    /// <summary>
+    /// Probability distribution when the parameter is constant. 
+    /// Don't add to the ParameterDistributionType enum, since we don't expose this in the GUI.
+    /// If the ConfigDistrTransitionDriverElement is a Constant, then this class is used by the simulation transition driver element. 
+    /// </summary>
+    public class DiracDeltaParameterDistribution : ParameterDistribution
+    {
+        public double ConstValue { get; set; }
+
+        public DiracDeltaParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return ConstValue;
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            DiracDeltaParameterDistribution d = pd as DiracDeltaParameterDistribution;
+
+            if (this.ConstValue != d.ConstValue) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<DiracDeltaParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
     }
 
     /// <summary>
