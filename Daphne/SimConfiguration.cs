@@ -4632,8 +4632,8 @@ namespace Daphne
                 row.activations.Add(1);
             }
 
-            //For differentiation, need to add new state before cytokinetic state
-            if (Name == "Differentiation" && sname != "cytokinetic")
+            //For division, need to add new state before cytokinetic state
+            if (Name == "Division" && sname != "cytokinetic")
             {
                 int insertIndex = Driver.states.Count - 1;
                 if (insertIndex < 0) insertIndex = 0;
@@ -4690,8 +4690,8 @@ namespace Daphne
 
         public void DeleteState(int index)
         {
-            //For differentiation, do not allow deletion of last state
-            if (Name == "Differentiation")
+            //For division, do not allow deletion of last state. Should not even get here because last row will be disabled.
+            if (Name == "Division")
             {
                 if (index == Driver.states.Count - 1)
                 {
@@ -9968,6 +9968,7 @@ namespace Daphne
         public DistributedParameter()
         {
             DistributionType = ParameterDistributionType.CONSTANT;
+
         }
 
         /// <summary>
@@ -10138,6 +10139,56 @@ namespace Daphne
         public abstract double Sample();
         public abstract bool Equals(ParameterDistribution pd);
         public abstract ParameterDistribution Clone();
+    }
+
+    /// <summary>
+    /// Probability distribution when the parameter is constant. 
+    /// Don't add to the ParameterDistributionType enum, since we don't expose this in the GUI.
+    /// If the ConfigDistrTransitionDriverElement is a Constant, then this class is used by the simulation transition driver element. 
+    /// </summary>
+    public class DiracDeltaParameterDistribution : ParameterDistribution
+    {
+        public double ConstValue { get; set; }
+
+        public DiracDeltaParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return ConstValue;
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            DiracDeltaParameterDistribution d = pd as DiracDeltaParameterDistribution;
+
+            if (this.ConstValue != d.ConstValue) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<DiracDeltaParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
     }
 
     /// <summary>
