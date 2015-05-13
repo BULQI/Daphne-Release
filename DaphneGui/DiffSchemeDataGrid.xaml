@@ -220,7 +220,6 @@
                 VirtualizingStackPanel.VirtualizationMode="Standard"
                 VirtualizingStackPanel.IsVirtualizing="False" 
                 ItemsSource="{Binding Driver.DriverElements}"
-                Loaded="DivRegGrid_Loaded"
                 >
             <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
             <DataGrid.Resources>

@@ -488,12 +488,20 @@ namespace DaphneGui
 
         private static void dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-
             DataGrid dataGrid = sender as DataGrid;
             var diffScheme = GetDiffSchemeSource(dataGrid);
             string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
             if (diffScheme == null) return;
             int index = e.Row.GetIndex();
+
+            //Enable all items (rows) - later disable cytokinetic row.
+            for (int i = 0; i < diffScheme.Driver.states.Count; i++)
+            {
+                DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(i);
+                if (row == null) continue;
+                row.IsEnabled = true;
+            }
+
             if (index < diffScheme.Driver.states.Count)
             {
                 //e.Row.Header = context.RowHeaders[index];
@@ -506,7 +514,7 @@ namespace DaphneGui
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
 
-                //This new code disables the last row in Epigenetic Map grid
+                //This section is very important for disabling cytokinetic rows in both grids
                 string sname = diffScheme.Driver.states[index];
                 if (dataGrid.Name == "EpigeneticMapGridDiv" && sname == "cytokinetic")
                 {
@@ -586,24 +594,7 @@ namespace DaphneGui
         }
 
         #endregion
-                
-        private void DivRegGrid_Loaded(object sender, RoutedEventArgs e)
-        {
-            DataGrid grid = sender as DataGrid;
-            if (grid == null)
-                return;
-
-            int count = grid.Items.Count;
-            if (count == 0)
-                return;
-
-            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(count - 1);
-
-            if (row != null)
-                row.IsEnabled = false;
-        }
-
-
+        
     }
 
 
