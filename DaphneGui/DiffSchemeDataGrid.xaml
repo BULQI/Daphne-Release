@@ -103,11 +103,9 @@
             VirtualizingStackPanel.VirtualizationMode="Standard"
             VirtualizingStackPanel.IsVirtualizing="False" 
             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
-            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
-            
+            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"            
             ItemsSource="{Binding activationRows}"
-                  
-            
+            Loaded="EpigeneticMapGridDiv_Loaded"
             >
             <!--Disable drag-and-drop for now - was problematic-->
             <!--MouseMove="EpigeneticGrid_MouseMove"
@@ -180,7 +178,7 @@
                             <Setter Property="Background"  Value="LightGray"/>
                         </Trigger>
                     </Style.Triggers>
-                </Style>
+                </Style>               
             </DataGrid.Resources>
 
             <DataGrid.RowHeaderStyle>

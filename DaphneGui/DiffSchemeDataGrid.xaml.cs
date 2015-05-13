@@ -93,7 +93,9 @@ namespace DaphneGui
                 return;
 
             string stateName = diff_scheme.GenerateStateName();
-            diff_scheme.AddState(stateName);            
+            diff_scheme.AddState(stateName);
+
+            CollectionViewSource.GetDefaultView(dataGrid.ItemsSource).Refresh();  
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -503,6 +505,13 @@ namespace DaphneGui
                 binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
+
+                //This new code disables the last row in Epigenetic Map grid
+                string sname = diffScheme.Driver.states[index];
+                if (dataGrid.Name == "EpigeneticMapGridDiv" && sname == "cytokinetic")
+                {
+                    e.Row.IsEnabled = false;
+                }
             }
 
         }
@@ -573,19 +582,24 @@ namespace DaphneGui
         }
 
         #endregion
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        
+        private void EpigeneticMapGridDiv_Loaded(object sender, RoutedEventArgs e)
         {
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
-            int x = 0;
-            x++;
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, diff_scheme);
+            DataGrid grid = sender as DataGrid;
+            if (grid == null)
+                return;
 
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
-            //DataContext = diff_scheme;
+            int count = grid.Items.Count;
+            if (count == 0)
+                return;
+
+            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(count-1);
+
+            if (row != null)
+                row.IsEnabled = false;
         }
+
+
     }
 
 
