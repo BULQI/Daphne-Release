@@ -4578,7 +4578,7 @@ namespace Daphne
             genes.Add(gguid);
             foreach (ConfigActivationRow row in activationRows)
             {
-                row.activations.Add(1.0);
+                row.activations.Add(0.0);
             }
         }
 
@@ -4629,7 +4629,7 @@ namespace Daphne
             ConfigActivationRow row = new ConfigActivationRow();
             for (int i = 0; i < genes.Count; i++)
             {
-                row.activations.Add(1);
+                row.activations.Add(0);
             }
 
             //For division, need to add new state before cytokinetic state

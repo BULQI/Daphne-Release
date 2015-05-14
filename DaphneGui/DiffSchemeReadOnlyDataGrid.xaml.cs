@@ -191,8 +191,8 @@ namespace DaphneGui
             //////FOR NOW DON'T CREATE THE LAST COLUMN
             return;
 
-            DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn(currentScheme);
-            dataGrid.Columns.Add(combobox_col);
+            //DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn(currentScheme);
+            //dataGrid.Columns.Add(combobox_col);
         }
 
         /// <summary>
@@ -296,19 +296,7 @@ namespace DaphneGui
             ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
 
-            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
-            if (DiffSchemeTarget == "EpigeneticMap")
-            {
-                //CreateGeneColumns(dataGrid, diffScheme.genes);
-            }
-            else
-            {
-                //CreateStateColumns(dataGrid, diffScheme.Driver.states);
-                dataGrid.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
-                dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
-            }
 
             dataGrid.LoadingRow -= new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             dataGrid.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
