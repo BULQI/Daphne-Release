@@ -111,16 +111,16 @@
             Drop="EpigeneticGrid_Drop"-->
 
             <DataGrid.ContextMenu>
-                <ContextMenu >
+                <ContextMenu x:Name="contextMenu">
                     <MenuItem Header="Delete Selected Genes" Name="menuDeleteDivGenes" Click="ContextMenuDeleteGenes_Click" 
                                               CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
                     <MenuItem Header="Delete Selected States" Name="menuDeleteDivStates" Click="ContextMenuDeleteStates_Click"
                                               CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
-                    <MenuItem Header="Add a State" Name="menuAddDivState" Click="ContextMenuAddState_Click"
+                    <MenuItem Header="Insert a State Below" Name="menuInsertDivState" Click="ContextMenuInsertState_Click"
                                               CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
-                </ContextMenu>
+                </ContextMenu>       
             </DataGrid.ContextMenu>
-
+            
             <DataGrid.Resources>
                 <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
                     <Setter Property="Background" Value="Transparent" />
@@ -177,7 +177,7 @@
                             <Setter Property="Background"  Value="LightGray"/>
                         </Trigger>
                     </Style.Triggers>
-                </Style>               
+                </Style>
             </DataGrid.Resources>
 
             <DataGrid.RowHeaderStyle>
@@ -221,7 +221,7 @@
                 VirtualizingStackPanel.IsVirtualizing="False" 
                 ItemsSource="{Binding Driver.DriverElements}"
                 >
-            <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
+  
             <DataGrid.Resources>
                 <Style x:Name="DivRegComboStyle" TargetType="ComboBox">
                     <Setter Property="IsEnabled" Value="True" />

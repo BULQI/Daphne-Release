@@ -4508,6 +4508,59 @@ namespace Daphne
             return true;
         }
 
+        public void InsertState(int insertIndex, string sname)
+        {
+            states.Insert(insertIndex, sname);
+            InsertTransitionDriverColumn(insertIndex);
+            InsertTransitionDriverRow(insertIndex);
+        }
+
+        public void InsertTransitionDriverRow(int insertIndex)
+        {
+            // Create a new row of empty molecule-driven transition driver elements with the default parameters
+            //      Alpha = Beta = 0, driver_mol_guid_ref = ""
+            ConfigTransitionDriverRow row = new ConfigTransitionDriverRow();
+            for (int i = 0; i < states.Count; i++)
+            {
+                row.elements.Add(new ConfigMolTransitionDriverElement());
+                row.elements[i].CurrentState = insertIndex;
+                row.elements[i].CurrentStateName = states[insertIndex];
+                row.elements[i].DestState = i;
+                row.elements[i].DestStateName = states[i]; 
+            }
+
+            // Insert the row in array of driver elements
+            DriverElements.Insert(insertIndex, row);
+
+            // Update the current and destination state values for the inserted and following rows
+            for (int i = insertIndex + 1; i < states.Count; i++)
+            {
+                for (int j = 0; j < states.Count; j++)
+                {
+                    DriverElements[i].elements[j].CurrentState = i;
+                    DriverElements[i].elements[j].CurrentStateName = states[i];
+                }   
+            }
+        }
+
+        public void InsertTransitionDriverColumn(int insertIndex)
+        {
+            // Insert a column in the elements using the previous size (states.Count - 1)
+            for (int i = 0; i < states.Count - 1; i++)
+            {
+                DriverElements[i].elements.Insert(insertIndex, new ConfigMolTransitionDriverElement());
+
+                // update current and destination states starting at the inserted column and up to the new size (states.Count)
+                for (int j = insertIndex; j < states.Count; j++)
+                {
+                    DriverElements[i].elements[j].CurrentState = i;
+                    DriverElements[i].elements[j].CurrentStateName = states[i];
+                    DriverElements[i].elements[j].DestState = j;
+                    DriverElements[i].elements[j].DestStateName = states[j];
+                }
+            }
+        }
+
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -4623,69 +4676,22 @@ namespace Daphne
             return NewStateName;
         }
 
-        public void AddState(string sname)
+        public void InsertState(string sname, int insertIndex)
         {
-            //Add a row in Epigenetic Table
+            // Insert the state and adjust the transition regulators
+            Driver.InsertState(insertIndex, sname);
+            OnPropertyChanged("Driver");
+
+            // Create an activation row of zeros
             ConfigActivationRow row = new ConfigActivationRow();
             for (int i = 0; i < genes.Count; i++)
             {
-                row.activations.Add(1);
+                row.activations.Add(0.0);
             }
 
-            //For division, need to add new state before cytokinetic state
-            if (Name == "Division" && sname != "cytokinetic")
-            {
-                int insertIndex = Driver.states.Count - 1;
-                if (insertIndex < 0) insertIndex = 0;
-                Driver.states.Insert(insertIndex, sname);
-                activationRows.Insert(insertIndex, row);
-            }
-            else
-            {
-                Driver.states.Add(sname);
-                activationRows.Add(row);
-            }
-
+            // Insert the row in the Epigenetic Table
+            activationRows.Insert(insertIndex, row);
             OnPropertyChanged("activationRows");
-
-            //Add a row AND a column in Differentiation Table
-            ConfigTransitionDriverRow trow;
-
-            //Add a column to existing rows - NEED TO SKIP LAST ONE?
-            for (int k = 0; k < Driver.states.Count - 1; k++)
-            {
-                trow = Driver.DriverElements[k];
-                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = Driver.states[k];
-                e.CurrentState = k;
-                e.DestState = Driver.states.Count - 1;
-                e.DestStateName = Driver.states[Driver.states.Count - 1];
-                trow.elements.Add(e);
-            }
-
-            //Add a row
-            trow = new ConfigTransitionDriverRow();
-            for (int j = 0; j < Driver.states.Count; j++)
-            {
-                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = sname;
-                e.CurrentState = Driver.states.Count - 1;
-                e.DestState = j;
-                e.DestStateName = Driver.states[j];
-                trow.elements.Add(e);
-            }
-
-            //Driver.DriverElements.Add(trow);
-            int row_count = Driver.DriverElements.Count;
-            Driver.DriverElements.Insert(row_count, trow);
-
-            OnPropertyChanged("Driver");
         }
 
         public void DeleteState(int index)

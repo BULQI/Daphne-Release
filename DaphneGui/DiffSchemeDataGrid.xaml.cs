@@ -32,7 +32,6 @@ namespace DaphneGui
         #region context_menus
         private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
         {
-            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             Level level = MainWindow.GetLevelContext(this);
 
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
@@ -81,21 +80,40 @@ namespace DaphneGui
             //Update row headers in both grids
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
             DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
-
         }
 
-        private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
+        private void ContextMenuInsertState_Click(object sender, RoutedEventArgs e)
         {
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
 
-            if (diff_scheme == null) 
+            if (diff_scheme == null)
                 return;
 
-            string stateName = diff_scheme.GenerateStateName();
-            diff_scheme.AddState(stateName);
+            if (dataGrid.SelectedIndex < -1)
+                return;
 
-            CollectionViewSource.GetDefaultView(dataGrid.ItemsSource).Refresh();  
+            DiffSchemeDataGrid diffSchemeDG = FindLogicalParent<DiffSchemeDataGrid>(dataGrid);
+            if (diffSchemeDG == null)
+                return;
+
+            int insertIndex;
+            // Only allow insert before the last, cytokinetic, state of a division scheme
+            if (diffSchemeDG.Name == "DivSchemeGrid" && dataGrid.SelectedIndex == diff_scheme.Driver.states.Count - 1)
+            {
+                System.Windows.MessageBox.Show("Cannot add a state after the cytokinetic state in a cell division scheme.");
+                return;
+            }
+            else
+            {
+                insertIndex = dataGrid.SelectedIndex + 1;
+            }
+
+            string stateName = diff_scheme.GenerateStateName();
+            diff_scheme.InsertState(stateName, insertIndex);
+
+            CollectionViewSource.GetDefaultView(diffSchemeDG.EpigeneticMapGridDiv.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(diffSchemeDG.DivRegGrid.ItemsSource).Refresh();
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
