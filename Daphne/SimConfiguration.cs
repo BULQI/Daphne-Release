@@ -4578,7 +4578,7 @@ namespace Daphne
             genes.Add(gguid);
             foreach (ConfigActivationRow row in activationRows)
             {
-                row.activations.Add(1.0);
+                row.activations.Add(0.0);
             }
         }
 
@@ -4629,18 +4629,29 @@ namespace Daphne
             ConfigActivationRow row = new ConfigActivationRow();
             for (int i = 0; i < genes.Count; i++)
             {
-                row.activations.Add(1);
+                row.activations.Add(0);
             }
 
-            Driver.states.Add(sname);
-            activationRows.Add(row);
+            //For division, need to add new state before cytokinetic state
+            if (Name == "Division" && sname != "cytokinetic")
+            {
+                int insertIndex = Driver.states.Count - 1;
+                if (insertIndex < 0) insertIndex = 0;
+                Driver.states.Insert(insertIndex, sname);
+                activationRows.Insert(insertIndex, row);
+            }
+            else
+            {
+                Driver.states.Add(sname);
+                activationRows.Add(row);
+            }
 
             OnPropertyChanged("activationRows");
 
             //Add a row AND a column in Differentiation Table
             ConfigTransitionDriverRow trow;
 
-            //Add a column to existing rows
+            //Add a column to existing rows - NEED TO SKIP LAST ONE?
             for (int k = 0; k < Driver.states.Count - 1; k++)
             {
                 trow = Driver.DriverElements[k];
@@ -4670,13 +4681,25 @@ namespace Daphne
                 trow.elements.Add(e);
             }
 
-            Driver.DriverElements.Add(trow);
+            //Driver.DriverElements.Add(trow);
+            int row_count = Driver.DriverElements.Count;
+            Driver.DriverElements.Insert(row_count, trow);
 
             OnPropertyChanged("Driver");
         }
 
         public void DeleteState(int index)
         {
+            //For division, do not allow deletion of last state. Should not even get here because last row will be disabled.
+            if (Name == "Division")
+            {
+                if (index == Driver.states.Count - 1)
+                {
+                    MessageBox.Show("Cannot delete cytokinetic state.", "State deletion error", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+            }
+
             activationRows.RemoveAt(index);
             Driver.states.RemoveAt(index);
             Driver.DriverElements.RemoveAt(index);
@@ -7494,6 +7517,20 @@ namespace Daphne
         }
     }
 
+    public class PlotStates
+    {
+        public ObservableCollection<bool> Death { get; set; }
+        public ObservableCollection<bool> Division { get; set; }
+        public ObservableCollection<bool> Differentiation { get; set; }
+
+        public PlotStates()
+        {
+            Death = new ObservableCollection<bool>();
+            Division = new ObservableCollection<bool>();
+            Differentiation = new ObservableCollection<bool>();
+        }
+    }
+
     public class ReportStates
     {
         public bool Death { get; set; }
@@ -7561,6 +7598,71 @@ namespace Daphne
             set
             {
                 report_states = value;
+            }
+        }
+
+        private PlotStates plot_states;
+        public PlotStates plotStates
+        {
+            get
+            {
+                return plot_states;
+            }
+            set
+            {
+                plot_states = value;
+            }
+        }
+
+        /// <summary>
+        /// create the correct number of default plot states, set to false; if the existing states
+        /// have the correct number then leave them as they are
+        /// </summary>
+        public void CreatePlotStates()
+        {
+            if (Cell == null)
+            {
+                plot_states.Death.Clear();
+                plot_states.Differentiation.Clear();
+                plot_states.Division.Clear();
+                return;
+            }
+
+            if (Cell.death_driver == null)
+            {
+                plot_states.Death.Clear();
+            }
+            else if (plot_states.Death.Count != Cell.death_driver.states.Count)
+            {
+                plot_states.Death.Clear();
+                foreach (string s in Cell.death_driver.states)
+                {
+                    plot_states.Death.Add(false);
+                }
+            }
+            if (Cell.diff_scheme == null)
+            {
+                plot_states.Differentiation.Clear();
+            }
+            else if (plot_states.Differentiation.Count != Cell.diff_scheme.Driver.states.Count)
+            {
+                plot_states.Differentiation.Clear();
+                foreach (string s in Cell.diff_scheme.Driver.states)
+                {
+                    plot_states.Differentiation.Add(false);
+                }
+            }
+            if (Cell.div_scheme == null)
+            {
+                plot_states.Division.Clear();
+            }
+            else if (plot_states.Division.Count != Cell.div_scheme.Driver.states.Count)
+            {
+                plot_states.Division.Clear();
+                foreach (string s in Cell.div_scheme.Driver.states)
+                {
+                    plot_states.Division.Add(false);
+                }
             }
         }
 
@@ -7647,6 +7749,8 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();
+            // plotting
+            plot_states = new PlotStates();
 
             renderLabel = cellpopulation_guid;
         }
@@ -9945,6 +10049,7 @@ namespace Daphne
         public DistributedParameter()
         {
             DistributionType = ParameterDistributionType.CONSTANT;
+
         }
 
         /// <summary>
@@ -10115,6 +10220,56 @@ namespace Daphne
         public abstract double Sample();
         public abstract bool Equals(ParameterDistribution pd);
         public abstract ParameterDistribution Clone();
+    }
+
+    /// <summary>
+    /// Probability distribution when the parameter is constant. 
+    /// Don't add to the ParameterDistributionType enum, since we don't expose this in the GUI.
+    /// If the ConfigDistrTransitionDriverElement is a Constant, then this class is used by the simulation transition driver element. 
+    /// </summary>
+    public class DiracDeltaParameterDistribution : ParameterDistribution
+    {
+        public double ConstValue { get; set; }
+
+        public DiracDeltaParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return ConstValue;
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            DiracDeltaParameterDistribution d = pd as DiracDeltaParameterDistribution;
+
+            if (this.ConstValue != d.ConstValue) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<DiracDeltaParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
     }
 
     /// <summary>

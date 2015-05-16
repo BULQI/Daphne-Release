@@ -1161,7 +1161,7 @@ namespace DaphneGui
             coll1.Add(cc1);
 
             FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
-            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
+            addGenesCombo.SetValue(ComboBox.WidthProperty, 85D);
             addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
             addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
             addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
@@ -1254,6 +1254,7 @@ namespace DaphneGui
                 if (new_scheme == null)
                 {
                     cell.div_scheme = new_scheme = new ConfigTransitionScheme();
+                    cell.div_scheme.Name = "Division";
                 }
             }
             else if (schemeName == "Differentiation")
@@ -1262,6 +1263,7 @@ namespace DaphneGui
                 if (new_scheme == null)
                 {
                     cell.diff_scheme = new_scheme = new ConfigTransitionScheme();
+                    cell.diff_scheme.Name = "Differentiation";
                 }
             }
             else return;
@@ -1286,8 +1288,17 @@ namespace DaphneGui
 
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
-            AddDifferentiationState(schemeName, "State0");
-            AddDifferentiationState(schemeName, "State1");
+
+            if (schemeName == "Differentiation")
+            {
+                AddDifferentiationState(schemeName, "State0");
+                AddDifferentiationState(schemeName, "State1");
+            }
+            else
+            {
+                AddDifferentiationState(schemeName, "State0");
+                AddDifferentiationState(schemeName, "cytokinetic");
+            }
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)

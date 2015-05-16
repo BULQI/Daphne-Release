@@ -93,7 +93,9 @@ namespace DaphneGui
                 return;
 
             string stateName = diff_scheme.GenerateStateName();
-            diff_scheme.AddState(stateName);            
+            diff_scheme.AddState(stateName);
+
+            CollectionViewSource.GetDefaultView(dataGrid.ItemsSource).Refresh();  
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -486,12 +488,20 @@ namespace DaphneGui
 
         private static void dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-
             DataGrid dataGrid = sender as DataGrid;
             var diffScheme = GetDiffSchemeSource(dataGrid);
             string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
             if (diffScheme == null) return;
             int index = e.Row.GetIndex();
+
+            //Enable all items (rows) - later disable cytokinetic row.
+            for (int i = 0; i < diffScheme.Driver.states.Count; i++)
+            {
+                DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(i);
+                if (row == null) continue;
+                row.IsEnabled = true;
+            }
+
             if (index < diffScheme.Driver.states.Count)
             {
                 //e.Row.Header = context.RowHeaders[index];
@@ -503,6 +513,17 @@ namespace DaphneGui
                 binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
+
+                //This section is very important for disabling cytokinetic rows in both grids
+                string sname = diffScheme.Driver.states[index];
+                if (dataGrid.Name == "EpigeneticMapGridDiv" && sname == "cytokinetic")
+                {
+                    e.Row.IsEnabled = false;
+                }
+                if (dataGrid.Name == "DivRegGrid" && sname == "cytokinetic")
+                {
+                    e.Row.IsEnabled = false;
+                }
             }
 
         }
@@ -573,19 +594,7 @@ namespace DaphneGui
         }
 
         #endregion
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
-            int x = 0;
-            x++;
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, diff_scheme);
-
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
-            //DataContext = diff_scheme;
-        }
+        
     }
 
 
