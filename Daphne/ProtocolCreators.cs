@@ -352,6 +352,7 @@ namespace Daphne
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
+            cellPop.CreatePlotStates();
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
@@ -505,6 +506,7 @@ namespace Daphne
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
+            cellPop.CreatePlotStates();
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
@@ -4620,6 +4622,7 @@ namespace Daphne
             // Cell placement
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
+            cellPop.CreatePlotStates();
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
