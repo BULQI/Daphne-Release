@@ -1207,13 +1207,6 @@ namespace DaphneGui
 
                 if (scheme.genes.Contains(gene1.entity_guid)) return; //shouldnot happen...
 
-                //If no states exist, then create at least 2 new ones
-                if (scheme.Driver.states.Count == 0)
-                {
-                    scheme.AddState("state1");
-                    scheme.AddState("state2");
-                }
-
                 ConfigGene newgene = gene1.Clone(null);
                 scheme.AddGene(newgene.entity_guid);
 
@@ -1242,7 +1235,7 @@ namespace DaphneGui
         /// This method adds a differentiation state given a name 
         /// </summary>
         /// <param name="stateName"></param>
-        private void AddDifferentiationState(string schemeName, string stateName)
+        private void AddDifferentiationState(string schemeName, string stateName, int insertIndex)
         {
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
@@ -1268,7 +1261,7 @@ namespace DaphneGui
             }
             else return;
 
-            new_scheme.AddState(stateName);
+            new_scheme.InsertState(stateName, insertIndex);
 
             //refresh display
             if (schemeName == "Division")
@@ -1291,13 +1284,13 @@ namespace DaphneGui
 
             if (schemeName == "Differentiation")
             {
-                AddDifferentiationState(schemeName, "State0");
-                AddDifferentiationState(schemeName, "State1");
+                AddDifferentiationState(schemeName, "State0", 0);
+                AddDifferentiationState(schemeName, "State1", 1);
             }
             else
             {
-                AddDifferentiationState(schemeName, "State0");
-                AddDifferentiationState(schemeName, "cytokinetic");
+                AddDifferentiationState(schemeName, "State0", 0);
+                AddDifferentiationState(schemeName, "cytokinetic", 1);
             }
         }
 
@@ -1395,12 +1388,6 @@ namespace DaphneGui
 
             ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
-
-            //REMOVED this for resolving bug 2429 - the combo should populate from er.genes
-            //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            //if (!cell.HasGene(gene.entity_guid))
-            //    return;
-
 
             if (ds != null)
             {
