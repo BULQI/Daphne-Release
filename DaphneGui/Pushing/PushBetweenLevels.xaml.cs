@@ -17,6 +17,7 @@ using System.IO;
 using System.Globalization;
 using System.Data;
 using System.Collections;
+using System.ComponentModel;
 
 namespace DaphneGui.Pushing
 {
@@ -55,41 +56,41 @@ namespace DaphneGui.Pushing
 
             // Keep this window within the bounds of MainWindow. This will help with making movies.
             this.Height = Application.Current.MainWindow.Height;
-            this.MaxHeight = Application.Current.MainWindow.Height;
+            //this.MaxHeight = Application.Current.MainWindow.Height;
             GridHeight = this.Height * 0.85;
             this.Left = Application.Current.MainWindow.Left;
 
             if (type == PushLevelEntityType.Molecule)
             {
-                this.Title = "Save Molecules Between Levels";
+                this.Title = "Transfer Molecules Between Stores";
             }
             else if (type == PushLevelEntityType.Reaction)
             {
-                this.Title = "Save Reactions Between Levels";
+                this.Title = "Transfer Reactions Between Stores";
             }
             else if (type == PushLevelEntityType.Gene)
             {
-                this.Title = "Save Genes Between Levels";
+                this.Title = "Transfer Genes Between Stores";
             }
             else if (type == PushLevelEntityType.Cell)
             {
-                this.Title = "Save Cells Between Levels";
+                this.Title = "Transfer Cells Between Stores";
             }
             else if (type == PushLevelEntityType.ReactionComplex)
             {
-                this.Title = "Save Reaction Complexes Between Levels";
+                this.Title = "Transfer Reaction Complexes Between Stores";
             }
             else if (type == PushLevelEntityType.ReactionTemplate)
             {
-                this.Title = "Save Reaction Templates Between Levels";
+                this.Title = "Transfer Reaction Templates Between Levels";
             }
             else if (type == PushLevelEntityType.TransDriver)
             {
-                this.Title = "Save Transition Drivers Between Levels";
+                this.Title = "Transfer Transition Drivers Between Stores";
             }
             else if (type == PushLevelEntityType.DiffScheme)
             {
-                this.Title = "Save Differentiation Schemes Between Levels";
+                this.Title = "Transfer Differentiation Schemes Between Stores";
             }
         }
 
@@ -97,6 +98,16 @@ namespace DaphneGui.Pushing
         {            
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
+
+            //ICollectionView molview = CollectionViewSource.GetDefaultView(LeftList);
+            //molview.SortDescriptions.Clear();
+            //SortDescription molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            //molview.SortDescriptions.Add(molSort);
+
+            //molview = CollectionViewSource.GetDefaultView(RightList);
+            //molview.SortDescriptions.Clear();
+            //molSort = new SortDescription("Name", ListSortDirection.Ascending);
+            //molview.SortDescriptions.Add(molSort); 
         }
 
         private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : DependencyObject
@@ -147,40 +158,56 @@ namespace DaphneGui.Pushing
             switch (PushEntityType)
             {
                 case PushLevelEntityType.Molecule:
-                    LeftList = LevelA.entity_repository.molecules;
-                    RightList = LevelB.entity_repository.molecules;
+                    //LeftList = LevelA.entity_repository.molecules;
+                    //RightList = LevelB.entity_repository.molecules;
+                    LeftList = new ObservableCollection<ConfigMolecule>(from i in LevelA.entity_repository.molecules orderby i.Name select i);
+                    RightList = new ObservableCollection<ConfigMolecule>(from i in LevelB.entity_repository.molecules orderby i.Name select i);
                     break;
                 case PushLevelEntityType.Gene:
-                    LeftList = LevelA.entity_repository.genes;
-                    RightList = LevelB.entity_repository.genes;
+                    //LeftList = LevelA.entity_repository.genes;
+                    //RightList = LevelB.entity_repository.genes;
+                    LeftList = new ObservableCollection<ConfigGene>(from i in LevelA.entity_repository.genes orderby i.Name select i);
+                    RightList = new ObservableCollection<ConfigGene>(from i in LevelB.entity_repository.genes orderby i.Name select i);
                     break;
                 case PushLevelEntityType.Reaction:
-                    LeftList = LevelA.entity_repository.reactions;
+                    //LeftList = LevelA.entity_repository.reactions;
+                    LeftList = new ObservableCollection<ConfigReaction>(from i in LevelA.entity_repository.reactions orderby i.TotalReactionString select i);
                     MainWindow.ToolWin.PushReactionFilter(LeftList, LevelA);
-                    RightList = LevelB.entity_repository.reactions;
+                    //RightList = LevelB.entity_repository.reactions;
+                    RightList = new ObservableCollection<ConfigReaction>(from i in LevelB.entity_repository.reactions orderby i.TotalReactionString select i);
                     MainWindow.ToolWin.PushReactionFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.Cell:
-                    LeftList = LevelA.entity_repository.cells;
-                    RightList = LevelB.entity_repository.cells;
+                    //LeftList = LevelA.entity_repository.cells;
+                    //RightList = LevelB.entity_repository.cells;
+                    LeftList = new ObservableCollection<ConfigCell>(from i in LevelA.entity_repository.cells orderby i.CellName select i);
+                    RightList = new ObservableCollection<ConfigCell>(from i in LevelB.entity_repository.cells orderby i.CellName select i);
                     break;
                 case PushLevelEntityType.DiffScheme:
-                    LeftList = LevelA.entity_repository.diff_schemes;
-                    RightList = LevelB.entity_repository.diff_schemes;
+                    //LeftList = LevelA.entity_repository.diff_schemes;
+                    //RightList = LevelB.entity_repository.diff_schemes;
+                    LeftList = new ObservableCollection<ConfigTransitionScheme>(from i in LevelA.entity_repository.diff_schemes orderby i.Name select i);
+                    RightList = new ObservableCollection<ConfigTransitionScheme>(from i in LevelB.entity_repository.diff_schemes orderby i.Name select i);
                     break;
                 case PushLevelEntityType.ReactionTemplate:
-                    LeftList = LevelA.entity_repository.reaction_templates;
-                    RightList = LevelB.entity_repository.reaction_templates;
+                    //LeftList = LevelA.entity_repository.reaction_templates;
+                    //RightList = LevelB.entity_repository.reaction_templates;
+                    LeftList = new ObservableCollection<ConfigReactionTemplate>(from i in LevelA.entity_repository.reaction_templates orderby i.name select i);
+                    RightList = new ObservableCollection<ConfigReactionTemplate>(from i in LevelB.entity_repository.reaction_templates orderby i.name select i);
                     break;
                 case PushLevelEntityType.ReactionComplex:
-                    LeftList = LevelA.entity_repository.reaction_complexes;
+                    //LeftList = LevelA.entity_repository.reaction_complexes;
+                    LeftList = new ObservableCollection<ConfigReactionComplex>(from i in LevelA.entity_repository.reaction_complexes orderby i.Name select i);
                     MainWindow.ToolWin.PushReactionComplexFilter(LeftList, LevelA);
-                    RightList = LevelB.entity_repository.reaction_complexes;
+                    //RightList = LevelB.entity_repository.reaction_complexes;
+                    RightList = new ObservableCollection<ConfigReactionComplex>(from i in LevelB.entity_repository.reaction_complexes orderby i.Name select i);
                     MainWindow.ToolWin.PushReactionComplexFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.TransDriver:
-                    LeftList = LevelA.entity_repository.transition_drivers;
-                    RightList = LevelB.entity_repository.transition_drivers;
+                    //LeftList = LevelA.entity_repository.transition_drivers;
+                    //RightList = LevelB.entity_repository.transition_drivers;
+                    LeftList = new ObservableCollection<ConfigTransitionDriver>(from i in LevelA.entity_repository.transition_drivers orderby i.Name select i);
+                    RightList = new ObservableCollection<ConfigTransitionDriver>(from i in LevelB.entity_repository.transition_drivers orderby i.Name select i);
                     break;
                 default:
                     break;
@@ -200,8 +227,16 @@ namespace DaphneGui.Pushing
             LeftContent.DataContext = LeftList;
 
             AssignDataGrids();
+
             LeftDataGrid.Items.Refresh();
             RightDataGrid.Items.Refresh();
+             
+        }
+
+        private void LeftDataGridLoaded(object sender, RoutedEventArgs e)
+        {
+            //ResetGrids();
+            //ActualButtonImage.Source = RightImage.Source;
         }
 
         private void AssignDataGrids()
@@ -660,6 +695,7 @@ namespace DaphneGui.Pushing
 
         private void grid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
+           
             ConfigEntity entity = e.Row.Item as ConfigEntity;
             e.Row.IsEnabled = true;
 
@@ -700,9 +736,31 @@ namespace DaphneGui.Pushing
         {
         }
 
-        private void LeftContent_Loaded(object sender, RoutedEventArgs e)
+        private void EntityDataGrid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-        }
+        //    DataGrid dg = sender as DataGrid;
+
+        //    ResetGrids();
+
+        //    if (dg == LeftDataGrid)
+        //    {
+        //        ICollectionView entview = CollectionViewSource.GetDefaultView(LeftList);
+        //        entview.SortDescriptions.Clear();
+        //        SortDescription entSort = new SortDescription("Name", ListSortDirection.Ascending);
+        //        entview.SortDescriptions.Add(entSort);
+        //    }
+        //    else if (dg == RightDataGrid)
+        //    {
+        //        ICollectionView entview = CollectionViewSource.GetDefaultView(RightList);
+        //        entview.SortDescriptions.Clear();
+        //        SortDescription entSort = new SortDescription("Name", ListSortDirection.Ascending);
+        //        entview.SortDescriptions.Add(entSort);
+        //    }
+
+            
+        //    if (dg != null && dg.ItemsSource != null)
+        //        CollectionViewSource.GetDefaultView(dg.ItemsSource).Refresh();
+        } 
 
     }  //End of PushBetweenLevels class
 

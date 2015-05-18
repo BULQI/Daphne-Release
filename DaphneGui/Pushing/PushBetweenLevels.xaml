@@ -5,7 +5,6 @@
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:local="clr-namespace:DaphneGui"
-        xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Get/Save entities between stores"
         SizeToContent="WidthAndHeight"
@@ -30,7 +29,7 @@
         <push:PushLevelIsDaphneStoreConverter x:Key="PushLevelIsDaphneStoreConv" />
 
         <!-- Molecules -->
-        <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
+        <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate" >
             <StackPanel Name="spMols" Orientation="Vertical">
                 <StackPanel>
                     
@@ -40,8 +39,9 @@
                               LoadingRow="grid_LoadingRow"
                               MouseDoubleClick="LeftGrid_MouseDoubleClick"
                               RowHeaderWidth="12"
-                              SelectionChanged="datagrid_SelectionChanged"
                               CanUserDeleteRows="False"
+                              SelectionChanged="datagrid_SelectionChanged"
+                              DataContextChanged="EntityDataGrid_DataContextChanged"
                               >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -87,7 +87,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <TextBlock Text="No molecules exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no molecules in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -170,7 +170,7 @@
                             />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="No genes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no genes in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -220,7 +220,7 @@
                             />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="No reactions exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no reactions in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -268,7 +268,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <TextBlock Text="No cells exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no cells in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -280,22 +280,9 @@
                                 </Style>
                          </TextBlock.Style>
                     </TextBlock>
-
-                    <StackPanel x:Name="spUserControls">
-                        <Expander   Padding="6" ExpandDirection="Down"
-                                    Header="Movement"                                                  
-                                    x:Name="MotionPropertiesExpander"
-                                    Margin="0,5,0,0" 
-                                    Canvas.ZIndex="1"   
-                                    Visibility="Visible"
-                                    BorderThickness="1"
-                                    BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}">
-                            
-                                <local:CellPropertiesControl IsEnabled="False"  Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
-                            
-                        </Expander>
-                        
+                 
+                    <StackPanel x:Name="spUserControls">                         
+                        <local:CellPropertiesControl Tag="False" Opacity="2.0"  DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
                         <local:CellDetailsReadOnlyControl x:Name="cellDetailsControl" DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
                     </StackPanel>    
                     
@@ -329,7 +316,7 @@
                             </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="No reaction complexes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                    <TextBlock Text="There are no reaction complexes in this store." HorizontalAlignment="Center"  VerticalAlignment="Center" >
                         <TextBlock.Style>
                                 <Style>
                                     <Setter Property="TextBlock.Visibility" Value="Hidden" />
@@ -479,7 +466,7 @@
                             Content="{Binding}"
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}" 
                             Margin="6"
-                            Loaded="LeftContent_Loaded"/>                        
+                            />                        
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

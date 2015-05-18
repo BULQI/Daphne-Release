@@ -2195,7 +2195,7 @@ namespace Daphne
             diffScheme.Driver.states = new ObservableCollection<string>();
             for (int j = 0; j < stateNames.Count(); j++)
             {
-                diffScheme.Driver.states.Add(stateNames[j]);
+                diffScheme.Driver.AddStateNamePlot(stateNames[j], false);
             }
 
             // Add genes
@@ -4442,7 +4442,7 @@ namespace Daphne
             {
                 row = new ConfigTransitionDriverRow();
                 row.elements = new ObservableCollection<ConfigTransitionDriverElement>();
-                driver.states.Add(stateName[i]);
+                driver.AddStateNamePlot(stateName[i], false);
                 for (int j = 0; j < signal.GetLength(1); j++)
                 {
                     ConfigMolTransitionDriverElement driverElement = new ConfigMolTransitionDriverElement();

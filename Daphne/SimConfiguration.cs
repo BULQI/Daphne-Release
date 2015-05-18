@@ -201,7 +201,7 @@ namespace Daphne
         // correspond in length and index with the BoundaryFace enum...
         private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Protocol",
+                                    "Protocol Store",
                                     "User Store",
                                     "Daphne Store"
                                 };
@@ -4436,12 +4436,14 @@ namespace Daphne
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
+        public ObservableCollection<bool> plotStates { get; set; }
 
         public ConfigTransitionDriver()
             : base()
         {
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
+            plotStates = new ObservableCollection<bool>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4506,6 +4508,92 @@ namespace Daphne
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// add a state; this keeps state names and plot booleans in synch
+        /// </summary>
+        /// <param name="name">the state name</param>
+        /// <param name="plot">initial plot on / off value</param>
+        public void AddStateNamePlot(string name, bool plot)
+        {
+            states.Add(name);
+            plotStates.Add(plot);
+        }
+
+        /// <summary>
+        /// insert a state; this keeps state names and plot booleans in synch
+        /// </summary>
+        /// <param name="index">index at which to insert</param>
+        /// <param name="name">the state name</param>
+        /// <param name="plot">initial plot on / off value</param>
+        public void InsertStateNamePlot(int index, string name, bool plot)
+        {
+            states.Insert(index, name);
+            plotStates.Insert(index, plot);
+        }
+
+        /// <summary>
+        /// remove a state; this keeps state names and plot booleans in synch
+        /// </summary>
+        /// <param name="index">index at which to remove</param>
+        public void RemoveStateNamePlot(int index)
+        {
+            states.RemoveAt(index);
+            plotStates.RemoveAt(index);
+        }
+
+        public void InsertState(int insertIndex, string sname)
+        {
+            InsertStateNamePlot(insertIndex, sname, false);
+            InsertTransitionDriverColumn(insertIndex);
+            InsertTransitionDriverRow(insertIndex);
+        }
+
+        public void InsertTransitionDriverRow(int insertIndex)
+        {
+            // Create a new row of empty molecule-driven transition driver elements with the default parameters
+            //      Alpha = Beta = 0, driver_mol_guid_ref = ""
+            ConfigTransitionDriverRow row = new ConfigTransitionDriverRow();
+            for (int i = 0; i < states.Count; i++)
+            {
+                row.elements.Add(new ConfigMolTransitionDriverElement());
+                row.elements[i].CurrentState = insertIndex;
+                row.elements[i].CurrentStateName = states[insertIndex];
+                row.elements[i].DestState = i;
+                row.elements[i].DestStateName = states[i]; 
+            }
+
+            // Insert the row in array of driver elements
+            DriverElements.Insert(insertIndex, row);
+
+            // Update the current and destination state values for the inserted and following rows
+            for (int i = insertIndex + 1; i < states.Count; i++)
+            {
+                for (int j = 0; j < states.Count; j++)
+                {
+                    DriverElements[i].elements[j].CurrentState = i;
+                    DriverElements[i].elements[j].CurrentStateName = states[i];
+                }   
+            }
+        }
+
+        public void InsertTransitionDriverColumn(int insertIndex)
+        {
+            // Insert a column in the elements using the previous size (states.Count - 1)
+            for (int i = 0; i < states.Count - 1; i++)
+            {
+                DriverElements[i].elements.Insert(insertIndex, new ConfigMolTransitionDriverElement());
+
+                // update current and destination states starting at the inserted column and up to the new size (states.Count)
+                for (int j = insertIndex; j < states.Count; j++)
+                {
+                    DriverElements[i].elements[j].CurrentState = i;
+                    DriverElements[i].elements[j].CurrentStateName = states[i];
+                    DriverElements[i].elements[j].DestState = j;
+                    DriverElements[i].elements[j].DestStateName = states[j];
+                }
+            }
         }
 
     }
@@ -4578,7 +4666,7 @@ namespace Daphne
             genes.Add(gguid);
             foreach (ConfigActivationRow row in activationRows)
             {
-                row.activations.Add(1.0);
+                row.activations.Add(0.0);
             }
         }
 
@@ -4623,62 +4711,38 @@ namespace Daphne
             return NewStateName;
         }
 
-        public void AddState(string sname)
+        public void InsertState(string sname, int insertIndex)
         {
-            //Add a row in Epigenetic Table
+            // Insert the state and adjust the transition regulators
+            Driver.InsertState(insertIndex, sname);
+            OnPropertyChanged("Driver");
+
+            // Create an activation row of zeros
             ConfigActivationRow row = new ConfigActivationRow();
             for (int i = 0; i < genes.Count; i++)
             {
-                row.activations.Add(1);
+                row.activations.Add(0.0);
             }
 
-            Driver.states.Add(sname);
-            activationRows.Add(row);
-
+            // Insert the row in the Epigenetic Table
+            activationRows.Insert(insertIndex, row);
             OnPropertyChanged("activationRows");
-
-            //Add a row AND a column in Differentiation Table
-            ConfigTransitionDriverRow trow;
-
-            //Add a column to existing rows
-            for (int k = 0; k < Driver.states.Count - 1; k++)
-            {
-                trow = Driver.DriverElements[k];
-                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = Driver.states[k];
-                e.CurrentState = k;
-                e.DestState = Driver.states.Count - 1;
-                e.DestStateName = Driver.states[Driver.states.Count - 1];
-                trow.elements.Add(e);
-            }
-
-            //Add a row
-            trow = new ConfigTransitionDriverRow();
-            for (int j = 0; j < Driver.states.Count; j++)
-            {
-                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = sname;
-                e.CurrentState = Driver.states.Count - 1;
-                e.DestState = j;
-                e.DestStateName = Driver.states[j];
-                trow.elements.Add(e);
-            }
-
-            Driver.DriverElements.Add(trow);
-
-            OnPropertyChanged("Driver");
         }
 
         public void DeleteState(int index)
         {
+            //For division, do not allow deletion of last state. Should not even get here because last row will be disabled.
+            if (Name == "Division")
+            {
+                if (index == Driver.states.Count - 1)
+                {
+                    MessageBox.Show("Cannot delete cytokinetic state.", "State deletion error", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+            }
+
             activationRows.RemoveAt(index);
-            Driver.states.RemoveAt(index);
+            Driver.RemoveStateNamePlot(index);
             Driver.DriverElements.RemoveAt(index);
 
             //NOW LOOP THRU ALL REMAINING DRIVERELEMENTS
@@ -4730,7 +4794,7 @@ namespace Daphne
                 return;
 
             string state = Driver.states[sourceIndex];
-            Driver.states.RemoveAt(sourceIndex);
+            Driver.RemoveStateNamePlot(sourceIndex);
             Driver.states.Insert(targetIndex, state);  
 
             ConfigActivationRow car = new ConfigActivationRow();
@@ -6884,7 +6948,14 @@ namespace Daphne
             }
 
             wallDis = 0.0;
-            if (SystemOfPersistence.HProtocol.scenario is TissueScenario)
+        }
+
+        /// <summary>
+        /// find the distance to the wall required according to the boundary condition
+        /// </summary>
+        private void findWallDis()
+        {
+            if (wallDis == 0.0 && SystemOfPersistence.HProtocol.scenario is TissueScenario)
             {
                 TissueScenario scenario = (TissueScenario)SystemOfPersistence.HProtocol.scenario;
 
@@ -6906,6 +6977,9 @@ namespace Daphne
         /// <returns></returns>
         protected bool inBounds(double[] pos)
         {
+            // if this is not assigned yet, find it
+            findWallDis();
+
             if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
                 (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
                 (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
@@ -6949,8 +7023,8 @@ namespace Daphne
         /// determine the maximum number of new cells that can get added to the population underlying
         /// this distribution; assume densest sphere packing: find maximum number allowable and adjust
         /// n if needed maximum density = 0.74, only that much of the total volume gets occupied
-        /// by spheres (cells), and a sphere effectively occucies the volume V_cell / 0.74
-        /// n cells need a volume V_total = n * V_cell / 0.74, and n = V_total / (V_cell / 0.74)
+        /// by spheres (cells), V_cells = 0.74 * V_total, V_occupied + n * V_cell_to_add = 0.74 * V_total
+        /// solve for n = (0.74 * V_total - V_occupied) / V_cell_to_add
         /// </summary>
         /// <returns>number of cells that can get added for the tissue simulation, zero otherwise</returns>
         public int MaxCellsToAdd()
@@ -6964,9 +7038,12 @@ namespace Daphne
                        occupiedVolume = 0,
                        // use the exact factor instead of 0.74
                        factor = Math.PI / (3.0 * Math.Sqrt(2.0)),
-                       // this much of the ecm should stay unoccupied (percent)
-                       safety = 0.0;
-                
+                       // for safety, this much of the ecm should stay unoccupied (percent)
+                       safety = 0.1;
+
+                // if this is not assigned yet, find it
+                findWallDis();
+
                 // the boundary conditions will not allow filling the whole volume, subtract the cell-free zone close to the wall
                 ecmVolume = (Extents[0] - 2 * wallDis) * (Extents[1] - 2 * wallDis) * (Extents[2] - 2 * wallDis);
 
@@ -6977,10 +7054,10 @@ namespace Daphne
                 // find the already occupied volume, sum up the effective volume of existing cells
                 foreach (CellPopulation cp in scenario.cellpopulations)
                 {
-                    occupiedVolume += cp.CellStates.Count * 4.0 / 3.0 * Math.PI * Math.Pow(cp.Cell.CellRadius, 3.0) / factor;
+                    occupiedVolume += cp.CellStates.Count * 4.0 / 3.0 * Math.PI * Math.Pow(cp.Cell.CellRadius, 3.0);
                 }
-                // for the cell type to be added, calculate max_n = freeVolume / effective_cellVolume
-                max_n = (int)((ecmVolume - occupiedVolume) / (4.0 / 3.0 * Math.PI * Math.Pow(cellPop.Cell.CellRadius, 3.0) / factor));
+                // for the cell type to be added, calculate max_n
+                max_n = (int)((factor * ecmVolume - occupiedVolume) / (4.0 / 3.0 * Math.PI * Math.Pow(cellPop.Cell.CellRadius, 3.0)));
             }
             return max_n;
         }
@@ -9932,6 +10009,7 @@ namespace Daphne
         public DistributedParameter()
         {
             DistributionType = ParameterDistributionType.CONSTANT;
+
         }
 
         /// <summary>
@@ -10102,6 +10180,56 @@ namespace Daphne
         public abstract double Sample();
         public abstract bool Equals(ParameterDistribution pd);
         public abstract ParameterDistribution Clone();
+    }
+
+    /// <summary>
+    /// Probability distribution when the parameter is constant. 
+    /// Don't add to the ParameterDistributionType enum, since we don't expose this in the GUI.
+    /// If the ConfigDistrTransitionDriverElement is a Constant, then this class is used by the simulation transition driver element. 
+    /// </summary>
+    public class DiracDeltaParameterDistribution : ParameterDistribution
+    {
+        public double ConstValue { get; set; }
+
+        public DiracDeltaParameterDistribution()
+            : base()
+        {
+        }
+
+        public override void Initialize()
+        {
+            isInitialized = true;
+        }
+
+        public override double Sample()
+        {
+            if (isInitialized == false)
+            {
+                Initialize();
+            }
+
+            return ConstValue;
+        }
+
+        public override bool Equals(ParameterDistribution pd)
+        {
+            DiracDeltaParameterDistribution d = pd as DiracDeltaParameterDistribution;
+
+            if (this.ConstValue != d.ConstValue) return false;
+
+            return true;
+        }
+
+        public override ParameterDistribution Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ParameterDistribution newDistr = JsonConvert.DeserializeObject<DiracDeltaParameterDistribution>(jsonSpec, Settings);
+
+            return newDistr;
+        }
     }
 
     /// <summary>

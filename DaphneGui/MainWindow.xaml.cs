@@ -2375,10 +2375,10 @@ namespace DaphneGui
                         // run the simulation forward to the next task; also handle burn in
                         if (postConstruction == true && AssumeIDE() == true)
                         {
-                            if (sim.Burn_inExec() == true)
+                            if (sim.Burn_inActive() == true)
                             {
                                 sim.Burn_inStep();
-                                if (sim.Burn_inExec() == false)
+                                if (sim.Burn_inActive() == false)
                                 {
                                     sim.Burn_inCleanup();
                                     // no need to render this, will be taken care of by the start of the run
@@ -2397,10 +2397,10 @@ namespace DaphneGui
                         {
                             try
                             {
-                                if (sim.Burn_inExec() == true)
+                                if (sim.Burn_inActive() == true)
                                 {
                                     sim.Burn_inStep();
-                                    if (sim.Burn_inExec() == false)
+                                    if (sim.Burn_inActive() == false)
                                     {
                                         sim.Burn_inCleanup();
                                     }
@@ -2422,7 +2422,7 @@ namespace DaphneGui
                         {
                             if (Properties.Settings.Default.skipDataWrites == false)
                             {
-                                if (sim.Burn_inExec() == false && sim.FrameData != null)
+                                if (sim.Burn_inActive() == false && sim.FrameData != null)
                                 {
                                     sim.FrameData.writeData(sim.FrameNumber - 1);
                                 }
@@ -3210,6 +3210,9 @@ namespace DaphneGui
 
             Nullable<bool> result = loadScenarioUsingDialog();
 
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
+
             // Process open file dialog box results
             if (result == true)
             {
@@ -3391,6 +3394,9 @@ namespace DaphneGui
 
             setScenarioPaths(filename);
             prepareProtocol(ReadJson(""));
+
+            CellOptionsExpander.IsExpanded = false;
+            ECMOptionsExpander.IsExpanded = false;
         }
 
         private void prepareProtocol(Protocol protocol)
@@ -3767,6 +3773,30 @@ namespace DaphneGui
             else
             {
                 ReacComplexChartWindow.Activate();
+            }
+        }
+
+        //This code moves the popup controls if main window moves
+        private void mainWindow_LocationChanged(object sender, EventArgs e)
+        {
+            if (CellOptionsPopup.IsOpen)
+            {
+                var offset = CellOptionsPopup.HorizontalOffset;
+                CellOptionsPopup.HorizontalOffset = offset + 1;
+                CellOptionsPopup.HorizontalOffset = offset;
+
+                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+
+            if (ECMOptionsPopup.IsOpen)
+            {
+                var offset = ECMOptionsPopup.HorizontalOffset;
+                ECMOptionsPopup.HorizontalOffset = offset + 1;
+                ECMOptionsPopup.HorizontalOffset = offset;
+
+                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;    
+                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             }
         }
 

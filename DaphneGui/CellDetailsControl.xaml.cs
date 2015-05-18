@@ -509,17 +509,15 @@ namespace DaphneGui
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
-            //Level protocol = MainWindow.ST_CurrentLevel;
-            //Level protocol = MainWindow.SOP.Protocol;
             Level protocol = MainWindow.GetLevelContext(this);
 
-            string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
-            message = message + "Any duplicate reactions currently in the membrane will be removed. Continue?";
-            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.No)
-            {
-                return;
-            }
+            //string message = "If the Membrane does not currently contain any of the molecules necessary for these reactions, then they will be added. ";
+            //message = message + " Continue?";
+            //MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            //if (result == MessageBoxResult.No)
+            //{
+            //    return;
+            //}
 
             foreach (var item in lvCellAvailableReacs.SelectedItems)
             {
@@ -593,13 +591,13 @@ namespace DaphneGui
             //Level protocol = MainWindow.SOP.Protocol;
             Level protocol = MainWindow.GetLevelContext(this);
 
-            string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
-            message = message + "Any duplicate reactions currently in the cytosol will be removed. Continue?";
-            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.No)
-            {
-                return;
-            }
+            //string message = "If the Cytosol does not currently contain any of the molecules or genes necessary for these reactions, then they will be added appropriately. ";
+            //message = message + " Continue?";
+            //MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            //if (result == MessageBoxResult.No)
+            //{
+            //    return;
+            //}
 
             foreach (var item in lvCytosolAvailableReacs.SelectedItems)
             {
@@ -857,10 +855,19 @@ namespace DaphneGui
                 return;
             }
 
-            //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
+            //If the cell cytosol already contains this reaction, exclude it from the available reactions list
             if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
             {
                 e.Accepted = false;
+            }
+
+            //skg 5/8/15 - MUST ALSO EXCLUDE REACTIONS THAT ARE IN THE REACTION COMPLEXES
+            foreach (ConfigReactionComplex crc in cc.cytosol.reaction_complexes)
+            {
+                if (crc.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    e.Accepted = false;
+                }
             }
         }
 
@@ -899,6 +906,16 @@ namespace DaphneGui
                 return;
             }
 
+            //skg 5/8/15 - MUST ALSO EXCLUDE REACTIONS THAT ARE IN THE REACTION COMPLEXES
+            foreach (ConfigReactionComplex crc in cc.membrane.reaction_complexes)
+            {
+                if (crc.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    e.Accepted = false;
+                    return;
+                }
+            }
+
             e.Accepted = true;
         }
 
@@ -915,7 +932,7 @@ namespace DaphneGui
                 return;
             }
 
-            //if already in cytosol, return
+            //if already in membrane, return
             if (cc.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid))
             {
                 e.Accepted = false;
@@ -1144,7 +1161,7 @@ namespace DaphneGui
             coll1.Add(cc1);
 
             FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
-            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
+            addGenesCombo.SetValue(ComboBox.WidthProperty, 85D);
             addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
             addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
             addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
@@ -1190,13 +1207,6 @@ namespace DaphneGui
 
                 if (scheme.genes.Contains(gene1.entity_guid)) return; //shouldnot happen...
 
-                //If no states exist, then create at least 2 new ones
-                if (scheme.Driver.states.Count == 0)
-                {
-                    scheme.AddState("state1");
-                    scheme.AddState("state2");
-                }
-
                 ConfigGene newgene = gene1.Clone(null);
                 scheme.AddGene(newgene.entity_guid);
 
@@ -1225,7 +1235,7 @@ namespace DaphneGui
         /// This method adds a differentiation state given a name 
         /// </summary>
         /// <param name="stateName"></param>
-        private void AddDifferentiationState(string schemeName, string stateName)
+        private void AddDifferentiationState(string schemeName, string stateName, int insertIndex)
         {
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
@@ -1237,6 +1247,7 @@ namespace DaphneGui
                 if (new_scheme == null)
                 {
                     cell.div_scheme = new_scheme = new ConfigTransitionScheme();
+                    cell.div_scheme.Name = "Division";
                 }
             }
             else if (schemeName == "Differentiation")
@@ -1245,11 +1256,12 @@ namespace DaphneGui
                 if (new_scheme == null)
                 {
                     cell.diff_scheme = new_scheme = new ConfigTransitionScheme();
+                    cell.diff_scheme.Name = "Differentiation";
                 }
             }
             else return;
 
-            new_scheme.AddState(stateName);
+            new_scheme.InsertState(stateName, insertIndex);
 
             //refresh display
             if (schemeName == "Division")
@@ -1269,8 +1281,17 @@ namespace DaphneGui
 
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
-            AddDifferentiationState(schemeName, "State0");
-            AddDifferentiationState(schemeName, "State1");
+
+            if (schemeName == "Differentiation")
+            {
+                AddDifferentiationState(schemeName, "State0", 0);
+                AddDifferentiationState(schemeName, "State1", 1);
+            }
+            else
+            {
+                AddDifferentiationState(schemeName, "State0", 0);
+                AddDifferentiationState(schemeName, "cytokinetic", 1);
+            }
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)
@@ -1367,12 +1388,6 @@ namespace DaphneGui
 
             ConfigTransitionScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
-
-            //REMOVED this for resolving bug 2429 - the combo should populate from er.genes
-            //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            //if (!cell.HasGene(gene.entity_guid))
-            //    return;
-
 
             if (ds != null)
             {
@@ -1719,13 +1734,20 @@ namespace DaphneGui
         // UserControl methods
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            //Sort molecules in ascending order
+            System.ComponentModel.SortDescription sd = new System.ComponentModel.SortDescription();
+            sd.PropertyName = "Name";
+            sd.Direction = System.ComponentModel.ListSortDirection.Ascending;
+
             // cyto_molecule_combo_box
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BulkMolecules_Filter;
+            cvs.SortDescriptions.Insert(0, sd);
 
             // memb_molecule_combo_box
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BoundaryMolecules_Filter;
+            cvs.SortDescriptions.Insert(0, sd);
 
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
