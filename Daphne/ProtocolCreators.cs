@@ -352,7 +352,6 @@ namespace Daphne
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
-            cellPop.CreatePlotStates();
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
@@ -506,7 +505,6 @@ namespace Daphne
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
-            cellPop.CreatePlotStates();
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
@@ -2197,7 +2195,7 @@ namespace Daphne
             diffScheme.Driver.states = new ObservableCollection<string>();
             for (int j = 0; j < stateNames.Count(); j++)
             {
-                diffScheme.Driver.states.Add(stateNames[j]);
+                diffScheme.Driver.AddStateNamePlot(stateNames[j], false);
             }
 
             // Add genes
@@ -4444,7 +4442,7 @@ namespace Daphne
             {
                 row = new ConfigTransitionDriverRow();
                 row.elements = new ObservableCollection<ConfigTransitionDriverElement>();
-                driver.states.Add(stateName[i]);
+                driver.AddStateNamePlot(stateName[i], false);
                 for (int j = 0; j < signal.GetLength(1); j++)
                 {
                     ConfigMolTransitionDriverElement driverElement = new ConfigMolTransitionDriverElement();
@@ -4622,7 +4620,6 @@ namespace Daphne
             // Cell placement
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
-            cellPop.CreatePlotStates();
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
