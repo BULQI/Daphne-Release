@@ -23,6 +23,7 @@ namespace DaphneGui
     public partial class Save3DView : Window, INotifyPropertyChanged
     {
         public string FileName { get; set; }
+        public Color CurrentColor { get; set; }
 
         public Save3DView()
         {
@@ -30,6 +31,7 @@ namespace DaphneGui
             DataContext = this;
             PredefColorIndex = OutputColorList.White;
             CustomColor = Colors.White;
+            CurrentColor = Colors.Black;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

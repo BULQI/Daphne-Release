@@ -14,6 +14,7 @@ using System.Windows.Forms.Integration;
 using Kitware.VTK;
 
 using Daphne;
+using System.Windows.Media;
 
 namespace DaphneGui
 {
@@ -779,6 +780,33 @@ namespace DaphneGui
             }
         }
 
+        private System.Windows.Media.Color currentColor;
+        public System.Windows.Media.Color CurrentColor
+        {
+            get
+            {
+                return currentColor;
+            }
+            set
+            {
+                currentColor = value;
+                ChangeBackground();
+                OnPropertyChanged("CurrentColor");
+            }
+        }
+
+        /// <summary>
+        /// Changes the background color of the 3D window
+        /// </summary>
+        private void ChangeBackground()
+        {
+            rw = rwc.RenderWindow;
+            vtkRenderer ren = rw.GetRenderers().GetFirstRenderer();
+            ren.SetBackground(CurrentColor.R/255.0, CurrentColor.G/255.0, CurrentColor.B/255.0);
+            vtkWindow currWindow = ren.GetVTKWindow();
+            currWindow.Render();
+        }
+
         private bool leftButtonPressed = false;
         private uint leftButtonPressTimeStamp = 0;
         private int[] leftButtonPressPostion = new int[2];
@@ -818,7 +846,8 @@ namespace DaphneGui
             rw = rwc.RenderWindow;
             vtkRenderer ren = rw.GetRenderers().GetFirstRenderer();
 
-            // background color
+            // background color - initialize to black
+            CurrentColor = Colors.Black;
             ren.SetBackground(0.0, 0.0, 0.0);
 
             // interactor style
