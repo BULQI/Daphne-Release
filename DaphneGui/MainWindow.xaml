@@ -609,9 +609,9 @@
                                                 <Separator ToolBar.OverflowMode="Never"/>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Background: " VerticalAlignment="Center" Margin="2,2,0,0"></TextBlock>
-                                                    <uc:GreyScaleColorPicker x:Name="picker" VerticalAlignment="Bottom"  SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <uc:GreyScaleColorPicker x:Name="picker" VerticalAlignment="Bottom" Width="100"  SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                 </StackPanel>
-                                                <Separator ToolBar.OverflowMode="Never"/>
+                                                <Separator ToolBar.OverflowMode="Never" Margin="4,0"/>
                                                 <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>                                                
                                             </ToolBar>
                                         </ToolBarTray>
