@@ -14,6 +14,8 @@ using Ninject;
 using Ninject.Parameters;
 
 using System.Diagnostics;
+using NativeDaphne;
+using Gene = NativeDaphne.Nt_Gene;
 
 namespace Daphne
 {
@@ -74,7 +76,6 @@ namespace Daphne
         public virtual void Burn_inCleanup()
         {
         }
-
         public virtual void reset()
         {
             RunStatus = RUNSTAT_OFF;
@@ -147,7 +148,6 @@ namespace Daphne
                     else if (config_tde.GetType() == typeof(ConfigDistrTransitionDriverElement))
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
-
                         if (((ConfigDistrTransitionDriverElement)config_tde).Distr.DistributionType == ParameterDistributionType.CONSTANT)
                         {
                             tde.distr = new DiracDeltaParameterDistribution();
@@ -320,7 +320,6 @@ namespace Daphne
             }
 
             //TRANSITIONS
-
             // death behavior
             if (cp.Cell.death_driver != null)
             {
@@ -379,6 +378,10 @@ namespace Daphne
                 // Set gene activity levels now that the current state is set
                 simCell.SetGeneActivities(simCell.Differentiator);
             }
+
+            //parameters for objects not created in the middle layer
+            simCell.Sigma = simCell.StochLocomotor != null ? simCell.StochLocomotor.Sigma : 0.0;
+            simCell.TransductionConstant = simCell.Locomotor != null ? simCell.Locomotor.TransductionConstant : 0;
 
             // add the cell
             AddCell(simCell);
@@ -726,57 +729,57 @@ namespace Daphne
             {
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
-                    comp.BulkReactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                            comp.Populations[cr.reactants_molecule_guid_ref[1]],
                                                            comp.Populations[cr.products_molecule_guid_ref[0]],
                                                            cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
                 {
-                    comp.BulkReactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                             comp.Populations[cr.products_molecule_guid_ref[0]],
                                                             comp.Populations[cr.products_molecule_guid_ref[1]],
                                                             cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Annihilation)
                 {
-                    comp.BulkReactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                             cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dimerization)
                 {
-                    comp.BulkReactions.Add(new Dimerization(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new Dimerization(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                             comp.Populations[cr.products_molecule_guid_ref[0]],
                                                             cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.DimerDissociation)
                 {
-                    comp.BulkReactions.Add(new DimerDissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new DimerDissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                  comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                  cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transformation)
                 {
-                    comp.BulkReactions.Add(new Transformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new Transformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                               comp.Populations[cr.products_molecule_guid_ref[0]],
                                                               cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.AutocatalyticTransformation)
                 {
-                    comp.BulkReactions.Add(new AutocatalyticTransformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new AutocatalyticTransformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                            comp.Populations[cr.reactants_molecule_guid_ref[1]],
                                                                            comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                            cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAnnihilation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedAnnihilation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedAnnihilation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                      comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                      cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAssociation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedAssociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedAssociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                     comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                     comp.Populations[cr.reactants_molecule_guid_ref[1]],
                                                                     comp.Populations[cr.products_molecule_guid_ref[0]],
@@ -784,27 +787,27 @@ namespace Daphne
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedCreation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedCreation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedCreation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                  comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                  cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDimerization)
                 {
-                    comp.BulkReactions.Add(new CatalyzedDimerization(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedDimerization(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                      comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                      comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                      cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDimerDissociation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedDimerDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedDimerDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                           comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                           comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                           cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDissociation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                      comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                      comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                      comp.Populations[cr.products_molecule_guid_ref[1]],
@@ -812,7 +815,7 @@ namespace Daphne
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedTransformation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                    comp.AddBulkReaction(new CatalyzedTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
                                                                        comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                        comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                        cr.rate_const));
@@ -824,9 +827,11 @@ namespace Daphne
         {
             foreach (ConfigReaction cr in config_reacs)
             {
-                cell.Cytosol.BulkReactions.Add(new Transcription(cell.Genes[cr.modifiers_molecule_guid_ref[0]],
+                var r = new Transcription(cell.Genes[cr.modifiers_molecule_guid_ref[0]],
                                                                 cell.Cytosol.Populations[cr.products_molecule_guid_ref[0]],
-                                                                cr.rate_const));
+                                                                cr.rate_const);
+
+                cell.Cytosol.AddBulkReaction(r);
             }
 
         }
@@ -844,30 +849,33 @@ namespace Daphne
             // no cell rotation currently
             Transform t = new Transform(false);
 
-            dataBasket.Environment.Comp.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
+            dataBasket.Environment.Comp.AddBoundary(c.Population_id, c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
+
             // set translation by reference: when the cell moves then the transform gets updated automatically
-            t.setTranslationByReference(new DenseVector(c.SpatialState.X));
-            dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
+            t.setTranslationByReference(c.SpatialState.X);
+            dataBasket.Environment.Comp.AddBoundaryTransform(c.PlasmaMembrane.Interior.Id, t);
+            //dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
         public void RemoveCell(Cell c)
         {
             // remove the boundary reactions involving this cell
-            dataBasket.Environment.Comp.BoundaryReactions.Remove(c.PlasmaMembrane.Interior.Id);
+            //handled both comp and baseComp
+            dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
 
             // remove the ecs boundary concs and fluxes that involve this cell
             foreach (MolecularPopulation mp in dataBasket.Environment.Comp.Populations.Values)
             {
-                mp.BoundaryConcs.Remove(c.PlasmaMembrane.Interior.Id);
-                mp.BoundaryFluxes.Remove(c.PlasmaMembrane.Interior.Id);
+                mp.RemoveBoundaryFluxConc(c.PlasmaMembrane.Interior.Id);
             }
 
             // remove the cell's membrane from the ecs boundary
-            dataBasket.Environment.Comp.Boundaries.Remove(c.PlasmaMembrane.Interior.Id);
-            dataBasket.Environment.Comp.BoundaryTransforms.Remove(c.PlasmaMembrane.Interior.Id);
+            dataBasket.Environment.Comp.RemoveBoundary(c.PlasmaMembrane.Interior.Id);
+            dataBasket.Environment.Comp.RemoveBoundaryTransform(c.PlasmaMembrane.Interior.Id);
 
             // remove the actual cell
             dataBasket.Cells.Remove(c.Cell_id);
+            dataBasket.Populations[c.Population_id].RemoveCell(c.Cell_id);
         }
 
         public virtual void RunForward()
@@ -963,6 +971,7 @@ namespace Daphne
         public static Protocol ProtocolHandle;
 
         public static CellManager cellManager;
+
         protected CollisionManager collisionManager;
 
         protected byte runStatus;
@@ -983,7 +992,6 @@ namespace Daphne
         // burn in variables
         private double mu_max, alpha, f_max;
         private int burn_in_iter;
-
         public TissueSimulation()
         {
             dataBasket = new DataBasket(this);
@@ -1001,7 +1009,6 @@ namespace Daphne
             alpha = 2.0;
             burn_in_iter = 0;
         }
-
         protected override int linearDistributionCase(int dim)
         {
             switch (dim)
@@ -1031,12 +1038,18 @@ namespace Daphne
                 return;
             }
 
+            if (dataBasket.Environment != null)
+            {
+                dataBasket.Environment.Dispose();
+            }
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.Environment = SimulationModule.kernel.Get<ECSEnvironment>();
 
             // clear the databasket dictionaries
             dataBasket.Clear();
 
+            //remove any cells in the cell dictionary
+            cellManager.Clear();
             // set up the collision manager
             //MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
             DenseVector box = new DenseVector(3);
@@ -1128,6 +1141,11 @@ namespace Daphne
 
             // distribution governing time-to-removal for apoptotic cells
             cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();
+
+            //set up some middle layer parameters
+            cellManager.InitializeNtCellManger();
+            dataBasket.Environment.Comp.InitilizeBase();
+
         }
 
         // Tom's burn in algorithm
@@ -1178,12 +1196,10 @@ namespace Daphne
                     pmax = kvp.Value;
                 }
             }
-
             // find mu such that it allows maximally 10% of (r1 + r2) movement for the pair with f_max
             if(pmax != null)
             {
                 double tmp = 0.1 * (pmax.Cell(0).Radius + pmax.Cell(1).Radius) / (f_max * integratorStep);
-
                 if (tmp < mu_max)
                 {
                     mu = tmp;
@@ -1231,7 +1247,9 @@ namespace Daphne
                 dataBasket.Environment.Step(localStep);
                 
                 // zero all cell forces; needs to happen first
-                cellManager.ResetCellForces();
+                //handled in the middle layer
+                //cellManager.ResetCellForces();
+
                 // handle collisions
                 if (collisionManager != null)
                 {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using MathNet.Numerics.LinearAlgebra.Double;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -64,24 +65,22 @@ namespace Daphne
         /// </summary>
         /// <param name="pos">position to test</param>
         /// <returns>tuple with indices; negative for out of bounds</returns>
-        public void findGridIndex(double[] pos, ref int[] idx)
+        public void findGridIndex(Nt_Darray pos, ref int[] idx)
         {
-            //double[] tmp = new double[pos.Count];
+            //save one allocation
+            for (int i = 0; i < pos.Length; i++)
+            {
+                idx[i] = (int)(pos[i] / gridStep);
+                if (idx[i] < 0 || idx[i] > gridPts[i] - 1)
+                {
+                    idx[0] = idx[1] = idx[2] = -1;
+                    return;
+                }
+            }
+        }
 
-            //for (int i = 0; i < pos.Count; i++)
-            //{
-            //    // tmp[0] goes along x, tmp[1] along y
-            //    tmp[i] = pos[i] / gridStep;
-
-            //    // for now return -1 for out of bounds
-            //    if (tmp[i] < 0 || (int)tmp[i] > gridPts[i] - 1)
-            //    {
-            //        return new int[] { -1, -1, -1 };
-            //    }
-            //}
-
-            //return new int[] { (int)tmp[0], (int)tmp[1], (int)tmp[2] };
-
+        public void findGridIndex(Nt_Darray pos, ref Nt_Iarray idx)
+        {
             //save one allocation
             for (int i = 0; i < pos.Length; i++)
             {
@@ -99,6 +98,12 @@ namespace Daphne
         /// </summary>
         /// <param name="idx">tuple to test</param>
         /// <returns>true or false</returns>
+        public bool legalIndex(Nt_Iarray idx)
+        {
+            return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];
+        }
+
+
         public bool legalIndex(int[] idx)
         {
             return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];

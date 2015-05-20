@@ -9,14 +9,15 @@ using Ninject.Parameters;
 using ManifoldRing;
 
 using MathNet.Numerics.LinearAlgebra.Double;
-
+using System.Diagnostics;
+using NativeDaphne;
 namespace Daphne
 {
     /// <summary>
     /// Manages the chemical reactions that occur within the interior manifold of the compartment and between the interior and the boundaries. 
     /// All molecular populations must be defined on either the interior manifold or one of the boundary manifolds.
     /// </summary>
-    public class Compartment : IDynamic
+    public class Compartment : IDynamic, IDisposable
     {
         public Compartment(Manifold interior)
         {
@@ -28,8 +29,40 @@ namespace Daphne
             BoundaryTransforms = new Dictionary<int, Transform>();
             NaturalBoundaries = new Dictionary<int, Manifold>();
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
+            //create specialized base compartments
+            if (Interior is TinyBall)
+            {
+                var tmp = Interior as TinyBall;
+                baseComp = new Nt_Cytosol(interior.Extent(0));
+                baseComp.InteriorId = Interior.Id;
+            }
+            else if (Interior is TinySphere)
+            {
+                baseComp = new Nt_PlasmaMembrane(interior.Extent(0));
+            }
+            else if (Interior is InterpolatedRectangularPrism)
+            {
+                int[] extents = new int[3];
+                var m = Interior as InterpolatedRectangularPrism;
+                extents[0] = m.NodesPerSide(0);
+                extents[1] = m.NodesPerSide(1);
+                extents[2] = m.NodesPerSide(2);
+                baseComp = new Nt_ECS(extents, m.StepSize(), false);
+            }
+            else
+            {
+                throw new NotImplementedException("unknown manifold");
+            }
+            baseComp.InteriorId = Interior.Id;
+            
         }
 
+        public void AddMolecularPopulation(string moleculeKey, MolecularPopulation mp)
+        {
+            mp.Compartment = this.baseComp;
+            Populations.Add(moleculeKey, mp);
+            baseComp.NtPopulations.Add(mp);
+        }
         public void AddMolecularPopulation(Molecule mol, string moleculeKey, string type, double[] parameters)
         {
             MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("moleculeKey", moleculeKey), new ConstructorArgument("comp", this));
@@ -46,11 +79,13 @@ namespace Daphne
 
             if (Populations.ContainsKey(moleculeKey) == false)
             {
+                mp.Compartment = this.baseComp;
                 Populations.Add(moleculeKey, mp);
+                baseComp.NtPopulations.Add(mp);
             }
             else
             {
-                // add together
+                //add together
                 Populations[moleculeKey].Conc += mp.Conc;
                 // NOTE: presumably, we need to also add the boundaries here
             }
@@ -62,29 +97,48 @@ namespace Daphne
         /// <param name="dt">The time interval.</param>
         public void Step(double dt)
         {
-            // the step method may organize the reactions in a more sophisticated manner to account
-            // for different rate constants etc.
-            foreach (Reaction r in BulkReactions)
-            {
-                r.Step(dt);
-            }
 
-            //if (!(this.Interior is PointManifold))
-            foreach (List<Reaction> rlist in BoundaryReactions.Values)
+            //// the step method may organize the reactions in a more sophisticated manner to account
+            //// for different rate constants etc.
+            //foreach (Reaction r in BulkReactions)
+            //{
+            //    r.Step(dt);
+            //}
+
+            ////if (!(this.Interior is PointManifold))
+            //foreach (List<Reaction> rlist in BoundaryReactions.Values)
+            //{
+            //    foreach (Reaction r in rlist)
+            //    {
+            //        r.Step(dt);
+            //    }
+            //}
+
+            //reactions above moved to middle layer
+            //for cells, reactions are handled by "compartments" in cellpopulation
+            //for ecs, it is handled here
+            if (this.Interior is TinyBall == false && this.Interior is TinySphere == false)
             {
-                foreach (Reaction r in rlist)
+                baseComp.step(dt);
+
+                foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
                 {
-                    r.Step(dt);
+                    // Apply Laplacian, note: boundary fluxes moved to upper level
+                    if (molpop.Value.IsDiffusing == true)
+                    {
+                        molpop.Value.Step(dt);
+                    }
                 }
             }
+        }
 
-            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
+
+        public void AddBulkReaction(Reaction r)
+        {
+            BulkReactions.Add(r);
+            if (r as Nt_Reaction != null)
             {
-                // Apply Laplacian, note: boundary fluxes moved to upper level
-                if (molpop.Value.IsDiffusing == true)
-                {
-                    molpop.Value.Step(dt);
-                }
+                baseComp.NtBulkReactions.Add(r as Nt_Reaction);
             }
         }
 
@@ -98,6 +152,108 @@ namespace Daphne
 
             // add the reaction
             BoundaryReactions[key].Add(r);
+            
+            //for the middle layer.
+            int index = BoundaryReactions[key].Count-1;
+            var tmp = r as Nt_Reaction;
+            if (tmp == null)
+            {
+                throw new Exception("reaction casting error");
+            }
+            Nt_Reaction ntr = r as Nt_Reaction;
+            if (ntr == null)
+            {
+                throw new Exception("invalid reaction error");
+            }
+            baseComp.AddBoundaryReaction(key, r as Nt_Reaction, index);
+        }
+
+
+        //Nt_Compartment related methods
+        public void InitilizeBase()
+        {
+            baseComp.initialize();
+        }
+
+        public Dictionary<int, List<Nt_Compartment>> NtBoundaries
+        {
+            get
+            {
+                return baseComp.NtBoundaries;
+            }
+        }
+
+        /// <summary>
+        /// add boundary in cytosol, need population id for middle layer
+        /// </summary>
+        /// <param name="pop_id"></param>
+        /// <param name="boundary_id"></param>
+        /// <param name="c"></param>
+        public void AddBoundary(int pop_id, int boundary_id, Compartment c)
+        {
+            if (Boundaries.ContainsKey(boundary_id))
+            {
+                return;
+            }
+            Boundaries.Add(boundary_id, c);
+            baseComp.AddNtBoundary(pop_id, boundary_id, c.BaseComp);
+        }
+
+        /// <summary>
+        /// add boundary for cytosol
+        /// </summary>
+        /// <param name="boundary_id"></param>
+        /// <param name="c"></param>
+        public void AddBoundary(int boundary_id, Compartment c)
+        {
+            if (Boundaries.ContainsKey(boundary_id))
+            {
+                return;
+            }
+            AddBoundary(0, boundary_id, c);
+        }
+
+
+        public void AddBoundaryTransform(int boundary_id, Transform t)
+        {
+            BoundaryTransforms.Add(boundary_id, t);
+            baseComp.AddBoundaryTransform(boundary_id, t.Translation);
+        }
+
+        public void RemoveBoundaryReactions(int boundaryId)
+        {
+            BoundaryReactions.Remove(boundaryId);
+            baseComp.RemoveBoundaryReaction(boundaryId);
+        }
+
+        public void RemoveBoundary(int boundaryId)
+        {
+            Boundaries.Remove(boundaryId);
+            baseComp.RemoveNtBoundary(boundaryId);
+        }
+
+        public void RemoveBoundaryTransform(int boundaryId)
+        {
+            BoundaryTransforms.Remove(boundaryId);
+            baseComp.RemoveBoundaryTransform(boundaryId);
+        }
+
+
+        public Nt_Compartment BaseComp
+        {
+            get
+            {
+                return baseComp;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (baseComp != null)
+            {
+                baseComp.Dispose();
+                baseComp = null;
+            }
         }
 
         public Dictionary<string, MolecularPopulation> Populations { get; private set; }
@@ -108,12 +264,15 @@ namespace Daphne
         public Dictionary<int, Transform> BoundaryTransforms { get; set; }
         public Dictionary<int, Manifold> NaturalBoundaries { get; private set; }
         public Dictionary<int, Transform> NaturalBoundaryTransforms { get; private set; }
+        private Nt_Compartment baseComp;
     }
 
-    public abstract class EnvironmentBase
+    public abstract class EnvironmentBase : IDisposable
     {
         protected Compartment comp;
 
+        //for setting up environment data in the middle layer
+        //public Nt_Environment nt_environment;
         public EnvironmentBase()
         {
         }
@@ -125,6 +284,22 @@ namespace Daphne
 
         public virtual void Step(double dt)
         { }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+            disposed = true;
+        }
+
+        bool disposed = false;
+
     }
 
     public class PointEnvironment : EnvironmentBase
@@ -234,7 +409,7 @@ namespace Daphne
     {
         private Dictionary<string, int> sides;
         public bool toroidal { get; private set; }
-
+        private bool disposed = false;
         public ECSEnvironment(int[] numGridPts, double gridStep, bool toroidal)
         {
             InterpolatedRectangularPrism p = SimulationModule.kernel.Get<InterpolatedRectangularPrism>();
@@ -247,8 +422,10 @@ namespace Daphne
             comp = new Compartment(p);
             sides = new Dictionary<string, int>();
 
-            // add the sides and transforms
+            Nt_ECS baseComp = comp.BaseComp as Nt_ECS;
+            baseComp.IsToroidal = toroidal;
 
+            // add the sides and transforms
             InterpolatedRectangle r;
             Transform t;
             //double[] axis = new double[Transform.Dim];
@@ -345,7 +522,7 @@ namespace Daphne
         public override void Step(double dt)
         {
             this.Comp.Step(dt);
-
+            
             //apply ECS/membrane boundary flux - specific to ECS/Membran
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
@@ -380,6 +557,23 @@ namespace Daphne
             {
                 kvp.Value.UpdateECSMembraneBoundary();
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                if (this.comp.BaseComp != null)
+                {
+                    this.comp.BaseComp.Dispose();
+                }
+            }
+            disposed = true;
+            // Call base class implementation. 
+            base.Dispose(disposing);
         }
     }
 

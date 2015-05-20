@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using NativeDaphne;
 
 namespace ManifoldRing
 {
@@ -307,7 +308,7 @@ namespace ManifoldRing
     /// </summary>
     public class ScalarField
     {
-        internal double[] array;
+        public Nt_Darray array;
         private readonly Manifold m;
         private IFieldInitializer init;
 
@@ -323,7 +324,7 @@ namespace ManifoldRing
         public ScalarField(Manifold m)
         {
             this.m = m;
-            array = new double[m.ArraySize];
+            array = new Nt_Darray(m.ArraySize);
         }
 
         /// <summary>
@@ -390,7 +391,7 @@ namespace ManifoldRing
         /// <returns> number of elements copied</returns>
         public int CopyArray(double[] valarr, int start = 0)
         {
-            Array.Copy(array, 0, valarr, start, array.Length);
+            Array.Copy(array.ArrayCopy, 0, valarr, start, array.Length);
             return array.Length;
         }
 
@@ -632,7 +633,6 @@ namespace ManifoldRing
             {
                 array[i] -= f.array[i];
             }
-
             return this;
         }
 

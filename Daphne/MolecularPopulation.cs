@@ -6,7 +6,7 @@ using System.Text;
 
 using Ninject;
 using Ninject.Parameters;
-
+using NativeDaphne;
 using ManifoldRing;
 
 namespace Daphne
@@ -34,7 +34,7 @@ namespace Daphne
     }
 
 
-    public class MolecularPopulation : IDynamic
+    public class MolecularPopulation : Nt_MolecularPopulation, IDynamic
     {
         // the individuals that make up this MolecularPopulation
         public Molecule Molecule { get; private set; }
@@ -49,8 +49,6 @@ namespace Daphne
         // Diffusion is on, by default.
         public bool IsDiffusing { get; set; }
         public Dictionary<int, MolBoundaryType> boundaryCondition;
-        // the molecule guid reference
-        public string MoleculeKey { get; set; }
 
         public Manifold Man
         {
@@ -59,8 +57,14 @@ namespace Daphne
 
         public ScalarField Conc
         {
-            get { return concentration; }
-            set { concentration = value; }
+            get 
+            {
+                return concentration; 
+            }
+            set 
+            {
+                concentration = value; 
+            }
         }
 
         public Compartment Comp
@@ -90,23 +94,37 @@ namespace Daphne
             get { return naturalBoundaryConcs; }
         }
 
-        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp)
+        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp) : base(moleculeKey, mol.Name, mol.DiffusionCoefficient)
         {
             concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+            base.molpopConc = concentration.array;
             manifold = comp.Interior;
             Molecule = mol;
             MoleculeKey = moleculeKey;
             compartment = comp;
+            base.Compartment = comp.BaseComp;
             boundaryCondition = new Dictionary<int, MolBoundaryType>();
 
             // true boundaries
             boundaryFluxes = new Dictionary<int, ScalarField>();
             boundaryConcs = new Dictionary<int, ScalarField>();
-            foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
+
+            //the addition has to be in order in the middle layer
+            foreach (var kvp in compartment.NtBoundaries)
             {
-                AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
+                var compartment_list = kvp.Value;
+                foreach (Nt_Compartment nc in compartment_list)
+                {
+                    var key = nc.InteriorId;
+                    var interior = compartment.Boundaries[key].Interior;
+                    AddBoundaryFluxConc(key, interior);
+                }
             }
 
+            //foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
+            //{
+            //    AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
+            //}
             // natural boundaries
             naturalBoundaryFluxes = new Dictionary<int, ScalarField>();
             naturalBoundaryConcs = new Dictionary<int, ScalarField>();
@@ -129,8 +147,15 @@ namespace Daphne
 
             boundaryFluxes.Add(key, boundFlux);
             boundaryConcs.Add(key, boundConc);
+            base.AddNtBoundaryFluxConc(key, boundConc.array, boundFlux.array);
         }
 
+        public void RemoveBoundaryFluxConc(int key)
+        {
+            BoundaryConcs.Remove(key);
+            BoundaryFluxes.Remove(key);
+            base.RemoveNtBoundaryFluxConc(key);
+        }
 
         public void Initialize(string type, double[] parameters)
         {

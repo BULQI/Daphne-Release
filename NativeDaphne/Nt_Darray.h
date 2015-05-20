@@ -64,11 +64,9 @@ namespace NativeDaphne
 		{
 			if (is_pointer_owner == true && _array != NULL)
 			{
-				//there might be a problem for this free
 				free(_array);
 				_array = NULL;
 			}
-			//_array = NULL;
 		}
 
 		property array<double>^ ArrayCopy
@@ -133,10 +131,6 @@ namespace NativeDaphne
 			}
 			double *dst = d->NativePointer;
 			NtUtility::AddDoubleArray(_array, dst, length);
-			//for (int i=0; i< length; i++)
-			//{
-			//	_array[i] += dst[i];
-			//}
 			return this;
 		}
 

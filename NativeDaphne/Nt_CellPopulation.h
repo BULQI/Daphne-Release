@@ -84,10 +84,6 @@ namespace NativeDaphne
 			{
 				masterCell->AddCell(cell);
 			}
-			//things to add here...
-			//1. add genes
-			//2. add molecularPopulation (cytosol & membrane)
-			//3. add reacitons both cytosol & mebrane
 			for each (KeyValuePair<String^, Nt_Gene^>^ kvp in cell->Genes)
 			{
 				this->AddGene(kvp->Value);

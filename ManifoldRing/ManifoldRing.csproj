@@ -74,7 +74,6 @@
     <Reference Include="MathNet.Numerics">
       <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.0.2-unstable-9\lib\net40\Ninject.dll</HintPath>
     </Reference>
@@ -82,6 +81,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -94,6 +94,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NativeDaphne\NativeDaphne.vcxproj">
+      <Project>{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}</Project>
+      <Name>NativeDaphne</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

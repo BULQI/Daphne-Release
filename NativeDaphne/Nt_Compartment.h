@@ -207,18 +207,14 @@ namespace NativeDaphne
 		//this is the id of the interior in the upper level.
 		int InteriorId;
 
-		//Nt_Manifold^ Nt_interior;
-
 		Nt_Compartment()
         {
             NtPopulations = gcnew List<Nt_MolecularPopulation^>();
             NtBulkReactions = gcnew List<Nt_Reaction^>();
-            //NtBoundaryReactions = gcnew List<Nt_Reaction^>();
 			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
             NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
 			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
 			BoundaryIndexMap = gcnew Dictionary<int, int>();
-			//Nt_interior = nullptr;
 			initialized = false;
 			InteriorId = -1;
 
@@ -229,30 +225,13 @@ namespace NativeDaphne
             manifoldType = _manifold_type;
             NtPopulations = gcnew List<Nt_MolecularPopulation^>();
             NtBulkReactions = gcnew List<Nt_Reaction^>();
-            //NtBoundaryReactions = gcnew List<Nt_Reaction^>();
 			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
             NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
 			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
 			BoundaryIndexMap = gcnew Dictionary<int, int>();
-			//Nt_interior = nullptr;
 			initialized = false;
 			InteriorId = -1;
         }
-
-   //     Nt_Compartment(Nt_Manifold^ m)
-   //     {
-   //         //manifoldType = _manifold_type;
-   //         NtPopulations = gcnew List<Nt_MolecularPopulation^>();
-   //         NtBulkReactions = gcnew List<Nt_Reaction^>();
-   //         //NtBoundaryReactions = gcnew List<Nt_Reaction^>();
-			//NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
-   //         NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
-			//BoundaryToCellpopMap = gcnew Dictionary<int, int>();
-			//BoundaryIndexMap = gcnew Dictionary<int, int>();
-			//Nt_interior = m;
-			//InteriorId = -1;
-			//initialized = false;
-   //     }
 
 		~Nt_Compartment()
 		{
@@ -322,6 +301,8 @@ namespace NativeDaphne
         /// <param name="dt">The time interval.</param>
         virtual void step(double dt)
         {
+			throw gcnew Exception("NotImplementedException");
+
 			if (!initialized)initialize();
 
             for (int i=0; i< NtBulkReactions->Count; i++)
@@ -343,11 +324,6 @@ namespace NativeDaphne
 				NtPopulations[i]->step(dt);
 			}
         }
-
-		//void AddReaction(Nt_Reaction ^rxn)
-		//{
-		//	NtBulkReactions->Add(rxn);
-		//}
 
 		//add boundary reaction, here key is the manifold id of the boundary.
 		//for a given boundary, there is a list of reactions, here 
@@ -403,7 +379,6 @@ namespace NativeDaphne
 	{
 	public:
 		double CellRadius;
-		//Nt_Compartment^ Boundary;
 
 		Nt_Cytosol(double r) : Nt_Compartment(Nt_ManifoldType::TinyBall)
 		{
@@ -508,6 +483,7 @@ namespace NativeDaphne
 			}
 
 			//for now, this is doing update ecs/membrane boundary
+			//disabled for reactions only
 			for (int i=0; i< NtPopulations->Count; i++)
 			{
 				NtPopulations[i]->step(this, dt);
@@ -629,7 +605,6 @@ namespace NativeDaphne
 					throw gcnew Exception("Wong number of reacitons");
 				}
 
-
 				NtBulkReactions[i]->Step(dt);
 			}
 
@@ -650,16 +625,16 @@ namespace NativeDaphne
 						throw gcnew Exception("Wong number of reacitons");
 					}
 
-
 					 ReactionList[i]->Step(dt);
 				 }
 			}
 
 			//for now, this is doing update ecs/membrane boundary
-			for (int i=0; i< NtPopulations->Count; i++)
-			{
-				NtPopulations[i]->step(this, dt);
-			}
+			//this is disabled for handling reactions ONLY
+			//for (int i=0; i< NtPopulations->Count; i++)
+			//{
+			//	NtPopulations[i]->step(this, dt);
+			//}
 		}
 		
 

@@ -87,7 +87,12 @@
     <Reference Include="MathNet.Numerics">
       <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
+    <Reference Include="NativeDaphne, Version=1.0.5517.29376, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\x64\Debug\NativeDaphne.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ninject">
@@ -112,6 +117,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CellPopulation.cs" />
     <Compile Include="CollisionManager.cs" />
     <Compile Include="ColorHelper.cs" />
     <Compile Include="Common.cs" />

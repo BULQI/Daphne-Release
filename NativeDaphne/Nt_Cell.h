@@ -189,9 +189,6 @@ namespace NativeDaphne
 			void set(Nt_CellSpatialState^ value)
 			{
 				spatialState = value;
-				//for future use
-				//nt_cell->X = spatialState->X->NativePointer;
-				//nt_cell->F = spatialState->F->NativePointer;
 			}
         }
 
@@ -236,7 +233,6 @@ namespace NativeDaphne
 			GridIndex[0] = -1;
 			GridIndex[1] = -1;
 			GridIndex[2] = -1;
-			//gridIndex = GridIndex->NativePointer;
 			gridIndex = (int*)malloc(4 *sizeof(int));
 			GridIndex->NativePointer = gridIndex;
 			PreviousGridIndex = (int*)malloc(4 *sizeof(int));

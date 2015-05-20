@@ -399,7 +399,7 @@ namespace Daphne
                         {
                             for (int k = -1; k <= 1; k++)
                             {
-                                int[] test = neighbor(cell.GridIndex, i, j, k);
+                                int[] test = neighbor(cell.GridIndex.ToArray(), i, j, k);
 
                                 // don't go outside the grid
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != null)

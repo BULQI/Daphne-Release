@@ -5,7 +5,7 @@ using System.Text;
 
 //using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-
+using NativeDaphne;
 namespace ManifoldRing
 {
     /// <summary>
@@ -39,7 +39,8 @@ namespace ManifoldRing
     /// </summary>
     public class Transform
     {
-        private Vector pos;
+        private Nt_Darray darray;
+        //private Vector pos;
         private Matrix rot;
         private double[] position; //storage for pos data
         /// <summary>
@@ -55,7 +56,8 @@ namespace ManifoldRing
         public Transform(bool hasRot = true)
         {
             position = new double[Dim];
-            pos = new DenseVector(Dim);
+            darray = new Nt_Darray(Dim);
+            //pos = new DenseVector(Dim);
             this.HasRot = hasRot;
 
             if (HasRot == true)
@@ -73,7 +75,7 @@ namespace ManifoldRing
             {
                 for (int i = 0; i < Dim; i++)
                 {
-                    position[i] = pos[i];
+                    position[i] = darray[i];
                 }
                 return position;
             }
@@ -83,33 +85,41 @@ namespace ManifoldRing
         /// <summary>
         /// retrieve the translation component
         /// </summary>
-        public Vector Translation
+        public Nt_Darray Translation
         {
-            get { return pos; }
+            get { return darray; }
             set
             {
-                if (pos.Count != value.Count)
+                if (darray.Length != value.Length)
                 {
                     throw new Exception("Dimension mismatch.");
                 }
 
-                pos[0] = value[0]; pos[1] = value[1]; pos[2] = value[2];
+                darray[0] = value[0]; darray[1] = value[1]; darray[2] = value[2];
             }
+        }
+
+        public void setTranslationByReference(Nt_Darray x)
+        {
+            if (darray.Length != x.Length)
+            {
+                throw new Exception("Dimension mismatch.");
+            }
+            darray = x;
         }
 
         /// <summary>
         /// make the tranlation point to an external position vector; will stay in synch
         /// </summary>
         /// <param name="x">the position vector to synch with</param>
-        public void setTranslationByReference(Vector x)
-        {
-            if (pos.Count != x.Count)
-            {
-                throw new Exception("Dimension mismatch.");
-            }
-
-            pos = x;
-        }
+        //public void setTranslationByReference(Vector x)
+        //{
+        //    if (pos.Count != x.Count)
+        //    {
+        //        throw new Exception("Dimension mismatch.");
+        //    }
+        //    pos = x;
+        //}
 
         /// <summary>
         /// retrieve the rotation component
@@ -156,12 +166,15 @@ namespace ManifoldRing
         /// <param name="x">delta x</param>
         public void translate(Vector x)
         {
-            if (pos.Count != x.Count)
+            if (darray.Length != x.Count)
             {
                 throw new Exception("Dimension mismatch.");
             }
-
-            pos = (DenseVector)(pos + x);
+            for (int i = 0; i < darray.Length; i++)
+            {
+                darray[i] += x[i];
+            }
+            //pos = (DenseVector)(pos + x);
         }
 
         /// <summary>
@@ -223,15 +236,21 @@ namespace ManifoldRing
 
                 tmp = (DenseMatrix)rot.Multiply(tmp);
 
-                tmp[0, 0] += pos[0];
-                tmp[1, 0] += pos[1];
-                tmp[2, 0] += pos[2];
+                tmp[0, 0] += darray[0];
+                tmp[1, 0] += darray[1];
+                tmp[2, 0] += darray[2];
 
                 return (Vector)tmp.Column(0);
             }
             else
             {
-                return (Vector)(x + pos);
+                Vector tmp = new DenseVector(Dim);
+                for (int i = 0; i < tmp.Count; i++)
+                {
+                    tmp[i] = x[i] + darray[i];
+                }
+                return tmp;
+                //return (Vector)(x + pos);
             }
         }
 
@@ -255,9 +274,9 @@ namespace ManifoldRing
                 tmp[1, 0] = x[1];
                 tmp[2, 0] = x[2];
 
-                tmp[0, 0] -= pos[0];
-                tmp[1, 0] -= pos[1];
-                tmp[2, 0] -= pos[2];
+                tmp[0, 0] -= darray[0];
+                tmp[1, 0] -= darray[1];
+                tmp[2, 0] -= darray[2];
 
                 tmp = (Matrix)rot.Inverse().Multiply(tmp);
 
@@ -265,7 +284,14 @@ namespace ManifoldRing
             }
             else
             {
-                return (Vector)(x - pos);
+                Vector tmp = new DenseVector(Dim);
+                for (int i = 0; i < tmp.Count; i++)
+                {
+                    tmp[i] = x[i] - darray[i];
+                }
+                return tmp;
+
+                //return (Vector)(x - pos);
             }
         }
     }

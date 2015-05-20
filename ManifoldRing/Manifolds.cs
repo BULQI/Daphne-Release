@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using MathNet.Numerics.LinearAlgebra.Double;
+using NativeDaphne;
 
 namespace ManifoldRing
 {
@@ -400,7 +400,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            double[] array = laplacian.array;
+            var array = laplacian.array;
             array[0] = 0;
             array[1] = sf.array[1];
             array[2] = sf.array[2];
@@ -596,7 +596,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            double[] array = laplacian.array;
+            var array = laplacian.array;
             array[0] = 0;
             array[1] = sf.array[1];
             array[2] = sf.array[2];
@@ -638,7 +638,7 @@ namespace ManifoldRing
                 throw new Exception("Manifold mismatch: flux for TinyBall must be on TinySphere.");
             }
 
-            double[] array = diffusionField.array;
+            var array = diffusionField.array;
             array[0] = 3 * flux.array[0] / radius;
             array[1] = 5 * flux.array[1] / radius;
             array[2] = 5 * flux.array[2] / radius;
@@ -981,7 +981,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation.ToArray();
+            double[] pos = t.Translation.ArrayCopy;
             Vector x = new DenseVector(new double[3]);
 
             for (int i = 0; i < ArraySize; i++)
@@ -1455,7 +1455,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-                double[] pos = t.Translation.ToArray();
+                double[] pos = t.Translation.ArrayCopy;
                 to.array[0] = from.Value(pos);
 
                 return to;
