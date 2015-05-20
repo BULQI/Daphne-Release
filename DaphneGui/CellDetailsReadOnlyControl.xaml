@@ -61,6 +61,7 @@
                     </CompositeCollection>
                 </ComboBox.ItemsSource>
             </ComboBox>
+
                 <StackPanel Margin="0,4">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
@@ -101,7 +102,7 @@
                             </TextBox>
                         </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </StackPanel>                
             </StackPanel>
         </DataTemplate>
 

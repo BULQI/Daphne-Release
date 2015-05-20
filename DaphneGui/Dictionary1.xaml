@@ -44,8 +44,11 @@
     <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
     <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
+    <DataTemplate DataType="{x:Type DataGrid}">
+        
+    </DataTemplate>
 
-    <!--This is used to diaplay a tooltip for a grid cell-->
+    <!--This is used to display a tooltip for a grid cell-->
     <Style TargetType="DataGridCell" x:Key="gridCellTextStyle">
         <Setter Property="ToolTip">
             <Setter.Value>
