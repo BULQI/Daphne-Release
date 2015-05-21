@@ -265,7 +265,6 @@ namespace DaphneGui
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
 
-
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
         private const int ATTACH_PARENT_PROCESS = -1;
@@ -282,7 +281,7 @@ namespace DaphneGui
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
-            ST_RenderSkinWindow.Visibility = Visibility.Collapsed;            
+            ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
 
             this.ToolWinCellInfo.Close();
 
@@ -494,7 +493,24 @@ namespace DaphneGui
             do
             {
                 // attempt to load a default simulation file; if it doesn't exist disable the gui
-                protocol_path = new Uri(appPath + @"\Config\" + file);
+                if (openLastScenarioMenu.IsChecked == true)
+                {
+                    string folder = System.IO.Path.GetDirectoryName(file);
+                    folder = folder.Trim();
+                    if (folder.Length == 0)
+                    {
+                        protocol_path = new Uri(appPath + @"\Config\" + file);
+                    }
+                    else
+                    {
+                        protocol_path = new Uri(file);
+                    }
+                }
+                else
+                {
+                    protocol_path = new Uri(appPath + @"\Config\" + file);
+                }
+                
                 orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
 
                 file_exists = File.Exists(protocol_path.LocalPath);
@@ -1040,7 +1056,7 @@ namespace DaphneGui
 
             dlg.OverwritePrompt = true;
             dlg.InitialDirectory = orig_path;
-            dlg.FileName = "store"; // Default file name
+            dlg.FileName = "new_store"; // Default file name
             dlg.DefaultExt = ".json"; // Default file extension
             dlg.Filter = "Daphne Stores JSON docs (.json)|*.json"; // Filter files by extension
 
@@ -1918,7 +1934,7 @@ namespace DaphneGui
             if (dialog.ShowDialog() == true)
             {
                 //Get selected color
-                Color c = dialog.ActualColor;
+                Color c = dialog.CurrentColor;
 
                 //Values need to be between 0 and 1
                 rgb[0] = c.R / (double)255;
@@ -2677,109 +2693,41 @@ namespace DaphneGui
 
         private void saveStore(Level store, string storeName)
         {
-            ////string messageBoxText = storeName + " has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(store.FileName) + "?";
-            ////string caption = storeName + " Changed";
-            ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
-            ////MessageBoxImage icon = MessageBoxImage.Warning;
-
-            ////// Display message box
-            ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-
-            ////if (result == MessageBoxResult.Cancel)
-            ////{
-            ////    return;
-            ////}
-            ////else if (result == MessageBoxResult.No)
-            ////{
-            ////    saveStoreUsingDialog(store, store.FileName);
-            ////}
-            ////else
-            ////{
-                FileInfo info = new FileInfo(store.FileName);
-                if (info.IsReadOnly == false || !info.Exists)
+            FileInfo info = new FileInfo(store.FileName);
+            if (info.IsReadOnly == false || !info.Exists)
+            {
+                store.SerializeToFile(false);
+                if (storeName == "DaphneStore")
                 {
-                    store.SerializeToFile(false);
-                    if (storeName == "DaphneStore")
-                    {
-                        orig_daphne_store_content = store.SerializeToString();
-                    }
-                    else if (storeName == "UserStore")
-                    {
-                        orig_user_store_content = store.SerializeToString();
-                    }
+                    orig_daphne_store_content = store.SerializeToString();
                 }
-                else
+                else if (storeName == "UserStore")
                 {
-                    string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                    string caption = "File write protected";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Warning;
-                    MessageBox.Show(messageBoxText, caption, button, icon);
+                    orig_user_store_content = store.SerializeToString();
                 }
-            ////}
+            }
+            else
+            {
+                string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                string caption = "File write protected";
+                MessageBoxButton button = MessageBoxButton.OK;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBox.Show(messageBoxText, caption, button, icon);
+            }
         }
 
         private void saveStoreFiles()
         {
             //DaphneStore
-            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
+            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content && CellStudioToolWindow.DataContext == SOP.DaphneStore)
             {
                 saveStore(sop.DaphneStore, "DaphneStore");
-
-                ////string messageBoxText = "Daphne store has changed. Do you want to overwrite the information in " + System.IO.Path.GetFileName(sop.DaphneStore.FileName) + "?";
-                ////string caption = "Daphne Store Changed";
-                ////MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                ////MessageBoxImage icon = MessageBoxImage.Warning;
-
-                ////// Display message box
-                ////MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-
-                ////if (result == MessageBoxResult.Cancel)
-                ////{
-                ////    return;
-                ////}
-                ////else if (result == MessageBoxResult.No)
-                ////{
-                ////    saveStoreUsingDialog(sop.DaphneStore, sop.DaphneStore.FileName);
-                ////}
-                ////else
-                ////{
-                ////    FileInfo info = new FileInfo(sop.DaphneStore.FileName);
-                ////    if (info.IsReadOnly == false || !info.Exists)
-                ////    {
-                ////        sop.DaphneStore.SerializeToFile(false);
-                ////        orig_daphne_store_content = sop.DaphneStore.SerializeToString();
-                ////    }
-                ////    else
-                ////    {
-                ////        messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
-                ////        caption = "File write protected";
-                ////        button = MessageBoxButton.OK;
-                ////        icon = MessageBoxImage.Warning;
-                ////        MessageBox.Show(messageBoxText, caption, button, icon);
-                ////    }
-                ////}
             }
 
             //UserStore
-            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
+            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content && CellStudioToolWindow.DataContext == SOP.UserStore)
             {
                 saveStore(sop.UserStore, "UserStore");
-
-                ////FileInfo info = new FileInfo(sop.UserStore.FileName);
-                ////if (info.IsReadOnly == false || !info.Exists)
-                ////{
-                ////    sop.UserStore.SerializeToFile(false);
-                ////    orig_user_store_content = sop.UserStore.SerializeToString();
-                ////}
-                ////else
-                ////{
-                ////    string messageBoxText = "The file is write protected: " + sop.UserStore.FileName;
-                ////    string caption = "File write protected";
-                ////    MessageBoxButton button = MessageBoxButton.OK;
-                ////    MessageBoxImage icon = MessageBoxImage.Warning;
-                ////    MessageBox.Show(messageBoxText, caption, button, icon);
-                ////}
             }
         }
 
@@ -3241,18 +3189,6 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            //If we're in UserStore or DaphneStore mode, do this and return.
-            if (CellStudioToolWindow.DataContext == SOP.UserStore)
-            {
-                saveStore(sop.UserStore, "UserStore");
-                return;
-            }
-            else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
-            {
-                saveStore(sop.DaphneStore, "DaphneStore");
-                return;
-            }
-
             ToolWin.Apply();
 
             FileInfo fi = new FileInfo(sop.Protocol.FileName);
@@ -3272,7 +3208,6 @@ namespace DaphneGui
                 // display message box
                 MessageBox.Show(messageBoxText, caption, button, icon);
             }
-            saveStoreFiles();
             tempFileContent = false;
         }
 
@@ -3325,7 +3260,8 @@ namespace DaphneGui
             // if this option is selected then save the currently open scenario file name
             if (openLastScenarioMenu.IsChecked == true)
             {
-                Properties.Settings.Default.lastOpenScenario = extractFileName();
+                ////Properties.Settings.Default.lastOpenScenario = extractFileName();  //
+                Properties.Settings.Default.lastOpenScenario = protocol_path.LocalPath;
             }
 
             // save the preferences
@@ -3808,6 +3744,21 @@ namespace DaphneGui
 
                 //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;    
                 //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+        }
+
+        private void menuAdminSave_Click(object sender, RoutedEventArgs e)
+        {
+            //If we're in UserStore or DaphneStore mode, do this and return.
+            if (CellStudioToolWindow.DataContext == SOP.UserStore)
+            {
+                saveStore(sop.UserStore, "UserStore");
+                return;
+            }
+            else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
+            {
+                saveStore(sop.DaphneStore, "DaphneStore");
+                return;
             }
         }
 

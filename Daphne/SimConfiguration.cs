@@ -4439,12 +4439,14 @@ namespace Daphne
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
+        public ObservableCollection<bool> plotStates { get; set; }
 
         public ConfigTransitionDriver()
             : base()
         {
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
+            plotStates = new ObservableCollection<bool>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4509,6 +4511,92 @@ namespace Daphne
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// add a state; this keeps state names and plot booleans in synch
+        /// </summary>
+        /// <param name="name">the state name</param>
+        /// <param name="plot">initial plot on / off value</param>
+        public void AddStateNamePlot(string name, bool plot)
+        {
+            states.Add(name);
+            plotStates.Add(plot);
+        }
+
+        /// <summary>
+        /// insert a state; this keeps state names and plot booleans in synch
+        /// </summary>
+        /// <param name="index">index at which to insert</param>
+        /// <param name="name">the state name</param>
+        /// <param name="plot">initial plot on / off value</param>
+        public void InsertStateNamePlot(int index, string name, bool plot)
+        {
+            states.Insert(index, name);
+            plotStates.Insert(index, plot);
+        }
+
+        /// <summary>
+        /// remove a state; this keeps state names and plot booleans in synch
+        /// </summary>
+        /// <param name="index">index at which to remove</param>
+        public void RemoveStateNamePlot(int index)
+        {
+            states.RemoveAt(index);
+            plotStates.RemoveAt(index);
+        }
+
+        public void InsertState(int insertIndex, string sname)
+        {
+            InsertStateNamePlot(insertIndex, sname, false);
+            InsertTransitionDriverColumn(insertIndex);
+            InsertTransitionDriverRow(insertIndex);
+        }
+
+        public void InsertTransitionDriverRow(int insertIndex)
+        {
+            // Create a new row of empty molecule-driven transition driver elements with the default parameters
+            //      Alpha = Beta = 0, driver_mol_guid_ref = ""
+            ConfigTransitionDriverRow row = new ConfigTransitionDriverRow();
+            for (int i = 0; i < states.Count; i++)
+            {
+                row.elements.Add(new ConfigMolTransitionDriverElement());
+                row.elements[i].CurrentState = insertIndex;
+                row.elements[i].CurrentStateName = states[insertIndex];
+                row.elements[i].DestState = i;
+                row.elements[i].DestStateName = states[i]; 
+            }
+
+            // Insert the row in array of driver elements
+            DriverElements.Insert(insertIndex, row);
+
+            // Update the current and destination state values for the inserted and following rows
+            for (int i = insertIndex + 1; i < states.Count; i++)
+            {
+                for (int j = 0; j < states.Count; j++)
+                {
+                    DriverElements[i].elements[j].CurrentState = i;
+                    DriverElements[i].elements[j].CurrentStateName = states[i];
+                }   
+            }
+        }
+
+        public void InsertTransitionDriverColumn(int insertIndex)
+        {
+            // Insert a column in the elements using the previous size (states.Count - 1)
+            for (int i = 0; i < states.Count - 1; i++)
+            {
+                DriverElements[i].elements.Insert(insertIndex, new ConfigMolTransitionDriverElement());
+
+                // update current and destination states starting at the inserted column and up to the new size (states.Count)
+                for (int j = insertIndex; j < states.Count; j++)
+                {
+                    DriverElements[i].elements[j].CurrentState = i;
+                    DriverElements[i].elements[j].CurrentStateName = states[i];
+                    DriverElements[i].elements[j].DestState = j;
+                    DriverElements[i].elements[j].DestStateName = states[j];
+                }
+            }
         }
 
     }
@@ -4626,69 +4714,22 @@ namespace Daphne
             return NewStateName;
         }
 
-        public void AddState(string sname)
+        public void InsertState(string sname, int insertIndex)
         {
-            //Add a row in Epigenetic Table
+            // Insert the state and adjust the transition regulators
+            Driver.InsertState(insertIndex, sname);
+            OnPropertyChanged("Driver");
+
+            // Create an activation row of zeros
             ConfigActivationRow row = new ConfigActivationRow();
             for (int i = 0; i < genes.Count; i++)
             {
-                row.activations.Add(0);
+                row.activations.Add(0.0);
             }
 
-            //For division, need to add new state before cytokinetic state
-            if (Name == "Division" && sname != "cytokinetic")
-            {
-                int insertIndex = Driver.states.Count - 1;
-                if (insertIndex < 0) insertIndex = 0;
-                Driver.states.Insert(insertIndex, sname);
-                activationRows.Insert(insertIndex, row);
-            }
-            else
-            {
-                Driver.states.Add(sname);
-                activationRows.Add(row);
-            }
-
+            // Insert the row in the Epigenetic Table
+            activationRows.Insert(insertIndex, row);
             OnPropertyChanged("activationRows");
-
-            //Add a row AND a column in Differentiation Table
-            ConfigTransitionDriverRow trow;
-
-            //Add a column to existing rows - NEED TO SKIP LAST ONE?
-            for (int k = 0; k < Driver.states.Count - 1; k++)
-            {
-                trow = Driver.DriverElements[k];
-                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = Driver.states[k];
-                e.CurrentState = k;
-                e.DestState = Driver.states.Count - 1;
-                e.DestStateName = Driver.states[Driver.states.Count - 1];
-                trow.elements.Add(e);
-            }
-
-            //Add a row
-            trow = new ConfigTransitionDriverRow();
-            for (int j = 0; j < Driver.states.Count; j++)
-            {
-                ConfigMolTransitionDriverElement e = new ConfigMolTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = sname;
-                e.CurrentState = Driver.states.Count - 1;
-                e.DestState = j;
-                e.DestStateName = Driver.states[j];
-                trow.elements.Add(e);
-            }
-
-            //Driver.DriverElements.Add(trow);
-            int row_count = Driver.DriverElements.Count;
-            Driver.DriverElements.Insert(row_count, trow);
-
-            OnPropertyChanged("Driver");
         }
 
         public void DeleteState(int index)
@@ -4704,7 +4745,7 @@ namespace Daphne
             }
 
             activationRows.RemoveAt(index);
-            Driver.states.RemoveAt(index);
+            Driver.RemoveStateNamePlot(index);
             Driver.DriverElements.RemoveAt(index);
 
             //NOW LOOP THRU ALL REMAINING DRIVERELEMENTS
@@ -4756,7 +4797,7 @@ namespace Daphne
                 return;
 
             string state = Driver.states[sourceIndex];
-            Driver.states.RemoveAt(sourceIndex);
+            Driver.RemoveStateNamePlot(sourceIndex);
             Driver.states.Insert(targetIndex, state);  
 
             ConfigActivationRow car = new ConfigActivationRow();
@@ -7524,20 +7565,6 @@ namespace Daphne
         }
     }
 
-    public class PlotStates
-    {
-        public ObservableCollection<bool> Death { get; set; }
-        public ObservableCollection<bool> Division { get; set; }
-        public ObservableCollection<bool> Differentiation { get; set; }
-
-        public PlotStates()
-        {
-            Death = new ObservableCollection<bool>();
-            Division = new ObservableCollection<bool>();
-            Differentiation = new ObservableCollection<bool>();
-        }
-    }
-
     public class ReportStates
     {
         public bool Death { get; set; }
@@ -7605,71 +7632,6 @@ namespace Daphne
             set
             {
                 report_states = value;
-            }
-        }
-
-        private PlotStates plot_states;
-        public PlotStates plotStates
-        {
-            get
-            {
-                return plot_states;
-            }
-            set
-            {
-                plot_states = value;
-            }
-        }
-
-        /// <summary>
-        /// create the correct number of default plot states, set to false; if the existing states
-        /// have the correct number then leave them as they are
-        /// </summary>
-        public void CreatePlotStates()
-        {
-            if (Cell == null)
-            {
-                plot_states.Death.Clear();
-                plot_states.Differentiation.Clear();
-                plot_states.Division.Clear();
-                return;
-            }
-
-            if (Cell.death_driver == null)
-            {
-                plot_states.Death.Clear();
-            }
-            else if (plot_states.Death.Count != Cell.death_driver.states.Count)
-            {
-                plot_states.Death.Clear();
-                foreach (string s in Cell.death_driver.states)
-                {
-                    plot_states.Death.Add(false);
-                }
-            }
-            if (Cell.diff_scheme == null)
-            {
-                plot_states.Differentiation.Clear();
-            }
-            else if (plot_states.Differentiation.Count != Cell.diff_scheme.Driver.states.Count)
-            {
-                plot_states.Differentiation.Clear();
-                foreach (string s in Cell.diff_scheme.Driver.states)
-                {
-                    plot_states.Differentiation.Add(false);
-                }
-            }
-            if (Cell.div_scheme == null)
-            {
-                plot_states.Division.Clear();
-            }
-            else if (plot_states.Division.Count != Cell.div_scheme.Driver.states.Count)
-            {
-                plot_states.Division.Clear();
-                foreach (string s in Cell.div_scheme.Driver.states)
-                {
-                    plot_states.Division.Add(false);
-                }
             }
         }
 
@@ -7756,8 +7718,6 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();
-            // plotting
-            plot_states = new PlotStates();
 
             renderLabel = cellpopulation_guid;
         }

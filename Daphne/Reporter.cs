@@ -143,7 +143,12 @@ namespace Daphne
             }
         }
 
-        public virtual CellTrackData ProvideTrackData(int cellID)
+        public virtual CellTrackData ProvideCellTrackData(int cellID)
+        {
+            return null;
+        }
+
+        public virtual CellPopulationDynamicsData ProvideCellPopulationDynamicsData(CellPopulation pop)
         {
             return null;
         }
@@ -940,8 +945,8 @@ namespace Daphne
         /// extracts and returns the track data for a cell
         /// </summary>
         /// <param name="cellID">the cell's id</param>
-        /// <returns>track data in a dictionary keyed by the time step with values position array</returns>
-        public override CellTrackData ProvideTrackData(int cellID)
+        /// <returns>track data with lists of times and matching positions</returns>
+        public override CellTrackData ProvideCellTrackData(int cellID)
         {
             CellTrackData data = null;
 
@@ -958,7 +963,7 @@ namespace Daphne
                            path = hSim.HDF5FileHandle.FilePath,
                            line;
                     string[] parts;
-                    int cell_id = 0, time = 0, pos_x = 0, pos_y = 0, pos_z = 0, assigned = 0;
+                    int cell_id = 0, time = 0, pos_x = 0, pos_y = 0, pos_z = 0, total = 5, assigned = 0;
                     StreamReader stream = new StreamReader(path + file);
 
                     // read description
@@ -967,7 +972,7 @@ namespace Daphne
                     line = stream.ReadLine();
                     // find indices of interest
                     parts = line.Split();
-                    for(int i = 0; i < parts.Length && assigned < 5; i++)
+                    for(int i = 0; i < parts.Length && assigned < total; i++)
                     {
                         if(parts[i] == "cell_id")
                         {
@@ -1007,6 +1012,112 @@ namespace Daphne
                     }
                     stream.Close();
                 }
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// extract the cell population dynamics data
+        /// </summary>
+        /// <param name="pop">cell population we want to plot</param>
+        /// <returns>an object with lists for the state names for processing and lists for the times and matching states</returns>
+        public override CellPopulationDynamicsData ProvideCellPopulationDynamicsData(CellPopulation pop)
+        {
+            CellPopulationDynamicsData data = null;
+
+            // is the needed data there?
+            if ((pop.reportStates.Death == true || pop.reportStates.Differentiation == true || pop.reportStates.Division == true) &&
+                tsFiles.CellTypeReport.ContainsKey(pop.cellpopulation_id) == true)
+            {
+                string file = tsFiles.CellTypeReport[pop.cellpopulation_id],
+                        path = hSim.HDF5FileHandle.FilePath,
+                        line;
+                string[] parts;
+                int time = 0, death = -1, diff = -1, div = -1, total = 1, assigned = 0,
+                    ipart;
+                double dtime;
+                StreamReader stream = new StreamReader(path + file);
+
+                // create the data
+                data = new CellPopulationDynamicsData(pop);
+                // we can only read out states that were reported
+                if (pop.reportStates.Death == true)
+                {
+                    total++;
+                }
+                if (pop.reportStates.Differentiation == true)
+                {
+                    total++;
+                }
+                if (pop.reportStates.Division == true)
+                {
+                    total++;
+                }
+                // read description
+                stream.ReadLine();
+                // read header
+                line = stream.ReadLine();
+                // find indices of interest
+                parts = line.Split();
+                for (int i = 0; i < parts.Length && assigned < total; i++)
+                {
+                    if (parts[i] == "time")
+                    {
+                        time = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "DeathState")
+                    {
+                        death = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "DiffState")
+                    {
+                        diff = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "DivState")
+                    {
+                        div = i;
+                        assigned++;
+                    }
+                }
+
+                // now read all remaining lines and process them / add up the dynamics values per cell
+                while ((line = stream.ReadLine()) != null)
+                {
+                    parts = line.Split('\t');
+                    dtime = Convert.ToDouble(parts[time]);
+                    // add zero entries for this time if it is a new time (checked in the function)
+                    data.AddSet(dtime);
+
+                    // now the individual states
+                    // death
+                    if (death >= 0)
+                    {
+                        // the entry converted to int
+                        ipart = Convert.ToInt32(parts[death]);
+                        // increment that state
+                        data.IncrementState(CellPopulationDynamicsData.State.DEATH, ipart);
+                    }
+                    // diff
+                    if (diff >= 0)
+                    {
+                        // the entry converted to int
+                        ipart = Convert.ToInt32(parts[diff]);
+                        // increment that state
+                        data.IncrementState(CellPopulationDynamicsData.State.DIFF, ipart);
+                    }
+                    // div
+                    if (div >= 0)
+                    {
+                        // the entry converted to int
+                        ipart = Convert.ToInt32(parts[div]);
+                        // increment that state
+                        data.IncrementState(CellPopulationDynamicsData.State.DIV, ipart);
+                    }
+                }
+                stream.Close();
             }
             return data;
         }
@@ -1358,6 +1469,139 @@ namespace Daphne
         public override void WriteLine(StreamWriter writer)
         {
             writer.WriteLine("{0}\t{1}\t{2}\t{3}", this.cell_id, this.time, this.daughter_id, this.generation);
+        }
+    }
+
+    public class CellPopulationDynamicsData
+    {
+        public enum State { DEATH, DIV, DIFF };
+        public List<double> Times { get; private set; }
+        private Dictionary<int, List<int>> deathStates;
+        private Dictionary<int, List<int>> divStates;
+        private Dictionary<int, List<int>> diffStates;
+        private double lastTime;
+
+
+        /// <summary>
+        /// constructor creates the data structures to be filled for a population's dynamics plot
+        /// </summary>
+        /// <param name="pop">the population to be plotted</param>
+        public CellPopulationDynamicsData(CellPopulation pop)
+        {
+            // read out the possible states in this population
+            ConfigCell cell = pop.Cell;
+            int i;
+
+            Times = new List<double>();
+            lastTime = -1;
+            
+            // death
+            if (pop.reportStates.Death == true)
+            {
+                deathStates = new Dictionary<int, List<int>>();
+                for (i = 0; i < cell.death_driver.states.Count; i++)
+                {
+                    deathStates.Add(i, new List<int>());
+                }
+            }
+            // diff
+            if (pop.reportStates.Differentiation == true)
+            {
+                diffStates = new Dictionary<int, List<int>>();
+                for (i = 0; i < cell.diff_scheme.Driver.states.Count; i++)
+                {
+                    diffStates.Add(i, new List<int>());
+                }
+            }
+            // div
+            if (pop.reportStates.Division == true)
+            {
+                divStates = new Dictionary<int, List<int>>();
+                for (i = 0; i < cell.div_scheme.Driver.states.Count; i++ )
+                {
+                    divStates.Add(i, new List<int>());
+                }
+            }
+        }
+
+        /// <summary>
+        /// add a zeroed set of states at a given time
+        /// </summary>
+        /// <param name="time">time step value</param>
+        public void AddSet(double time)
+        {
+            // only append one set per timestep
+            if (time == lastTime)
+            {
+                return;
+            }
+            lastTime = time;
+
+            // add the time
+            Times.Add(time);
+            // add a counter for each state, set to zero
+            foreach (List<int> l in deathStates.Values)
+            {
+                l.Add(0);
+            }
+            foreach (List<int> l in diffStates.Values)
+            {
+                l.Add(0);
+            }
+            foreach (List<int> l in divStates.Values)
+            {
+                l.Add(0);
+            }
+        }
+
+        /// <summary>
+        /// increment the last entry for the state with the given index
+        /// </summary>
+        /// <param name="state">enum identifying the state</param>
+        /// <param name="name">state index</param>
+        public void IncrementState(State state, int index)
+        {
+            if (state == State.DEATH)
+            {
+                deathStates[index][Times.Count - 1]++;
+            }
+            else if (state == State.DIFF)
+            {
+                diffStates[index][Times.Count - 1]++;
+            }
+            else if (state == State.DIV)
+            {
+                divStates[index][Times.Count - 1]++;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// retrieve the series for a state
+        /// </summary>
+        /// <param name="state">enum identifying the state</param>
+        /// <param name="name">state index</param>
+        public List<int> GetState(State state, int index)
+        {
+            if (state == State.DEATH)
+            {
+                return deathStates[index];
+            }
+            else if (state == State.DIFF)
+            {
+                return diffStates[index];
+            }
+            else if (state == State.DIV)
+            {
+                return divStates[index];
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -107,6 +107,7 @@
     <Reference Include="ActiproSoftware.Editors.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Editors.Wpf.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ActiproSoftware.Shared.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -175,9 +176,6 @@
     </ApplicationDefinition>
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="AddDiffState.xaml.cs">
-      <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddEditGene.xaml.cs">
       <DependentUpon>AddEditGene.xaml</DependentUpon>
@@ -290,7 +288,6 @@
       <DependentUpon>ChartViewToolWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Workbench\DiffScheme.cs" />
     <Compile Include="Workbench\EditRCReactions.xaml.cs">
       <DependentUpon>EditRCReactions.xaml</DependentUpon>
     </Compile>
@@ -302,10 +299,6 @@
       <DependentUpon>NewEditReacComplex.xaml</DependentUpon>
     </Compile>
     <Page Include="About.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="AddDiffState.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

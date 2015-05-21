@@ -12,7 +12,7 @@
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Daphne"
-        Width="1400" Height="770" Closing="Window_Closing"
+        Width="1500" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
         Name="mainWindow"
         LocationChanged="mainWindow_LocationChanged"
@@ -182,7 +182,7 @@
                 <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
                     <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
-                    <MenuItem Header="Save" Name="menuAdminSave" Command="ApplicationCommands.Save" Visibility="Collapsed" />
+                    <MenuItem Header="Save" Name="menuAdminSave" Visibility="Collapsed" Click="menuAdminSave_Click"/>
                     <MenuItem Header="Save As..." Name="menuAdminSaveAs" Click="menuAdminSaveAs_Click" Visibility="Collapsed" />
                     <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
                 </MenuItem>
@@ -607,7 +607,12 @@
                                                     <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <Separator ToolBar.OverflowMode="Never"/>
-                                                <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Background: " VerticalAlignment="Center" Margin="2,2,0,0"></TextBlock>
+                                                    <uc:GreyScaleColorPicker x:Name="picker" VerticalAlignment="Bottom" Width="100"  SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                                <Separator ToolBar.OverflowMode="Never" Margin="4,0"/>
+                                                <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>                                                
                                             </ToolBar>
                                         </ToolBarTray>
 

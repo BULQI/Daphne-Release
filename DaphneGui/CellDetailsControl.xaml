@@ -50,7 +50,7 @@
         <DataTemplate x:Key="Mol_TDE_dgCell_Editing" >
             <StackPanel Orientation="Vertical">
             <ComboBox Name="MolPopComboBox"
-                          DisplayMemberPath="Name"
+                          DisplayMemberPath="Name" 
                           >
 
                 <ComboBox.SelectedValue>
@@ -89,7 +89,7 @@
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
-
+                    
                     <TextBlock Text="Transition rate values" />
 
                     <StackPanel Orientation="Vertical" Margin="0,4">
