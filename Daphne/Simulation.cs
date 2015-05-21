@@ -873,9 +873,9 @@ namespace Daphne
             dataBasket.Environment.Comp.RemoveBoundary(c.PlasmaMembrane.Interior.Id);
             dataBasket.Environment.Comp.RemoveBoundaryTransform(c.PlasmaMembrane.Interior.Id);
 
-            // remove the actual cell
-            dataBasket.Cells.Remove(c.Cell_id);
-            dataBasket.Populations[c.Population_id].RemoveCell(c.Cell_id);
+            // remove the actual cell - moved to databasket.RemoveCell
+            //dataBasket.Cells.Remove(c.Cell_id);
+            //dataBasket.Populations[c.Population_id].RemoveCell(c.Cell_id);
         }
 
         public virtual void RunForward()

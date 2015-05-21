@@ -298,6 +298,11 @@ namespace Daphne
                 Differentiator.TransitionOccurred = false;
                 DifferentiationState = Differentiator.CurrentState;
             }
+            
+            if (alive && isMotile && (!exiting))
+            {
+                this.EnforceBC();
+            }
         }
 
         public void SetGeneActivities(ITransitionScheme scheme)

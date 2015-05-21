@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using NativeDaphne;
 using Gene = NativeDaphne.Nt_Gene;
+using System.Diagnostics;
 
 namespace Daphne
 {
@@ -46,10 +47,15 @@ namespace Daphne
             }
         }
 
+        //for debug
+        public static int iteration_count = 0;
+
         public void Step(double dt)
         {
             List<int> removalList = null;
             List<Cell> daughterList = null;
+
+            iteration_count++;
 
             //steps through cell populations - it is ONLY handling reactions for now.
             foreach (KeyValuePair<int, CellsPopulation> kvp in SimulationBase.dataBasket.Populations)
