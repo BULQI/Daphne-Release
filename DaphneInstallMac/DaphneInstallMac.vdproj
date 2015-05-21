@@ -280,12 +280,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_94DCEEDC8C0561C9D6CA37FEA66F205E"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_82B7518D998A430CB0CEBF9FF70615EF"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -389,6 +383,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_9A4E1247C8D0298E3FB115930FB061BB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_94DCEEDC8C0561C9D6CA37FEA66F205E"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -1621,7 +1621,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Daphne"
         "ProductCode" = "8:{433BA1AC-4C06-4BBB-B70C-32A37DC92459}"
-        "PackageCode" = "8:{D9A012DD-96C7-41A1-B089-73E3B5D7C527}"
+        "PackageCode" = "8:{05D0B036-46F3-4610-B168-3728B3E653D8}"
         "UpgradeCode" = "8:{87AE3FB4-1748-4B6D-8A4A-FB3C106B782A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -1743,16 +1743,16 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_55CFF041D06F40F8BFC198009E52AEAC"
             {
-            "Name" = "8:Daphne.ico"
+            "Name" = "8:Daphne"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_8BDABAEB426C4E7E9607598789E0B9CB"
+            "Target" = "8:_82B7518D998A430CB0CEBF9FF70615EF"
             "Folder" = "8:_183CE68C8BED4003935730F5015C103B"
             "WorkingFolder" = "8:_BED9B14AE72746E6802303F2C68D6881"
-            "Icon" = "8:"
+            "Icon" = "8:_8BDABAEB426C4E7E9607598789E0B9CB"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AAF9DA067061409EA5C3C3ADCAACFE43"
@@ -1780,7 +1780,7 @@
             "Target" = "8:_82B7518D998A430CB0CEBF9FF70615EF"
             "Folder" = "8:_0353C18E71044CE3A88F69B8DD8E9561"
             "WorkingFolder" = "8:_BED9B14AE72746E6802303F2C68D6881"
-            "Icon" = "8:"
+            "Icon" = "8:_8BDABAEB426C4E7E9607598789E0B9CB"
             "Feature" = "8:"
             }
         }
