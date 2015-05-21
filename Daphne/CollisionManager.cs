@@ -71,18 +71,17 @@ namespace Daphne
             //return Math.Max(Math.Max(dx, dy), dz) > maxSep;
         }
 
-        // high and low word; this assumes no cell index is larger than the highest value that can be expressed in a word; if we ever have more cells than that
-        // then the key will have to become a long
-        private int pairKey(int idx1, int idx2)
+        // high and low int
+        private long pairKey(int idx1, int idx2)
         {
-            int max = idx1 > idx2 ? idx1 : idx2,
-                min = max == idx1 ? idx2 : idx1,
-                // half an int (a word) in bits
-                halfIntLength = sizeof(int) * 4,
-                key;
+            long max = idx1 > idx2 ? idx1 : idx2,
+                 min = max == idx1 ? idx2 : idx1,
+                 // half a long, meaning an int, in bits
+                 key;
+            byte halfLongLength = sizeof(long) * 4;
 
             key = max;
-            key <<= halfIntLength;
+            key <<= halfLongLength;
             key |= min;
             return key;
         }
@@ -150,7 +149,7 @@ namespace Daphne
                         continue;
                     }
 
-                    int key = pairKey(del.Cell_id, kvp.Value.Cell_id);
+                    long key = pairKey(del.Cell_id, kvp.Value.Cell_id);
 
                     // remove the pair; will only act if the pair exists
                     if (pairs.Remove(key))
@@ -178,7 +177,7 @@ namespace Daphne
                         continue;
                     }
 
-                    int key = pairKey(oldKey, kvp.Value.Cell_id);
+                    long key = pairKey(oldKey, kvp.Value.Cell_id);
 
                     // remove the pair; will only act if the pair exists
                     if (pairs.ContainsKey(key) == true)
@@ -228,7 +227,7 @@ namespace Daphne
         {
             if (pairs != null)
             {
-                foreach (KeyValuePair<int, Pair> kvp in pairs)
+                foreach (KeyValuePair<long, Pair> kvp in pairs)
                 {
                     // recalculate the distance for pairs
                     kvp.Value.calcDistance(gridSize.ToArray());
@@ -242,13 +241,13 @@ namespace Daphne
         private void updateGridAndPairs()
         {
             List<Cell> criticalCells = null;
-            List<int> removalPairKeys = null;
+            List<long> removalPairKeys = null;
             double[] gridSizeArr = gridSize.ToArray();
 
             // create the pairs dictionary
             if (pairs == null)
             {
-                pairs = new Dictionary<int, Pair>();
+                pairs = new Dictionary<long, Pair>();
             }
 
             int[] idx = new int[3];
@@ -348,13 +347,13 @@ namespace Daphne
             // only keep the critical pairs and update their distance;
             // remove the ones that are no longer critical,
             // i.e. are 'clearly separated' and a) were critical but never became overlapping or b) have broken their bond
-            foreach (KeyValuePair<int, Pair> kvp in pairs)
+            foreach (KeyValuePair<long, Pair> kvp in pairs)
             {
                 if (kvp.Value.isCriticalPair() == false && clearSeparation(kvp.Value) == true || legalIndex(kvp.Value.Cell(0).GridIndex) == false || legalIndex(kvp.Value.Cell(1).GridIndex) == false)
                 {
                     if (removalPairKeys == null)
                     {
-                        removalPairKeys = new List<int>();
+                        removalPairKeys = new List<long>();
                     }
                     removalPairKeys.Add(kvp.Key);
                 }
@@ -398,7 +397,7 @@ namespace Daphne
                                             continue;
                                         }
 
-                                        int key = pairKey(cell.Cell_id, kvpg.Value.Cell_id);
+                                        long key = pairKey(cell.Cell_id, kvpg.Value.Cell_id);
 
                                         // not already inserted
                                         if (pairs.ContainsKey(key) == false)
@@ -476,7 +475,7 @@ namespace Daphne
         private void pairInteractions()
         {
             // compute interaction forces for all pairs and apply to the cells in the pairs (accumulate)
-            foreach (KeyValuePair<int, Pair> kvp in pairs)
+            foreach (KeyValuePair<long, Pair> kvp in pairs)
             {
                 kvp.Value.pairInteract();
             }
@@ -515,12 +514,12 @@ namespace Daphne
         /// <summary>
         /// accessor for pairs
         /// </summary>
-        public Dictionary<int, Pair> Pairs
+        public Dictionary<long, Pair> Pairs
         {
             get { return pairs; }
         }
 
-        private Dictionary<int, Pair> pairs;
+        private Dictionary<long, Pair> pairs;
         private Dictionary<int, Cell>[, ,] grid;
     }
 }
