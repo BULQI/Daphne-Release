@@ -36,7 +36,7 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstall", "DaphneInst
 		{858658F6-6BD4-4009-A49D-AB893B266755} = {858658F6-6BD4-4009-A49D-AB893B266755}
 	EndProjectSection
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstallMac", "Temp\DaphneInstallMac\DaphneInstallMac.vdproj", "{6A4E27AA-8D03-4959-A968-6440CDCABF5B}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstallMac", "DaphneInstallMac\DaphneInstallMac.vdproj", "{6A4E27AA-8D03-4959-A968-6440CDCABF5B}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
@@ -71,10 +71,6 @@ Global
 		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		MacRelease|Any CPU = MacRelease|Any CPU
-		MacRelease|Mixed Platforms = MacRelease|Mixed Platforms
-		MacRelease|x64 = MacRelease|x64
-		MacRelease|x86 = MacRelease|x86
 		Release|Any CPU = Release|Any CPU
 		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|x64 = Release|x64
@@ -89,13 +85,6 @@ Global
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|x64.Build.0 = Debug|x64
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|x86.ActiveCfg = Debug|x64
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|x86.Build.0 = Debug|x64
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|Any CPU.Build.0 = Release|Any CPU
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|Mixed Platforms.ActiveCfg = Release|x64
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|Mixed Platforms.Build.0 = Release|x64
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|x64.ActiveCfg = Release|x64
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|x64.Build.0 = Release|x64
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.MacRelease|x86.ActiveCfg = Release|x64
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Mixed Platforms.ActiveCfg = Release|x64
@@ -110,13 +99,6 @@ Global
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x64.ActiveCfg = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x86.ActiveCfg = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x86.Build.0 = Debug|x64
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|Any CPU.ActiveCfg = MacRelease|x64
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|Mixed Platforms.ActiveCfg = MacRelease|x64
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|Mixed Platforms.Build.0 = MacRelease|x64
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|x64.ActiveCfg = MacRelease|x64
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|x64.Build.0 = MacRelease|x64
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|x86.ActiveCfg = MacRelease|x86
-		{858658F6-6BD4-4009-A49D-AB893B266755}.MacRelease|x86.Build.0 = MacRelease|x86
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Any CPU.ActiveCfg = Release|x86
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Mixed Platforms.ActiveCfg = Release|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Mixed Platforms.Build.0 = Release|x64
@@ -132,13 +114,6 @@ Global
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.Debug|x64.Build.0 = Debug|x64
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.Debug|x86.ActiveCfg = Debug|x64
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.Debug|x86.Build.0 = Debug|x64
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|Any CPU.ActiveCfg = MacRelease|Any CPU
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|Any CPU.Build.0 = MacRelease|Any CPU
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|Mixed Platforms.ActiveCfg = MacRelease|x64
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|Mixed Platforms.Build.0 = MacRelease|x64
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|x64.ActiveCfg = MacRelease|x64
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|x64.Build.0 = MacRelease|x64
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.MacRelease|x86.ActiveCfg = MacRelease|x64
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA}.Release|Mixed Platforms.ActiveCfg = Release|x64
@@ -155,13 +130,6 @@ Global
 		{93211B2D-B05D-4B80-8552-E882D2273DC0}.Debug|x64.Build.0 = Debug|x64
 		{93211B2D-B05D-4B80-8552-E882D2273DC0}.Debug|x86.ActiveCfg = Debug|x64
 		{93211B2D-B05D-4B80-8552-E882D2273DC0}.Debug|x86.Build.0 = Debug|x64
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|Any CPU.ActiveCfg = Release|x64
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|Mixed Platforms.ActiveCfg = Release|x64
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|Mixed Platforms.Build.0 = Release|x64
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|x64.ActiveCfg = Release|x64
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|x64.Build.0 = Release|x64
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|x86.ActiveCfg = Release|x86
-		{93211B2D-B05D-4B80-8552-E882D2273DC0}.MacRelease|x86.Build.0 = Release|x86
 		{93211B2D-B05D-4B80-8552-E882D2273DC0}.Release|Any CPU.ActiveCfg = Release|x86
 		{93211B2D-B05D-4B80-8552-E882D2273DC0}.Release|Mixed Platforms.ActiveCfg = Release|x64
 		{93211B2D-B05D-4B80-8552-E882D2273DC0}.Release|Mixed Platforms.Build.0 = Release|x64
@@ -177,13 +145,6 @@ Global
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Debug|x64.Build.0 = Debug|x64
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Debug|x86.ActiveCfg = Debug|x64
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Debug|x86.Build.0 = Debug|x64
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|Any CPU.ActiveCfg = MacRelease|Any CPU
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|Any CPU.Build.0 = MacRelease|Any CPU
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|Mixed Platforms.ActiveCfg = MacRelease|x64
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|Mixed Platforms.Build.0 = MacRelease|x64
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|x64.ActiveCfg = MacRelease|x64
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|x64.Build.0 = MacRelease|x64
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.MacRelease|x86.ActiveCfg = MacRelease|x64
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Release|Mixed Platforms.ActiveCfg = Release|x64
@@ -199,13 +160,6 @@ Global
 		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|x64.ActiveCfg = Debug|x64
 		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|x64.Build.0 = Debug|x64
 		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|x86.ActiveCfg = Debug|x64
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|Any CPU.ActiveCfg = MacRelease|Any CPU
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|Any CPU.Build.0 = MacRelease|Any CPU
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|Mixed Platforms.ActiveCfg = MacRelease|x64
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|Mixed Platforms.Build.0 = MacRelease|x64
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|x64.ActiveCfg = MacRelease|x64
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|x64.Build.0 = MacRelease|x64
-		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.MacRelease|x86.ActiveCfg = MacRelease|x64
 		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Mixed Platforms.ActiveCfg = Release|x64
@@ -218,14 +172,6 @@ Global
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|Mixed Platforms.ActiveCfg = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|x64.ActiveCfg = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|x86.ActiveCfg = Debug
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|Any CPU.ActiveCfg = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|Any CPU.Build.0 = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|Mixed Platforms.ActiveCfg = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|Mixed Platforms.Build.0 = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|x64.ActiveCfg = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|x64.Build.0 = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|x86.ActiveCfg = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.MacRelease|x86.Build.0 = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Any CPU.ActiveCfg = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Mixed Platforms.ActiveCfg = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|x64.ActiveCfg = Release
@@ -235,16 +181,8 @@ Global
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|Mixed Platforms.ActiveCfg = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|Mixed Platforms.Build.0 = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x64.ActiveCfg = Debug
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x64.Build.0 = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x86.ActiveCfg = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x86.Build.0 = Debug
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|Any CPU.ActiveCfg = MacRelease
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|Any CPU.Build.0 = MacRelease
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|Mixed Platforms.ActiveCfg = MacRelease
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|Mixed Platforms.Build.0 = MacRelease
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|x64.ActiveCfg = MacRelease
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|x86.ActiveCfg = MacRelease
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.MacRelease|x86.Build.0 = MacRelease
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Any CPU.ActiveCfg = Release
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Any CPU.Build.0 = Release
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Mixed Platforms.ActiveCfg = Release

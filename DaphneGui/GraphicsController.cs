@@ -1524,7 +1524,7 @@ namespace DaphneGui
                     {
                         if (trackTool.IsInitialized(cellID) == false)
                         {
-                            CellTrackData data = MainWindow.Sim.Reporter.ProvideTrackData(cellID);
+                            CellTrackData data = MainWindow.Sim.Reporter.ProvideCellTrackData(cellID);
 
                             if (data == null)
                             {

@@ -493,14 +493,23 @@ namespace DaphneGui
                 // attempt to load a default simulation file; if it doesn't exist disable the gui
                 if (openLastScenarioMenu.IsChecked == true)
                 {
-                    protocol_path = new Uri(file);
-                    orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+                    string folder = System.IO.Path.GetDirectoryName(file);
+                    folder = folder.Trim();
+                    if (folder.Length == 0)
+                    {
+                        protocol_path = new Uri(appPath + @"\Config\" + file);
+                    }
+                    else
+                    {
+                        protocol_path = new Uri(file);
+                    }
                 }
                 else
                 {
                     protocol_path = new Uri(appPath + @"\Config\" + file);
-                    orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
+                
+                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
 
                 file_exists = File.Exists(protocol_path.LocalPath);
 

@@ -12,7 +12,7 @@
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Daphne"
-        Width="1400" Height="770" Closing="Window_Closing"
+        Width="1500" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
         Name="mainWindow"
         LocationChanged="mainWindow_LocationChanged"
