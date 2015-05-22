@@ -580,6 +580,8 @@ namespace Daphne
             // division
             if (Divider.nStates > 1)
             {
+                // The daughter cell will start at state 0 of the cell cycle (as does the mother). 
+                // For distribution-driven transitions, choose the time-to-next event in the IntializeState method.
                 daughter.Divider.Initialize(Divider.nStates, Divider.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Divider.Behavior, Divider.Behavior);
                 Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
@@ -593,6 +595,9 @@ namespace Daphne
             // differentiation
             if (Differentiator.nStates > 1)
             {
+                // The daughter cell will start in the same differentiation state as the mother. 
+                // For distribution-driven transitions, the daughter will be assigned the same clock and time-to-next event values as the mother.
+                // So, no need to run InitializeState.
                 daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Differentiator.Behavior, Differentiator.Behavior);
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
@@ -600,7 +605,6 @@ namespace Daphne
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
                 daughter.DifferentiationState = daughter.Differentiator.CurrentState = daughter.Differentiator.Behavior.CurrentState = Differentiator.CurrentState;
                 daughter.SetGeneActivities(daughter.Differentiator);
-                daughter.Differentiator.Behavior.InitializeState();
             }
 
             return daughter;
@@ -624,6 +628,8 @@ namespace Daphne
                     else
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
+                        tde.clock = ((DistrTransitionDriverElement)kvp_inner.Value).clock;
+                        tde.timeToNextEvent = ((DistrTransitionDriverElement)kvp_inner.Value).timeToNextEvent;
                         tde.distr = ((DistrTransitionDriverElement)kvp_inner.Value).distr.Clone();
                         // add it to the daughter
                         daughter_behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
