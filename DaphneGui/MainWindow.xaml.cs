@@ -126,7 +126,6 @@ namespace DaphneGui
 
         private DocWindow dw;
         private Thread simThread;
-        private VCRControl vcrControl = null;
         public static Cell selectedCell = null;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
@@ -136,6 +135,12 @@ namespace DaphneGui
         {
             get { return sim; }
             set { sim = value; }
+        }
+
+        private static VCRControl vcrControl = null;
+        public static VCRControl VCR
+        {
+            get { return vcrControl; }
         }
 
         private Process devHelpProc;
