@@ -3751,6 +3751,22 @@ namespace DaphneGui
             }
         }
 
+        private void menuPlotOptions_Click(object sender, RoutedEventArgs e)
+        {
+            Plots.PlotOptionsWindow plots = new Plots.PlotOptionsWindow();
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            plots.DataContext = scenario;
+            plots.ShowDialog();
+        }
+
+        private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
+        {
+            Plots.PlotRenderingWindow plots = new Plots.PlotRenderingWindow();
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            plots.DataContext = scenario;
+            plots.ShowDialog();
+        }
+
     }
 
 

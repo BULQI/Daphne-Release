@@ -4428,6 +4428,12 @@ namespace Daphne
         }
     }
 
+    public class DriverState
+    {
+        public string name { get; set; }
+        public bool plot { get; set; }
+    }
+
     public class ConfigTransitionDriver : ConfigEntity
     {
         public string Name { get; set; }
@@ -4438,12 +4444,15 @@ namespace Daphne
         public ObservableCollection<string> states { get; set; }
         public ObservableCollection<bool> plotStates { get; set; }
 
+        public ObservableCollection<DriverState> PlotStatePairs { get; set; }
+
         public ConfigTransitionDriver()
             : base()
         {
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
             plotStates = new ObservableCollection<bool>();
+            PlotStatePairs = new ObservableCollection<DriverState>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4517,9 +4526,19 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void AddStateNamePlot(string name, bool plot)
         {
+            //PlotStatePairs.Add(new DriverState { name = name, plot = plot });
             states.Add(name);
             plotStates.Add(plot);
+            DriverState ds = new DriverState { name = name, plot = plot };
+            PlotStatePairs.Add(ds);
         }
+
+        //StudentName student4 = new StudentName
+        //{
+        //    FirstName = "Craig",
+        //    LastName = "Playstead",
+        //    ID = 116
+        //};
 
         /// <summary>
         /// insert a state; this keeps state names and plot booleans in synch
@@ -4529,8 +4548,10 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void InsertStateNamePlot(int index, string name, bool plot)
         {
+            PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
             states.Insert(index, name);
             plotStates.Insert(index, plot);
+            
         }
 
         /// <summary>
@@ -4539,6 +4560,7 @@ namespace Daphne
         /// <param name="index">index at which to remove</param>
         public void RemoveStateNamePlot(int index)
         {
+            PlotStatePairs.RemoveAt(index);
             states.RemoveAt(index);
             plotStates.RemoveAt(index);
         }

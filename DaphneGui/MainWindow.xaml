@@ -106,7 +106,8 @@
                     <!--<local:RecentFileList x:Name="recentFileList" />-->
                     <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
                 </MenuItem>
-                <MenuItem Header="Analysis" Name="analysisMenu" Visibility="Collapsed" >
+                <MenuItem Header="Analysis" Name="analysisMenu" >
+                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
                     <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
                     <MenuItem Header="Cell Division" Name="cellDivMenu" Click="OpenCellDivisionWindow" />
                 </MenuItem>
@@ -186,6 +187,7 @@
                     <MenuItem Header="Save As..." Name="menuAdminSaveAs" Click="menuAdminSaveAs_Click" Visibility="Collapsed" />
                     <MenuItem Header="Return to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click" IsEnabled="False" />               
                 </MenuItem>
+              
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
                     <MenuItem Header="Tech help" Name="techHelp"  IsEnabled="False">

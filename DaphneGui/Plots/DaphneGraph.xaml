@@ -1,0 +1,11 @@
+﻿<Window x:Class="DaphneGui.Plots.DaphneGraph"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
+        Title="Daphne Analysis" MinHeight="300" MinWidth="300">
+    <Grid>
+        <SciChart:SciChartSurface x:Name="sciChart" Grid.Row="1">
+            
+        </SciChart:SciChartSurface>
+    </Grid>
+</Window>

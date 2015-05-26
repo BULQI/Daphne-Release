@@ -94,8 +94,11 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
-
   <ItemGroup>
+    <Reference Include="Abt.Controls.SciChart.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Program Files (x86)\SciChart\Lib\net40\Abt.Controls.SciChart.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="ActiproSoftware.Docking.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Docking.Wpf.dll</HintPath>
@@ -235,6 +238,18 @@
     </Compile>
     <Compile Include="ParamDistrReadOnlyControl.xaml.cs">
       <DependentUpon>ParamDistrReadOnlyControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Plots\DaphneGraph.xaml.cs">
+      <DependentUpon>DaphneGraph.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Plots\PlotRenderingWindow.xaml.cs">
+      <DependentUpon>PlotRenderingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Plots\PlotOptions.xaml.cs">
+      <DependentUpon>PlotOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Plots\PlotsOptionsWindow.xaml.cs">
+      <DependentUpon>PlotsOptionsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
@@ -379,6 +394,22 @@
     <Page Include="ParamDistrReadOnlyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Plots\DaphneGraph.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Plots\PlotRenderingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Plots\PlotOptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Plots\PlotsOptionsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pushing\PushBetweenLevels.xaml">
       <SubType>Designer</SubType>

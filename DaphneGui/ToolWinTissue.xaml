@@ -8,6 +8,7 @@
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+                    xmlns:plot="clr-namespace:DaphneGui.Plots"
                     ImageSource="Images/Properties16.png"
                     x:Name="toolWinTissue"
                     >
@@ -790,6 +791,24 @@
                                 <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Protocol.scenario.reactionsReport, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                             </StackPanel>
                     </Expander>
+
+                    <!--Cell Population Dynamics-->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Cell Population Dynamics"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        
+                        <StackPanel>
+                            <plot:PlotOptions x:Name="plotOptions" ></plot:PlotOptions>
+                        </StackPanel>
+
+                    </Expander>
+                    <!--<plot:PlotOptions x:Name="plotOptions" ></plot:PlotOptions>-->
 
                 </StackPanel>
             </ScrollViewer>
