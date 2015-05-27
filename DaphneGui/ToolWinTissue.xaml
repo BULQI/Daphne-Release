@@ -8,7 +8,7 @@
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-                    xmlns:plot="clr-namespace:DaphneGui.Plots"
+                    xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
                     ImageSource="Images/Properties16.png"
                     x:Name="toolWinTissue"
                     >
@@ -804,7 +804,7 @@
                             >
                         
                         <StackPanel>
-                            <plot:PlotOptions x:Name="plotOptions" ></plot:PlotOptions>
+                            <plot:CellPopDynOptions x:Name="plotOptions" DataContext="{Binding Path=Protocol.scenario}" ></plot:CellPopDynOptions>
                         </StackPanel>
 
                     </Expander>

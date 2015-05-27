@@ -4526,11 +4526,12 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void AddStateNamePlot(string name, bool plot)
         {
-            //PlotStatePairs.Add(new DriverState { name = name, plot = plot });
             states.Add(name);
             plotStates.Add(plot);
-            DriverState ds = new DriverState { name = name, plot = plot };
-            PlotStatePairs.Add(ds);
+            //DriverState ds = new DriverState { name = name, plot = plot };
+            //ds.name = "abc";
+            //string test = name;
+            //PlotStatePairs.Add(ds);
         }
 
         //StudentName student4 = new StudentName
@@ -4548,9 +4549,16 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void InsertStateNamePlot(int index, string name, bool plot)
         {
-            PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
             states.Insert(index, name);
             plotStates.Insert(index, plot);
+
+            //PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
+
+            //DriverState ds = new DriverState();
+            //ds.name = name; ds.plot = plot;
+            //PlotStatePairs.Add(ds);
+            //ds.name = "abc";
+            //string test = name;
             
         }
 
@@ -4560,7 +4568,7 @@ namespace Daphne
         /// <param name="index">index at which to remove</param>
         public void RemoveStateNamePlot(int index)
         {
-            PlotStatePairs.RemoveAt(index);
+            //PlotStatePairs.RemoveAt(index);
             states.RemoveAt(index);
             plotStates.RemoveAt(index);
         }

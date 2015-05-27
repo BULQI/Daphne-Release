@@ -9,16 +9,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Plots
+namespace DaphneGui.CellPopDynamics
 {
     /// <summary>
-    /// Interaction logic for DaphneGraph.xaml
+    /// Interaction logic for CellPopDynamicsGraph.xaml
     /// </summary>
-    public partial class DaphneGraph : Window
+    public partial class CellPopDynamicsGraph : UserControl
     {
-        public DaphneGraph()
+        public CellPopDynamicsGraph()
         {
             InitializeComponent();
         }

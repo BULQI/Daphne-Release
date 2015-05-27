@@ -200,6 +200,9 @@
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynamicsGraph.xaml.cs">
+      <DependentUpon>CellPopDynamicsGraph.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
     </Compile>
@@ -239,16 +242,16 @@
     <Compile Include="ParamDistrReadOnlyControl.xaml.cs">
       <DependentUpon>ParamDistrReadOnlyControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Plots\DaphneGraph.xaml.cs">
-      <DependentUpon>DaphneGraph.xaml</DependentUpon>
+    <Compile Include="CellPopDynamics\CellPopDynGraph.xaml.cs">
+      <DependentUpon>CellPopDynGraph.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Plots\PlotRenderingWindow.xaml.cs">
-      <DependentUpon>PlotRenderingWindow.xaml</DependentUpon>
+    <Compile Include="CellPopDynamics\CellPopDynWindow.xaml.cs">
+      <DependentUpon>CellPopDynWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Plots\PlotOptions.xaml.cs">
-      <DependentUpon>PlotOptions.xaml</DependentUpon>
+    <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
+      <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Plots\PlotsOptionsWindow.xaml.cs">
+    <Compile Include="CellPopDynamics\PlotsOptionsWindow.xaml.cs">
       <DependentUpon>PlotsOptionsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
@@ -343,6 +346,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CellPopDynamics\CellPopDynamicsGraph.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellPropertiesControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -395,19 +402,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Plots\DaphneGraph.xaml">
+    <Page Include="CellPopDynamics\CellPopDynGraph.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Plots\PlotRenderingWindow.xaml">
+    <Page Include="CellPopDynamics\CellPopDynWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Plots\PlotOptions.xaml">
+    <Page Include="CellPopDynamics\CellPopDynOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Plots\PlotsOptionsWindow.xaml">
+    <Page Include="CellPopDynamics\PlotsOptionsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

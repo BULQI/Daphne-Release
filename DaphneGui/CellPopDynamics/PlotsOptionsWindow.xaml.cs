@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Plots
+namespace DaphneGui.CellPopDynamics
 {
     /// <summary>
     /// Interaction logic for PlotsWindow.xaml

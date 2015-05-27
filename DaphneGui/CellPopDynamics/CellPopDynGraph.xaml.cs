@@ -11,14 +11,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Plots
+namespace DaphneGui.CellPopDynamics
 {
     /// <summary>
-    /// Interaction logic for PlotRenderingWindow.xaml
+    /// Interaction logic for CellPopDynGraph.xaml
     /// </summary>
-    public partial class PlotRenderingWindow : Window
+    public partial class CellPopDynGraph : Window
     {
-        public PlotRenderingWindow()
+        public CellPopDynGraph()
         {
             InitializeComponent();
         }

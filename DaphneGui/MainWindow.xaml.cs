@@ -3753,7 +3753,7 @@ namespace DaphneGui
 
         private void menuPlotOptions_Click(object sender, RoutedEventArgs e)
         {
-            Plots.PlotOptionsWindow plots = new Plots.PlotOptionsWindow();
+            CellPopDynamics.PlotOptionsWindow plots = new CellPopDynamics.PlotOptionsWindow();
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             plots.DataContext = scenario;
             plots.ShowDialog();
@@ -3761,10 +3761,10 @@ namespace DaphneGui
 
         private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
-            Plots.PlotRenderingWindow plots = new Plots.PlotRenderingWindow();
+            CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            plots.DataContext = scenario;
-            plots.ShowDialog();
+            dynWindow.DataContext = scenario;
+            dynWindow.ShowDialog();
         }
 
     }
