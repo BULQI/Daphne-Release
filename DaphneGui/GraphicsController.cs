@@ -1831,7 +1831,13 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.Sim.RunStatus == SimulationBase.RUNSTAT_OFF)
+                // special case: vcr
+                if (MainWindow.VCR != null && MainWindow.VCR.CheckFlag(VCRControl.VCR_OPEN) == true)
+                {
+                    ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Progress: " + progress + "%");
+                }
+                // regular handling
+                else if (MainWindow.Sim.RunStatus == SimulationBase.RUNSTAT_OFF)
                 {
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "");
                 }

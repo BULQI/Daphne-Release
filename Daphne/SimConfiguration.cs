@@ -4620,7 +4620,12 @@ namespace Daphne
 
     public class ConfigTransitionScheme : ConfigEntity
     {
-        public string Name { get; set; }
+        private string name;
+        public string Name 
+        {
+            get { return name; }
+            set { name = value; OnPropertyChanged("Name"); }
+        }
 
         //For regulators
         public ConfigTransitionDriver Driver { get; set; }
@@ -4649,7 +4654,7 @@ namespace Daphne
             : base()
         {
             genes = new ObservableCollection<string>();
-            Name = "New scheme";
+            Name = "Transition scheme";
             Driver = new ConfigTransitionDriver();
             activationRows = new ObservableCollection<ConfigActivationRow>();
         }
@@ -4661,7 +4666,45 @@ namespace Daphne
 
         public override string GenerateNewName(Level level, string ending)
         {
-            throw new NotImplementedException();
+            if (FindByName(level, Name) == false)
+            {
+                return Name;
+            }
+
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:0}", nSuffix);
+            string TempName = OriginalName + suffix;
+            while (FindByName(level, TempName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:0}", nSuffix);
+                TempName = OriginalName + suffix;
+            }
+
+            return TempName;
+        }
+
+        public static bool FindByName(Level level, string name)
+        {
+            bool ret = false;
+            foreach (ConfigTransitionScheme scheme in level.entity_repository.diff_schemes)
+            {
+                if (scheme.Name == name)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
         }
 
         public void AddGene(string gguid)
@@ -4698,16 +4741,16 @@ namespace Daphne
         public string GenerateStateName()
         {
             string OriginalName = "State";
-            string ending = "_New";
+            string ending = "";
 
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
+            int nSuffix = 0;
+            string suffix = ending + string.Format("{0:0}", nSuffix);
             string NewStateName = OriginalName + suffix;
 
             while (HasState(NewStateName) == true)
             {
                 nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
+                suffix = ending + string.Format("{0:0}", nSuffix);
                 NewStateName = OriginalName + suffix;
             }
 
