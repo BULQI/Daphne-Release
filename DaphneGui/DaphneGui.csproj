@@ -94,8 +94,15 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
-
   <ItemGroup>
+    <Reference Include="Abt.Controls.SciChart.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Program Files (x86)\SciChart\Lib\net40\Abt.Controls.SciChart.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Abt.Controls.SciChart3D.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Program Files (x86)\SciChart\Lib\net40\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="ActiproSoftware.Docking.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Docking.Wpf.dll</HintPath>
@@ -197,6 +204,18 @@
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynamicsGraph.xaml.cs">
+      <DependentUpon>CellPopDynamicsGraph.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
+      <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynWindow.xaml.cs">
+      <DependentUpon>CellPopDynWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\PlotsOptionsWindow.xaml.cs">
+      <DependentUpon>PlotsOptionsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
     </Compile>
@@ -204,6 +223,8 @@
       <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellTrackTool.cs" />
+    <Compile Include="Charting\DoubleSeries.cs" />
+    <Compile Include="Charting\XYPoint.cs" />
     <Compile Include="ComponentsToolWindow.xaml.cs">
       <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
     </Compile>
@@ -327,6 +348,22 @@
     <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynamicsGraph.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynOptions.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellPopDynamics\PlotsOptionsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="CellPropertiesControl.xaml">
       <SubType>Designer</SubType>

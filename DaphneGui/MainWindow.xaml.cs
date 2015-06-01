@@ -3546,6 +3546,8 @@ namespace DaphneGui
             menuProtocolStore.IsEnabled = true;
             menuAdminSave.Visibility = Visibility.Visible;
             menuAdminSaveAs.Visibility = Visibility.Visible;
+            userStoreFileMenu.Visibility = Visibility.Visible;
+            fileMenu.Visibility = Visibility.Collapsed;
         }
 
         private void prepareForDaphneStore()
@@ -3563,6 +3565,8 @@ namespace DaphneGui
             menuProtocolStore.IsEnabled = true;
             menuAdminSave.Visibility = Visibility.Visible;
             menuAdminSaveAs.Visibility = Visibility.Visible;
+            userStoreFileMenu.Visibility = Visibility.Visible;
+            fileMenu.Visibility = Visibility.Collapsed;
         }
         
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3577,6 +3581,8 @@ namespace DaphneGui
             menuProtocolStore.IsEnabled = false;
             menuAdminSave.Visibility = Visibility.Collapsed;
             menuAdminSaveAs.Visibility = Visibility.Collapsed;
+            userStoreFileMenu.Visibility = Visibility.Collapsed;
+            fileMenu.Visibility = Visibility.Visible;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3754,6 +3760,22 @@ namespace DaphneGui
                 saveStore(sop.DaphneStore, "DaphneStore");
                 return;
             }
+        }
+
+        private void menuPlotOptions_Click(object sender, RoutedEventArgs e)
+        {
+            CellPopDynamics.PlotOptionsWindow plots = new CellPopDynamics.PlotOptionsWindow();
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            plots.DataContext = scenario;
+            plots.ShowDialog();
+        }
+
+        private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
+        {
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
+            dynWindow.DataContext = scenario;
+            dynWindow.ShowDialog();
         }
 
     }

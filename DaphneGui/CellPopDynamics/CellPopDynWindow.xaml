@@ -1,0 +1,69 @@
+﻿<Window x:Class="DaphneGui.CellPopDynamics.CellPopDynWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
+        xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+        xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        Title="Cell Population Dynamics" 
+        >
+
+    <!--DockPanel-->
+    <DockPanel LastChildFill="True">
+
+        <!-- DockSite -->
+        <docking:DockSite x:Name="dockSite" 
+                          CanDocumentWindowsRaft="True"
+                          AreDocumentWindowsDestroyedOnClose="False"
+                          UseHostedAutoHidePopups="False"
+                          AutomationProperties.AutomationId="DaphneDockSite"
+                          >
+
+            
+            <docking:SplitContainer x:Name="plotSplitContainer">
+
+                <!-- Left-hand content container - Plotting options GUI -->
+                <docking:SplitContainer Orientation="Vertical">
+                    
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,700" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                        <docking:ToolWindow Title="Plot Options" >
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                <StackPanel>
+                                    <plot:CellPopDynOptions x:Name="plotOptions" ></plot:CellPopDynOptions>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,100">
+                        <docking:ToolWindow Title="Plot Options" >
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="plotButton" Width="100" Height="24" Content="Plot" Click="plotButton_Click"></Button>
+                                    <Button Width="100" Height="24" Content="Export"></Button>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+                    
+                </docking:SplitContainer>
+
+                <!-- Right-hand content containers - Tool bar and Chart window -->
+                <!--<docking:SplitContainer Orientation="Vertical">-->
+                    
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800"  AutomationProperties.AutomationId="PlotRightTWContainer">
+                        <docking:ToolWindow Title="Graph" >
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                <StackPanel>
+                                <plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+                
+                <!--</docking:SplitContainer>-->
+
+            </docking:SplitContainer>
+        </docking:DockSite>
+    </DockPanel>
+
+</Window>
