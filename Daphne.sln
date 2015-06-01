@@ -37,6 +37,12 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstall", "DaphneInst
 	EndProjectSection
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstallMac", "DaphneInstallMac\DaphneInstallMac.vdproj", "{6A4E27AA-8D03-4959-A968-6440CDCABF5B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338} = {B88B4859-8E76-41ED-AA84-6B48A90EA338}
+		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B} = {A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813} = {A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}
+		{621278E2-936D-4F67-B2B2-B4E2705DE5BA} = {621278E2-936D-4F67-B2B2-B4E2705DE5BA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
@@ -177,19 +183,13 @@ Global
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|x64.ActiveCfg = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|x86.ActiveCfg = Release
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|Any CPU.ActiveCfg = Debug
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|Any CPU.Build.0 = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|Mixed Platforms.ActiveCfg = Debug
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|Mixed Platforms.Build.0 = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x64.ActiveCfg = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x86.ActiveCfg = Debug
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Debug|x86.Build.0 = Debug
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Any CPU.ActiveCfg = Release
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Any CPU.Build.0 = Release
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Mixed Platforms.ActiveCfg = Release
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|Mixed Platforms.Build.0 = Release
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|x64.ActiveCfg = Release
 		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|x86.ActiveCfg = Release
-		{6A4E27AA-8D03-4959-A968-6440CDCABF5B}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
