@@ -2795,6 +2795,7 @@ namespace DaphneGui
             if (firstRun == true)
             {
                 repetition = 1;
+                Rand.ReseedAll(SOP.Protocol.sim_params.globalRandomSeed);
             }
             switch (ToolWinType)
             {

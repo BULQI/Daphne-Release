@@ -546,8 +546,6 @@ namespace Daphne
                 return;
             }
 
-            Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
-
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(protocol.scenario));
 
