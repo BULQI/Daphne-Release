@@ -7,6 +7,8 @@
         Title="Cell Population Dynamics" 
         >
 
+    <!--This is for when user selects Cell Pop Dynamics in Analysis menu-->
+    
     <!--DockPanel-->
     <DockPanel LastChildFill="True">
 
@@ -34,12 +36,14 @@
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
 
+                    <!--command buttons-->
                     <docking:ToolWindowContainer docking:DockSite.ControlSize="300,100">
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="plotButton" Width="100" Height="24" Content="Plot" Click="plotButton_Click"></Button>
                                     <Button Width="100" Height="24" Content="Export"></Button>
+                                    <Button x:Name="plotTester" Width="100" Height="24" Content="Test" Click="plotTester_Click"></Button>
                                 </StackPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>
@@ -47,20 +51,18 @@
                     
                 </docking:SplitContainer>
 
-                <!-- Right-hand content containers - Tool bar and Chart window -->
-                <!--<docking:SplitContainer Orientation="Vertical">-->
-                    
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800"  AutomationProperties.AutomationId="PlotRightTWContainer">
-                        <docking:ToolWindow Title="Graph" >
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel>
-                                <plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </docking:ToolWindow>
-                    </docking:ToolWindowContainer>
+                <!-- Right-hand content containers - Chart window and maybe a tool bar also-->
                 
-                <!--</docking:SplitContainer>-->
+                <!--The graph was not resizing with the container so it is set to fixed size for now.  Need to fix this.-->
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800"  AutomationProperties.AutomationId="PlotRightTWContainer">
+                    <docking:ToolWindow Title="Graph" >
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                            <StackPanel>
+                                <plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </docking:ToolWindow>
+                </docking:ToolWindowContainer>
 
             </docking:SplitContainer>
         </docking:DockSite>

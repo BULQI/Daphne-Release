@@ -3779,6 +3779,19 @@ namespace DaphneGui
             dynWindow.ShowDialog();
         }
 
+        /// <summary>
+        /// This handler toggles the visibility of the background color combo box in toolbar
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BackgroundButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (bgPicker.Visibility == Visibility.Collapsed)
+                bgPicker.Visibility = Visibility.Visible;
+            else
+                bgPicker.Visibility = Visibility.Collapsed;
+        }
+
     }
 
 

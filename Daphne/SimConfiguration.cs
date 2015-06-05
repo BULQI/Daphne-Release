@@ -4428,6 +4428,15 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Helper class makes it easier to display Cell population dynamics GUI
+    /// </summary>
+    public class DriverState
+    {
+        public string name { get; set; }
+        public bool plot { get; set; }
+    }
+
     public class ConfigTransitionDriver : ConfigEntity
     {
         public string Name { get; set; }
@@ -4436,7 +4445,23 @@ namespace Daphne
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
-        public ObservableCollection<bool> plotStates { get; set; }
+        //public ObservableCollection<bool> plotStates { get; set; }
+
+        private ObservableCollection<bool> _plotStates;
+        public ObservableCollection<bool> plotStates
+        {
+            get
+            {
+                return _plotStates;
+            }
+            set
+            {
+                _plotStates = value;
+                OnPropertyChanged("plotStates");
+            }
+        }
+
+        public ObservableCollection<DriverState> PlotStatePairs { get; set; }
 
         public ConfigTransitionDriver()
             : base()
@@ -4444,6 +4469,7 @@ namespace Daphne
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
             plotStates = new ObservableCollection<bool>();
+            PlotStatePairs = new ObservableCollection<DriverState>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4517,8 +4543,22 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void AddStateNamePlot(string name, bool plot)
         {
+            name = name.Trim();
+            if (name.Length == 0)
+                return;
+
             states.Add(name);
             plotStates.Add(plot);
+
+            DriverState ds = new DriverState { name = name, plot = plot };
+            ds.name = name;
+            ds.plot = plot;
+
+            DriverState existingDS = PlotStatePairs.Where(m => m.name == name).First();
+
+            //add if doesn't exist already
+            if (existingDS == null)
+                PlotStatePairs.Add(ds);
         }
 
         /// <summary>
@@ -4529,8 +4569,18 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void InsertStateNamePlot(int index, string name, bool plot)
         {
+            name = name.Trim();
+            if (name.Length == 0)
+                return;
+
             states.Insert(index, name);
             plotStates.Insert(index, plot);
+
+            //PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
+            DriverState ds = new DriverState();
+            ds.name = name;
+            ds.plot = plot;
+            PlotStatePairs.Insert(index, ds);
         }
 
         /// <summary>
@@ -4539,6 +4589,7 @@ namespace Daphne
         /// <param name="index">index at which to remove</param>
         public void RemoveStateNamePlot(int index)
         {
+            PlotStatePairs.RemoveAt(index);
             states.RemoveAt(index);
             plotStates.RemoveAt(index);
         }

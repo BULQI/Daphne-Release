@@ -5,10 +5,63 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <!--<SciChart:SciChartSurface x:Name="sciChart" Grid.Row="1">
+             Loaded="UserControl_Loaded"
+             >
+             <!--d:DesignHeight="300" d:DesignWidth="300"-->
 
-        </SciChart:SciChartSurface>-->
+    <Grid SciChart:ThemeManager.Theme="ExpressionLight">
+
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>-->
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" >
+            <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" Height="500" Width="850" >
+
+                <!--Height="500" Width="500"-->
+
+                <!--<SciChart:SciChartSurface.RenderableSeries >
+                <SciChart:FastLineRenderableSeries SeriesColor="Yellow">
+                    <SciChart:FastLineRenderableSeries.PointMarker>
+                        <SciChart:EllipsePointMarker/>
+                    </SciChart:FastLineRenderableSeries.PointMarker>
+                </SciChart:FastLineRenderableSeries>
+            </SciChart:SciChartSurface.RenderableSeries>-->
+
+
+
+                <!--  Declare Axes  -->
+                <SciChart:SciChartSurface.XAxis>
+                    <SciChart:NumericAxis VisibleRange="0, 5000" />
+                </SciChart:SciChartSurface.XAxis>
+
+                <SciChart:SciChartSurface.YAxis>
+                    <SciChart:NumericAxis VisibleRange="0, 100" />
+                </SciChart:SciChartSurface.YAxis>
+
+                <!--  Declare ChartModifiers  -->
+                <SciChart:SciChartSurface.ChartModifier>
+                    <SciChart:ModifierGroup>
+                        <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Horizontal" Margin="10" />
+                        <SciChart:SeriesSelectionModifier>
+                            <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                <Style TargetType="SciChart:BaseRenderableSeries">
+                                    <Setter Property="StrokeThickness" Value="3" />
+                                </Style>
+                            </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                        </SciChart:SeriesSelectionModifier>
+
+                    </SciChart:ModifierGroup>
+                </SciChart:SciChartSurface.ChartModifier>
+
+            </SciChart:SciChartSurface>
+        </ScrollViewer>
+
     </Grid>
 </UserControl>

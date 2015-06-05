@@ -69,6 +69,7 @@
                                 ItemsSource="{Binding Path=cellpopulations}" 
                                 SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
+                                SelectionChanged="lbPlotCellPops_SelectionChanged"
                             />
 
                 <!-- Death State -->
@@ -83,15 +84,8 @@
                                 >
                     <StackPanel>
 
-                        <!--ListBox just for testing-->
-                        <!--<ListBox x:Name="deathStatesListBox" IsEnabled="False"
-                                ItemsSource="{Binding ElementName=lbPlotCellPops, Mode=OneWay, Path=SelectedItem.Cell.death_driver.PlotStatePairs}" 
-                                ItemTemplate="{Binding Source={StaticResource statesListItemTemplate}}"
-                                SelectedIndex="0"
-                        />-->
-
                         <DataGrid x:Name="deathStatesGrid" AutoGenerateColumns="False" 
-                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.death_driver.PlotStatePairs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.death_driver.plotStates}"
                                         SelectedItem="0"
                                         MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200" 
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
@@ -102,7 +96,6 @@
                                         BorderBrush="Black"    
                                         LoadingRow="deathStatesGrid_LoadingRow"
                                         >
-                            <!--ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.death_driver.PlotStatePairs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
 
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" >
@@ -123,18 +116,14 @@
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
-                                <!--<DataGridTemplateColumn Header="Name" >
+                                <DataGridTemplateColumn Width="20" Header="Plot" >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                            <CheckBox  IsChecked="{Binding Path=.}" Click="DeathCheckBox_Click" HorizontalAlignment="Center"
+                                                       /> 
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>-->
-                               
-                                <DataGridCheckBoxColumn Header="Plot" Width="20"
-                                                        Binding="{Binding Path=plot, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                        ElementStyle="{StaticResource plotCheckBoxStyle}">
-                                </DataGridCheckBoxColumn>
+                                </DataGridTemplateColumn>
                                 
                             </DataGrid.Columns>
 
@@ -171,10 +160,39 @@
                             BorderBrush="Black"
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
-                    
                     <StackPanel>
+
+                        <!--<TextBlock Text="Test Listbox" />
+                        <ListBox x:Name="diffStatesListBox" 
+                                ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.plotStates, Mode=OneWay}"                                 
+                                SelectedIndex="0"
+                                DisplayMemberPath="."
+                        />-->
+                        
+                        <!--<DataGrid x:Name="TestGrid" AutoGenerateColumns="False"
+                                  ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.plotStates}"
+                                  LoadingRow="diffStatesGrid_LoadingRow"
+                                  >
+
+                            <DataGrid.Columns>                                
+                                <DataGridCheckBoxColumn Header="Plot" Width="20"
+                                        Binding="{Binding Path=., UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        ElementStyle="{StaticResource plotCheckBoxStyle}"
+                                        >
+                                </DataGridCheckBoxColumn>
+
+                                <DataGridTemplateColumn Width="20" Header="Plot" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox  IsChecked="{Binding Path=., UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>-->
+                        
                         <DataGrid x:Name="diffStatesGrid" AutoGenerateColumns="False"    
-                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.PlotStatePairs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.plotStates}"  
                                         MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200" 
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" 
@@ -184,8 +202,6 @@
                                         BorderBrush="Black" 
                                         LoadingRow="diffStatesGrid_LoadingRow"
                                     >
-                                        <!--RowHeaderWidth="0"-->
-                            <!--ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.PlotStatePairs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->  
 
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" >
@@ -214,10 +230,26 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>-->
 
-                                <DataGridCheckBoxColumn Header="Plot" Width="20"
-                                                        Binding="{Binding Path=plot, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                        ElementStyle="{StaticResource plotCheckBoxStyle}">
-                                </DataGridCheckBoxColumn>
+                                <!--<DataGridCheckBoxColumn Header="Plot" Width="20"
+                                                        Binding="{Binding Path=., UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                        ElementStyle="{StaticResource plotCheckBoxStyle}"
+                                                        
+                                                        >
+                                </DataGridCheckBoxColumn>-->
+
+
+
+                                <DataGridTemplateColumn Width="20" Header="Plot" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox  IsChecked="{Binding Path=.}" HorizontalAlignment="Center"
+                                                       Click="DiffCheckBox_Click"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                
+                                
+                                
 
                             </DataGrid.Columns>
 
@@ -255,9 +287,9 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                     <StackPanel>
-                        <DataGrid x:Name="divStatesGrid" AutoGenerateColumns="False" Visibility="Hidden"
-                                         
-                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.div_scheme.Driver.PlotStatePairs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                       
+                        <DataGrid x:Name="divStatesGrid" AutoGenerateColumns="False" 
+                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.div_scheme.Driver.plotStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                         SelectedIndex="0"
                                         MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200" 
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
@@ -268,8 +300,6 @@
                                         BorderBrush="Black" 
                                         LoadingRow="divStatesGrid_LoadingRow"
                                         >
-
-                            <!--ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.div_scheme.Driver.PlotStatePairs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
 
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" >
@@ -290,83 +320,15 @@
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
-                                <!--<DataGridTemplateColumn Header="Name" >
+
+                                <DataGridTemplateColumn Width="20" Header="Plot" >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                            <CheckBox  IsChecked="{Binding Path=.}" HorizontalAlignment="Center"
+                                                       Click="DivCheckBox_Click"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>-->
-
-                                <DataGridCheckBoxColumn Header="Plot" Width="20"
-                                                        Binding="{Binding ElementName=divStatesGrid, Path=SelectedItem, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                        ElementStyle="{StaticResource plotCheckBoxStyle}">
-                                    
-                                     <!--Binding="{Binding Path=plot, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"-->
-                                    
-                                </DataGridCheckBoxColumn>
-
-                            </DataGrid.Columns>
-
-                            <DataGrid.RowHeaderStyle>
-                                <Style TargetType="{x:Type DataGridRowHeader}" >
-                                    <Setter Property="BorderBrush" Value="LightGray"/>
-                                    <Setter Property="Visibility"  Value="Visible" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsRowSelected" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
-                                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.RowHeaderStyle>
-
-                            <DataGrid.RowHeaderTemplate>
-                                <DataTemplate>
-                                    <TextBox Text="{Binding Content}" MinWidth="100" Width="Auto" IsReadOnly="True" />
-                                </DataTemplate>
-                            </DataGrid.RowHeaderTemplate>
-                        </DataGrid>
-
-                        <DataGrid x:Name="divStatesGrid2" AutoGenerateColumns="False" 
-                                        ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.div_scheme.Driver.plotStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
-                                        SelectedIndex="0"
-                                        MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200" 
-                                        CanUserReorderColumns="False" CanUserResizeRows="False"
-                                        CanUserSortColumns="False" 
-                                        VerticalContentAlignment="Center"
-                                        CanUserAddRows="False"
-                                        BorderThickness="1"
-                                        BorderBrush="Black" 
-                                        LoadingRow="divStatesGrid2_LoadingRow"
-                                        >
-
-                            <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader" >
-                                    <Setter Property="FontSize" Value="12" />
-                                    <Setter Property="Height" Value="24" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="BorderBrush" Value="Black" />
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Offset="0.0" Color="White" />
-                                                <GradientStop Offset="1.0" Color="Beige" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </DataGrid.ColumnHeaderStyle>
-
-                            <DataGrid.Columns>                                
-
-                                <DataGridCheckBoxColumn Header="Plot" Width="20"
-                                                        Binding="{Binding ElementName=divStatesGrid2, Path=SelectedItem, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                        ElementStyle="{StaticResource plotCheckBoxStyle}">
-
-                                </DataGridCheckBoxColumn>
+                                </DataGridTemplateColumn>
 
                             </DataGrid.Columns>
 

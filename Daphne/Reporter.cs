@@ -1538,18 +1538,30 @@ namespace Daphne
 
             // add the time
             Times.Add(time);
+
             // add a counter for each state, set to zero
-            foreach (List<int> l in deathStates.Values)
+
+            //skg added ifs 6/3/15
+            if (deathStates != null)
             {
-                l.Add(0);
+                foreach (List<int> l in deathStates.Values)
+                {
+                    l.Add(0);
+                }
             }
-            foreach (List<int> l in diffStates.Values)
+            if (diffStates != null)
             {
-                l.Add(0);
+                foreach (List<int> l in diffStates.Values)
+                {
+                    l.Add(0);
+                }
             }
-            foreach (List<int> l in divStates.Values)
+            if (divStates != null)
             {
-                l.Add(0);
+                foreach (List<int> l in divStates.Values)
+                {
+                    l.Add(0);
+                }
             }
         }
 

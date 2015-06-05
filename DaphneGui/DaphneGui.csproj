@@ -504,6 +504,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Images\background.png" />
+    <Resource Include="Images\bucket.png" />
     <Resource Include="Images\LeftArrow_48x48.png" />
     <Resource Include="Images\RightArrow_48x48.png" />
     <Resource Include="Images\arrow-32x32.png" />

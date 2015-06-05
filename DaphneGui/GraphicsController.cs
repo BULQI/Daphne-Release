@@ -749,6 +749,7 @@ namespace DaphneGui
         private bool toolsToolbar_IsEnabled = true;
         private bool resetCameraButton_IsChecked = false;
         private bool orientationMarker_IsChecked = true;
+        private bool backgroundButton_IsChecked = false;
         private bool scalarBarMarker_IsChecked = false;
         private System.Windows.Visibility colorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
         private double colorScaleMaxFactor = 1.0;
@@ -990,6 +991,22 @@ namespace DaphneGui
                     axesTool.SetEnabled(value ? 1 : 0);
                     rwc.Invalidate();
                     base.OnPropertyChanged("OrientationMarker_IsChecked");
+                }
+            }
+        }
+
+        public bool BackgroundButton_IsChecked
+        {
+            get { return backgroundButton_IsChecked; }
+            set
+            {
+                if (value == backgroundButton_IsChecked)
+                    return;
+                else
+                {
+                    backgroundButton_IsChecked = value;
+                    rwc.Invalidate();
+                    base.OnPropertyChanged("BackgroundButton_IsChecked");
                 }
             }
         }
