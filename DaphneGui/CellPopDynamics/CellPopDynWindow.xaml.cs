@@ -22,6 +22,7 @@ using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Abt.Controls.SciChart.Visuals.PointMarkers;
 using Newtonsoft.Json;
 using System.IO;
+using Abt.Controls.SciChart;
 
 namespace DaphneGui.CellPopDynamics
 {
@@ -38,22 +39,34 @@ namespace DaphneGui.CellPopDynamics
 
         private void plotButton_Click(object sender, RoutedEventArgs e)
         {
-            //Get the selected cell population
+            //Get the selected cell population - if none, inform user
             CellPopulation pop = plotOptions.lbPlotCellPops.SelectedItem as CellPopulation;
             if (pop == null)
             {
-                MessageBox.Show("Please select a cell population first.");
+                MessageBox.Show("Please select a cell population first.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            //Get the dynamics data for this cell pop
-            CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
+            //If no states are selected for plotting, inform user
+            if (!pop.Cell.death_driver.plotStates.Contains(true) &&
+                  !pop.Cell.diff_scheme.Driver.plotStates.Contains(true) &&
+                  !pop.Cell.div_scheme.Driver.plotStates.Contains(true))
+            {
+                MessageBox.Show("No states have been selected for plotting. Please run the simulation before running the analysis.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
+            //Get the dynamics data for this cell pop - if null, that means the simulation has not been run - inform user
+            CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
             if (data == null) 
             {
-                MessageBox.Show("There is no data to plot. Please run the simulation before running the analysis.");
+                MessageBox.Show("There is no data to plot. Please run the simulation before running the analysis.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return; 
             }
+
+            //*********************************************************
+            //If we get here, then we have the data and we can plot it.
+            //*********************************************************
 
             int interval = data.Times.Count / 100;      //arbitrary number of points to graph so we don't graph all points - see reaction complex and see what we do there
             if (interval <= 0) interval = 1;            //cannot be zero because it is used as a divisor below
@@ -61,12 +74,9 @@ namespace DaphneGui.CellPopDynamics
             int pointsToGraph = 0;
 
             //death driver
-
             ////NEED TO CHANGE Y VALUES FROM DOUBLE TO INT!
             for (int i = 0; i < pop.Cell.death_driver.states.Count; i++)
             {
-                //pop.Cell.death_driver.plotStates[i] = true; //For testing only - selects all states
-
                 if (pop.Cell.death_driver.plotStates[i] == true) // states and plotStates are parallel lists
                 {
                     List<int> series = data.GetState(CellPopulationDynamicsData.State.DEATH, i); // the first parameter is an enum
@@ -96,7 +106,7 @@ namespace DaphneGui.CellPopDynamics
                     //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
                     flrs.DataSeries = newSeries;
 
-                    dynGraph.mySciChart.RenderableSeries.Add(flrs);
+                    mySciChart.RenderableSeries.Add(flrs);
                 }
             }
 
@@ -135,7 +145,7 @@ namespace DaphneGui.CellPopDynamics
                     //flrs.PointMarker = new EllipsePointMarker { Fill = Colors.Red };
                     flrs.DataSeries = newSeries;
 
-                    dynGraph.mySciChart.RenderableSeries.Add(flrs);
+                    mySciChart.RenderableSeries.Add(flrs);
                 }
                 
 
@@ -174,12 +184,12 @@ namespace DaphneGui.CellPopDynamics
                     //flrs.PointMarker = new SquarePointMarker { Fill = Colors.Yellow };
                     flrs.DataSeries = newSeries;
 
-                    dynGraph.mySciChart.RenderableSeries.Add(flrs);
+                    mySciChart.RenderableSeries.Add(flrs);
                 }
             }
 
             //This draws the graph
-            dynGraph.mySciChart.ZoomExtents();
+            mySciChart.ZoomExtents();
 
 
             //Tried to serialize the data so would not have to "run" repeatedly, but this did not work - will try again
@@ -205,7 +215,7 @@ namespace DaphneGui.CellPopDynamics
 
         private void plotTester_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Not yet implemented.");
+            MessageBox.Show("Not yet implemented.", "Plotting Tester", MessageBoxButton.OK, MessageBoxImage.Information);
 
 #if false
             string jsonFile = "C:\\TEMP\\GraphData.json";
@@ -236,6 +246,11 @@ namespace DaphneGui.CellPopDynamics
             dynGraph.mySciChart.ZoomExtents();
 #endif
             
+        }
+
+        private void plotExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Not yet implemented.", "Export Plot", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }

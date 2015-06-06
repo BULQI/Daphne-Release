@@ -4,6 +4,7 @@
         xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
         xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
         Title="Cell Population Dynamics" 
         >
 
@@ -42,7 +43,7 @@
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="plotButton" Width="100" Height="24" Content="Plot" Click="plotButton_Click"></Button>
-                                    <Button Width="100" Height="24" Content="Export"></Button>
+                                    <Button x:Name="plotExportButton"  Width="100" Height="24" Content="Export" Click="plotExportButton_Click"></Button>
                                     <Button x:Name="plotTester" Width="100" Height="24" Content="Test" Click="plotTester_Click"></Button>
                                 </StackPanel>
                             </ScrollViewer>
@@ -53,13 +54,46 @@
 
                 <!-- Right-hand content containers - Chart window and maybe a tool bar also-->
                 
-                <!--The graph was not resizing with the container so it is set to fixed size for now.  Need to fix this.-->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800"  AutomationProperties.AutomationId="PlotRightTWContainer">
                     <docking:ToolWindow Title="Graph" >
                         <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                            <StackPanel>
-                                <plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>
-                            </StackPanel>
+                            
+                            <!--Moved the graph code here because it was not resizing-->
+                            <!--<plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>-->
+                            <Grid SciChart:ThemeManager.Theme="BrightSpark">
+                                <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
+
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1"  >
+
+                                        <!--  Declare Axes  -->
+                                        <SciChart:SciChartSurface.XAxis>
+                                            <SciChart:NumericAxis VisibleRange="0, 10000" />
+                                        </SciChart:SciChartSurface.XAxis>
+
+                                        <SciChart:SciChartSurface.YAxis>
+                                            <SciChart:NumericAxis VisibleRange="0, 200" />
+                                        </SciChart:SciChartSurface.YAxis>
+
+                                        <!--  Declare ChartModifiers  -->
+                                        <SciChart:SciChartSurface.ChartModifier>
+                                            <SciChart:ModifierGroup>
+                                                <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Horizontal" Margin="10" />
+                                                <SciChart:SeriesSelectionModifier>
+                                                    <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                        <Style TargetType="SciChart:BaseRenderableSeries">
+                                                            <Setter Property="StrokeThickness" Value="3" />
+                                                        </Style>
+                                                    </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                </SciChart:SeriesSelectionModifier>
+
+                                            </SciChart:ModifierGroup>
+                                        </SciChart:SciChartSurface.ChartModifier>
+
+                                    </SciChart:SciChartSurface>
+                                </ScrollViewer>
+                            </Grid>
+                                
                         </ScrollViewer>
                     </docking:ToolWindow>
                 </docking:ToolWindowContainer>
