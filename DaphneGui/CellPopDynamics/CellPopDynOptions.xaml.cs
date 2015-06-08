@@ -144,6 +144,12 @@ namespace DaphneGui.CellPopDynamics
             if (pop == null)
                 return;
 
+            if (pop.Cell == null)
+                return;
+
+            if (pop.Cell.diff_scheme == null)
+                return;
+
             //Differentiation
             int diff = pop.Cell.diff_scheme.Driver.states.Count - pop.Cell.diff_scheme.Driver.plotStates.Count;
             //if the number of plotStates items is less than number of states, add plotStates to make them same size
