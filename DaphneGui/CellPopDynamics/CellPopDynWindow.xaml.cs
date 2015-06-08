@@ -23,6 +23,7 @@ using Abt.Controls.SciChart.Visuals.PointMarkers;
 using Newtonsoft.Json;
 using System.IO;
 using Abt.Controls.SciChart;
+using Abt.Controls.SciChart.Visuals.Axes;
 
 namespace DaphneGui.CellPopDynamics
 {
@@ -52,7 +53,7 @@ namespace DaphneGui.CellPopDynamics
                   !pop.Cell.diff_scheme.Driver.plotStates.Contains(true) &&
                   !pop.Cell.div_scheme.Driver.plotStates.Contains(true))
             {
-                MessageBox.Show("No states have been selected for plotting. Please run the simulation before running the analysis.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("No states have been selected for plotting. Please select some states using the check boxes.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -68,131 +69,20 @@ namespace DaphneGui.CellPopDynamics
             //If we get here, then we have the data and we can plot it.
             //*********************************************************
 
+            mySciChart.RenderableSeries.Clear();
+
             int interval = data.Times.Count / 100;      //arbitrary number of points to graph so we don't graph all points - see reaction complex and see what we do there
             if (interval <= 0) interval = 1;            //cannot be zero because it is used as a divisor below
-            
-            int pointsToGraph = 0;
 
-            //death driver
-            ////NEED TO CHANGE Y VALUES FROM DOUBLE TO INT!
-            for (int i = 0; i < pop.Cell.death_driver.states.Count; i++)
-            {
-                if (pop.Cell.death_driver.plotStates[i] == true) // states and plotStates are parallel lists
-                {
-                    List<int> series = data.GetState(CellPopulationDynamicsData.State.DEATH, i); // the first parameter is an enum
-                    // can now plot series against data.Times; they are also parallel lists, i.e. times[j] belongs to series[j] – they form a point
-
-                    //convert to trimmed list - plot every interval'th item and make it a double - SHOULD BE INT!
-                    List<double> dSeries = new List<double>();
-                    List<double> dTimes = new List<double>();
-                    pointsToGraph = 0;
-
-                    for (int j = 0; j < series.Count; j++)
-                    {
-                        //skip graphing points unless current index modulus interval = 0
-                        if (j % interval == 0)
-                        {
-                            dSeries.Add(series[j]);
-                            dTimes.Add(data.Times[j]);
-                            pointsToGraph++;
-                        }
-                    }
-
-                    var newSeries = new XyDataSeries<double, double> { SeriesName = pop.Cell.death_driver.states[i] };
-                    newSeries.Append(dTimes, dSeries);
-
-                    FastLineRenderableSeries flrs = new FastLineRenderableSeries();
-                    flrs.SeriesColor = Colors.Red;
-                    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
-                    flrs.DataSeries = newSeries;
-
-                    mySciChart.RenderableSeries.Add(flrs);
-                }
-            }
-
-            //diff driver
-            for (int i = 0; i < pop.Cell.diff_scheme.Driver.states.Count; i++)
-            {
-                //pop.Cell.diff_scheme.Driver.plotStates[i] = true;  //For testing only - selects all states
-                if (pop.Cell.diff_scheme.Driver.plotStates[i] == true) // states and plotStates are parallel lists
-                {
-                    List<int> series = data.GetState(CellPopulationDynamicsData.State.DIFF, i); // the first parameter is an enum
-                    // can now plot series against data.Times; they are also parallel lists, i.e. times[j] belongs to series[j] – they form a point
-
-                    //convert to trimmed list - plot every interval'th item and make it a double - SHOULD BE INT!
-                    List<double> dSeries = new List<double>();
-                    List<double> dTimes = new List<double>();
-                    pointsToGraph = 0;
-
-                    for (int j = 0; j < series.Count; j++ )
-                    {
-                        //skip graphing points unless current index modulus interval = 0
-                        if (j % interval == 0)
-                        {
-                            dSeries.Add(series[j]);
-                            dTimes.Add(data.Times[j]);
-                            pointsToGraph++;
-                        }
-                    }
-
-                    var newSeries = new XyDataSeries<double, double> { SeriesName = pop.Cell.diff_scheme.Driver.states[i] };
-
-                    newSeries.Append(dTimes, dSeries);
-                    ////allSeries.Add(newSeries);
-
-                    FastLineRenderableSeries flrs = new FastLineRenderableSeries();
-                    flrs.SeriesColor = Colors.Green;
-                    //flrs.PointMarker = new EllipsePointMarker { Fill = Colors.Red };
-                    flrs.DataSeries = newSeries;
-
-                    mySciChart.RenderableSeries.Add(flrs);
-                }
-                
-
-            }
-
-            // div driver
-            for (int i = 0; i < pop.Cell.div_scheme.Driver.states.Count; i++)
-            {
-                //pop.Cell.div_scheme.Driver.plotStates[i] = true;  //For testing only - selects all states
-                if (pop.Cell.div_scheme.Driver.plotStates[i] == true) // states and plotStates are parallel lists
-                {
-                    List<int> series = data.GetState(CellPopulationDynamicsData.State.DIV, i); // the first parameter is an enum
-                    // can now plot series against data.Times; they are also parallel lists, i.e. times[j] belongs to series[j] – they form a point
-
-                    //convert to trimmed list - plot every interval'th item and make it a double - SHOULD BE INT!
-                    List<double> dSeries = new List<double>();
-                    List<double> dTimes = new List<double>();
-                    pointsToGraph = 0;
-
-                    for (int j = 0; j < series.Count; j++)
-                    {
-                        //skip graphing points unless current index modulus interval = 0
-                        if (j % interval == 0)
-                        {
-                            dSeries.Add(series[j]);
-                            dTimes.Add(data.Times[j]);
-                            pointsToGraph++;
-                        }
-                    }
-
-                    var newSeries = new XyDataSeries<double, double> { SeriesName = pop.Cell.div_scheme.Driver.states[i] };
-                    newSeries.Append(dTimes, dSeries);
-
-                    FastLineRenderableSeries flrs = new FastLineRenderableSeries();
-                    flrs.SeriesColor = Colors.Blue;
-                    //flrs.PointMarker = new SquarePointMarker { Fill = Colors.Yellow };
-                    flrs.DataSeries = newSeries;
-
-                    mySciChart.RenderableSeries.Add(flrs);
-                }
-            }
+            DrawStates(pop.Cell, pop.Cell.death_driver, data, CellPopulationDynamicsData.State.DEATH, interval);
+            DrawStates(pop.Cell, pop.Cell.diff_scheme.Driver, data, CellPopulationDynamicsData.State.DIFF, interval);
+            DrawStates(pop.Cell, pop.Cell.div_scheme.Driver, data, CellPopulationDynamicsData.State.DIV, interval);
 
             //This draws the graph
             mySciChart.ZoomExtents();
+            return;
 
-
-            //Tried to serialize the data so would not have to "run" repeatedly, but this did not work - will try again
+            //Tried to serialize the data so would not have to "run" repeatedly, but this did not work yet - will try again
 
             ////var Settings = new JsonSerializerSettings();
             ////Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -211,6 +101,59 @@ namespace DaphneGui.CellPopDynamics
             ////    MessageBox.Show("CellPopDynWindow Serialize failed: " + jsonFile + "  " + ex.Message);
             ////}
 
+        }
+
+        private void DrawStates(ConfigCell cell, ConfigTransitionDriver driver, CellPopulationDynamicsData data, CellPopulationDynamicsData.State state, int interval)
+        {
+            ////NEED TO CHANGE Y VALUES FROM DOUBLE TO INT!
+            for (int i = 0; i < driver.states.Count; i++)
+            {
+                if (driver.plotStates[i] == true) // states and plotStates are parallel lists
+                {
+                    List<int> series = data.GetState(state, i); // the first parameter is an enum
+                    // can now plot series against data.Times; they are also parallel lists, i.e. times[j] belongs to series[j] – they form a point
+
+                    //convert to trimmed list - plot every interval'th item and make it a double - SHOULD BE INT!
+                    List<double> dSeries = new List<double>();
+                    List<double> dTimes = new List<double>();
+
+                    for (int j = 0; j < series.Count; j++)
+                    {
+                        //skip graphing points unless current index modulus interval = 0
+                        if (j % interval == 0)
+                        {
+                            dSeries.Add(series[j]);
+                            dTimes.Add(data.Times[j]);
+                        }
+                    }
+
+                    var newSeries = new XyDataSeries<double, double> { SeriesName = driver.states[i] };
+                    newSeries.Append(dTimes, dSeries);
+
+                    FastLineRenderableSeries flrs = new FastLineRenderableSeries();
+
+                    if (state == CellPopulationDynamicsData.State.DEATH)
+                    {
+                        flrs.SeriesColor = Colors.Red;
+                        //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Red };
+                    }
+                    if (state == CellPopulationDynamicsData.State.DIFF)
+                    {
+                        flrs.SeriesColor = Colors.Green;
+                        //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
+                    }
+                    if (state == CellPopulationDynamicsData.State.DIV)
+                    {
+                        flrs.SeriesColor = Colors.Blue;
+                        //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Blue };
+                    }
+
+                    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
+                    flrs.DataSeries = newSeries;
+
+                    mySciChart.RenderableSeries.Add(flrs);
+                }
+            }
         }
 
         private void plotTester_Click(object sender, RoutedEventArgs e)

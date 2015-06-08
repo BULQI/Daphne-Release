@@ -64,21 +64,21 @@
                                 <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
 
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1"  >
+                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Popultion Dynamics"  >
 
                                         <!--  Declare Axes  -->
                                         <SciChart:SciChartSurface.XAxis>
-                                            <SciChart:NumericAxis VisibleRange="0, 10000" />
+                                            <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="True"/>
                                         </SciChart:SciChartSurface.XAxis>
 
                                         <SciChart:SciChartSurface.YAxis>
-                                            <SciChart:NumericAxis VisibleRange="0, 200" />
+                                            <SciChart:NumericAxis VisibleRange="0, 200" AxisTitle="Number of cells" DrawMinorGridLines="True"/>
                                         </SciChart:SciChartSurface.YAxis>
 
                                         <!--  Declare ChartModifiers  -->
                                         <SciChart:SciChartSurface.ChartModifier>
                                             <SciChart:ModifierGroup>
-                                                <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Horizontal" Margin="10" />
+                                                <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
                                                 <SciChart:SeriesSelectionModifier>
                                                     <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                         <Style TargetType="SciChart:BaseRenderableSeries">
