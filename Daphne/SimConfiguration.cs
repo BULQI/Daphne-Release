@@ -4461,7 +4461,7 @@ namespace Daphne
             }
         }
 
-        public ObservableCollection<DriverState> PlotStatePairs { get; set; }
+        //public ObservableCollection<DriverState> PlotStatePairs { get; set; }
 
         public ConfigTransitionDriver()
             : base()
@@ -4469,7 +4469,7 @@ namespace Daphne
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
             plotStates = new ObservableCollection<bool>();
-            PlotStatePairs = new ObservableCollection<DriverState>();
+            //PlotStatePairs = new ObservableCollection<DriverState>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4554,11 +4554,11 @@ namespace Daphne
             ds.name = name;
             ds.plot = plot;
 
-            DriverState existingDS = PlotStatePairs.Where(m => m.name == name).First();
+            //DriverState existingDS = PlotStatePairs.Where(m => m.name == name).First();
 
-            //add if doesn't exist already
-            if (existingDS == null)
-                PlotStatePairs.Add(ds);
+            ////add if doesn't exist already
+            //if (existingDS == null)
+            //    PlotStatePairs.Add(ds);
         }
 
         /// <summary>
@@ -4576,11 +4576,11 @@ namespace Daphne
             states.Insert(index, name);
             plotStates.Insert(index, plot);
 
-            //PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
-            DriverState ds = new DriverState();
-            ds.name = name;
-            ds.plot = plot;
-            PlotStatePairs.Insert(index, ds);
+            ////PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
+            //DriverState ds = new DriverState();
+            //ds.name = name;
+            //ds.plot = plot;
+            //PlotStatePairs.Insert(index, ds);
         }
 
         /// <summary>
@@ -4589,7 +4589,7 @@ namespace Daphne
         /// <param name="index">index at which to remove</param>
         public void RemoveStateNamePlot(int index)
         {
-            PlotStatePairs.RemoveAt(index);
+            //PlotStatePairs.RemoveAt(index);
             states.RemoveAt(index);
             plotStates.RemoveAt(index);
         }
