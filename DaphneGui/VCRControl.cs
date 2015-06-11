@@ -368,6 +368,7 @@ namespace DaphneGui
             vtkAVIWriter movieWriter;
             vtkWindowToImageFilter movieSource = new vtkWindowToImageFilter();
             bool first = true;
+            int rep = 1, n = 10;
 
             // set up the pipeline
             movieSource.SetInput(((VTKFullGraphicsController)MainWindow.GC).RWC.RenderWindow);
@@ -396,6 +397,14 @@ namespace DaphneGui
                 }
                 movieSource.Modified();
                 movieWriter.Write();
+                // the exporting should ideally be handled in a separate thread to avoid this call to
+                // DoEvents, but vtk is not thread-safe, will not work in a thread;
+                // call DoEvents every n repetitions
+                if (rep % n == 0)
+                {
+                    System.Windows.Forms.Application.DoEvents();
+                }
+                rep++;
                 if (frame >= TotalFrames - 1)
                 {
                     clearFlag(VCR_EXPORT);
