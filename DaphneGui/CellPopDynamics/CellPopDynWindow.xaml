@@ -27,7 +27,7 @@
                 <!-- Left-hand content container - Plotting options GUI -->
                 <docking:SplitContainer Orientation="Vertical">
                     
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,700" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,650" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel>
@@ -38,14 +38,14 @@
                     </docking:ToolWindowContainer>
 
                     <!--command buttons-->
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,100">
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,150">
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="plotButton" Width="100" Height="24" Content="Plot" Click="plotButton_Click"></Button>
-                                    <Button x:Name="plotExportButton"  Width="100" Height="24" Content="Export" Click="plotExportButton_Click"></Button>
-                                    <Button x:Name="plotTester" Width="100" Height="24" Content="Test" Click="plotTester_Click"></Button>
-                                </StackPanel>
+                                <WrapPanel Orientation="Horizontal">
+                                    <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
+                                    <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
+                                    <Button x:Name="plotTester" Width="50" Height="24" Content="Test" Click="plotTester_Click"></Button>
+                                </WrapPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>

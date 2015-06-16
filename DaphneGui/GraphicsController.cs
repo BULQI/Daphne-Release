@@ -15,6 +15,8 @@ using Kitware.VTK;
 
 using Daphne;
 using System.Windows.Media;
+using System.Windows.Controls.Primitives;
+using System.Windows.Controls;
 
 namespace DaphneGui
 {
@@ -861,6 +863,8 @@ namespace DaphneGui
             rw.GetInteractor().LeftButtonPressEvt += new vtkObject.vtkObjectEventHandler(leftMouseDown);
             rw.GetInteractor().EndInteractionEvt += new vtkObject.vtkObjectEventHandler(leftMouseClick);
 
+            rw.GetInteractor().MouseMoveEvt += new vtkObject.vtkObjectEventHandler(onMouseMove);
+
             // progress
             cornerAnnotation = new GraphicsProp(rw);
             vtkCornerAnnotation prop = vtkCornerAnnotation.New();
@@ -1477,6 +1481,110 @@ namespace DaphneGui
                         ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                     }
                 }
+            }
+        }
+
+        private Popup infoPop = new Popup();
+
+        public void onMouseMove(vtkObject sender, vtkObjectEventArgs e)
+        {
+            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+            int[] location = interactor.GetEventPosition();
+
+            // Increase the tolerance for locating cells for tracking and display of cell information
+            // when cells are rendered as points or polygons.
+            double orig_tolerance = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetTolerance();
+            if (cellRenderMethod != CellRenderMethod.CELL_RENDER_SPHERES)
+            {
+                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(0.01);
+            }
+
+            int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(location[0], location[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
+
+            if (p > 0)
+            {
+                p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
+                if (p >= 0 && infoPop.IsOpen == false)
+                {
+                    int cellID = CellController.GetCellIndex(p);
+                    GraphicsProp prop = CellController.CellActor;
+                    vtkProp vProp = prop.Prop;
+                    //vProp.EnterEvt += new vtkObject.vtkObjectEventHandler(onMouseEnter);
+                    vProp.LeaveEvt += new vtkObject.vtkObjectEventHandler(onMouseLeave);
+
+                    Cell cell = SimulationBase.dataBasket.Cells[cellID];
+
+
+                    infoPop.AllowsTransparency = true;
+                    infoPop.PopupAnimation = PopupAnimation.Fade;
+                    infoPop.PlacementTarget = MW.VTKDisplayDocWindow;
+
+                    infoPop.Placement = PlacementMode.Mouse;
+                    TextBlock tb = new TextBlock { Text = "Cell ID: " };
+                    tb.Background = Brushes.Transparent;
+                    tb.Foreground = Brushes.Yellow;
+                    tb.MaxWidth = 200;
+                    tb.TextWrapping = TextWrapping.Wrap;
+                    tb.TextAlignment = TextAlignment.Left;
+
+                    tb.Text += cellID.ToString();
+                    tb.Text += "\nDifferentiation state: " + cell.DifferentiationState.ToString();
+                    tb.Text += "\nDivision state: " + cell.DividerState.ToString();
+                    tb.Text += "\nGeneration: " + cell.generation.ToString();
+                    tb.Text += "\nCytokinetic: " + cell.Cytokinetic.ToString();
+                    tb.Text += "\nMotil: " + cell.IsMotile.ToString();
+                    tb.Text += "\nChemotactic: " + cell.IsChemotactic.ToString();
+                    tb.Text += "\nStochastic: " + cell.IsStochastic.ToString();
+
+
+                    infoPop.Child = tb;
+                    infoPop.IsOpen = true;
+                }
+            }
+            else if (infoPop.IsOpen == true)
+            {
+                infoPop.IsOpen = false;
+            }
+        }
+
+        private CellHoverInfo infoPopup;
+        public void onMouseEnter(vtkObject sender, vtkObjectEventArgs e)
+        {
+            //if (!HandToolButton_IsChecked)
+            //    return;
+
+            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+            int[] location = interactor.GetEventPosition();
+
+            // Increase the tolerance for locating cells for tracking and display of cell information
+            // when cells are rendered as points or polygons.
+            double orig_tolerance = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetTolerance();
+            if (cellRenderMethod != CellRenderMethod.CELL_RENDER_SPHERES)
+            {
+                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(0.01);
+            }
+
+            int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(location[0], location[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
+
+            if (p > 0)
+            {
+                p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
+                if (p >= 0)
+                {
+                    int cellID = CellController.GetCellIndex(p);
+
+                    infoPopup = new CellHoverInfo();
+                    infoPopup.DataContext = this;
+                    infoPopup.Visibility = Visibility.Visible;
+                }
+            }
+
+        }
+        public void onMouseLeave(vtkObject sender, vtkObjectEventArgs e)
+        {
+            if (infoPop != null)
+            {
+                infoPop.IsOpen = false;
             }
         }
 
