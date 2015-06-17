@@ -31,7 +31,7 @@
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel>
-                                    <plot:CellPopDynOptions x:Name="plotOptions" ></plot:CellPopDynOptions>
+                                    <plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>
                                 </StackPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>

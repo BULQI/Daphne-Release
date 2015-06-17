@@ -70,6 +70,7 @@
                                 SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
                                 SelectionChanged="lbPlotCellPops_SelectionChanged"
+                                DataContextChanged="lbPlotCellPops_DataContextChanged"
                             />
 
                 <!-- Death State -->

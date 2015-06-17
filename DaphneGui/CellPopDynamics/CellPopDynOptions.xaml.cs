@@ -117,7 +117,10 @@ namespace DaphneGui.CellPopDynamics
                 if (pop != null)
                 {
                     pop.Cell.diff_scheme.Driver.plotStates[index] = (bool)check.IsChecked;
-                    pop.reportStates.Differentiation = (bool)check.IsChecked;
+                    if ((string)Tag == "Reports" && check.IsChecked == true)
+                    {
+                        pop.reportStates.Differentiation = true;
+                    }
                 }
             }
         }
@@ -132,7 +135,10 @@ namespace DaphneGui.CellPopDynamics
                 if (pop != null)
                 {
                     pop.Cell.div_scheme.Driver.plotStates[index] = (bool)check.IsChecked;
-                    pop.reportStates.Division = (bool)check.IsChecked;
+                    if ((string)Tag == "Reports" && check.IsChecked == true)
+                    {
+                        pop.reportStates.Division = true;
+                    }
                 }
             }
         }
@@ -201,9 +207,19 @@ namespace DaphneGui.CellPopDynamics
                 if (pop != null)
                 {
                     pop.Cell.death_driver.plotStates[index] = (bool)check.IsChecked;
-                    pop.reportStates.Death = (bool)check.IsChecked;
+                    if ((string)Tag == "Reports" && check.IsChecked == true)
+                    {
+                        pop.reportStates.Death = true;
+                    }
                 }
             }
+        }
+
+        private void lbPlotCellPops_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            ListBox listBox = sender as ListBox;
+            if (listBox.Items.Count > 0)
+                listBox.SelectedIndex = 0;
         }
         
     }
