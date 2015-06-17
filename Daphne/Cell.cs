@@ -829,7 +829,7 @@ namespace Daphne
     /// <summary>
     /// data structure for single cell track data
     /// </summary>
-    public class CellTrackData
+    public class CellTrackData : ReporterData
     {
         public List<double> Times { get; set; }
         public List<double[]> Positions { get; set; }
@@ -841,6 +841,46 @@ namespace Daphne
         {
             Times = new List<double>();
             Positions = new List<double[]>();
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // position
+                    for (int j = 0; j < 3; j++)
+                    {
+                        dtmp = Positions[i][j];
+                        Positions[i][j] = Positions[minloc][j];
+                        Positions[minloc][j] = dtmp;
+                    }
+                }
+            }
         }
     }
 }

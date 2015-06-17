@@ -1012,6 +1012,11 @@ namespace Daphne
                     stream.Close();
                 }
             }
+            if (data != null)
+            {
+                // sort by time
+                data.Sort();
+            }
             return data;
         }
 
@@ -1117,6 +1122,11 @@ namespace Daphne
                     }
                 }
                 stream.Close();
+            }
+            if (data != null)
+            {
+                // sort by the time
+                data.Sort();
             }
             return data;
         }
@@ -1471,7 +1481,7 @@ namespace Daphne
         }
     }
 
-    public class CellPopulationDynamicsData
+    public class CellPopulationDynamicsData : ReporterData
     {
         public enum State { DEATH, DIV, DIFF };
         public List<double> Times { get; private set; }
@@ -1612,6 +1622,58 @@ namespace Daphne
             else
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int itmp, minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // states
+                    foreach (List<int> list in deathStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                    foreach (List<int> list in divStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                    foreach (List<int> list in diffStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                }
             }
         }
     }

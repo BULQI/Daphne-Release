@@ -48,6 +48,7 @@ namespace DaphneGui.CellPopDynamics
                 return;
             }
 
+#if SANJEEVS
             //If no states are selected for plotting, inform user
             if (!pop.Cell.death_driver.plotStates.Contains(true) &&
                   !pop.Cell.diff_scheme.Driver.plotStates.Contains(true) &&
@@ -64,6 +65,15 @@ namespace DaphneGui.CellPopDynamics
                 MessageBox.Show("There is no data to plot. Please run the simulation before running the analysis.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return; 
             }
+#else
+            //Get the dynamics data for this cell pop - if null, that means the information for the desired population is not in the file - inform user
+            CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
+            if (data == null)
+            {
+                MessageBox.Show("Missing data. Rerun the simulation with cell population dynamics reporting enabled.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+#endif
 
             //*********************************************************
             //If we get here, then we have the data and we can plot it.
