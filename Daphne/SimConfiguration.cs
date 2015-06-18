@@ -6920,6 +6920,70 @@ namespace Daphne
         }
 
         /// <summary>
+        /// This method returns true if the cell has at least one driver - death, diff or div.
+        /// Returns false if there are no drivers.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasDriver()
+        {
+            if (death_driver != null)
+                return true;
+
+            if (diff_scheme == null && div_scheme == null) 
+                return false;
+
+            if (diff_scheme != null)
+                if (diff_scheme.Driver != null)
+                    return true;
+
+            if (div_scheme != null)
+                if (div_scheme.Driver != null)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// This method returns true if at least one plotState is selected.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAnyPlotStateSelected()
+        {
+            if (death_driver != null)
+            {
+                if (death_driver.plotStates.Contains(true))
+                {
+                    return true;
+                }
+            }
+
+            if (diff_scheme != null)
+            {
+                if (diff_scheme.Driver != null)
+                {
+                    if (diff_scheme.Driver.plotStates.Contains(true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (div_scheme != null)
+            {
+                if (div_scheme.Driver != null)
+                {
+                    if (div_scheme.Driver.plotStates.Contains(true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
         /// Force distributed parameters to reinitialize on the next Sample.
         /// This is needed in order to get reproducible results for the same global seed value.
         /// </summary>

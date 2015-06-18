@@ -163,35 +163,6 @@
                             >
                     <StackPanel>
 
-                        <!--<TextBlock Text="Test Listbox" />
-                        <ListBox x:Name="diffStatesListBox" 
-                                ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.plotStates, Mode=OneWay}"                                 
-                                SelectedIndex="0"
-                                DisplayMemberPath="."
-                        />-->
-                        
-                        <!--<DataGrid x:Name="TestGrid" AutoGenerateColumns="False"
-                                  ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.plotStates}"
-                                  LoadingRow="diffStatesGrid_LoadingRow"
-                                  >
-
-                            <DataGrid.Columns>                                
-                                <DataGridCheckBoxColumn Header="Plot" Width="20"
-                                        Binding="{Binding Path=., UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                        ElementStyle="{StaticResource plotCheckBoxStyle}"
-                                        >
-                                </DataGridCheckBoxColumn>
-
-                                <DataGridTemplateColumn Width="20" Header="Plot" >
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox  IsChecked="{Binding Path=., UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>-->
-                        
                         <DataGrid x:Name="diffStatesGrid" AutoGenerateColumns="False"    
                                         ItemsSource="{Binding ElementName=lbPlotCellPops, Path=SelectedItem.Cell.diff_scheme.Driver.plotStates}"  
                                         MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200" 
@@ -223,23 +194,7 @@
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
-                                <!--<DataGridTemplateColumn Header="Name" >
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>-->
-
-                                <!--<DataGridCheckBoxColumn Header="Plot" Width="20"
-                                                        Binding="{Binding Path=., UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                        ElementStyle="{StaticResource plotCheckBoxStyle}"
-                                                        
-                                                        >
-                                </DataGridCheckBoxColumn>-->
-
-
-
+                          
                                 <DataGridTemplateColumn Width="20" Header="Plot" >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -248,9 +203,6 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                
-                                
-                                
 
                             </DataGrid.Columns>
 

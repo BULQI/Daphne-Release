@@ -48,24 +48,19 @@ namespace DaphneGui.CellPopDynamics
                 return;
             }
 
-#if SANJEEVS
-            //If no states are selected for plotting, inform user
-            if (!pop.Cell.death_driver.plotStates.Contains(true) &&
-                  !pop.Cell.diff_scheme.Driver.plotStates.Contains(true) &&
-                  !pop.Cell.div_scheme.Driver.plotStates.Contains(true))
+            if (pop.Cell.HasDriver() == false)
+            {
+                MessageBox.Show("This cell population does not have any drivers so there is nothing to plot.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                return; 
+            }
+
+            if (pop.Cell.IsAnyPlotStateSelected() == false)
+            //if (pop.Cell.NoPlotStatesSelected() == true)
             {
                 MessageBox.Show("No states have been selected for plotting. Please select some states using the check boxes.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            //Get the dynamics data for this cell pop - if null, that means the simulation has not been run - inform user
-            CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
-            if (data == null) 
-            {
-                MessageBox.Show("There is no data to plot. Please run the simulation before running the analysis.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
-                return; 
-            }
-#else
             //Get the dynamics data for this cell pop - if null, that means the information for the desired population is not in the file - inform user
             CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
             if (data == null)
@@ -73,7 +68,6 @@ namespace DaphneGui.CellPopDynamics
                 MessageBox.Show("Missing data. Rerun the simulation with cell population dynamics reporting enabled.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-#endif
 
             //*********************************************************
             //If we get here, then we have the data and we can plot it.
@@ -81,17 +75,15 @@ namespace DaphneGui.CellPopDynamics
 
             mySciChart.RenderableSeries.Clear();
 
-            int interval = data.Times.Count / 100;      //arbitrary number of points to graph so we don't graph all points - see reaction complex and see what we do there
-            if (interval <= 0) interval = 1;            //cannot be zero because it is used as a divisor below
-
-            DrawStates(pop.Cell, pop.Cell.death_driver, data, CellPopulationDynamicsData.State.DEATH, interval);
-            DrawStates(pop.Cell, pop.Cell.diff_scheme.Driver, data, CellPopulationDynamicsData.State.DIFF, interval);
-            DrawStates(pop.Cell, pop.Cell.div_scheme.Driver, data, CellPopulationDynamicsData.State.DIV, interval);
+            DrawStates(pop.Cell, pop.Cell.death_driver, data, CellPopulationDynamicsData.State.DEATH);
+            DrawStates(pop.Cell, pop.Cell.diff_scheme.Driver, data, CellPopulationDynamicsData.State.DIFF);
+            DrawStates(pop.Cell, pop.Cell.div_scheme.Driver, data, CellPopulationDynamicsData.State.DIV);
 
             //This draws the graph
             mySciChart.ZoomExtents();
             return;
 
+#if false
             //Tried to serialize the data so would not have to "run" repeatedly, but this did not work yet - will try again
 
             ////var Settings = new JsonSerializerSettings();
@@ -110,10 +102,11 @@ namespace DaphneGui.CellPopDynamics
             ////{
             ////    MessageBox.Show("CellPopDynWindow Serialize failed: " + jsonFile + "  " + ex.Message);
             ////}
+#endif
 
         }
 
-        private void DrawStates(ConfigCell cell, ConfigTransitionDriver driver, CellPopulationDynamicsData data, CellPopulationDynamicsData.State state, int interval)
+        private void DrawStates(ConfigCell cell, ConfigTransitionDriver driver, CellPopulationDynamicsData data, CellPopulationDynamicsData.State state)
         {
             ////NEED TO CHANGE Y VALUES FROM DOUBLE TO INT!
             for (int i = 0; i < driver.states.Count; i++)
@@ -129,12 +122,8 @@ namespace DaphneGui.CellPopDynamics
 
                     for (int j = 0; j < series.Count; j++)
                     {
-                        //skip graphing points unless current index modulus interval = 0
-                        if (j % interval == 0)
-                        {
                             dSeries.Add(series[j]);
                             dTimes.Add(data.Times[j]);
-                        }
                     }
 
                     var newSeries = new XyDataSeries<double, double> { SeriesName = driver.states[i] };
