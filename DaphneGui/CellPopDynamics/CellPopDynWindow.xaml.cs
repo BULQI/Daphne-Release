@@ -32,10 +32,22 @@ namespace DaphneGui.CellPopDynamics
     /// </summary>
     public partial class CellPopDynWindow : Window
     {
+        private Dictionary<int, Color> lineColors;
+        private static int NextColorIndex = 0;
+
         public CellPopDynWindow()
         {
             InitializeComponent();
             DataContext = this;
+
+            lineColors = new Dictionary<int, Color>();
+            lineColors.Add(0, Colors.Red);
+            lineColors.Add(1, new Color{A=255, R=8, G=251, B=3});
+            lineColors.Add(2, Colors.Blue);
+            lineColors.Add(3, Colors.Yellow);
+            lineColors.Add(4, Colors.Magenta);
+            lineColors.Add(5, Colors.Cyan);
+            lineColors.Add(6, Colors.Black);
         }
 
         private void plotButton_Click(object sender, RoutedEventArgs e)
@@ -130,22 +142,34 @@ namespace DaphneGui.CellPopDynamics
                     newSeries.Append(dTimes, dSeries);
 
                     FastLineRenderableSeries flrs = new FastLineRenderableSeries();
+                    if (NextColorIndex >= lineColors.Count)
+                    {
+                        NextColorIndex = 0;
+                    }
 
-                    if (state == CellPopulationDynamicsData.State.DEATH)
+                    flrs.SeriesColor = lineColors[NextColorIndex];
+
+                    NextColorIndex++;
+                    if (NextColorIndex >= lineColors.Count)
                     {
-                        flrs.SeriesColor = Colors.Red;
-                        //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Red };
+                        NextColorIndex = 0;
                     }
-                    if (state == CellPopulationDynamicsData.State.DIFF)
-                    {
-                        flrs.SeriesColor = Colors.Green;
-                        //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
-                    }
-                    if (state == CellPopulationDynamicsData.State.DIV)
-                    {
-                        flrs.SeriesColor = Colors.Blue;
-                        //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Blue };
-                    }
+
+                    //if (state == CellPopulationDynamicsData.State.DEATH)
+                    //{
+                    //    flrs.SeriesColor = Colors.Red;
+                    //    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Red };
+                    //}
+                    //if (state == CellPopulationDynamicsData.State.DIFF)
+                    //{
+                    //    flrs.SeriesColor = Colors.Green;
+                    //    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
+                    //}
+                    //if (state == CellPopulationDynamicsData.State.DIV)
+                    //{
+                    //    flrs.SeriesColor = Colors.Blue;
+                    //    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Blue };
+                    //}
 
                     //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
                     flrs.DataSeries = newSeries;
