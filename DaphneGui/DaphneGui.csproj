@@ -216,9 +216,6 @@
     <Compile Include="CellPopDynamics\CellPopDynWindow.xaml.cs">
       <DependentUpon>CellPopDynWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CellPopDynamics\PlotsOptionsWindow.xaml.cs">
-      <DependentUpon>PlotsOptionsWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
     </Compile>
@@ -365,10 +362,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="CellPopDynamics\CellPopDynWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="CellPopDynamics\PlotsOptionsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

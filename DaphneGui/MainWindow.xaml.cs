@@ -3763,14 +3763,6 @@ namespace DaphneGui
             }
         }
 
-        private void menuPlotOptions_Click(object sender, RoutedEventArgs e)
-        {
-            CellPopDynamics.PlotOptionsWindow plots = new CellPopDynamics.PlotOptionsWindow();
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            plots.DataContext = scenario;
-            plots.ShowDialog();
-        }
-
         private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;

@@ -60,8 +60,9 @@
                             
                             <!--Moved the graph code here because it was not resizing-->
                             <!--<plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>-->
+                            <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
+                            
                             <Grid SciChart:ThemeManager.Theme="BrightSpark">
-                                <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
 
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                     <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Popultion Dynamics"  >
