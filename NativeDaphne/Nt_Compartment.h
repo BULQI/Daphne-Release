@@ -45,6 +45,7 @@ namespace NativeDaphne
 			}
 		}
 
+		// gmk: terminology
 		//with default populaiton id = 0, like cytosol and plasmambrane boundaries
 		void AddBoundaryReaction(List<Nt_Reaction^>^ rxns)
 		{
@@ -148,7 +149,7 @@ namespace NativeDaphne
 			}
 		}
 
-
+		// gmk: Pulation, Put in NT_ECS with virtual and override?
 		//given boundaryId, return cellpopulationId
 		int GetCellPulationId(int boundary_id)
 		{
@@ -169,7 +170,7 @@ namespace NativeDaphne
 			return -1;
 		}
 
-
+		// gmk: Belongs elsewhere? Put in NT_ECS with virtual and override?
 		//given boundaryId, return index of the given boundary in the given population
 		int GetCellPopulationIndex(int boundary_id)
 		{
@@ -186,6 +187,7 @@ namespace NativeDaphne
 		List<Nt_MolecularPopulation ^> ^NtPopulations;
         List<Nt_Reaction^> ^NtBulkReactions;
 
+		// gmk: key=0 means plasma membrane/cytosol?
 		//key - populaiton id; vlaue - boudnaryReactions
 		Dictionary<int, Nt_ReactionSet^>^ NtBoundaryReactions;
 
@@ -360,6 +362,10 @@ namespace NativeDaphne
 			{
 				throw gcnew Exception("Error removing boundary reaciton: key not found");
 			}
+
+			if (NtBoundaryReactions->Count == 0)
+				return;
+
 			int population_id = BoundaryToCellpopMap[key];
 			int reaction_index = BoundaryIndexMap[key];
 
