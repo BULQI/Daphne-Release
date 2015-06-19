@@ -1102,7 +1102,7 @@ namespace Daphne
                         // the entry converted to int
                         ipart = Convert.ToInt32(parts[death]);
                         // increment that state
-                        data.IncrementState(CellPopulationDynamicsData.State.DEATH, ipart);
+                        data.IncrementState(CellPopulationDynamicsData.State.DEATH, ipart, dtime);
                     }
                     // diff
                     if (diff >= 0)
@@ -1110,7 +1110,7 @@ namespace Daphne
                         // the entry converted to int
                         ipart = Convert.ToInt32(parts[diff]);
                         // increment that state
-                        data.IncrementState(CellPopulationDynamicsData.State.DIFF, ipart);
+                        data.IncrementState(CellPopulationDynamicsData.State.DIFF, ipart, dtime);
                     }
                     // div
                     if (div >= 0)
@@ -1118,7 +1118,7 @@ namespace Daphne
                         // the entry converted to int
                         ipart = Convert.ToInt32(parts[div]);
                         // increment that state
-                        data.IncrementState(CellPopulationDynamicsData.State.DIV, ipart);
+                        data.IncrementState(CellPopulationDynamicsData.State.DIV, ipart, dtime);
                     }
                 }
                 stream.Close();
@@ -1488,7 +1488,7 @@ namespace Daphne
         private Dictionary<int, List<int>> deathStates;
         private Dictionary<int, List<int>> divStates;
         private Dictionary<int, List<int>> diffStates;
-        private double lastTime;
+        private Dictionary<double, int> times_dict;
 
 
         /// <summary>
@@ -1502,7 +1502,7 @@ namespace Daphne
             int i;
 
             Times = new List<double>();
-            lastTime = -1;
+            times_dict = new Dictionary<double, int>();
             
             // death
             if (pop.reportStates.Death == true)
@@ -1540,14 +1540,16 @@ namespace Daphne
         public void AddSet(double time)
         {
             // only append one set per timestep
-            if (time == lastTime)
+            if (times_dict.ContainsKey(time) == true)
             {
                 return;
             }
-            lastTime = time;
 
             // add the time
             Times.Add(time);
+            // use a dictionary for fast lookup, save the list index as value;
+            // it will serve to access the correct state
+            times_dict.Add(time, Times.Count - 1);
 
             // add a counter for each state, set to zero
 
@@ -1579,20 +1581,21 @@ namespace Daphne
         /// increment the last entry for the state with the given index
         /// </summary>
         /// <param name="state">enum identifying the state</param>
-        /// <param name="name">state index</param>
-        public void IncrementState(State state, int index)
+        /// <param name="index">state index</param>
+        /// <param name="time">the current time</param>
+        public void IncrementState(State state, int index, double time)
         {
             if (state == State.DEATH)
             {
-                deathStates[index][Times.Count - 1]++;
+                deathStates[index][times_dict[time]]++;
             }
             else if (state == State.DIFF)
             {
-                diffStates[index][Times.Count - 1]++;
+                diffStates[index][times_dict[time]]++;
             }
             else if (state == State.DIV)
             {
-                divStates[index][Times.Count - 1]++;
+                divStates[index][times_dict[time]]++;
             }
             else
             {
