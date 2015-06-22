@@ -48,6 +48,7 @@ using SBMLayer;
 using System.Security.Principal;
 using System.Globalization;
 using DaphneUserControlLib;
+using DaphneGui.CellPopDynamics;
 
 namespace DaphneGui
 {
@@ -267,6 +268,7 @@ namespace DaphneGui
         public static ComponentsToolWindow ST_ComponentsToolWindow;
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
+        //public static CellPopDynWindow ST_CellPopDynWindow;
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -285,6 +287,8 @@ namespace DaphneGui
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
             ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
+            //ST_CellPopDynWindow = cellPopDynWindow;
+
 
             this.ToolWinCellInfo.Close();
 
@@ -1164,7 +1168,7 @@ namespace DaphneGui
             applyButton.IsEnabled = enable;
             saveButton.IsEnabled = enable;
             abortButton.IsEnabled = false;
-            analysisMenu.IsEnabled = enable;
+            //analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
             ImportSBML.IsEnabled = enable;
@@ -1332,7 +1336,7 @@ namespace DaphneGui
             #endregion
         }
 
-        private void OpenCellDivisionWindow(object sender, RoutedEventArgs e)
+        private void OpenPedigreeAnalWindow(object sender, RoutedEventArgs e)
         {
             #region MyRegion
             //if (cdm == null)
@@ -2114,6 +2118,7 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
+                        //MdiTabContainer.Items.Add(ST_CellPopDynWindow);
                         ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
                         ST_VTKDisplayDocWindow.Activate();
 
@@ -2622,6 +2627,7 @@ namespace DaphneGui
                 if (gc is VTKFullGraphicsController)
                 {
                     ((VTKFullGraphicsController)gc).TracksActive = true;
+                    //analysisMenu.IsEnabled = true;
                 }
             }
             else

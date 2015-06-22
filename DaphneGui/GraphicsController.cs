@@ -17,6 +17,7 @@ using Daphne;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using System.Windows.Controls;
+using DaphneUserControlLib;
 
 namespace DaphneGui
 {
@@ -1488,6 +1489,11 @@ namespace DaphneGui
 
         public void onMouseMove(vtkObject sender, vtkObjectEventArgs e)
         {
+            if (MW.VCRbutton_Play.IsChecked == (bool?)true)
+            {
+                return;
+            }
+
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] location = interactor.GetEventPosition();
 
@@ -1504,38 +1510,27 @@ namespace DaphneGui
             if (p > 0)
             {
                 p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
+
+                //If info box already displayed, skip all this
                 if (p >= 0 && infoPop.IsOpen == false)
                 {
+                    //This statement for debugging only
+                    //Console.WriteLine("In onMouseMove over cell");
+
                     int cellID = CellController.GetCellIndex(p);
                     GraphicsProp prop = CellController.CellActor;
                     vtkProp vProp = prop.Prop;
-                    //vProp.EnterEvt += new vtkObject.vtkObjectEventHandler(onMouseEnter);
-                    vProp.LeaveEvt += new vtkObject.vtkObjectEventHandler(onMouseLeave);
 
                     Cell cell = SimulationBase.dataBasket.Cells[cellID];
-
 
                     infoPop.AllowsTransparency = true;
                     infoPop.PopupAnimation = PopupAnimation.Fade;
                     infoPop.PlacementTarget = MW.VTKDisplayDocWindow;
-
                     infoPop.Placement = PlacementMode.Mouse;
-                    TextBlock tb = new TextBlock { Text = "Cell ID: " };
-                    tb.Background = Brushes.Transparent;
-                    tb.Foreground = Brushes.Yellow;
-                    tb.MaxWidth = 200;
-                    tb.TextWrapping = TextWrapping.Wrap;
-                    tb.TextAlignment = TextAlignment.Left;
 
-                    tb.Text += cellID.ToString();
-                    tb.Text += "\nDifferentiation state: " + cell.DifferentiationState.ToString();
-                    tb.Text += "\nDivision state: " + cell.DividerState.ToString();
-                    tb.Text += "\nGeneration: " + cell.generation.ToString();
-                    tb.Text += "\nCytokinetic: " + cell.Cytokinetic.ToString();
-                    tb.Text += "\nMotil: " + cell.IsMotile.ToString();
-                    tb.Text += "\nChemotactic: " + cell.IsChemotactic.ToString();
-                    tb.Text += "\nStochastic: " + cell.IsStochastic.ToString();
-
+                    //Here, gather the necessary information
+                    TextBox tb = new TextBox();
+                    GetCellInfo(cellID, cell, tb);
 
                     infoPop.Child = tb;
                     infoPop.IsOpen = true;
@@ -1547,45 +1542,57 @@ namespace DaphneGui
             }
         }
 
-        private CellHoverInfo infoPopup;
-        public void onMouseEnter(vtkObject sender, vtkObjectEventArgs e)
+        /// <summary>
+        /// Retrieve cell info to be displayed when mouse pointer hovers over a cell
+        /// </summary>
+        /// <param name="cellID"></param>
+        /// <param name="cell"></param>
+        /// <param name="tb"></param>
+        private void GetCellInfo(int cellID, Cell cell, TextBox tb)
         {
-            //if (!HandToolButton_IsChecked)
-            //    return;
+            CellPopulation pop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(cell.Population_id);
+            string cellName = pop.Cell.CellName;
 
-            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
-            int[] location = interactor.GetEventPosition();
+            SolidColorBrush brush = new SolidColorBrush(new Color { A = 92, R = 255, G = 255, B = 255 });
+            tb.Background = brush;        //was Brushes.Transparent;
+            tb.Foreground = Brushes.Yellow;
+            tb.BorderThickness = new Thickness { Left = 1, Right = 1, Bottom = 1, Top = 1 };
+            tb.BorderBrush = Brushes.White;
+            tb.MaxWidth = 200;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.TextAlignment = TextAlignment.Left;
 
-            // Increase the tolerance for locating cells for tracking and display of cell information
-            // when cells are rendered as points or polygons.
-            double orig_tolerance = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetTolerance();
-            if (cellRenderMethod != CellRenderMethod.CELL_RENDER_SPHERES)
+            tb.Text += "\nCell Name: " + cellName;
+            tb.Text += "\nCell ID: " + cellID.ToString();
+            if (cell.Differentiator != null)
             {
-                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(0.01);
+                string diffstate = pop.Cell.diff_scheme.Driver.states[cell.DifferentiationState];
+                tb.Text += "\nDifferentiation state: " + diffstate;
+            }
+            if (cell.Divider != null)
+            {
+                string divstate = pop.Cell.div_scheme.Driver.states[cell.DividerState];
+                tb.Text += "\nDivision state: " + divstate;
+                tb.Text += "\nGeneration: " + cell.generation.ToString();
             }
 
-            int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(location[0], location[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
+            DoublesBox dbl = new DoublesBox();
+            dbl.Number = cell.SpatialState.X[0];
+            dbl.SNLowerThreshold = 1E100;
+            dbl.SNUpperThreshold = 1E-100;
+            string sX = dbl.FNumber;
+            dbl = new DoublesBox();
+            dbl.Number = cell.SpatialState.X[1];
+            dbl.SNLowerThreshold = 1E100;
+            dbl.SNUpperThreshold = 1E-100;
+            string sY = dbl.FNumber;
+            dbl = new DoublesBox();
+            dbl.Number = cell.SpatialState.X[2];
+            dbl.SNLowerThreshold = 1E100;
+            dbl.SNUpperThreshold = 1E-100;
+            string sZ = dbl.FNumber;
 
-            if (p > 0)
-            {
-                p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
-                if (p >= 0)
-                {
-                    int cellID = CellController.GetCellIndex(p);
-
-                    infoPopup = new CellHoverInfo();
-                    infoPopup.DataContext = this;
-                    infoPopup.Visibility = Visibility.Visible;
-                }
-            }
-
-        }
-        public void onMouseLeave(vtkObject sender, vtkObjectEventArgs e)
-        {
-            if (infoPop != null)
-            {
-                infoPop.IsOpen = false;
-            }
+            tb.Text += "\n(" + sX + ", " + sY + ", " + sZ + ")";
         }
 
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)

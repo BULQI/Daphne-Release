@@ -24,6 +24,7 @@ using Newtonsoft.Json;
 using System.IO;
 using Abt.Controls.SciChart;
 using Abt.Controls.SciChart.Visuals.Axes;
+//using ActiproSoftware.Windows.Controls.Docking;
 
 namespace DaphneGui.CellPopDynamics
 {
@@ -33,7 +34,7 @@ namespace DaphneGui.CellPopDynamics
     public partial class CellPopDynWindow : Window
     {
         private Dictionary<int, Color> lineColors;
-        private static int NextColorIndex = 0;
+        private int NextColorIndex = 0;
 
         public CellPopDynWindow()
         {
@@ -41,13 +42,12 @@ namespace DaphneGui.CellPopDynamics
             DataContext = this;
 
             lineColors = new Dictionary<int, Color>();
-            lineColors.Add(0, Colors.Red);
-            lineColors.Add(1, new Color{A=255, R=8, G=251, B=3});
-            lineColors.Add(2, Colors.Blue);
-            lineColors.Add(3, Colors.Yellow);
-            lineColors.Add(4, Colors.Magenta);
-            lineColors.Add(5, Colors.Cyan);
-            lineColors.Add(6, Colors.Black);
+            lineColors.Add(0, Colors.Blue);
+            lineColors.Add(1, Colors.Red);
+            lineColors.Add(2, new Color{A=255, R=8, G=251, B=3});   //bright green
+            lineColors.Add(3, Colors.Magenta);
+            lineColors.Add(4, Colors.Cyan);
+            lineColors.Add(5, Colors.Black);
         }
 
         private void plotButton_Click(object sender, RoutedEventArgs e)
@@ -77,7 +77,7 @@ namespace DaphneGui.CellPopDynamics
             CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
             if (data == null)
             {
-                MessageBox.Show("Missing data. Rerun the simulation with cell population dynamics reporting enabled.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Missing data. Please either run this protocol first or load a past experiment", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -155,23 +155,6 @@ namespace DaphneGui.CellPopDynamics
                         NextColorIndex = 0;
                     }
 
-                    //if (state == CellPopulationDynamicsData.State.DEATH)
-                    //{
-                    //    flrs.SeriesColor = Colors.Red;
-                    //    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Red };
-                    //}
-                    //if (state == CellPopulationDynamicsData.State.DIFF)
-                    //{
-                    //    flrs.SeriesColor = Colors.Green;
-                    //    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
-                    //}
-                    //if (state == CellPopulationDynamicsData.State.DIV)
-                    //{
-                    //    flrs.SeriesColor = Colors.Blue;
-                    //    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Blue };
-                    //}
-
-                    //flrs.PointMarker = new TrianglePointMarker { Fill = Colors.Green };
                     flrs.DataSeries = newSeries;
 
                     mySciChart.RenderableSeries.Add(flrs);
@@ -218,5 +201,6 @@ namespace DaphneGui.CellPopDynamics
         {
             MessageBox.Show("Not yet implemented.", "Export Plot", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
     }
 }

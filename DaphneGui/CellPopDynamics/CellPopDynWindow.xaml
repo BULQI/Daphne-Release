@@ -31,6 +31,12 @@
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel>
+                                    <!--<TextBlock Text="{Binding experiment_name}"></TextBlock>
+                                    <ListBox x:Name="lbCellPopTester"
+                                        ItemsSource="{Binding Path=entity_repository.cells}" 
+                                        SelectedIndex="0"
+                                        DisplayMemberPath="cellpopulation_name"   
+                                    />-->
                                     <plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>
                                 </StackPanel>
                             </ScrollViewer>
@@ -44,7 +50,7 @@
                                 <WrapPanel Orientation="Horizontal">
                                     <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
                                     <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
-                                    <Button x:Name="plotTester" Width="50" Height="24" Content="Test" Click="plotTester_Click"></Button>
+                                    <Button x:Name="plotTester" Width="50" Height="24" Visibility="Hidden" Content="Test" Click="plotTester_Click"></Button>
                                 </WrapPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>
@@ -65,7 +71,7 @@
                             <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Popultion Dynamics"  >
+                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics"  >
 
                                         <!--  Declare Axes  -->
                                         <SciChart:SciChartSurface.XAxis>
@@ -73,7 +79,7 @@
                                         </SciChart:SciChartSurface.XAxis>
 
                                         <SciChart:SciChartSurface.YAxis>
-                                            <SciChart:NumericAxis VisibleRange="0, 200" AxisTitle="Number of cells" DrawMinorGridLines="True"/>
+                                            <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="True"/>
                                         </SciChart:SciChartSurface.YAxis>
 
                                         <!--  Declare ChartModifiers  -->
@@ -87,7 +93,8 @@
                                                         </Style>
                                                     </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                 </SciChart:SeriesSelectionModifier>
-
+                                                <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                                <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
                                             </SciChart:ModifierGroup>
                                         </SciChart:SciChartSurface.ChartModifier>
 
