@@ -1170,7 +1170,7 @@ namespace Daphne
             }
             // 5., find the maximum force
             f_max = 0;
-            foreach (KeyValuePair<int, Pair> kvp in collisionManager.Pairs)
+            foreach (KeyValuePair<long, Pair> kvp in collisionManager.Pairs)
             {
                 if (kvp.Value.Force > f_max)
                 {

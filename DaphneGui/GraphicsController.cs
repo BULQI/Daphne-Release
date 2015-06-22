@@ -15,6 +15,9 @@ using Kitware.VTK;
 
 using Daphne;
 using System.Windows.Media;
+using System.Windows.Controls.Primitives;
+using System.Windows.Controls;
+using DaphneUserControlLib;
 
 namespace DaphneGui
 {
@@ -749,6 +752,7 @@ namespace DaphneGui
         private bool toolsToolbar_IsEnabled = true;
         private bool resetCameraButton_IsChecked = false;
         private bool orientationMarker_IsChecked = true;
+        private bool backgroundButton_IsChecked = false;
         private bool scalarBarMarker_IsChecked = false;
         private System.Windows.Visibility colorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
         private double colorScaleMaxFactor = 1.0;
@@ -859,6 +863,8 @@ namespace DaphneGui
             // add events to the iren instead of Observers
             rw.GetInteractor().LeftButtonPressEvt += new vtkObject.vtkObjectEventHandler(leftMouseDown);
             rw.GetInteractor().EndInteractionEvt += new vtkObject.vtkObjectEventHandler(leftMouseClick);
+
+            rw.GetInteractor().MouseMoveEvt += new vtkObject.vtkObjectEventHandler(onMouseMove);
 
             // progress
             cornerAnnotation = new GraphicsProp(rw);
@@ -990,6 +996,22 @@ namespace DaphneGui
                     axesTool.SetEnabled(value ? 1 : 0);
                     rwc.Invalidate();
                     base.OnPropertyChanged("OrientationMarker_IsChecked");
+                }
+            }
+        }
+
+        public bool BackgroundButton_IsChecked
+        {
+            get { return backgroundButton_IsChecked; }
+            set
+            {
+                if (value == backgroundButton_IsChecked)
+                    return;
+                else
+                {
+                    backgroundButton_IsChecked = value;
+                    rwc.Invalidate();
+                    base.OnPropertyChanged("BackgroundButton_IsChecked");
                 }
             }
         }
@@ -1463,6 +1485,116 @@ namespace DaphneGui
             }
         }
 
+        private Popup infoPop = new Popup();
+
+        public void onMouseMove(vtkObject sender, vtkObjectEventArgs e)
+        {
+            if (MW.VCRbutton_Play.IsChecked == (bool?)true)
+            {
+                return;
+            }
+
+            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+            int[] location = interactor.GetEventPosition();
+
+            // Increase the tolerance for locating cells for tracking and display of cell information
+            // when cells are rendered as points or polygons.
+            double orig_tolerance = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetTolerance();
+            if (cellRenderMethod != CellRenderMethod.CELL_RENDER_SPHERES)
+            {
+                ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(0.01);
+            }
+
+            int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(location[0], location[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
+
+            if (p > 0)
+            {
+                p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
+
+                //If info box already displayed, skip all this
+                if (p >= 0 && infoPop.IsOpen == false)
+                {
+                    //This statement for debugging only
+                    //Console.WriteLine("In onMouseMove over cell");
+
+                    int cellID = CellController.GetCellIndex(p);
+                    GraphicsProp prop = CellController.CellActor;
+                    vtkProp vProp = prop.Prop;
+
+                    Cell cell = SimulationBase.dataBasket.Cells[cellID];
+
+                    infoPop.AllowsTransparency = true;
+                    infoPop.PopupAnimation = PopupAnimation.Fade;
+                    infoPop.PlacementTarget = MW.VTKDisplayDocWindow;
+                    infoPop.Placement = PlacementMode.Mouse;
+
+                    //Here, gather the necessary information
+                    TextBox tb = new TextBox();
+                    GetCellInfo(cellID, cell, tb);
+
+                    infoPop.Child = tb;
+                    infoPop.IsOpen = true;
+                }
+            }
+            else if (infoPop.IsOpen == true)
+            {
+                infoPop.IsOpen = false;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve cell info to be displayed when mouse pointer hovers over a cell
+        /// </summary>
+        /// <param name="cellID"></param>
+        /// <param name="cell"></param>
+        /// <param name="tb"></param>
+        private void GetCellInfo(int cellID, Cell cell, TextBox tb)
+        {
+            CellPopulation pop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(cell.Population_id);
+            string cellName = pop.Cell.CellName;
+
+            SolidColorBrush brush = new SolidColorBrush(new Color { A = 92, R = 255, G = 255, B = 255 });
+            tb.Background = brush;        //was Brushes.Transparent;
+            tb.Foreground = Brushes.Yellow;
+            tb.BorderThickness = new Thickness { Left = 1, Right = 1, Bottom = 1, Top = 1 };
+            tb.BorderBrush = Brushes.White;
+            tb.MaxWidth = 200;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.TextAlignment = TextAlignment.Left;
+
+            tb.Text += "\nCell Name: " + cellName;
+            tb.Text += "\nCell ID: " + cellID.ToString();
+            if (cell.Differentiator != null)
+            {
+                string diffstate = pop.Cell.diff_scheme.Driver.states[cell.DifferentiationState];
+                tb.Text += "\nDifferentiation state: " + diffstate;
+            }
+            if (cell.Divider != null)
+            {
+                string divstate = pop.Cell.div_scheme.Driver.states[cell.DividerState];
+                tb.Text += "\nDivision state: " + divstate;
+                tb.Text += "\nGeneration: " + cell.generation.ToString();
+            }
+
+            DoublesBox dbl = new DoublesBox();
+            dbl.Number = cell.SpatialState.X[0];
+            dbl.SNLowerThreshold = 1E100;
+            dbl.SNUpperThreshold = 1E-100;
+            string sX = dbl.FNumber;
+            dbl = new DoublesBox();
+            dbl.Number = cell.SpatialState.X[1];
+            dbl.SNLowerThreshold = 1E100;
+            dbl.SNUpperThreshold = 1E-100;
+            string sY = dbl.FNumber;
+            dbl = new DoublesBox();
+            dbl.Number = cell.SpatialState.X[2];
+            dbl.SNLowerThreshold = 1E100;
+            dbl.SNUpperThreshold = 1E-100;
+            string sZ = dbl.FNumber;
+
+            tb.Text += "\n(" + sX + ", " + sY + ", " + sZ + ")";
+        }
+
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
             if (!HandToolButton_IsChecked)
@@ -1831,7 +1963,13 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.Sim.RunStatus == SimulationBase.RUNSTAT_OFF)
+                // special case: vcr
+                if (MainWindow.VCR != null && MainWindow.VCR.CheckFlag(VCRControl.VCR_OPEN) == true)
+                {
+                    ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Progress: " + progress + "%");
+                }
+                // regular handling
+                else if (MainWindow.Sim.RunStatus == SimulationBase.RUNSTAT_OFF)
                 {
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "");
                 }

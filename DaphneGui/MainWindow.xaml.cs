@@ -48,6 +48,7 @@ using SBMLayer;
 using System.Security.Principal;
 using System.Globalization;
 using DaphneUserControlLib;
+using DaphneGui.CellPopDynamics;
 
 namespace DaphneGui
 {
@@ -126,7 +127,6 @@ namespace DaphneGui
 
         private DocWindow dw;
         private Thread simThread;
-        private VCRControl vcrControl = null;
         public static Cell selectedCell = null;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
@@ -136,6 +136,12 @@ namespace DaphneGui
         {
             get { return sim; }
             set { sim = value; }
+        }
+
+        private static VCRControl vcrControl = null;
+        public static VCRControl VCR
+        {
+            get { return vcrControl; }
         }
 
         private Process devHelpProc;
@@ -262,6 +268,7 @@ namespace DaphneGui
         public static ComponentsToolWindow ST_ComponentsToolWindow;
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
+        //public static CellPopDynWindow ST_CellPopDynWindow;
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -280,6 +287,8 @@ namespace DaphneGui
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
             ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
+            //ST_CellPopDynWindow = cellPopDynWindow;
+
 
             this.ToolWinCellInfo.Close();
 
@@ -1159,7 +1168,7 @@ namespace DaphneGui
             applyButton.IsEnabled = enable;
             saveButton.IsEnabled = enable;
             abortButton.IsEnabled = false;
-            analysisMenu.IsEnabled = enable;
+            //analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
             ImportSBML.IsEnabled = enable;
@@ -1327,7 +1336,7 @@ namespace DaphneGui
             #endregion
         }
 
-        private void OpenCellDivisionWindow(object sender, RoutedEventArgs e)
+        private void OpenPedigreeAnalWindow(object sender, RoutedEventArgs e)
         {
             #region MyRegion
             //if (cdm == null)
@@ -2109,6 +2118,7 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
+                        //MdiTabContainer.Items.Add(ST_CellPopDynWindow);
                         ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
                         ST_VTKDisplayDocWindow.Activate();
 
@@ -2617,6 +2627,7 @@ namespace DaphneGui
                 if (gc is VTKFullGraphicsController)
                 {
                     ((VTKFullGraphicsController)gc).TracksActive = true;
+                    //analysisMenu.IsEnabled = true;
                 }
             }
             else
@@ -2791,6 +2802,7 @@ namespace DaphneGui
             {
                 repetition = 1;
             }
+
             switch (ToolWinType)
             {
                 case ToolWindowType.Tissue:
@@ -3757,20 +3769,25 @@ namespace DaphneGui
             }
         }
 
-        private void menuPlotOptions_Click(object sender, RoutedEventArgs e)
-        {
-            CellPopDynamics.PlotOptionsWindow plots = new CellPopDynamics.PlotOptionsWindow();
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            plots.DataContext = scenario;
-            plots.ShowDialog();
-        }
-
         private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
             dynWindow.DataContext = scenario;
             dynWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// This handler toggles the visibility of the background color combo box in toolbar
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BackgroundButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (bgPicker.Visibility == Visibility.Collapsed)
+                bgPicker.Visibility = Visibility.Visible;
+            else
+                bgPicker.Visibility = Visibility.Collapsed;
         }
 
     }

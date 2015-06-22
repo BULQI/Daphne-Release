@@ -26,50 +26,14 @@ namespace DaphneGui.CellPopDynamics
             InitializeComponent();
         }
 
-        ////private void deathStatesGrid_Loaded(object sender, RoutedEventArgs e)
-        ////{
-        ////    var selItem = lbPlotCellPops.SelectedItem;
-        ////    var selValue = lbPlotCellPops.SelectedValue;
-        ////}
-
-        ////private void lbPlotCellPops_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        ////{
-        ////    var selItem = lbPlotCellPops.SelectedItem;
-        ////    var selValue = lbPlotCellPops.SelectedValue;
-
-            
-        ////}
-
-        
-
-        ////private void deathStatesGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        ////{
-        ////    //DataGrid dg = (DataGrid)sender;
-        ////    //CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
-        ////    //int index = dg.SelectedIndex;
-        ////    //bool plotOn = pop.Cell.death_driver.plotStates[index];
-
-        ////    //foreach (DataGridColumn col in dg.Columns)
-        ////    //{
-        ////    //    if (col is DataGridCheckBoxColumn)
-        ////    //    {
-        ////    //        col.
-        ////    //        col.SetValue = pop.Cell.death_driver.plotStates[index];
-        ////    //    }
-        ////    //    col.Width = DataGridLength.Auto;
-        ////    //}
-        ////}
-
-        ////private void deathStatesGrid_Loaded_1(object sender, RoutedEventArgs e)
-        ////{
-        ////    int n = 1;
-        ////    n++;
-        ////}
-
         private void deathStatesGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             DataGrid dataGrid = sender as DataGrid;
             CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
+
+            if (pop == null)
+                return;
+
             int index = e.Row.GetIndex();
 
             if (index < pop.Cell.death_driver.states.Count)
@@ -85,6 +49,7 @@ namespace DaphneGui.CellPopDynamics
             }
 
         }
+
         private void diffStatesGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             DataGrid dataGrid = sender as DataGrid;
@@ -102,8 +67,26 @@ namespace DaphneGui.CellPopDynamics
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
             }
-
         }
+
+        //private void divStatesGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        //{
+        //    DataGrid dataGrid = sender as DataGrid;
+        //    CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
+
+        //    int index = e.Row.GetIndex();
+        //    if (index < pop.Cell.div_scheme.Driver.states.Count)
+        //    {
+        //        DataGridRowHeader dgr = new DataGridRowHeader();
+        //        dgr.DataContext = pop.Cell.div_scheme.Driver;
+        //        Binding binding = new Binding(string.Format("states[{0}]", index));
+        //        binding.NotifyOnTargetUpdated = true;
+        //        binding.Mode = BindingMode.OneWay;
+        //        binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+        //        dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
+        //        e.Row.Header = dgr;
+        //    }
+        //}
 
         private void divStatesGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
@@ -122,6 +105,164 @@ namespace DaphneGui.CellPopDynamics
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
             }
+        }
+
+        private void DiffCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            int index = diffStatesGrid.SelectedIndex;
+            if (index >= 0 && index < diffStatesGrid.Items.Count)
+            {
+                CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
+                CheckBox check = sender as CheckBox;
+                if (pop != null)
+                {
+                    pop.Cell.diff_scheme.Driver.plotStates[index] = (bool)check.IsChecked;
+                    if ((string)Tag == "Reports" && check.IsChecked == true)
+                    {
+                        pop.reportStates.Differentiation = true;
+                    }
+                }
+            }
+        }
+
+        private void DivCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            int index = divStatesGrid.SelectedIndex;
+            if (index >= 0 && index < divStatesGrid.Items.Count)
+            {
+                CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
+                CheckBox check = sender as CheckBox;
+                if (pop != null)
+                {
+                    pop.Cell.div_scheme.Driver.plotStates[index] = (bool)check.IsChecked;
+                    if ((string)Tag == "Reports" && check.IsChecked == true)
+                    {
+                        pop.reportStates.Division = true;
+                    }
+                }
+            }
+        }
+
+        private void lbPlotCellPops_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
+
+            if (pop == null)
+                return;
+
+            if (pop.Cell == null)
+                return;
+
+            if (pop.Cell.diff_scheme == null)
+                return;
+
+            //Differentiation
+            if (pop.Cell.diff_scheme != null && pop.Cell.diff_scheme.Driver != null)
+            {
+                int diff = pop.Cell.diff_scheme.Driver.states.Count - pop.Cell.diff_scheme.Driver.plotStates.Count;
+                //if the number of plotStates items is less than number of states, add plotStates to make them same size
+                if (diff > 0)
+                {
+                    for (int i = 0; i < diff; i++)
+                    {
+                        pop.Cell.diff_scheme.Driver.plotStates.Add(false);
+                    }
+                }
+            }
+
+            //Division
+            if (pop.Cell.div_scheme != null && pop.Cell.div_scheme.Driver != null)
+            {
+                int div = pop.Cell.div_scheme.Driver.states.Count - pop.Cell.div_scheme.Driver.plotStates.Count;
+                //if the number of plotStates items is less than number of states, add plotStates to make them same size
+                if (div > 0)
+                {
+                    for (int i = 0; i < div; i++)
+                    {
+                        pop.Cell.div_scheme.Driver.plotStates.Add(false);
+                    }
+                }
+            }
+
+            //Death
+            if (pop.Cell.death_driver != null)
+            {
+                int death = pop.Cell.death_driver.states.Count - pop.Cell.death_driver.plotStates.Count;
+                //if the number of plotStates items is less than number of states, add plotStates to make them same size
+                if (death > 0)
+                {
+                    for (int i = 0; i < death; i++)
+                    {
+                        pop.Cell.death_driver.plotStates.Add(false);
+                    }
+                }
+                else if (death < 0)
+                {
+                    death = -death;
+                    for (int i = 0; i < death; i++)
+                    {
+                        int last = pop.Cell.death_driver.plotStates.Count;
+                        pop.Cell.death_driver.plotStates.RemoveAt(last - 1);
+                    }
+                }
+            }
+        }
+
+        private void DeathCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            int index = deathStatesGrid.SelectedIndex;
+            if (index >= 0 && index < deathStatesGrid.Items.Count)
+            {
+                CellPopulation pop = lbPlotCellPops.SelectedItem as CellPopulation;
+                CheckBox check = sender as CheckBox;
+                if (pop != null)
+                {
+                    pop.Cell.death_driver.plotStates[index] = (bool)check.IsChecked;
+                    if ((string)Tag == "Reports" && check.IsChecked == true)
+                    {
+                        pop.reportStates.Death = true;
+                    }
+                }
+            }
+        }
+
+        private void lbPlotCellPops_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            //ListBox listBox = sender as ListBox;
+            //if (listBox.Items.Count > 0)
+            //    listBox.SelectedIndex = 0;
+        }
+
+        private void lbPlotCellPops_Loaded(object sender, RoutedEventArgs e)
+        {
+            ListBox listBox = sender as ListBox;
+            if (listBox.Items.Count > 0)
+                if (listBox.SelectedIndex == -1)
+                    listBox.SelectedIndex = 0;
+        }
+        
+    }
+
+
+    ////////////////////////////////////////////////////////////////////
+    //CONVERTERS
+    //
+
+    public class plotStateToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return false;
+
+            bool plot = (bool)value;
+
+            return plot;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return "false";
         }
     }
 }

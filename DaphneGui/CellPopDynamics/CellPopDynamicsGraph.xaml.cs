@@ -12,6 +12,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+//using Abt.Controls.SciChart.ChartModifiers;
+//using Abt.Controls.SciChart.Model.DataSeries;
+//using Daphne.Charting.Data;
+using Abt.Controls.SciChart.Visuals;
+
 namespace DaphneGui.CellPopDynamics
 {
     /// <summary>
@@ -22,6 +27,10 @@ namespace DaphneGui.CellPopDynamics
         public CellPopDynamicsGraph()
         {
             InitializeComponent();
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

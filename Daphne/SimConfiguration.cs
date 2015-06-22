@@ -4428,6 +4428,9 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Helper class makes it easier to display Cell population dynamics GUI
+    /// </summary>
     public class DriverState
     {
         public string name { get; set; }
@@ -4442,9 +4445,23 @@ namespace Daphne
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
-        public ObservableCollection<bool> plotStates { get; set; }
+        //public ObservableCollection<bool> plotStates { get; set; }
 
-        public ObservableCollection<DriverState> PlotStatePairs { get; set; }
+        private ObservableCollection<bool> _plotStates;
+        public ObservableCollection<bool> plotStates
+        {
+            get
+            {
+                return _plotStates;
+            }
+            set
+            {
+                _plotStates = value;
+                OnPropertyChanged("plotStates");
+            }
+        }
+
+        //public ObservableCollection<DriverState> PlotStatePairs { get; set; }
 
         public ConfigTransitionDriver()
             : base()
@@ -4452,7 +4469,7 @@ namespace Daphne
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
             plotStates = new ObservableCollection<bool>();
-            PlotStatePairs = new ObservableCollection<DriverState>();
+            //PlotStatePairs = new ObservableCollection<DriverState>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4526,20 +4543,23 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void AddStateNamePlot(string name, bool plot)
         {
+            name = name.Trim();
+            if (name.Length == 0)
+                return;
+
             states.Add(name);
             plotStates.Add(plot);
-            //DriverState ds = new DriverState { name = name, plot = plot };
-            //ds.name = "abc";
-            //string test = name;
-            //PlotStatePairs.Add(ds);
-        }
 
-        //StudentName student4 = new StudentName
-        //{
-        //    FirstName = "Craig",
-        //    LastName = "Playstead",
-        //    ID = 116
-        //};
+            DriverState ds = new DriverState { name = name, plot = plot };
+            ds.name = name;
+            ds.plot = plot;
+
+            //DriverState existingDS = PlotStatePairs.Where(m => m.name == name).First();
+
+            ////add if doesn't exist already
+            //if (existingDS == null)
+            //    PlotStatePairs.Add(ds);
+        }
 
         /// <summary>
         /// insert a state; this keeps state names and plot booleans in synch
@@ -4549,17 +4569,18 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void InsertStateNamePlot(int index, string name, bool plot)
         {
+            name = name.Trim();
+            if (name.Length == 0)
+                return;
+
             states.Insert(index, name);
             plotStates.Insert(index, plot);
 
-            //PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
-
+            ////PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
             //DriverState ds = new DriverState();
-            //ds.name = name; ds.plot = plot;
-            //PlotStatePairs.Add(ds);
-            //ds.name = "abc";
-            //string test = name;
-            
+            //ds.name = name;
+            //ds.plot = plot;
+            //PlotStatePairs.Insert(index, ds);
         }
 
         /// <summary>
@@ -4647,7 +4668,12 @@ namespace Daphne
 
     public class ConfigTransitionScheme : ConfigEntity
     {
-        public string Name { get; set; }
+        private string name;
+        public string Name 
+        {
+            get { return name; }
+            set { name = value; OnPropertyChanged("Name"); }
+        }
 
         //For regulators
         public ConfigTransitionDriver Driver { get; set; }
@@ -4676,7 +4702,7 @@ namespace Daphne
             : base()
         {
             genes = new ObservableCollection<string>();
-            Name = "New scheme";
+            Name = "Transition scheme";
             Driver = new ConfigTransitionDriver();
             activationRows = new ObservableCollection<ConfigActivationRow>();
         }
@@ -4688,7 +4714,45 @@ namespace Daphne
 
         public override string GenerateNewName(Level level, string ending)
         {
-            throw new NotImplementedException();
+            if (FindByName(level, Name) == false)
+            {
+                return Name;
+            }
+
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:0}", nSuffix);
+            string TempName = OriginalName + suffix;
+            while (FindByName(level, TempName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:0}", nSuffix);
+                TempName = OriginalName + suffix;
+            }
+
+            return TempName;
+        }
+
+        public static bool FindByName(Level level, string name)
+        {
+            bool ret = false;
+            foreach (ConfigTransitionScheme scheme in level.entity_repository.diff_schemes)
+            {
+                if (scheme.Name == name)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
         }
 
         public void AddGene(string gguid)
@@ -4725,16 +4789,16 @@ namespace Daphne
         public string GenerateStateName()
         {
             string OriginalName = "State";
-            string ending = "_New";
+            string ending = "";
 
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
+            int nSuffix = 0;
+            string suffix = ending + string.Format("{0:0}", nSuffix);
             string NewStateName = OriginalName + suffix;
 
             while (HasState(NewStateName) == true)
             {
                 nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
+                suffix = ending + string.Format("{0:0}", nSuffix);
                 NewStateName = OriginalName + suffix;
             }
 
@@ -6854,6 +6918,70 @@ namespace Daphne
 
             return true;
         }
+
+        /// <summary>
+        /// This method returns true if the cell has at least one driver - death, diff or div.
+        /// Returns false if there are no drivers.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasDriver()
+        {
+            if (death_driver != null)
+                return true;
+
+            if (diff_scheme == null && div_scheme == null) 
+                return false;
+
+            if (diff_scheme != null)
+                if (diff_scheme.Driver != null)
+                    return true;
+
+            if (div_scheme != null)
+                if (div_scheme.Driver != null)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// This method returns true if at least one plotState is selected.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAnyPlotStateSelected()
+        {
+            if (death_driver != null)
+            {
+                if (death_driver.plotStates.Contains(true))
+                {
+                    return true;
+                }
+            }
+
+            if (diff_scheme != null)
+            {
+                if (diff_scheme.Driver != null)
+                {
+                    if (diff_scheme.Driver.plotStates.Contains(true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (div_scheme != null)
+            {
+                if (div_scheme.Driver != null)
+                {
+                    if (div_scheme.Driver.plotStates.Contains(true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
 
         /// <summary>
         /// Force distributed parameters to reinitialize on the next Sample.

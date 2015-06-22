@@ -111,10 +111,10 @@
                     <MenuItem Header="Save Store As..." Name="fileSaveStoreAs" Click="menuAdminSaveAs_Click" />
                 </MenuItem>
                 
-                <MenuItem Header="Analysis" Name="analysisMenu" >
+                <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
                     <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
                     <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
-                    <MenuItem Header="Cell Division" Name="cellDivMenu" Click="OpenCellDivisionWindow" />
+                    <MenuItem Header="Pedigree Analysis" Name="pedigreeAnalMenu" Click="OpenPedigreeAnalWindow" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
@@ -530,7 +530,7 @@
                                                 <Grid>
                                                     <Expander x:Name="CellOptionsExpander"
                                                               ExpandDirection="Down" 
-                                                              MinWidth="150"
+                                                              MinWidth="112"
                                                               IsExpanded="False"
                                                               Header="Cell Options"
                                                               Margin="4,4,0,0" 
@@ -557,7 +557,7 @@
 
                                                 <Grid>
                                                     <Expander x:Name="ECMOptionsExpander"
-                                                              MinWidth="150"
+                                                              MinWidth="114"
                                                               ExpandDirection="Down" 
                                                               IsExpanded="False"
                                                               Header="ECM Options"
@@ -614,12 +614,17 @@
                                                     <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <Separator ToolBar.OverflowMode="Never"/>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="Background: " VerticalAlignment="Center" Margin="2,2,0,0"></TextBlock>
-                                                    <uc:GreyScaleColorPicker x:Name="picker" VerticalAlignment="Bottom" Width="100"  SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                </StackPanel>
-                                                <Separator ToolBar.OverflowMode="Never" Margin="4,0"/>
-                                                <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>                                                
+                                                <ToggleButton Name="BackgroundButton" 
+                                                        IsChecked="{Binding BackgroundButton_IsChecked}" 
+                                                        Click="BackgroundButton_Click"
+                                                        ToolTip="Choose background" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/bucket.png" Width="24"  Height="24" Style="{StaticResource toolbarTBImageStyle}" />
+                                                </ToggleButton>
+                                                <uc:GreyScaleColorPicker Margin="2,0"  x:Name="bgPicker" Visibility="Collapsed"  VerticalAlignment="Bottom" MaxWidth="110"  
+                                                                             SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                             />
+                                                <Separator ToolBar.OverflowMode="Never" />
+                                                <Button Content="Export" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="52" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>                                                
                                             </ToolBar>
                                         </ToolBarTray>
 
@@ -639,8 +644,7 @@
                                 <local:RenderSkinWindow x:Name="renderSkinWindow" Title="Render Scheme"
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                        Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
-                                        ConverterParameter=renderSkinWindow}"             
-                                                        />
+                                       ConverterParameter=renderSkinWindow}"      />
                             </docking:TabbedMdiContainer>
                         </docking:TabbedMdiHost>
                     </docking:Workspace>

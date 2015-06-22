@@ -4,8 +4,12 @@
         xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
         xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-        Title="Cell Population Dynamics" >
+        xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
+        Title="Cell Population Dynamics" 
+        >
 
+    <!--This is for when user selects Cell Pop Dynamics in Analysis menu-->
+    
     <!--DockPanel-->
     <DockPanel LastChildFill="True">
 
@@ -23,43 +27,84 @@
                 <!-- Left-hand content container - Plotting options GUI -->
                 <docking:SplitContainer Orientation="Vertical">
                     
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,700" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,650" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel>
-                                    <plot:CellPopDynOptions x:Name="plotOptions" ></plot:CellPopDynOptions>
+                                    <!--<TextBlock Text="{Binding experiment_name}"></TextBlock>
+                                    <ListBox x:Name="lbCellPopTester"
+                                        ItemsSource="{Binding Path=entity_repository.cells}" 
+                                        SelectedIndex="0"
+                                        DisplayMemberPath="cellpopulation_name"   
+                                    />-->
+                                    <plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>
                                 </StackPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
 
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,100">
+                    <!--command buttons-->
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,150">
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="plotButton" Width="100" Height="24" Content="Plot" Click="plotButton_Click"></Button>
-                                    <Button Width="100" Height="24" Content="Export"></Button>
-                                </StackPanel>
+                                <WrapPanel Orientation="Horizontal">
+                                    <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
+                                    <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
+                                    <Button x:Name="plotTester" Width="50" Height="24" Visibility="Hidden" Content="Test" Click="plotTester_Click"></Button>
+                                </WrapPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
                     
                 </docking:SplitContainer>
 
-                <!-- Right-hand content containers - Tool bar and Chart window -->
-                <!--<docking:SplitContainer Orientation="Vertical">-->
-                    
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800"  AutomationProperties.AutomationId="PlotRightTWContainer">
-                        <docking:ToolWindow Title="Graph" >
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel>
-                                <plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </docking:ToolWindow>
-                    </docking:ToolWindowContainer>
+                <!-- Right-hand content containers - Chart window and maybe a tool bar also-->
                 
-                <!--</docking:SplitContainer>-->
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800"  AutomationProperties.AutomationId="PlotRightTWContainer">
+                    <docking:ToolWindow Title="Graph" >
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                            
+                            <!--Moved the graph code here because it was not resizing-->
+                            <!--<plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>-->
+                            <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
+                            
+                            <Grid SciChart:ThemeManager.Theme="BrightSpark">
+
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics"  >
+
+                                        <!--  Declare Axes  -->
+                                        <SciChart:SciChartSurface.XAxis>
+                                            <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="True"/>
+                                        </SciChart:SciChartSurface.XAxis>
+
+                                        <SciChart:SciChartSurface.YAxis>
+                                            <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="True"/>
+                                        </SciChart:SciChartSurface.YAxis>
+
+                                        <!--  Declare ChartModifiers  -->
+                                        <SciChart:SciChartSurface.ChartModifier>
+                                            <SciChart:ModifierGroup>
+                                                <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
+                                                <SciChart:SeriesSelectionModifier>
+                                                    <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                        <Style TargetType="SciChart:BaseRenderableSeries">
+                                                            <Setter Property="StrokeThickness" Value="3" />
+                                                        </Style>
+                                                    </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                </SciChart:SeriesSelectionModifier>
+                                                <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                                <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
+                                            </SciChart:ModifierGroup>
+                                        </SciChart:SciChartSurface.ChartModifier>
+
+                                    </SciChart:SciChartSurface>
+                                </ScrollViewer>
+                            </Grid>
+                                
+                        </ScrollViewer>
+                    </docking:ToolWindow>
+                </docking:ToolWindowContainer>
 
             </docking:SplitContainer>
         </docking:DockSite>

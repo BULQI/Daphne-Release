@@ -1231,67 +1231,57 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// This method adds a differentiation state given a name 
-        /// </summary>
-        /// <param name="stateName"></param>
-        private void AddDifferentiationState(string schemeName, string stateName, int insertIndex)
-        {
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)return;
-
-            ConfigTransitionScheme new_scheme = null;
-            if (schemeName == "Division")
-            {
-                new_scheme = cell.div_scheme;
-                if (new_scheme == null)
-                {
-                    cell.div_scheme = new_scheme = new ConfigTransitionScheme();
-                    cell.div_scheme.Name = "Division";
-                }
-            }
-            else if (schemeName == "Differentiation")
-            {
-                new_scheme = cell.diff_scheme;
-                if (new_scheme == null)
-                {
-                    cell.diff_scheme = new_scheme = new ConfigTransitionScheme();
-                    cell.diff_scheme.Name = "Differentiation";
-                }
-            }
-            else return;
-
-            new_scheme.InsertState(stateName, insertIndex);
-
-            //refresh display
-            if (schemeName == "Division")
-            {
-                cell.div_scheme = null;
-                cell.div_scheme = new_scheme;
-            }
-            else if (schemeName == "Differentiation")
-            {
-                cell.diff_scheme = null;
-                cell.diff_scheme = new_scheme;
-            }
-        }
-
         private void btnNewDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-
             string schemeName = ((Button)sender).Tag as string;
             if (schemeName == null) return;
 
-            if (schemeName == "Differentiation")
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null) return;
+
+            Level level = MainWindow.GetLevelContext(this);
+
+            if (schemeName == "Division")
             {
-                AddDifferentiationState(schemeName, "State0", 0);
-                AddDifferentiationState(schemeName, "State1", 1);
+                    cell.div_scheme = new ConfigTransitionScheme();
+                    cell.div_scheme.Name = "Division";
+                    // Check whether the default name (above) is already taken.
+                    cell.div_scheme.Name = cell.div_scheme.GenerateNewName(level, "_");
+                    cell.div_scheme.InsertState("G1-S-G2-M", 0);
+                    cell.div_scheme.InsertState("cytokinetic", 1);
+
+                    // Add a transition driver with arbitrary values
+                    ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
+                    distr_element.Distr = new DistributedParameter();
+                    distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                    distr_element.Distr.ConstValue = 60; // minutes
+                    distr_element.CurrentState = 0;
+                    distr_element.CurrentStateName = cell.div_scheme.Driver.states[0];
+                    distr_element.DestState = 1;
+                    distr_element.DestStateName = cell.div_scheme.Driver.states[1];
+                    cell.div_scheme.Driver.DriverElements[0].elements[1] = distr_element;
+                    level.entity_repository.diff_schemes.Add(cell.div_scheme.Clone(true));
             }
-            else
+            else if (schemeName == "Differentiation")
             {
-                AddDifferentiationState(schemeName, "State0", 0);
-                AddDifferentiationState(schemeName, "cytokinetic", 1);
+                    cell.diff_scheme = new ConfigTransitionScheme();
+                    cell.diff_scheme.Name = "Differentiation";
+                    // Check whether the default name (above) is already taken.
+                    cell.diff_scheme.Name = cell.diff_scheme.GenerateNewName(level, "_");
+                    cell.diff_scheme.InsertState("State0", 0);
+                    cell.diff_scheme.InsertState("State1", 1);
+                    ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
+                    distr_element.Distr = new DistributedParameter();
+                    distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                    distr_element.Distr.ConstValue = 180; // minutes
+                    distr_element.CurrentState = 0;
+                    distr_element.CurrentStateName = cell.diff_scheme.Driver.states[0];
+                    distr_element.DestState = 1;
+                    distr_element.DestStateName = cell.diff_scheme.Driver.states[1];
+                    cell.diff_scheme.Driver.DriverElements[0].elements[1] = distr_element;
+                    level.entity_repository.diff_schemes.Add(cell.diff_scheme.Clone(true));
             }
+            else return;
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)

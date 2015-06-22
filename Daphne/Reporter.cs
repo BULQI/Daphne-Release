@@ -1012,6 +1012,11 @@ namespace Daphne
                     stream.Close();
                 }
             }
+            if (data != null)
+            {
+                // sort by time
+                data.Sort();
+            }
             return data;
         }
 
@@ -1097,7 +1102,7 @@ namespace Daphne
                         // the entry converted to int
                         ipart = Convert.ToInt32(parts[death]);
                         // increment that state
-                        data.IncrementState(CellPopulationDynamicsData.State.DEATH, ipart);
+                        data.IncrementState(CellPopulationDynamicsData.State.DEATH, ipart, dtime);
                     }
                     // diff
                     if (diff >= 0)
@@ -1105,7 +1110,7 @@ namespace Daphne
                         // the entry converted to int
                         ipart = Convert.ToInt32(parts[diff]);
                         // increment that state
-                        data.IncrementState(CellPopulationDynamicsData.State.DIFF, ipart);
+                        data.IncrementState(CellPopulationDynamicsData.State.DIFF, ipart, dtime);
                     }
                     // div
                     if (div >= 0)
@@ -1113,10 +1118,15 @@ namespace Daphne
                         // the entry converted to int
                         ipart = Convert.ToInt32(parts[div]);
                         // increment that state
-                        data.IncrementState(CellPopulationDynamicsData.State.DIV, ipart);
+                        data.IncrementState(CellPopulationDynamicsData.State.DIV, ipart, dtime);
                     }
                 }
                 stream.Close();
+            }
+            if (data != null)
+            {
+                // sort by the time
+                data.Sort();
             }
             return data;
         }
@@ -1471,14 +1481,14 @@ namespace Daphne
         }
     }
 
-    public class CellPopulationDynamicsData
+    public class CellPopulationDynamicsData : ReporterData
     {
         public enum State { DEATH, DIV, DIFF };
         public List<double> Times { get; private set; }
         private Dictionary<int, List<int>> deathStates;
         private Dictionary<int, List<int>> divStates;
         private Dictionary<int, List<int>> diffStates;
-        private double lastTime;
+        private Dictionary<double, int> times_dict;
 
 
         /// <summary>
@@ -1492,7 +1502,7 @@ namespace Daphne
             int i;
 
             Times = new List<double>();
-            lastTime = -1;
+            times_dict = new Dictionary<double, int>();
             
             // death
             if (pop.reportStates.Death == true)
@@ -1530,26 +1540,40 @@ namespace Daphne
         public void AddSet(double time)
         {
             // only append one set per timestep
-            if (time == lastTime)
+            if (times_dict.ContainsKey(time) == true)
             {
                 return;
             }
-            lastTime = time;
 
             // add the time
             Times.Add(time);
+            // use a dictionary for fast lookup, save the list index as value;
+            // it will serve to access the correct state
+            times_dict.Add(time, Times.Count - 1);
+
             // add a counter for each state, set to zero
-            foreach (List<int> l in deathStates.Values)
+
+            //skg added ifs 6/3/15
+            if (deathStates != null)
             {
-                l.Add(0);
+                foreach (List<int> l in deathStates.Values)
+                {
+                    l.Add(0);
+                }
             }
-            foreach (List<int> l in diffStates.Values)
+            if (diffStates != null)
             {
-                l.Add(0);
+                foreach (List<int> l in diffStates.Values)
+                {
+                    l.Add(0);
+                }
             }
-            foreach (List<int> l in divStates.Values)
+            if (divStates != null)
             {
-                l.Add(0);
+                foreach (List<int> l in divStates.Values)
+                {
+                    l.Add(0);
+                }
             }
         }
 
@@ -1557,20 +1581,21 @@ namespace Daphne
         /// increment the last entry for the state with the given index
         /// </summary>
         /// <param name="state">enum identifying the state</param>
-        /// <param name="name">state index</param>
-        public void IncrementState(State state, int index)
+        /// <param name="index">state index</param>
+        /// <param name="time">the current time</param>
+        public void IncrementState(State state, int index, double time)
         {
             if (state == State.DEATH)
             {
-                deathStates[index][Times.Count - 1]++;
+                deathStates[index][times_dict[time]]++;
             }
             else if (state == State.DIFF)
             {
-                diffStates[index][Times.Count - 1]++;
+                diffStates[index][times_dict[time]]++;
             }
             else if (state == State.DIV)
             {
-                divStates[index][Times.Count - 1]++;
+                divStates[index][times_dict[time]]++;
             }
             else
             {
@@ -1600,6 +1625,58 @@ namespace Daphne
             else
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int itmp, minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // states
+                    foreach (List<int> list in deathStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                    foreach (List<int> list in divStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                    foreach (List<int> list in diffStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                }
             }
         }
     }

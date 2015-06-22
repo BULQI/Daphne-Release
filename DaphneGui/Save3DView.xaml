@@ -20,7 +20,7 @@
                             <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding}" Value="5">
-                                    <Setter Property="Fill" Value="{Binding Path=CustomColor}"/>
+                                    <Setter Property="Fill" Value="{Binding Path=CurrentColor}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -90,7 +90,7 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=CustomColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Value="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="0,2" >
 
             </editors:ColorEditBox>

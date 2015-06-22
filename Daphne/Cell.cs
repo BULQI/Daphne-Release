@@ -580,6 +580,8 @@ namespace Daphne
             // division
             if (Divider.nStates > 1)
             {
+                // The daughter cell will start at state 0 of the cell cycle (as does the mother). 
+                // For distribution-driven transitions, choose the time-to-next event in the IntializeState method.
                 daughter.Divider.Initialize(Divider.nStates, Divider.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Divider.Behavior, Divider.Behavior);
                 Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
@@ -593,6 +595,9 @@ namespace Daphne
             // differentiation
             if (Differentiator.nStates > 1)
             {
+                // The daughter cell will start in the same differentiation state as the mother. 
+                // For distribution-driven transitions, the daughter will be assigned the same clock and time-to-next event values as the mother.
+                // So, no need to run InitializeState.
                 daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Differentiator.Behavior, Differentiator.Behavior);
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
@@ -600,7 +605,6 @@ namespace Daphne
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
                 daughter.DifferentiationState = daughter.Differentiator.CurrentState = daughter.Differentiator.Behavior.CurrentState = Differentiator.CurrentState;
                 daughter.SetGeneActivities(daughter.Differentiator);
-                daughter.Differentiator.Behavior.InitializeState();
             }
 
             return daughter;
@@ -624,6 +628,8 @@ namespace Daphne
                     else
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
+                        tde.clock = ((DistrTransitionDriverElement)kvp_inner.Value).clock;
+                        tde.timeToNextEvent = ((DistrTransitionDriverElement)kvp_inner.Value).timeToNextEvent;
                         tde.distr = ((DistrTransitionDriverElement)kvp_inner.Value).distr.Clone();
                         // add it to the daughter
                         daughter_behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
@@ -823,7 +829,7 @@ namespace Daphne
     /// <summary>
     /// data structure for single cell track data
     /// </summary>
-    public class CellTrackData
+    public class CellTrackData : ReporterData
     {
         public List<double> Times { get; set; }
         public List<double[]> Positions { get; set; }
@@ -835,6 +841,46 @@ namespace Daphne
         {
             Times = new List<double>();
             Positions = new List<double[]>();
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // position
+                    for (int j = 0; j < 3; j++)
+                    {
+                        dtmp = Positions[i][j];
+                        Positions[i][j] = Positions[minloc][j];
+                        Positions[minloc][j] = dtmp;
+                    }
+                }
+            }
         }
     }
 }

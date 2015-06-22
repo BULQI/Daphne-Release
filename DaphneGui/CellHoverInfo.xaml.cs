@@ -9,23 +9,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaphneGui.CellPopDynamics
+namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for PlotsWindow.xaml
+    /// Interaction logic for CellHoverInfo.xaml
     /// </summary>
-    public partial class PlotOptionsWindow : Window
+    public partial class CellHoverInfo : UserControl
     {
-        public PlotOptionsWindow()
+        public CellHoverInfo()
         {
             InitializeComponent();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            var scenario = DataContext;
         }
     }
 }
