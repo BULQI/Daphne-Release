@@ -529,7 +529,7 @@ namespace Daphne
             }
         }
 
-        public virtual void Load(Protocol protocol, bool completeReset)
+        public virtual void Load(Protocol protocol, bool completeReset, int repetition)
         {
             ProtocolHandle = protocol;
 
@@ -546,7 +546,10 @@ namespace Daphne
                 return;
             }
 
-            Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+            if (repetition < 2)
+            {
+                Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+            }
 
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(protocol.scenario));
@@ -1017,13 +1020,13 @@ namespace Daphne
             }
         }
 
-        public override void Load(Protocol protocol, bool completeReset)
+        public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (TissueScenario)protocol.scenario;
             envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // call the base
-            base.Load(protocol, completeReset);
+            base.Load(protocol, completeReset, repetition);
 
             // exit if no reset required
             if (completeReset == false)
@@ -1293,12 +1296,12 @@ namespace Daphne
             generateReport = false;
         }
 
-        public override void Load(Protocol protocol, bool completeReset)
+        public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
-            base.Load(protocol, completeReset);
+            base.Load(protocol, completeReset, repetition);
 
             // exit if no reset required
             if (completeReset == true)

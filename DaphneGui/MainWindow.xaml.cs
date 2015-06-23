@@ -2211,13 +2211,13 @@ namespace DaphneGui
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
             {
-                sim.Load(sop.Protocol, completeReset);
+                sim.Load(sop.Protocol, completeReset, repetition);
             }
             else
             {
                 try
                 {
-                    sim.Load(sop.Protocol, completeReset);
+                    sim.Load(sop.Protocol, completeReset, repetition);
                 }
                 catch (Exception e)
                 {
