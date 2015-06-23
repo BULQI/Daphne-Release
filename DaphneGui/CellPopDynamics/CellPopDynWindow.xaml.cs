@@ -36,6 +36,17 @@ namespace DaphneGui.CellPopDynamics
         private Dictionary<int, Color> lineColors;
         private int NextColorIndex = 0;
 
+        //x axis default units are minutes 
+        // For minutes, xScale = 1.0;
+        // For hours,   xScale = 1.0/60 
+        // For days,    xScale = 1.0/(60*24)
+        // For weeks,   xScale = 1.0/(60*24*7)
+        
+        private double[] xScaleValues = { 1.0, 1.0 / 60, 1.0 / (60 * 24), 1.0 / (60 * 24 * 7) };
+        private string[] xAxisLabels = { "Time in minutes", "Time in hours", "Time in days", "Time in weeks" };
+        private double xScale = 1.0;
+        private string xAxisLabel = "Time in minutes";
+
         public CellPopDynWindow()
         {
             InitializeComponent();
@@ -51,6 +62,11 @@ namespace DaphneGui.CellPopDynamics
         }
 
         private void plotButton_Click(object sender, RoutedEventArgs e)
+        {
+            DoPlot();
+        }
+
+        private void DoPlot()
         {
             //Get the selected cell population - if none, inform user
             CellPopulation pop = plotOptions.lbPlotCellPops.SelectedItem as CellPopulation;
@@ -87,9 +103,14 @@ namespace DaphneGui.CellPopDynamics
 
             mySciChart.RenderableSeries.Clear();
 
+            mySciChart.XAxes[0].AxisTitle = xAxisLabel;
+
             DrawStates(pop.Cell, pop.Cell.death_driver, data, CellPopulationDynamicsData.State.DEATH);
             DrawStates(pop.Cell, pop.Cell.diff_scheme.Driver, data, CellPopulationDynamicsData.State.DIFF);
             DrawStates(pop.Cell, pop.Cell.div_scheme.Driver, data, CellPopulationDynamicsData.State.DIV);
+
+            // Set initial zoom??
+            //mySciChart.XAxis.VisibleRange = new DoubleRange(3, 6);
 
             //This draws the graph
             mySciChart.ZoomExtents();
@@ -128,14 +149,13 @@ namespace DaphneGui.CellPopDynamics
                     List<int> series = data.GetState(state, i); // the first parameter is an enum
                     // can now plot series against data.Times; they are also parallel lists, i.e. times[j] belongs to series[j] – they form a point
 
-                    //convert to trimmed list - plot every interval'th item and make it a double - SHOULD BE INT!
                     List<double> dSeries = new List<double>();
                     List<double> dTimes = new List<double>();
 
                     for (int j = 0; j < series.Count; j++)
                     {
                             dSeries.Add(series[j]);
-                            dTimes.Add(data.Times[j]);
+                            dTimes.Add(data.Times[j] * xScale);
                     }
 
                     var newSeries = new XyDataSeries<double, double> { SeriesName = driver.states[i] };
@@ -202,5 +222,19 @@ namespace DaphneGui.CellPopDynamics
             MessageBox.Show("Not yet implemented.", "Export Plot", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        private void TimeUnitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            if (combo == null || combo.SelectedIndex == -1)
+                return;
+            // Only want to respond to purposeful user interaction - so if initializing combo box, ignore                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count == 0)
+                return;
+
+            xScale = xScaleValues[combo.SelectedIndex];
+            xAxisLabel = xAxisLabels[combo.SelectedIndex];
+
+            //DoPlot();
+        }
     }
 }

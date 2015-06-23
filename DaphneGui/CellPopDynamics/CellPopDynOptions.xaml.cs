@@ -226,13 +226,6 @@ namespace DaphneGui.CellPopDynamics
             }
         }
 
-        private void lbPlotCellPops_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            //ListBox listBox = sender as ListBox;
-            //if (listBox.Items.Count > 0)
-            //    listBox.SelectedIndex = 0;
-        }
-
         private void lbPlotCellPops_Loaded(object sender, RoutedEventArgs e)
         {
             ListBox listBox = sender as ListBox;
