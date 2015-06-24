@@ -65,12 +65,12 @@
                     </Style>
 
                 </StackPanel.Resources>
-                <ListBox x:Name="lbPlotCellPops"
+                <ListBox x:Name="lbPlotCellPops" Height="300" MinHeight="100"
                                 ItemsSource="{Binding Path=cellpopulations}" 
                                 SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
+                                Loaded="lbPlotCellPops_Loaded"
                                 SelectionChanged="lbPlotCellPops_SelectionChanged"
-                                DataContextChanged="lbPlotCellPops_DataContextChanged"
                             />
 
                 <!-- Death State -->

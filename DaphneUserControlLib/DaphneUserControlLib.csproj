@@ -71,8 +71,11 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
-
   <ItemGroup>
+    <Reference Include="Abt.Controls.SciChart.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Program Files (x86)\SciChart\Lib\net40\Abt.Controls.SciChart.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="ActiproSoftware.Editors.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Tools\LanguageDesigner\ActiproSoftware.Editors.Wpf.dll</HintPath>
@@ -99,12 +102,19 @@
     <Compile Include="DaphneColorDlg.xaml.cs">
       <DependentUpon>DaphneColorDlg.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DaphneGraph.xaml.cs">
+      <DependentUpon>DaphneGraph.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GreyScaleColorPicker.xaml.cs">
       <DependentUpon>GreyScaleColorPicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControlExtensions.cs" />
     <Compile Include="Validator.cs" />
     <Page Include="DaphneColorDlg.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DaphneGraph.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

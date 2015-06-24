@@ -157,42 +157,53 @@ namespace DaphneGui.CellPopDynamics
                 return;
 
             //Differentiation
-            int diff = pop.Cell.diff_scheme.Driver.states.Count - pop.Cell.diff_scheme.Driver.plotStates.Count;
-            //if the number of plotStates items is less than number of states, add plotStates to make them same size
-            if (diff > 0)
+            if (pop.Cell.diff_scheme != null && pop.Cell.diff_scheme.Driver != null)
             {
-                for (int i = 0; i < diff; i++)
+                int diff = pop.Cell.diff_scheme.Driver.states.Count - pop.Cell.diff_scheme.Driver.plotStates.Count;
+                //if the number of plotStates items is less than number of states, add plotStates to make them same size
+                if (diff > 0)
                 {
-                    pop.Cell.diff_scheme.Driver.plotStates.Add(false);
+                    for (int i = 0; i < diff; i++)
+                    {
+                        pop.Cell.diff_scheme.Driver.plotStates.Add(false);
+                    }
                 }
             }
+
             //Division
-            int div = pop.Cell.div_scheme.Driver.states.Count - pop.Cell.div_scheme.Driver.plotStates.Count;
-            //if the number of plotStates items is less than number of states, add plotStates to make them same size
-            if (div > 0)
+            if (pop.Cell.div_scheme != null && pop.Cell.div_scheme.Driver != null)
             {
-                for (int i = 0; i < div; i++)
+                int div = pop.Cell.div_scheme.Driver.states.Count - pop.Cell.div_scheme.Driver.plotStates.Count;
+                //if the number of plotStates items is less than number of states, add plotStates to make them same size
+                if (div > 0)
                 {
-                    pop.Cell.div_scheme.Driver.plotStates.Add(false);
+                    for (int i = 0; i < div; i++)
+                    {
+                        pop.Cell.div_scheme.Driver.plotStates.Add(false);
+                    }
                 }
             }
+
             //Death
-            int death = pop.Cell.death_driver.states.Count - pop.Cell.death_driver.plotStates.Count;
-            //if the number of plotStates items is less than number of states, add plotStates to make them same size
-            if (death > 0)
+            if (pop.Cell.death_driver != null)
             {
-                for (int i = 0; i < death; i++)
+                int death = pop.Cell.death_driver.states.Count - pop.Cell.death_driver.plotStates.Count;
+                //if the number of plotStates items is less than number of states, add plotStates to make them same size
+                if (death > 0)
                 {
-                    pop.Cell.death_driver.plotStates.Add(false);
+                    for (int i = 0; i < death; i++)
+                    {
+                        pop.Cell.death_driver.plotStates.Add(false);
+                    }
                 }
-            }
-            else if (death < 0)
-            {
-                death = -death;
-                for (int i = 0; i < death; i++)
+                else if (death < 0)
                 {
-                    int last = pop.Cell.death_driver.plotStates.Count;
-                    pop.Cell.death_driver.plotStates.RemoveAt(last - 1);
+                    death = -death;
+                    for (int i = 0; i < death; i++)
+                    {
+                        int last = pop.Cell.death_driver.plotStates.Count;
+                        pop.Cell.death_driver.plotStates.RemoveAt(last - 1);
+                    }
                 }
             }
         }
@@ -215,14 +226,20 @@ namespace DaphneGui.CellPopDynamics
             }
         }
 
-        private void lbPlotCellPops_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void lbPlotCellPops_Loaded(object sender, RoutedEventArgs e)
         {
             ListBox listBox = sender as ListBox;
             if (listBox.Items.Count > 0)
-                listBox.SelectedIndex = 0;
+                if (listBox.SelectedIndex == -1)
+                    listBox.SelectedIndex = 0;
         }
-        
+       
     }
+
+
+    ////////////////////////////////////////////////////////////////////
+    //CONVERTERS
+    //
 
     public class plotStateToBoolConverter : IValueConverter
     {

@@ -79,7 +79,7 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=CustomColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Value="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="0,2" >
 
             </editors:ColorEditBox>

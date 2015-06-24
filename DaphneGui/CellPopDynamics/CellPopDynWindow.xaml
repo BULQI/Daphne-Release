@@ -50,6 +50,13 @@
                                 <WrapPanel Orientation="Horizontal">
                                     <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
                                     <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
+                                    <ComboBox x:Name="TimeUnitsComboBox"
+                                              SelectionChanged="TimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
+                                        <ComboBoxItem>Minutes</ComboBoxItem>
+                                        <ComboBoxItem>Hours</ComboBoxItem>
+                                        <ComboBoxItem>Days</ComboBoxItem>
+                                        <ComboBoxItem>Weeks</ComboBoxItem>
+                                    </ComboBox>
                                     <Button x:Name="plotTester" Width="50" Height="24" Visibility="Hidden" Content="Test" Click="plotTester_Click"></Button>
                                 </WrapPanel>
                             </ScrollViewer>
@@ -71,7 +78,7 @@
                             <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics"  >
+                                    <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics">
 
                                         <!--  Declare Axes  -->
                                         <SciChart:SciChartSurface.XAxis>
