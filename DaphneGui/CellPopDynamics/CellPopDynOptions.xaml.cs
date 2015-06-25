@@ -233,6 +233,16 @@ namespace DaphneGui.CellPopDynamics
                 if (listBox.SelectedIndex == -1)
                     listBox.SelectedIndex = 0;
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Test_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         
     }
 

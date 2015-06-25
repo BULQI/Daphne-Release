@@ -268,7 +268,7 @@ namespace DaphneGui
         public static ComponentsToolWindow ST_ComponentsToolWindow;
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
-        //public static CellPopDynWindow ST_CellPopDynWindow;
+        public static CellPopDynToolWindow ST_CellPopDynToolWindow;
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -287,7 +287,7 @@ namespace DaphneGui
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
             ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
-            //ST_CellPopDynWindow = cellPopDynWindow;
+            ST_CellPopDynToolWindow = plotToolWindow;
 
 
             this.ToolWinCellInfo.Close();
@@ -2118,7 +2118,7 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
-                        //MdiTabContainer.Items.Add(ST_CellPopDynWindow);
+                        MdiTabContainer.Items.Add(ST_CellPopDynToolWindow);
                         ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
                         ST_VTKDisplayDocWindow.Activate();
 
@@ -2140,6 +2140,7 @@ namespace DaphneGui
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                this.plotToolWindow.DataContext = sop.Protocol.scenario;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)

@@ -11,6 +11,8 @@
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
+        xmlns:lin="clr-namespace:DaphneGui.CellLineage"
         Title="Daphne"
         Width="1500" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
@@ -432,6 +434,12 @@
                             </Grid>
                         </DataTemplate>
 
+                        <DataTemplate x:Key="plotTabTemplate">
+                            <Grid>
+                                <TextBlock Text="Cell Dynamics" />
+                            </Grid>
+                        </DataTemplate>
+
                     </docking:SplitContainer.Resources>
                     
                     <!-- VTK Windows Forms Host panel -->
@@ -645,6 +653,14 @@
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                        Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                        ConverterParameter=renderSkinWindow}"      />
+                                <plot:CellPopDynToolWindow x:Name="plotToolWindow" Title="Cell Dynamics" Visibility="Visible" 
+                                       ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"
+                                       HeaderTemplate="{Binding Source={StaticResource plotTabTemplate}}"     />
+                                <lin:CellLineageControl x:Name="lineageWindow" Title="Cell Lineage" Visibility="Visible"
+                                    />
+
+                                <!--DataContext="{Binding Path=MainWindow.SOP.Protocol.scenario}"-->
+
                             </docking:TabbedMdiContainer>
                         </docking:TabbedMdiHost>
                     </docking:Workspace>

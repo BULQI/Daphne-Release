@@ -4,13 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
-             xmlns:local="clr-namespace:DaphneGui.CellPopDynamics"
+             xmlns:dyn="clr-namespace:DaphneGui.CellPopDynamics"
+             xmlns:local="clr-namespace:DaphneGui"
              mc:Ignorable="d" 
+             Loaded="UserControl_Loaded"
              >
              <!--d:DesignHeight="300" d:DesignWidth="300"-->
 
     <UserControl.Resources>
-        <local:plotStateToBoolConverter x:Key="plotStateToBoolConv" />
+        <dyn:plotStateToBoolConverter x:Key="plotStateToBoolConv" />
     </UserControl.Resources>
     
     <!-- ************************************************  -->
@@ -65,13 +67,16 @@
                     </Style>
 
                 </StackPanel.Resources>
-                <ListBox x:Name="lbPlotCellPops"
+                <!--This window's datacontext is Scenario-->
+                <ListBox x:Name="lbPlotCellPops" MinHeight="100"
                                 ItemsSource="{Binding Path=cellpopulations}" 
                                 SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
-                                Loaded="lbPlotCellPops_Loaded"
                                 SelectionChanged="lbPlotCellPops_SelectionChanged"
+                                Loaded="lbPlotCellPops_Loaded"
                             />
+                <Button x:Name="Test" Click="Test_Click"/>
+                
 
                 <!-- Death State -->
                 <Expander ExpandDirection="Down" Padding="5"

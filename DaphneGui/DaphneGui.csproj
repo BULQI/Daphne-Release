@@ -200,6 +200,9 @@
     <Compile Include="CellHoverInfo.xaml.cs">
       <DependentUpon>CellHoverInfo.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellLineage\CellLineageControl.xaml.cs">
+      <DependentUpon>CellLineageControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
@@ -212,6 +215,9 @@
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
       <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynToolWindow.xaml.cs">
+      <DependentUpon>CellPopDynToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynWindow.xaml.cs">
       <DependentUpon>CellPopDynWindow.xaml</DependentUpon>
@@ -345,6 +351,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="CellLineage\CellLineageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -358,6 +368,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="CellPopDynamics\CellPopDynOptions.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynToolWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

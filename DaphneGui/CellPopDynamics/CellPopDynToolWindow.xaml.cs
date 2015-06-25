@@ -10,30 +10,42 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Daphne;
 
+using Daphne;
 using Abt.Controls.SciChart.ChartModifiers;
 using Abt.Controls.SciChart.Model.DataSeries;
 using Daphne.Charting.Data;
 using Abt.Controls.SciChart.Visuals;
-using System.Collections.ObjectModel;
+//using System.Collections.ObjectModel;
 using Abt.Controls.SciChart.Themes;
 using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Abt.Controls.SciChart.Visuals.PointMarkers;
-using Newtonsoft.Json;
-using System.IO;
+//using System.IO;
 using Abt.Controls.SciChart;
 using Abt.Controls.SciChart.Visuals.Axes;
-//using ActiproSoftware.Windows.Controls.Docking;
 
 namespace DaphneGui.CellPopDynamics
 {
     /// <summary>
-    /// Interaction logic for CellPopDynWindow.xaml
+    /// Interaction logic for CellPopDynToolWindow.xaml
     /// </summary>
-    public partial class CellPopDynWindow : Window
+    public partial class CellPopDynToolWindow : ToolWinBase
     {
-        private Dictionary<int, Color> lineColors;
+        public CellPopDynToolWindow()
+        {
+            InitializeComponent();
+            //DataContext = this;
+
+            lineColors = new Dictionary<int, Color>();
+            lineColors.Add(0, Colors.Blue);
+            lineColors.Add(1, Colors.Red);
+            lineColors.Add(2, new Color{A=255, R=8, G=251, B=3});   //bright green
+            lineColors.Add(3, Colors.Magenta);
+            lineColors.Add(4, Colors.Cyan);
+            lineColors.Add(5, Colors.Black);
+        }
+
+         private Dictionary<int, Color> lineColors;
         private int NextColorIndex = 0;
 
         //x axis default units are minutes 
@@ -47,20 +59,6 @@ namespace DaphneGui.CellPopDynamics
         private double xScale = 1.0;
         private string xAxisLabel = "Time in minutes";
 
-        public CellPopDynWindow()
-        {
-            InitializeComponent();
-            DataContext = this;
-
-            lineColors = new Dictionary<int, Color>();
-            lineColors.Add(0, Colors.Blue);
-            lineColors.Add(1, Colors.Red);
-            lineColors.Add(2, new Color{A=255, R=8, G=251, B=3});   //bright green
-            lineColors.Add(3, Colors.Magenta);
-            lineColors.Add(4, Colors.Cyan);
-            lineColors.Add(5, Colors.Black);
-        }
-
         private void plotButton_Click(object sender, RoutedEventArgs e)
         {
             DoPlot();
@@ -69,7 +67,7 @@ namespace DaphneGui.CellPopDynamics
         private void DoPlot()
         {
             //Get the selected cell population - if none, inform user
-            CellPopulation pop = plotOptions.lbPlotCellPops.SelectedItem as CellPopulation;  //CellPopulation pop = null; 
+            CellPopulation pop = plotOptions.lbPlotCellPops.SelectedItem as CellPopulation;
             if (pop == null)
             {
                 MessageBox.Show("Please select a cell population first.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -235,6 +233,11 @@ namespace DaphneGui.CellPopDynamics
             xAxisLabel = xAxisLabels[combo.SelectedIndex];
 
             //DoPlot();
+        }
+
+        private void ToolWinBase_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
