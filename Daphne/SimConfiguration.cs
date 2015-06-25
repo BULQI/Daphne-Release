@@ -7460,6 +7460,7 @@ namespace Daphne
 
         public CellState(double x, double y, double z)
         {
+            spState = new Nt_CellSpatialState();
             spState.X = new Nt_Darray(3);
             spState.X[0] = x;
             spState.X[1] = y;

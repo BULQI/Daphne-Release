@@ -608,7 +608,7 @@ namespace NativeDaphne
 				}
 				else if (componentCount != com_count)
 				{
-					throw gcnew Exception("Wong number of reacitons");
+					throw gcnew Exception("Wrong number of reactions");
 				}
 
 				NtBulkReactions[i]->Step(dt);
@@ -617,6 +617,10 @@ namespace NativeDaphne
 			for each (KeyValuePair<int, Nt_ReactionSet^>^ kvp in NtBoundaryReactions)
 			{
 				 List<Nt_Reaction^>^ ReactionList = kvp->Value->ReactionList;
+
+				 //debug
+				 componentCount = -1;
+
 				 for (int i= 0; i< ReactionList->Count; i++)
 				 {
 
@@ -628,7 +632,7 @@ namespace NativeDaphne
 					}
 					else if (componentCount != com_count)
 					{
-						throw gcnew Exception("Wong number of reacitons");
+						throw gcnew Exception("Wrong number of reactions");
 					}
 
 					 ReactionList[i]->Step(dt);

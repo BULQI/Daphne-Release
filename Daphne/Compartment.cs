@@ -222,8 +222,11 @@ namespace Daphne
 
         public void RemoveBoundaryReactions(int boundaryId)
         {
-            BoundaryReactions.Remove(boundaryId);
-            baseComp.RemoveBoundaryReaction(boundaryId);
+            if (BoundaryReactions.ContainsKey(boundaryId) == true)
+            {
+                BoundaryReactions.Remove(boundaryId);
+                baseComp.RemoveBoundaryReaction(boundaryId);
+            }
         }
 
         public void RemoveBoundary(int boundaryId)

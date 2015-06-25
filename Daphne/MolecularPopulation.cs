@@ -152,9 +152,12 @@ namespace Daphne
 
         public void RemoveBoundaryFluxConc(int key)
         {
-            BoundaryConcs.Remove(key);
-            BoundaryFluxes.Remove(key);
-            base.RemoveNtBoundaryFluxConc(key);
+            if (boundaryConcs.ContainsKey(key))
+            {
+                BoundaryConcs.Remove(key);
+                BoundaryFluxes.Remove(key);
+                base.RemoveNtBoundaryFluxConc(key);
+            }
         }
 
         public void Initialize(string type, double[] parameters)
