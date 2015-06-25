@@ -657,7 +657,7 @@
                                        ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"
                                        HeaderTemplate="{Binding Source={StaticResource plotTabTemplate}}"     />
                                 <lin:CellLineageControl x:Name="lineageWindow" Title="Cell Lineage" Visibility="Visible"
-                                    />
+                                                        ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  />
 
                                 <!--DataContext="{Binding Path=MainWindow.SOP.Protocol.scenario}"-->
 
