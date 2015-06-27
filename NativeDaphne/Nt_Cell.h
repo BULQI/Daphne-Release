@@ -239,6 +239,16 @@ namespace NativeDaphne
 			PreviousGridIndex[0] = -1; //evaludate into invalid
 			allocedItemCount = 0;
 			//nt_cell = new NtCell(radius, gridIndex);
+
+			_Sigma = NULL;
+			_TransductionConstant = NULL;
+			_DragCoefficient = NULL;
+			_X = NULL;
+			_V = NULL;
+			_F = NULL;
+			_random_samples = NULL;
+			_driver_gradient = NULL;
+
 		}
 
 		~Nt_Cell()
@@ -256,6 +266,9 @@ namespace NativeDaphne
 				free(_V);
 				free(_F);
 				free(gridIndex);
+				free(_Sigma);
+				free(_TransductionConstant);
+				free(_DragCoefficient);
 				//delete nt_cell;
 			}
 		}
@@ -307,6 +320,10 @@ namespace NativeDaphne
 					//ComponentCells[i]->nt_cell->F = _F + i * 3;
 
 				}
+
+				_Sigma = (double *)realloc(_Sigma, alloc_size * sizeof(double));
+				_TransductionConstant = (double *)realloc(_TransductionConstant, alloc_size * sizeof(double));
+				_DragCoefficient = (double *)realloc(_DragCoefficient, alloc_size * sizeof(double));
 			}
 			//copy new values
 			double *_xptr = _X + itemCount * 3;
@@ -323,6 +340,28 @@ namespace NativeDaphne
 			cell->spatialState->V->NativePointer = _vptr;
 			cell->spatialState->F->NativePointer = _fptr;
 			//cell->nt_cell->F = _fptr;
+
+			//todo set sigma values etc....
+			for (int i= itemCount *3; i < itemCount *3 + 3; i++)
+			{
+				_Sigma[i] = cell->Sigma;
+				_TransductionConstant[i] = cell->TransductionConstant;
+				_DragCoefficient[i] = cell->DragCoefficient;
+			}
+
+			if (this->Sigma != -1 && cell->Sigma != this->Sigma)
+			{
+				this->Sigma = -1; //indicate simga is not constant value
+			}
+			if (this->TransductionConstant != -1 && cell->TransductionConstant != this->TransductionConstant)
+			{
+				this->TransductionConstant = -1;
+			}
+			if (this->DragCoefficient != -1 && cell->DragCoefficient != this->DragCoefficient)
+			{
+				this->DragCoefficient = -1;
+			}	
+
 			ComponentCells->Add(cell);
 			array_length = ComponentCells->Count * 3;
 		}
@@ -399,6 +438,11 @@ namespace NativeDaphne
 		double *_X;
 		double *_V;
 		double *_F;
+
+		//used if they are distributions
+		double *_Sigma;
+		double *_TransductionConstant;
+		double *_DragCoefficient;
 
 		int allocedItemCount;
 		int array_length;

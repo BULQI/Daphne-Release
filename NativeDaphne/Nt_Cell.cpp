@@ -54,20 +54,53 @@ namespace NativeDaphne
 				*gradient++ = *src++;
 				*gradient++ = *src++;
 			}
-			daxpy(array_length, TransductionConstant, _driver_gradient, 1, _F, 1);
+			if (TransductionConstant != -1)
+			{
+				daxpy(array_length, TransductionConstant, _driver_gradient, 1, _F, 1);
+			}
+			else 
+			{
+				for (int i=0; i < array_length; i++)
+				{
+					_F[i] += _driver_gradient[i] * _TransductionConstant[i];
+				}
+			}
 		}
 
 		//stochastic
 		if (this->isStochastic)
 		{
 			Nt_CellManager::normalDist->Sample(array_length, _random_samples);
-			double factor = Sigma /Math::Sqrt(dt);
-			daxpy(array_length, factor, _random_samples, 1, _F, 1);
+			if (Sigma != -1)
+			{
+				double factor = Sigma /Math::Sqrt(dt);
+				daxpy(array_length, factor, _random_samples, 1, _F, 1);
+			}
+			else 
+			{
+				double sqrt_dt = Math::Sqrt(dt);
+				for (int i=0; i< array_length; i++)
+				{
+					_F[i] += _random_samples[i] * _Sigma[i]/sqrt_dt;
+				}
+			}
 			
 		}
 		//handle movement
 		daxpy(array_length, dt, _V, 1, _X, 1);
-		dscal(array_length, 1.0 - dt*DragCoefficient, _V, 1);
+
+		if (DragCoefficient != -1)
+		{
+			dscal(array_length, 1.0 - dt*DragCoefficient, _V, 1);
+		}
+		else 
+		{
+			for (int i=0; i< array_length; i++)
+			{
+				_V[i] *= (1.0 - dt * _DragCoefficient[i]);
+			}
+
+		}
 		daxpy(array_length, dt, _F, 1, _V, 1);
 
 		//reset cell force
