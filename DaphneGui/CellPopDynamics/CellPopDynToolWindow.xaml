@@ -92,7 +92,8 @@
                                                 <!--  Declare ChartModifiers  -->
                                                 <SciChart:SciChartSurface.ChartModifier>
                                                     <SciChart:ModifierGroup>
-                                                        <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
+                                                <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                                <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
                                                         <SciChart:SeriesSelectionModifier>
                                                             <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                                 <Style TargetType="SciChart:BaseRenderableSeries">
