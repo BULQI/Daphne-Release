@@ -290,6 +290,7 @@ namespace DaphneGui
             ST_ComponentsToolWindow = ComponentsToolWindow;
             ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
             ST_CellPopDynToolWindow = plotToolWindow;
+            ST_CellPopDynToolWindow.Visibility = Visibility.Collapsed;
             ST_CellLineageWindow = lineageWindow;
 
 
@@ -2121,9 +2122,11 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
-                        MdiTabContainer.Items.Add(ST_CellPopDynToolWindow);
-                        MdiTabContainer.Items.Add(ST_CellLineageWindow);
                         ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
+                        MdiTabContainer.Items.Add(ST_CellPopDynToolWindow);
+                        ST_CellPopDynToolWindow.Close();
+                        MdiTabContainer.Items.Add(ST_CellLineageWindow);
+                        ST_CellLineageWindow.Close();
                         ST_VTKDisplayDocWindow.Activate();
 
                     }
@@ -3776,10 +3779,15 @@ namespace DaphneGui
 
         private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
-            dynWindow.DataContext = scenario;
-            dynWindow.ShowDialog();
+            //TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            //CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
+            //dynWindow.DataContext = scenario;
+            //dynWindow.ShowDialog();
+
+            ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
+            //ST_CellPopDynToolWindow.Dock();
+            ST_CellPopDynToolWindow.Float();
+            ST_CellPopDynToolWindow.Activate();
         }
 
         /// <summary>

@@ -116,7 +116,7 @@
                 <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
                     <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
                     <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
-                    <MenuItem Header="Pedigree Analysis" Name="pedigreeAnalMenu" Click="OpenPedigreeAnalWindow" />
+                    <MenuItem Header="Cell Lineage..." Name="pedigreeAnalMenu" Click="OpenPedigreeAnalWindow" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
@@ -158,6 +158,10 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ReacComplexChartWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />
+                    <MenuItem x:Name="menu_CellPopDyn" Header="Cell Population Dynamics"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=plotToolWindow}" />
+                    <MenuItem x:Name="menu_CellLineage" Header="Cell Lineage"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=lineageWindow}" />
 
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  

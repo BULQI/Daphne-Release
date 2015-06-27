@@ -1,4 +1,4 @@
-﻿<local:ToolWinBase x:Class="DaphneGui.CellLineage.CellLineageControl"
+﻿<docking:ToolWindow x:Class="DaphneGui.CellLineage.CellLineageControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,7 +7,7 @@
              xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             >
 
     <StackPanel x:Name="CellLineageStackPanel" Orientation="Vertical" >
         
@@ -22,7 +22,7 @@
                           AutomationProperties.AutomationId="LineageDockSite"
                           >
 
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" >
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" Height="800">
                     <docking:ToolWindow Title="Graph" >
                         <ScrollViewer VerticalScrollBarVisibility="Auto" >
 
@@ -33,27 +33,28 @@
 
                                         <!--Declare Series-->
                                         <SciChart:SciChartSurface.RenderableSeries>
-                                            <SciChart:FastLineRenderableSeries x:Name="renderableLineSeries" SeriesColor="OrangeRed" StrokeDashArray="2 2 9 2">
+                                            
+                                            <SciChart:FastLineRenderableSeries x:Name="renderableLineSeries" SeriesColor="Green"  >
                                                 <SciChart:FastLineRenderableSeries.PointMarker>
-                                                    <SciChart:EllipsePointMarker Width="11" Height="11" Fill="Red" Stroke="Lavender" StrokeThickness="2"/>
+                                                    <SciChart:EllipsePointMarker Width="8" Height="8" Fill="Red" Stroke="Lavender" StrokeThickness="2"/>
                                                 </SciChart:FastLineRenderableSeries.PointMarker>
                                             </SciChart:FastLineRenderableSeries>
                                         </SciChart:SciChartSurface.RenderableSeries>
 
+                                        
 
                                         <!--  Declare Axes  -->
                                         <SciChart:SciChartSurface.XAxis>
-                                            <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="True"/>
+                                            <SciChart:NumericAxis VisibleRange="0, 1000" AxisTitle="Time in minutes" DrawMinorGridLines="True"/>
                                         </SciChart:SciChartSurface.XAxis>
 
                                         <SciChart:SciChartSurface.YAxis>
-                                            <SciChart:NumericAxis AxisAlignment="Left" AxisTitle="Random Values" DrawMinorGridLines="True"/>
+                                            <SciChart:NumericAxis AxisAlignment="Left" VisibleRange="0, 1000" AxisTitle="Random Values" DrawMinorGridLines="True" DrawLabels="True"/>
                                         </SciChart:SciChartSurface.YAxis>
 
                                         <!--  Declare ChartModifiers  -->
-                                        <SciChart:SciChartSurface.ChartModifier>
+                                        <!--<SciChart:SciChartSurface.ChartModifier>
                                             <SciChart:ModifierGroup>
-                                                <!--<SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>-->
                                                 <SciChart:SeriesSelectionModifier>
                                                     <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                         <Style TargetType="SciChart:BaseRenderableSeries">
@@ -63,8 +64,35 @@
                                                 </SciChart:SeriesSelectionModifier>
                                                 <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
                                                 <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
+                                                <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                                <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
+                                            </SciChart:ModifierGroup>
+                                            
+                                        </SciChart:SciChartSurface.ChartModifier>-->
+
+                                        <!--  Declare ChartModifiers  -->
+                                        <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
+                                        <!--  Adding the RubberBandXyZoomModifier gives SciChart the ability to zoom in by rectangle  -->
+                                        <SciChart:SciChartSurface.ChartModifier>
+                                            <SciChart:ModifierGroup>
+                                                <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
+                                                <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                                <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
+                                                <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                                <SciChart:SeriesSelectionModifier>
+                                                    <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                        <Style TargetType="SciChart:BaseRenderableSeries">
+                                                            <Setter Property="StrokeThickness" Value="3" />
+                                                        </Style>
+                                                    </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                </SciChart:SeriesSelectionModifier>
                                             </SciChart:ModifierGroup>
                                         </SciChart:SciChartSurface.ChartModifier>
+
+                                        <!--Annotations-->
+                                        <!--<SciChart:SciChartSurface.Annotations>
+                                            <SciChart:TextAnnotation FontSize="12" Text="You can create text" X1="10.0" XAxisId="abcd" Y1="20"/>                                            
+                                        </SciChart:SciChartSurface.Annotations>-->
 
                                     </SciChart:SciChartSurface>
                                 </ScrollViewer>
@@ -79,4 +107,4 @@
 
     </StackPanel>
     
-</local:ToolWinBase>
+</docking:ToolWindow>

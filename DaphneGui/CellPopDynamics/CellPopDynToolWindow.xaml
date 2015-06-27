@@ -5,8 +5,8 @@
         xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
         xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        xmlns:dyn="clr-namespace:DaphneGui.CellPopDynamics"
         xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
-        Loaded="ToolWinBase_Loaded"
         Title="CellPopDynToolWindow" 
         >
 
@@ -24,7 +24,7 @@
 
                     <!--Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DockPanel}}, Path=Height}"-->
 
-                    <docking:SplitContainer x:Name="plotSplitContainer" >
+                        <docking:SplitContainer x:Name="plotSplitContainer" >
 
                         <!-- Left-hand content container - Plotting options GUI -->
                         <docking:SplitContainer Orientation="Vertical">
@@ -42,7 +42,7 @@
 
                             <!--command buttons-->
                             <docking:ToolWindowContainer docking:DockSite.ControlSize="300,150">
-                                <docking:ToolWindow Title="Plot Options" >
+                                <docking:ToolWindow Title="Plot Actions" >
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <WrapPanel Orientation="Horizontal">
                                             <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
@@ -54,7 +54,6 @@
                                                 <ComboBoxItem>Days</ComboBoxItem>
                                                 <ComboBoxItem>Weeks</ComboBoxItem>
                                             </ComboBox>
-                                            <Button x:Name="plotTester" Width="50" Height="24" Visibility="Hidden" Content="Test" Click="plotTester_Click"></Button>
                                         </WrapPanel>
                                     </ScrollViewer>
                                 </docking:ToolWindow>
@@ -65,7 +64,7 @@
                         <!-- Right-hand content containers - Chart window and maybe a tool bar also-->
                         <!--docking:DockSite.ControlSize="500,800"-->
 
-                        <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="PlotRightTWContainer">
+                        <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="PlotRightTWContainer" >
                             <docking:ToolWindow Title="Graph" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
 
@@ -73,18 +72,21 @@
                                     <!--<plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>-->
                                     <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
 
-                                    <Grid SciChart:ThemeManager.Theme="BrightSpark">
+                            <!--FontSize="20" FontFamily="Lucida Sans" FontWeight="Bold"-->
+                            <!--FontSize="20" FontFamily="Segoe UI" FontWeight="Bold"-->
+
+                            <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                            <SciChart:SciChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics">
+                                    <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold">
 
                                                 <!--  Declare Axes  -->
                                                 <SciChart:SciChartSurface.XAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="True"/>
+                                                    <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="False" DrawMajorGridLines="False"/>
                                                 </SciChart:SciChartSurface.XAxis>
 
                                                 <SciChart:SciChartSurface.YAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="True"/>
+                                                    <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="False" DrawMajorGridLines="False"/>
                                                 </SciChart:SciChartSurface.YAxis>
 
                                                 <!--  Declare ChartModifiers  -->
@@ -103,7 +105,7 @@
                                                     </SciChart:ModifierGroup>
                                                 </SciChart:SciChartSurface.ChartModifier>
 
-                                            </SciChart:SciChartSurface>
+                                            </dyn:CellPopDynamicsChartSurface>
                                         </ScrollViewer>
                                     </Grid>
 

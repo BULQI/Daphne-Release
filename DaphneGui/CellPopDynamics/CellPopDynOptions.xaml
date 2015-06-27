@@ -68,15 +68,13 @@
 
                 </StackPanel.Resources>
                 <!--This window's datacontext is Scenario-->
-                <ListBox x:Name="lbPlotCellPops" MinHeight="100"
+                <ListBox x:Name="lbPlotCellPops" MinHeight="24"
                                 ItemsSource="{Binding Path=cellpopulations}" 
                                 SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
                                 SelectionChanged="lbPlotCellPops_SelectionChanged"
                                 Loaded="lbPlotCellPops_Loaded"
                             />
-                <Button x:Name="Test" Click="Test_Click"/>
-                
 
                 <!-- Death State -->
                 <Expander ExpandDirection="Down" Padding="5"
