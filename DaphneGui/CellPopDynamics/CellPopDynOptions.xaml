@@ -29,14 +29,7 @@
                             >
             <StackPanel>
                 <StackPanel.Resources>
-                    <!--<Style x:Key="gridcellstyle1" TargetType="{x:Type DataGridCell}">
-                        <Style.Triggers>
-                            <Trigger Property="Tag" Value="{x:Null}">
-                                <Setter Property="Background" Value="LightGray" />
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>-->
+                   
                     <Style x:Key="plotCheckBoxStyle" TargetType="{x:Type CheckBox}">
                         <Setter Property="HorizontalAlignment" Value="Center"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>

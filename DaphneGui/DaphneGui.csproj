@@ -210,6 +210,7 @@
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynamicsChartSurface.cs" />
     <Compile Include="CellPopDynamics\CellPopDynamicsGraph.xaml.cs">
       <DependentUpon>CellPopDynamicsGraph.xaml</DependentUpon>
     </Compile>

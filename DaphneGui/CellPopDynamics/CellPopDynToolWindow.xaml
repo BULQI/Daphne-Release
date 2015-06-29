@@ -29,7 +29,7 @@
                         <!-- Left-hand content container - Plotting options GUI -->
                         <docking:SplitContainer Orientation="Vertical">
 
-                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,650" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,760" x:Name="plotToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="PlotLeftTWContainer">
                                 <docking:ToolWindow Title="Plot Options" >
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <StackPanel>
@@ -41,7 +41,7 @@
                             </docking:ToolWindowContainer>
 
                             <!--command buttons-->
-                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,150">
+                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,40" MaxWidth="400">
                                 <docking:ToolWindow Title="Plot Actions" >
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <WrapPanel Orientation="Horizontal">
@@ -92,7 +92,6 @@
 
                                                 <dyn:CellPopDynamicsChartSurface.ContextMenu>
                                                     <ContextMenu >
-                                                        <MenuItem Header="Zoom In"  Name="menuZoomIn"  Click="menuZoomIn_Click"></MenuItem>
                                                         <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
                                                     </ContextMenu>
                                                 </dyn:CellPopDynamicsChartSurface.ContextMenu>
@@ -102,15 +101,17 @@
                                                     <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="False" DrawMajorGridLines="False"/>
                                                 </SciChart:SciChartSurface.XAxis>
 
+                                        <!--Title="Number of cells">  FontSize="20" FontFamily="Segoe UI" FontWeight="Bold"-->
+
                                                 <SciChart:SciChartSurface.YAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="False" DrawMajorGridLines="False"/>
+                                                    <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="False" DrawMajorGridLines="False" />
                                                 </SciChart:SciChartSurface.YAxis>
 
                                                 <!--  Declare ChartModifiers  -->
                                                 <SciChart:SciChartSurface.ChartModifier>
                                                     <SciChart:ModifierGroup>
-                                                <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
-                                                <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
+                                                        <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                                        <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
                                                         <SciChart:SeriesSelectionModifier>
                                                             <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                                 <Style TargetType="SciChart:BaseRenderableSeries">
