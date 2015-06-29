@@ -33,6 +33,8 @@ namespace Daphne
         private ITransitionDriver deathBehavior;
         private ITransitionScheme differentiator, divider;
 
+        private StochLocomotor stochLocomotor; 
+
 
         /// <summary>
         /// info for rendering
@@ -584,14 +586,41 @@ namespace Daphne
             set
             {
                 locomotor = value;
-                this.Driver = locomotor.Driver;
+                if (locomotor != null)
+                {
+                    this.Driver = locomotor.Driver;
+                    this.TransductionConstant = locomotor.TransductionConstant;
+                }
+                else
+                {
+                    this.Driver = null;
+                    this.TransductionConstant = 0.0;
+                }
             }
         }
 
         public Compartment Cytosol { get; private set; }
         public Compartment PlasmaMembrane { get; private set; }
 
-        public StochLocomotor StochLocomotor { get; set; } 
+        public StochLocomotor StochLocomotor 
+        {
+            get
+            {
+                return stochLocomotor;
+            }
+            set
+            {
+                stochLocomotor = value;
+                if (stochLocomotor != null)
+                {
+                    Sigma = stochLocomotor.Sigma;
+                }
+                else
+                {
+                    Sigma = 0;
+                }
+            }
+        } 
 
         /// <summary>
         /// set force to zero

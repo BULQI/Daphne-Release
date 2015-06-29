@@ -15,6 +15,8 @@ using namespace System::Security;
 
 namespace NativeDaphne 
 {
+	ref class Nt_CellPopulation;
+
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_CellManager
 	{
