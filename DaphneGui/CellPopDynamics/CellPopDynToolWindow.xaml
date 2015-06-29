@@ -72,13 +72,30 @@
                                     <!--<plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>-->
                                     <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
 
-                            <!--FontSize="20" FontFamily="Lucida Sans" FontWeight="Bold"-->
-                            <!--FontSize="20" FontFamily="Segoe UI" FontWeight="Bold"-->
+                                    <!--FontSize="20" FontFamily="Lucida Sans" FontWeight="Bold"-->
+                                    <!--FontSize="20" FontFamily="Segoe UI" FontWeight="Bold"-->
 
-                            <Grid SciChart:ThemeManager.Theme="BrightSpark">
+                                    <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                    <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold">
+                                            <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold">
+
+                                                <dyn:CellPopDynamicsChartSurface.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                                To zoom in and out, please use the mouse wheel or you can select a rectangular area to zoom into.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </dyn:CellPopDynamicsChartSurface.ToolTip>
+
+                                                <dyn:CellPopDynamicsChartSurface.ContextMenu>
+                                                    <ContextMenu >
+                                                        <MenuItem Header="Zoom In"  Name="menuZoomIn"  Click="menuZoomIn_Click"></MenuItem>
+                                                        <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
+                                                    </ContextMenu>
+                                                </dyn:CellPopDynamicsChartSurface.ContextMenu>
 
                                                 <!--  Declare Axes  -->
                                                 <SciChart:SciChartSurface.XAxis>

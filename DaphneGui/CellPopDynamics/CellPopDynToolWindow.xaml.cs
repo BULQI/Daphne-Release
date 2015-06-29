@@ -249,6 +249,16 @@ namespace DaphneGui.CellPopDynamics
             //DoPlot();
         }
 
+        private void menuZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void menuZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
     }
 
     /// <summary>
