@@ -1564,12 +1564,12 @@ namespace DaphneGui
 
             tb.Text += "\nCell Name: " + cellName;
             tb.Text += "\nCell ID: " + cellID.ToString();
-            if (cell.Differentiator != null)
+            if (cell.Differentiator.nStates > 0)
             {
                 string diffstate = pop.Cell.diff_scheme.Driver.states[cell.DifferentiationState];
                 tb.Text += "\nDifferentiation state: " + diffstate;
             }
-            if (cell.Divider != null)
+            if (cell.Divider.nStates > 0)
             {
                 string divstate = pop.Cell.div_scheme.Driver.states[cell.DividerState];
                 tb.Text += "\nDivision state: " + divstate;
