@@ -300,13 +300,14 @@ namespace Daphne
             if (cells.ContainsKey(key) == true)
             {
                 Cell cell = cells[key];
-                hSim.Reporter.AppendDeathEvent(cell.Cell_id, cell.Population_id);
+
+                hSim.Reporter.AppendDeathEvent(cell);
             }
         }
 
-        public void DivisionEvent(int mother_id, int pop_id, int daughter_id, int generation)
+        public void DivisionEvent(Cell mother, Cell daughter)
         {
-            hSim.Reporter.AppendDivisionEvent(mother_id, pop_id, daughter_id, generation);
+            hSim.Reporter.AppendDivisionEvent(mother, daughter);
         }
 
         public void ExitEvent(int key)
@@ -314,7 +315,8 @@ namespace Daphne
             if (cells.ContainsKey(key) == true)
             {
                 Cell cell = cells[key];
-                hSim.Reporter.AppendExitEvent(cell.Cell_id, cell.Population_id);
+
+                hSim.Reporter.AppendExitEvent(cell);
             }
         }
     }

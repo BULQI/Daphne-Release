@@ -1020,6 +1020,17 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// get the starting id based on the population size
+        /// </summary>
+        /// <param name="size">population size</param>
+        /// <returns></returns>
+        private ulong getStartingID(int size)
+        {
+            double x = Math.Ceiling(Math.Log(size) / Math.Log(2));
+            return (ulong)Math.Pow(2, x) + 1;
+        }
+
         public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (TissueScenario)protocol.scenario;
@@ -1060,6 +1071,15 @@ namespace Daphne
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+            ulong idStart, idCount = 0;
+            int cellNumber = 0;
+
+            // total number of cells
+            foreach (CellPopulation cp in scenarioHandle.cellpopulations)
+            {
+                cellNumber += cp.number;
+            }
+            idStart = getStartingID(cellNumber);
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenarioHandle.cellpopulations)
@@ -1070,6 +1090,10 @@ namespace Daphne
                 {
                     Cell c = instantiateCell(-1, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
 
+                    // assign lineage
+                    c.Lineage_id = idCount + idStart;
+                    idCount++;
+                    // state
                     c.SetCellState(cp.CellStates[i]);
                 }
             }

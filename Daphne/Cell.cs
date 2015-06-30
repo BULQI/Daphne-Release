@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 using ManifoldRing;
@@ -469,6 +470,9 @@ namespace Daphne
             daughter.renderLabel = renderLabel;
             this.generation++;
             daughter.generation = generation;
+            // lineage ids
+            this.Lineage_id *= 2;
+            daughter.Lineage_id = this.Lineage_id + 1;
             // same state
             daughter.setSpatialState(spatialState);
             // but offset the daughter randomly
@@ -649,6 +653,7 @@ namespace Daphne
 
         public int Cell_id { get; private set; }
         public static int SafeCell_id = 0;
+        public BigInteger Lineage_id { get; set; }
         public int Population_id { get; set; }
         protected int[] gridIndex = { -1, -1, -1 };
         public static double defaultRadius = 5.0;
