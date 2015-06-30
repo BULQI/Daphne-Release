@@ -366,7 +366,7 @@ namespace Daphne
             // remove the pairs that got scheduled for removal
             if (removalPairKeys != null)
             {
-                foreach (int key in removalPairKeys)
+                foreach (long key in removalPairKeys)
                 {
                     pairs.Remove(key);
                 }
