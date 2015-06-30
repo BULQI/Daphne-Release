@@ -211,17 +211,14 @@
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynamicsChartSurface.cs" />
-    <Compile Include="CellPopDynamics\CellPopDynamicsGraph.xaml.cs">
-      <DependentUpon>CellPopDynamicsGraph.xaml</DependentUpon>
+    <Compile Include="CellPopDynamics\CellPopDynExport.xaml.cs">
+      <DependentUpon>CellPopDynExport.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
       <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynToolWindow.xaml.cs">
       <DependentUpon>CellPopDynToolWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="CellPopDynamics\CellPopDynWindow.xaml.cs">
-      <DependentUpon>CellPopDynWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
@@ -364,19 +361,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CellPopDynamics\CellPopDynamicsGraph.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="CellPopDynamics\CellPopDynExport.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CellPopDynamics\CellPopDynOptions.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="CellPopDynamics\CellPopDynToolWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="CellPopDynamics\CellPopDynWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

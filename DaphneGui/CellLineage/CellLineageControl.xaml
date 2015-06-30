@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:DaphneGui"
              xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
+             Loaded="LineageSciChart_Loaded" 
              mc:Ignorable="d" 
              >
 
@@ -22,38 +23,67 @@
                           AutomationProperties.AutomationId="LineageDockSite"
                           >
 
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" Height="800">
-                    <docking:ToolWindow Title="Graph" >
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" >
-
-                            <Grid SciChart:ThemeManager.Theme="BrightSpark">
-
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                    <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" Loaded="LineageSciChart_Loaded">
-
-                                        <!--Declare Series-->
-                                        <SciChart:SciChartSurface.RenderableSeries>
-                                            
-                                            <SciChart:FastLineRenderableSeries x:Name="renderableLineSeries" SeriesColor="Green"  >
-                                                <SciChart:FastLineRenderableSeries.PointMarker>
-                                                    <SciChart:EllipsePointMarker Width="8" Height="8" Fill="Red" Stroke="Lavender" StrokeThickness="2"/>
-                                                </SciChart:FastLineRenderableSeries.PointMarker>
-                                            </SciChart:FastLineRenderableSeries>
-                                        </SciChart:SciChartSurface.RenderableSeries>
-
+                <docking:SplitContainer x:Name="plotSplitContainer" >
+                    <!--Left side-->
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,400" x:Name="plotToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                        <docking:ToolWindow Title="Plot Options" >
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Vertical">
+                                        <!--this window's datacontext is Protocol.Scenario-->
+                                        <!--<plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>-->
+                                        <TextBlock Text="Founder cell:" />
                                         
+                                        <ListBox x:Name="founderCellListBox" Margin="0,40" SelectedIndex="0">
+                                            <ListBoxItem>Cell 1</ListBoxItem>
+                                            <ListBoxItem>Cell 2</ListBoxItem>
+                                            <ListBoxItem>Cell 3</ListBoxItem>
+                                            <ListBoxItem>Cell 4</ListBoxItem>
+                                        </ListBox>
+                                    </StackPanel>
+                                    
+                                    <WrapPanel Orientation="Horizontal" Margin="0,100">
+                                        <Button x:Name="PlotLineageButton"  Width="120" Height="24" Content="Display Lineage" Click="PlotLineageButton_Click" />
+                                        <Button x:Name="ExportLineageButton"  Width="120" Height="24" Content="Export" />
+                                    </WrapPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+                    
+                    <!--Right side-->
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" Height="800">
+                        <docking:ToolWindow Title="Graph" >
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
 
-                                        <!--  Declare Axes  -->
-                                        <SciChart:SciChartSurface.XAxis>
-                                            <SciChart:NumericAxis VisibleRange="0, 1000" AxisTitle="Time in minutes" DrawMinorGridLines="True"/>
-                                        </SciChart:SciChartSurface.XAxis>
+                                <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
-                                        <SciChart:SciChartSurface.YAxis>
-                                            <SciChart:NumericAxis AxisAlignment="Left" VisibleRange="0, 1000" AxisTitle="Random Values" DrawMinorGridLines="True" DrawLabels="True"/>
-                                        </SciChart:SciChartSurface.YAxis>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                        <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" Loaded="LineageSciChart_Loaded">
 
-                                        <!--  Declare ChartModifiers  -->
-                                        <!--<SciChart:SciChartSurface.ChartModifier>
+                                            <!--Declare Series-->
+                                            <SciChart:SciChartSurface.RenderableSeries>
+
+                                                <SciChart:FastLineRenderableSeries x:Name="renderableLineSeries" SeriesColor="Black"  >
+                                                    <SciChart:FastLineRenderableSeries.PointMarker>
+                                                        <SciChart:EllipsePointMarker Width="12" Height="12" Fill="Red" Stroke="Lavender" StrokeThickness="2"/>
+                                                    </SciChart:FastLineRenderableSeries.PointMarker>
+                                                </SciChart:FastLineRenderableSeries>
+                                            </SciChart:SciChartSurface.RenderableSeries>
+
+
+
+                                            <!--  Declare Axes  -->
+                                            <SciChart:SciChartSurface.XAxis>
+                                                <SciChart:NumericAxis VisibleRange="0, 1000"  AxisTitle="Time in minutes" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
+                                            </SciChart:SciChartSurface.XAxis>
+
+                                            <SciChart:SciChartSurface.YAxis>
+                                                <SciChart:NumericAxis x:Name="ourYAxis" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
+                                            </SciChart:SciChartSurface.YAxis>
+
+                                            <!--  Declare ChartModifiers  -->
+                                            <!--<SciChart:SciChartSurface.ChartModifier>
                                             <SciChart:ModifierGroup>
                                                 <SciChart:SeriesSelectionModifier>
                                                     <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
@@ -70,37 +100,38 @@
                                             
                                         </SciChart:SciChartSurface.ChartModifier>-->
 
-                                        <!--  Declare ChartModifiers  -->
-                                        <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
-                                        <!--  Adding the RubberBandXyZoomModifier gives SciChart the ability to zoom in by rectangle  -->
-                                        <SciChart:SciChartSurface.ChartModifier>
-                                            <SciChart:ModifierGroup>
-                                                <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
-                                                <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
-                                                <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
-                                                <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
-                                                <SciChart:SeriesSelectionModifier>
-                                                    <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
-                                                        <Style TargetType="SciChart:BaseRenderableSeries">
-                                                            <Setter Property="StrokeThickness" Value="3" />
-                                                        </Style>
-                                                    </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
-                                                </SciChart:SeriesSelectionModifier>
-                                            </SciChart:ModifierGroup>
-                                        </SciChart:SciChartSurface.ChartModifier>
+                                            <!--  Declare ChartModifiers  -->
+                                            <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
+                                            <!--  Adding the RubberBandXyZoomModifier gives SciChart the ability to zoom in by rectangle  -->
+                                            <SciChart:SciChartSurface.ChartModifier>
+                                                <SciChart:ModifierGroup>
+                                                    <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
+                                                    <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                                    <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
+                                                    <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                                    <SciChart:SeriesSelectionModifier>
+                                                        <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                            <Style TargetType="SciChart:BaseRenderableSeries">
+                                                                <Setter Property="StrokeThickness" Value="3" />
+                                                            </Style>
+                                                        </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                    </SciChart:SeriesSelectionModifier>
+                                                </SciChart:ModifierGroup>
+                                            </SciChart:SciChartSurface.ChartModifier>
 
-                                        <!--Annotations-->
-                                        <!--<SciChart:SciChartSurface.Annotations>
+                                            <!--Annotations-->
+                                            <!--<SciChart:SciChartSurface.Annotations>
                                             <SciChart:TextAnnotation FontSize="12" Text="You can create text" X1="10.0" XAxisId="abcd" Y1="20"/>                                            
                                         </SciChart:SciChartSurface.Annotations>-->
 
-                                    </SciChart:SciChartSurface>
-                                </ScrollViewer>
-                            </Grid>
+                                        </SciChart:SciChartSurface>
+                                    </ScrollViewer>
+                                </Grid>
 
-                        </ScrollViewer>
-                    </docking:ToolWindow>
-                </docking:ToolWindowContainer>
+                            </ScrollViewer>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+                </docking:SplitContainer>
 
             </docking:DockSite>
         </DockPanel>

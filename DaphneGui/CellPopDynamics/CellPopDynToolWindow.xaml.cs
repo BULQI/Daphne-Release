@@ -16,11 +16,9 @@ using Abt.Controls.SciChart.ChartModifiers;
 using Abt.Controls.SciChart.Model.DataSeries;
 using Daphne.Charting.Data;
 using Abt.Controls.SciChart.Visuals;
-//using System.Collections.ObjectModel;
 using Abt.Controls.SciChart.Themes;
 using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Abt.Controls.SciChart.Visuals.PointMarkers;
-//using System.IO;
 using Abt.Controls.SciChart;
 using Abt.Controls.SciChart.Visuals.Axes;
 
@@ -30,204 +28,74 @@ namespace DaphneGui.CellPopDynamics
     /// Interaction logic for CellPopDynToolWindow.xaml
     /// </summary>
     public partial class CellPopDynToolWindow : ToolWinBase
-    {
-        //private Dictionary<int, Color> lineColors;
-        //private int NextColorIndex = 0;
-
-        //x axis default units are minutes 
-        // For minutes, xScale = 1.0;
-        // For hours,   xScale = 1.0/60 
-        // For days,    xScale = 1.0/(60*24)
-        // For weeks,   xScale = 1.0/(60*24*7)
-
-        //private double[] xScaleValues = { 1.0, 1.0 / 60, 1.0 / (60 * 24), 1.0 / (60 * 24 * 7) };
-        //private string[] xAxisLabels = { "Time in minutes", "Time in hours", "Time in days", "Time in weeks" };
-        //private double xScale = 1.0;
-        //private string xAxisLabel = "Time in minutes";
-        
-
+    {       
         public CellPopDynToolWindow()
         {
-
             InitializeComponent();
-
-            //lineColors = new Dictionary<int, Color>();
-            //lineColors.Add(0, Colors.Blue);
-            //lineColors.Add(1, Colors.Red);
-            //lineColors.Add(2, new Color{A=255, R=8, G=251, B=3});   //bright green
-            //lineColors.Add(3, Colors.Magenta);
-            //lineColors.Add(4, Colors.Cyan);
-            //lineColors.Add(5, Colors.Black);
-            //xAxisLabel = "Time in minutes";
         }
-
-        
 
         private void plotButton_Click(object sender, RoutedEventArgs e)
         {
-            //NextColorIndex = 0;
-            //DoPlot();
             mySciChart.Plot(this, plotOptions);
         }
 
-#if false
-        private void DoPlot()
+        private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
-            //Get the selected cell population - if none, inform user
-            CellPopulation pop = plotOptions.lbPlotCellPops.SelectedItem as CellPopulation;
-            if (pop == null)
+
+            CellPopDynExport dialog = new CellPopDynExport();
+
+            // Set image file format
+            if (dialog.ShowDialog() == true)
             {
-                MessageBox.Show("Please select a cell population first.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                //here save the file
+                SaveToFile(dialog.FileName);
             }
-
-            if (pop.Cell.HasDriver() == false)
-            {
-                MessageBox.Show("This cell population does not have any drivers so there is nothing to plot.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
-                return; 
-            }
-
-            if (pop.Cell.IsAnyPlotStateSelected() == false)
-            {
-                MessageBox.Show("No states have been selected for plotting. Please select some states using the check boxes.", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            //Get the dynamics data for this cell pop - if null, that means the information for the desired population is not in the file - inform user
-            CellPopulationDynamicsData data = MainWindow.Sim.Reporter.ProvideCellPopulationDynamicsData(pop);
-            if (data == null)
-            {
-                MessageBox.Show("Missing data. Please either run this protocol first or load a past experiment", "Plotting Error", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            //*********************************************************
-            //If we get here, then we have the data and we can plot it.
-            //*********************************************************
-
-            mySciChart.RenderableSeries.Clear();
-
-            mySciChart.XAxes[0].AxisTitle = xAxisLabel;
-
-            DrawStates(pop.Cell, pop.Cell.death_driver, data, CellPopulationDynamicsData.State.DEATH);
-            DrawStates(pop.Cell, pop.Cell.diff_scheme.Driver, data, CellPopulationDynamicsData.State.DIFF);
-            DrawStates(pop.Cell, pop.Cell.div_scheme.Driver, data, CellPopulationDynamicsData.State.DIV);
-
-            // Set initial zoom??
-            //mySciChart.XAxis.VisibleRange = new DoubleRange(3, 6);
-
-            //This draws the graph
-            mySciChart.ZoomExtents();
-            return;
-
-            //Tried to serialize the data so would not have to "run" repeatedly, but this did not work yet - will try again
-
-            ////var Settings = new JsonSerializerSettings();
-            ////Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            ////Settings.TypeNameHandling = TypeNameHandling.Auto;
-
-            ////string jsonSpec;
-            ////string jsonFile = "C:\\TEMP\\GraphData.json";
-            ////try 
-            ////{
-            ////    //serialize Protocol
-            ////    jsonSpec = JsonConvert.SerializeObject(dynGraph.mySciChart.RenderableSeries, Newtonsoft.Json.Formatting.Indented, Settings);
-            ////    File.WriteAllText(jsonFile, jsonSpec);
-            ////}
-            ////catch(Exception ex)
-            ////{
-            ////    MessageBox.Show("CellPopDynWindow Serialize failed: " + jsonFile + "  " + ex.Message);
-            ////}
-
-
         }
-#endif
 
-#if false
-        private void DrawStates(ConfigCell cell, ConfigTransitionDriver driver, CellPopulationDynamicsData data, CellPopulationDynamicsData.State state)
+        public void SaveToFile(string filename)
         {
-            ////NEED TO CHANGE Y VALUES FROM DOUBLE TO INT!
-            for (int i = 0; i < driver.states.Count; i++)
+            if (filename.EndsWith("png"))
             {
-                if (driver.plotStates[i] == true) // states and plotStates are parallel lists
+                mySciChart.ExportToFile(filename, ExportType.Png);
+            }
+            else if (filename.EndsWith("bmp"))
+            {
+                mySciChart.ExportToFile(filename, ExportType.Bmp);
+            }
+            else if (filename.EndsWith("jpg"))
+            {
+                mySciChart.ExportToFile(filename, ExportType.Jpeg);
+            }
+            else if (filename.EndsWith("pdf"))
+            {
+                var dialog = new PrintDialog();
+                if (dialog.ShowDialog() == true)
                 {
-                    List<int> series = data.GetState(state, i); // the first parameter is an enum
-                    // can now plot series against data.Times; they are also parallel lists, i.e. times[j] belongs to series[j] – they form a point
+                    var size = new Size(dialog.PrintableAreaWidth, dialog.PrintableAreaWidth * 3 / 4);
+                    var scs = CreateSciChartSurfaceWithoutShowingIt();
 
-                    List<double> dSeries = new List<double>();
-                    List<double> dTimes = new List<double>();
-
-                    for (int j = 0; j < series.Count; j++)
-                    {
-                            dSeries.Add(series[j]);
-                            dTimes.Add(data.Times[j] * xScale);
-                    }
-
-                    var newSeries = new XyDataSeries<double, double> { SeriesName = driver.states[i] };
-                    newSeries.Append(dTimes, dSeries);
-
-                    FastLineRenderableSeries flrs = new FastLineRenderableSeries();
-                    if (NextColorIndex >= lineColors.Count)
-                    {
-                        NextColorIndex = 0;
-                    }
-
-                    flrs.SeriesColor = lineColors[NextColorIndex];
-
-                    NextColorIndex++;
-                    if (NextColorIndex >= lineColors.Count)
-                    {
-                        NextColorIndex = 0;
-                    }
-
-                    flrs.DataSeries = newSeries;
-
-                    mySciChart.RenderableSeries.Add(flrs);
+                    // And print. This works particularly well to XPS!
+                    Action printAction = () => dialog.PrintVisual(scs, "Exported");
+                    Dispatcher.BeginInvoke(printAction);
                 }
             }
         }
-#endif
 
-#if false
-        private void plotTester_Click(object sender, RoutedEventArgs e)
+        private Visual CreateSciChartSurfaceWithoutShowingIt()
         {
-            MessageBox.Show("Not yet implemented.", "Plotting Tester", MessageBoxButton.OK, MessageBoxImage.Information);
+            SciChartSurface surf = new SciChartSurface();
+            // We must set a width and height. If you are rendering off screen without showing
+            // we have to tell the control what size to render
+            surf.Width = mySciChart.Width;
+            surf.Height = mySciChart.Height;
 
+            // Doing an export sets up the chart for rendering off screen, including handling all the horrible layout issues
+            // that occur when a WPF element is created and rendered without showing it.
+            //
+            // You must call this before printing, even if you don't intend to use the bitmap.
+            surf.ExportToBitmapSource();
 
-            string jsonFile = "C:\\TEMP\\GraphData.json";
-
-            //Deserialize JSON
-            var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-            //deserialize
-            string readText = File.ReadAllText(jsonFile);
-
-            try
-            {
-                ObservableCollection<IRenderableSeries> renderableSeries = JsonConvert.DeserializeObject<ObservableCollection<IRenderableSeries>>(readText, settings);
-                dynGraph.mySciChart.RenderableSeries = renderableSeries;
-                
-            }
-            catch
-            {
-                MessageBox.Show("CellPopDynWindow DeserializeObject failed: " + jsonFile);
-                return;
-            }
-
-            //CellPopDynamicsGraph graph = JsonConvert.DeserializeObject<CellPopDynamicsGraph>(readText, settings);
-            //dynGraph = graph;
-
-            dynGraph.mySciChart.ZoomExtents();
-
-            
-        }
-#endif
-
-        private void plotExportButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Not yet implemented.", "Export Plot", MessageBoxButton.OK, MessageBoxImage.Information);
+            return surf;
         }
 
         private void TimeUnitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -239,20 +107,14 @@ namespace DaphneGui.CellPopDynamics
             if (e.AddedItems.Count <= 0 || e.RemovedItems.Count == 0)
                 return;
 
-            //xScale = xScaleValues[combo.SelectedIndex];
-            //xAxisLabel = xAxisLabels[combo.SelectedIndex];
-
-            //mySciChart.XScale = xScaleValues[combo.SelectedIndex];
-            //mySciChart.XAxisLabel = xAxisLabels[combo.SelectedIndex];
             mySciChart.SetTimeUnits(combo.SelectedIndex);
             mySciChart.Plot(this, plotOptions);
 
-            //DoPlot();
         }
 
         private void menuZoomOut_Click(object sender, RoutedEventArgs e)
         {
-
+            mySciChart.ZoomExtents();            
         }
 
     }

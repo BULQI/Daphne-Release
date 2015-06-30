@@ -34,15 +34,15 @@ namespace DaphneGui.CellLineage
 
         private void LineageSciChart_Loaded(object sender, RoutedEventArgs e)
         {
-            //var dataSeries = CreateDataSeries();
             CreateFakeDataSeries();
 
-            //renderableLineSeries.DataSeries = dataSeries;
+            LineageSciChart.YAxis.Visibility = Visibility.Hidden;
+            ourYAxis.StrokeThickness = 0;
+            ourYAxis.BorderBrush = Brushes.Transparent;
 
-            //This draws the graph
-            LineageSciChart.YAxis.VisibleRange = new DoubleRange(-1, 50);
-            LineageSciChart.XAxis.VisibleRange = new DoubleRange(-1, 30);
-            //LineageSciChart.ZoomExtentsX();
+            //Hiding axes works well now - last thing was the surface's brush that needed to be hidden.
+            LineageSciChart.BorderBrush = Brushes.Transparent;
+            LineageSciChart.ZoomExtents();
         }
 
         private IXyDataSeries<double, double> CreateDataSeries()
@@ -91,7 +91,7 @@ namespace DaphneGui.CellLineage
             dataSeries.SeriesName = "Line 1";
             dataSeries.AcceptsUnsortedData = true;
             EllipsePointMarker marker = new EllipsePointMarker();
-            marker.Height = 8; marker.Width = 8;
+            marker.Height = 12; marker.Width = 12;
             marker.Fill = Colors.Red;
             marker.Stroke = Colors.Lavender;
             marker.StrokeThickness = 1;
@@ -109,7 +109,7 @@ namespace DaphneGui.CellLineage
             dataSeries.Append(20, 10);
             FastLineRenderableSeries flrs = new FastLineRenderableSeries();
             flrs.DataSeries = dataSeries;
-            flrs.SeriesColor = Colors.Green;
+            flrs.SeriesColor = Colors.Black;
             flrs.PointMarker = marker;
             LineageSciChart.RenderableSeries.Add(flrs);
 
@@ -119,7 +119,7 @@ namespace DaphneGui.CellLineage
             dataSeries.Append(20, 30);
             flrs = new FastLineRenderableSeries();
             flrs.DataSeries = dataSeries;
-            flrs.SeriesColor = Colors.Green;
+            flrs.SeriesColor = Colors.Black;
             flrs.PointMarker = marker;
             LineageSciChart.RenderableSeries.Add(flrs);
 
@@ -129,7 +129,7 @@ namespace DaphneGui.CellLineage
             dataSeries.Append(20, 20);
             flrs = new FastLineRenderableSeries();
             flrs.DataSeries = dataSeries;
-            flrs.SeriesColor = Colors.Green;
+            flrs.SeriesColor = Colors.Black;
             flrs.PointMarker = marker;
             LineageSciChart.RenderableSeries.Add(flrs);
 
@@ -139,10 +139,16 @@ namespace DaphneGui.CellLineage
             dataSeries.Append(20, 10);
             flrs = new FastLineRenderableSeries();
             flrs.DataSeries = dataSeries;
-            flrs.SeriesColor = Colors.Green;
+            flrs.SeriesColor = Colors.Black;
             flrs.PointMarker = marker;
             LineageSciChart.RenderableSeries.Add(flrs);
 
+        }
+
+        private void PlotLineageButton_Click(object sender, RoutedEventArgs e)
+        {
+            double w = this.Width;
+            double h = this.Height;
         }
     }
 }

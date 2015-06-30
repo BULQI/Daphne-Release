@@ -13,8 +13,36 @@
     
             <!--DockPanel-->
             <DockPanel LastChildFill="True">
+                <DockPanel.Resources>
+            <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
+                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="FontFamily" Value="Segoe UI"/>
+                    </Style>
 
-                <!-- DockSite -->
+            <!-- Declare an Axis Title Template *Just example code* -->
+            <!--<Style x:Key="BottomAxisTitleStyle" TargetType="SciChart:AxisTitle">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Margin="0,3,0,0"
+                                Style="{StaticResource TitleTextStyle}"
+                                Text="Showing time on"/>
+                                <TextBlock HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Text="{Binding}" />
+                                <TextBlock Margin="0,0,0,3"
+                                Style="{StaticResource TitleTextStyle}"
+                                Text="(daily Timeframe)"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>-->
+        </DockPanel.Resources>
+
+            <!-- DockSite -->
                 <docking:DockSite x:Name="dockSite" 
                           CanDocumentWindowsRaft="True"
                           AreDocumentWindowsDestroyedOnClose="False"
@@ -29,7 +57,7 @@
                         <!-- Left-hand content container - Plotting options GUI -->
                         <docking:SplitContainer Orientation="Vertical">
 
-                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,760" x:Name="plotToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,900" x:Name="plotToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="PlotLeftTWContainer">
                                 <docking:ToolWindow Title="Plot Options" >
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <StackPanel>
@@ -41,7 +69,8 @@
                             </docking:ToolWindowContainer>
 
                             <!--command buttons-->
-                            <docking:ToolWindowContainer docking:DockSite.ControlSize="300,40" MaxWidth="400">
+                            <!--docking:DockSite.ControlSize="300,40"-->
+                            <docking:ToolWindowContainer  MaxWidth="400">
                                 <docking:ToolWindow Title="Plot Actions" >
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <WrapPanel Orientation="Horizontal">
@@ -62,18 +91,13 @@
                         </docking:SplitContainer>
 
                         <!-- Right-hand content containers - Chart window and maybe a tool bar also-->
-                        <!--docking:DockSite.ControlSize="500,800"-->
 
                         <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="PlotRightTWContainer" >
                             <docking:ToolWindow Title="Graph" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
 
                                     <!--Moved the graph code here because it was not resizing-->
-                                    <!--<plot:CellPopDynamicsGraph x:Name="dynGraph"></plot:CellPopDynamicsGraph>-->
                                     <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
-
-                                    <!--FontSize="20" FontFamily="Lucida Sans" FontWeight="Bold"-->
-                                    <!--FontSize="20" FontFamily="Segoe UI" FontWeight="Bold"-->
 
                                     <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
@@ -98,13 +122,12 @@
 
                                                 <!--  Declare Axes  -->
                                                 <SciChart:SciChartSurface.XAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 10000" AxisTitle="Time in minutes" DrawMinorGridLines="False" DrawMajorGridLines="False"/>
+                                                    <SciChart:NumericAxis VisibleRange="0, 10000"  DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
+                                                    </SciChart:NumericAxis>
                                                 </SciChart:SciChartSurface.XAxis>
 
-                                        <!--Title="Number of cells">  FontSize="20" FontFamily="Segoe UI" FontWeight="Bold"-->
-
                                                 <SciChart:SciChartSurface.YAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" DrawMinorGridLines="False" DrawMajorGridLines="False" />
+                                                   <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
                                                 </SciChart:SciChartSurface.YAxis>
 
                                                 <!--  Declare ChartModifiers  -->
@@ -119,8 +142,16 @@
                                                                 </Style>
                                                             </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                         </SciChart:SeriesSelectionModifier>
+                                                        
+                                                        <!--MouseWheelZoomModifier allows user to zoom in and out using the mouse wheel-->
                                                         <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+
+                                                        <!--ExecuteOn="MouseDoubleClick" allows user to zoom out on double click-->
                                                         <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
+
+                                                        <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - DOES NOT WORK! -->
+                                                        <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
+                                                                
                                                     </SciChart:ModifierGroup>
                                                 </SciChart:SciChartSurface.ChartModifier>
 

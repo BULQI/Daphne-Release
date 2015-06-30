@@ -1340,8 +1340,14 @@ namespace DaphneGui
             #endregion
         }
 
-        private void OpenPedigreeAnalWindow(object sender, RoutedEventArgs e)
+        private void OpenLineageWindow(object sender, RoutedEventArgs e)
         {
+            vcrControl.CurrentFrame = 1;
+
+            ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
+            ST_CellLineageWindow.Float();
+            ST_CellLineageWindow.Activate();
+
             #region MyRegion
             //if (cdm == null)
             //{
@@ -2148,6 +2154,7 @@ namespace DaphneGui
                 this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
                 this.plotToolWindow.DataContext = sop.Protocol.scenario;
+                this.lineageWindow.DataContext = sop.Protocol.scenario;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
@@ -3783,9 +3790,8 @@ namespace DaphneGui
             //CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
             //dynWindow.DataContext = scenario;
             //dynWindow.ShowDialog();
-
+            
             ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
-            //ST_CellPopDynToolWindow.Dock();
             ST_CellPopDynToolWindow.Float();
             ST_CellPopDynToolWindow.Activate();
         }

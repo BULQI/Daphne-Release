@@ -115,8 +115,8 @@
                 
                 <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
                     <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
+                    <MenuItem Header="Cell Lineage..." Name="LineageAnalMenu" Click="OpenLineageWindow" />
                     <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
-                    <MenuItem Header="Cell Lineage..." Name="pedigreeAnalMenu" Click="OpenPedigreeAnalWindow" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
