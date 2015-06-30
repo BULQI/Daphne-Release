@@ -1518,8 +1518,15 @@ namespace DaphneGui
                     //Console.WriteLine("In onMouseMove over cell");
 
                     int cellID = CellController.GetCellIndex(p);
+
                     GraphicsProp prop = CellController.CellActor;
                     vtkProp vProp = prop.Prop;
+
+                    if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
+                    {
+                        MessageBox.Show("No information available. This cell may no longer exist.", "Mouse hover error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
 
                     Cell cell = SimulationBase.dataBasket.Cells[cellID];
 
@@ -1562,7 +1569,7 @@ namespace DaphneGui
             tb.TextWrapping = TextWrapping.Wrap;
             tb.TextAlignment = TextAlignment.Left;
 
-            tb.Text += "\nCell Name: " + cellName;
+            tb.Text += "Cell Name: " + cellName;
             tb.Text += "\nCell ID: " + cellID.ToString();
             if (cell.Differentiator.nStates > 0)
             {
@@ -1575,24 +1582,14 @@ namespace DaphneGui
                 tb.Text += "\nDivision state: " + divstate;
                 tb.Text += "\nGeneration: " + cell.generation.ToString();
             }
+            tb.Text += "\n" + "Location:";
 
-            DoublesBox dbl = new DoublesBox();
-            dbl.Number = cell.SpatialState.X[0];
-            dbl.SNLowerThreshold = 1E100;
-            dbl.SNUpperThreshold = 1E-100;
-            string sX = dbl.FNumber;
-            dbl = new DoublesBox();
-            dbl.Number = cell.SpatialState.X[1];
-            dbl.SNLowerThreshold = 1E100;
-            dbl.SNUpperThreshold = 1E-100;
-            string sY = dbl.FNumber;
-            dbl = new DoublesBox();
-            dbl.Number = cell.SpatialState.X[2];
-            dbl.SNLowerThreshold = 1E100;
-            dbl.SNUpperThreshold = 1E-100;
-            string sZ = dbl.FNumber;
+            int X = (int)cell.SpatialState.X[0];
+            int Y = (int)cell.SpatialState.X[1];
+            int Z = (int)cell.SpatialState.X[2];
 
-            tb.Text += "\n(" + sX + ", " + sY + ", " + sZ + ")";
+            tb.Text += string.Format("\n({0},{1},{2})", X, Y, Z);
+
         }
 
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
