@@ -49,6 +49,7 @@ using System.Security.Principal;
 using System.Globalization;
 using DaphneUserControlLib;
 using DaphneGui.CellPopDynamics;
+using DaphneGui.CellLineage;
 
 namespace DaphneGui
 {
@@ -268,7 +269,8 @@ namespace DaphneGui
         public static ComponentsToolWindow ST_ComponentsToolWindow;
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
-        //public static CellPopDynWindow ST_CellPopDynWindow;
+        public static CellPopDynToolWindow ST_CellPopDynToolWindow;
+        public static CellLineageControl ST_CellLineageWindow;
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -287,7 +289,9 @@ namespace DaphneGui
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
             ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
-            //ST_CellPopDynWindow = cellPopDynWindow;
+            ST_CellPopDynToolWindow = plotToolWindow;
+            ST_CellPopDynToolWindow.Visibility = Visibility.Collapsed;
+            ST_CellLineageWindow = lineageWindow;
 
 
             this.ToolWinCellInfo.Close();
@@ -1336,8 +1340,14 @@ namespace DaphneGui
             #endregion
         }
 
-        private void OpenPedigreeAnalWindow(object sender, RoutedEventArgs e)
+        private void OpenLineageWindow(object sender, RoutedEventArgs e)
         {
+            vcrControl.CurrentFrame = 1;
+
+            ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
+            ST_CellLineageWindow.Float();
+            ST_CellLineageWindow.Activate();
+
             #region MyRegion
             //if (cdm == null)
             //{
@@ -2118,8 +2128,11 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_ComponentsToolWindow);
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
-                        //MdiTabContainer.Items.Add(ST_CellPopDynWindow);
                         ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
+                        MdiTabContainer.Items.Add(ST_CellPopDynToolWindow);
+                        ST_CellPopDynToolWindow.Close();
+                        MdiTabContainer.Items.Add(ST_CellLineageWindow);
+                        ST_CellLineageWindow.Close();
                         ST_VTKDisplayDocWindow.Activate();
 
                     }
@@ -2140,6 +2153,8 @@ namespace DaphneGui
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                this.plotToolWindow.DataContext = sop.Protocol.scenario;
+                this.lineageWindow.DataContext = sop.Protocol.scenario;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
@@ -3771,10 +3786,14 @@ namespace DaphneGui
 
         private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
-            dynWindow.DataContext = scenario;
-            dynWindow.ShowDialog();
+            //TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            //CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
+            //dynWindow.DataContext = scenario;
+            //dynWindow.ShowDialog();
+            
+            ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
+            ST_CellPopDynToolWindow.Float();
+            ST_CellPopDynToolWindow.Activate();
         }
 
         /// <summary>

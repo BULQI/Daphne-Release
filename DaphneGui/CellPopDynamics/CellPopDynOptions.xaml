@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
-             xmlns:local="clr-namespace:DaphneGui.CellPopDynamics"
+             xmlns:dyn="clr-namespace:DaphneGui.CellPopDynamics"
+             xmlns:local="clr-namespace:DaphneGui"
              mc:Ignorable="d" 
              >
              <!--d:DesignHeight="300" d:DesignWidth="300"-->
 
     <UserControl.Resources>
-        <local:plotStateToBoolConverter x:Key="plotStateToBoolConv" />
+        <dyn:plotStateToBoolConverter x:Key="plotStateToBoolConv" />
     </UserControl.Resources>
     
     <!-- ************************************************  -->
@@ -27,14 +28,7 @@
                             >
             <StackPanel>
                 <StackPanel.Resources>
-                    <!--<Style x:Key="gridcellstyle1" TargetType="{x:Type DataGridCell}">
-                        <Style.Triggers>
-                            <Trigger Property="Tag" Value="{x:Null}">
-                                <Setter Property="Background" Value="LightGray" />
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>-->
+                   
                     <Style x:Key="plotCheckBoxStyle" TargetType="{x:Type CheckBox}">
                         <Setter Property="HorizontalAlignment" Value="Center"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -65,12 +59,13 @@
                     </Style>
 
                 </StackPanel.Resources>
-                <ListBox x:Name="lbPlotCellPops" Height="300" MinHeight="100"
+                <!--This window's datacontext is Scenario-->
+                <ListBox x:Name="lbPlotCellPops" MinHeight="24"
                                 ItemsSource="{Binding Path=cellpopulations}" 
                                 SelectedIndex="0"
                                 DisplayMemberPath="cellpopulation_name"
-                                Loaded="lbPlotCellPops_Loaded"
                                 SelectionChanged="lbPlotCellPops_SelectionChanged"
+                                Loaded="lbPlotCellPops_Loaded"
                             />
 
                 <!-- Death State -->

@@ -11,6 +11,8 @@
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
+        xmlns:lin="clr-namespace:DaphneGui.CellLineage"
         Title="Daphne"
         Width="1500" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
@@ -113,8 +115,8 @@
                 
                 <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
                     <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
+                    <MenuItem Header="Cell Lineage..." Name="LineageAnalMenu" Click="OpenLineageWindow" />
                     <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
-                    <MenuItem Header="Pedigree Analysis" Name="pedigreeAnalMenu" Click="OpenPedigreeAnalWindow" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
@@ -156,6 +158,10 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ReacComplexChartWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />
+                    <MenuItem x:Name="menu_CellPopDyn" Header="Cell Population Dynamics"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=plotToolWindow}" />
+                    <MenuItem x:Name="menu_CellLineage" Header="Cell Lineage"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=lineageWindow}" />
 
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
@@ -432,6 +438,12 @@
                             </Grid>
                         </DataTemplate>
 
+                        <DataTemplate x:Key="plotTabTemplate">
+                            <Grid>
+                                <TextBlock Text="Cell Dynamics" />
+                            </Grid>
+                        </DataTemplate>
+
                     </docking:SplitContainer.Resources>
                     
                     <!-- VTK Windows Forms Host panel -->
@@ -645,6 +657,14 @@
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
                                        Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                        ConverterParameter=renderSkinWindow}"      />
+                                <plot:CellPopDynToolWindow x:Name="plotToolWindow" Title="Cell Dynamics" Visibility="Visible" 
+                                       ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"
+                                       HeaderTemplate="{Binding Source={StaticResource plotTabTemplate}}"     />
+                                <lin:CellLineageControl x:Name="lineageWindow" Title="Cell Lineage" Visibility="Visible"
+                                                        ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  />
+
+                                <!--DataContext="{Binding Path=MainWindow.SOP.Protocol.scenario}"-->
+
                             </docking:TabbedMdiContainer>
                         </docking:TabbedMdiHost>
                     </docking:Workspace>
