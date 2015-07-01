@@ -121,12 +121,12 @@
 
                                                 <!--  Declare Axes  -->
                                                 <SciChart:SciChartSurface.XAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 10000"  DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
+                                                    <SciChart:NumericAxis VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
                                                     </SciChart:NumericAxis>
                                                 </SciChart:SciChartSurface.XAxis>
 
                                                 <SciChart:SciChartSurface.YAxis>
-                                                   <SciChart:NumericAxis VisibleRange="0, 200" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
+                                                    <SciChart:NumericAxis VisibleRange="0, 200" GrowBy="0.1, 0.2" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
                                                 </SciChart:SciChartSurface.YAxis>
 
                                                 <!--  Declare ChartModifiers  -->
@@ -149,7 +149,7 @@
                                                         <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
 
                                                         <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
-                                                        <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseRightButton"/>
+                                                        <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>
                                                                 
                                                     </SciChart:ModifierGroup>
                                                 </SciChart:SciChartSurface.ChartModifier>

@@ -128,12 +128,17 @@
 
                                             <!--  Declare Axes  -->
                                             <SciChart:SciChartSurface.XAxis>
-                                                <SciChart:NumericAxis VisibleRange="0, 1000"  AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
+                                                <SciChart:NumericAxis VisibleRange="0, 1000" x:Name="linXAxis" GrowBy="0.1, 0.1" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
                                             </SciChart:SciChartSurface.XAxis>
 
                                             <SciChart:SciChartSurface.YAxis>
-                                                <SciChart:NumericAxis x:Name="ourYAxis" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
+                                                <SciChart:NumericAxis x:Name="ourYAxis" GrowBy="0.1, 0.1" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
                                             </SciChart:SciChartSurface.YAxis>
+
+                                            <SciChart:SciChartSurface.Annotations>
+                                                <!--  Text annotations  -->
+                                                <SciChart:TextAnnotation FontSize="12" Text="This is an annotation" X1="300.0" Y1="200"/>
+                                            </SciChart:SciChartSurface.Annotations>
 
                                             <!--  Declare ChartModifiers  -->
                                             <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
@@ -145,7 +150,7 @@
                                                     <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
                                                     <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
                                                     <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
-                                                    <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseRightButton"/>
+                                                    <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>
                                                     <SciChart:SeriesSelectionModifier>
                                                         <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                             <Style TargetType="SciChart:BaseRenderableSeries">

@@ -56,10 +56,10 @@ namespace DaphneGui.CellLineage
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("To pan:");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
-            tbLineageSurfaceTooltip.AppendText("    Right-click and drag.");
+            tbLineageSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
 
             LoadLineageData();
-            //CreateFakeDataSeries();
+            CreateFakeDataSeries();
             Size size = new Size(600.0, 400.0);
             this.RenderSize = size;
             LineageSciChart.YAxis.Visibility = Visibility.Hidden;
