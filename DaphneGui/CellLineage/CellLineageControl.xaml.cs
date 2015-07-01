@@ -17,6 +17,7 @@ using ActiproSoftware.Windows.Controls.Docking;
 using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Abt.Controls.SciChart.Visuals.PointMarkers;
 using Abt.Controls.SciChart.Visuals.Axes;
+using Daphne;
 
 namespace DaphneGui.CellLineage
 {
@@ -34,8 +35,33 @@ namespace DaphneGui.CellLineage
 
         private void LineageSciChart_Loaded(object sender, RoutedEventArgs e)
         {
-            CreateFakeDataSeries();
+            //Set up surface tooltip
+            tbLineageSurfaceTooltip.Text = "";
 
+            tbLineageSurfaceTooltip.AppendText("To zoom in and out:");
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("    Use the mouse wheel OR");
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("    Select a rectangular area.");
+
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("To zoom back out:");
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("    Double click OR");
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("    Use mouse wheel.");
+
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("To pan:");
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("    Right-click and drag.");
+
+            LoadLineageData();
+            //CreateFakeDataSeries();
+            Size size = new Size(600.0, 400.0);
+            this.RenderSize = size;
             LineageSciChart.YAxis.Visibility = Visibility.Hidden;
             ourYAxis.StrokeThickness = 0;
             ourYAxis.BorderBrush = Brushes.Transparent;
@@ -43,6 +69,11 @@ namespace DaphneGui.CellLineage
             //Hiding axes works well now - last thing was the surface's brush that needed to be hidden.
             LineageSciChart.BorderBrush = Brushes.Transparent;
             LineageSciChart.ZoomExtents();
+        }
+
+        private void LoadLineageData()
+        {
+            //Dictionary<int, FounderInfo> result = Reporter.ProvideFounderCells();
         }
 
         private IXyDataSeries<double, double> CreateDataSeries()
@@ -149,6 +180,21 @@ namespace DaphneGui.CellLineage
         {
             double w = this.Width;
             double h = this.Height;
+        }
+
+        private void drawButton_Click(object sender, RoutedEventArgs e)
+        {
+            Draw();
+        }
+
+        private void lineageExportButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Draw()
+        {
+
         }
     }
 }

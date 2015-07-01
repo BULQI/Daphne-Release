@@ -15,6 +15,14 @@
         <!--DockPanel-->
         <DockPanel LastChildFill="True">
 
+            <DockPanel.Resources>
+                <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
+                    <Setter Property="FontSize" Value="20"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="FontFamily" Value="Segoe UI"/>
+                </Style>
+            </DockPanel.Resources>
+
             <!-- DockSite -->
             <docking:DockSite x:Name="dockSite" 
                           CanDocumentWindowsRaft="True"
@@ -23,15 +31,13 @@
                           AutomationProperties.AutomationId="LineageDockSite"
                           >
 
-                <docking:SplitContainer x:Name="plotSplitContainer" >
+                <docking:SplitContainer x:Name="lineageLeftRightSplitContainer" >
                     <!--Left side-->
-                    <docking:ToolWindowContainer docking:DockSite.ControlSize="300,400" x:Name="plotToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="PlotLeftTWContainer">
+                    <!--<docking:ToolWindowContainer docking:DockSite.ControlSize="300,400" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
                         <docking:ToolWindow Title="Plot Options" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Vertical">
-                                        <!--this window's datacontext is Protocol.Scenario-->
-                                        <!--<plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>-->
                                         <TextBlock Text="Founder cell:" />
                                         
                                         <ListBox x:Name="founderCellListBox" Margin="0,40" SelectedIndex="0">
@@ -49,8 +55,48 @@
                                 </StackPanel>
                             </ScrollViewer>
                         </docking:ToolWindow>
-                    </docking:ToolWindowContainer>
+                    </docking:ToolWindowContainer>-->
+
+
+
+
+
                     
+                    <docking:SplitContainer Orientation="Vertical">
+                        <!-- Left-hand content container - Cell Lineage Options -->
+                        <docking:ToolWindowContainer docking:DockSite.ControlSize="300,900" x:Name="lineageToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="LineageLeftTWContainer">
+                            <docking:ToolWindow Title="Cell Lineage Options" >
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                    <StackPanel>
+                                        <!--this window's datacontext is Protocol.Scenario-->
+                                        <TextBlock Text="Founder cell:" />
+                                        <ListBox x:Name="founderCellListBox" Margin="0,40" SelectedIndex="0">
+                                            <ListBoxItem>Founder Cell 1</ListBoxItem>
+                                            <ListBoxItem>Founder Cell 2</ListBoxItem>
+                                            <ListBoxItem>Founder Cell 3</ListBoxItem>
+                                            <ListBoxItem>Founder Cell 4</ListBoxItem>
+                                        </ListBox>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </docking:ToolWindow>
+                        </docking:ToolWindowContainer>
+
+                        <!--command buttons-->
+                        <docking:ToolWindowContainer  MaxWidth="400">
+                            <docking:ToolWindow Title="Cell Lineage Actions" >
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                    <WrapPanel Orientation="Horizontal">
+                                        <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
+                                        <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
+                                    </WrapPanel>
+                                </ScrollViewer>
+                            </docking:ToolWindow>
+                        </docking:ToolWindowContainer>
+
+                    </docking:SplitContainer>
+
+
+
                     <!--Right side-->
                     <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" Height="800">
                         <docking:ToolWindow Title="Graph" >
@@ -61,6 +107,15 @@
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" Loaded="LineageSciChart_Loaded">
 
+                                            <SciChart:SciChartSurface.ToolTip>
+                                                <ToolTip>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBox x:Name="tbLineageSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" MaxWidth="300" IsReadOnly="True">
+                                                        </TextBox>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </SciChart:SciChartSurface.ToolTip>
+                                            
                                             <!--Declare Series-->
                                             <SciChart:SciChartSurface.RenderableSeries>
 
@@ -71,34 +126,14 @@
                                                 </SciChart:FastLineRenderableSeries>
                                             </SciChart:SciChartSurface.RenderableSeries>
 
-
-
                                             <!--  Declare Axes  -->
                                             <SciChart:SciChartSurface.XAxis>
-                                                <SciChart:NumericAxis VisibleRange="0, 1000"  AxisTitle="Time in minutes" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
+                                                <SciChart:NumericAxis VisibleRange="0, 1000"  AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
                                             </SciChart:SciChartSurface.XAxis>
 
                                             <SciChart:SciChartSurface.YAxis>
                                                 <SciChart:NumericAxis x:Name="ourYAxis" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
                                             </SciChart:SciChartSurface.YAxis>
-
-                                            <!--  Declare ChartModifiers  -->
-                                            <!--<SciChart:SciChartSurface.ChartModifier>
-                                            <SciChart:ModifierGroup>
-                                                <SciChart:SeriesSelectionModifier>
-                                                    <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
-                                                        <Style TargetType="SciChart:BaseRenderableSeries">
-                                                            <Setter Property="StrokeThickness" Value="3" />
-                                                        </Style>
-                                                    </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
-                                                </SciChart:SeriesSelectionModifier>
-                                                <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
-                                                <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
-                                                <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
-                                                <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
-                                            </SciChart:ModifierGroup>
-                                            
-                                        </SciChart:SciChartSurface.ChartModifier>-->
 
                                             <!--  Declare ChartModifiers  -->
                                             <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
@@ -109,6 +144,8 @@
                                                     <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
                                                     <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
                                                     <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                                    <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
+                                                    <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseRightButton"/>
                                                     <SciChart:SeriesSelectionModifier>
                                                         <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                                             <Style TargetType="SciChart:BaseRenderableSeries">

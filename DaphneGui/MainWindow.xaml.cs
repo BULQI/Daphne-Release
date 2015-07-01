@@ -1345,7 +1345,7 @@ namespace DaphneGui
             vcrControl.CurrentFrame = 1;
 
             ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
-            ST_CellLineageWindow.Float();
+            ST_CellLineageWindow.Float(new Size(1000, 824));
             ST_CellLineageWindow.Activate();
 
             #region MyRegion
@@ -3792,7 +3792,7 @@ namespace DaphneGui
             //dynWindow.ShowDialog();
             
             ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
-            ST_CellPopDynToolWindow.Float();
+            ST_CellPopDynToolWindow.Float(new Size(1000, 824));
             ST_CellPopDynToolWindow.Activate();
         }
 

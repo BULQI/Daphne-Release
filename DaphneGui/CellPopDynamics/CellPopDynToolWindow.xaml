@@ -8,6 +8,7 @@
         xmlns:dyn="clr-namespace:DaphneGui.CellPopDynamics"
         xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
         Title="CellPopDynToolWindow" 
+        Loaded="CellPopDynWindow_Loaded"
         >
 
     
@@ -49,8 +50,6 @@
                           UseHostedAutoHidePopups="False"
                           AutomationProperties.AutomationId="DaphneDockSite"
                           >
-
-                    <!--Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DockPanel}}, Path=Height}"-->
 
                         <docking:SplitContainer x:Name="plotSplitContainer" >
 
@@ -105,11 +104,11 @@
                                             <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold">
 
                                                 <dyn:CellPopDynamicsChartSurface.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel Width="200" Orientation="Horizontal">
-                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                                To zoom in and out, please use the mouse wheel or you can select a rectangular area to zoom into.
-                                                            </TextBlock>
+                                                    <ToolTip >
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBox x:Name="tbSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                                                                     Padding="5" MaxWidth="300" IsReadOnly="True" ToolTipService.ShowDuration="2000">
+                                                            </TextBox>
                                                         </StackPanel>
                                                     </ToolTip>
                                                 </dyn:CellPopDynamicsChartSurface.ToolTip>
@@ -149,8 +148,8 @@
                                                         <!--ExecuteOn="MouseDoubleClick" allows user to zoom out on double click-->
                                                         <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
 
-                                                        <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - DOES NOT WORK! -->
-                                                        <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
+                                                        <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
+                                                        <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseRightButton"/>
                                                                 
                                                     </SciChart:ModifierGroup>
                                                 </SciChart:SciChartSurface.ChartModifier>
