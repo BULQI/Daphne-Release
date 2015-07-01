@@ -529,7 +529,7 @@ namespace Daphne
             }
         }
 
-        public virtual void Load(Protocol protocol, bool completeReset)
+        public virtual void Load(Protocol protocol, bool completeReset, int repetition)
         {
             ProtocolHandle = protocol;
 
@@ -546,7 +546,10 @@ namespace Daphne
                 return;
             }
 
-            Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+            if (repetition < 2)
+            {
+                Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+            }
 
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(protocol.scenario));
@@ -1017,13 +1020,24 @@ namespace Daphne
             }
         }
 
-        public override void Load(Protocol protocol, bool completeReset)
+        /// <summary>
+        /// get the starting id based on the population size
+        /// </summary>
+        /// <param name="size">population size</param>
+        /// <returns></returns>
+        private ulong getStartingID(int size)
+        {
+            double x = Math.Ceiling(Math.Log(size) / Math.Log(2));
+            return (ulong)Math.Pow(2, x) + 1;
+        }
+
+        public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (TissueScenario)protocol.scenario;
             envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // call the base
-            base.Load(protocol, completeReset);
+            base.Load(protocol, completeReset, repetition);
 
             // exit if no reset required
             if (completeReset == false)
@@ -1057,6 +1071,15 @@ namespace Daphne
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+            ulong idStart, idCount = 0;
+            int cellNumber = 0;
+
+            // total number of cells
+            foreach (CellPopulation cp in scenarioHandle.cellpopulations)
+            {
+                cellNumber += cp.number;
+            }
+            idStart = getStartingID(cellNumber);
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenarioHandle.cellpopulations)
@@ -1067,6 +1090,10 @@ namespace Daphne
                 {
                     Cell c = instantiateCell(-1, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
 
+                    // assign lineage
+                    c.Lineage_id = idCount + idStart;
+                    idCount++;
+                    // state
                     c.SetCellState(cp.CellStates[i]);
                 }
             }
@@ -1293,12 +1320,12 @@ namespace Daphne
             generateReport = false;
         }
 
-        public override void Load(Protocol protocol, bool completeReset)
+        public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
-            base.Load(protocol, completeReset);
+            base.Load(protocol, completeReset, repetition);
 
             // exit if no reset required
             if (completeReset == true)

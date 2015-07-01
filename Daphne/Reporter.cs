@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 using System.IO;
 
@@ -153,6 +154,16 @@ namespace Daphne
             return null;
         }
 
+        public virtual Dictionary<int, FounderInfo> ProvideFounderCells()
+        {
+            return null;
+        }
+
+        public virtual Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
+        {
+            return null;
+        }
+
         public abstract void StartReporter(string protocolFileName);
         public abstract void AppendReporter();
         public abstract void CloseReporter();
@@ -160,9 +171,9 @@ namespace Daphne
         public abstract void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File);
         public abstract void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File);
 
-        public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
-        public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id, int generation);
-        public abstract void AppendExitEvent(int cell_id, int cellpop_id);
+        public abstract void AppendDeathEvent(Cell cell);
+        public abstract void AppendDivisionEvent(Cell cell, Cell daughter);
+        public abstract void AppendExitEvent(Cell cell);
 
         public abstract void ReactionsReport();
     }
@@ -382,7 +393,7 @@ namespace Daphne
             // create a file stream for each cell population
             foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
-                string header = "cell_id\ttime";
+                string header = "cell_id\ttime\tlineage_id";
                 bool create = false;
 
                 if (cp.report_xvf.position == true)
@@ -501,8 +512,8 @@ namespace Daphne
 
                 foreach (Cell c in SimulationBase.dataBasket.Populations[cp.cellpopulation_id].Values)
                 {
-                    // cell_id time
-                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, hSim.AccumulatedTime);
+                    // cell_id lineage_id time
+                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}\t{2}", c.Cell_id, hSim.AccumulatedTime, c.Lineage_id);
 
                     if (cp.report_xvf.position == true)
                     {
@@ -610,7 +621,7 @@ namespace Daphne
 
                     tsFiles.CellTypeDeath.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} death events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
-                    writer.WriteLine("cell_id\ttime");
+                    writer.WriteLine("cell_id\ttime\tlineage_id");
                     deathEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
                 if (cp.reportStates.Division == true)
@@ -618,8 +629,8 @@ namespace Daphne
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_divisionEvents", "txt");
 
                     tsFiles.CellTypeDivision.Add(cp.cellpopulation_id, fileNameAssembled);
-                    writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);                
-                    writer.WriteLine("cell_id\ttime\tdaughter_id\tgeneration");
+                    writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
+                    writer.WriteLine("cell_id\ttime\tdaughter_id\tgeneration\tmother_lineage_id\tdaughter1_lineage_id\tdaughter2_lineage_id");
                     divisionEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
                 if (cp.reportStates.Exit == true)
@@ -628,7 +639,7 @@ namespace Daphne
 
                     tsFiles.CellTypeExit.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} exit events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
-                    writer.WriteLine("cell_id\ttime");
+                    writer.WriteLine("cell_id\ttime\tlineage_id");
                     exitEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
             }
@@ -654,35 +665,35 @@ namespace Daphne
             exitEvents.Clear();
         }
 
-        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        public override void AppendDeathEvent(Cell cell)
         {
             if (deathEvents != null)
             {
-                if (deathEvents.ContainsKey(cellpop_id))
+                if (deathEvents.ContainsKey(cell.Population_id))
                 {
-                    deathEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                    deathEvents[cell.Population_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell));
                 }
             }
         }
 
-        public override void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id, int generation)
+        public override void AppendDivisionEvent(Cell cell, Cell daughter)
         {
             if (divisionEvents != null)
             {
-                if (divisionEvents.ContainsKey(cellpop_id))
+                if (divisionEvents.ContainsKey(cell.Population_id))
                 {
-                    divisionEvents[cellpop_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell_id, daughter_id, generation));
+                    divisionEvents[cell.Population_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell, daughter));
                 }
             }
         }
 
-        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        public override void AppendExitEvent(Cell cell)
         {
             if (exitEvents != null)
             {
-                if (exitEvents.ContainsKey(cellpop_id))
+                if (exitEvents.ContainsKey(cell.Population_id))
                 {
-                    exitEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                    exitEvents[cell.Population_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell));
                 }
             }
         }
@@ -1034,8 +1045,8 @@ namespace Daphne
                 tsFiles.CellTypeReport.ContainsKey(pop.cellpopulation_id) == true)
             {
                 string file = tsFiles.CellTypeReport[pop.cellpopulation_id],
-                        path = hSim.HDF5FileHandle.FilePath,
-                        line;
+                       path = hSim.HDF5FileHandle.FilePath,
+                       line;
                 string[] parts;
                 int time = 0, death = -1, diff = -1, div = -1, total = 1, assigned = 0,
                     ipart;
@@ -1130,7 +1141,291 @@ namespace Daphne
             }
             return data;
         }
-    }
+
+        /// <summary>
+        /// return a dictionary of founder cells, can be null if none exist or the needed reporting is off
+        /// </summary>
+        /// <returns></returns>
+        public override Dictionary<int, FounderInfo> ProvideFounderCells()
+        {
+            Dictionary<int, FounderInfo> data = null;
+
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+            {
+                // a founder cell needs these reporting files present; no need to look at reporting options, presence of files is sufficient in this case
+                if (tsFiles.CellTypeReport.ContainsKey(cp.cellpopulation_id) == true &&
+                    tsFiles.CellTypeDivision.ContainsKey(cp.cellpopulation_id) == true &&
+                    tsFiles.CellTypeDeath.ContainsKey(cp.cellpopulation_id) == true &&
+                    tsFiles.CellTypeExit.ContainsKey(cp.cellpopulation_id) == true)
+                {
+                    string file = tsFiles.CellTypeReport[cp.cellpopulation_id],
+                           path = hSim.HDF5FileHandle.FilePath,
+                           line;
+                    string[] parts;
+                    int time = 0, cell_id = 0, lineage_id = 0, total = 3, assigned = 0;
+                    StreamReader stream = new StreamReader(path + file);
+
+                    // read description
+                    stream.ReadLine();
+                    // read header
+                    line = stream.ReadLine();
+                    // find indices of interest
+                    parts = line.Split();
+                    for (int i = 0; i < parts.Length && assigned < total; i++)
+                    {
+                        if (parts[i] == "time")
+                        {
+                            time = i;
+                            assigned++;
+                        }
+                        else if (parts[i] == "cell_id")
+                        {
+                            cell_id = i;
+                            assigned++;
+                        }
+                        else if (parts[i] == "lineage_id")
+                        {
+                            lineage_id = i;
+                            assigned++;
+                        }
+                    }
+                    data = new Dictionary<int, FounderInfo>();
+                    while ((line = stream.ReadLine()) != null)
+                    {
+                        parts = line.Split('\t');
+                        if (Convert.ToDouble(parts[time]) == 0)
+                        {
+                            data.Add(Convert.ToInt32(parts[cell_id]), new FounderInfo(BigInteger.Parse(parts[lineage_id]), cp.cellpopulation_id));
+                        }
+                    }
+                    stream.Close();
+                }
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// extract the genealogy information for a founder cell
+        /// </summary>
+        /// <param name="founder">data for the founder cell</param>
+        /// <returns>null on error, the dictionary of genealogy objects otherwise</returns>
+        public override Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
+        {
+            Dictionary<BigInteger, GenealogyInfo> data = new Dictionary<BigInteger, GenealogyInfo>();
+            string file = tsFiles.CellTypeDivision[founder.Population_Id],
+                   path = hSim.HDF5FileHandle.FilePath,
+                   line;
+            string[] parts;
+            int time = 0, generation = 0, mother_lineage_id = 0, daughter1_lineage_id = 0, daughter2_lineage_id = 0, total = 5, assigned = 0;
+            StreamReader stream = new StreamReader(path + file);
+
+            // add the founder cell
+            data.Add(founder.Lineage_Id, new GenealogyInfo(0, founder.Lineage_Id, 0));
+
+            // process divisions
+            // read description
+            stream.ReadLine();
+            // read header
+            line = stream.ReadLine();
+            // find indices of interest
+            parts = line.Split();
+            for (int i = 0; i < parts.Length && assigned < total; i++)
+            {
+                if (parts[i] == "time")
+                {
+                    time = i;
+                    assigned++;
+                }
+                else if (parts[i] == "generation")
+                {
+                    generation = i;
+                    assigned++;
+                }
+                else if (parts[i] == "mother_lineage_id")
+                {
+                    mother_lineage_id = i;
+                    assigned++;
+                }
+                else if (parts[i] == "daughter1_lineage_id")
+                {
+                    daughter1_lineage_id = i;
+                    assigned++;
+                }
+                else if (parts[i] == "daughter2_lineage_id")
+                {
+                    daughter2_lineage_id = i;
+                    assigned++;
+                }
+            }
+
+            List<DivisionContainer> divList = new List<DivisionContainer>();
+            DivisionContainer div;
+
+            // gather the division events first to sort them before usage
+            while ((line = stream.ReadLine()) != null)
+            {
+                parts = line.Split('\t');
+                div = new DivisionContainer();
+                div.time = Convert.ToDouble(parts[time]);
+                div.generation = Convert.ToInt32(parts[generation]);
+                div.mother = BigInteger.Parse(parts[mother_lineage_id]);
+                div.daughter1 = BigInteger.Parse(parts[daughter1_lineage_id]);
+                div.daughter2 = BigInteger.Parse(parts[daughter2_lineage_id]);
+                divList.Add(div);
+            }
+            stream.Close();
+            // sort by time
+            divList = divList.OrderBy(o => o.time).ToList();
+
+            // now update existing GenealogyInfo objects (mother), add new ones (daughters)
+            foreach(DivisionContainer dc in divList)
+            {
+                // an entry for this cell must exist
+                if (data.ContainsKey(dc.mother) == true)
+                {
+                    GenealogyInfo entry = data[dc.mother];
+
+                    // update the mother
+                    entry.EventType = GenealogyInfo.GI_DIVIDE;
+                    entry.EventTime = dc.time;
+                    // create daughter 1
+                    entry = new GenealogyInfo(dc.time, dc.daughter1, dc.generation);
+                    data.Add(dc.daughter1, entry);
+                    // create daughter 2
+                    entry = new GenealogyInfo(dc.time, dc.daughter2, dc.generation);
+                    data.Add(dc.daughter2, entry);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            // process deaths
+            int lineage_id = 0;
+
+            file = tsFiles.CellTypeDeath[founder.Population_Id];
+            total = 2;
+            assigned = 0;
+            stream = new StreamReader(path + file);
+
+            // read description
+            stream.ReadLine();
+            // read header
+            line = stream.ReadLine();
+            // find indices of interest
+            parts = line.Split();
+            for (int i = 0; i < parts.Length && assigned < total; i++)
+            {
+                if (parts[i] == "time")
+                {
+                    time = i;
+                    assigned++;
+                }
+                else if (parts[i] == "lineage_id")
+                {
+                    lineage_id = i;
+                    assigned++;
+                }
+            }
+
+            List<DeathExitContainer> deathExitList = new List<DeathExitContainer>();
+            DeathExitContainer deathExit;
+
+            // gather the death events first to sort them before usage
+            while ((line = stream.ReadLine()) != null)
+            {
+                parts = line.Split('\t');
+                deathExit = new DeathExitContainer();
+                deathExit.time = Convert.ToDouble(parts[time]);
+                deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
+                deathExitList.Add(deathExit);
+            }
+            stream.Close();
+            // sort by time
+            deathExitList = deathExitList.OrderBy(o => o.time).ToList();
+
+            // update existing GenealogyInfo objects
+            foreach(DeathExitContainer dec in deathExitList)
+            {
+                // an entry for this cell must exist
+                if (data.ContainsKey(dec.lineage) == true)
+                {
+                    GenealogyInfo entry = data[dec.lineage];
+
+                    // update the existing cell
+                    entry.EventType = GenealogyInfo.GI_DIE;
+                    entry.EventTime = dec.time;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            // process exits
+            file = tsFiles.CellTypeExit[founder.Population_Id];
+            total = 2;
+            assigned = 0;
+            stream = new StreamReader(path + file);
+
+            // read description
+            stream.ReadLine();
+            // read header
+            line = stream.ReadLine();
+            // find indices of interest
+            parts = line.Split();
+            for (int i = 0; i < parts.Length && assigned < total; i++)
+            {
+                if (parts[i] == "time")
+                {
+                    time = i;
+                    assigned++;
+                }
+                else if (parts[i] == "lineage_id")
+                {
+                    lineage_id = i;
+                    assigned++;
+                }
+            }
+
+            deathExitList.Clear();
+
+            // gather the exit events first to sort them before usage
+            while ((line = stream.ReadLine()) != null)
+            {
+                parts = line.Split('\t');
+                deathExit = new DeathExitContainer();
+                deathExit.time = Convert.ToDouble(parts[time]);
+                deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
+                deathExitList.Add(deathExit);
+            }
+            stream.Close();
+            // sort by time
+            deathExitList = deathExitList.OrderBy(o => o.time).ToList();
+
+            // update existing GenealogyInfo objects
+            foreach(DeathExitContainer dec in deathExitList)
+            {
+                // an entry for this cell must exist
+                if (data.ContainsKey(dec.lineage) == true)
+                {
+                    GenealogyInfo entry = data[dec.lineage];
+
+                    // update the existing cell
+                    entry.EventType = GenealogyInfo.GI_EXIT;
+                    entry.EventTime = dec.time;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return data;
+        }
+   }
 
     public class CompartmentMolpopReporter
     {
@@ -1309,17 +1604,17 @@ namespace Daphne
             }
         }
 
-        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        public override void AppendDeathEvent(Cell cell)
         {
             throw new NotImplementedException();
         }
 
-        public override void AppendDivisionEvent(int mother_id, int cellpop_id, int daughter_id, int generation)
+        public override void AppendDivisionEvent(Cell cell, Cell daughter)
         {
             throw new NotImplementedException();
         }
 
-        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        public override void AppendExitEvent(Cell cell)
         {
             throw new NotImplementedException();
         }
@@ -1447,16 +1742,18 @@ namespace Daphne
     {
         public double time;
         public int cell_id;
+        BigInteger lineage_id;
 
-        public TransitionEvent(double _time, int _cell_id)
+        public TransitionEvent(double _time, Cell cell)
         {
             time = _time;
-            cell_id = _cell_id;
+            cell_id = cell.Cell_id;
+            lineage_id = cell.Lineage_id;
         }
 
         public virtual void WriteLine(StreamWriter writer)
         {
-            writer.WriteLine("{0}\t{1}", this.cell_id, this.time);
+            writer.WriteLine("{0}\t{1}\t{2}", cell_id, time, lineage_id);
         }
     }
 
@@ -1467,17 +1764,21 @@ namespace Daphne
     {
         public int daughter_id;
         public int generation;
+        BigInteger mother_lineage_id, daughter1_lineage_id, daugher2_lineage_id;
 
-        public DivisionEvent(double _time, int _cell_id, int _daughter_id, int _generation)
-            : base(_time, _cell_id)
+        public DivisionEvent(double _time, Cell cell, Cell daughter)
+            : base(_time, cell)
         {
-            daughter_id = _daughter_id;
-            generation = _generation;
+            daughter_id = daughter.Cell_id;
+            generation = cell.generation;
+            mother_lineage_id = cell.Lineage_id / 2;
+            daughter1_lineage_id = cell.Lineage_id;
+            daugher2_lineage_id = daughter.Lineage_id;
         }
 
         public override void WriteLine(StreamWriter writer)
         {
-            writer.WriteLine("{0}\t{1}\t{2}\t{3}", this.cell_id, this.time, this.daughter_id, this.generation);
+            writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", cell_id, time, daughter_id, generation, mother_lineage_id, daughter1_lineage_id, daugher2_lineage_id);
         }
     }
 
@@ -1678,6 +1979,122 @@ namespace Daphne
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// class encapsulating the information needed for the founder cells
+    /// </summary>
+    public class FounderInfo
+    {
+        public BigInteger Lineage_Id;
+        public int Population_Id;
+
+        public FounderInfo(BigInteger lineage_id, int population_id)
+        {
+            Lineage_Id = lineage_id;
+            Population_Id = population_id;
+        }
+    }
+
+    /// <summary>
+    /// class encapsulating the genealogy information for lineage analysis
+    /// </summary>
+    public class GenealogyInfo
+    {
+        // lineage id of the mother cell before division
+        public BigInteger Lineage_Id;
+        // the number of divisions to reach this current cell
+        public int Generation;
+        // simulation clock time for this event
+        public double EventTime;
+        // simulation clock time for birth time
+        public double BirthTime;
+        // constant values defined in this class
+        public int EventType;
+        // not in use, yet
+        public double IgAffinity;
+        // not in use, yet
+        public double ExpectedMutations;
+        // constants
+        public static int GI_BIRTH = 0,
+                          GI_DIE = 1,
+                          GI_EXIT = 2,
+                          GI_DIVIDE = 3;
+
+        /// <summary>
+        /// constructor with parameters all event types have in common
+        /// </summary>
+        /// <param name="tBirth">birth time</param>
+        /// <param name="lineage_id">lineage id</param>
+        /// <param name="generation">generation</param>
+        public GenealogyInfo(double tBirth, BigInteger lineage_id, int generation)
+        {
+            Lineage_Id = lineage_id;
+            Generation = generation;
+            EventTime = -1;
+            EventType = GI_BIRTH;
+            BirthTime = tBirth;
+            IgAffinity = 0;
+        }
+
+        /// <summary>
+        /// return the relative event time
+        /// </summary>
+        /// <returns></returns>
+        public double RelativeEventTime()
+        {
+            return EventTime - BirthTime;
+        }
+
+        /// <summary>
+        /// return the daughter lineage id
+        /// </summary>
+        /// <param name="daughter">daughter 0 or 1</param>
+        /// <returns>daughter's lineage id</returns>
+        public BigInteger Daughter(int daughter)
+        {
+            if (daughter != 0)
+            {
+                daughter = 1;
+            }
+            return Lineage_Id * 2 + daughter;
+        }
+
+        /// <summary>
+        /// true if the object represents a division
+        /// </summary>
+        /// <returns>true for division</returns>
+        public bool IsDivision()
+        {
+            return EventType == GI_DIVIDE;
+        }
+    }
+
+    /// <summary>
+    /// save division events for sorting
+    /// </summary>
+    public class DivisionContainer
+    {
+        public double time;
+        public int generation;
+        public BigInteger mother, daughter1, daughter2;
+
+        public DivisionContainer()
+        {
+        }
+    }
+
+    /// <summary>
+    /// save death and exit events for sorting
+    /// </summary>
+    public class DeathExitContainer
+    {
+        public double time;
+        public BigInteger lineage;
+
+        public DeathExitContainer()
+        {
         }
     }
 }

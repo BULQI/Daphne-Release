@@ -6929,9 +6929,6 @@ namespace Daphne
             if (death_driver != null)
                 return true;
 
-            if (diff_scheme == null && div_scheme == null) 
-                return false;
-
             if (diff_scheme != null)
                 if (diff_scheme.Driver != null)
                     return true;
