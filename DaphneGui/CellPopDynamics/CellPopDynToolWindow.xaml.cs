@@ -41,15 +41,24 @@ namespace DaphneGui.CellPopDynamics
 
         private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "Image"; // Default file name
+            dlg.DefaultExt = ".jpg"; // Default file extension
+            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
 
-            CellPopDynExport dialog = new CellPopDynExport();
+            dlg.FilterIndex = 2;
+            dlg.RestoreDirectory = true;
 
-            // Set image file format
-            if (dialog.ShowDialog() == true)
+            // Show save file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process save file dialog box results
+            if (result == true)
             {
-                //here save the file
-                SaveToFile(dialog.FileName);
+                // Save file
+                SaveToFile(dlg.FileName);
             }
+           
         }
 
         public void SaveToFile(string filename)
@@ -115,6 +124,31 @@ namespace DaphneGui.CellPopDynamics
         private void menuZoomOut_Click(object sender, RoutedEventArgs e)
         {
             mySciChart.ZoomExtents();            
+        }
+
+        private void CellPopDynWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            //To zoom in and out: \n  Use the mouse wheel\n or select a rectangular area.\n\nTo pan, right-click and drag.
+            tbSurfaceTooltip.Text = "";
+            tbSurfaceTooltip.AppendText("To zoom in and out:");
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("    Use the mouse wheel OR");
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("    Select a rectangular area.");
+
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("To zoom back out:");
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("    Double click OR");
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("    Use mouse wheel.");
+
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("To pan:");
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("    Right-click and drag.");
         }
 
     }
