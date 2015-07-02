@@ -94,7 +94,7 @@ namespace DaphneGui.CellPopDynamics
         {
             SciChartSurface surf = new SciChartSurface();
             // We must set a width and height. If you are rendering off screen without showing
-            // we have to tell the control what size to render
+            // we have to tell the control what size to renderC:\Projects\Daphne\Daphne-skg\DaphneGui\CellPopDynamics\CellPopDynToolWindow.xaml
             surf.Width = mySciChart.Width;
             surf.Height = mySciChart.Height;
 
@@ -148,7 +148,7 @@ namespace DaphneGui.CellPopDynamics
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText("To pan:");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
-            tbSurfaceTooltip.AppendText("    Right-click and drag.");
+            tbSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
         }
 
     }

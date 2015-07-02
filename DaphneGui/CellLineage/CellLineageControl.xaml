@@ -32,45 +32,16 @@
                           >
 
                 <docking:SplitContainer x:Name="lineageLeftRightSplitContainer" >
-                    <!--Left side-->
-                    <!--<docking:ToolWindowContainer docking:DockSite.ControlSize="300,400" x:Name="plotToolWindowContainer" AutomationProperties.AutomationId="PlotLeftTWContainer">
-                        <docking:ToolWindow Title="Plot Options" >
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="Founder cell:" />
-                                        
-                                        <ListBox x:Name="founderCellListBox" Margin="0,40" SelectedIndex="0">
-                                            <ListBoxItem>Cell 1</ListBoxItem>
-                                            <ListBoxItem>Cell 2</ListBoxItem>
-                                            <ListBoxItem>Cell 3</ListBoxItem>
-                                            <ListBoxItem>Cell 4</ListBoxItem>
-                                        </ListBox>
-                                    </StackPanel>
-                                    
-                                    <WrapPanel Orientation="Horizontal" Margin="0,100">
-                                        <Button x:Name="PlotLineageButton"  Width="120" Height="24" Content="Display Lineage" Click="PlotLineageButton_Click" />
-                                        <Button x:Name="ExportLineageButton"  Width="120" Height="24" Content="Export" />
-                                    </WrapPanel>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </docking:ToolWindow>
-                    </docking:ToolWindowContainer>-->
-
-
-
-
-
-                    
+                    <!--Left side-->                    
                     <docking:SplitContainer Orientation="Vertical">
                         <!-- Left-hand content container - Cell Lineage Options -->
-                        <docking:ToolWindowContainer docking:DockSite.ControlSize="300,900" x:Name="lineageToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="LineageLeftTWContainer">
+                        <docking:ToolWindowContainer docking:DockSite.ControlSize="300,500" x:Name="lineageToolWindowContainer" MaxWidth="400" AutomationProperties.AutomationId="LineageLeftTWContainer">
                             <docking:ToolWindow Title="Cell Lineage Options" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                     <StackPanel>
                                         <!--this window's datacontext is Protocol.Scenario-->
-                                        <TextBlock Text="Founder cell:" />
-                                        <ListBox x:Name="founderCellListBox" Margin="0,40" SelectedIndex="0">
+                                        <TextBlock Text="Founder cells:" HorizontalAlignment="Left"/>
+                                        <ListBox x:Name="founderCellListBox" Margin="0,4" SelectedIndex="0" Width="100" MaxWidth="150" HorizontalAlignment="Left">
                                             <ListBoxItem>Founder Cell 1</ListBoxItem>
                                             <ListBoxItem>Founder Cell 2</ListBoxItem>
                                             <ListBoxItem>Founder Cell 3</ListBoxItem>

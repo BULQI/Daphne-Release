@@ -19,6 +19,8 @@ using Abt.Controls.SciChart.Visuals.PointMarkers;
 using Abt.Controls.SciChart.Visuals.Axes;
 using Daphne;
 
+using System.Numerics;
+
 namespace DaphneGui.CellLineage
 {
     /// <summary>
@@ -59,7 +61,7 @@ namespace DaphneGui.CellLineage
             tbLineageSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
 
             LoadLineageData();
-            CreateFakeDataSeries();
+            //CreateFakeDataSeries();
             Size size = new Size(600.0, 400.0);
             this.RenderSize = size;
             LineageSciChart.YAxis.Visibility = Visibility.Hidden;
@@ -73,7 +75,21 @@ namespace DaphneGui.CellLineage
 
         private void LoadLineageData()
         {
-            //Dictionary<int, FounderInfo> result = Reporter.ProvideFounderCells();
+            Dictionary<int, FounderInfo> result = MainWindow.Sim.Reporter.ProvideFounderCells();
+
+            if (result == null)
+            {
+                MessageBox.Show("Lineage reporting options not turned on.");
+                return;
+            }
+
+            founderCellListBox.Items.Clear();
+            foreach (KeyValuePair<int, FounderInfo> kvp in result)
+            {
+                BigInteger bigCellId = kvp.Value.Lineage_Id;   // ((FounderInfo)kvp.Value).
+                founderCellListBox.Items.Add(bigCellId.ToString());
+            }
+            
         }
 
         private IXyDataSeries<double, double> CreateDataSeries()
