@@ -124,6 +124,12 @@
     <Reference Include="HDF5DotNet">
       <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\dependencies\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.pdfa">
+      <HintPath>..\dependencies\itextsharp.pdfa.dll</HintPath>
+    </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
     </Reference>

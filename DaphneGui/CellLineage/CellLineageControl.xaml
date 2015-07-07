@@ -8,6 +8,8 @@
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              Loaded="LineageSciChart_Loaded" 
              mc:Ignorable="d" 
+             DataContext="."
+                    x:Name="lineageWindow"
              >
 
     <StackPanel x:Name="CellLineageStackPanel" Orientation="Vertical" >
@@ -39,14 +41,26 @@
                             <docking:ToolWindow Title="Cell Lineage Options" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                     <StackPanel>
-                                        <!--this window's datacontext is Protocol.Scenario-->
-                                        <TextBlock Text="Founder cells:" HorizontalAlignment="Left"/>
-                                        <ListBox x:Name="founderCellListBox" Margin="0,4" SelectedIndex="0" Width="100" MaxWidth="150" HorizontalAlignment="Left">
-                                            <ListBoxItem>Founder Cell 1</ListBoxItem>
-                                            <ListBoxItem>Founder Cell 2</ListBoxItem>
-                                            <ListBoxItem>Founder Cell 3</ListBoxItem>
-                                            <ListBoxItem>Founder Cell 4</ListBoxItem>
+                                        <!--this window's datacontext is 'this', i,e CellLineageControl -->
+                                        <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold"/>
+                                        <ListBox BorderBrush="DarkBlue" BorderThickness="2" Background="#FFE6F0FA" x:Name="founderCellListBox" Margin="20,-2" 
+                                                 SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="founderCellListBox_SelectionChanged"
+                                                 ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCells, Mode=OneWay}"
+                                                 DisplayMemberPath="Lineage_Id">
+                                            
                                         </ListBox>
+                                        
+                                        <StackPanel Margin="20,20">
+                                            <StackPanel Orientation="Horizontal" >
+                                                <TextBlock>Cell population Name: </TextBlock> 
+                                                <TextBox x:Name="tbCellPopName" Width="200" IsReadOnly="True" ></TextBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="20">
+                                                <TextBlock>Cell type:</TextBlock>
+                                                <TextBox x:Name="tbCellType" Width="200" IsReadOnly="True"></TextBox>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
                                     </StackPanel>
                                 </ScrollViewer>
                             </docking:ToolWindow>
@@ -54,7 +68,7 @@
 
                         <!--command buttons-->
                         <docking:ToolWindowContainer  MaxWidth="400">
-                            <docking:ToolWindow Title="Cell Lineage Actions" >
+                            <docking:ToolWindow Title="Cell lineage actions" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                     <WrapPanel Orientation="Horizontal">
                                         <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
@@ -76,7 +90,7 @@
                                 <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                        <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" Loaded="LineageSciChart_Loaded">
+                                        <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
 
                                             <SciChart:SciChartSurface.ToolTip>
                                                 <ToolTip>

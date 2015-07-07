@@ -1987,8 +1987,11 @@ namespace Daphne
     /// </summary>
     public class FounderInfo
     {
-        public BigInteger Lineage_Id;
-        public int Population_Id;
+        public BigInteger Lineage_Id { get; set; }
+        public int  Population_Id { get; set; }
+
+        //public BigInteger Lineage_Id;
+        //public int Population_Id;
 
         public FounderInfo(BigInteger lineage_id, int population_id)
         {

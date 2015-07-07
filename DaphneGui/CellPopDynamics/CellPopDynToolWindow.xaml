@@ -101,9 +101,12 @@
                                     <Grid SciChart:ThemeManager.Theme="BrightSpark">
 
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                            <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" Grid.Row="1" ChartTitle="Cell Population Dynamics" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold">
 
-                                                <dyn:CellPopDynamicsChartSurface.ToolTip>
+                                    <!--SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface"-->
+
+                                    <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" Grid.Row="1" ChartTitle="Cell Population Dynamics" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold" Margin="10,10" >
+
+                                            <dyn:CellPopDynamicsChartSurface.ToolTip>
                                                     <ToolTip >
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBox x:Name="tbSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
@@ -119,15 +122,15 @@
                                                     </ContextMenu>
                                                 </dyn:CellPopDynamicsChartSurface.ContextMenu>
 
-                                                <!--  Declare Axes  -->
-                                                <SciChart:SciChartSurface.XAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
-                                                    </SciChart:NumericAxis>
-                                                </SciChart:SciChartSurface.XAxis>
+                                            <!--  Declare Axes  -->
+                                            <SciChart:SciChartSurface.XAxis>
+                                                <SciChart:NumericAxis VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
+                                                </SciChart:NumericAxis>
+                                            </SciChart:SciChartSurface.XAxis>
 
-                                                <SciChart:SciChartSurface.YAxis>
-                                                    <SciChart:NumericAxis VisibleRange="0, 200" GrowBy="0.1, 0.2" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
-                                                </SciChart:SciChartSurface.YAxis>
+                                            <SciChart:SciChartSurface.YAxis>
+                                                <SciChart:NumericAxis VisibleRange="0, 200" GrowBy="0.1, 0.2" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
+                                            </SciChart:SciChartSurface.YAxis>
 
                                                 <!--  Declare ChartModifiers  -->
                                                 <SciChart:SciChartSurface.ChartModifier>
