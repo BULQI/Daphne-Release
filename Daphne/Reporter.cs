@@ -159,7 +159,7 @@ namespace Daphne
             return null;
         }
 
-        public virtual Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
+        public virtual Dictionary<BigInteger, GeneologyInfo> ProvideGeneologyData(FounderInfo founder)
         {
             return null;
         }
@@ -1210,9 +1210,9 @@ namespace Daphne
         /// </summary>
         /// <param name="founder">data for the founder cell</param>
         /// <returns>null on error, the dictionary of genealogy objects otherwise</returns>
-        public override Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
+        public override Dictionary<BigInteger, GeneologyInfo> ProvideGeneologyData(FounderInfo founder)
         {
-            Dictionary<BigInteger, GenealogyInfo> data = new Dictionary<BigInteger, GenealogyInfo>();
+            Dictionary<BigInteger, GeneologyInfo> data = new Dictionary<BigInteger, GeneologyInfo>();
             string file = tsFiles.CellTypeDivision[founder.Population_Id],
                    path = hSim.HDF5FileHandle.FilePath,
                    line;
@@ -1221,7 +1221,7 @@ namespace Daphne
             StreamReader stream = new StreamReader(path + file);
 
             // add the founder cell
-            data.Add(founder.Lineage_Id, new GenealogyInfo(0, founder.Lineage_Id, 0));
+            data.Add(founder.Lineage_Id, new GeneologyInfo(0, founder.Lineage_Id, 0));
 
             // process divisions
             // read description
@@ -1284,16 +1284,16 @@ namespace Daphne
                 // an entry for this cell must exist
                 if (data.ContainsKey(dc.mother) == true)
                 {
-                    GenealogyInfo entry = data[dc.mother];
+                    GeneologyInfo entry = data[dc.mother];
 
                     // update the mother
-                    entry.EventType = GenealogyInfo.GI_DIVIDE;
+                    entry.EventType = GeneologyInfo.GI_DIVIDE;
                     entry.EventTime = dc.time;
                     // create daughter 1
-                    entry = new GenealogyInfo(dc.time, dc.daughter1, dc.generation);
+                    entry = new GeneologyInfo(dc.time, dc.daughter1, dc.generation);
                     data.Add(dc.daughter1, entry);
                     // create daughter 2
-                    entry = new GenealogyInfo(dc.time, dc.daughter2, dc.generation);
+                    entry = new GeneologyInfo(dc.time, dc.daughter2, dc.generation);
                     data.Add(dc.daughter2, entry);
                 }
                 else
@@ -1352,10 +1352,10 @@ namespace Daphne
                 // an entry for this cell must exist
                 if (data.ContainsKey(dec.lineage) == true)
                 {
-                    GenealogyInfo entry = data[dec.lineage];
+                    GeneologyInfo entry = data[dec.lineage];
 
                     // update the existing cell
-                    entry.EventType = GenealogyInfo.GI_DIE;
+                    entry.EventType = GeneologyInfo.GI_DIE;
                     entry.EventTime = dec.time;
                 }
                 else
@@ -1411,10 +1411,10 @@ namespace Daphne
                 // an entry for this cell must exist
                 if (data.ContainsKey(dec.lineage) == true)
                 {
-                    GenealogyInfo entry = data[dec.lineage];
+                    GeneologyInfo entry = data[dec.lineage];
 
                     // update the existing cell
-                    entry.EventType = GenealogyInfo.GI_EXIT;
+                    entry.EventType = GeneologyInfo.GI_EXIT;
                     entry.EventTime = dec.time;
                 }
                 else
@@ -2003,7 +2003,7 @@ namespace Daphne
     /// <summary>
     /// class encapsulating the genealogy information for lineage analysis
     /// </summary>
-    public class GenealogyInfo
+    public class GeneologyInfo
     {
         // lineage id of the mother cell before division
         public BigInteger Lineage_Id;
@@ -2031,7 +2031,7 @@ namespace Daphne
         /// <param name="tBirth">birth time</param>
         /// <param name="lineage_id">lineage id</param>
         /// <param name="generation">generation</param>
-        public GenealogyInfo(double tBirth, BigInteger lineage_id, int generation)
+        public GeneologyInfo(double tBirth, BigInteger lineage_id, int generation)
         {
             Lineage_Id = lineage_id;
             Generation = generation;

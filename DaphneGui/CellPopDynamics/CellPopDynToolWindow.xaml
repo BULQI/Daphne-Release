@@ -149,7 +149,7 @@
                                                         <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
 
                                                         <!--ExecuteOn="MouseDoubleClick" allows user to zoom out on double click-->
-                                                        <SciChart:ZoomExtentsModifier ExecuteOn="MouseDoubleClick"/>
+                                                        <SciChart:ZoomExtentsModifier IsAnimated="True" ExecuteOn="MouseDoubleClick"/>
 
                                                         <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
                                                         <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>

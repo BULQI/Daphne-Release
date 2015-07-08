@@ -42,14 +42,20 @@
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                     <StackPanel>
                                         <!--this window's datacontext is 'this', i,e CellLineageControl -->
-                                        <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold"/>
-                                        <ListBox BorderBrush="DarkBlue" BorderThickness="2" Background="#FFE6F0FA" x:Name="founderCellListBox" Margin="20,-2" 
-                                                 SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="founderCellListBox_SelectionChanged"
-                                                 ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCells, Mode=OneWay}"
-                                                 DisplayMemberPath="Lineage_Id">
+                                        <TextBlock Margin="20,20" Text="Cell populations:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold"/>
+                                        <ListBox x:Name="cellPopsListBox" Margin="20,-2" 
+                                                 SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="cellPopsListBox_SelectionChanged"
+                                                 ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=TwoWay}"
+                                                 DisplayMemberPath="Cell_Pop.cellpopulation_name">
                                             
                                         </ListBox>
-                                        
+                                        <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold"/>
+                                        <ListBox x:Name="founderCellListBox" Margin="20,-2" 
+                                                 SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="founderCellListBox_SelectionChanged"
+                                                 ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellsByCellPop, Mode=OneWay}"
+                                                 DisplayMemberPath="Lineage_Id">
+                                        </ListBox>
+
                                         <StackPanel Margin="20,20">
                                             <StackPanel Orientation="Horizontal" >
                                                 <TextBlock>Cell population Name: </TextBlock> 
@@ -122,7 +128,7 @@
 
                                             <SciChart:SciChartSurface.Annotations>
                                                 <!--  Text annotations  -->
-                                                <SciChart:TextAnnotation FontSize="12" Text="This is an annotation" X1="300.0" Y1="200"/>
+                                                <SciChart:TextAnnotation x:Name="textAnnot" FontSize="12" Text="This is an annotation" X1="300.0" Y1="200"/>
                                             </SciChart:SciChartSurface.Annotations>
 
                                             <!--  Declare ChartModifiers  -->
@@ -132,7 +138,7 @@
                                                 <SciChart:ModifierGroup>
                                                     <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
                                                     <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
-                                                    <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick"/>
+                                                    <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick" IsAnimated="True"/>
                                                     <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
                                                     <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
                                                     <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>
