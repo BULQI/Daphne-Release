@@ -57,10 +57,6 @@
                                         </ListBox>
 
                                         <StackPanel Margin="20,20">
-                                            <StackPanel Orientation="Horizontal" >
-                                                <TextBlock>Cell population Name: </TextBlock> 
-                                                <TextBox x:Name="tbCellPopName" Width="200" IsReadOnly="True" ></TextBox>
-                                            </StackPanel>
                                             <StackPanel Orientation="Horizontal" Margin="20">
                                                 <TextBlock>Cell type:</TextBlock>
                                                 <TextBox x:Name="tbCellType" Width="200" IsReadOnly="True"></TextBox>

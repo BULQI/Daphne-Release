@@ -306,6 +306,12 @@ namespace DaphneGui.CellLineage
             pda.SetReport(MainWindow.Sim.Reporter);
             List<Series> s = pda.GetPedigreeTreeSeries(FounderCells[index]);
 
+            if (s == null)
+            {
+                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             //last 3 things are the chart tile, x-axis and y-axis titles.
             string chartTitle = pda.GetChartTitle();
             string XTitle = pda.GetChartXTitle();
@@ -316,6 +322,12 @@ namespace DaphneGui.CellLineage
 
         private void ConvertAndDraw(string chartTitle, string xTitle, string yTitle, List<Series> series)
         {
+            if (series == null)
+            {
+                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             foreach(Series s in series) 
             {
                 var dataSeries = new XyDataSeries<double, double>();
