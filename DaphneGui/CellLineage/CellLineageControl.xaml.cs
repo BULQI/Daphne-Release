@@ -322,8 +322,8 @@ namespace DaphneGui.CellLineage
                 dataSeries.SeriesName = "";
                 EllipsePointMarker marker = new EllipsePointMarker();
                 marker.Height = 12; marker.Width = 12;
-                marker.Fill = Colors.Red;
-                marker.Stroke = Colors.Lavender;
+                marker.Fill = new Color { A=255, R=148, G=249, B=146 };
+                marker.Stroke = Colors.Green;
                 marker.StrokeThickness = 1;
 
                 double[] x;
@@ -341,22 +341,34 @@ namespace DaphneGui.CellLineage
                 dataSeries.Append(x, y);
 
                 FastLineRenderableSeries flrs = new FastLineRenderableSeries();
+                System.Windows.Media.Color col = new System.Windows.Media.Color { A=s.Color.A, R=s.Color.R, G=s.Color.G, B=s.Color.B };
                 flrs.DataSeries = dataSeries;
-                flrs.SeriesColor = Colors.Black;
+                flrs.SeriesColor = col;
                 flrs.PointMarker = marker;
 
                 LineageSciChart.RenderableSeries.Add(flrs);
 
                 //This is how to add Annotations - Do not delete this
-                ////var textAnnot = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
-                ////{
-                ////    Name = s.Name,
-                ////    Text = string.Format("({0:G4}, {1:G2})", x[0], y[0]),
-                ////    X1 = x[0],
-                ////    Y1 = y[0],
-                ////};
+                var textAnnot1 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                {
+                    Name = s.Name,
+                    Text = s.Points[0].Label,
+                    FontSize = 6.0,
+                    X1 = x[0],
+                    Y1 = y[0],
+                };
+                textAnnot1.FontSize = 11.0;
+                LineageSciChart.Annotations.Add(textAnnot1);
 
-                ////LineageSciChart.Annotations.Add(textAnnot);
+                var textAnnot2 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                {
+                    Name = s.Name,
+                    Text = s.Points[1].Label,
+                    X1 = x[1],
+                    Y1 = y[1],
+                };
+                textAnnot2.FontSize = 11.0;
+                LineageSciChart.Annotations.Add(textAnnot2);
 
                 //Sample code
                 //Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation ta = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation();

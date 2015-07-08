@@ -42,14 +42,14 @@
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                     <StackPanel>
                                         <!--this window's datacontext is 'this', i,e CellLineageControl -->
-                                        <TextBlock Margin="20,20" Text="Cell populations:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold"/>
+                                        <TextBlock Margin="20,20" Text="Cell populations:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
                                         <ListBox x:Name="cellPopsListBox" Margin="20,-2" 
                                                  SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="cellPopsListBox_SelectionChanged"
                                                  ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=TwoWay}"
                                                  DisplayMemberPath="Cell_Pop.cellpopulation_name">
                                             
                                         </ListBox>
-                                        <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold"/>
+                                        <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
                                         <ListBox x:Name="founderCellListBox" Margin="20,-2" 
                                                  SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="founderCellListBox_SelectionChanged"
                                                  ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellsByCellPop, Mode=OneWay}"
@@ -128,7 +128,7 @@
 
                                             <SciChart:SciChartSurface.Annotations>
                                                 <!--  Text annotations  -->
-                                                <SciChart:TextAnnotation x:Name="textAnnot" FontSize="12" Text="This is an annotation" X1="300.0" Y1="200"/>
+                                                <SciChart:TextAnnotation x:Name="textAnnot" FontSize="11" Text="This is an annotation" X1="300.0" Y1="200"/>
                                             </SciChart:SciChartSurface.Annotations>
 
                                             <!--  Declare ChartModifiers  -->
