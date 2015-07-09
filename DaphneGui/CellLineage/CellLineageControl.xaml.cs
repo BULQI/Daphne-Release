@@ -37,6 +37,9 @@ namespace DaphneGui.CellLineage
         public ObservableCollection<GuiFounderInfo> FounderCellPops { get; set; }
         public ObservableCollection<GuiFounderInfo> FounderCellsByCellPop { get; set; }
 
+        public CellPopulation CurrCellPop { get; set; }
+        TissueScenario ScenarioHandle { get; set; }
+
 
         public CellLineageControl()
         {
@@ -69,10 +72,11 @@ namespace DaphneGui.CellLineage
                 gfi.Lineage_Id = kvp.Value.Lineage_Id;
                 gfi.Population_Id = kvp.Value.Population_Id;
                 
-                TissueScenario scenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-                if (scenarioHandle.cellpopulation_dict.ContainsKey(kvp.Value.Population_Id) == true)
+                //TissueScenario scenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+                ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+                if (ScenarioHandle.cellpopulation_dict.ContainsKey(kvp.Value.Population_Id) == true)
                 {
-                    gfi.Cell_Pop = scenarioHandle.cellpopulation_dict[kvp.Value.Population_Id];
+                    gfi.Cell_Pop = ScenarioHandle.cellpopulation_dict[kvp.Value.Population_Id];
                 }
 
                 FounderCells.Add(kvp.Value);
@@ -88,8 +92,7 @@ namespace DaphneGui.CellLineage
                 return;
 
             CellPopulation pop = ((GuiFounderInfo)listbox.SelectedItem).Cell_Pop;
-            if (listbox.SelectedIndex == -1)
-                return;
+            CurrCellPop = ((GuiFounderInfo)listbox.SelectedItem).Cell_Pop;
 
             int cellPopId = pop.cellpopulation_id;
             FounderCellsByCellPop.Clear();

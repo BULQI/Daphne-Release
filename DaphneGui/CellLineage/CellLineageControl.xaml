@@ -43,11 +43,23 @@
                                     <StackPanel>
                                         <!--this window's datacontext is 'this', i,e CellLineageControl -->
                                         <TextBlock Margin="20,20" Text="Cell populations:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
-                                        <ListBox x:Name="cellPopsListBox" Margin="20,-2" 
+                                        <!--<ListBox x:Name="cellPopsListBox" Margin="20,-2" 
                                                  SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="cellPopsListBox_SelectionChanged"
                                                  ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=TwoWay}"
                                                  DisplayMemberPath="Cell_Pop.cellpopulation_name">
                                             
+                                        </ListBox>-->
+                                        <ListBox x:Name="cellPopsListBox" Margin="20,-2" 
+                                                 SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="cellPopsListBox_SelectionChanged"
+                                                 ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=TwoWay}">
+                                                 
+                                            
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding ElementName=lineageWindow, Path=CurrCellPop.cellpopulation_name}" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+
                                         </ListBox>
                                         <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
                                         <ListBox x:Name="founderCellListBox" Margin="20,-2" 
