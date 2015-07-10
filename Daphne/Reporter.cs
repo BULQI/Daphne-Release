@@ -1209,7 +1209,7 @@ namespace Daphne
         /// extract the genealogy information for a founder cell
         /// </summary>
         /// <param name="founder">data for the founder cell</param>
-        /// <returns>null on error, the dictionary of genealogy objects otherwise</returns>
+        /// <returns>the dictionary of genealogy objects</returns>
         public override Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
         {
             Dictionary<BigInteger, GenealogyInfo> data = new Dictionary<BigInteger, GenealogyInfo>();
@@ -1296,10 +1296,6 @@ namespace Daphne
                     entry = new GenealogyInfo(dc.time, dc.daughter2, dc.generation);
                     data.Add(dc.daughter2, entry);
                 }
-                else
-                {
-                    return null;
-                }
             }
 
             // process deaths
@@ -1358,10 +1354,6 @@ namespace Daphne
                     entry.EventType = GenealogyInfo.GI_DIE;
                     entry.EventTime = dec.time;
                 }
-                else
-                {
-                    return null;
-                }
             }
 
             // process exits
@@ -1417,15 +1409,11 @@ namespace Daphne
                     entry.EventType = GenealogyInfo.GI_EXIT;
                     entry.EventTime = dec.time;
                 }
-                else
-                {
-                    return null;
-                }
             }
 
             return data;
         }
-   }
+    }
 
     public class CompartmentMolpopReporter
     {
