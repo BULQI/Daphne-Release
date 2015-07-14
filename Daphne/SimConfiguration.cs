@@ -7572,7 +7572,7 @@ namespace Daphne
             Lineage_id = "";
         }
 
-        public CellState(double x, double y, double z) : base()
+        public CellState(double x, double y, double z) : this()
         {
             spState.X[0] = x;
             spState.X[1] = y;
