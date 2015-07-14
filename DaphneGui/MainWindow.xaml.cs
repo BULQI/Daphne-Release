@@ -2609,7 +2609,12 @@ namespace DaphneGui
             // only allow fitting and other analysis that needs the database if database writing is on
             if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
             {
-                analysisMenu.IsEnabled = true;
+                //After a run, enable Analysis menu only if we have a Tissue scenario
+                if (ToolWinType == ToolWindowType.Tissue)
+                {
+                    analysisMenu.IsEnabled = true;
+                }
+
                 this.ExportMenu.IsEnabled = true;
                 // And show stats results chart
                 // NOTE: If the stats charts can be displayed without the database saving, then these
@@ -3187,6 +3192,9 @@ namespace DaphneGui
 
             CellOptionsExpander.IsExpanded = false;
             ECMOptionsExpander.IsExpanded = false;
+
+            //Upon Load Protocol, disable Analysis menu
+            analysisMenu.IsEnabled = false;
 
             // Process open file dialog box results
             if (result == true)
