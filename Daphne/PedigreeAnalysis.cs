@@ -33,7 +33,7 @@ namespace Daphne
         /// </summary>
         private void resetData()
         {
-            familytree = new Dictionary<BigInteger, GeneologyInfo>();
+            familytree = new Dictionary<BigInteger, GenealogyInfo>();
             cellsets = new Dictionary<int, string>();
             experiment_id = -1;
             //reporter = null;
@@ -43,7 +43,7 @@ namespace Daphne
         {
             resetData();
             //need to build family tree first.
-            familytree = reporter.ProvideGeneologyData(founder);
+            familytree = reporter.ProvideGenealogyData(founder);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Daphne
                 divtree.Add(familytree[cellID].Generation, thisgeneration);
             }
             int sign = 1;
-            if (familytree[cellID].EventType == GeneologyInfo.GI_DIE || familytree[cellID].EventType == GeneologyInfo.GI_EXIT)
+            if (familytree[cellID].EventType == GenealogyInfo.GI_DIE || familytree[cellID].EventType == GenealogyInfo.GI_EXIT)
                 sign = -1;
             divtree[familytree[cellID].Generation].Add(index, sign * (familytree[cellID].EventTime));
             if (CellHasDaughters(cellID))//it has two daughters.
@@ -161,7 +161,7 @@ namespace Daphne
             return X_Coordinate;
         }
 
-        private string determineXCoordiateStartingLabel(Dictionary<int, Dictionary<int, int>> dicCellID, Dictionary<int, GeneologyInfo> familytree, int generationID, int indexID)
+        private string determineXCoordiateStartingLabel(Dictionary<int, Dictionary<int, int>> dicCellID, Dictionary<int, GenealogyInfo> familytree, int generationID, int indexID)
         {
             string X_CoordinateString;
             int X_coordinateID;
@@ -185,7 +185,7 @@ namespace Daphne
             X_Coordinate = dic[generationID][indexID];
             return X_Coordinate;
         }
-        private string determineXCoordiateEndingLabel(Dictionary<int, Dictionary<int, BigInteger >> dicCellID, Dictionary<BigInteger , GeneologyInfo> familytree,
+        private string determineXCoordiateEndingLabel(Dictionary<int, Dictionary<int, BigInteger>> dicCellID, Dictionary<BigInteger, GenealogyInfo> familytree,
             int generationID, int indexID)
         {
             string X_CoordinateString;
@@ -226,7 +226,7 @@ namespace Daphne
         /// <param name="cA"></param>
         /// <param name="title"></param>
         private List<Series> drawChartPedTree(Dictionary<int, Dictionary<int, double>> dicDivTime,
-                Dictionary<int, Dictionary<int, BigInteger>> dicCellID, Dictionary< BigInteger , GeneologyInfo> familyTree)
+                Dictionary<int, Dictionary<int, BigInteger>> dicCellID, Dictionary<BigInteger, GenealogyInfo> familyTree)
         {
             List<Series> chartingSeries = new List<Series>();
             //draw points first
@@ -395,7 +395,7 @@ namespace Daphne
         }
 
         public List<Series> GetPedigreeTreeSeries(FounderInfo founder/*Dictionary<int, Dictionary<int, double>> dicDivTime, Dictionary<int, Dictionary<int, int>> dicDivCellID,
-            Dictionary<int, GeneologyInfo> familyTree, string title, string note*/)
+            Dictionary<int, GenealogyInfo> familyTree, string title, string note*/)
         {
             
             List<Series> chartingSeries = new List<Series>();//return data structure holding all the points/lines,etc
@@ -466,7 +466,7 @@ namespace Daphne
         }
 
         //======member declaration
-        private Dictionary<BigInteger, GeneologyInfo> familytree;
+        private Dictionary<BigInteger, GenealogyInfo> familytree;
         private Dictionary<int, string> cellsets;
         private int experiment_id;
         private ReporterBase reporter;

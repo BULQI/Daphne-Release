@@ -30,32 +30,63 @@ namespace DaphneGui.CellLineage
     /// <summary>
     /// Interaction logic for CellLineageControl.xaml
     /// </summary>
-    public partial class CellLineageControl : ToolWindow
+    public partial class CellLineageControl : ToolWinBase
     {
-        private readonly Random _random = new Random();
         public ObservableCollection<FounderInfo> FounderCells { get; set; }
-        public ObservableCollection<GuiFounderInfo> FounderCellPops { get; set; }
-        public ObservableCollection<GuiFounderInfo> FounderCellsByCellPop { get; set; }
+        public ObservableCollection<FounderInfo> FounderCellsByCellPop { get; set; }
+        public ObservableCollection<CellPopulation> FounderCellPops { get; set; }
 
-        public CellPopulation CurrCellPop { get; set; }
-        TissueScenario ScenarioHandle { get; set; }
+        //private ObservableCollection<CellPopulation> founderCellPops;
+        //public ObservableCollection<CellPopulation> FounderCellPops
+        //{
+        //    get
+        //    {
+        //        return founderCellPops;
+        //    }
+        //    set
+        //    {
+        //        founderCellPops = value;
+        //        OnPropertyChanged("FounderCellPops");
+        //    }
+        //}
 
+
+
+        public TissueScenario ScenarioHandle {get;set;}
+        
 
         public CellLineageControl()
         {
             FounderCells = new ObservableCollection<FounderInfo>();
-            FounderCellPops = new ObservableCollection<GuiFounderInfo>();
-            FounderCellsByCellPop = new ObservableCollection<GuiFounderInfo>();
+            FounderCellsByCellPop = new ObservableCollection<FounderInfo>();
+            FounderCellPops = new ObservableCollection<CellPopulation>();
+            ScenarioHandle = null;
 
             InitializeComponent();
 
             DataContext = this;
         }
         
+        /// <summary>
+        /// This method calls the Reporter to return a list of FounderInfo, all founder cells.
+        /// </summary>
         private void LoadLineageData()
         {
             DataContext = this;
 
+            //First, get all the cell populations with division schemes, to display in the ListBox.
+            ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            FounderCellPops.Clear();
+            foreach (KeyValuePair<int,CellPopulation> kvp in ScenarioHandle.cellpopulation_dict)
+            {
+                if (kvp.Value.Cell.div_scheme != null)
+                {
+                    FounderCellPops.Add(kvp.Value);
+                }
+            }
+            
+
+            //Second, get the dictionary of all founder cells and store them in FounderCells
             Dictionary<int, FounderInfo> result = MainWindow.Sim.Reporter.ProvideFounderCells();
 
             if (result == null)
@@ -65,77 +96,103 @@ namespace DaphneGui.CellLineage
             }
 
             FounderCells.Clear();
-            FounderCellPops.Clear();
             foreach (KeyValuePair<int, FounderInfo> kvp in result)
             {
-                GuiFounderInfo gfi = new GuiFounderInfo();
-                gfi.Lineage_Id = kvp.Value.Lineage_Id;
-                gfi.Population_Id = kvp.Value.Population_Id;
-                
-                //TissueScenario scenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-                ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-                if (ScenarioHandle.cellpopulation_dict.ContainsKey(kvp.Value.Population_Id) == true)
-                {
-                    gfi.Cell_Pop = ScenarioHandle.cellpopulation_dict[kvp.Value.Population_Id];
-                }
-
                 FounderCells.Add(kvp.Value);
-                FounderCellPops.Add(gfi);                
             }
-            
+
+            if (FounderCellPops.Count > 0)
+            {
+                OnPropertyChanged("FounderCellPops");
+            }
+
+            if (cellPopsListBox.Items.Count > 0)
+            {
+                cellPopsListBox.SelectedIndex = -1;
+                cellPopsListBox.SelectedIndex = 0;
+            }
         }
 
         private void cellPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ListBox listbox = sender as ListBox;
-            if (listbox.SelectedIndex == -1)
+            // Only want to respond to meaningful user interaction, not just population and depopulation of cell pops list
+            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            //    return;
+
+            ListBox cellPopLBox = sender as ListBox;
+            if (cellPopLBox.Items.Count == 0 || cellPopLBox.SelectedIndex == -1)
                 return;
 
-            CellPopulation pop = ((GuiFounderInfo)listbox.SelectedItem).Cell_Pop;
-            CurrCellPop = ((GuiFounderInfo)listbox.SelectedItem).Cell_Pop;
+            //Get the cell pop id of currently selected cell populaton
+            int cellPopId = ((CellPopulation)cellPopLBox.SelectedItem).cellpopulation_id;
 
-            int cellPopId = pop.cellpopulation_id;
+            //If ScenarioHandle is null, assign it here
+            if (ScenarioHandle == null)
+            {
+                ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            }
+
+            //Get the cell type and display it
+            string cell_type = ((CellPopulation)cellPopLBox.SelectedItem).Cell.CellName;
+            tbCellType.Text = cell_type;
+
+            ////Get all the founder cells in the selected cell population and Add them to FounderCellsByCellPop which is bound to 2nd listbox
+            //if (FounderCells.Count == 0)
+            //    return;
+
             FounderCellsByCellPop.Clear();
-            List<GuiFounderInfo> listGFI = FounderCellPops.Where(x => x.Population_Id == cellPopId).ToList();
-            foreach (GuiFounderInfo gfi in listGFI)
+            List<FounderInfo> listFI = FounderCells.Where(x => x.Population_Id == cellPopId).ToList();
+            foreach (FounderInfo fi in listFI)
             {
-                FounderCellsByCellPop.Add(gfi);
+                FounderCellsByCellPop.Add(fi);
             }
 
         }
 
-        private void founderCellListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void founderCellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (founderCellListBox.Items.Count == 0)
-                return;
-            if (MainWindow.SOP == null)
-                return;
-            if (MainWindow.SOP.Protocol == null)
-                return;
-            if (MainWindow.SOP.Protocol.scenario == null)
-                return;
+            //This code is only for displaying cell type
+            ////if (founderCellListBox.Items.Count == 0)
+            ////    return;
+            ////if (MainWindow.SOP == null)
+            ////    return;
+            ////if (MainWindow.SOP.Protocol == null)
+            ////    return;
+            ////if (MainWindow.SOP.Protocol.scenario == null)
+            ////    return;
 
-            if (founderCellListBox.SelectedIndex >= 0) 
-            {
-                TissueScenario scenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-                GuiFounderInfo gfi = founderCellListBox.SelectedItem as GuiFounderInfo;
-                if (scenarioHandle.cellpopulation_dict.ContainsKey(gfi.Population_Id) == true)
-                {
-                    CellPopulation cp = scenarioHandle.cellpopulation_dict[gfi.Population_Id];
-                    string name = cp.cellpopulation_name;
-                    string cell_type = cp.Cell.CellName;
-                    tbCellType.Text = cell_type;
-                }
-            }
+            ////if (ScenarioHandle == null)
+            ////{
+            ////    ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            ////}
+
+            ////if (ScenarioHandle == null)
+            ////    return;
+
+            ////if (founderCellListBox.SelectedIndex >= 0) 
+            ////{
+            ////    FounderInfo fi = founderCellListBox.SelectedItem as FounderInfo;
+            ////    if (ScenarioHandle.cellpopulation_dict.ContainsKey(fi.Population_Id) == true)
+            ////    {
+            ////        CellPopulation cp = ScenarioHandle.cellpopulation_dict[fi.Population_Id];
+            ////        string cell_type = cp.Cell.CellName;
+            ////        tbCellType.Text = cell_type;
+            ////    }
+            ////}
         }
-
         
+        /// <summary>
+        /// This gets called when chart is loaded. Tooltip is initialized here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LineageSciChart_Loaded(object sender, RoutedEventArgs e)
         {
             //Set up surface tooltip
+
             tbLineageSurfaceTooltip.Text = "";
 
-            tbLineageSurfaceTooltip.AppendText("To zoom in and out:");
+            tbLineageSurfaceTooltip.AppendText("To zoom in:");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Use the mouse wheel OR");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
@@ -143,11 +200,13 @@ namespace DaphneGui.CellLineage
 
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
-            tbLineageSurfaceTooltip.AppendText("To zoom back out:");
+            tbLineageSurfaceTooltip.AppendText("To zoom out:");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Double click OR");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Use mouse wheel.");
+            tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
+            tbLineageSurfaceTooltip.AppendText("    Right-click.");
 
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
@@ -155,6 +214,7 @@ namespace DaphneGui.CellLineage
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
 
+            ClearChart();
             LoadLineageData();
             //CreateFakeDataSeries();
             Size size = new Size(600.0, 400.0);
@@ -167,7 +227,166 @@ namespace DaphneGui.CellLineage
             LineageSciChart.BorderBrush = Brushes.Transparent;
             LineageSciChart.ZoomExtents();
         }
+         
+        /// <summary>
+        /// Export the chart to a file.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lineageExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Coming soon.");
+        }
 
+        /// <summary>
+        /// Right-click Menu Zoom Out handler.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void menuZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            LineageSciChart.ZoomExtents();
+        }
+
+        /// <summary>
+        /// Draw button handler. Calls the Draw method.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void drawButton_Click(object sender, RoutedEventArgs e)
+        {
+            Draw();
+        }
+
+        /// <summary>
+        /// This method draws the lineage.
+        /// </summary>
+        private void Draw()
+        {
+            int index = founderCellsListBox.SelectedIndex;
+            if (index < 0)
+            {
+                MessageBox.Show("Please select a founder cell first.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            PedigreeAnalysis pda = new PedigreeAnalysis();
+            pda.SetReport(MainWindow.Sim.Reporter);
+            List<Series> s = pda.GetPedigreeTreeSeries(FounderCells[index]);
+
+            if (s == null || s.Count == 0)
+            {
+                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            ClearChart();
+            
+            //last 3 things are the chart tile, x-axis and y-axis titles.
+            string chartTitle = pda.GetChartTitle();
+            string XTitle = pda.GetChartXTitle();
+            string YTitle = pda.GetChartYTitle();
+
+            ConvertAndDraw(chartTitle, XTitle, YTitle, s);
+        }
+
+        private void ClearChart()
+        {
+            LineageSciChart.RenderableSeries.Clear();
+            LineageSciChart.Annotations.Clear();
+            LineageSciChart.XAxis.Clear();
+            LineageSciChart.YAxis.Clear();
+        }
+
+        /// <summary>
+        /// This method takes all the series to be plotted (each series is only 2 points and is assumed to be 2 points), 
+        /// and converts the data into a format that SciChart recognizes.  
+        /// 
+        /// NOTE: DO NOT USE THIS METHOD TO DRAW ANY SERIES WITH MORE THAN 2 POINTS
+        /// 
+        /// </summary>
+        /// <param name="chartTitle"></param>
+        /// <param name="xTitle"></param>
+        /// <param name="yTitle"></param>
+        /// <param name="series"></param>
+        private void ConvertAndDraw(string chartTitle, string xTitle, string yTitle, List<Series> series)
+        {
+            if (series == null)
+            {
+                MessageBox.Show("No pedigree data was found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            foreach(Series s in series) 
+            {
+                var dataSeries = new XyDataSeries<double, double>();
+                dataSeries.SeriesName = "";
+                EllipsePointMarker marker = new EllipsePointMarker();
+                marker.Height = 12; marker.Width = 12;
+                marker.Fill = new Color { A=255, R=148, G=249, B=146 };
+                marker.Stroke = Colors.Green;
+                marker.StrokeThickness = 1;
+
+                double[] x;
+                double[] y;
+
+                List<double> tempX = new List<double>();
+                List<double> tempY = new List<double>();
+                tempX.Add(s.Points[0].XValue);
+                tempX.Add(s.Points[1].XValue);
+                tempY.Add(s.Points[0].YValues[0]);
+                tempY.Add(s.Points[1].YValues[0]);
+                x = tempX.ToArray();
+                y = tempY.ToArray();
+
+                dataSeries.Append(x, y);
+
+                FastLineRenderableSeries flrs = new FastLineRenderableSeries();
+                System.Windows.Media.Color col = new System.Windows.Media.Color { A=s.Color.A, R=s.Color.R, G=s.Color.G, B=s.Color.B };
+                flrs.DataSeries = dataSeries;
+                flrs.SeriesColor = col;
+                flrs.PointMarker = marker;
+
+                LineageSciChart.RenderableSeries.Add(flrs);
+
+                //This is how to add Annotations - Do not delete this
+                //For the 1st point
+                var textAnnot1 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                {
+                    Name = s.Name,
+                    Text = s.Points[0].Label,
+                    FontSize = 6.0,
+                    X1 = x[0],
+                    Y1 = y[0],
+                };
+                textAnnot1.FontSize = 11.0;
+                LineageSciChart.Annotations.Add(textAnnot1);
+
+                //For the 2nd point
+                var textAnnot2 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                {
+                    Name = s.Name,
+                    Text = s.Points[1].Label,
+                    X1 = x[1],
+                    Y1 = y[1],
+                };
+                textAnnot2.FontSize = 11.0;
+                LineageSciChart.Annotations.Add(textAnnot2);
+
+                //Sample code
+                //Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation ta = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation();
+                //LineageSciChart.Annotations.Add(ta);
+            }
+
+            //Other chart attributes
+            LineageSciChart.ChartTitle = chartTitle;
+            LineageSciChart.XAxis.AxisTitle = xTitle;
+            LineageSciChart.YAxis.AxisTitle = yTitle;
+            LineageSciChart.BorderBrush = Brushes.Transparent;
+            LineageSciChart.ZoomExtents();
+        }
+
+#if false
         private IXyDataSeries<double, double> CreateDataSeries()
         {
             var dataSeries = new XyDataSeries<double, double>();
@@ -267,143 +486,6 @@ namespace DaphneGui.CellLineage
 
         }
 
-        //private void PlotLineageButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    double w = this.Width;
-        //    double h = this.Height;
-
-        //    GuiFounderInfo gfi = founderCellListBox.SelectedItem as GuiFounderInfo;
-
-        //    int index = founderCellListBox.SelectedIndex;
-
-        //    PedigreeAnalysis pda = new PedigreeAnalysis();
-        //    List<Series> s = pda.GetPedigreeTreeSeries(FounderCells[index]);
- 
-        //    //last 3 things are the chart tile, x-axis and y-axis titles.
-        //    string chartTitle=pda.GetChartTitle();
-        //    string XTitle=pda.GetChartXTitle();
-        //    string YTitle=pda.GetChartYTitle();
-
-        //}
-
-        private void drawButton_Click(object sender, RoutedEventArgs e)
-        {
-            Draw();
-        }
-
-        private void lineageExportButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Draw()
-        {
-            int index = founderCellListBox.SelectedIndex;
-            if (index < 0)
-            {
-                MessageBox.Show("Please select a founder cell first.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            PedigreeAnalysis pda = new PedigreeAnalysis();
-            pda.SetReport(MainWindow.Sim.Reporter);
-            List<Series> s = pda.GetPedigreeTreeSeries(FounderCells[index]);
-
-            if (s == null)
-            {
-                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            //last 3 things are the chart tile, x-axis and y-axis titles.
-            string chartTitle = pda.GetChartTitle();
-            string XTitle = pda.GetChartXTitle();
-            string YTitle = pda.GetChartYTitle();
-
-            ConvertAndDraw(chartTitle, XTitle, YTitle, s);
-        }
-
-        private void ConvertAndDraw(string chartTitle, string xTitle, string yTitle, List<Series> series)
-        {
-            if (series == null)
-            {
-                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            foreach(Series s in series) 
-            {
-                var dataSeries = new XyDataSeries<double, double>();
-                dataSeries.SeriesName = "";
-                EllipsePointMarker marker = new EllipsePointMarker();
-                marker.Height = 12; marker.Width = 12;
-                marker.Fill = new Color { A=255, R=148, G=249, B=146 };
-                marker.Stroke = Colors.Green;
-                marker.StrokeThickness = 1;
-
-                double[] x;
-                double[] y;
-
-                List<double> tempX = new List<double>();
-                List<double> tempY = new List<double>();
-                tempX.Add(s.Points[0].XValue);
-                tempX.Add(s.Points[1].XValue);
-                tempY.Add(s.Points[0].YValues[0]);
-                tempY.Add(s.Points[1].YValues[0]);
-                x = tempX.ToArray();
-                y = tempY.ToArray();
-
-                dataSeries.Append(x, y);
-
-                FastLineRenderableSeries flrs = new FastLineRenderableSeries();
-                System.Windows.Media.Color col = new System.Windows.Media.Color { A=s.Color.A, R=s.Color.R, G=s.Color.G, B=s.Color.B };
-                flrs.DataSeries = dataSeries;
-                flrs.SeriesColor = col;
-                flrs.PointMarker = marker;
-
-                LineageSciChart.RenderableSeries.Add(flrs);
-
-                //This is how to add Annotations - Do not delete this
-                var textAnnot1 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
-                {
-                    Name = s.Name,
-                    Text = s.Points[0].Label,
-                    FontSize = 6.0,
-                    X1 = x[0],
-                    Y1 = y[0],
-                };
-                textAnnot1.FontSize = 11.0;
-                LineageSciChart.Annotations.Add(textAnnot1);
-
-                var textAnnot2 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
-                {
-                    Name = s.Name,
-                    Text = s.Points[1].Label,
-                    X1 = x[1],
-                    Y1 = y[1],
-                };
-                textAnnot2.FontSize = 11.0;
-                LineageSciChart.Annotations.Add(textAnnot2);
-
-                //Sample code
-                //Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation ta = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation();
-                //LineageSciChart.Annotations.Add(ta);
-            }
-
-            LineageSciChart.ChartTitle = chartTitle;
-            LineageSciChart.XAxis.AxisTitle = xTitle;
-            LineageSciChart.YAxis.AxisTitle = yTitle;
-            LineageSciChart.BorderBrush = Brushes.Transparent;
-            LineageSciChart.ZoomExtents();
-        }
-
-        
-    }
-
-    public class GuiFounderInfo
-    {
-        public BigInteger Lineage_Id { get; set; }
-        public int Population_Id { get; set; }
-        public CellPopulation Cell_Pop { get; set; }
+#endif
     }
 }

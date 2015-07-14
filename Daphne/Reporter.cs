@@ -159,7 +159,7 @@ namespace Daphne
             return null;
         }
 
-        public virtual Dictionary<BigInteger, GeneologyInfo> ProvideGeneologyData(FounderInfo founder)
+        public virtual Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
         {
             return null;
         }
@@ -1209,10 +1209,10 @@ namespace Daphne
         /// extract the genealogy information for a founder cell
         /// </summary>
         /// <param name="founder">data for the founder cell</param>
-        /// <returns>null on error, the dictionary of genealogy objects otherwise</returns>
-        public override Dictionary<BigInteger, GeneologyInfo> ProvideGeneologyData(FounderInfo founder)
+        /// <returns>the dictionary of genealogy objects</returns>
+        public override Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
         {
-            Dictionary<BigInteger, GeneologyInfo> data = new Dictionary<BigInteger, GeneologyInfo>();
+            Dictionary<BigInteger, GenealogyInfo> data = new Dictionary<BigInteger, GenealogyInfo>();
             string file = tsFiles.CellTypeDivision[founder.Population_Id],
                    path = hSim.HDF5FileHandle.FilePath,
                    line;
@@ -1221,7 +1221,7 @@ namespace Daphne
             StreamReader stream = new StreamReader(path + file);
 
             // add the founder cell
-            data.Add(founder.Lineage_Id, new GeneologyInfo(0, founder.Lineage_Id, 0));
+            data.Add(founder.Lineage_Id, new GenealogyInfo(0, founder.Lineage_Id, 0));
 
             // process divisions
             // read description
@@ -1284,21 +1284,17 @@ namespace Daphne
                 // an entry for this cell must exist
                 if (data.ContainsKey(dc.mother) == true)
                 {
-                    GeneologyInfo entry = data[dc.mother];
+                    GenealogyInfo entry = data[dc.mother];
 
                     // update the mother
-                    entry.EventType = GeneologyInfo.GI_DIVIDE;
+                    entry.EventType = GenealogyInfo.GI_DIVIDE;
                     entry.EventTime = dc.time;
                     // create daughter 1
-                    entry = new GeneologyInfo(dc.time, dc.daughter1, dc.generation);
+                    entry = new GenealogyInfo(dc.time, dc.daughter1, dc.generation);
                     data.Add(dc.daughter1, entry);
                     // create daughter 2
-                    entry = new GeneologyInfo(dc.time, dc.daughter2, dc.generation);
+                    entry = new GenealogyInfo(dc.time, dc.daughter2, dc.generation);
                     data.Add(dc.daughter2, entry);
-                }
-                else
-                {
-                    return null;
                 }
             }
 
@@ -1352,15 +1348,11 @@ namespace Daphne
                 // an entry for this cell must exist
                 if (data.ContainsKey(dec.lineage) == true)
                 {
-                    GeneologyInfo entry = data[dec.lineage];
+                    GenealogyInfo entry = data[dec.lineage];
 
                     // update the existing cell
-                    entry.EventType = GeneologyInfo.GI_DIE;
+                    entry.EventType = GenealogyInfo.GI_DIE;
                     entry.EventTime = dec.time;
-                }
-                else
-                {
-                    return null;
                 }
             }
 
@@ -1411,21 +1403,17 @@ namespace Daphne
                 // an entry for this cell must exist
                 if (data.ContainsKey(dec.lineage) == true)
                 {
-                    GeneologyInfo entry = data[dec.lineage];
+                    GenealogyInfo entry = data[dec.lineage];
 
                     // update the existing cell
-                    entry.EventType = GeneologyInfo.GI_EXIT;
+                    entry.EventType = GenealogyInfo.GI_EXIT;
                     entry.EventTime = dec.time;
-                }
-                else
-                {
-                    return null;
                 }
             }
 
             return data;
         }
-   }
+    }
 
     public class CompartmentMolpopReporter
     {
@@ -1990,9 +1978,6 @@ namespace Daphne
         public BigInteger Lineage_Id { get; set; }
         public int  Population_Id { get; set; }
 
-        //public BigInteger Lineage_Id;
-        //public int Population_Id;
-
         public FounderInfo(BigInteger lineage_id, int population_id)
         {
             Lineage_Id = lineage_id;
@@ -2003,7 +1988,7 @@ namespace Daphne
     /// <summary>
     /// class encapsulating the genealogy information for lineage analysis
     /// </summary>
-    public class GeneologyInfo
+    public class GenealogyInfo
     {
         // lineage id of the mother cell before division
         public BigInteger Lineage_Id;
@@ -2031,7 +2016,7 @@ namespace Daphne
         /// <param name="tBirth">birth time</param>
         /// <param name="lineage_id">lineage id</param>
         /// <param name="generation">generation</param>
-        public GeneologyInfo(double tBirth, BigInteger lineage_id, int generation)
+        public GenealogyInfo(double tBirth, BigInteger lineage_id, int generation)
         {
             Lineage_Id = lineage_id;
             Generation = generation;

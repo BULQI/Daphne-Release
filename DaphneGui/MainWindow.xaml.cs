@@ -1726,13 +1726,13 @@ namespace DaphneGui
 
 
             ////get family tree first.
-            //Dictionary<int, GeneologyInfo> familytree = CellDivTools.GetFamilyTree(SC.Protocol.experiment_db_id);
+            //Dictionary<int, GenealogyInfo> familytree = CellDivTools.GetFamilyTree(SC.Protocol.experiment_db_id);
 
             ////now what?
-            //foreach (KeyValuePair<int, GeneologyInfo> kvpc in familytree)
+            //foreach (KeyValuePair<int, GenealogyInfo> kvpc in familytree)
             //{
             //    int motherID;
-            //    //GeneologyInfo daughterNode=null;
+            //    //GenealogyInfo daughterNode=null;
             //    if (kvpc.Value.Generation == 0 && kvpc.Value.CellType == (int)CellBaseTypeLabel.BCell && kvpc.Value.DieOrDivide != 0)//this is founder.
             //    {
             //        motherID = kvpc.Value.CellId;
