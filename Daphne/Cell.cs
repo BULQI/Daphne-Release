@@ -107,7 +107,7 @@ namespace Daphne
             genes.Add(gene_guid, gene);
         }
 
-        public Cell(double radius, int id)
+        public Cell(double radius)
         {
             if (radius <= 0)
             {
@@ -122,21 +122,6 @@ namespace Daphne
             spatialState.X = new double[CellSpatialState.SingleDim];
             spatialState.V = new double[CellSpatialState.SingleDim];
             spatialState.F = new double[CellSpatialState.SingleDim];
-
-            // the safe id must be larger than the largest one in use
-            // if the passed id is legitimate, use it
-            if (id > -1)
-            {
-                Cell_id = id;
-                if (id >= SafeCell_id)
-                {
-                    SafeCell_id = id + 1;
-                }
-            }
-            else
-            {
-                Cell_id = SafeCell_id++;
-            }
         }
 
         [Inject]
@@ -236,6 +221,16 @@ namespace Daphne
         /// <param name="state">the state</param>
         public void SetCellState(CellState state)
         {
+            // cell id
+            if (state.Cell_id > -1)
+            {
+                Cell_id = state.Cell_id;
+            }
+            // lineage id
+            if (state.Lineage_id != "")
+            {
+                Lineage_id = BigInteger.Parse(state.Lineage_id);
+            }
             // spatial
             setSpatialState(state.spState);
             // generation
@@ -464,7 +459,9 @@ namespace Daphne
             }
 
             // create daughter
-            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius), new ConstructorArgument("id", -1));
+            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
+            // generate new cell id, pass -1 to use safeCellId++
+            daughter.Cell_id = DataBasket.GenerateSafeCellId(-1);
             // same population id
             daughter.Population_id = Population_id;
             daughter.renderLabel = renderLabel;
@@ -517,11 +514,8 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
-            string cell_guid;
-
             if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
                 configComp[0] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.cytosol;
                 configComp[1] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.membrane;
             }
@@ -651,8 +645,7 @@ namespace Daphne
         public double DragCoefficient { get; set; }
         public StochLocomotor StochLocomotor { get; set; } 
 
-        public int Cell_id { get; private set; }
-        public static int SafeCell_id = 0;
+        public int Cell_id { get; set; }
         public BigInteger Lineage_id { get; set; }
         public int Population_id { get; set; }
         protected int[] gridIndex = { -1, -1, -1 };
