@@ -1149,14 +1149,12 @@ namespace Daphne
         public override Dictionary<int, FounderInfo> ProvideFounderCells()
         {
             Dictionary<int, FounderInfo> data = null;
+            data = new Dictionary<int, FounderInfo>();
 
             foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
-                // a founder cell needs these reporting files present; no need to look at reporting options, presence of files is sufficient in this case
-                if (tsFiles.CellTypeReport.ContainsKey(cp.cellpopulation_id) == true &&
-                    tsFiles.CellTypeDivision.ContainsKey(cp.cellpopulation_id) == true &&
-                    tsFiles.CellTypeDeath.ContainsKey(cp.cellpopulation_id) == true &&
-                    tsFiles.CellTypeExit.ContainsKey(cp.cellpopulation_id) == true)
+                // a founder cell needs the division reporting file present; no need to look at reporting options, presence of file is sufficient in this case
+                if (tsFiles.CellTypeDivision.ContainsKey(cp.cellpopulation_id) == true)
                 {
                     string file = tsFiles.CellTypeReport[cp.cellpopulation_id],
                            path = hSim.HDF5FileHandle.FilePath,
@@ -1189,7 +1187,7 @@ namespace Daphne
                             assigned++;
                         }
                     }
-                    data = new Dictionary<int, FounderInfo>();
+                    
                     while ((line = stream.ReadLine()) != null)
                     {
                         parts = line.Split('\t');
@@ -1298,116 +1296,124 @@ namespace Daphne
                 }
             }
 
-            // process deaths
             int lineage_id = 0;
-
-            file = tsFiles.CellTypeDeath[founder.Population_Id];
-            total = 2;
-            assigned = 0;
-            stream = new StreamReader(path + file);
-
-            // read description
-            stream.ReadLine();
-            // read header
-            line = stream.ReadLine();
-            // find indices of interest
-            parts = line.Split();
-            for (int i = 0; i < parts.Length && assigned < total; i++)
-            {
-                if (parts[i] == "time")
-                {
-                    time = i;
-                    assigned++;
-                }
-                else if (parts[i] == "lineage_id")
-                {
-                    lineage_id = i;
-                    assigned++;
-                }
-            }
-
             List<DeathExitContainer> deathExitList = new List<DeathExitContainer>();
             DeathExitContainer deathExit;
 
-            // gather the death events first to sort them before usage
-            while ((line = stream.ReadLine()) != null)
+            // process deaths
+            if (tsFiles.CellTypeDeath.ContainsKey(founder.Population_Id))
             {
-                parts = line.Split('\t');
-                deathExit = new DeathExitContainer();
-                deathExit.time = Convert.ToDouble(parts[time]);
-                deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
-                deathExitList.Add(deathExit);
-            }
-            stream.Close();
-            // sort by time
-            deathExitList = deathExitList.OrderBy(o => o.time).ToList();
+                file = tsFiles.CellTypeDeath[founder.Population_Id];
+                total = 2;
+                assigned = 0;
+                stream = new StreamReader(path + file);
 
-            // update existing GenealogyInfo objects
-            foreach(DeathExitContainer dec in deathExitList)
-            {
-                // an entry for this cell must exist
-                if (data.ContainsKey(dec.lineage) == true)
+                // read description
+                stream.ReadLine();
+                // read header
+                line = stream.ReadLine();
+                // find indices of interest
+                parts = line.Split();
+                for (int i = 0; i < parts.Length && assigned < total; i++)
                 {
-                    GenealogyInfo entry = data[dec.lineage];
+                    if (parts[i] == "time")
+                    {
+                        time = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "lineage_id")
+                    {
+                        lineage_id = i;
+                        assigned++;
+                    }
+                }
 
-                    // update the existing cell
-                    entry.EventType = GenealogyInfo.GI_DIE;
-                    entry.EventTime = dec.time;
+                //List<DeathExitContainer> deathExitList = new List<DeathExitContainer>();
+                //DeathExitContainer deathExit;
+
+                // gather the death events first to sort them before usage
+                while ((line = stream.ReadLine()) != null)
+                {
+                    parts = line.Split('\t');
+                    deathExit = new DeathExitContainer();
+                    deathExit.time = Convert.ToDouble(parts[time]);
+                    deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
+                    deathExitList.Add(deathExit);
+                }
+                stream.Close();
+                // sort by time
+                deathExitList = deathExitList.OrderBy(o => o.time).ToList();
+
+                // update existing GenealogyInfo objects
+                foreach (DeathExitContainer dec in deathExitList)
+                {
+                    // an entry for this cell must exist
+                    if (data.ContainsKey(dec.lineage) == true)
+                    {
+                        GenealogyInfo entry = data[dec.lineage];
+
+                        // update the existing cell
+                        entry.EventType = GenealogyInfo.GI_DIE;
+                        entry.EventTime = dec.time;
+                    }
                 }
             }
 
             // process exits
-            file = tsFiles.CellTypeExit[founder.Population_Id];
-            total = 2;
-            assigned = 0;
-            stream = new StreamReader(path + file);
-
-            // read description
-            stream.ReadLine();
-            // read header
-            line = stream.ReadLine();
-            // find indices of interest
-            parts = line.Split();
-            for (int i = 0; i < parts.Length && assigned < total; i++)
+            if (tsFiles.CellTypeExit.ContainsKey(founder.Population_Id))
             {
-                if (parts[i] == "time")
+                file = tsFiles.CellTypeExit[founder.Population_Id];
+                total = 2;
+                assigned = 0;
+                stream = new StreamReader(path + file);
+
+                // read description
+                stream.ReadLine();
+                // read header
+                line = stream.ReadLine();
+                // find indices of interest
+                parts = line.Split();
+                for (int i = 0; i < parts.Length && assigned < total; i++)
                 {
-                    time = i;
-                    assigned++;
+                    if (parts[i] == "time")
+                    {
+                        time = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "lineage_id")
+                    {
+                        lineage_id = i;
+                        assigned++;
+                    }
                 }
-                else if (parts[i] == "lineage_id")
+
+                deathExitList.Clear();
+
+                // gather the exit events first to sort them before usage
+                while ((line = stream.ReadLine()) != null)
                 {
-                    lineage_id = i;
-                    assigned++;
+                    parts = line.Split('\t');
+                    deathExit = new DeathExitContainer();
+                    deathExit.time = Convert.ToDouble(parts[time]);
+                    deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
+                    deathExitList.Add(deathExit);
                 }
-            }
+                stream.Close();
+                // sort by time
+                deathExitList = deathExitList.OrderBy(o => o.time).ToList();
 
-            deathExitList.Clear();
-
-            // gather the exit events first to sort them before usage
-            while ((line = stream.ReadLine()) != null)
-            {
-                parts = line.Split('\t');
-                deathExit = new DeathExitContainer();
-                deathExit.time = Convert.ToDouble(parts[time]);
-                deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
-                deathExitList.Add(deathExit);
-            }
-            stream.Close();
-            // sort by time
-            deathExitList = deathExitList.OrderBy(o => o.time).ToList();
-
-            // update existing GenealogyInfo objects
-            foreach(DeathExitContainer dec in deathExitList)
-            {
-                // an entry for this cell must exist
-                if (data.ContainsKey(dec.lineage) == true)
+                // update existing GenealogyInfo objects
+                foreach (DeathExitContainer dec in deathExitList)
                 {
-                    GenealogyInfo entry = data[dec.lineage];
+                    // an entry for this cell must exist
+                    if (data.ContainsKey(dec.lineage) == true)
+                    {
+                        GenealogyInfo entry = data[dec.lineage];
 
-                    // update the existing cell
-                    entry.EventType = GenealogyInfo.GI_EXIT;
-                    entry.EventTime = dec.time;
+                        // update the existing cell
+                        entry.EventType = GenealogyInfo.GI_EXIT;
+                        entry.EventTime = dec.time;
+                    }
                 }
             }
 

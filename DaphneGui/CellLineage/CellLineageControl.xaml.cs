@@ -35,25 +35,7 @@ namespace DaphneGui.CellLineage
         public ObservableCollection<FounderInfo> FounderCells { get; set; }
         public ObservableCollection<FounderInfo> FounderCellsByCellPop { get; set; }
         public ObservableCollection<CellPopulation> FounderCellPops { get; set; }
-
-        //private ObservableCollection<CellPopulation> founderCellPops;
-        //public ObservableCollection<CellPopulation> FounderCellPops
-        //{
-        //    get
-        //    {
-        //        return founderCellPops;
-        //    }
-        //    set
-        //    {
-        //        founderCellPops = value;
-        //        OnPropertyChanged("FounderCellPops");
-        //    }
-        //}
-
-
-
         public TissueScenario ScenarioHandle {get;set;}
-        
 
         public CellLineageControl()
         {
@@ -132,9 +114,9 @@ namespace DaphneGui.CellLineage
                 ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             }
 
-            //Get the cell type and display it
-            string cell_type = ((CellPopulation)cellPopLBox.SelectedItem).Cell.CellName;
-            tbCellType.Text = cell_type;
+            ////Get the cell type and display it
+            //string cell_type = ((CellPopulation)cellPopLBox.SelectedItem).Cell.CellName;
+            //tbCellType.Text = cell_type;
 
             ////Get all the founder cells in the selected cell population and Add them to FounderCellsByCellPop which is bound to 2nd listbox
             //if (FounderCells.Count == 0)
@@ -188,10 +170,17 @@ namespace DaphneGui.CellLineage
         /// <param name="e"></param>
         private void LineageSciChart_Loaded(object sender, RoutedEventArgs e)
         {
+            //try
+            //{
+            actionsContainer.Dock(this.innerSplitter.DockSite, Direction.Bottom);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
+            
             //Set up surface tooltip
-
             tbLineageSurfaceTooltip.Text = "";
-
             tbLineageSurfaceTooltip.AppendText("To zoom in:");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Use the mouse wheel OR");
@@ -204,7 +193,7 @@ namespace DaphneGui.CellLineage
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Double click OR");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
-            tbLineageSurfaceTooltip.AppendText("    Use mouse wheel.");
+            tbLineageSurfaceTooltip.AppendText("    Use mouse wheel OR");
             tbLineageSurfaceTooltip.AppendText(Environment.NewLine);
             tbLineageSurfaceTooltip.AppendText("    Right-click.");
 
@@ -272,7 +261,7 @@ namespace DaphneGui.CellLineage
 
             PedigreeAnalysis pda = new PedigreeAnalysis();
             pda.SetReport(MainWindow.Sim.Reporter);
-            List<Series> s = pda.GetPedigreeTreeSeries(FounderCells[index]);
+            List<Series> s = pda.GetPedigreeTreeSeries(FounderCellsByCellPop[index]);
 
             if (s == null || s.Count == 0)
             {

@@ -94,9 +94,6 @@ namespace DaphneGui.CellPopDynamics
             else if (filename.EndsWith("tif"))
             {
                 mySciChart.ExportToTiff(filename);
-
-                BitmapSource b = mySciChart.ExportToBitmapSource();
-                
             }
         }
         
@@ -138,6 +135,7 @@ namespace DaphneGui.CellPopDynamics
 
         private void CellPopDynWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            //actionsToolWindow.Dock(this.actionsContainer, ActiproSoftware.Windows.Controls.Docking.Direction.Bottom);
             //To zoom in and out: \n  Use the mouse wheel\n or select a rectangular area.\n\nTo pan, right-click and drag.
             tbSurfaceTooltip.Text = "";
             tbSurfaceTooltip.AppendText("To zoom in:");

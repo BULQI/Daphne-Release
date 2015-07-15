@@ -227,12 +227,87 @@ namespace DaphneGui.CellPopDynamics
         {
             //First save image as bmp file    
             string tempFile = @"c:\temp\cellpopdyn.bmp";
+            string filePath = System.IO.Path.GetDirectoryName(tempFile) + @"\";
+            if (Directory.Exists(filePath) == false)
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
+            System.Windows.Media.Imaging.BitmapSource bmpSource = ExportToBitmapSource();
             ExportToFile(tempFile, ExportType.Bmp);
 
             //Start with the first bitmap by putting it into an Image object
-            Bitmap bitmap = (Bitmap)System.Drawing.Image.FromFile(tempFile);
-            bitmap.Save(outFile, ImageFormat.Tiff);
+            Bitmap bitmap1 = (Bitmap)System.Drawing.Image.FromFile(tempFile);
+
+            filePath = System.IO.Path.GetDirectoryName(outFile) + @"\";
+            if (Directory.Exists(filePath) == false)
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
+            bitmap1.Save(outFile, ImageFormat.Tiff);
+
+            Bitmap bitmap2 = BitmapFromSource(bmpSource);
+
+            try
+            {
+                //ExportToFile(outFile, ExportType.Bmp);      // tmap2.Save(outFile)
+                bitmap2.Save(outFile, ImageFormat.Tiff);
+            }
+            catch (System.ArgumentNullException ex1)
+            {
+                string msg = "Exception 1:  " + ex1.Message;
+                MessageBox.Show(msg);
+            }
+            catch (System.Runtime.InteropServices.ExternalException ex2)
+            {
+                string msg = "Exception 2:  " + ex2.Message;
+                MessageBox.Show(msg);
+            }
+            catch (Exception e)
+            {
+                string msg = "General exception: Memory bitmap save to tiff file failed.  ";
+                msg += e.Message;
+                MessageBox.Show(msg);
+            }
         }
+
+        private System.Drawing.Bitmap BitmapFromSource(System.Windows.Media.Imaging.BitmapSource bmpSource)
+        {
+            System.Drawing.Bitmap bitmap;
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                System.Windows.Media.Imaging.BitmapEncoder enc = new System.Windows.Media.Imaging.BmpBitmapEncoder();
+                enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmpSource));
+                enc.Save(outStream);
+                bitmap = new System.Drawing.Bitmap(outStream);
+            }
+            return bitmap;
+        }
+
+        //private System.Drawing.Bitmap BitmapFromMemoryStream(System.Windows.Media.Imaging.BitmapSource bmpSource)
+        //{
+        //    Bitmap bmp = Bitmap.FromStream
+        //    byte[] bitmapData = new byte[imageText.Length];
+        //    MemoryStream sBmp;
+        //    bitmapData = Convert.FromBase64String(imageText);
+        //    sBmp = new MemoryStream(bitmapData);
+        //    System.Drawing.Image img = Image.FromStream(sBmp);
+        //    img.Save(path);
+
+
+        //    System.Drawing.Bitmap bitmap;
+        //    using (MemoryStream outStream = new MemoryStream())
+        //    {
+        //        System.Windows.Media.Imaging.BitmapEncoder enc = new System.Windows.Media.Imaging.BmpBitmapEncoder();
+        //        enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmpSource));
+        //        enc.Save(outStream);
+        //        bitmap = new System.Drawing.Bitmap(outStream);
+        //    }
+        //    return bitmap;
+        //}
+
+
 
     }
 }

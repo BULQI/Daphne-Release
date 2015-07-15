@@ -7,12 +7,11 @@
              xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              Loaded="LineageSciChart_Loaded" 
-             mc:Ignorable="d" 
+              
              DataContext="."
-                    x:Name="lineageWindow"
+             x:Name="lineageWindow"
              >
 
-    <StackPanel x:Name="CellLineageStackPanel" Orientation="Vertical" >
         
         <!--DockPanel-->
         <DockPanel LastChildFill="True">
@@ -35,77 +34,74 @@
 
                 <docking:SplitContainer x:Name="lineageLeftRightSplitContainer" >
                     <!--Left side-->                    
-                    <!--<docking:SplitContainer Orientation="Vertical">-->
-                            <!-- Left-hand content container - Cell Lineage Options -->
-                        <docking:ToolWindowContainer x:Name="lineageToolWindowContainer" docking:DockSite.ControlSize="300,900"  AutomationProperties.AutomationId="LineageLeftTWContainer">
-                            <docking:ToolWindow Title="Cell Lineage Options" >
+                    <docking:SplitContainer x:Name="innerSplitter" Orientation="Vertical">
+                        <!-- Left-hand content container - Cell Lineage Options -->
+                        <docking:ToolWindowContainer x:Name="lineageToolWindowContainer" docking:DockSite.ControlSize="500,900" Width="500" AutomationProperties.AutomationId="LineageLeftTWContainer">
+                            <docking:ToolWindow Title="Cell Lineage Options" Height="852" >
                                 <StackPanel Orientation="Vertical">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <StackPanel>
                                             <!--this window's datacontext is 'this', i,e CellLineageControl -->
-                                            <TextBlock Margin="20,20" Text="Cell populations:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
+                                            <TextBlock Margin="20,0" Text="Cell populations and types" MaxWidth="300" HorizontalAlignment="Left" FontSize="14" />
 
-                                            <ListBox x:Name="cellPopsListBox" Margin="20,-2" 
+                                            <ListBox x:Name="cellPopsListBox" Margin="20,0" 
                                                      ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=OneWay}"
-                                                     SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" 
+                                                     SelectedIndex="0" Width="360" MaxWidth="400" HorizontalAlignment="Left" 
                                                      SelectionChanged="cellPopsListBox_SelectionChanged"
-                                                 
                                                      >
                                                 <ListBox.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding Path=cellpopulation_name}" />
+                                                        <StackPanel Orientation="Horizontal" >
+                                                            <TextBlock Text="{Binding Path=cellpopulation_name}" Width="100" HorizontalAlignment="Left" />
+                                                            <TextBlock Text="Cell type:  " Width="50" HorizontalAlignment="Left" />
+                                                            <TextBlock Text="{Binding Path=Cell.CellName}" Width="150" Margin="4,0" HorizontalAlignment="Right" />
+                                                        </StackPanel>
                                                     </DataTemplate>
                                                 </ListBox.ItemTemplate>
 
                                             </ListBox>
-                                            <TextBlock Margin="20,20" Text="Founder cells by lineage id:" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
-                                            <ListBox x:Name="founderCellsListBox" Margin="20,-2" 
+                                            <TextBlock Margin="20,20" Text="Founder cells by lineage id" MaxWidth="200" HorizontalAlignment="Left" FontSize="14" />
+                                            <ListBox x:Name="founderCellsListBox" Margin="20,2" 
                                                      SelectedIndex="0" Width="160" MaxWidth="200" HorizontalAlignment="Left" SelectionChanged="founderCellsListBox_SelectionChanged"
                                                      ItemsSource="{Binding Path=FounderCellsByCellPop, Mode=OneWay}"
                                                      DisplayMemberPath="Lineage_Id">
                                             </ListBox>
 
-                                            <StackPanel Margin="20,20">
+                                            <!--<StackPanel Margin="20,20" Visibility="Hidden">
                                                 <StackPanel Orientation="Horizontal" Margin="20">
-                                                    <TextBlock>Cell type:</TextBlock>
-                                                    <TextBox x:Name="tbCellType" Width="200" IsReadOnly="True"></TextBox>
+                                                    <TextBlock Width="200">Cell type:</TextBlock>
+                                                    <TextBox Width="200" IsReadOnly="True"></TextBox>
                                                 </StackPanel>
-                                            </StackPanel>
+                                            </StackPanel>-->
 
                                         </StackPanel>
                                     </ScrollViewer>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                        <WrapPanel Orientation="Horizontal">
-                                            <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
-                                            <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
-                                        </WrapPanel>
-                                    </ScrollViewer>
+                                    
                                 </StackPanel>
 
                             </docking:ToolWindow>
                         </docking:ToolWindowContainer>
 
-                            <!--command buttons-->
-                            <!--<docking:ToolWindowContainer >
-                                <docking:ToolWindow Title="Cell lineage actions" Height="50" >
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                        <WrapPanel Orientation="Horizontal">
-                                            <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
-                                            <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
-                                        </WrapPanel>
-                                    </ScrollViewer>
-                                </docking:ToolWindow>
-                            </docking:ToolWindowContainer>-->
-
-                    <!--</docking:SplitContainer>-->
+                        <!--command buttons-->
+                        <docking:ToolWindowContainer MinHeight="48" Height="48" x:Name="actionsContainer" DockPanel.Dock="Bottom" >
+                            <docking:ToolWindow Title="Cell Lineage Actions" Width="400" VerticalContentAlignment="Center" 
+                                                x:Name="actionsToolWindow" HorizontalContentAlignment="Center"
+                                                >
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                                    <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2,0">
+                                        <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
+                                        <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
+                                    </WrapPanel>
+                                </ScrollViewer>
+                            </docking:ToolWindow>
+                        </docking:ToolWindowContainer>
+                    </docking:SplitContainer>
 
                     <!--Right side-->
-                    <docking:ToolWindowContainer AutomationProperties.AutomationId="LineageTWContainer" >
+                    <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" >
                         <docking:ToolWindow Title="Graph" >
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
-
                                 <Grid SciChart:ThemeManager.Theme="BrightSpark">
-
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
                                         <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
 
@@ -171,6 +167,5 @@
             </docking:DockSite>
         </DockPanel>
 
-    </StackPanel>
     
 </local:ToolWinBase>
