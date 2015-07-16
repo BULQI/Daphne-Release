@@ -138,6 +138,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Reference Include="MathNet.Numerics, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
       <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -152,9 +155,13 @@
     <ClInclude Include="Nt_Compartment.h" />
     <ClInclude Include="Nt_Darray.h" />
     <ClInclude Include="Nt_Gene.h" />
+    <ClInclude Include="Nt_Interpolation.h" />
+    <ClInclude Include="Nt_Manifolds.h" />
+    <ClInclude Include="Nt_ManifoldUtilities.h" />
     <ClInclude Include="Nt_MolecularPopulation.h" />
     <ClInclude Include="Nt_NormalDist.h" />
     <ClInclude Include="Nt_Reaction.h" />
+    <ClInclude Include="Nt_Scalarfield.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
@@ -163,9 +170,12 @@
     <ClCompile Include="Nt_Cell.cpp" />
     <ClCompile Include="Nt_CellPopulation.cpp" />
     <ClCompile Include="Nt_Darray.cpp" />
+    <ClCompile Include="Nt_Interpolation.cpp" />
+    <ClCompile Include="Nt_Manifolds.cpp" />
     <ClCompile Include="Nt_MolecularPopulation.cpp" />
     <ClCompile Include="Nt_NormalDist.cpp" />
     <ClCompile Include="Nt_Reaction.cpp" />
+    <ClCompile Include="Nt_Scalarfield.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

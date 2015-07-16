@@ -138,7 +138,8 @@ namespace Daphne
             BulkReactions.Add(r);
             if (r as Nt_Reaction != null)
             {
-                baseComp.NtBulkReactions.Add(r as Nt_Reaction);
+                baseComp.AddBulkReaction(r as Nt_Reaction);
+                //baseComp.NtBulkReactions.Add(r as Nt_Reaction);
             }
         }
 

@@ -1,18 +1,31 @@
 #include "stdafx.h"
 #include <stdlib.h>
 #include <malloc.h>
-
 #include "NtUtility.h"
-//#include "Nt_CellManager.h"
 #include "Nt_CellPopulation.h"
 
 #include <vcclr.h>
 
+using namespace std;
 using namespace System;
 using namespace System::Collections::Generic;
+using namespace NativeDaphneLibrary;
 
 namespace NativeDaphne
 {
+
+	void Nt_CellPopulation::initialize()
+	{
+		array<double> ^extent = Nt_CellManager::EnvironmentExtent;
+		for (int i=0; i< 3; i++)
+		{
+			ECSExtentLimit[i] = extent[i] - radius;
+		}
+		Cytosol->initialize();
+		PlasmaMembrane->initialize();	
+		initialized = true;
+	}
+
 	void Nt_CellPopulation::step(double dt)
 		{
 			if (!initialized)initialize();
@@ -23,53 +36,23 @@ namespace NativeDaphne
 
 			if (!isMotile || ComponentCells->Count == 0)return;
 
-					//handle boudnaryForce - only cells that are close to boudnary needs this.
+			//handle boudnaryForce - only cells that are close to boudnary needs this.
 			if (Nt_CellManager::boundaryForceFlag == true)
 			{
-				array<double> ^extent = Nt_CellManager::EnvironmentExtent;
-				double radius_inverse = 1.0/radius;
-				double PairPhi1 = Nt_CellManager::PairPhi1;
-				double dist = 0;
-				for (int i=0; i< array_length; i++)
-				{
-					//check left boundary
-					if (_X[i] < radius)
-					{
-						if (_X[i] == 0)continue;
-						_F[i] += PairPhi1 *(1.0/_X[i] - radius_inverse); //1.0/radius
-					}
-					//check right boundary
-					else if ( (dist= extent[i%3] - _X[i]) < radius)
-					{
-						//normal would be (-1) for the right bound!
-						_F[i] -= PairPhi1 *(1.0/dist - radius_inverse);
-					}
-				}
+				NtUtility::apply_boundary_force(array_length, _X, ECSExtentLimit, radius, Nt_CellManager::PairPhi1, _F);
 			}
 
 			//handle chemotaxis
 			if (this->isChemotactic)
 			{
-				int n = 0;
-				double *gradient = _driver_gradient;
-				for (int i=0; i < ComponentCells->Count; i++)
-				{
-					//copy gradient (the last 3 elements) of DriverConc
-					double *src = ComponentCells[i]->Driver->NativePointer + 1;
-					*gradient++ = *src++;
-					*gradient++ = *src++;
-					*gradient++ = *src++;
-				}
+				double *driverConc = ComponentCells[0]->Driver->NativePointer;
 				if (TransductionConstant != -1)
 				{
-					daxpy(array_length, TransductionConstant, _driver_gradient, 1, _F, 1);
+					NtUtility::daxpy3_skip1(array_length, TransductionConstant, driverConc, _F);
 				}
 				else 
 				{
-					for (int i=0; i < array_length; i++)
-					{
-						_F[i] += _driver_gradient[i] * _TransductionConstant[i];
-					}
+					NtUtility::dxypz3_skip1(array_length, driverConc, _TransductionConstant, _F);
 				}
 			}
 

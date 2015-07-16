@@ -373,6 +373,10 @@ namespace NativeDaphne
 			rset->RemoveReactions(reaction_index);
 		}
 
+		virtual void AddBulkReaction(Nt_Reaction ^rxn)
+		{
+			NtBulkReactions->Add(rxn);
+		}
 
 		//set up native data structure for molecular population and reactions.
 		void initialize()
@@ -557,18 +561,11 @@ namespace NativeDaphne
 			initialized = false;
 		}
 
-		void AddReaction(Nt_Reaction ^rxn)
+		virtual void AddBulkReaction(Nt_Reaction ^rxn) override
 		{
-			throw gcnew Exception("wrong place");
-			/*
-			int cellpop_id = rxn->boundaryId;
-			if (boundaryReactions->ContainsKey(cellpop_id) == false)
-			{
-				Nt_ReactionSet^ rset = gcnew Nt_ReactionSet();
-				boundaryReactions->Add(cellpop_id, rset);
-			}
-			boundaryReactions[cellpop_id]->AddReaction(rxn);*/
+			NtBulkReactions->Add(rxn->CloneParent());
 		}
+
 
 		void initialize()
 		{

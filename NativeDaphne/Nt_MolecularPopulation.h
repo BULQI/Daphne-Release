@@ -5,11 +5,14 @@
 #include "NtUtility.h"
 #include "Nt_NormalDist.h"
 #include "Nt_DArray.h"
+#include "Nt_Scalarfield.h"
+
 
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Security;
 using namespace NativeDaphneLibrary;
+using namespace Nt_ManifoldRing;
 
 namespace NativeDaphne 
 {
@@ -314,7 +317,11 @@ namespace NativeDaphne
 		{
 			int get()
 			{
-				return array_length;
+				if (ComponentPopulations != nullptr)
+				{
+					return array_length;
+				}
+				return molpopConc->Length;
 			}
 		}
 		

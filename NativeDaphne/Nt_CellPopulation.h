@@ -80,7 +80,8 @@ namespace NativeDaphne
 			_V = NULL;
 			_F = NULL;
 			_random_samples = NULL;
-			_driver_gradient = NULL;
+
+			ECSExtentLimit = (double *)malloc(3 *sizeof(double));
 		}
 
 		~Nt_CellPopulation(void)
@@ -93,7 +94,7 @@ namespace NativeDaphne
 			if (allocedItemCount > 0)
 			{
 				free(_random_samples);
-				free(_driver_gradient);
+//				free(_driver_gradient);
 				free(_X);
 				free(_V);
 				free(_F);
@@ -101,6 +102,7 @@ namespace NativeDaphne
 				free(_TransductionConstant);
 				free(_DragCoefficient);
 			}
+			free(ECSExtentLimit);
 		}
 				
 		void AddMolecularPopulation(bool isCytosol, Nt_MolecularPopulation^ molpop)
@@ -141,7 +143,7 @@ namespace NativeDaphne
 					allocedItemCount = NtUtility::GetAllocSize(itemCount+1, allocedItemCount);
 					int alloc_size = allocedItemCount * 3 * sizeof(double);
 					_random_samples = (double *)realloc(_random_samples, alloc_size);
-					_driver_gradient = (double *)realloc(_driver_gradient, alloc_size);
+//					_driver_gradient = (double *)realloc(_driver_gradient, alloc_size);
 					_X = (double *)realloc(_X, alloc_size);
 					_V = (double *)realloc(_V, alloc_size);
 					_F = (double *)realloc(_F, alloc_size);
@@ -347,20 +349,14 @@ namespace NativeDaphne
 
 		void step(double dt);
 		
-		void initialize()
-		{
-			Cytosol->initialize();
-			PlasmaMembrane->initialize();	
-			initialized = true;
-		}
+		void initialize();
 
 	private:
 
 
 		List<Nt_Cell^>^ ComponentCells;
 
-		double *_driver_gradient; //for chemotaxis
-		//double *_driverConc;
+		//double *_driver_gradient; //for chemotaxis
 		double *_random_samples; //for Stochasitic - random sampling data
 
 		//specialstate arrays
@@ -377,6 +373,8 @@ namespace NativeDaphne
 		double *_Sigma;
 		double *_TransductionConstant;
 		double *_DragCoefficient;
+
+		double *ECSExtentLimit;
 
 		int allocedItemCount;
 		int array_length;

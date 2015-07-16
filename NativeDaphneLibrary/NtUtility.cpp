@@ -34,4 +34,56 @@ namespace NativeDaphneLibrary
 		}
 		return 0;
 	}
+
+	int NtUtility::daxpy3_skip1(int n, double alpha, double *x, double *y)
+	{
+		double *ystop = y + n;
+		while (y != ystop)
+		{
+			x++;
+			*y++ += alpha * (*x++);
+			*y++ += alpha * (*x++);
+			*y++ += alpha * (*x++);
+		}
+		return 0;
+	}
+
+	int NtUtility::dxypz3_skip1(int n, double *x, double *y, double *z)
+	{
+		double *zstop = z + n;
+		while (z != zstop)
+		{
+			x++;
+			*z++ += (*x++) * (*y++);
+			*z++ += (*x++) * (*y++);
+			*z++ += (*x++) * (*y++);
+		}
+		return 0;
+	}
+
+	int NtUtility::apply_boundary_force(int n, double *_X, double *ECSExtentLimit, double radius, double PairPhi1, double *_F)
+	{
+		double *xstop = _X + n;
+		double radius_constant = PairPhi1 / radius;
+		double dist;
+		while (_X != xstop)
+		{
+			for (int i=0; i<3; i++, _X++, _F++)
+			{
+				if (*_X < radius && *_X != 0)
+				{
+					*_F += (PairPhi1 / (*_X) - radius_constant);
+				}
+				else if (*_X > ECSExtentLimit[i] && (dist = ECSExtentLimit[i] + radius - *_X) != 0)
+				{
+					*_F -= (PairPhi1/dist - radius_constant);
+				}
+			}
+		}
+		return 0;
+	}
+
+
+
+
 }

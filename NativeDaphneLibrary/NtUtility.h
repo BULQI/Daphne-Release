@@ -30,6 +30,16 @@ namespace NativeDaphneLibrary
 		static int NtMultiplyScalar(int n, int inc, double *x, double *y, double *z);
 
 
+		/* y = y +  a * x; 
+		  but for x, skip 1 and then do 3  a * x */
+		static int daxpy3_skip1(int n, double alpha, double *x, double *y);
+
+		/* z = z + x * y;  for x, skip 1 and then do 3 x * y */
+		static int dxypz3_skip1(int n, double *x, double *y, double *z);
+		
+
+		static int apply_boundary_force(int n, double *_x, double *ECSExtentLimit, double radius, double PairPhi1, double *_F);
+
 		//compute memory size to be allocted, given data size
 		//the memory doubles when not enough
 		static int GetAllocSize(int n, int curSize)

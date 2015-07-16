@@ -655,7 +655,7 @@ namespace ManifoldRing
             {
                 difference.array[i] = f1.array[i] - f2.array[i];
             }
-
+            
             return difference;
         }
 

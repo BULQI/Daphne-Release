@@ -48,6 +48,18 @@
     <ClInclude Include="Nt_CellManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Nt_Manifolds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nt_Scalarfield.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nt_Interpolation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nt_ManifoldUtilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -72,6 +84,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Nt_NormalDist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Nt_Manifolds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Nt_Scalarfield.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Nt_Interpolation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
