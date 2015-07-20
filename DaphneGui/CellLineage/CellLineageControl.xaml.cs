@@ -169,16 +169,7 @@ namespace DaphneGui.CellLineage
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void LineageSciChart_Loaded(object sender, RoutedEventArgs e)
-        {
-            //try
-            //{
-            actionsContainer.Dock(this.innerSplitter.DockSite, Direction.Bottom);
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.Message);
-            //}
-            
+        {            
             //Set up surface tooltip
             tbLineageSurfaceTooltip.Text = "";
             tbLineageSurfaceTooltip.AppendText("To zoom in:");

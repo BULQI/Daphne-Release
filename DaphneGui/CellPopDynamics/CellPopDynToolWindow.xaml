@@ -12,58 +12,65 @@
     >
     
     <!--DockPanel-->
-    <DockPanel LastChildFill="True">
-        <DockPanel.Resources>
-            <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="FontFamily" Value="Segoe UI"/>
-            </Style>
-        </DockPanel.Resources>
+    <!--<DockPanel LastChildFill="True">-->
+    
 
         <!-- DockSite -->
-        <docking:DockSite x:Name="dockSite"
+        <!--<docking:DockSite x:Name="dockSite"
                 CanDocumentWindowsRaft="True"
                 AreDocumentWindowsDestroyedOnClose="False"
                 UseHostedAutoHidePopups="False"
                 AutomationProperties.AutomationId="DaphneDockSite"
-                >
+                >-->
 
             <docking:SplitContainer x:Name="plotSplitContainer" >
 
-                <!-- Left-hand content container - GUI for plotting options -->
+        <docking:SplitContainer.Resources>
+                    <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
+                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="FontFamily" Value="Segoe UI"/>
+                    </Style>
+        </docking:SplitContainer.Resources>
+                
+                 <!-- Left-hand content container - GUI for plotting options -->
                 <!--Plot Options panel-->
-                <docking:SplitContainer Orientation="Vertical" x:Name="leftSplitter" >
                     <docking:ToolWindowContainer docking:DockSite.ControlSize="300,900" x:Name="plotToolWindowContainer" MaxHeight="1200" AutomationProperties.AutomationId="PlotLeftTWContainer">
                         <docking:ToolWindow Title="Plot Options">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel>
-                                    <!--this window's datacontext is Protocol.Scenario-->
-                                    <plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>
-                                </StackPanel>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Row="0">
+                                        <!--this window's datacontext is Protocol.Scenario-->
+                                        <plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>
+                                    </StackPanel>
+                                    
+                                    <!--Command Buttons Panel-->
+                                    <TextBox Background="#FFE0E0E0" BorderBrush="Black" BorderThickness="0" IsReadOnly="True" Text="  Actions" Height="24" Grid.Row="1"></TextBox>
+                                    <Border BorderBrush="Black" BorderThickness="0" Background="#FFE0E0E0" Grid.Row="2">
+                                        <WrapPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0" Grid.Row="3" >
+                                            <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
+                                            <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
+                                            <ComboBox x:Name="TimeUnitsComboBox" SelectionChanged="TimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
+                                                <ComboBoxItem>Minutes</ComboBoxItem>
+                                                <ComboBoxItem>Hours</ComboBoxItem>
+                                                <ComboBoxItem>Days</ComboBoxItem>
+                                                <ComboBoxItem>Weeks</ComboBoxItem>
+                                            </ComboBox>
+                                        </WrapPanel>
+                                    </Border>
+                                </Grid>
                             </ScrollViewer>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
-
-                    <!--Command Buttons panel-->
-                    <docking:ToolWindowContainer MinHeight="48" Height="48" x:Name="actionsContainer" DockPanel.Dock="Bottom">
-                        <docking:ToolWindow Title="Plot Actions" VerticalContentAlignment="Center" x:Name="actionsToolWindow" HorizontalContentAlignment="Center" >
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2,0">
-                                    <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
-                                    <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
-                                    <ComboBox x:Name="TimeUnitsComboBox" SelectionChanged="TimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
-                                        <ComboBoxItem>Minutes</ComboBoxItem>
-                                        <ComboBoxItem>Hours</ComboBoxItem>
-                                        <ComboBoxItem>Days</ComboBoxItem>
-                                        <ComboBoxItem>Weeks</ComboBoxItem>
-                                    </ComboBox>
-                                </WrapPanel>
-                            </ScrollViewer>
-                        </docking:ToolWindow>
-                    </docking:ToolWindowContainer>
-                </docking:SplitContainer>
-
                 
                 <!-- Right-hand content containers - Chart window -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="PlotRightTWContainer" >
@@ -135,6 +142,6 @@
                     </docking:ToolWindow>
                 </docking:ToolWindowContainer>
             </docking:SplitContainer>
-        </docking:DockSite>
-    </DockPanel>            
+        <!--</docking:DockSite>-->
+    <!--</DockPanel>-->            
 </local:ToolWinBase>

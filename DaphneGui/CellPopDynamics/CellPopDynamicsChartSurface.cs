@@ -158,10 +158,21 @@ namespace DaphneGui.CellPopDynamics
             }
         }
 
+       
         public void OutputToPDF(string filename)
         {
+            var source = this.ExportToBitmapSource();
+            Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
+                ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp1.UnlockBits(data);
+
+            //bmp1
+
             //First we create a file stream object representing the actual file and name it to whatever you want.
-            //(By using the method MapPath we target the folder we created earlier as this is a Web application)
+            //(By using the method MapPath we target the folder we created earlier)
 
             System.IO.FileStream fs = new FileStream(filename, FileMode.Create);
 
@@ -187,11 +198,11 @@ namespace DaphneGui.CellPopDynamics
             //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
 
             // Add meta information to the document
-            document.AddAuthor("Sanjeev Gupta");
-            document.AddCreator("Daphne PDF output");
+            document.AddAuthor  ("Sanjeev Gupta");
+            document.AddCreator ("Daphne PDF output");
             document.AddKeywords("PDF export daphne");
-            document.AddSubject("Document subject - Save the SciChart graph to a PDF document");
-            document.AddTitle("The document title - Daphne graph in PDF format");
+            document.AddSubject ("Document subject - Save the SciChart graph to a PDF document");
+            document.AddTitle   ("The document title - Daphne graph in PDF format");
 
             //Before we can write to the document, we need to open it.
             document.Open();
@@ -210,104 +221,112 @@ namespace DaphneGui.CellPopDynamics
             // Always close open filehandles explicity
             fs.Close();
 
-            //Other way
-            //To place the image you first set the position and then add the image to the content byte:
-            //PdfContentByte cb = writer.DirectContent;
-            //iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(Server.MapPath("img.png"));
-            //img.SetAbsolutePosition(50, 647);
-            //cb.AddImage(img);
+        }
 
-            ////You can scale the size using the ScaleAbsolute or ScalePercent methods like this:
 
-            //img.ScaleAbsolute(216, 70);
-            //img.ScalePercent(50);
+        /// <summary>
+        /// This method tries to output a PDF file without first outputting a .bmp file.
+        /// It does not work yet.
+        /// </summary>
+        /// <param name="filename"></param>
+        public void OutputToPDF2(string filename)
+        {
+            //Export this graph to BitmapSource
+            var source = this.ExportToBitmapSource();
+
+            //Then retrieve from BitmapSource into a Bitmap object
+            Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
+            ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp1.UnlockBits(data);
+
+            //Convert the bitmap into a byte array by writing to memory instead of disk
+            byte[] bmpArray = BitmapToByte(bmp1);
+
+            //Now we have a bitmap to save to .PDF file instead of saving the graph as a .bmp file first
+
+            //Create an image from bitmap array
+            iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(bmpArray);
+
+            //Save to memory stream
+            MemoryStream stream = new MemoryStream();
+            bmp1.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+
+
+            // Create an instance of the document class which represents the PDF document itself.
+            iTextSharp.text.Rectangle rect = new iTextSharp.text.Rectangle(img.Width, img.Height);
+            Document document = new Document(rect, 25, 25, 20, 20);     //new Document(PageSize.A4, 25, 25, 30, 30);
+
+            // Create an instance to the PDF file by creating an instance of the PDF
+            // Writer class using the document and the memory stream in the constructor.
+            PdfWriter writer = PdfWriter.GetInstance(document, stream);               //(document, fs);
+
+            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
+            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
+
+            // Add meta information to the document
+            document.AddAuthor("Sanjeev Gupta");
+            document.AddCreator("Daphne PDF output");
+            document.AddKeywords("PDF export daphne");
+            document.AddSubject("Document subject - Save the SciChart graph to a PDF document");
+            document.AddTitle("The document title - Daphne graph in PDF format");
+
+            try
+            {
+                //Before we can write to the document, we need to open it.
+                document.Open();
+
+                // Add a simple and wellknown phrase to the document in a flow layout manner
+                //document.Add(new iTextSharp.text.Paragraph("Hello World!"));
+
+                document.Add(img);
+
+                // Close the document
+                document.Close();
+
+                // Close the writer instance
+                writer.Close();
+
+                // Close the stream
+                stream.Close();
+            }
+            catch (Exception ee)
+            {
+                MessageBox.Show(ee.Message);
+            }
+
+
+        }
+
+        /// <summary>
+        /// This method converts a bitmap to a byte array
+        /// </summary>
+        /// <param name="bmp"></param>
+        /// <returns></returns>
+        public static byte[] BitmapToByte(Bitmap bmp)
+        {
+            byte[] byteArray = new byte[0];
+            using (MemoryStream stream = new MemoryStream())
+            {
+                bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                stream.Close();
+
+                byteArray = stream.ToArray();
+            }
+            return byteArray;
         }
 
         public void ExportToTiff(string outFile)
         {
-            //First save image as bmp file    
-            string tempFile = @"c:\temp\cellpopdyn.bmp";
-            string filePath = System.IO.Path.GetDirectoryName(tempFile) + @"\";
-            if (Directory.Exists(filePath) == false)
-            {
-                Directory.CreateDirectory(filePath);
-            }
-
-            System.Windows.Media.Imaging.BitmapSource bmpSource = ExportToBitmapSource();
-            ExportToFile(tempFile, ExportType.Bmp);
-
-            //Start with the first bitmap by putting it into an Image object
-            Bitmap bitmap1 = (Bitmap)System.Drawing.Image.FromFile(tempFile);
-
-            filePath = System.IO.Path.GetDirectoryName(outFile) + @"\";
-            if (Directory.Exists(filePath) == false)
-            {
-                Directory.CreateDirectory(filePath);
-            }
-
-            bitmap1.Save(outFile, ImageFormat.Tiff);
-
-            Bitmap bitmap2 = BitmapFromSource(bmpSource);
-
-            try
-            {
-                //ExportToFile(outFile, ExportType.Bmp);      // tmap2.Save(outFile)
-                bitmap2.Save(outFile, ImageFormat.Tiff);
-            }
-            catch (System.ArgumentNullException ex1)
-            {
-                string msg = "Exception 1:  " + ex1.Message;
-                MessageBox.Show(msg);
-            }
-            catch (System.Runtime.InteropServices.ExternalException ex2)
-            {
-                string msg = "Exception 2:  " + ex2.Message;
-                MessageBox.Show(msg);
-            }
-            catch (Exception e)
-            {
-                string msg = "General exception: Memory bitmap save to tiff file failed.  ";
-                msg += e.Message;
-                MessageBox.Show(msg);
-            }
+            var source = this.ExportToBitmapSource();
+            Bitmap bmp3 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp3.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp3.Size),
+                ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp3.UnlockBits(data);
+            bmp3.Save(outFile, ImageFormat.Tiff);
         }
-
-        private System.Drawing.Bitmap BitmapFromSource(System.Windows.Media.Imaging.BitmapSource bmpSource)
-        {
-            System.Drawing.Bitmap bitmap;
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                System.Windows.Media.Imaging.BitmapEncoder enc = new System.Windows.Media.Imaging.BmpBitmapEncoder();
-                enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmpSource));
-                enc.Save(outStream);
-                bitmap = new System.Drawing.Bitmap(outStream);
-            }
-            return bitmap;
-        }
-
-        //private System.Drawing.Bitmap BitmapFromMemoryStream(System.Windows.Media.Imaging.BitmapSource bmpSource)
-        //{
-        //    Bitmap bmp = Bitmap.FromStream
-        //    byte[] bitmapData = new byte[imageText.Length];
-        //    MemoryStream sBmp;
-        //    bitmapData = Convert.FromBase64String(imageText);
-        //    sBmp = new MemoryStream(bitmapData);
-        //    System.Drawing.Image img = Image.FromStream(sBmp);
-        //    img.Save(path);
-
-
-        //    System.Drawing.Bitmap bitmap;
-        //    using (MemoryStream outStream = new MemoryStream())
-        //    {
-        //        System.Windows.Media.Imaging.BitmapEncoder enc = new System.Windows.Media.Imaging.BmpBitmapEncoder();
-        //        enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmpSource));
-        //        enc.Save(outStream);
-        //        bitmap = new System.Drawing.Bitmap(outStream);
-        //    }
-        //    return bitmap;
-        //}
-
-
-
     }
 }
