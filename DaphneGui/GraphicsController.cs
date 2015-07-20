@@ -1571,6 +1571,7 @@ namespace DaphneGui
 
             tb.Text += "Cell Name: " + cellName;
             tb.Text += "\nCell ID: " + cellID.ToString();
+            tb.Text += "\nLineage ID: " + cell.Lineage_id.ToString();
             if (cell.Differentiator.nStates > 0)
             {
                 string diffstate = pop.Cell.diff_scheme.Driver.states[cell.DifferentiationState];
