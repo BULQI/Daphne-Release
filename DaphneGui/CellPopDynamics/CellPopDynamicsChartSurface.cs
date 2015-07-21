@@ -22,7 +22,7 @@ namespace DaphneGui.CellPopDynamics
     /// <summary>
     /// Chart surface class derived from SciChartSurface
     /// </summary>
-    class CellPopDynamicsChartSurface : SciChartSurface
+    class CellPopDynamicsChartSurface : CellPopChartSurface
     {
         //x axis default units are minutes 
         // For minutes, xScale = 1.0;
@@ -156,148 +156,51 @@ namespace DaphneGui.CellPopDynamics
                     RenderableSeries.Add(flrs);
                 }
             }
-        }
-
-       
-        public void OutputToPDF(string filename)
-        {
-            var source = this.ExportToBitmapSource();
-            Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
-                ImageLockMode.WriteOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-            bmp1.UnlockBits(data);
-
-            //bmp1
-
-            //First we create a file stream object representing the actual file and name it to whatever you want.
-            //(By using the method MapPath we target the folder we created earlier)
-
-            System.IO.FileStream fs = new FileStream(filename, FileMode.Create);
-
-            //To create a PDF document, create an instance of the class Document and pass the page size and the page margins to the constructor. 
-            //Then use that object and the file stream to create the PdfWriter instance enabling us to output text and other elements to the PDF file.
-
-            //First save image as bmp file    
-            string tempFile = @"c:\temp\cellpopdyn.bmp";
-            ExportToFile(tempFile, ExportType.Bmp);
-
-            //Get image
-            iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(tempFile);
-
-            // Create an instance of the document class which represents the PDF document itself.
-            iTextSharp.text.Rectangle rect = new iTextSharp.text.Rectangle(img.Width, img.Height);
-            Document document = new Document(rect, 25, 25, 20, 20);     //new Document(PageSize.A4, 25, 25, 30, 30);
-
-            // Create an instance to the PDF file by creating an instance of the PDF
-            // Writer class using the document and the filestrem in the constructor.
-            PdfWriter writer = PdfWriter.GetInstance(document, fs);
-
-            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
-            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
-
-            // Add meta information to the document
-            document.AddAuthor  ("Sanjeev Gupta");
-            document.AddCreator ("Daphne PDF output");
-            document.AddKeywords("PDF export daphne");
-            document.AddSubject ("Document subject - Save the SciChart graph to a PDF document");
-            document.AddTitle   ("The document title - Daphne graph in PDF format");
-
-            //Before we can write to the document, we need to open it.
-            document.Open();
-
-            // Add a simple and wellknown phrase to the document in a flow layout manner
-            //document.Add(new iTextSharp.text.Paragraph("Hello World!"));
-
-            document.Add(img);
-
-            // Close the document
-            document.Close();
-
-            // Close the writer instance
-            writer.Close();
-
-            // Always close open filehandles explicity
-            fs.Close();
-
-        }
-
+        }       
 
         /// <summary>
-        /// This method tries to output a PDF file without first outputting a .bmp file.
-        /// It does not work yet.
+        /// This method outputs a PDF file without first outputting a .bmp file.
         /// </summary>
         /// <param name="filename"></param>
-        public void OutputToPDF2(string filename)
-        {
-            //Export this graph to BitmapSource
-            var source = this.ExportToBitmapSource();
+        //public void OutputToPDF2(string filename)
+        //{
+        //    //Export this graph to BitmapSource
+        //    var source = this.ExportToBitmapSource();
 
-            //Then retrieve from BitmapSource into a Bitmap object
-            Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
-            ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-            bmp1.UnlockBits(data);
+        //    //Then retrieve from BitmapSource into a Bitmap object
+        //    Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        //    BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
+        //    ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        //    source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+        //    bmp1.UnlockBits(data);
 
-            //Convert the bitmap into a byte array by writing to memory instead of disk
-            byte[] bmpArray = BitmapToByte(bmp1);
+        //    //Now we have a bitmap. Convert the bitmap into a byte array by writing to memory instead of disk.
+        //    //byte[] bmpArray = BitmapToByte(bmp1);
 
-            //Now we have a bitmap to save to .PDF file instead of saving the graph as a .bmp file first
+        //    //Now we have a bitmap to save to .PDF file instead of saving the graph as a .bmp file first
 
-            //Create an image from bitmap array
-            iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(bmpArray);
+        //    //Create an image from bitmap array
+        //    //iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(bmpArray);
 
-            //Save to memory stream
-            MemoryStream stream = new MemoryStream();
-            bmp1.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+        //    //-------------------------------------------------
+        //    System.Drawing.Image image = bmp1;  
+        //    Document doc = new Document(PageSize.A4);
+        //    PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
+        //    doc.Open();
+        //    iTextSharp.text.Image pdfImage = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Jpeg);
+        //    doc.Add(pdfImage);
+        //    //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
+        //    //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
+        //    // Add meta information to the document
+        //    doc.AddAuthor("Sanjeev Gupta");
+        //    doc.AddCreator("Daphne PDF output");
+        //    doc.AddKeywords("PDF export daphne");
+        //    doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
+        //    doc.AddTitle("The document title - Daphne graph in PDF format");
+        //    doc.Close();
+        //    //------------------------------------------------------------------------------------------
 
-
-            // Create an instance of the document class which represents the PDF document itself.
-            iTextSharp.text.Rectangle rect = new iTextSharp.text.Rectangle(img.Width, img.Height);
-            Document document = new Document(rect, 25, 25, 20, 20);     //new Document(PageSize.A4, 25, 25, 30, 30);
-
-            // Create an instance to the PDF file by creating an instance of the PDF
-            // Writer class using the document and the memory stream in the constructor.
-            PdfWriter writer = PdfWriter.GetInstance(document, stream);               //(document, fs);
-
-            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
-            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
-
-            // Add meta information to the document
-            document.AddAuthor("Sanjeev Gupta");
-            document.AddCreator("Daphne PDF output");
-            document.AddKeywords("PDF export daphne");
-            document.AddSubject("Document subject - Save the SciChart graph to a PDF document");
-            document.AddTitle("The document title - Daphne graph in PDF format");
-
-            try
-            {
-                //Before we can write to the document, we need to open it.
-                document.Open();
-
-                // Add a simple and wellknown phrase to the document in a flow layout manner
-                //document.Add(new iTextSharp.text.Paragraph("Hello World!"));
-
-                document.Add(img);
-
-                // Close the document
-                document.Close();
-
-                // Close the writer instance
-                writer.Close();
-
-                // Close the stream
-                stream.Close();
-            }
-            catch (Exception ee)
-            {
-                MessageBox.Show(ee.Message);
-            }
-
-
-        }
+        //}
 
         /// <summary>
         /// This method converts a bitmap to a byte array
@@ -317,16 +220,16 @@ namespace DaphneGui.CellPopDynamics
             return byteArray;
         }
 
-        public void ExportToTiff(string outFile)
-        {
-            var source = this.ExportToBitmapSource();
-            Bitmap bmp3 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp3.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp3.Size),
-                ImageLockMode.WriteOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-            bmp3.UnlockBits(data);
-            bmp3.Save(outFile, ImageFormat.Tiff);
-        }
+        //public void ExportToTiff(string outFile)
+        //{
+        //    var source = this.ExportToBitmapSource();
+        //    Bitmap bmp3 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        //    BitmapData data = bmp3.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp3.Size),
+        //        ImageLockMode.WriteOnly,
+        //        System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        //    source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+        //    bmp3.UnlockBits(data);
+        //    bmp3.Save(outFile, ImageFormat.Tiff);
+        //}
     }
 }

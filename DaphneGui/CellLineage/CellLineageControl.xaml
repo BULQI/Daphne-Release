@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DaphneGui"
+              xmlns:lin="clr-namespace:DaphneGui.CellLineage"
              xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              Loaded="LineageSciChart_Loaded"               
@@ -60,7 +61,7 @@
                                 <StackPanel Margin="0,10">
                                     <TextBlock Text="Founder cells by lineage id" HorizontalAlignment="Left" FontSize="14" />
                                     <ListBox x:Name="founderCellsListBox" 
-                                        SelectedIndex="0" Width="160" HorizontalAlignment="Left" SelectionChanged="founderCellsListBox_SelectionChanged"
+                                        SelectedIndex="0" Width="160" HorizontalAlignment="Left" 
                                         ItemsSource="{Binding Path=FounderCellsByCellPop, Mode=OneWay}"
                                         DisplayMemberPath="Lineage_Id">
                                     </ListBox>
@@ -88,7 +89,8 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                 <Grid SciChart:ThemeManager.Theme="BrightSpark">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                        <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
+                            <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
+                            <!--<CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >-->
 
                             <!--Tooltip-->
                             <SciChart:SciChartSurface.ToolTip>

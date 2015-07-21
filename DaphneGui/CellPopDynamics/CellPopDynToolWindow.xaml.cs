@@ -70,7 +70,6 @@ namespace DaphneGui.CellPopDynamics
             else if (filename.EndsWith("bmp"))
             {
                 mySciChart.ExportToFile(filename, ExportType.Bmp);
-                //mySciChart.ExportToBitmapSource
             }
             else if (filename.EndsWith("jpg"))
             {
@@ -78,18 +77,7 @@ namespace DaphneGui.CellPopDynamics
             }
             else if (filename.EndsWith("pdf"))
             {
-                mySciChart.OutputToPDF(filename);
-
-                //var dialog = new PrintDialog();
-                //if (dialog.ShowDialog() == true)
-                //{
-                //    var size = new Size(dialog.PrintableAreaWidth, dialog.PrintableAreaWidth * 3 / 4);
-                //    var scs = CreateSciChartSurfaceWithoutShowingIt();
-
-                //    // And print. This works particularly well to XPS!
-                //    Action printAction = () => dialog.PrintVisual(scs, "Exported");
-                //    Dispatcher.BeginInvoke(printAction);
-                //}
+                mySciChart.OutputToPDF(filename);                
             }
             else if (filename.EndsWith("tif"))
             {

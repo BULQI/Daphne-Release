@@ -24,6 +24,12 @@ using Daphne;
 using System.Numerics;
 using System.Collections.ObjectModel;
 using System.Windows.Forms.DataVisualization.Charting;
+using Abt.Controls.SciChart.Visuals;
+using System.Drawing;
+using System.Drawing.Imaging;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.IO;
 
 namespace DaphneGui.CellLineage
 {
@@ -131,38 +137,6 @@ namespace DaphneGui.CellLineage
 
         }
 
-        private void founderCellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //This code is only for displaying cell type
-            ////if (founderCellListBox.Items.Count == 0)
-            ////    return;
-            ////if (MainWindow.SOP == null)
-            ////    return;
-            ////if (MainWindow.SOP.Protocol == null)
-            ////    return;
-            ////if (MainWindow.SOP.Protocol.scenario == null)
-            ////    return;
-
-            ////if (ScenarioHandle == null)
-            ////{
-            ////    ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            ////}
-
-            ////if (ScenarioHandle == null)
-            ////    return;
-
-            ////if (founderCellListBox.SelectedIndex >= 0) 
-            ////{
-            ////    FounderInfo fi = founderCellListBox.SelectedItem as FounderInfo;
-            ////    if (ScenarioHandle.cellpopulation_dict.ContainsKey(fi.Population_Id) == true)
-            ////    {
-            ////        CellPopulation cp = ScenarioHandle.cellpopulation_dict[fi.Population_Id];
-            ////        string cell_type = cp.Cell.CellName;
-            ////        tbCellType.Text = cell_type;
-            ////    }
-            ////}
-        }
-        
         /// <summary>
         /// This gets called when chart is loaded. Tooltip is initialized here.
         /// </summary>
@@ -197,14 +171,14 @@ namespace DaphneGui.CellLineage
             ClearChart();
             LoadLineageData();
             //CreateFakeDataSeries();
-            Size size = new Size(600.0, 400.0);
+            System.Windows.Size size = new System.Windows.Size(600.0, 400.0);
             this.RenderSize = size;
             LineageSciChart.YAxis.Visibility = Visibility.Hidden;
             ourYAxis.StrokeThickness = 0;
-            ourYAxis.BorderBrush = Brushes.Transparent;
+            ourYAxis.BorderBrush = System.Windows.Media.Brushes.Transparent;
 
             //Hiding axes works well now - last thing was the surface's brush that needed to be hidden.
-            LineageSciChart.BorderBrush = Brushes.Transparent;
+            LineageSciChart.BorderBrush = System.Windows.Media.Brushes.Transparent;
             LineageSciChart.ZoomExtents();
         }
          
@@ -215,7 +189,98 @@ namespace DaphneGui.CellLineage
         /// <param name="e"></param>
         private void lineageExportButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Coming soon.");
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "Image"; // Default file name
+            dlg.DefaultExt = ".jpg"; // Default file extension
+            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
+
+            dlg.FilterIndex = 2;
+            dlg.RestoreDirectory = true;
+
+            // Show save file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process save file dialog box results
+            if (result == true)
+            {
+                // Save file
+                SaveToFile(dlg.FileName);
+            }
+        }
+
+        public void SaveToFile(string filename)
+        {
+            if (filename.EndsWith("png"))
+            {
+                LineageSciChart.ExportToFile(filename, ExportType.Png);
+            }
+            else if (filename.EndsWith("bmp"))
+            {
+                LineageSciChart.ExportToFile(filename, ExportType.Bmp);
+            }
+            else if (filename.EndsWith("jpg"))
+            {
+                LineageSciChart.ExportToFile(filename, ExportType.Jpeg);
+            }
+            else if (filename.EndsWith("pdf"))
+            {
+                OutputToPDF(LineageSciChart, filename);
+            }
+            else if (filename.EndsWith("tif"))
+            {
+                ExportToTiff(LineageSciChart, filename);
+            }
+        }
+
+        /// <summary>
+        /// This method outputs a PDF file without first outputting a .bmp file.
+        /// </summary>
+        /// <param name="filename"></param>
+        public void OutputToPDF(SciChartSurface surface, string filename)
+        {
+            //Export this graph to BitmapSource
+            var source = surface.ExportToBitmapSource();
+
+            //Then retrieve from BitmapSource into a Bitmap object
+            Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
+            ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp1.UnlockBits(data);
+
+            //-------------------------------------------------
+            System.Drawing.Image image = bmp1;
+            iTextSharp.text.Image pdfImage = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            Document doc = new Document(PageSize.A4);
+            PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
+            doc.Open();
+
+            doc.Add(pdfImage);
+            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
+            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
+            // Add meta information to the document
+            doc.AddAuthor("Sanjeev Gupta");
+            doc.AddCreator("Daphne PDF output");
+            doc.AddKeywords("PDF export daphne");
+            doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
+            doc.AddTitle("The document title - Daphne graph in PDF format");
+            doc.Close();
+            //------------------------------------------------------------------------------------------
+
+        }
+
+
+        public void ExportToTiff(SciChartSurface surface, string outFile)
+        {
+            var source = surface.ExportToBitmapSource();
+            Bitmap bmp3 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp3.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp3.Size),
+                ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp3.UnlockBits(data);
+            bmp3.Save(outFile, ImageFormat.Tiff);
         }
 
         /// <summary>
@@ -303,7 +368,7 @@ namespace DaphneGui.CellLineage
                 dataSeries.SeriesName = "";
                 EllipsePointMarker marker = new EllipsePointMarker();
                 marker.Height = 12; marker.Width = 12;
-                marker.Fill = new Color { A=255, R=148, G=249, B=146 };
+                marker.Fill = new System.Windows.Media.Color { A=255, R=148, G=249, B=146 };
                 marker.Stroke = Colors.Green;
                 marker.StrokeThickness = 1;
 
@@ -362,7 +427,7 @@ namespace DaphneGui.CellLineage
             LineageSciChart.ChartTitle = chartTitle;
             LineageSciChart.XAxis.AxisTitle = xTitle;
             LineageSciChart.YAxis.AxisTitle = yTitle;
-            LineageSciChart.BorderBrush = Brushes.Transparent;
+            LineageSciChart.BorderBrush = System.Windows.Media.Brushes.Transparent;
             LineageSciChart.ZoomExtents();
         }
 
