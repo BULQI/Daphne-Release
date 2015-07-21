@@ -124,6 +124,12 @@
     <Reference Include="HDF5DotNet">
       <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\dependencies\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.pdfa">
+      <HintPath>..\dependencies\itextsharp.pdfa.dll</HintPath>
+    </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
     </Reference>
@@ -201,6 +207,7 @@
     <Compile Include="CellHoverInfo.xaml.cs">
       <DependentUpon>CellHoverInfo.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellLineage\CellLineageChartSurface.cs" />
     <Compile Include="CellLineage\CellLineageControl.xaml.cs">
       <DependentUpon>CellLineageControl.xaml</DependentUpon>
     </Compile>
@@ -208,6 +215,7 @@
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellPopChartSurface.cs" />
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>

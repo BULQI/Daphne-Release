@@ -1571,7 +1571,10 @@ namespace DaphneGui
 
             tb.Text += "Cell Name: " + cellName;
             tb.Text += "\nCell ID: " + cellID.ToString();
-            tb.Text += "\nLineage ID: " + cell.Lineage_id.ToString();
+            if (cell.Divider.nStates > 0)
+            {
+                tb.Text += "\nLineage ID: " + cell.Lineage_id.ToString();
+            }
             if (cell.Differentiator.nStates > 0)
             {
                 string diffstate = pop.Cell.diff_scheme.Driver.states[cell.DifferentiationState];
@@ -1589,7 +1592,7 @@ namespace DaphneGui
             int Y = (int)cell.SpatialState.X[1];
             int Z = (int)cell.SpatialState.X[2];
 
-            tb.Text += string.Format("\n({0},{1},{2})", X, Y, Z);
+            tb.Text += string.Format("  ({0},{1},{2})", X, Y, Z);
 
         }
 

@@ -77,24 +77,19 @@ namespace DaphneGui.CellPopDynamics
             }
             else if (filename.EndsWith("pdf"))
             {
-                var dialog = new PrintDialog();
-                if (dialog.ShowDialog() == true)
-                {
-                    var size = new Size(dialog.PrintableAreaWidth, dialog.PrintableAreaWidth * 3 / 4);
-                    var scs = CreateSciChartSurfaceWithoutShowingIt();
-
-                    // And print. This works particularly well to XPS!
-                    Action printAction = () => dialog.PrintVisual(scs, "Exported");
-                    Dispatcher.BeginInvoke(printAction);
-                }
+                mySciChart.OutputToPDF(filename);                
+            }
+            else if (filename.EndsWith("tif"))
+            {
+                mySciChart.ExportToTiff(filename);
             }
         }
-
+        
         private Visual CreateSciChartSurfaceWithoutShowingIt()
         {
             SciChartSurface surf = new SciChartSurface();
             // We must set a width and height. If you are rendering off screen without showing
-            // we have to tell the control what size to render
+            // we have to tell the control what size to render C:\Projects\Daphne\Daphne-skg\DaphneGui\CellPopDynamics\CellPopDynToolWindow.xaml
             surf.Width = mySciChart.Width;
             surf.Height = mySciChart.Height;
 
@@ -128,9 +123,10 @@ namespace DaphneGui.CellPopDynamics
 
         private void CellPopDynWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            //actionsToolWindow.Dock(this.actionsContainer, ActiproSoftware.Windows.Controls.Docking.Direction.Bottom);
             //To zoom in and out: \n  Use the mouse wheel\n or select a rectangular area.\n\nTo pan, right-click and drag.
             tbSurfaceTooltip.Text = "";
-            tbSurfaceTooltip.AppendText("To zoom in and out:");
+            tbSurfaceTooltip.AppendText("To zoom in:");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText("    Use the mouse wheel OR");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
@@ -138,17 +134,19 @@ namespace DaphneGui.CellPopDynamics
 
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText(Environment.NewLine);
-            tbSurfaceTooltip.AppendText("To zoom back out:");
+            tbSurfaceTooltip.AppendText("To zoom out:");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText("    Double click OR");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
-            tbSurfaceTooltip.AppendText("    Use mouse wheel.");
+            tbSurfaceTooltip.AppendText("    Use mouse wheel OR");
+            tbSurfaceTooltip.AppendText(Environment.NewLine);
+            tbSurfaceTooltip.AppendText("    Right-click + Zoom out.");
 
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText("To pan:");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
-            tbSurfaceTooltip.AppendText("    Right-click and drag.");
+            tbSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
         }
 
     }
