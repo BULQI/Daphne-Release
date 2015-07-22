@@ -192,9 +192,7 @@ namespace DaphneGui.CellLineage
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.FileName = "CellLineage"; // Default file name
             dlg.DefaultExt = ".bmp"; // Default file extension
-            //dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf|*.pdf|XPS (*.xps)|*.xps";
-            //"Image files (*.bmp, *.jpg)|*.bmp;*.jpg|All files (*.*)|*.*"
-            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
+            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
 
             dlg.FilterIndex = 2;
             dlg.RestoreDirectory = true;
@@ -231,11 +229,7 @@ namespace DaphneGui.CellLineage
             else if (filename.EndsWith("tif"))
             {
                 ExportToTiff(LineageSciChart, filename);
-            }
-            else if (filename.EndsWith("xps"))
-            {
-                //ExportToXPS();
-            }
+            }            
         }
 
         /// <summary>
