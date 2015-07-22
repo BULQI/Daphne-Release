@@ -89,7 +89,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                 <Grid SciChart:ThemeManager.Theme="BrightSpark">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                            <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
+                            <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" >
                             <!--<CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >-->
 
                             <!--Tooltip-->

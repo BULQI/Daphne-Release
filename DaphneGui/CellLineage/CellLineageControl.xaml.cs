@@ -192,7 +192,9 @@ namespace DaphneGui.CellLineage
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.FileName = "CellLineage"; // Default file name
             dlg.DefaultExt = ".bmp"; // Default file extension
-            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
+            //dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf|*.pdf|XPS (*.xps)|*.xps";
+            //"Image files (*.bmp, *.jpg)|*.bmp;*.jpg|All files (*.*)|*.*"
+            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
 
             dlg.FilterIndex = 2;
             dlg.RestoreDirectory = true;
@@ -229,6 +231,10 @@ namespace DaphneGui.CellLineage
             else if (filename.EndsWith("tif"))
             {
                 ExportToTiff(LineageSciChart, filename);
+            }
+            else if (filename.EndsWith("xps"))
+            {
+                //ExportToXPS();
             }
         }
 
@@ -412,6 +418,21 @@ namespace DaphneGui.CellLineage
                 flrs.PointMarker = marker;
 
                 LineageSciChart.RenderableSeries.Add(flrs);
+
+                //For founder cell, the annotation should be the y-axis label
+                if (x[0] == 0)
+                {
+                    var textAnnot0 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                    {
+                        Name = s.Name,
+                        Text = LineageSciChart.YAxis.AxisTitle,
+                        FontSize = 6.0,
+                        X1 = x[0],
+                        Y1 = y[0],
+                    };
+                    textAnnot0.FontSize = 11.0;
+                    LineageSciChart.Annotations.Add(textAnnot0);
+                }
 
                 //This is how to add Annotations - Do not delete this
                 //For the 1st point

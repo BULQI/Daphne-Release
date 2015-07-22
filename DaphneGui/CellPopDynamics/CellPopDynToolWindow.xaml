@@ -72,7 +72,7 @@
                                     <!--SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface"-->
                                     <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold" Margin="10,10" >
                                         <!--Tooltip for main surface-->
-                                                                        <dyn:CellPopDynamicsChartSurface.ToolTip>
+                                        <dyn:CellPopDynamicsChartSurface.ToolTip>
                                         <ToolTip >
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox x:Name="tbSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
@@ -100,7 +100,7 @@
                                     </SciChart:SciChartSurface.YAxis>
 
                                         <!--  Declare ChartModifiers  -->
-                                                                                                                        <SciChart:SciChartSurface.ChartModifier>
+                                    <SciChart:SciChartSurface.ChartModifier>
                                         <SciChart:ModifierGroup>
                                             <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
                                             <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
