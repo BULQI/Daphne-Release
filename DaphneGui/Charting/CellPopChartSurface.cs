@@ -9,17 +9,51 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows;
 using System.IO;
+using System.Windows.Controls;
+using System.Printing;
+using System.Windows.Xps;
+using System.Windows.Documents;
+using System.Windows.Xps.Packaging;
 
 namespace DaphneGui
 {
+
+    /// <summary>
+    /// This class derives from SciChartSurface and serves as a base class for Lineage and Cell Pop Dynamics chart surface classes.
+    /// Common methods are located here.  This is not an abstract class.
+    /// </summary>
     public class CellPopChartSurface : SciChartSurface
     {
-        private string filename, filetype;
-        SciChartSurface surface;
-
-        public void SaveToFile(string fileName, string fileType, SciChartSurface surf)
+        /// <summary>
+        /// This method saves the chart to file - types png, bmp, jpg, pdf, tif
+        /// </summary>
+        /// <param name="filename"></param>
+        public void SaveToFile(string filename)
         {
-            filename = fileName;  filetype = fileType; surface = surf;
+            if (filename.EndsWith("png"))
+            {
+                ExportToFile(filename, ExportType.Png);
+            }
+            else if (filename.EndsWith("bmp"))
+            {
+                ExportToFile(filename, ExportType.Bmp);
+            }
+            else if (filename.EndsWith("jpg"))
+            {
+                ExportToFile(filename, ExportType.Jpeg);
+            }
+            else if (filename.EndsWith("pdf"))
+            {
+                OutputToPDF(filename);
+            }
+            else if (filename.EndsWith("tif"))
+            {
+                ExportToTiff(filename);
+            }
+            else if (filename.EndsWith("xps"))
+            {
+                ExportToXps(filename);
+            }
         }
 
         /// <summary>
@@ -60,7 +94,10 @@ namespace DaphneGui
 
         }
 
-
+        /// <summary>
+        /// This method outputs a tiff file without outputting a bmp file.
+        /// </summary>
+        /// <param name="outFile"></param>
         public void ExportToTiff(string outFile)
         {
             var source = this.ExportToBitmapSource();
@@ -71,6 +108,43 @@ namespace DaphneGui
             source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
             bmp3.UnlockBits(data);
             bmp3.Save(outFile, ImageFormat.Tiff);
+        }
+
+        public void ExportToXps(string filename)
+        {
+            var dialog = new PrintDialog();
+
+            if (dialog.ShowDialog() == true)
+            {
+                var size = new System.Windows.Size(dialog.PrintableAreaWidth, dialog.PrintableAreaWidth * 3 / 4);
+
+                //var scs = CreateSciChartSurfaceWithoutShowingIt(size);
+                //And print. This works particularly well to XPS! 
+                //Action printAction = () => dialog.PrintVisual(scs, "Programmer Awesomeness");
+                Action printAction = () => dialog.PrintVisual(this, "XPS file");
+                Dispatcher.BeginInvoke(printAction);
+            }
+
+            //OutputXpsDoc(filename);
+        }
+
+        //Not working yet
+        private void OutputXpsDoc(string filename)
+        {
+            FixedDocument fixedDoc = new FixedDocument();
+            PageContent pageContent = new PageContent();
+            FixedPage fixedPage = new FixedPage();
+
+            //Create first page of document
+            fixedPage.Children.Add(this);
+            ((System.Windows.Markup.IAddChild)pageContent).AddChild(fixedPage);
+            fixedDoc.Pages.Add(pageContent);
+
+            XpsDocument xpsd = new XpsDocument(filename, FileAccess.ReadWrite);
+
+            System.Windows.Xps.XpsDocumentWriter xw = XpsDocument.CreateXpsDocumentWriter(xpsd);
+            xw.Write(fixedDoc);
+            xpsd.Close();
         }
     }
 }

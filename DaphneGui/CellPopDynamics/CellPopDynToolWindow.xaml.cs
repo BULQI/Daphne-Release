@@ -42,8 +42,8 @@ namespace DaphneGui.CellPopDynamics
         private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Image"; // Default file name
-            dlg.DefaultExt = ".jpg"; // Default file extension
+            dlg.FileName = "CellPopDynamics"; // Default file name
+            dlg.DefaultExt = ".bmp"; // Default file extension
             dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
 
             dlg.FilterIndex = 2;
@@ -56,52 +56,16 @@ namespace DaphneGui.CellPopDynamics
             if (result == true)
             {
                 // Save file
-                SaveToFile(dlg.FileName);
+                mySciChart.SaveToFile(dlg.FileName);
             }
            
         }
 
-        public void SaveToFile(string filename)
-        {
-            if (filename.EndsWith("png"))
-            {
-                mySciChart.ExportToFile(filename, ExportType.Png);
-            }
-            else if (filename.EndsWith("bmp"))
-            {
-                mySciChart.ExportToFile(filename, ExportType.Bmp);
-            }
-            else if (filename.EndsWith("jpg"))
-            {
-                mySciChart.ExportToFile(filename, ExportType.Jpeg);
-            }
-            else if (filename.EndsWith("pdf"))
-            {
-                mySciChart.OutputToPDF(filename);                
-            }
-            else if (filename.EndsWith("tif"))
-            {
-                mySciChart.ExportToTiff(filename);
-            }
-        }
-        
-        private Visual CreateSciChartSurfaceWithoutShowingIt()
-        {
-            SciChartSurface surf = new SciChartSurface();
-            // We must set a width and height. If you are rendering off screen without showing
-            // we have to tell the control what size to render C:\Projects\Daphne\Daphne-skg\DaphneGui\CellPopDynamics\CellPopDynToolWindow.xaml
-            surf.Width = mySciChart.Width;
-            surf.Height = mySciChart.Height;
-
-            // Doing an export sets up the chart for rendering off screen, including handling all the horrible layout issues
-            // that occur when a WPF element is created and rendered without showing it.
-            //
-            // You must call this before printing, even if you don't intend to use the bitmap.
-            surf.ExportToBitmapSource();
-
-            return surf;
-        }
-
+        /// <summary>
+        /// Event handler called when user changes time units (minutes, hours, days, weeks).
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TimeUnitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
@@ -116,6 +80,11 @@ namespace DaphneGui.CellPopDynamics
 
         }
 
+        /// <summary>
+        /// User selected "zoom out" from right-click context menu on chart
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void menuZoomOut_Click(object sender, RoutedEventArgs e)
         {
             mySciChart.ZoomExtents();            

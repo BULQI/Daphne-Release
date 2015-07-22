@@ -190,11 +190,11 @@ namespace DaphneGui.CellLineage
         private void lineageExportButton_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Image"; // Default file name
-            dlg.DefaultExt = ".jpg"; // Default file extension
-            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
-
-            dlg.FilterIndex = 2;
+            dlg.FileName = "CellLineage"; // Default file name
+            dlg.DefaultExt = ".bmp"; // Default file extension
+            //dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
+            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
+            dlg.FilterIndex = 1;
             dlg.RestoreDirectory = true;
 
             // Show save file dialog box
@@ -204,83 +204,8 @@ namespace DaphneGui.CellLineage
             if (result == true)
             {
                 // Save file
-                SaveToFile(dlg.FileName);
+                LineageSciChart.SaveToFile(dlg.FileName);
             }
-        }
-
-        public void SaveToFile(string filename)
-        {
-            if (filename.EndsWith("png"))
-            {
-                LineageSciChart.ExportToFile(filename, ExportType.Png);
-            }
-            else if (filename.EndsWith("bmp"))
-            {
-                LineageSciChart.ExportToFile(filename, ExportType.Bmp);
-            }
-            else if (filename.EndsWith("jpg"))
-            {
-                LineageSciChart.ExportToFile(filename, ExportType.Jpeg);
-            }
-            else if (filename.EndsWith("pdf"))
-            {
-                OutputToPDF(LineageSciChart, filename);
-            }
-            else if (filename.EndsWith("tif"))
-            {
-                ExportToTiff(LineageSciChart, filename);
-            }
-        }
-
-        /// <summary>
-        /// This method outputs a PDF file without first outputting a .bmp file.
-        /// </summary>
-        /// <param name="filename"></param>
-        public void OutputToPDF(SciChartSurface surface, string filename)
-        {
-            //Export this graph to BitmapSource
-            var source = surface.ExportToBitmapSource();
-
-            //Then retrieve from BitmapSource into a Bitmap object
-            Bitmap bmp1 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp1.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp1.Size),
-            ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-            bmp1.UnlockBits(data);
-
-            //-------------------------------------------------
-            System.Drawing.Image image = bmp1;
-            iTextSharp.text.Image pdfImage = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
-
-            Document doc = new Document(PageSize.A4);
-            PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
-            doc.Open();
-
-            doc.Add(pdfImage);
-            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
-            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
-            // Add meta information to the document
-            doc.AddAuthor("Sanjeev Gupta");
-            doc.AddCreator("Daphne PDF output");
-            doc.AddKeywords("PDF export daphne");
-            doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
-            doc.AddTitle("The document title - Daphne graph in PDF format");
-            doc.Close();
-            //------------------------------------------------------------------------------------------
-
-        }
-
-
-        public void ExportToTiff(SciChartSurface surface, string outFile)
-        {
-            var source = surface.ExportToBitmapSource();
-            Bitmap bmp3 = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp3.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp3.Size),
-                ImageLockMode.WriteOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-            bmp3.UnlockBits(data);
-            bmp3.Save(outFile, ImageFormat.Tiff);
         }
 
         /// <summary>

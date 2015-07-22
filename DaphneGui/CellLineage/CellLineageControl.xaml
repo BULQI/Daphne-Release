@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DaphneGui"
-              xmlns:lin="clr-namespace:DaphneGui.CellLineage"
+             xmlns:lin="clr-namespace:DaphneGui.CellLineage"
              xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              Loaded="LineageSciChart_Loaded"               
@@ -89,43 +89,43 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                 <Grid SciChart:ThemeManager.Theme="BrightSpark">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                            <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
+                            <lin:CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >
                             <!--<CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >-->
 
                             <!--Tooltip-->
-                            <SciChart:SciChartSurface.ToolTip>
+                                <lin:CellLineageChartSurface.ToolTip>
                                 <ToolTip x:Name="LineageToolTip">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBox x:Name="tbLineageSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" MaxWidth="300" IsReadOnly="True" >
                                         </TextBox>
                                     </StackPanel>
                                 </ToolTip>
-                            </SciChart:SciChartSurface.ToolTip>
+                                </lin:CellLineageChartSurface.ToolTip>
 
-                            <SciChart:SciChartSurface.ContextMenu>
+                                <lin:CellLineageChartSurface.ContextMenu>
                                 <ContextMenu >
                                     <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
                                 </ContextMenu>
-                            </SciChart:SciChartSurface.ContextMenu>
+                                </lin:CellLineageChartSurface.ContextMenu>
 
                             <!--  Declare Axes  -->
-                            <SciChart:SciChartSurface.XAxis>
+                                <lin:CellLineageChartSurface.XAxis>
                                 <SciChart:NumericAxis VisibleRange="0, 1000" x:Name="linXAxis" GrowBy="0.1, 0.2" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
-                            </SciChart:SciChartSurface.XAxis>
+                                </lin:CellLineageChartSurface.XAxis>
 
-                            <SciChart:SciChartSurface.YAxis>
+                                <lin:CellLineageChartSurface.YAxis>
                                 <SciChart:NumericAxis x:Name="ourYAxis" GrowBy="0.1, 0.2" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
-                            </SciChart:SciChartSurface.YAxis>
+                                </lin:CellLineageChartSurface.YAxis>
                                             
                             <!--Annotations-->
-                            <SciChart:SciChartSurface.Annotations>
+                                <lin:CellLineageChartSurface.Annotations>
                                 <SciChart:TextAnnotation x:Name="textAnnot" FontSize="11" Text="This is an annotation" X1="300.0" Y1="200"/>
-                            </SciChart:SciChartSurface.Annotations>
+                                </lin:CellLineageChartSurface.Annotations>
 
                             <!--  Declare ChartModifiers  -->
                             <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
                             <!--  Adding the RubberBandXyZoomModifier gives SciChart the ability to zoom in by rectangle  -->
-                            <SciChart:SciChartSurface.ChartModifier>
+                                <lin:CellLineageChartSurface.ChartModifier>
                                 <SciChart:ModifierGroup>
                                     <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
                                     <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
@@ -141,8 +141,8 @@
                                         </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                     </SciChart:SeriesSelectionModifier>
                                 </SciChart:ModifierGroup>
-                            </SciChart:SciChartSurface.ChartModifier>
-                        </SciChart:SciChartSurface>
+                                </lin:CellLineageChartSurface.ChartModifier>
+                            </lin:CellLineageChartSurface>
                     </ScrollViewer>
                 </Grid>
             </ScrollViewer>
