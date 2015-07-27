@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "Nt_Manifolds.h"
 #include "Nt_Scalarfield.h"
+#include "NtUtility.h"
+
+#include <acml.h>
+
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -9,6 +13,7 @@ using namespace System::Linq;
 using namespace System::Text;
 using namespace MathNet::Numerics::LinearAlgebra::Double;
 using namespace NativeDaphneLibrary;
+using namespace NativeDaphneLibrary;
 
 
 namespace Nt_ManifoldRing
@@ -16,11 +21,26 @@ namespace Nt_ManifoldRing
 	ScalarField::ScalarField(Manifold^ m)
     {
 		this->m = m;
-        _array = gcnew Nt_Darray(m->ArraySize);
+		if (m == nullptr)
+		{
+			darray = gcnew Nt_Darray();
+		}
+		else 
+		{
+			//fixed size, won't be appendable to
+			darray = gcnew Nt_Darray(m->ArraySize);
+		}
     }
 
 	void ScalarField::Initialize(String^ type, array<double>^ parameters)
 	{
+
+		if (type == "ScalarFieldCollection")
+		{
+			this->components = gcnew List<ScalarField^>();
+			this->darray->InitializeAsCollection();
+			return;
+		}
 		if (FactoryContainer::fieldInitFactory == nullptr)
 		{
 			throw gcnew Exception("Calling Initialize without a valid factory.");
@@ -33,14 +53,14 @@ namespace Nt_ManifoldRing
 		{
 			for (int i = 0; i < m->ArraySize; i++)
 			{
-				_array[i] = init->initialize(i);
+				darray[i] = init->initialize(i);
 			}
 		}
 		else if (m->GetType() == InterpolatedRectangle::typeid || m->GetType() == InterpolatedRectangularPrism::typeid)
 		{
 			for (int i = 0; i < m->ArraySize; i++)
 			{
-				_array[i] = init->initialize((dynamic_cast<InterpolatedNodes^>(m))->linearIndexToLocal(i));
+				darray[i] = init->initialize((dynamic_cast<InterpolatedNodes^>(m))->linearIndexToLocal(i));
 			}
 		}
 		else
@@ -49,7 +69,7 @@ namespace Nt_ManifoldRing
 			if (init->GetType() == ConstFieldInitializer::typeid)
 			{
 				// initialize the zero-th moment for ME fields; leave gradient equal to zero
-				_array[0] = init->initialize(gcnew array<double>{ 0, 0, 0 });
+				darray[0] = init->initialize(gcnew array<double>{ 0, 0, 0 });
 			}
 			else
 			{
@@ -137,10 +157,15 @@ namespace Nt_ManifoldRing
 	/// <returns>resulting field</returns>
 	ScalarField^ ScalarField::Multiply(double s)
 	{
+
+		dscal(this->ArrayLength, s, this->ArrayPointer, 1);
+
+		/*
 		for (int i = 0; i < m->ArraySize; i++)
 		{
-			_array[i] *= s;
+			darray[i] *= s;
 		}
+		*/
 
 		return this;
 	}
@@ -170,10 +195,14 @@ namespace Nt_ManifoldRing
 	ScalarField^ ScalarField::operator *(ScalarField^ f, double s)
 	{
 		ScalarField^ product = gcnew ScalarField(f->m);
-
-		for (int i = 0; i < f->m->ArraySize; i++)
+		if (f->ArrayLength != product->ArrayLength)
 		{
-			product->_array[i] = s * f->_array[i];
+			product->darray->resize(f->ArrayLength);
+		}
+
+		for (int i = 0; i < f->ArrayLength; i++)
+		{
+			product->darray[i] = s * f->darray[i];
 		}
 
 		return product;
@@ -203,6 +232,10 @@ namespace Nt_ManifoldRing
 			throw gcnew Exception("Scalar field multiplicands must share a manifold.");
 		}
 		ScalarField^ product = gcnew ScalarField(f1->m);
+		if (f1->ArrayLength != product->ArrayLength)
+		{
+			product->darray->resize(f1->ArrayLength);
+		}
 		return f1->m->Multiply(product->reset(f1), f2);
 	}
 
@@ -217,10 +250,12 @@ namespace Nt_ManifoldRing
 		{
 			throw gcnew Exception("Scalar field addends must share a manifold.");
 		}
-		for (int i = 0; i < m->ArraySize; i++)
-		{
-			_array[i] += f->_array[i];
-		}
+
+		this->darray->Add(f->darray);
+		//for (int i = 0; i < m->ArraySize; i++)
+		//{
+		//	darray[i] += f->darray[i];
+		//}
 
 		return this;
 	}
@@ -249,10 +284,14 @@ namespace Nt_ManifoldRing
 		}
 
 		ScalarField^ sum = gcnew ScalarField(f1->m);
-
-		for (int i = 0; i < f1->m->ArraySize; i++)
+		if (sum->ArrayLength != f1->ArrayLength)
 		{
-			sum->_array[i] = f1->_array[i] + f2->_array[i];
+			sum->darray->resize(f1->ArrayLength);
+		}
+
+		for (int i = 0; i < f1->ArrayLength; i++)
+		{
+			sum->darray[i] = f1->darray[i] + f2->darray[i];
 		}
 
 		return sum;
@@ -267,6 +306,10 @@ namespace Nt_ManifoldRing
 	ScalarField^ ScalarField::operator +(ScalarField ^f, double d)
 	{
 		ScalarField^ sf = gcnew ScalarField(f->m);
+		if (f->ArrayLength != sf->ArrayLength)
+		{
+			sf->darray->resize(f->ArrayLength);
+		}
 		return sf->reset(f)->Add(d);
 	}
 
@@ -293,9 +336,9 @@ namespace Nt_ManifoldRing
 			throw gcnew Exception("Scalar field addends must share a manifold->");
 		}
 
-		for (int i = 0; i < m->ArraySize; i++)
+		for (int i = 0; i < this->ArrayLength; i++)
 		{
-			_array[i] -= f->_array[i];
+			darray[i] -= f->darray[i];
 		}
 		return this;
 	}
@@ -314,10 +357,14 @@ namespace Nt_ManifoldRing
 		}
 
 		ScalarField^ difference = gcnew ScalarField(f1->m);
+		if (difference->ArrayLength != f1->ArrayLength)
+		{
+			difference->darray->resize(f1->ArrayLength);
+		}
 
 		for (int i = 0; i < f1->m->ArraySize; i++)
 		{
-			difference->_array[i] = f1->_array[i] - f2->_array[i];
+			difference->darray[i] = f1->darray[i] - f2->darray[i];
 		}
 
 		return difference;

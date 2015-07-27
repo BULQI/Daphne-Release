@@ -126,9 +126,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\vtk\Kitware.VTK.dll</HintPath>
     </Reference>
-    <Reference Include="ManifoldRing">
-      <HintPath>..\dependencies\ManifoldRing.dll</HintPath>
-    </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>..\dependencies\MathNet.Numerics.dll</HintPath>
     </Reference>

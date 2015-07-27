@@ -18,82 +18,126 @@ namespace NativeDaphne
 	///////////////////////////////////
 	//Nt_MolecularPopulation
 	///////////////////////////////////
-	Nt_MolecularPopulation::Nt_MolecularPopulation(String ^_molguid, String^ _name, double _diffusionCoefficient)
+	Nt_MolecularPopulation::Nt_MolecularPopulation(Manifold^ m, String ^_molguid, String^ _name, double _diffusionCoefficient)
 	{
+		manifold = m;
 		MoleculeKey = _molguid;
 		Name = _name;
 		DiffusionCoefficient = _diffusionCoefficient;
-		molpopConc = nullptr;
-		_molpopConc = NULL;
-		allocedItemCount = 0;
+
+		concentration = gcnew ScalarField(m);
 		BoundaryConcAndFlux = gcnew Dictionary<int, Nt_MolecluarPopulationBoundary^>();
 		parent = nullptr;
+		_laplacian = NULL;
+		_boundaryConcPtrs = NULL;
 	}
 
-	Nt_MolecularPopulation::Nt_MolecularPopulation(String ^_molguid, String^ _name, double _diffusionCoefficient, Nt_Darray^ conc)
+	Nt_MolecularPopulation^ Nt_MolecularPopulation::CloneParent(Nt_Compartment^ c)
 	{
+		Nt_MolecularPopulation^ molpop = gcnew Nt_MolecularPopulation(this->manifold, this->MoleculeKey, this->Name, this->DiffusionCoefficient);
+		molpop->ComponentPopulations = gcnew List<Nt_MolecularPopulation^>();
+		molpop->Compartment = c;
+		//make the ScalarField as a collection
+		molpop->Conc->Initialize("ScalarFieldCollection", nullptr);
+		molpop->AddMolecularPopulation(this);
+		molpop->IsDiffusing = this->IsDiffusing;
+		return molpop;
+	}
+
+	Nt_MolecularPopulation::Nt_MolecularPopulation(Manifold^ m, String ^_molguid, String^ _name, double _diffusionCoefficient, ScalarField^ conc)
+	{
+		manifold = m;
 		MoleculeKey = _molguid;
 		Name = _name;
 		DiffusionCoefficient = _diffusionCoefficient;
-		molpopConc = conc;
-		allocedItemCount = 0;
-		_molpopConc = NULL;
+		concentration = conc;
 		parent = nullptr;
+		_laplacian = NULL;
+		_boundaryConcPtrs = NULL;
 	}
 
 	void Nt_MolecularPopulation::step(double dt)
 	{
-		throw gcnew Exception("not implemented");
+		//throw gcnew Exception("not currently used");
+		if (IsDiffusing == true)
+		{
+			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
+		}
+
 	}
 
 	void Nt_MolecularPopulation::step(Nt_Cytosol^ cytosol, double dt)
 	{
-		double *_boundaryConc = BoundaryConcAndFlux[0]->ConcPointer;
-		double *_boundaryFlux = BoundaryConcAndFlux[0]->FluxPointer;
 
-		int n = ComponentPopulations->Count * 4; //each concentration has 4 items
-	
-		//handle diffusion - laplacian
-		dcopy(n, _molpopConc, 1, _laplacian, 1);
-		dscal(n/4, 0.0, _laplacian, 4); //set the first element to 0
+		if (IsDiffusing == true)
+		{
+			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
+		}
 
-		double factor1 = (-5.0 /(cytosol->CellRadius *cytosol->CellRadius)) * DiffusionCoefficient * dt;
-		daxpy(n, factor1, _laplacian, 1, _molpopConc, 1);
+		//handle diffusion flux terms, cytosol has only one boundary plasma membrane
+		Nt_MolecluarPopulationBoundary^ molbound = BoundaryConcAndFlux[0];
+		concentration->DiffusionFluxTerm(molbound->Flux, cytosol->BoundaryTransform, dt);
 
-		//Diffusion Flux Term
-		double factor2 = -5 * dt /cytosol->CellRadius;
-
-		//if (this->Name == "A*")
-		//{
-		//	Console::WriteLine("_boundarFlux[0] = {0} _molpopConc[0] = {1}", _boundaryFlux[0], _molpopConc[0]);
-		//}
-		dscal(n/4, 0.6, _boundaryFlux, 4); //set the first element to 3/5, so that we can time 5 for all elements
-		daxpy(n, factor2, _boundaryFlux, 1, _molpopConc, 1);
-
-	
 		//clear flux
-		memset(_boundaryFlux, 0, n*sizeof(double));
+		Nt_Darray^ flux = molbound->Flux->darray;
+		memset(flux->NativePointer, 0, flux->Length*sizeof(double));
 
 		//update membrane boundary
-		memcpy(_boundaryConc, _molpopConc, n *sizeof(double));
+		memcpy(molbound->Conc->ArrayPointer, concentration->ArrayPointer, molbound->Conc->ArrayLength * sizeof(double));
+
+
+		//double *_boundaryConc = BoundaryConcAndFlux[0]->ConcPointer;
+		//double *_boundaryFlux = BoundaryConcAndFlux[0]->FluxPointer;
+
+		//int n = ComponentPopulations->Count * 4; //each concentration has 4 items
+	
+		////handle diffusion - laplacian
+		//dcopy(n, _molpopConc, 1, _laplacian, 1);
+		//dscal(n/4, 0.0, _laplacian, 4); //set the first element to 0
+
+		//double factor1 = (-5.0 /(cytosol->CellRadius *cytosol->CellRadius)) * DiffusionCoefficient * dt;
+		//daxpy(n, factor1, _laplacian, 1, _molpopConc, 1);
+
+		////Diffusion Flux Term
+		//double factor2 = -5 * dt /cytosol->CellRadius;
+
+
+		//dscal(n/4, 0.6, _boundaryFlux, 4); //set the first element to 3/5, so that we can time 5 for all elements
+		//daxpy(n, factor2, _boundaryFlux, 1, _molpopConc, 1);
+
+	
+		////clear flux
+		//memset(_boundaryFlux, 0, n*sizeof(double));
+
+		////update membrane boundary
+		//memcpy(_boundaryConc, _molpopConc, n *sizeof(double));
 		
 	}
 
 	void Nt_MolecularPopulation::step(Nt_PlasmaMembrane^ membrane, double dt)
 	{
-		int n = ComponentPopulations->Count * 4;
 
-		//handle diffusion flux
-		dcopy(n, _molpopConc, 1, _laplacian, 1);
-		dscal(n/4, 0.0, _laplacian, 4);
-		double factor1 = (-2.0 /(membrane->CellRadius *membrane->CellRadius)) * DiffusionCoefficient * dt;
-		daxpy(n, factor1, _laplacian, 1, _molpopConc, 1);
+		if (IsDiffusing == true)
+		{
+			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
+		}
+
+		//non "generic" verison
+		//double*  _molpopConc = concentration->ArrayPointer;
+		//int n = concentration->Length;
+		//dcopy(n, _molpopConc, 1, _laplacian, 1);
+		//dscal(n/4, 0.0, _laplacian, 4);
+		//double factor1 = (-2.0 /(membrane->CellRadius *membrane->CellRadius)) * DiffusionCoefficient * dt;
+		//daxpy(n, factor1, _laplacian, 1, _molpopConc, 1);
 	}
 
 	void Nt_MolecularPopulation::step(Nt_ECS^ ECS, double dt)
 	{
-				
-		throw gcnew Exception("removed from implementation for reactions only");
+		//generic verison
+		step(dt);
+		return;
+
+		//faster verion
 		/*NtInterpolatedRectangularPrism *ir_prism = ECS->ir_prism;
 		double *sfarray = this->molpopConc->NativePointer;
 		int item_count = ECS->BoundaryKeys->Count;
@@ -102,36 +146,17 @@ namespace NativeDaphne
 
 	void Nt_MolecularPopulation::AddMolecularPopulation(Nt_MolecularPopulation^ molpop)
 	{
-		int itemCount = ComponentPopulations->Count;
-		int itemLength = molpop->molpopConc->Length;
 
-		if (itemCount + 1 > allocedItemCount)
-		{
-			allocedItemCount = NtUtility::GetAllocSize(itemCount+1, allocedItemCount);
-			int alloc_size = allocedItemCount * itemLength * sizeof(double);
-			_molpopConc = (double *)realloc(_molpopConc, alloc_size);
-			if (_molpopConc == NULL)
-			{
-				throw gcnew Exception("Error realloc memory");
-			}
-			_laplacian = (double *)realloc(_laplacian, alloc_size);
-			//reassign memory address
-			for (int i=0; i< itemCount; i++)
-			{
-					ComponentPopulations[i]->NativePointer = _molpopConc + i * itemLength;
-			}
-		}
-		//copy new values
-		double *_cptr = _molpopConc + itemCount * itemLength;
-		for (int i=0; i<itemLength; i++)
-		{
-			_cptr[i] = molpop->molpopConc[i];
-		}
-		molpop->molpopConc->NativePointer = _cptr;
-			
+		concentration->AddComponent(molpop->Conc);
 		molpop->parent = this;
 		ComponentPopulations->Add(molpop);
-		array_length = ComponentPopulations->Count * itemLength;
+
+		int len = molpop->Conc->darray->Length;
+		if (_laplacian != NULL)
+		{
+			int y = 1;
+		}
+		_laplacian = (double *)realloc(_laplacian, molpop->Conc->darray->Length);
 
 		//merge boundaries, this should only be needed for cells.
 		if (molpop->BoundaryConcAndFlux->Count > 0)
@@ -149,13 +174,12 @@ namespace NativeDaphne
 				Nt_MolecluarPopulationBoundary^ boundary = kvp->Value;
 				if (boundary->IsContainer() == true)
 				{
-					throw gcnew Exception("cytosol should only have one boundary");
+					throw gcnew Exception("cytosol should have only one boundary");
 				}
 				this->AddNtBoundaryFluxConc(boundary);
 			}
 		}
 	}
-
 
 	void Nt_MolecularPopulation::RemoveMolecularPopulation(int index)
 	{
@@ -166,19 +190,16 @@ namespace NativeDaphne
 		}
 
 		Nt_MolecularPopulation^ target = ComponentPopulations[index];
+		concentration->RemoveComponent(target->Conc);
+
 		Nt_MolecularPopulation^ last_molpop = ComponentPopulations[itemCount-1];
 		if (target != last_molpop)
 		{
-			//swap the content
-			target->molpopConc->MemSwap(last_molpop->molpopConc);
-			target->molpopConc->detach();
 			ComponentPopulations[index] = last_molpop;
 		}
 		target->parent = nullptr;
 		ComponentPopulations->RemoveAt(itemCount-1);
 
-		//here we are dealing with cytosol/plasma mebrane, so we 
-		//have maximum one boundary
 		if (target->BoundaryConcAndFlux->Count > 0)
 		{
 			for each (KeyValuePair<int, Nt_MolecluarPopulationBoundary^>^kvp in target->BoundaryConcAndFlux)
@@ -194,7 +215,7 @@ namespace NativeDaphne
 	}
 
 	//add - add to a collection
-	void Nt_MolecularPopulation::AddNtBoundaryFluxConc(int boundId, Nt_Darray^ conc, Nt_Darray^ flux)
+	void Nt_MolecularPopulation::AddNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux)
 	{
 
 			if (Compartment == nullptr)
@@ -203,6 +224,7 @@ namespace NativeDaphne
 			}
 			if (Compartment->manifoldType == Nt_ManifoldType::TinyBall)
 			{
+				//BoundaryConcAndFlux->Add(boundId, gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
 				SetNtBoundaryFluxConc(boundId, conc, flux);
 				return;
 			}
@@ -214,7 +236,7 @@ namespace NativeDaphne
 			}
 			if (BoundaryConcAndFlux->ContainsKey(pop_id) == false)
 			{
-				Nt_MolecluarPopulationBoundary^ boundary = gcnew Nt_MolecluarPopulationBoundary();
+				Nt_MolecluarPopulationBoundary^ boundary = gcnew Nt_MolecluarPopulationBoundary(conc->M, true); 				
 				boundary->AddBoundaryConcAndFlux(gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
 				BoundaryConcAndFlux->Add(pop_id, boundary);
 			}
@@ -225,7 +247,7 @@ namespace NativeDaphne
 	}
 
 	//set boundary and flux - for cytosol which has only one boundary
-	void Nt_MolecularPopulation::SetNtBoundaryFluxConc(int boundId, Nt_Darray^ conc, Nt_Darray^ flux)
+	void Nt_MolecularPopulation::SetNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux)
 	{
 
 			if (Compartment == nullptr)
@@ -310,14 +332,14 @@ namespace NativeDaphne
 			Nt_MolecluarPopulationBoundary^ boundary = kvp->Value;
 			if (boundary->IsContainer() == false)
 			{
-				boundaryConcDict->Add(boundary->BoundaryId, boundary->Conc);
+				boundaryConcDict->Add(boundary->BoundaryId, boundary->Conc->darray);
 			}
 			else 
 			{
 				List<Nt_MolecluarPopulationBoundary^>^ Component = boundary->Component;
 				for (int i=0; i< Component->Count; i++)
 				{
-					boundaryConcDict->Add(Component[i]->BoundaryId, Component[i]->Conc);
+					boundaryConcDict->Add(Component[i]->BoundaryId, Component[i]->Conc->darray);
 				}
 			}
 		}

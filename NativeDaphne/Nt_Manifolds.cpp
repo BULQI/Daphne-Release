@@ -2,6 +2,7 @@
 #include "Nt_Manifolds.h"
 #include "Nt_Scalarfield.h"
 #include "Nt_Interpolation.h"
+#include <acml.h>
 
 namespace Nt_ManifoldRing
 {
@@ -18,14 +19,29 @@ namespace Nt_ManifoldRing
 	/// <returns>resulting field</returns>
 	ScalarField^ MomentExpansionManifold::Multiply(ScalarField^ sf1, ScalarField^ sf2)
 	{
-
-		double s1 = sf1->_array[0];
-		double s2 = sf2->_array[0];
-		sf1->_array[0] *= sf2->_array[0];
-		for (int i = 1; i < sf1->_array->Length; i++)
+		int itemCount = sf1->ArrayLength/this->ArraySize;
+		double *array1 = sf1->ArrayPointer;
+		double *array2 = sf2->ArrayPointer;
+		for (int i=0; i< itemCount; i++)
 		{
-			sf1->_array[i] = sf1->_array[i] * s2 + s1 * sf2->_array[i];
+			double s1 = array1[0];
+			double s2 = array2[0];
+			array1[0] = s1 * s2;
+			for (int j = 1; j < ArraySize; j++)
+			{
+				array1[j] = array1[j] * s2 + s1 * array2[j];
+			}
+			array1 += ArraySize;
+			array2 += ArraySize;
 		}
+
+		//double s1 = sf1->darray[0];
+		//double s2 = sf2->darray[0];
+		//sf1->darray[0] *= sf2->darray[0];
+		//for (int i = 1; i < sf1->darray->Length; i++)
+		//{
+		//	sf1->darray[i] = sf1->darray[i] * s2 + s1 * sf2->darray[i];
+		//}
 		return sf1;
 	}
 
@@ -38,7 +54,11 @@ namespace Nt_ManifoldRing
 	/// <returns></returns>
 	ScalarField^ MomentExpansionManifold::Add(ScalarField^ sf, double d)
 	{
-		sf->_array[0] += d;
+		for (int i=0; i< sf->ArrayLength; i += this->ArraySize)
+		{
+			sf->darray[i] += d;
+		}
+		//sf->darray[0] += d;
 		return sf;
 	}
 
@@ -54,10 +74,10 @@ namespace Nt_ManifoldRing
 		array<double>^ pos = t->Position;
 		array<double>^ grad = from->M->Grad(pos, from);
 
-		to->_array[0] = from->Value(pos);
-		to->_array[1] = grad[0];
-		to->_array[2] = grad[1];
-		to->_array[3] = grad[2];
+		to->darray[0] = from->Value(pos);
+		to->darray[1] = grad[0];
+		to->darray[2] = grad[1];
+		to->darray[3] = grad[2];
 
 		return to;
 	}
@@ -69,7 +89,7 @@ namespace Nt_ManifoldRing
 	/// <returns>the mean value</returns>
 	double MomentExpansionManifold::MeanValue(ScalarField^ sf)  
 	{
-		return sf->_array[0];
+		return sf->darray[0];
 	}
 
 
@@ -81,7 +101,7 @@ namespace Nt_ManifoldRing
 	/// <returns>value as double</returns>
 	double TinySphere::Value(array<double>^ x, ScalarField^ sf) 
 	{
-		double value = sf->_array[0],
+		double value = sf->darray[0],
 			norm = 0;
 
 		for (int i = 0; i < 3; i++)
@@ -97,7 +117,7 @@ namespace Nt_ManifoldRing
 		norm = 1.0 / Math::Sqrt(norm);
 		for (int i = 1; i < 4; i++)
 		{
-			value += radius * norm * x[i - 1] * sf->_array[i];
+			value += radius * norm * x[i - 1] * sf->darray[i];
 		}
 
 		return value;
@@ -110,12 +130,24 @@ namespace Nt_ManifoldRing
 	/// <returns>resulting field</returns>
 	ScalarField^ TinySphere::Laplacian(ScalarField^ sf) 
 	{
-		Nt_Darray^ array = laplacian->_array;
-		array[0] = 0;
-		array[1] = sf->_array[1];
-		array[2] = sf->_array[2];
-		array[3] = sf->_array[3];
-		return laplacian->Multiply(-2.0 / (radius * radius));
+
+		int n = sf->ArrayLength;
+		if (laplacian->ArrayLength != n)
+		{
+			laplacian->darray->resize(n);
+		}
+		double *laplacian_ptr = laplacian->ArrayPointer;
+		memcpy(laplacian_ptr, sf->ArrayPointer, n * sizeof(double));
+		for (int i=0; i<n; i+=4)laplacian_ptr[i] = 0;
+		dscal(n, -2.0/(radius * radius), laplacian_ptr, 1);
+		return laplacian;
+
+		//Nt_Darray^ array = laplacian->darray;
+		//array[0] = 0;
+		//array[1] = sf->darray[1];
+		//array[2] = sf->darray[2];
+		//array[3] = sf->darray[3];
+		//return laplacian->Multiply(-2.0 / (radius * radius));
 	}
 
 	/// <summary>
@@ -130,9 +162,9 @@ namespace Nt_ManifoldRing
 
 		u = dynamic_cast<DenseVector^>(u->Normalize(2.0));
 
-		double d = u[0] * sf->_array[1] + u[1] * sf->_array[2] + u[2] * sf->_array[3];
+		double d = u[0] * sf->darray[1] + u[1] * sf->darray[2] + u[2] * sf->darray[3];
 
-		return gcnew array<double>{ sf->_array[1] - u[0] * d, sf->_array[2] - u[1] * d, sf->_array[3] - u[2] * d };
+		return gcnew array<double>{ sf->darray[1] - u[0] * d, sf->darray[2] - u[1] * d, sf->darray[3] - u[2] * d };
 	}
 
 	/// <summary>
@@ -142,7 +174,7 @@ namespace Nt_ManifoldRing
 	/// <returns>integral value</returns>
 	double TinySphere::Integrate(ScalarField^ sf) 
 	{
-		return sf->_array[0] * 4 * Math::PI * radius * radius;
+		return sf->darray[0] * 4 * Math::PI * radius * radius;
 	}
 
 	/// <summary>
@@ -179,11 +211,11 @@ namespace Nt_ManifoldRing
 			return 0;
 		}
 
-		double value = sf->_array[0];
+		double value = sf->darray[0];
 
 		for (int i = 1; i < 4; i++)
 		{
-			value += x[i - 1] * sf->_array[i];
+			value += x[i - 1] * sf->darray[i];
 		}
 
 		return value;
@@ -197,13 +229,26 @@ namespace Nt_ManifoldRing
 	/// <returns>resulting field</returns>
 	ScalarField^ TinyBall::Laplacian(ScalarField^ sf) 
 	{
-		Nt_Darray^ array = laplacian->_array;
+		
+		int n = sf->ArrayLength;
+		if (laplacian->ArrayLength != n)
+		{
+			laplacian->darray->resize(n);
+		}
+		double *laplacian_ptr = laplacian->ArrayPointer;
+		memcpy(laplacian_ptr, sf->ArrayPointer, n * sizeof(double));
+		for (int i=0; i<n; i+=4)laplacian_ptr[i] = 0;
+		dscal(n, -5.0/(radius * radius), laplacian_ptr, 1);
+		return laplacian;
+		/*
+		Nt_Darray^ array = laplacian->darray;
 		array[0] = 0;
-		array[1] = sf->_array[1];
-		array[2] = sf->_array[2];
-		array[3] = sf->_array[3];
+		array[1] = sf->darray[1];
+		array[2] = sf->darray[2];
+		array[3] = sf->darray[3];
 		laplacian->Multiply(-5.0 / (radius * radius));
 		return laplacian;
+		*/
 	}
 
 	/// <summary>
@@ -218,9 +263,9 @@ namespace Nt_ManifoldRing
 		{
 			return gcnew array<double>{ 0, 0, 0 };
 		}
-		gradient[0] = sf->_array[1];
-		gradient[1] = sf->_array[2];
-		gradient[2] = sf->_array[3];
+		gradient[0] = sf->darray[1];
+		gradient[1] = sf->darray[2];
+		gradient[2] = sf->darray[3];
 
 		return gradient;
 	}
@@ -234,19 +279,24 @@ namespace Nt_ManifoldRing
 	/// <returns>diffusion flux term as field</returns>
 	ScalarField^ TinyBall::DiffusionFluxTerm(ScalarField^ flux, Transform^ t, ScalarField^ dst, double dt) 
 	{
-		if (dynamic_cast<TinySphere^>(flux->M) == nullptr)
+		if (dynamic_cast<TinySphere^>(flux->M) == nullptr || flux->ArrayLength != dst->ArrayLength)
 		{
 			throw gcnew Exception("Manifold mismatch: flux for TinyBall must be on TinySphere.");
 		}
+		
+		int n = dst->ArrayLength;
+		dscal(n/4, 0.6, flux->ArrayPointer, 4);
+		daxpy(n, -5.0 * dt /radius, flux->ArrayPointer, 1, dst->ArrayPointer, 1);
+		return dst;
 
-		Nt_Darray^ array = diffusionField->_array;
-		array[0] = 3 * flux->_array[0] / radius;
-		array[1] = 5 * flux->_array[1] / radius;
-		array[2] = 5 * flux->_array[2] / radius;
-		array[3] = 5 * flux->_array[3] / radius;
-
+		/*
+		Nt_Darray^ array = diffusionField->darray;
+		array[0] = 3 * flux->darray[0] / radius;
+		array[1] = 5 * flux->darray[1] / radius;
+		array[2] = 5 * flux->darray[2] / radius;
+		array[3] = 5 * flux->darray[3] / radius;
 		return dst->Add(diffusionField->Multiply(-dt));
-		//return diffusionField;
+		*/
 	}
 
 	/// <summary>
@@ -256,7 +306,7 @@ namespace Nt_ManifoldRing
 	/// <returns>integral value</returns>
 	double TinyBall::Integrate(ScalarField^ sf) 
 	{
-		return sf->_array[0] * 4 * Math::PI * radius * radius * radius / 3;
+		return sf->darray[0] * 4 * Math::PI * radius * radius * radius / 3;
 	}
 
 	//****************************************************
@@ -314,7 +364,7 @@ namespace Nt_ManifoldRing
 	{
 		for (int i = 0; i < ArraySize; i++)
 		{
-			sf1->_array[i] *= sf2->_array[i];
+			sf1->darray[i] *= sf2->darray[i];
 		}
 		return sf1;
 	}
@@ -329,7 +379,7 @@ namespace Nt_ManifoldRing
 	{
 		for (int i = 0; i < ArraySize; i++)
 		{
-			sf->_array[i] += d;
+			sf->darray[i] += d;
 		}
 		return sf;
 	}
@@ -410,7 +460,7 @@ namespace Nt_ManifoldRing
 			//to.array[i] = from.M.Value(x + pos, from);                
 			Vector^ y = gcnew DenseVector(pos);
 			y = dynamic_cast<DenseVector^>(x + y);
-			to->_array[i] = from->M->Value(y->ToArray(), from);
+			to->darray[i] = from->M->Value(y->ToArray(), from);
 		}
 		return to;
 	}
@@ -540,7 +590,7 @@ namespace Nt_ManifoldRing
 	{
 		if (localIsOn(x))
 		{
-			return sf->_array[0];
+			return sf->darray[0];
 		}
 		else
 		{
@@ -555,7 +605,7 @@ namespace Nt_ManifoldRing
 	/// <returns>the mean value</returns>
 	double PointManifold::MeanValue(ScalarField^ sf) 
 	{
-		return sf->_array[0];
+		return sf->darray[0];
 	}
 
 
@@ -567,7 +617,7 @@ namespace Nt_ManifoldRing
 	/// <returns>resulting field</returns>
 	ScalarField^ PointManifold::Multiply(ScalarField^ sf1, ScalarField^ sf2) 
 	{
-		sf1->_array[0] *= sf2->_array[0];
+		sf1->darray[0] *= sf2->darray[0];
 		return sf1;
 	}
 
@@ -579,7 +629,7 @@ namespace Nt_ManifoldRing
 	/// <returns></returns>
 	ScalarField^ PointManifold::Add(ScalarField^ sf, double d) 
 	{
-		sf->_array[0] += d;
+		sf->darray[0] += d;
 		return sf;
 	}
 
@@ -623,7 +673,7 @@ namespace Nt_ManifoldRing
 	/// <returns>integral value</returns>
 	double PointManifold::Integrate(ScalarField^ sf) 
 	{
-		return sf->_array[0];
+		return sf->darray[0];
 	}
 
 	/// <summary>
@@ -635,7 +685,7 @@ namespace Nt_ManifoldRing
 	ScalarField^ PointManifold::Restrict(ScalarField^ from, Transform^ t, ScalarField^ to) 
 	{
 		array<double>^ pos = t->Translation->ArrayCopy;
-		to->_array[0] = from->Value(pos);
+		to->darray[0] = from->Value(pos);
 
 		return to;
 	}

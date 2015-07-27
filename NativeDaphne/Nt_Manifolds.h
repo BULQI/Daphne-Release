@@ -18,6 +18,7 @@ namespace Nt_ManifoldRing
     /// This puts the responsibility for scalar field multiplication in the manifold class.
     /// We may regard this as the specification of a scalar field handling class.
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class Manifold abstract
     {
 	private:

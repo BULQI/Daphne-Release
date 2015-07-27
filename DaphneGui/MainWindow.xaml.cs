@@ -36,7 +36,7 @@ using Ninject;
 using Ninject.Parameters;
 
 using Daphne;
-using ManifoldRing;
+using Nt_ManifoldRing;
 using Workbench;
 
 using System.Collections.ObjectModel;

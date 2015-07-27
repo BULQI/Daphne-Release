@@ -5,7 +5,7 @@ using System.Text;
 
 using System.IO;
 
-using ManifoldRing;
+using Nt_ManifoldRing;
 using System.Globalization;
 
 namespace Daphne

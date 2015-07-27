@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Daphne;
-using ManifoldRing;
+using Nt_ManifoldRing;
 using System.IO;
 using System.Windows.Markup;
 using System.Windows.Data;

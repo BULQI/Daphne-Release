@@ -7,7 +7,7 @@ using System.Text;
 using Ninject;
 using Ninject.Parameters;
 using NativeDaphne;
-using ManifoldRing;
+using Nt_ManifoldRing;
 
 namespace Daphne
 {
@@ -39,33 +39,33 @@ namespace Daphne
         // the individuals that make up this MolecularPopulation
         public Molecule Molecule { get; private set; }
         private Compartment compartment;
-        private readonly Manifold manifold;
-        private ScalarField concentration;
+        //private readonly Manifold manifold;
+        //private ScalarField concentration;
         private Dictionary<int, ScalarField> boundaryFluxes;
         private readonly Dictionary<int, ScalarField> boundaryConcs,
                                                       naturalBoundaryFluxes,
                                                       naturalBoundaryConcs;
-        // Switch that allows us to turn off diffusion.
-        // Diffusion is on, by default.
-        public bool IsDiffusing { get; set; }
+        //// Switch that allows us to turn off diffusion.
+        //// Diffusion is on, by default.
+        //public bool IsDiffusing { get; set; }
         public Dictionary<int, MolBoundaryType> boundaryCondition;
 
-        public Manifold Man
-        {
-            get { return manifold; }
-        }
+        //public Manifold Man
+        //{
+        //    get { return manifold; }
+        //}
 
-        public ScalarField Conc
-        {
-            get 
-            {
-                return concentration; 
-            }
-            set 
-            {
-                concentration = value; 
-            }
-        }
+        //public ScalarField Conc
+        //{
+        //    get 
+        //    {
+        //        return concentration; 
+        //    }
+        //    set 
+        //    {
+        //        concentration = value; 
+        //    }
+        //}
 
         public Compartment Comp
         {
@@ -94,11 +94,9 @@ namespace Daphne
             get { return naturalBoundaryConcs; }
         }
 
-        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp) : base(moleculeKey, mol.Name, mol.DiffusionCoefficient)
+        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp) : base(comp.Interior, moleculeKey, mol.Name, mol.DiffusionCoefficient)
         {
-            concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-            base.molpopConc = concentration.array;
-            manifold = comp.Interior;
+            //concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
             Molecule = mol;
             MoleculeKey = moleculeKey;
             compartment = comp;
@@ -147,7 +145,7 @@ namespace Daphne
 
             boundaryFluxes.Add(key, boundFlux);
             boundaryConcs.Add(key, boundConc);
-            base.AddNtBoundaryFluxConc(key, boundConc.array, boundFlux.array);
+            base.AddNtBoundaryFluxConc(key, boundConc, boundFlux);
         }
 
         public void RemoveBoundaryFluxConc(int key)

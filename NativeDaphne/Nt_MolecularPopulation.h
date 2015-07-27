@@ -20,81 +20,60 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_MolecluarPopulationBoundary
 	{
+	private:
+		List<Nt_MolecluarPopulationBoundary^>^ components;
 	public:
 		int BoundaryId;
-		Nt_Darray ^Conc;
-		Nt_Darray ^Flux;
+		ScalarField^ Conc;
+		ScalarField^ Flux;
 
-		List<Nt_MolecluarPopulationBoundary^>^ Component;
-
-
-		Nt_MolecluarPopulationBoundary()
+		property List<Nt_MolecluarPopulationBoundary^>^ Component
 		{
-			_boundaryConcs = NULL;
-			_boundaryFlux = NULL;
-			allocedItemCount = 0;
-			array_length = 0;
-			Component = gcnew List<Nt_MolecluarPopulationBoundary^>();
+			List<Nt_MolecluarPopulationBoundary^>^ get()
+			{
+				return components;
+			}
 		}
 
-		Nt_MolecluarPopulationBoundary(int boundId, Nt_Darray^ conc, Nt_Darray^ flux)
+		//default constructor for collection
+		Nt_MolecluarPopulationBoundary()
+		{
+		}
+
+		//default constructor for collection
+		Nt_MolecluarPopulationBoundary(Manifold^ m, bool isCollection)
+		{
+			Conc = gcnew ScalarField(m);
+			Flux = gcnew ScalarField(m);
+			if (isCollection)
+			{
+				components = gcnew List<Nt_MolecluarPopulationBoundary^>();
+				Conc->Initialize("ScalarFieldCollection", nullptr);
+				Flux->Initialize("ScalarFieldCollection", nullptr);
+			}
+		}
+
+		Nt_MolecluarPopulationBoundary(int boundId, ScalarField^ conc, ScalarField^ flux)
 		{
 			BoundaryId = boundId;
 			Conc = conc;
 			Flux = flux;
-
-			allocedItemCount = 1;
-			array_length = conc->Length;
-
-			_boundaryConcs = NULL;
-			_boundaryFlux = NULL;
 		}
 
 		Nt_MolecluarPopulationBoundary^ CloneParent()
 		{
-			return gcnew Nt_MolecluarPopulationBoundary();
+			return gcnew Nt_MolecluarPopulationBoundary(this->Conc->M, true);
+			
 		}
 
 		void AddBoundaryConcAndFlux(Nt_MolecluarPopulationBoundary^ boundary)
 		{
-			int itemCount = Component->Count;
-			Nt_Darray^ conc = boundary->Conc;
-			Nt_Darray^ flux = boundary->Flux;
-			int itemLength = conc->Length;
-			if (itemCount + 1 > allocedItemCount)
-			{
-				allocedItemCount = NtUtility::GetAllocSize(itemCount+1, allocedItemCount);
-				int alloc_size = allocedItemCount * conc->Length * sizeof(double);
-				_boundaryConcs = (double *)realloc(_boundaryConcs, alloc_size);
-				_boundaryFlux = (double *)realloc(_boundaryFlux, alloc_size);
-				if (! _boundaryConcs || !_boundaryFlux)
-				{
-					throw gcnew Exception("Error realloc memory");
-				}
-				//reassign memory address
-				for (int i=0; i< itemCount; i++)
-				{
-					Nt_MolecluarPopulationBoundary^ item = Component[i];
-					item->Conc->NativePointer = _boundaryConcs + i * itemLength;
-					item->Flux->NativePointer = _boundaryFlux + i * itemLength;
-				}
-			}
-
-			//appened new values
-			double *_cptr = _boundaryConcs + itemCount * itemLength;
-			double *_fptr = _boundaryFlux + itemCount * itemLength;
-			for (int i=0; i< itemLength; i++)
-			{
-				_cptr[i] = conc[i];
-				_fptr[i] = flux[i];
-			}
-			boundary->Conc->NativePointer = _cptr;
-			boundary->Flux->NativePointer = _fptr;
-			Component->Add(boundary);
-			array_length = Component->Count * conc->Length;
+			this->Conc->AddComponent(boundary->Conc);
+			this->Flux->AddComponent(boundary->Flux);
+			components->Add(boundary);
 		}
 
-		void AddBoundaryConcAndFlux(int boundId, Nt_Darray^ conc, Nt_Darray^ flux)
+		void AddBoundaryConcAndFlux(int boundId, ScalarField^ conc, ScalarField^ flux)
 		{
 			Nt_MolecluarPopulationBoundary^ boundary = gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux);
 			AddBoundaryConcAndFlux(boundary);
@@ -103,94 +82,66 @@ namespace NativeDaphne
 		//remove a boundary by its component conc
 		void RemoveBoundaryConcAndFlux(Nt_MolecluarPopulationBoundary^ item)
 		{
-			if (Component->Count == 0)
+			if (components->Count == 0)
 			{
 				throw gcnew Exception("remove boundary error 1: component is empty");
 			}
-			
-			int index = (int) (item->Conc->NativePointer - _boundaryConcs)/item->Conc->Length;
-			//debug
-			if (Component[index] != item)
+			int index = this->Conc->RemoveComponent(item->Conc);
+			this->Flux->RemoveComponent(item->Flux);
+			if (index != components->Count-1 )
 			{
-				throw gcnew Exception("boundary item mismatch");
+				components[index] = components[components->Count -1];
 			}
-
-			Nt_MolecluarPopulationBoundary^ lastItem = Component[Component->Count-1];
-			if (item != lastItem)
-			{
-				item->Conc->MemSwap(lastItem->Conc);
-				item->Flux->MemSwap(lastItem->Flux);
-				Component[index] = lastItem;
-			}
-			item->Conc->detach();
-			item->Flux->detach();
-			Component->RemoveAt(Component->Count-1);
-
-			//release memory if no item left.
-			if (Component->Count == 0)
-			{
-				if (this->allocedItemCount > 0)
-				{
-					free(_boundaryConcs);
-					free(_boundaryFlux);
-					_boundaryConcs = NULL;
-					_boundaryFlux = NULL;
-					allocedItemCount = 0;
-				}
-			}
-
+			components->RemoveAt(components->Count -1);
 		}
 
 		void RemoveBoundaryConcAndFlux(int index)
 		{
-			if (Component->Count == 0)
+			if (components->Count == 0)
 			{
 				throw gcnew Exception("remoeve boundary error 2: component is empty");
 			}
-			if (index < 0 || index >= Component->Count)
+			if (index < 0 || index >= components->Count)
 			{
 				throw gcnew Exception("remove boundary error: index out of range");
 			}
-			RemoveBoundaryConcAndFlux(Component[index]);
+			RemoveBoundaryConcAndFlux(components[index]);
 		}
 
-		void RemoveBoundaryConcAndFlux(Nt_Darray^ boundary_conc)
+
+		void RemoveBoundaryConcAndFlux(ScalarField^ boundary_conc)
 		{
-			if (Component->Count == 0)
+			if (components->Count == 0)
 			{
-				throw gcnew Exception("remoeve boundary error: component is empty");
+				throw gcnew Exception("remove boundary error: component is empty");
 			}
-			int index = (int)(boundary_conc->NativePointer - _boundaryConcs)/boundary_conc->Length;
-			if (index < 0 || index >= Component->Count || Component[index]->Conc != boundary_conc)
+			int index = (int)(boundary_conc->ArrayPointer - this->Conc->ArrayPointer)/boundary_conc->ArrayLength;
+			if (index < 0 || index >= components->Count || components[index]->Conc != boundary_conc)
 			{
 				throw gcnew Exception("remove boundary error: index out range");
 			}
-			RemoveBoundaryConcAndFlux(Component[index]);
+			RemoveBoundaryConcAndFlux(components[index]);
 		}
 				
 		Nt_MolecluarPopulationBoundary^ firstComponent()
 		{
-			if (Component->Count == 0)
+			if (components->Count == 0)
 			{
 				return nullptr;
 			}
-			return Component[0];
+			return components[0];
 		}
 
 		bool IsContainer()
 		{
-			return Component != nullptr;
+			return components != nullptr;
 		}
 
 		property double *ConcPointer
 		{
 			double* get()
 			{
-				if (Component == nullptr)
-				{
-					return Conc->NativePointer;
-				}
-				return _boundaryConcs;
+				return Conc->ArrayPointer;
 			}
 		}
 
@@ -198,11 +149,7 @@ namespace NativeDaphne
 		{
 			double* get()
 			{
-				if (Component == nullptr)
-				{
-					return Flux->NativePointer;
-				}
-				return _boundaryFlux;
+				return Flux->ArrayPointer;
 			}
 		}
 
@@ -210,15 +157,9 @@ namespace NativeDaphne
 		{
 			int get()
 			{
-				return Component == nullptr ? -1 : Component->Count;
+				return components == nullptr ? -1 : components->Count;
 			}
 		}
-
-	private:
-		int allocedItemCount; 
-		int array_length;
-		double *_boundaryConcs;
-		double *_boundaryFlux;
 	};
 
 
@@ -230,7 +171,9 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_MolecularPopulation
 	{
-
+	protected:
+		ScalarField^ concentration;
+		initonly Manifold^ manifold;
 	internal:
 		//this exist only for help debug
 		String^ Name;
@@ -240,7 +183,28 @@ namespace NativeDaphne
 		//molecule identity
 		String^ MoleculeKey;
 
-		Nt_Darray ^molpopConc;
+		property Manifold^ Man
+		{
+			Manifold^ get()
+			{
+				return manifold;
+			}
+		}
+
+
+		property bool IsDiffusing;
+
+		property ScalarField^ Conc
+        {
+            ScalarField^ get() 
+            {
+                return concentration; 
+            }
+            void set(ScalarField^ value) 
+            {
+                concentration = value; 
+            }
+        }
 
 		List<Nt_MolecularPopulation^> ^ComponentPopulations;
 
@@ -250,26 +214,19 @@ namespace NativeDaphne
 
 
 		//constructor
-		Nt_MolecularPopulation(String^ _molguid, String^ _name, double diff_coeff);
+		Nt_MolecularPopulation(Manifold^ m, String^ _molguid, String^ _name, double diff_coeff);
 
-		Nt_MolecularPopulation(String^ _molguid, String^ _name, double diff_coeff, Nt_Darray^ conc);
+		Nt_MolecularPopulation(Manifold^ m, String^ _molguid, String^ _name, double diff_coeff, ScalarField^ conc);
 
-		virtual Nt_MolecularPopulation^ CloneParent(Nt_Compartment^ c)
-		{
-			Nt_MolecularPopulation^ molpop = gcnew Nt_MolecularPopulation(this->MoleculeKey, this->Name, this->DiffusionCoefficient);
-			molpop->ComponentPopulations = gcnew List<Nt_MolecularPopulation^>();
-			molpop->Compartment = c;
-			molpop->AddMolecularPopulation(this);
-			return molpop;
-		}
+		virtual Nt_MolecularPopulation^ CloneParent(Nt_Compartment^ c);
 
 		virtual void AddMolecularPopulation(Nt_MolecularPopulation^ molpop);
 
 		virtual void RemoveMolecularPopulation(int index);
 
-		virtual void AddNtBoundaryFluxConc(int boundId, Nt_Darray^ conc, Nt_Darray^ flux);
+		virtual void AddNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux);
 
-		virtual void SetNtBoundaryFluxConc(int boundId, Nt_Darray^ conc, Nt_Darray^ flux);
+		virtual void SetNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux);
 
 		virtual void AddNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ boundary);
 
@@ -292,48 +249,31 @@ namespace NativeDaphne
 		Nt_Compartment^ Compartment;
 
 	internal:
+		
 		Nt_MolecularPopulation^ parent;
 
-		property double *NativePointer
+		property double *ConcPointer
 		{
 			double* get()
 			{
-				return molpopConc != nullptr ? molpopConc->NativePointer : _molpopConc;
+				return concentration->ArrayPointer;
 			}
-			void set(double *value)
-			{
-				if (molpopConc != nullptr)
-				{
-					molpopConc->NativePointer = value;
-				}
-				else 
-				{
-					_molpopConc = value;
-				}
-			}
+			//cannot set
 		}
 
+		//array length
 		property int Length
 		{
 			int get()
 			{
-				if (ComponentPopulations != nullptr)
-				{
-					return array_length;
-				}
-				return molpopConc->Length;
+				return concentration->darray->Length;
 			}
 		}
 		
 	protected:
-		double *_molpopConc;
-		double *_laplacian;
-		//the size of memory allocated, number of items.
-		int allocedItemCount;
-				
+		double *_laplacian;				
 		//for cells in ecs
 		double **_boundaryConcPtrs;
-		int array_length;
 		bool initialized;
 	};
 

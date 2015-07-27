@@ -223,7 +223,8 @@ namespace NativeDaphne
 			{
 				this->AddGene(kvp->Value);
 			}
-			//add molecular population before add reactions.
+			//add molecular population before adding reactions.
+			//otherwise the reaction won't have correct conc. pointer and length
 			this->Cytosol->AddMolecularPopulation(cell->cytosol->NtPopulations);
 			this->PlasmaMembrane->AddMolecularPopulation(cell->plasmaMembrane->NtPopulations);
 
@@ -260,17 +261,18 @@ namespace NativeDaphne
 			//remove cell spaticalState etc.
 			this->RemoveCell(cell);
 
-			//at this point, remove the cells data from molpop, reactions etc.
-
-			this->Cytosol->RemoveMemberCompartment(index);
-
-			this->PlasmaMembrane->RemoveMemberCompartment(index);
-
+			//at this point, remove the cells molpop first, and then reactions etc.
+			this->Cytosol->RemoveMemberCompartmentMolpop(index);
+			this->PlasmaMembrane->RemoveMemberCompartmentMolpop(index);
 			//remove genes
 			for (int i=0; i< genes->Count; i++)
 			{
 				genes[i]->RemoveGene(index);
 			}
+
+			this->Cytosol->RemoveMemberCompartmentReactions(index);
+			this->PlasmaMembrane->RemoveMemberCompartmentReactions(index);
+
 			//remove membrane boundary from cytosol and update boundaryId index in the cytosol collection
 			Cytosol->RemoveNtBoundary(cell->plasmaMembrane->InteriorId);
 

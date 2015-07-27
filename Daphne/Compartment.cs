@@ -6,7 +6,7 @@ using System.Text;
 using Ninject;
 using Ninject.Parameters;
 
-using ManifoldRing;
+using Nt_ManifoldRing;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Diagnostics;
@@ -29,7 +29,7 @@ namespace Daphne
             BoundaryTransforms = new Dictionary<int, Transform>();
             NaturalBoundaries = new Dictionary<int, Manifold>();
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
-            //create specialized base compartments
+            //create specialized base compartments if needed
             if (Interior is TinyBall)
             {
                 var tmp = Interior as TinyBall;
@@ -51,7 +51,8 @@ namespace Daphne
             }
             else
             {
-                throw new NotImplementedException("unknown manifold");
+                //generic
+                baseComp = new Nt_Compartment();
             }
             baseComp.InteriorId = Interior.Id;
             
@@ -98,38 +99,12 @@ namespace Daphne
         public void Step(double dt)
         {
 
-            //// the step method may organize the reactions in a more sophisticated manner to account
-            //// for different rate constants etc.
-            //foreach (Reaction r in BulkReactions)
-            //{
-            //    r.Step(dt);
-            //}
-
-            ////if (!(this.Interior is PointManifold))
-            //foreach (List<Reaction> rlist in BoundaryReactions.Values)
-            //{
-            //    foreach (Reaction r in rlist)
-            //    {
-            //        r.Step(dt);
-            //    }
-            //}
-
-            //reactions above moved to middle layer
-            //for cells, reactions are handled by "compartments" in cellpopulation
-            //for ecs, it is handled here
-            if (this.Interior is TinyBall == false && this.Interior is TinySphere == false)
+            if (this.Interior is TinyBall == true || this.Interior is TinySphere == true)
             {
-                baseComp.step(dt);
-
-                foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
-                {
-                    // Apply Laplacian, note: boundary fluxes moved to upper level
-                    if (molpop.Value.IsDiffusing == true)
-                    {
-                        molpop.Value.Step(dt);
-                    }
-                }
+                throw new Exception("wrong place");
             }
+
+            baseComp.step(dt);
         }
 
 

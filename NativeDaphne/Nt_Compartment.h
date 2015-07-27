@@ -79,11 +79,11 @@ namespace NativeDaphne
 					NtPopulations[i]->AddMolecularPopulation(molpop);
 					//debug
 					Nt_MolecularPopulation^ item = NtPopulations[i];
-					double *conc = item->NativePointer;
+					double *conc = item->ConcPointer;
 					double x = conc[0];
 
 					Nt_MolecularPopulation^ child = item->ComponentPopulations[0];
-					double *child_c = child->NativePointer;
+					double *child_c = child->ConcPointer;
 					double y = child_c[0];
 					return;
 				}
@@ -109,45 +109,65 @@ namespace NativeDaphne
 			}
 		}
 
-		void RemoveMemberCompartment(int index)
+
+		//remove molpop and reactions for a cell with the given index.
+		void RemoveMemberCompartmentMolpop(int index)
 		{
-			//remove molpop and reactions
 			for (int i=0; i< NtPopulations->Count; i++)
 			{
 				NtPopulations[i]->RemoveMolecularPopulation(index);
 			}
+		}
 
+		void RemoveMemberCompartmentReactions(int index)
+		{
 			//remove reactions
 			for (int i=0; i< NtBulkReactions->Count; i++)
 			{
 				NtBulkReactions[i]->RemoveReaction(index);
 			}
 
-			//remove compartment is only valid for cytosol
-			//not for ecs. for ecs, we remove the boudnary
-			//for a given cell. this is one reason that 
-			//it might be better if we do molecularPopuation
-			//with composition too, like we do with compartment
 			if (NtBoundaryReactions->Count > 0)
 			{
 				if (this->manifoldType != Nt_ManifoldType::TinyBallCollection)
 				{
 					throw gcnew Exception("Error RemoveMemberCompartment: wrong compartment");
 				}
-				Dictionary<int, Nt_ReactionSet^>::ValueCollection^ values = NtBoundaryReactions->Values;
-				Nt_ReactionSet^ rxn_set = nullptr;
-				for each (Nt_ReactionSet^ x in values)
-				{
-					rxn_set = x;
-					break;
-				}
-				if (rxn_set == nullptr)
-				{
-					throw gcnew Exception("Error RemoveMemberCompartment: reaction set empty");
-				}
+				//the key to NtBoundaryReaction is cellpopulation_id, which is valid for ECS
+				//but for cytosol collection, the boundary is membrane collection, there is
+				//no concept of populationId, we thus asseumed 0 as the key
+				//maybe we should move this into the Cytosol compartment
+				///and make this a non-dictionary.
+				Nt_ReactionSet^ rxn_set = NtBoundaryReactions[0];
 				rxn_set->RemoveReactions(index);
 			}
 		}
+
+
+		//void RemoveMemberCompartment(int index)
+		//{
+		//	//remove molpop and reactions for a cell with the given index.
+		//	for (int i=0; i< NtPopulations->Count; i++)
+		//	{
+		//		NtPopulations[i]->RemoveMolecularPopulation(index);
+		//	}
+
+		//	//remove reactions
+		//	for (int i=0; i< NtBulkReactions->Count; i++)
+		//	{
+		//		NtBulkReactions[i]->RemoveReaction(index);
+		//	}
+
+		//	if (NtBoundaryReactions->Count > 0)
+		//	{
+		//		if (this->manifoldType != Nt_ManifoldType::TinyBallCollection)
+		//		{
+		//			throw gcnew Exception("Error RemoveMemberCompartment: wrong compartment");
+		//		}
+		//		Nt_ReactionSet^ rxn_set = NtBoundaryReactions[0];
+		//		rxn_set->RemoveReactions(index);
+		//	}
+		//}
 
 		// gmk: Pulation, Put in NT_ECS with virtual and override?
 		//given boundaryId, return cellpopulationId
@@ -303,7 +323,7 @@ namespace NativeDaphne
         /// <param name="dt">The time interval.</param>
         virtual void step(double dt)
         {
-			throw gcnew Exception("NotImplementedException");
+			//throw gcnew Exception("NotImplementedException");
 
 			if (!initialized)initialize();
 
@@ -390,14 +410,18 @@ namespace NativeDaphne
 	public:
 		double CellRadius;
 
+		Transform^ BoundaryTransform;
+		
 		Nt_Cytosol(double r) : Nt_Compartment(Nt_ManifoldType::TinyBall)
 		{
 			CellRadius = r;
+			BoundaryTransform = gcnew Transform(false);
 		}
 
 		Nt_Cytosol(double r, Nt_ManifoldType mtype) : Nt_Compartment(mtype)
 		{
 			CellRadius = r;
+			BoundaryTransform = gcnew Transform(false);
 		}
 
 		~Nt_Cytosol(){}
@@ -587,6 +611,8 @@ namespace NativeDaphne
 			initialized = true;
 		}
 
+
+		//ecm step
 		virtual void step(double dt) override
         {
 			if (initialized == false)initialize();
@@ -638,10 +664,13 @@ namespace NativeDaphne
 
 			//for now, this is doing update ecs/membrane boundary
 			//this is disabled for handling reactions ONLY
-			//for (int i=0; i< NtPopulations->Count; i++)
-			//{
-			//	NtPopulations[i]->step(this, dt);
-			//}
+			for (int i=0; i< NtPopulations->Count; i++)
+			{
+				if (NtPopulations[i]->IsDiffusing == true)
+				{
+					NtPopulations[i]->step(this, dt);
+				}
+			}
 		}
 		
 

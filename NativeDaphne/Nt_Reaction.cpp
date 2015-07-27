@@ -7,6 +7,7 @@
 #include "Nt_Reaction.h"
 #include "NtUtility.h"
 #include "Nt_Compartment.h"
+#include "Nt_Manifolds.h"
 
 
 #include <vcclr.h>
@@ -47,17 +48,15 @@ namespace NativeDaphne
 	Nt_Annihilation::Nt_Annihilation(Nt_MolecularPopulation^ reactant, double rate_const) :Nt_Reaction(rate_const)
 	{
 		Reactant = reactant;
+		_reactant = Reactant->ConcPointer;
+		array_length = Reactant->Length;
 	}
 
 	void Nt_Annihilation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
-		_reactant = Reactant->NativePointer;
+		_reactant = Reactant->ConcPointer;
 		array_length = Reactant->Length;
-		if (!_reactant)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
 	}
 
 	void Nt_Annihilation:: RemoveReaction(int index)
@@ -72,14 +71,13 @@ namespace NativeDaphne
 		Nt_Annihilation^ rxn = gcnew Nt_Annihilation(this->RateConstant);
 		rxn->ComponentReactions = gcnew List<Nt_Reaction ^>();
 		rxn->Reactant = this->Reactant->parent != nullptr ? this->Reactant->parent : this->Reactant;
-		this->Steppable = false;
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_Annihilation::Step(double dt)
 	{
-		dscal(array_length, (1.0 -RateConstant*dt), _reactant, 1);
+		dscal(array_length, (1.0 - RateConstant*dt), _reactant, 1);
 	}
 
 
@@ -90,34 +88,39 @@ namespace NativeDaphne
 	{
 	}
 
-	Nt_Association::Nt_Association(Nt_MolecularPopulation^ _reactant1, Nt_MolecularPopulation^ _reactant2, 
-		Nt_MolecularPopulation^ _product, double _rateConst):Nt_Reaction(_rateConst)
+	Nt_Association::Nt_Association(Nt_MolecularPopulation^ reactant1, Nt_MolecularPopulation^ reactant2, 
+		Nt_MolecularPopulation^ product, double _rateConst):Nt_Reaction(_rateConst)
 	{
-			Reactant1 = _reactant1;
-			Reactant2 = _reactant2;
-			Product = _product;
+			Reactant1 = reactant1;
+			Reactant2 = reactant2;
+			Product = product;
+			array_length = Reactant1->Length;
+			intensity = gcnew ScalarField(Reactant1->Conc->M);
+			_reactant1 = Reactant1->ConcPointer;
+			_reactant2 = Reactant2->ConcPointer;
+			_product = Product->ConcPointer;
+
 	}
 
 	void Nt_Association::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant1->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-
-		_reactant1 = Reactant1->NativePointer;
-		_reactant2 = Reactant2->NativePointer;
-		_product = Product->NativePointer;
-		if (_reactant1 == NULL || _reactant2 == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_reactant1 = Reactant1->ConcPointer;
+		_reactant2 = Reactant2->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_Association::RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant1->Length;
+		if (array_length != ComponentReactions->Count * Reactant1->Man->ArraySize)
+		{
+			throw gcnew Exception("incorrect array length");
+		}
+		intensity->darray->resize(array_length);
 	}
 
 
@@ -128,16 +131,22 @@ namespace NativeDaphne
 		rxn->Reactant1 = Reactant1->parent != nullptr ? Reactant1->parent : Reactant1;
 		rxn->Reactant2 = Reactant2->parent != nullptr ? Reactant2->parent : Reactant2;
 		rxn->Product = Product->parent != nullptr ? Product->parent : Product;
+		//temprary variable
+		rxn->intensity = gcnew ScalarField(rxn->Reactant1->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_Association::Step(double dt)
-	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _reactant1, _reactant2, _intensity);
-		daxpy(array_length, -dt * RateConstant, _intensity, 1, _reactant1, 1);
-		daxpy(array_length, -dt * RateConstant, _intensity, 1, _reactant2, 1);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _product, 1);
+	{	
+		  
+		//this handles the scalar muliplication.
+		intensity->reset(Reactant1->Conc)->Multiply(Reactant2->Conc)->Multiply(RateConstant * dt);
+		
+		double* _intensity = intensity->ArrayPointer;
+		daxpy(array_length, -1.0, _intensity, 1, _reactant1, 1);
+		daxpy(array_length, -1.0, _intensity, 1, _reactant2, 1);
+		daxpy(array_length, 1.0, _intensity, 1, _product, 1);
 	}
 
 
@@ -148,23 +157,21 @@ namespace NativeDaphne
 	{
 	}
 
-	Nt_Dimerization::Nt_Dimerization(Nt_MolecularPopulation^ _reactant, Nt_MolecularPopulation^ _product, double _rateConst):Nt_Reaction(_rateConst)
+	Nt_Dimerization::Nt_Dimerization(Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product, double _rateConst):Nt_Reaction(_rateConst)
 	{
-		Reactant = _reactant;
-		Product = _product;
+		Reactant = reactant;
+		Product = product;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
+		array_length = Reactant->Length;
 	}
 
 	void Nt_Dimerization::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_reactant = Reactant->NativePointer;
-		_product = Product->NativePointer;
-		if (_reactant == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_Dimerization::RemoveReaction(int index)
@@ -196,23 +203,21 @@ namespace NativeDaphne
 	{
 	}
 
-	Nt_DimerDissociation::Nt_DimerDissociation(Nt_MolecularPopulation^ _reactant, Nt_MolecularPopulation^ _product, double _rateConst):Nt_Reaction(_rateConst)
+	Nt_DimerDissociation::Nt_DimerDissociation(Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product, double _rateConst):Nt_Reaction(_rateConst)
 	{
-		Reactant = _reactant;
-		Product = _product;
+		Reactant = reactant;
+		Product = product;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
+		array_length = Reactant->Length;
 	}
 
 	void Nt_DimerDissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_reactant = Reactant->NativePointer;
-		_product = Product->NativePointer;
-		if (_reactant == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_DimerDissociation::RemoveReaction(int index)
@@ -245,26 +250,25 @@ namespace NativeDaphne
 	{
 	}
 
-	Nt_Dissociation::Nt_Dissociation(Nt_MolecularPopulation^ _reactant, Nt_MolecularPopulation^ _product1, 
-		Nt_MolecularPopulation^ _product2, double _rateConst):Nt_Reaction(_rateConst)
+	Nt_Dissociation::Nt_Dissociation(Nt_MolecularPopulation^ reactant, Nt_MolecularPopulation^ product1, 
+		Nt_MolecularPopulation^ product2, double _rateConst):Nt_Reaction(_rateConst)
 	{
-			Reactant = _reactant;
-			Product1 = _product1;
-			Product2 = _product2;
+			Reactant = reactant;
+			Product1 = product1;
+			Product2 = product2;
+			_reactant = Reactant->ConcPointer;
+			_product1 = Product1->ConcPointer;
+			_product2 = Product2->ConcPointer;
+			array_length = Reactant->Length;
 	}
 
 	void Nt_Dissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
+		_reactant = Reactant->ConcPointer;
+		_product1 = Product1->ConcPointer;
+		_product2 = Product2->ConcPointer;
 		array_length = Reactant->Length;
-		_reactant = Reactant->NativePointer;
-		_product1 = Product1->NativePointer;
-		_product2 = Product2->NativePointer;
-		if (_reactant == NULL || _product1 == NULL || _product2 == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
 	}
 
 	void Nt_Dissociation::RemoveReaction(int index)
@@ -286,6 +290,15 @@ namespace NativeDaphne
 
 	void Nt_Dissociation::Step(double dt)
 	{
+		//if (array_length == 1)
+		//{
+		//	double tmp = dt * RateConstant * (*_reactant);
+		//	*_product1 += tmp;
+		//	*_product2 += tmp;
+		//	*_reactant -= tmp;
+		//	return;
+		//}
+
 		daxpy(array_length, dt*RateConstant, _reactant, 1, _product1, 1);
 		daxpy(array_length, dt*RateConstant, _reactant, 1, _product2, 1);
 		dscal(array_length, (1.0-RateConstant * dt), _reactant, 1);
@@ -303,18 +316,17 @@ namespace NativeDaphne
 	{
 		Reactant = reactant;
 		Product = product;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
+		array_length = Reactant->Length;
 	}
 
 	void Nt_Transformation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 		array_length = Reactant->Length;
-		_reactant = Reactant->NativePointer;
-		_product = Product->NativePointer;
-		if (_reactant == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
 	}
 
 	void Nt_Transformation::RemoveReaction(int index)
@@ -335,8 +347,15 @@ namespace NativeDaphne
 	
 	void Nt_Transformation::Step(double dt)
 	{
-		
-		NtUtility::NtDoubleDaxpy(array_length, RateConstant *dt, _reactant, _product);
+		//if (array_length == 1)
+		//{
+		//	double intensity = RateConstant * dt;
+		//	*_product += *_reactant * intensity;
+		//	*_reactant *= (1.0 - intensity);
+		//	return;
+		//}
+		daxpy(array_length, RateConstant *dt, _reactant, 1, _product, 1);
+		dscal(array_length, (1.0 - RateConstant * dt), _reactant, 1);
 	}
 
 
@@ -360,27 +379,26 @@ namespace NativeDaphne
 			Reactant = reactant1;
 			Catalyst = reactant2;
 		}
+		intensity = gcnew ScalarField(Reactant->Conc->M);
+		_reactant = Reactant->ConcPointer;
+		_catalyst = Catalyst->ConcPointer;
+		array_length = Reactant->Length;
 	}
 
 	void Nt_AutocatalyticTransformation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-
-		_reactant = Reactant->NativePointer;
-		_catalyst = Catalyst->NativePointer;
-		if (_reactant == NULL || _catalyst == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_reactant = Reactant->ConcPointer;
+		_catalyst = Catalyst->ConcPointer;
 	}
 
 	void Nt_AutocatalyticTransformation::RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_AutocatalyticTransformation::CloneParent()
@@ -390,14 +408,18 @@ namespace NativeDaphne
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Catalyst = Catalyst->parent != nullptr ? Catalyst->parent : Catalyst;
 		rxn->AddReaction(this);
+		intensity = gcnew ScalarField(Reactant->Conc->M);
 		return rxn;
 	}
 
 	void Nt_AutocatalyticTransformation::Step(double dt)
 	{
-		NativeDaphneLibrary::NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant, _intensity);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _catalyst, 1);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _reactant, 1);
+		//this handles the scalar muliplication.
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc)->Multiply(RateConstant * dt);
+
+		double *_intensity = intensity->ArrayPointer;
+		daxpy(array_length, 1.0, _intensity, 1, _catalyst, 1);
+		daxpy(array_length, -1.0, _intensity, 1, _reactant, 1);
 	}
 
 
@@ -413,26 +435,26 @@ namespace NativeDaphne
 	{
 		Reactant = reactant;
 		Catalyst = catalyst;
+		_reactant = Reactant->ConcPointer;
+		_catalyst = Catalyst->ConcPointer;
+		array_length = Reactant->Length;
+		intensity = gcnew ScalarField(Reactant->Conc->M);
 	}
 
 	void Nt_CatalyzedAnnihilation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_reactant = Reactant->NativePointer;
-		_catalyst = Catalyst->NativePointer;
-		if (_reactant == NULL || _catalyst == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_reactant = Reactant->ConcPointer;
+		_catalyst = Catalyst->ConcPointer;
 	}
 
 	void Nt_CatalyzedAnnihilation::RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedAnnihilation::CloneParent()
@@ -441,14 +463,15 @@ namespace NativeDaphne
 		rxn->ComponentReactions = gcnew List<Nt_Reaction ^>();
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Catalyst = Catalyst->parent != nullptr ? Catalyst->parent : Catalyst;
+		rxn->intensity = gcnew ScalarField(Reactant->Man);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedAnnihilation::Step(double dt)
 	{
-		NativeDaphneLibrary::NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant, _intensity);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _reactant, 1);
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant, 1);
 	}
 
 	//****************************************
@@ -465,29 +488,31 @@ namespace NativeDaphne
 		Reactant1 = reactant1;
 		Reactant2 = reactant2;
 		Product = product;
+
+		_catalyst = Catalyst->ConcPointer;
+		_reactant1 = Reactant1->ConcPointer;
+		_reactant2 = Reactant2->ConcPointer;
+		_product = Product->ConcPointer;
+		array_length = Reactant1->Length;
+		intensity = gcnew ScalarField(Reactant1->Conc->M);
 	}
 
 	void Nt_CatalyzedAssociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant1->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_intensity2 = (double *)realloc(_intensity, array_length *sizeof(double));
-		_reactant1 = Reactant1->NativePointer;
-		_reactant2 = Reactant2->NativePointer;
-		_catalyst = Catalyst->NativePointer;
-		_product = Product->NativePointer;
-		if (_reactant1 == NULL || _catalyst == NULL || _reactant2 == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant1 = Reactant1->ConcPointer;
+		_reactant2 = Reactant2->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_CatalyzedAssociation::RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant1->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedAssociation::CloneParent()
@@ -498,17 +523,20 @@ namespace NativeDaphne
 		rxn->Reactant1 = Reactant1->parent != nullptr ? Reactant1->parent : Reactant1;
 		rxn->Reactant2 = Reactant2->parent != nullptr ? Reactant2->parent : Reactant2;
 		rxn->Product = Product->parent != nullptr ? Product->parent : Product;
+		rxn->intensity = gcnew ScalarField(Reactant1->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedAssociation::Step(double dt)
 	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant1, _intensity);
-		NtUtility::NtMultiplyScalar(array_length, 4, _intensity, _reactant2, _intensity2);
-		daxpy(array_length, -dt*RateConstant, _intensity2, 1, _reactant1, 1);
-		daxpy(array_length, -dt*RateConstant, _intensity2, 1, _reactant2, 1);
-		daxpy(array_length, dt*RateConstant, _intensity2, 1, _product, 1);
+
+		//handles the scalar muliplication.
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant1->Conc)->Multiply(Reactant2->Conc);
+
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant1, 1);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant2, 1);
+		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _product, 1);
 	}
 
 	//****************************************
@@ -522,19 +550,17 @@ namespace NativeDaphne
 	{
 		Catalyst = catalyst;
 		Product = product;
+		_catalyst = Catalyst->ConcPointer;
+		_product = Product->ConcPointer;
+		array_length = Product->Length;
 	}
 
 	void Nt_CatalyzedCreation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Product->Length;
-		_catalyst = Catalyst->NativePointer;
-		_product = Product->NativePointer;
-		if (_catalyst == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		_catalyst = Catalyst->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_CatalyzedCreation::RemoveReaction(int index)
@@ -572,21 +598,22 @@ namespace NativeDaphne
 		Catalyst = catalyst;
 		Reactant = reactant;
 		Product = product;
+		array_length = Reactant->Length;
+		intensity = gcnew ScalarField(Reactant->Conc->M);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
+	
 	}
 
 	void Nt_CatalyzedDimerization::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_catalyst = Catalyst->NativePointer;
-		_reactant = Reactant->NativePointer;
-		_product = Product->NativePointer;
-		if (_catalyst == NULL || _reactant == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 
@@ -594,6 +621,7 @@ namespace NativeDaphne
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedDimerization::CloneParent()
@@ -603,15 +631,18 @@ namespace NativeDaphne
 		rxn->Catalyst = Catalyst->parent != nullptr ? Catalyst->parent : Catalyst;
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Product = Product->parent != nullptr ? Product->parent : Product;
+		rxn->intensity = gcnew ScalarField(Reactant->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedDimerization::Step(double dt)
 	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant, _intensity);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _product, 1);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _reactant, 1);
+		//handle scalar multiplicaiton
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc);
+
+		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _product, 1);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant, 1);
 	}
 
 
@@ -628,27 +659,30 @@ namespace NativeDaphne
 		Catalyst = catalyst;
 		Reactant = reactant;
 		Product = product;
+
+		array_length = Reactant->Length;
+		intensity = gcnew ScalarField(Reactant->Conc->M);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_CatalyzedDimerDissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
+
 		array_length = Reactant->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_catalyst = Catalyst->NativePointer;
-		_reactant = Reactant->NativePointer;
-		_product = Product->NativePointer;
-		if (_catalyst == NULL || _reactant == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 	void Nt_CatalyzedDimerDissociation::RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedDimerDissociation::CloneParent()
@@ -658,15 +692,16 @@ namespace NativeDaphne
 		rxn->Catalyst = Catalyst->parent != nullptr ? Catalyst->parent : Catalyst;
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Product = Product->parent != nullptr ? Product->parent : Product;
+		rxn->intensity = gcnew ScalarField(rxn->Reactant->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedDimerDissociation::Step(double dt)
 	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant, _intensity);
-		daxpy(array_length, dt*RateConstant*2.0, _intensity, 1, _product, 1);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _reactant, 1);
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc);
+		daxpy(array_length, dt*RateConstant*2.0, intensity->ArrayPointer, 1, _product, 1);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant, 1);
 	}
 
 
@@ -684,29 +719,31 @@ namespace NativeDaphne
 		Reactant = reactant;
 		Product1 = product1;
 		Product1 = product1;
+		
+		array_length = Reactant->Length;
+		intensity = gcnew ScalarField(Reactant->Conc->M);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product1 = Product1->ConcPointer;
+		_product2 = Product2->ConcPointer;
 	}
 
 	void Nt_CatalyzedDissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_catalyst = Catalyst->NativePointer;
-		_reactant = Reactant->NativePointer;
-		_product1 = Product1->NativePointer;
-		_product2 = Product2->NativePointer;
-		if (_catalyst == NULL || _reactant == NULL || _product1 == NULL || _product2 == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product1 = Product1->ConcPointer;
+		_product2 = Product2->ConcPointer;
 	}
-
 
 	void Nt_CatalyzedDissociation::RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedDissociation::CloneParent()
@@ -717,17 +754,17 @@ namespace NativeDaphne
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Product1 = Product1->parent != nullptr ? Product1->parent : Product1;
 		rxn->Product2 = Product2->parent != nullptr ? Product2->parent : Product2;
-		rxn->AddReaction(this);
+		rxn->intensity = gcnew ScalarField(rxn->Reactant->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedDissociation::Step(double dt)
 	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant, _intensity);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _reactant, 1);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _product1, 1);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _product2, 1);
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant, 1);
+		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _product1, 1);
+		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _product2, 1);
 	}
 
 	//****************************************
@@ -743,21 +780,23 @@ namespace NativeDaphne
 		Catalyst = catalyst;
 		Reactant = reactant;
 		Product = product;
+		array_length = Reactant->Length;
+		intensity = gcnew ScalarField(Reactant->Conc->M);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
+
+
 	}
 
 	void Nt_CatalyzedTransformation::AddReaction(Nt_Reaction^ src_rxn)
 	{
-		src_rxn->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_catalyst = Catalyst->NativePointer;
-		_reactant = Reactant->NativePointer;
-		_product = Product->NativePointer;
-		if (_catalyst == NULL || _reactant == NULL || _product == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		intensity->darray->resize(array_length);
+		_catalyst = Catalyst->ConcPointer;
+		_reactant = Reactant->ConcPointer;
+		_product = Product->ConcPointer;
 	}
 
 
@@ -765,6 +804,7 @@ namespace NativeDaphne
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedTransformation::CloneParent()
@@ -774,15 +814,16 @@ namespace NativeDaphne
 		rxn->Catalyst = Catalyst->parent != nullptr ? Catalyst->parent : Catalyst;
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Product = Product->parent != nullptr ? Product->parent : Product;
+		rxn->intensity = gcnew ScalarField(rxn->Reactant->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedTransformation::Step(double dt)
 	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _catalyst, _reactant, _intensity);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _reactant, 1);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _product, 1);
+		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant, 1);
+		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _product, 1);
 	}
 
 	//************************************
@@ -797,20 +838,18 @@ namespace NativeDaphne
 	{
 		Gene = gene;
 		Product = product;
+		array_length = Product->Length;
+		_product = Product->ConcPointer;
+		_activation = Gene->activation_pointer();
 	}
 
 	void Nt_Transcription::AddReaction(Nt_Reaction ^src_rxn)
 	{
-		this->Steppable = false;
 		ComponentReactions->Add(src_rxn);
 		array_length = Product->Length;
-		_product = Product->NativePointer;
+		_product = Product->ConcPointer;
 		_activation = Gene->activation_pointer();
 		CopyNumber = Gene->CopyNumber;
-		if (_product == NULL || _activation == NULL)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
 	}
 
 
@@ -832,7 +871,6 @@ namespace NativeDaphne
 
 	void Nt_Transcription::Step(double dt)
 	{
-		//note: transcirption only addes to the first element, not to all 4 elements of _product
 		double factor = RateConstant * CopyNumber * dt;
 		daxpy(array_length/4, factor, _activation, 1, _product, 4);
 	}
@@ -850,27 +888,39 @@ namespace NativeDaphne
 		Bulk = bulk;
 		BulkActivated = bulkActivated;
 		Receptor = receptor;
+
+		array_length = Receptor->Length;
+		intensity = gcnew ScalarField(Receptor->Conc->M);
+		boundaryId = Receptor->Man->Id;
+
+		int pop_id = bulk->Compartment->GetCellPulationId(boundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[pop_id]->FluxPointer;
+		_bulk_BoundaryConc = Bulk->BoundaryConcAndFlux[pop_id]->ConcPointer;
+		_bulkActivated_BoundaryFlux = BulkActivated->BoundaryConcAndFlux[pop_id]->FluxPointer;
+		_receptor = Receptor->ConcPointer;
+
 	}
 
 	void Nt_CatalyzedBoundaryActivation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
 		array_length = Receptor->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
+		intensity->darray->resize(array_length);
 		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[boundaryId]->FluxPointer;
 		_bulk_BoundaryConc = Bulk->BoundaryConcAndFlux[boundaryId]->ConcPointer;
 		_bulkActivated_BoundaryFlux = BulkActivated->BoundaryConcAndFlux[boundaryId]->FluxPointer;
-		_receptor = Receptor->NativePointer;
-		if (!_bulk_BoundaryConc || !_bulk_BoundaryFlux || !_bulkActivated_BoundaryFlux || !_receptor)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		_receptor = Receptor->ConcPointer;
 	}
 
 	void Nt_CatalyzedBoundaryActivation:: RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Receptor->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_CatalyzedBoundaryActivation::CloneParent()
@@ -886,16 +936,16 @@ namespace NativeDaphne
 		rxn->BulkActivated = BulkActivated->parent != nullptr ? BulkActivated->parent : BulkActivated;
 		rxn->Receptor = Receptor->parent != nullptr ? Receptor->parent : Receptor;
 		rxn->boundaryId = boundary_id;
+		rxn->intensity = gcnew ScalarField(rxn->Receptor->Conc->M);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_CatalyzedBoundaryActivation::Step(double dt)
 	{
-		int n = array_length;
-		NtUtility::NtMultiplyScalar(n, 4, _receptor, _bulk_BoundaryConc, _intensity);
-		daxpy(n, RateConstant, _intensity, 1, _bulk_BoundaryFlux, 1);
-		daxpy(n, -RateConstant, _intensity, 1, _bulkActivated_BoundaryFlux, 1);
+		intensity->reset(Receptor->Conc)->Multiply(Bulk->BoundaryConcAndFlux[boundaryId]->Conc);
+		daxpy(array_length, RateConstant, intensity->ArrayPointer, 1, _bulk_BoundaryFlux, 1);
+		daxpy(array_length, -RateConstant, intensity->ArrayPointer, 1, _bulkActivated_BoundaryFlux, 1);
 	}
 
 	//*************************************
@@ -910,19 +960,26 @@ namespace NativeDaphne
 	{
 		Bulk = bulk;
 		Membrane = membrane;
+		array_length = Membrane->Length;
+		boundaryId = membrane->Man->Id;
+
+		int pop_id = bulk->Compartment->GetCellPulationId(boundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		_bulk_BoundaryConc = Bulk->BoundaryConcAndFlux[pop_id]->ConcPointer;
+		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[pop_id]->FluxPointer;
+		_membraneConc = Membrane->ConcPointer;
 	}
 
 	void Nt_BoundaryTransportTo:: AddReaction(Nt_Reaction ^src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
 		array_length = Membrane->Length;
-		_bulk_BoundaryConc = Bulk->BoundaryConcAndFlux[boundaryId]->ConcPointer; //native_pointer(); //this only works for cytosol, not for ECS
+		_bulk_BoundaryConc = Bulk->BoundaryConcAndFlux[boundaryId]->ConcPointer;
 		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[boundaryId]->FluxPointer;
-		_membraneConc = Membrane->NativePointer;
-		if (!_bulk_BoundaryConc || !_bulk_BoundaryFlux || !_membraneConc)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		_membraneConc = Membrane->ConcPointer;
 	}
 
 	void Nt_BoundaryTransportTo:: RemoveReaction(int index)
@@ -968,6 +1025,16 @@ namespace NativeDaphne
 	{
 		Membrane = membrane;
 		Bulk = bulk;
+		boundaryId = Membrane->Man->Id;
+		array_length = Membrane->Length;
+
+		int pop_id = bulk->Compartment->GetCellPulationId(boundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[pop_id]->FluxPointer;
+		_membraneConc = Membrane->ConcPointer;
 	}
 
 	void Nt_BoundaryTransportFrom:: AddReaction(Nt_Reaction ^src_rxn)
@@ -975,11 +1042,7 @@ namespace NativeDaphne
 		ComponentReactions->Add(src_rxn);
 		array_length = Membrane->Length;
 		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[boundaryId]->FluxPointer;
-		_membraneConc = Membrane->NativePointer;
-		if (!_bulk_BoundaryFlux || !_membraneConc)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
+		_membraneConc = Membrane->ConcPointer;
 	}
 
 
@@ -1019,29 +1082,37 @@ namespace NativeDaphne
 		Receptor = receptor;
 		Ligand = ligand;
 		Complex = complex;
-		_intensity = NULL;
+		array_length = Receptor->Length;
+		boundaryId = Complex->Man->Id;
+		intensity = gcnew ScalarField(Complex->Man);
+		_receptor = Receptor->ConcPointer;	//membrane
+		_complex = Complex->ConcPointer;	//membrane
+
+		int pop_id = ligand->Compartment->GetCellPulationId(boundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		_ligand_BoundaryConc = Ligand->BoundaryConcAndFlux[pop_id]->ConcPointer;
+		_ligand_BoundaryFlux = Ligand->BoundaryConcAndFlux[pop_id]->FluxPointer;
 	}
 
 	void Nt_BoundaryAssociation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
 		array_length = Receptor->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_receptor = Receptor->NativePointer;	//membrane
-		_complex = Complex->NativePointer;		//membrane
+		intensity->darray->resize(array_length);
+		_receptor = Receptor->ConcPointer;	//membrane
+		_complex = Complex->ConcPointer;	//membrane
 		_ligand_BoundaryConc = Ligand->BoundaryConcAndFlux[boundaryId]->ConcPointer;
 		_ligand_BoundaryFlux = Ligand->BoundaryConcAndFlux[boundaryId]->FluxPointer;
-
-		if (!_receptor || !_complex || !_ligand_BoundaryConc || !_ligand_BoundaryFlux)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
 	}
 
 	void Nt_BoundaryAssociation:: RemoveReaction(int index)
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Receptor->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_BoundaryAssociation::CloneParent(int popid)
@@ -1052,16 +1123,20 @@ namespace NativeDaphne
 		rxn->Complex = Complex->parent != nullptr ? Complex->parent : Complex;
 		rxn->Ligand = Ligand->parent != nullptr ? Ligand->parent : Ligand;
 		rxn->Receptor = Receptor->parent != nullptr ? Receptor->parent : Receptor;
+		rxn->intensity = gcnew ScalarField(rxn->Complex->Man);
 		rxn->AddReaction(this);
 		return rxn;
 	}
 
 	void Nt_BoundaryAssociation::Step(double dt)
 	{
-		NtUtility::NtMultiplyScalar(array_length, 4, _receptor, _ligand_BoundaryConc, _intensity);
-		daxpy(array_length, RateConstant, _intensity, 1, _ligand_BoundaryFlux, 1);
-		daxpy(array_length, -dt*RateConstant, _intensity, 1, _receptor, 1);
-		daxpy(array_length, dt*RateConstant, _intensity, 1, _complex, 1);
+		//not the intensity has the correct manifold informaiton but it may not have correct
+		//information about component, since the reset does not copy that info and the info is also
+		//not needed for the computation.
+		intensity->reset(Receptor->Conc)->Multiply(Ligand->BoundaryConcAndFlux[boundaryId]->Conc);
+		daxpy(array_length, RateConstant, intensity->ArrayPointer, 1, _ligand_BoundaryFlux, 1);
+		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _receptor, 1);
+		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _complex, 1);
 	}
 
 	//*************************************
@@ -1077,22 +1152,30 @@ namespace NativeDaphne
 		Receptor = receptor;
 		Ligand = ligand;
 		Complex = complex;
-		_intensity = NULL;
+		intensity = gcnew ScalarField(Complex->Man);
+		array_length = Receptor->Length;
+		_receptor = Receptor->ConcPointer;	//membrane
+		_complex = Complex->ConcPointer;	//membrane
+
+		boundaryId = Complex->Man->Id;
+		int pop_id = ligand->Compartment->GetCellPulationId(boundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		_ligand_BoundaryConc = Ligand->BoundaryConcAndFlux[pop_id]->ConcPointer;
+		_ligand_BoundaryFlux = Ligand->BoundaryConcAndFlux[pop_id]->FluxPointer;
 	}
 
 	void Nt_BoundaryDissociation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
 		array_length = Receptor->Length;
-		_intensity = (double *)realloc(_intensity, array_length *sizeof(double));
-		_receptor = Receptor->NativePointer;	//membrane
-		_complex = Complex->NativePointer;		//membrane
+		intensity->darray->resize(array_length);
+		_receptor = Receptor->ConcPointer;	//membrane
+		_complex = Complex->ConcPointer;		//membrane
 		_ligand_BoundaryConc = Ligand->BoundaryConcAndFlux[boundaryId]->ConcPointer;
 		_ligand_BoundaryFlux = Ligand->BoundaryConcAndFlux[boundaryId]->FluxPointer;
-		if (!_receptor || !_complex || !_ligand_BoundaryConc || !_ligand_BoundaryFlux)
-		{
-			throw gcnew Exception("reaction component not initialized");
-		}
 	}
 
 
@@ -1100,6 +1183,7 @@ namespace NativeDaphne
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Receptor->Length;
+		intensity->darray->resize(array_length);
 	}
 
 
@@ -1111,6 +1195,7 @@ namespace NativeDaphne
 		rxn->Complex = Complex->parent != nullptr ? Complex->parent : Complex;
 		rxn->Ligand = Ligand->parent != nullptr ? Ligand->parent : Ligand;
 		rxn->Receptor = Receptor->parent != nullptr ? Receptor->parent : Receptor;
+		rxn->intensity = gcnew ScalarField(rxn->Complex->Man);
 		rxn->AddReaction(this);
 		return rxn;
 	}

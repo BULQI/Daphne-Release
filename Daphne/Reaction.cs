@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NativeDaphne;
 using Gene = NativeDaphne.Nt_Gene;
-using ManifoldRing;
+using Nt_ManifoldRing;
 
 namespace Daphne
 {
@@ -59,6 +59,8 @@ namespace Daphne
 
         public override void Step(double dt)
         {
+            //base.Step(dt);
+            //return;
             intensity = intensity.reset(reactant1.Conc).Multiply(reactant2.Conc).Multiply(RateConstant * dt);
             reactant1.Conc.Subtract(intensity);
             reactant2.Conc.Subtract(intensity);
@@ -132,6 +134,8 @@ namespace Daphne
 
         public override void Step(double dt)
         {
+            //base.Step(dt);
+            //return;
             intensity.reset(reactant.Conc).Multiply(RateConstant * dt);
             reactant.Conc.Subtract(intensity);
             product1.Conc.Add(intensity);
@@ -157,6 +161,8 @@ namespace Daphne
 
         public override void Step(double dt)
         {
+            //base.Step(dt);
+            //return;
             intensity.reset(reactant.Conc).Multiply(RateConstant * dt);
             reactant.Conc.Subtract(intensity);
             product.Conc.Add(intensity);
@@ -530,7 +536,6 @@ namespace Daphne
             ligand = _ligand;
             complex = _complex;
             boundary = complex.Man;
-            boundaryId = boundary.Id;
             RateConstant = _RateConst;
             //Type = ReactionType.BoundaryDissociation;
             intensity = new ScalarField(this.boundary);

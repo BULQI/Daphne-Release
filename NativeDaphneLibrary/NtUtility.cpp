@@ -12,12 +12,12 @@ using namespace std;
 namespace NativeDaphneLibrary
 {
 	
-	int NtUtility::NtDoubleDaxpy(int n, double alpha, double *x, double *y)
-	{
-		daxpy(n, alpha, x, 1, y, 1);	//y = y + x*alpha
-		dscal(n, (1-alpha), x, 1);		//x = x - alpa*x = (1-a)*x
-		return 0;
-	}
+	//int NtUtility::NtDoubleDaxpy(int n, double alpha, double *x, double *y)
+	//{
+	//	daxpy(n, alpha, x, 1, y, 1);	//y = y + x*alpha
+	//	dscal(n, (1-alpha), x, 1);		//x = x - alpa*x = (1-a)*x
+	//	return 0;
+	//}
 
 	//multiply two scalars and save result in z
 	int NtUtility::NtMultiplyScalar(int n, int inc, double *x, double *y, double *z)

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 
 using MathNet.Numerics.LinearAlgebra.Double;
-using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
 using NativeDaphne;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Nt_ManifoldRing;
 using Gene = NativeDaphne.Nt_Gene;
 
 namespace Daphne

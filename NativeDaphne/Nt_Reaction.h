@@ -17,9 +17,6 @@ namespace NativeDaphne
 	public:
 		property double RateConstant;
 
-		//indicate if the reaction should/should not perform step()
-		property bool Steppable;
-
 		virtual void Step(double dt);
 
 	internal:
@@ -116,9 +113,11 @@ namespace NativeDaphne
 		virtual void RemoveReaction(int index) override;
 
 		virtual Nt_Reaction^ CloneParent() override;
+
 		virtual void Step(double dt) override;
 
 		Nt_MolecularPopulation^ Reactant;
+
 	private:
 		double *_reactant;
 		int array_length;
@@ -145,12 +144,11 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product;
 
 	private:
+		ScalarField^ intensity;
 		double *_reactant1;
 		double *_reactant2;
 		double *_product;
-		double *_intensity;
-		int array_length; //the "active" data length of the array
-		
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -175,7 +173,7 @@ namespace NativeDaphne
 	private:
 		double *_reactant;
 		double *_product;
-		int array_length; //the "active" data length of the array
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -197,12 +195,10 @@ namespace NativeDaphne
 
 		Nt_MolecularPopulation ^Reactant;
 		Nt_MolecularPopulation ^Product;
-
 	private:
 		double *_reactant;
 		double *_product;
-		int array_length; //the "active" data length of the array
-		
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -230,7 +226,6 @@ namespace NativeDaphne
 		double *_product1;
 		double *_product2;
 		int array_length;
-		
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -255,8 +250,7 @@ namespace NativeDaphne
 	private:
 		double *_reactant;
 		double *_product;
-		int array_length; //the "active" data length of the array
-		
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -279,11 +273,10 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Catalyst;
 
 	private:
+		ScalarField^ intensity;
 		double *_reactant;
 		double *_catalyst;
-		double *_intensity;
-		int array_length; //the "active" data length of the array
-		
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -308,14 +301,12 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product;
 
 	private:
+		ScalarField^ intensity;	
 		double *_catalyst;
 		double *_reactant1;
 		double *_reactant2;
 		double *_product;
-		double *_intensity;
-		double *_intensity2;
-		int array_length; //the "active" data length of the array
-		
+		int array_length;
 	};
 
 
@@ -369,11 +360,11 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product;
 
 	private:
+		ScalarField^ intensity;
 		double *_reactant;
 		double *_catalyst;
 		double *_product;
-		double *_intensity;
-		int array_length; //the "active" data length of the array
+		int array_length;
 		
 	};
 
@@ -399,10 +390,10 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product;
 
 	private:
+		ScalarField^ intensity;
 		double *_catalyst;
 		double *_reactant;
 		double *_product;
-		double *_intensity;
 		int array_length;
 	};
 
@@ -428,12 +419,12 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product2;
 
 	private:
+		ScalarField^ intensity;
 		double *_catalyst;
 		double *_reactant;
 		double *_product1;
 		double *_product2;
-		double *_intensity;
-		int array_length; //the "active" data length of the array		
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -457,11 +448,11 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product;
 
 	private:
+		ScalarField^ intensity;
 		double *_catalyst;
 		double *_reactant;
 		double *_product;
-		double *_intensity;
-		int array_length; //the "active" data length of the array
+		int array_length;
 		
 	};
 
@@ -486,11 +477,10 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Catalyst;
 
 	private:
+		ScalarField^ intensity;
 		double *_reactant;
 		double *_catalyst;
-		double *_intensity;
-		int array_length; //the "active" data length of the array
-		
+		int array_length;
 	};
 
 
@@ -541,11 +531,11 @@ namespace NativeDaphne
 		int boundaryId;
 
 	private:
+		ScalarField^ intensity;
 		double *_bulk_BoundaryConc;
 		double *_bulk_BoundaryFlux;
 		double *_bulkActivated_BoundaryFlux;
 		double *_receptor;
-		double *_intensity;
 		int array_length;
 	};
 
@@ -629,13 +619,12 @@ namespace NativeDaphne
 		int boundaryId;
 
 	private:
+		ScalarField^ intensity;
 		double *_ligand_BoundaryConc; //from bulk
 		double *_ligand_BoundaryFlux; //from bulk
-
 		double* _receptor;
 		double* _complex;
-		double *_intensity;
-		int array_length; //the "active" data length of the array
+		int array_length;
 	};
 
 	[SuppressUnmanagedCodeSecurity]
@@ -659,12 +648,11 @@ namespace NativeDaphne
 		int boundaryId; //manifold->Id
 
 	private:
+		ScalarField^ intensity;
 		double *_ligand_BoundaryConc; //from bulk
 		double *_ligand_BoundaryFlux; //from bulk
-
 		double* _receptor;
 		double* _complex;
-		double *_intensity;
 		int array_length;
 	};
 

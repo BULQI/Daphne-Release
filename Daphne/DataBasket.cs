@@ -192,6 +192,7 @@ namespace Daphne
                 {
                     hSim.RemoveCell(cell);
                     Populations[cell.Population_id].RemoveCell(cell.Cell_id, false);
+                    hSim.RemoveCellBoudnaryReacitons(cell);
                     return true;
                 }
 
@@ -201,7 +202,7 @@ namespace Daphne
                 hSim.CollisionManager.RemoveCellFromGrid(cell);
 
                 // remove the cell chemistry
-                //for dead cells, the chemistyr has been removed when found dead
+                //for dead cells, the chemistry has been removed when found dead
                 if (cell.Alive == true)
                 {
                     hSim.RemoveCell(cell);
@@ -209,6 +210,10 @@ namespace Daphne
 
                 Cells.Remove(cell.Cell_id);
                 Populations[cell.Population_id].RemoveCell(cell.Cell_id);
+                if (cell.Alive)
+                {
+                    hSim.RemoveCellBoudnaryReacitons(cell);
+                }
                 CellManager.cellDictionary.Remove(cell.Cell_id);
                 return true;
             }

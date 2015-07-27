@@ -14,7 +14,9 @@ using Daphne;
 using Kitware.VTK;
 using System.Diagnostics;
 using System.Windows.Media;
-using ManifoldRing;
+using Nt_ManifoldRing;
+
+
 
 namespace DaphneGui
 {

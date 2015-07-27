@@ -100,6 +100,29 @@ namespace Daphne
                 //    kvp.Value.EnforceBC();
                 //}
 
+                if (iteration_count < 0) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
+                {
+                    Debug.WriteLine("\n----membrane----");
+                    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
+                    {
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
+                    }
+
+                    Debug.WriteLine("----Cytosol----");
+                    foreach (var item in kvp.Value.Cytosol.Populations)
+                    {
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
+                    }
+
+                    Debug.WriteLine("---locaiton---");
+                    Debug.WriteLine("positon = {0} {1} {2}", kvp.Value.SpatialState.X[0], kvp.Value.SpatialState.X[1], kvp.Value.SpatialState.X[2]);
+
+                }
+
                 // if the cell  moved out of bounds schedule its removal
                 if (kvp.Value.Exiting == true)
                 {

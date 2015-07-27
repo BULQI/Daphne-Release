@@ -16,6 +16,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// helper for field initialization
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public interface class IFieldInitializer
     {
         /// <summary>
@@ -38,6 +39,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// field initialization with a constant
     /// </summary>
+    [SuppressUnmanagedCodeSecurity]
     public ref class ConstFieldInitializer : IFieldInitializer
     {
 	private:
@@ -93,6 +95,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// field initialization with a linear profile
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class LinearFieldInitializer : IFieldInitializer
     {
 	private:
@@ -318,18 +321,21 @@ namespace Nt_ManifoldRing
     };
 
 	ref class Manifold;
+
     /// <summary>
     /// scalar field class with operations
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class ScalarField
     {
 	private:
-        
-        initonly Manifold^ m;
+        Manifold^ m;
         IFieldInitializer^ init;
+		List<ScalarField^>^ components;
 
-	internal:
-		Nt_Darray^ _array;
+	//internal:
+	public:
+		Nt_Darray^ darray;
 	public:
 		
 		/// <summary>
@@ -349,6 +355,47 @@ namespace Nt_ManifoldRing
         /// <param name="m">manifold</param>
         ScalarField(Manifold^ m);
 
+		void AddComponent(ScalarField^ src)
+		{
+			if (this->components == nullptr)
+			{
+				throw gcnew Exception("Object is not of collection type");
+			}
+			if (this->m == nullptr)this->m = src->M;
+			darray->AddComponent(src->darray);
+			components->Add(src);
+		}
+
+		//returning the index of the component before removal
+		int RemoveComponent(ScalarField^ src)
+		{
+			int index = darray->RemoveComponent(src->darray);
+			if (index != components->Count -1)
+			{
+				components[index] = components[components->Count -1];
+			}
+			components->RemoveAt(components->Count -1);
+			return index;
+		}
+		
+	internal:
+		property double* ArrayPointer
+		{
+			double *get()
+			{
+				return darray->NativePointer;
+			}
+		}
+
+		property int ArrayLength
+		{
+			int get()
+			{
+				return darray->Length;
+			}
+		}
+	public:
+
         /// <summary>
         /// initialize the field according to the initializer object
         /// </summary>
@@ -357,13 +404,17 @@ namespace Nt_ManifoldRing
 
         ScalarField^ reset(ScalarField^ src)
         {
-            for (int i = 0; i < _array->Length; i++) _array[i] = src->_array[i];
+			if (this->ArrayLength != src->ArrayLength)
+			{
+				throw gcnew ArgumentException("noncompatabile array length");
+			}
+            for (int i = 0; i < darray->Length; i++) darray[i] = src->darray[i];
             return this;
         }
 
         ScalarField^ reset(double d)
         {
-            for (int i = 0; i < _array->Length; i++) _array[i] = d;
+            for (int i = 0; i < darray->Length; i++) darray[i] = d;
             return this;
         }
 
@@ -376,8 +427,8 @@ namespace Nt_ManifoldRing
         /// <returns> number of elements copied</returns>
 		int CopyArray(array<double>^ valarr, int start)
         {
-            Array::Copy(_array->ArrayCopy, 0, valarr, start, _array->Length);
-            return _array->Length;
+            Array::Copy(darray->ArrayCopy, 0, valarr, start, darray->Length);
+            return darray->Length;
         }
 
 		/// <summary>
@@ -388,8 +439,8 @@ namespace Nt_ManifoldRing
         /// <returns> number of elements copied</returns>
 		int CopyArray(array<double>^ valarr)
         {
-            Array::Copy(_array->ArrayCopy, 0, valarr, 0, _array->Length);
-            return _array->Length;
+            Array::Copy(darray->ArrayCopy, 0, valarr, 0, darray->Length);
+            return darray->Length;
         }
 
         /// <summary>

@@ -35,7 +35,7 @@ namespace Nt_ManifoldRing
     /// LocalMatrix is a struct to facilitate local matrix algebra on a lattice by providing an efficient
     /// representation of a sparse matrix. 
     /// </summary>
-    public ref struct LocalMatrix
+    public value struct LocalMatrix
     {
 	public:
 		int Index;
@@ -85,7 +85,7 @@ namespace Nt_ManifoldRing
             position = gcnew array<double>(Dim);
             darray = gcnew Nt_Darray(Dim);
             this->HasRot = true;
-                // set up the rotation to be aligned with the canonical world coordinates
+            // set up the rotation to be aligned with the canonical world coordinates
             rot = gcnew DenseMatrix(Dim, Dim, gcnew array<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
         }
 

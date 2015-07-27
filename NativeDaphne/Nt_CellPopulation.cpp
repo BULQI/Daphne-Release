@@ -45,7 +45,7 @@ namespace NativeDaphne
 			//handle chemotaxis
 			if (this->isChemotactic)
 			{
-				double *driverConc = ComponentCells[0]->Driver->NativePointer;
+				double *driverConc = ComponentCells[0]->Driver->ConcPointer;
 				if (TransductionConstant != -1)
 				{
 					NtUtility::daxpy3_skip1(array_length, TransductionConstant, driverConc, _F);

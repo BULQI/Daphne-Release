@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 
-using ManifoldRing;
+using Nt_ManifoldRing;
 
 using Ninject;
 using Ninject.Parameters;
@@ -859,15 +859,16 @@ namespace Daphne
 
         public void RemoveCell(Cell c)
         {
-            // remove the boundary reactions involving this cell
-            //handled both comp and baseComp
-            dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
-
             // remove the ecs boundary concs and fluxes that involve this cell
             foreach (MolecularPopulation mp in dataBasket.Environment.Comp.Populations.Values)
             {
                 mp.RemoveBoundaryFluxConc(c.PlasmaMembrane.Interior.Id);
             }
+
+            // remove the boundary reactions involving this cell
+            //handled both comp and baseComp
+            //delayed removal to RemoveCellBoudnaryReacitons(Cell c)
+            //dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
 
             // remove the cell's membrane from the ecs boundary
             dataBasket.Environment.Comp.RemoveBoundary(c.PlasmaMembrane.Interior.Id);
@@ -877,6 +878,14 @@ namespace Daphne
             //dataBasket.Cells.Remove(c.Cell_id);
             //dataBasket.Populations[c.Population_id].RemoveCell(c.Cell_id);
         }
+
+        //rmeove boundary reactions associated with this cell
+        public void RemoveCellBoudnaryReacitons(Cell c)
+        {
+            dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
+        }
+
+
 
         public virtual void RunForward()
         {

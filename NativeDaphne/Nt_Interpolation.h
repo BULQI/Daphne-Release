@@ -19,7 +19,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// interpolator interface
     /// </summary>
-
+	[SuppressUnmanagedCodeSecurity]
     public interface class Interpolator
     {
         void Init(InterpolatedNodes^ m, bool toroidal);
@@ -43,7 +43,7 @@ namespace Nt_ManifoldRing
 		InterpolatedNodes^ m;
         // Used to create the value, gradient, and laplacian operators
         // We may be able to change access to 'protected' if Convert() is moved out of ScalarField
-		virtual array<LocalMatrix^>^ interpolationMatrix(array<double>^ x) abstract;
+		virtual array<LocalMatrix>^ interpolationMatrix(array<double>^ x) abstract;
         /// <summary>
         /// Calculate sparse matrix for computing Laplacian at every grid point.
         /// Only computed once.
@@ -51,18 +51,18 @@ namespace Nt_ManifoldRing
         /// Dirichlet or Neumann BCs will be imposed later, as needed.
         /// </summary>
         /// <returns></returns>
-		virtual array<array<LocalMatrix^>^>^ laplacianMatrix() abstract;
+		virtual array<array<LocalMatrix>^>^ laplacianMatrix() abstract;
         /// <summary>
         /// Calculate sparse matrix for computing the gradient at arbitrary position x.
         /// </summary>
         /// <param name="x">Spatial point for gradient calculation</param>
         /// <returns></returns>
-		virtual array<array<LocalMatrix^>^>^ gradientMatrix(array<double>^ x) abstract;
+		virtual array<array<LocalMatrix>^>^ gradientMatrix(array<double>^ x) abstract;
 
         // Used to compute value, gradient, and laplacian
-		array<LocalMatrix^>^ interpolationOperator;
-		array<array<LocalMatrix^>^>^ gradientOperator;
-		array<array<LocalMatrix^>^>^ laplacianOperator;
+		array<LocalMatrix>^ interpolationOperator;
+		array<array<LocalMatrix>^>^ gradientOperator;
+		array<array<LocalMatrix>^>^ laplacianOperator;
 
         // computed gradient (at a point) and laplacian
 		array<double>^ gradient;
@@ -133,33 +133,33 @@ namespace Nt_ManifoldRing
         int NodePerSide1;
         int NodePerSide2;
         //used to speed up compuation
-        array<array<LocalMatrix^>^>^ gradientOperator16;
-        array<array<LocalMatrix^>^>^ gradientOperator20;
-        array<array<LocalMatrix^>^>^ gradientOperatorJagged;
+        array<array<LocalMatrix>^>^ gradientOperator16;
+        array<array<LocalMatrix>^>^ gradientOperator20;
+        array<array<LocalMatrix>^>^ gradientOperatorJagged;
         array<int>^ idxarr;
 
 	public:
 		Trilinear3D() : NodeInterpolator()
         {
-            interpolationOperator = gcnew array<LocalMatrix^>(8);
+            interpolationOperator = gcnew array<LocalMatrix>(8);
         }
 
 		virtual void Init(InterpolatedNodes^ m, bool _toroidal) override;
 
 	protected:
         // Don't need to account for toroidal BCs with this low-order scheme. 
-		virtual array<LocalMatrix^>^ interpolationMatrix(array<double>^ x) override;
+		virtual array<LocalMatrix>^ interpolationMatrix(array<double>^ x) override;
 
 
-		array<LocalMatrix^>^ interpolationMatrix_original(array<double>^ x);
+		array<LocalMatrix>^ interpolationMatrix_original(array<double>^ x);
 
         // NOTES:
         // Gradient operators indices could be created and stored once when the NodeInterpolator is instantiated, similar to Laplacian. 
-		virtual array<array<LocalMatrix^>^>^ gradientMatrix(array<double>^ x) override;
+		virtual array<array<LocalMatrix>^>^ gradientMatrix(array<double>^ x) override;
 
-		array<array<LocalMatrix^>^>^ gradientMatrix_original(array<double>^ x);
+		array<array<LocalMatrix>^>^ gradientMatrix_original(array<double>^ x);
 
-		virtual array<array<LocalMatrix^>^>^ laplacianMatrix() override;
+		virtual array<array<LocalMatrix>^>^ laplacianMatrix() override;
 		
 	public:
 		virtual double Integration(ScalarField^ sf) override;
@@ -174,20 +174,20 @@ namespace Nt_ManifoldRing
 	public:
 		Trilinear2D(): NodeInterpolator()
         {
-            interpolationOperator = gcnew array<LocalMatrix^>(4);
+            interpolationOperator = gcnew array<LocalMatrix>(4);
         }
 
 		virtual void Init(InterpolatedNodes^ m, bool _toroidal) override;
 
 	protected:
         // Don't need to account for toroidal BCs with this low-order scheme. 
-		virtual array<LocalMatrix^>^ interpolationMatrix(array<double>^ x) override;
+		virtual array<LocalMatrix>^ interpolationMatrix(array<double>^ x) override;
         
         // NOTES:
         // Gradient operators indices could be created and stored once when the NodeInterpolator is instantiated, similar to Laplacian. 
-		virtual array<array<LocalMatrix^>^>^ gradientMatrix(array<double>^ x) override;
+		virtual array<array<LocalMatrix>^>^ gradientMatrix(array<double>^ x) override;
         
-		virtual array<array<LocalMatrix^>^>^ laplacianMatrix() override;
+		virtual array<array<LocalMatrix>^>^ laplacianMatrix() override;
 		
 	public:
 		virtual double Integration(ScalarField^ sf) override;
@@ -222,19 +222,19 @@ namespace Nt_ManifoldRing
 
 	protected:
 
-		virtual array<LocalMatrix^>^ interpolationMatrix(array<double>^ x) override
+		virtual array<LocalMatrix>^ interpolationMatrix(array<double>^ x) override
         {
             throw gcnew NotImplementedException();
             //return interpolator;
         }
 
-		virtual array<array<LocalMatrix^>^>^ gradientMatrix(array<double>^ x) override
+		virtual array<array<LocalMatrix>^>^ gradientMatrix(array<double>^ x) override
         {
             throw gcnew NotImplementedException();
             //return gradient;
         }
 
-		virtual array<array<LocalMatrix^>^>^ laplacianMatrix() override
+		virtual array<array<LocalMatrix>^>^ laplacianMatrix() override
         {
             throw gcnew NotImplementedException();
             // return laplacian;
@@ -269,19 +269,19 @@ namespace Nt_ManifoldRing
         }
 
 	protected:
-		virtual array<LocalMatrix^>^ interpolationMatrix(array<double>^ x) override
+		virtual array<LocalMatrix>^ interpolationMatrix(array<double>^ x) override
         {
             throw gcnew NotImplementedException();
             //return interpolator;
         }
 
-		virtual array<array<LocalMatrix^>^>^ gradientMatrix(array<double>^ x) override
+		virtual array<array<LocalMatrix>^>^ gradientMatrix(array<double>^ x) override
         {
             throw gcnew NotImplementedException();
             //return gradient;
         }
 
-		virtual array<array<LocalMatrix^>^>^ laplacianMatrix() override
+		virtual array<array<LocalMatrix>^>^ laplacianMatrix() override
         {
             throw gcnew NotImplementedException();
             // return laplacian;

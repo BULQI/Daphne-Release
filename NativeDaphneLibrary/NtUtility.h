@@ -20,7 +20,7 @@ namespace NativeDaphneLibrary
 		 * y = alpha * x + y
 		 * x = -alpha *x + x;
 		 *********************************/
-		static int NtDoubleDaxpy(int n, double alpha, double *x, double *y);
+		//static int NtDoubleDaxpy(int n, double alpha, double *x, double *y);
 
 		/*scalar multiply
 		  n - total number of elemnts

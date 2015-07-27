@@ -34,24 +34,31 @@ namespace NativeDaphne
 	public ref class Nt_Darray
 	{
 	private:
+		int capacity;
 		int length;
 		//indicate pointer is replaced with external pointer
 		bool is_pointer_owner;
 		double *_array;
+		List<Nt_Darray^>^ component;
 	public:
 
+		//default constructor, servers as collection
 		Nt_Darray()
 		{
 			length = 0;
+			capacity = 0;
 			is_pointer_owner = true;
 			_array = NULL;
+			component = gcnew List<Nt_Darray^>();
 		}
 
+		//constructor with fixed array length
 		Nt_Darray(int len)
 		{
 			_array = (double *)malloc(len *sizeof(double));
 			memset(_array, 0, len *sizeof(double));
 			length = len;
+			capacity = len;
 			is_pointer_owner = true;
 		}
 
@@ -69,6 +76,29 @@ namespace NativeDaphne
 			}
 		}
 
+		//set as a colleciton
+		void InitializeAsCollection()
+		{
+			component = gcnew List<Nt_Darray^>();
+			length = 0;
+		}
+
+		//expand the memory length
+		void resize(int len)
+		{
+			if (is_pointer_owner == false)
+			{
+				throw gcnew Exception("Error resize memory the object does not own");
+			}
+			if (len > capacity)
+			{
+				capacity = len;
+				_array = (double *)realloc(_array, capacity * sizeof(double));
+			}
+			length = len;
+		}
+
+
 		property array<double>^ ArrayCopy
 		{
 			array<double>^ get() 
@@ -82,8 +112,64 @@ namespace NativeDaphne
 			}
 		}
 
+		void AddComponent(Nt_Darray^ src)
+		{
+			if (component == nullptr)
+			{
+				throw gcnew Exception("Object is not of collection type");
+			}
+			int item_len = src->Length;
+			if (component->Count > 0 && component[0]->Length != item_len)
+			{
+				throw gcnew Exception("Component is not of same length");
+			}
 
-			
+			if (length + src->Length > capacity)
+			{
+				capacity = NtUtility::GetAllocSize(length + src->Length, capacity);
+				_array = (double *)realloc(_array, capacity * sizeof(double));
+				double *head = _array;
+				for (int i=0; i< component->Count; i++)
+				{
+					component[i]->NativePointer = head;
+					head += item_len;
+				}
+			}
+			double *dstptr = _array + component->Count * item_len;
+			for (int i=0; i< item_len; i++)
+			{
+				dstptr[i] = src[i];
+			}
+			src->NativePointer = dstptr;
+			length += item_len;
+			component->Add(src);
+		}
+
+		//when a component is removed from the collection, the component's storage
+		//is also reallocated.
+		//return the index of the component before removal
+		int RemoveComponent(Nt_Darray^ src)
+		{
+			if (component == nullptr || component->Count == 0)
+			{
+				throw gcnew Exception("Collection empty");
+			}
+			int index = (int)(src->NativePointer - _array)/src->Length;
+			if (index < 0 || index > component->Count || component[index] != src)
+			{
+				throw gcnew Exception("object not found");
+			}
+			Nt_Darray^ last_item = component[component->Count - 1];
+			if (src != last_item)
+			{
+				src->MemSwap(last_item);
+				component[index] = last_item;
+			}
+			component->RemoveAt(component->Count-1);
+			length -= src->Length;
+			src->detach();
+			return index;
+		}
 
 		[JsonIgnore]
 		property double default[int]
@@ -114,6 +200,14 @@ namespace NativeDaphne
 			}
 		}
 
+		property int ComponentCount
+		{
+			int get()
+			{
+				return component == nullptr ? 0 : component->Count;
+			}
+		}
+
 		static void Copy(Nt_Darray ^src, Nt_Darray ^dst, int len)
 		{
 			for (int i=0; i<len; i++)
@@ -128,6 +222,11 @@ namespace NativeDaphne
 			if (d->Length != length)
 			{
 				throw gcnew Exception("Error Nt_Darray.Add: dimension mismsatch");
+			}
+			if (length == 1)
+			{
+				*_array += d->_array[0];
+				return this;
 			}
 			double *dst = d->NativePointer;
 			NtUtility::AddDoubleArray(_array, dst, length);
@@ -318,8 +417,6 @@ namespace NativeDaphne
 			}
 		}
 	};
-
-
 
 }
 
