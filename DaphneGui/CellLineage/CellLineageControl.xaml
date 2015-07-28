@@ -98,13 +98,13 @@
                         <lin:CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" >
 
                             <!-- LayoutTransform not used - just for testing-->
-                            <SciChart:SciChartSurface.LayoutTransform>
+                            <!--<SciChart:SciChartSurface.LayoutTransform>
                                     <ScaleTransform x:Name="scaleTransf"
                                         CenterX="8000"
                                         CenterY="0"
                                         ScaleX="4"
-                                        ScaleY="4l" />
-                            </SciChart:SciChartSurface.LayoutTransform>
+                                        ScaleY="4" />
+                            </SciChart:SciChartSurface.LayoutTransform>-->
 
                             <!--Tooltip-->
                             <lin:CellLineageChartSurface.ToolTip>

@@ -239,8 +239,8 @@ namespace DaphneGui.CellLineage
             MemSurface.Width = doc.PageSize.Width;      //500;
             MemSurface.Height = doc.PageSize.Height;    //500;
 
-            MemSurface.RenderTransform = new ScaleTransform(0.5, 0.5, 1000, 2);
-            //MemSurface.LayoutTransform = new ScaleTransform(4, 4, 8000, 0);
+            //MemSurface.RenderTransform = new ScaleTransform(4,4);
+            //MemSurface.RenderTransform.TransformBounds(new Rect(new System.Windows.Size();
 
             //ScaleTransform scaler = new ScaleTransform(20.0, 20.0);
             //LayoutTransformer ltf = new LayoutTransformer();

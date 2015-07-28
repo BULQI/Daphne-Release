@@ -84,7 +84,8 @@ namespace DaphneGui
             System.Drawing.Image image = bmp1;
             iTextSharp.text.Image pdfImage = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
 
-            Document doc = new Document(PageSize.A4);
+            Document doc = new Document(PageSize.LETTER);
+            doc.SetMargins(4, doc.RightMargin, doc.TopMargin, doc.BottomMargin);
             PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
             doc.Open();
             
