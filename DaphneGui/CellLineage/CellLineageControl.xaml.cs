@@ -43,6 +43,9 @@ namespace DaphneGui.CellLineage
         public ObservableCollection<CellPopulation> FounderCellPops { get; set; }
         public TissueScenario ScenarioHandle {get;set;}
 
+        private SciChartSurface MemSurface;
+        private List<Series> MemSeries;
+
         public CellLineageControl()
         {
             FounderCells = new ObservableCollection<FounderInfo>();
@@ -53,6 +56,10 @@ namespace DaphneGui.CellLineage
             InitializeComponent();
 
             DataContext = this;
+
+            MemSeries = new List<Series>();
+            MemSurface = new SciChartSurface();
+            MemSurface.ChartTitle = "Rendered In Memory";
         }
         
         /// <summary>
@@ -201,11 +208,165 @@ namespace DaphneGui.CellLineage
             Nullable<bool> result = dlg.ShowDialog();
 
             // Process save file dialog box results
+
             if (result == true)
-            {
-                // Save file
                 LineageSciChart.SaveToFile(dlg.FileName);
+
+            ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
+            //if (result == true)
+            //{
+            //    // Save file
+            //    if (dlg.FileName.EndsWith("pdf"))
+            //    {
+            //        this.SavePdf(dlg.FileName);
+            //    }
+            //    else 
+            //    {
+            //        LineageSciChart.SaveToFile(dlg.FileName);
+            //    }
+            //}
+        }
+
+        private void SavePdf(string filename)
+        {
+            ThemeManager.SetTheme(MemSurface, "BrightSpark");
+            GetDataSeries();
+
+            Document doc = new Document(PageSize.LETTER);
+            PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
+            doc.Open();
+
+            MemSurface.Width = doc.PageSize.Width;      //500;
+            MemSurface.Height = doc.PageSize.Height;    //500;
+
+            MemSurface.RenderTransform = new ScaleTransform(0.5, 0.5, 1000, 2);
+            //MemSurface.LayoutTransform = new ScaleTransform(4, 4, 8000, 0);
+
+            //ScaleTransform scaler = new ScaleTransform(20.0, 20.0);
+            //LayoutTransformer ltf = new LayoutTransformer();
+            //ltf.Content = MemSurface.RenderableSeries;
+            //ltf.ApplyLayoutTransform();
+
+            //MemSurface.LayoutTransform = scaler;
+            //MemSurface.LayoutTransform.
+
+            //MemSurface.Width = doc.PageSize.Width; //500;
+            //MemSurface.Height = doc.PageSize.Height; //500;
+            //LayoutTransformer ltf = new LayoutTransformer();
+            //ltf.Content = MemSurface;
+            //ltf.LayoutTransform = scaler;
+            //ltf.ApplyLayoutTransform();
+            ////MemSurface.ZoomExtents();
+
+            //Matrix m = scaler.Value;
+            //int i = m.Transform(MemSurface.RenderableSeries[0].DataSeries.
+            //Export this surface to bitmap source
+            var source = MemSurface.ExportToBitmapSource();
+
+            //Then retrieve from BitmapSource into a Bitmap object
+            Bitmap bmp = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size),
+            ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+            bmp.UnlockBits(data);
+
+            System.Drawing.Image image = bmp;
+            iTextSharp.text.Image pdfImage = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            //Document doc = new Document(PageSize.LETTER);            
+            //PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
+            //doc.Open();
+
+            doc.Add(pdfImage);
+            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
+            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
+            // Add meta information to the document
+            doc.AddAuthor("Sanjeev Gupta");
+            doc.AddCreator("Daphne PDF output");
+            doc.AddKeywords("PDF export daphne");
+            doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
+            doc.AddTitle("The document title - Daphne graph in PDF format");
+            doc.Close();
+        }
+
+        /// <summary>
+        /// Gets series for the memory chart surface.
+        /// </summary>
+        private void GetDataSeries()
+        {
+            foreach (Series s in MemSeries)
+            {
+                var dataSeries = new XyDataSeries<double, double>();
+                dataSeries.SeriesName = "";
+                EllipsePointMarker marker = new EllipsePointMarker();
+                marker.Height = 12; marker.Width = 12;
+                marker.Fill = new System.Windows.Media.Color { A = 255, R = 148, G = 249, B = 146 };
+                marker.Stroke = Colors.Green;
+                marker.StrokeThickness = 1;
+
+                double[] x;
+                double[] y;
+
+                List<double> tempX = new List<double>();
+                List<double> tempY = new List<double>();
+                tempX.Add(s.Points[0].XValue);
+                tempX.Add(s.Points[1].XValue);
+                tempY.Add(s.Points[0].YValues[0]);
+                tempY.Add(s.Points[1].YValues[0]);
+                x = tempX.ToArray();
+                y = tempY.ToArray();
+
+                dataSeries.Append(x, y);
+
+                //Annotations
+
+                //For founder cell, the annotation should be the y-axis label
+                if (x[0] == 0)
+                {
+                    var textAnnot0 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                    {
+                        Name = s.Name,
+                        Text = MemSurface.YAxis.AxisTitle,
+                        FontSize = 6.0,
+                        X1 = x[0],
+                        Y1 = y[0],
+                    };
+                    textAnnot0.FontSize = 9.0;
+                    MemSurface.Annotations.Add(textAnnot0);
+                }
+
+                //For the 1st point
+                var textAnnot1 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                {
+                    Name = s.Name,
+                    Text = s.Points[0].Label,
+                    FontSize = 6.0,
+                    X1 = x[0],
+                    Y1 = y[0],
+                };
+                textAnnot1.FontSize = 9.0;
+                MemSurface.Annotations.Add(textAnnot1);
+
+                //For the 2nd point
+                var textAnnot2 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                {
+                    Name = s.Name,
+                    Text = s.Points[1].Label,
+                    X1 = x[1],
+                    Y1 = y[1],
+                };
+                textAnnot2.FontSize = 9.0;
+                MemSurface.Annotations.Add(textAnnot2);
+
+                FastLineRenderableSeries flrs = new FastLineRenderableSeries();
+                System.Windows.Media.Color col = new System.Windows.Media.Color { A = s.Color.A, R = s.Color.R, G = s.Color.G, B = s.Color.B };
+                flrs.DataSeries = dataSeries;
+                flrs.SeriesColor = col;
+                flrs.PointMarker = marker;
+
+                MemSurface.RenderableSeries.Add(flrs);
             }
+
         }
 
         /// <summary>
@@ -243,6 +404,21 @@ namespace DaphneGui.CellLineage
             PedigreeAnalysis pda = new PedigreeAnalysis();
             pda.SetReport(MainWindow.Sim.Reporter);
             List<Series> s = pda.GetPedigreeTreeSeries(FounderCellsByCellPop[index]);
+
+            //MEMORY RENDERING FOR HIGHER RESOLUTION
+            List<Series> tempSer = pda.GetPedigreeTreeSeries(FounderCellsByCellPop[index]);
+            foreach (Series ser in tempSer)
+            {
+                MemSeries.Add(ser);
+            }
+            MemSurface.XAxis = new NumericAxis();
+            MemSurface.YAxis = new NumericAxis();
+            MemSurface.ChartTitle = pda.GetChartTitle();
+            MemSurface.XAxis.AxisTitle = pda.GetChartXTitle(); 
+            MemSurface.YAxis.AxisTitle = pda.GetChartYTitle(); 
+            MemSurface.BorderBrush = System.Windows.Media.Brushes.Transparent;
+            
+            //END MEMORY
 
             if (s == null || s.Count == 0)
             {
@@ -319,7 +495,22 @@ namespace DaphneGui.CellLineage
 
                 LineageSciChart.RenderableSeries.Add(flrs);
 
-                //This is how to add Annotations - Do not delete this
+                //This is to add Annotations
+                //For founder cell, the annotation should be the y-axis label
+                if (x[0] == 0)
+                {
+                    var textAnnot0 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
+                    {
+                        Name = s.Name,
+                        Text = MemSurface.YAxis.AxisTitle,
+                        FontSize = 6.0,
+                        X1 = x[0],
+                        Y1 = y[0],
+                    };
+                    textAnnot0.FontSize = 9.0;
+                    LineageSciChart.Annotations.Add(textAnnot0);
+                }
+
                 //For the 1st point
                 var textAnnot1 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
                 {
@@ -329,7 +520,7 @@ namespace DaphneGui.CellLineage
                     X1 = x[0],
                     Y1 = y[0],
                 };
-                textAnnot1.FontSize = 11.0;
+                textAnnot1.FontSize = 9.0;
                 LineageSciChart.Annotations.Add(textAnnot1);
 
                 //For the 2nd point
@@ -340,12 +531,8 @@ namespace DaphneGui.CellLineage
                     X1 = x[1],
                     Y1 = y[1],
                 };
-                textAnnot2.FontSize = 11.0;
+                textAnnot2.FontSize = 9.0;
                 LineageSciChart.Annotations.Add(textAnnot2);
-
-                //Sample code
-                //Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation ta = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation();
-                //LineageSciChart.Annotations.Add(ta);
             }
 
             //Other chart attributes
@@ -355,6 +542,8 @@ namespace DaphneGui.CellLineage
             LineageSciChart.BorderBrush = System.Windows.Media.Brushes.Transparent;
             LineageSciChart.ZoomExtents();
         }
+
+        
 
 #if false
         private IXyDataSeries<double, double> CreateDataSeries()
