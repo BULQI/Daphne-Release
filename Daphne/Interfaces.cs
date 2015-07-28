@@ -48,4 +48,13 @@ namespace Daphne
         /// </summary>
         void Resize(double[] newExtents);
     }
+
+    public interface ReporterData
+    {
+        /// <summary>
+        /// implements a sort by which the data arrays/lists/dictionaries get arranged (most likely sorted by time)
+        /// </summary>
+        /// <returns></returns>
+        void Sort();
+    }
 }

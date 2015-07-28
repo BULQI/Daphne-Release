@@ -50,6 +50,8 @@ using System.Globalization;
 using DaphneUserControlLib;
 using NativeDaphne;
 
+using DaphneGui.CellPopDynamics;
+using DaphneGui.CellLineage;
 
 namespace DaphneGui
 {
@@ -269,6 +271,8 @@ namespace DaphneGui
         public static ComponentsToolWindow ST_ComponentsToolWindow;
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
         public static RenderSkinWindow ST_RenderSkinWindow;
+        public static CellPopDynToolWindow ST_CellPopDynToolWindow;
+        public static CellLineageControl ST_CellLineageWindow;
 
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
@@ -287,6 +291,10 @@ namespace DaphneGui
             ST_CellStudioToolWindow = CellStudioToolWindow;
             ST_ComponentsToolWindow = ComponentsToolWindow;
             ST_RenderSkinWindow.Visibility = Visibility.Collapsed;
+            ST_CellPopDynToolWindow = plotToolWindow;
+            ST_CellPopDynToolWindow.Visibility = Visibility.Collapsed;
+            ST_CellLineageWindow = lineageWindow;
+
 
             this.ToolWinCellInfo.Close();
 
@@ -1166,7 +1174,7 @@ namespace DaphneGui
             applyButton.IsEnabled = enable;
             saveButton.IsEnabled = enable;
             abortButton.IsEnabled = false;
-            analysisMenu.IsEnabled = enable;
+            //analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
             ImportSBML.IsEnabled = enable;
@@ -1334,8 +1342,14 @@ namespace DaphneGui
             #endregion
         }
 
-        private void OpenCellDivisionWindow(object sender, RoutedEventArgs e)
+        private void OpenLineageWindow(object sender, RoutedEventArgs e)
         {
+            vcrControl.CurrentFrame = 1;
+
+            ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
+            ST_CellLineageWindow.Float(new Size(1000, 824));
+            ST_CellLineageWindow.Activate();
+
             #region MyRegion
             //if (cdm == null)
             //{
@@ -1714,13 +1728,13 @@ namespace DaphneGui
 
 
             ////get family tree first.
-            //Dictionary<int, GeneologyInfo> familytree = CellDivTools.GetFamilyTree(SC.Protocol.experiment_db_id);
+            //Dictionary<int, GenealogyInfo> familytree = CellDivTools.GetFamilyTree(SC.Protocol.experiment_db_id);
 
             ////now what?
-            //foreach (KeyValuePair<int, GeneologyInfo> kvpc in familytree)
+            //foreach (KeyValuePair<int, GenealogyInfo> kvpc in familytree)
             //{
             //    int motherID;
-            //    //GeneologyInfo daughterNode=null;
+            //    //GenealogyInfo daughterNode=null;
             //    if (kvpc.Value.Generation == 0 && kvpc.Value.CellType == (int)CellBaseTypeLabel.BCell && kvpc.Value.DieOrDivide != 0)//this is founder.
             //    {
             //        motherID = kvpc.Value.CellId;
@@ -2117,6 +2131,10 @@ namespace DaphneGui
                         MdiTabContainer.Items.Add(ST_CellStudioToolWindow);
                         MdiTabContainer.Items.Add(ST_RenderSkinWindow);
                         ST_RenderSkinWindow.Close();    //should be closed initially, otherwise this tab exists behind the others and appears in expander options combo box 
+                        MdiTabContainer.Items.Add(ST_CellPopDynToolWindow);
+                        ST_CellPopDynToolWindow.Close();
+                        MdiTabContainer.Items.Add(ST_CellLineageWindow);
+                        ST_CellLineageWindow.Close();
                         ST_VTKDisplayDocWindow.Activate();
 
                     }
@@ -2137,6 +2155,8 @@ namespace DaphneGui
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.CellsListBox.SelectedIndex = 0;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                this.plotToolWindow.DataContext = sop.Protocol.scenario;
+                this.lineageWindow.DataContext = sop.Protocol.scenario;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
@@ -2208,13 +2228,13 @@ namespace DaphneGui
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
             {
-                sim.Load(sop.Protocol, completeReset);
+                sim.Load(sop.Protocol, completeReset, repetition);
             }
             else
             {
                 try
                 {
-                    sim.Load(sop.Protocol, completeReset);
+                    sim.Load(sop.Protocol, completeReset, repetition);
                 }
                 catch (Exception e)
                 {
@@ -2591,7 +2611,12 @@ namespace DaphneGui
             // only allow fitting and other analysis that needs the database if database writing is on
             if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
             {
-                analysisMenu.IsEnabled = true;
+                //After a run, enable Analysis menu only if we have a Tissue scenario
+                if (ToolWinType == ToolWindowType.Tissue)
+                {
+                    analysisMenu.IsEnabled = true;
+                }
+
                 this.ExportMenu.IsEnabled = true;
                 // And show stats results chart
                 // NOTE: If the stats charts can be displayed without the database saving, then these
@@ -2624,6 +2649,7 @@ namespace DaphneGui
                 if (gc is VTKFullGraphicsController)
                 {
                     ((VTKFullGraphicsController)gc).TracksActive = true;
+                    //analysisMenu.IsEnabled = true;
                 }
             }
             else
@@ -2798,6 +2824,7 @@ namespace DaphneGui
             {
                 repetition = 1;
             }
+
             switch (ToolWinType)
             {
                 case ToolWindowType.Tissue:
@@ -2912,7 +2939,7 @@ namespace DaphneGui
                     lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
                 }
                 else
-                {
+                {                    
                     MessageBoxResult result = toolWin.ScenarioContentChanged();
 
                     // Process message box results
@@ -3176,6 +3203,9 @@ namespace DaphneGui
 
             CellOptionsExpander.IsExpanded = false;
             ECMOptionsExpander.IsExpanded = false;
+
+            //Upon Load Protocol, disable Analysis menu
+            analysisMenu.IsEnabled = false;
 
             // Process open file dialog box results
             if (result == true)
@@ -3557,6 +3587,8 @@ namespace DaphneGui
             menuProtocolStore.IsEnabled = true;
             menuAdminSave.Visibility = Visibility.Visible;
             menuAdminSaveAs.Visibility = Visibility.Visible;
+            userStoreFileMenu.Visibility = Visibility.Visible;
+            fileMenu.Visibility = Visibility.Collapsed;
         }
 
         private void prepareForDaphneStore()
@@ -3574,6 +3606,8 @@ namespace DaphneGui
             menuProtocolStore.IsEnabled = true;
             menuAdminSave.Visibility = Visibility.Visible;
             menuAdminSaveAs.Visibility = Visibility.Visible;
+            userStoreFileMenu.Visibility = Visibility.Visible;
+            fileMenu.Visibility = Visibility.Collapsed;
         }
         
         private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
@@ -3588,6 +3622,8 @@ namespace DaphneGui
             menuProtocolStore.IsEnabled = false;
             menuAdminSave.Visibility = Visibility.Collapsed;
             menuAdminSaveAs.Visibility = Visibility.Collapsed;
+            userStoreFileMenu.Visibility = Visibility.Collapsed;
+            fileMenu.Visibility = Visibility.Visible;
 
             if (SOP.Protocol.scenario is TissueScenario)
             {
@@ -3765,6 +3801,31 @@ namespace DaphneGui
                 saveStore(sop.DaphneStore, "DaphneStore");
                 return;
             }
+        }
+
+        private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
+        {
+            //TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            //CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
+            //dynWindow.DataContext = scenario;
+            //dynWindow.ShowDialog();
+            
+            ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
+            ST_CellPopDynToolWindow.Float(new Size(1000, 824));
+            ST_CellPopDynToolWindow.Activate();
+        }
+
+        /// <summary>
+        /// This handler toggles the visibility of the background color combo box in toolbar
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BackgroundButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (bgPicker.Visibility == Visibility.Collapsed)
+                bgPicker.Visibility = Visibility.Visible;
+            else
+                bgPicker.Visibility = Visibility.Collapsed;
         }
 
     }

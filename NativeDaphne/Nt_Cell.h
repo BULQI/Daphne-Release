@@ -125,7 +125,7 @@ namespace NativeDaphne
 
 
 	public:
-		int Cell_id;
+		property int Cell_id;
 		static int SafeCell_id = 0;
 		static double defaultRadius = 5.0;
 		property int Population_id;

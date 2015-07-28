@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Numerics;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 
@@ -229,15 +230,13 @@ namespace Daphne
         /// <summary>
         /// instantiate a cell based on given values
         /// </summary>
-        /// <param name="id">cell id</param>
         /// <param name="cp">the population this cell is part of</param>
         /// <param name="configComp">the two cell compartments (cytosol, membrane)</param>
         /// <param name="bulk_reacs">bulk reactions (cytosol, membrane)</param>
         /// <param name="boundary_reacs">boundary reactions</param>
         /// <param name="transcription_reacs">transcription reactions</param>
         /// <param name="report">when true, prepare boundary reaction report</param>
-        public Cell instantiateCell(int id,
-                                    CellPopulation cp,
+        public Cell instantiateCell(CellPopulation cp,
                                     ConfigCompartment[] configComp,
                                     List<ConfigReaction>[] bulk_reacs,
                                     List<ConfigReaction> boundary_reacs,
@@ -252,7 +251,7 @@ namespace Daphne
                 prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
             }
 
-            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius), new ConstructorArgument("id", id));
+            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius));
 
             simCell.renderLabel = cp.Cell.renderLabel ?? cp.Cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
@@ -382,9 +381,6 @@ namespace Daphne
             //parameters for objects not created in the middle layer
             simCell.Sigma = simCell.StochLocomotor != null ? simCell.StochLocomotor.Sigma : 0.0;
             simCell.TransductionConstant = simCell.Locomotor != null ? simCell.Locomotor.TransductionConstant : 0;
-
-            // add the cell
-            AddCell(simCell);
 
             if (report == true && result != null)
             {
@@ -532,7 +528,7 @@ namespace Daphne
             }
         }
 
-        public virtual void Load(Protocol protocol, bool completeReset)
+        public virtual void Load(Protocol protocol, bool completeReset, int repetition)
         {
             ProtocolHandle = protocol;
 
@@ -549,7 +545,10 @@ namespace Daphne
                 return;
             }
 
-            Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+            if (repetition < 2)
+            {
+                Rand.ReseedAll(protocol.sim_params.globalRandomSeed);
+            }
 
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(protocol.scenario));
@@ -1033,13 +1032,24 @@ namespace Daphne
             }
         }
 
-        public override void Load(Protocol protocol, bool completeReset)
+        /// <summary>
+        /// get the starting id based on the population size
+        /// </summary>
+        /// <param name="size">population size</param>
+        /// <returns></returns>
+        private ulong getStartingID(int size)
+        {
+            double x = Math.Ceiling(Math.Log(size) / Math.Log(2));
+            return (ulong)Math.Pow(2, x) + 1;
+        }
+
+        public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (TissueScenario)protocol.scenario;
             envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // call the base
-            base.Load(protocol, completeReset);
+            base.Load(protocol, completeReset, repetition);
 
             // exit if no reset required
             if (completeReset == false)
@@ -1079,6 +1089,15 @@ namespace Daphne
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+            ulong idStart, idCount = 0;
+            int cellNumber = 0;
+
+            // total number of cells
+            foreach (CellPopulation cp in scenarioHandle.cellpopulations)
+            {
+                cellNumber += cp.number;
+            }
+            idStart = getStartingID(cellNumber);
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenarioHandle.cellpopulations)
@@ -1087,9 +1106,30 @@ namespace Daphne
 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell c = instantiateCell(-1, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
+                    Cell c = instantiateCell(cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
+                    int cell_id = cp.CellStates[i].Cell_id;
+                    string lineage_id = cp.CellStates[i].Lineage_id;
 
+                    // the safe id must be larger than the largest one in use
+                    // if the cell id is legitimate (> 0), use it
+                    c.Cell_id = DataBasket.GenerateSafeCellId(cell_id);
+
+                    // assign lineage
+                    if (lineage_id != "")
+                    {
+                        c.Lineage_id = BigInteger.Parse(lineage_id);
+                    }
+                    else
+                    {
+                        c.Lineage_id = idCount + idStart;
+                        idCount++;
+                    }
+
+                    // state
                     c.SetCellState(cp.CellStates[i]);
+
+                    // add the cell
+                    AddCell(c);
                 }
             }
 
@@ -1320,12 +1360,12 @@ namespace Daphne
             generateReport = false;
         }
 
-        public override void Load(Protocol protocol, bool completeReset)
+        public override void Load(Protocol protocol, bool completeReset, int repetition)
         {
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
-            base.Load(protocol, completeReset);
+            base.Load(protocol, completeReset, repetition);
 
             // exit if no reset required
             if (completeReset == true)

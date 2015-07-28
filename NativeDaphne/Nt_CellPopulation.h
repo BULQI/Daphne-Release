@@ -211,14 +211,7 @@ namespace NativeDaphne
 
 			//here we should have a boundary id for the plasmamembrane.
 			Cytosol->AddNtBoundary(0, cell->plasmaMembrane->InteriorId, cell->plasmaMembrane);
-			//if (masterCell == nullptr)
-			//{
-			//	masterCell = cell->CloneParent();
-			//}
-			//else 
-			//{
-			//	masterCell->AddCell(cell);
-			//}
+
 			for each (KeyValuePair<String^, Nt_Gene^>^ kvp in cell->Genes)
 			{
 				this->AddGene(kvp->Value);
@@ -232,36 +225,34 @@ namespace NativeDaphne
 			this->PlasmaMembrane->AddCompartmentReactions(cell->plasmaMembrane);
 			ntCellDictionary->Add(cell->Cell_id, cell);
 		}
+		
 
+		//remove cell 
 		void RemoveCell(int cell_id, bool completeRemoval)
 		{
-			Nt_Cell^ cell = ntCellDictionary[cell_id];
-			if (cell == nullptr)
+			if (ntCellDictionary->ContainsKey(cell_id) == false)
 			{
-				throw gcnew Exception("Error mid layer RemoveCell");
-			}
-			if (completeRemoval == true)
-			{
+				//AH - for debug
 				if (deadCells->ContainsKey(cell_id) == true)
 				{
 					deadCells->Remove(cell_id);
 					fprintf(stderr, "Dead cell id=%d removed from system.\n", cell_id);
-					return;
 				}
-				fprintf(stderr, "Removing cell id=%d current cell Count = %d\n", cell_id, ntCellDictionary->Count);
-			}
-			else
-			{
-				//only called for dead cell
-				fprintf(stderr, "Cell id=%d is marked as dead\n", cell_id);
+				else 
+				{
+					throw gcnew Exception("Error RemoveCell: cell id not exists");
+				}
+				return;
 			}
 			
+			Nt_Cell^ cell = ntCellDictionary[cell_id];
+			//remove chemistry etc.
 			int index = this->GetCellIndex(cell);
 
 			//remove cell spaticalState etc.
-			this->RemoveCell(cell);
+			this->RemoveCellStates(cell);
 
-			//at this point, remove the cells molpop first, and then reactions etc.
+			//remove cell chemistry
 			this->Cytosol->RemoveMemberCompartmentMolpop(index);
 			this->PlasmaMembrane->RemoveMemberCompartmentMolpop(index);
 			//remove genes
@@ -276,16 +267,20 @@ namespace NativeDaphne
 			//remove membrane boundary from cytosol and update boundaryId index in the cytosol collection
 			Cytosol->RemoveNtBoundary(cell->plasmaMembrane->InteriorId);
 
-			if (completeRemoval == false)
+			//AH - for debug
+			if (cell->Alive == false)
 			{
 				deadCells->Add(cell->Cell_id, cell);
-				return;
+				fprintf(stderr, "Cell id=%d is marked as dead\n", cell_id);
 			}
+
 			ntCellDictionary->Remove(cell_id);
 		}
 
 		//remove cells spatialStates, sigma, transdcutionConsant and Dragcoefficient from array
-		int RemoveCell(Nt_Cell ^c)
+		//note, the cell by itself still has its valid spatialstates etc., just not as part
+		//of the cellpopulation.
+		int RemoveCellStates(Nt_Cell ^c)
 		{
 			//debug
 			double *xptr = c->SpatialState->X->NativePointer;

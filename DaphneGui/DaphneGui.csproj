@@ -98,6 +98,14 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Abt.Controls.SciChart.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Abt.Controls.SciChart3D.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="ActiproSoftware.Docking.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Docking.Wpf.dll</HintPath>
@@ -118,6 +126,12 @@
     </Reference>
     <Reference Include="HDF5DotNet">
       <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\dependencies\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.pdfa">
+      <HintPath>..\dependencies\itextsharp.pdfa.dll</HintPath>
     </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
@@ -145,6 +159,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
@@ -189,12 +204,30 @@
     <Compile Include="CellDetailsReadOnlyControl.xaml.cs">
       <DependentUpon>CellDetailsReadOnlyControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellHoverInfo.xaml.cs">
+      <DependentUpon>CellHoverInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellLineage\CellLineageChartSurface.cs" />
+    <Compile Include="CellLineage\CellLineageControl.xaml.cs">
+      <DependentUpon>CellLineageControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellPopChartSurface.cs" />
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynamicsChartSurface.cs" />
+    <Compile Include="CellPopDynamics\CellPopDynExport.xaml.cs">
+      <DependentUpon>CellPopDynExport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
+      <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynToolWindow.xaml.cs">
+      <DependentUpon>CellPopDynToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
@@ -203,6 +236,8 @@
       <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellTrackTool.cs" />
+    <Compile Include="Charting\DoubleSeries.cs" />
+    <Compile Include="Charting\XYPoint.cs" />
     <Compile Include="ComponentsToolWindow.xaml.cs">
       <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
     </Compile>
@@ -319,6 +354,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="CellHoverInfo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellLineage\CellLineageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -326,6 +369,18 @@
     <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynExport.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynOptions.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynToolWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="CellPropertiesControl.xaml">
       <SubType>Designer</SubType>
@@ -466,6 +521,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Images\background.png" />
+    <Resource Include="Images\bucket.png" />
     <Resource Include="Images\LeftArrow_48x48.png" />
     <Resource Include="Images\RightArrow_48x48.png" />
     <Resource Include="Images\arrow-32x32.png" />

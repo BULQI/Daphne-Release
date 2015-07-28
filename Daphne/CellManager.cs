@@ -52,6 +52,7 @@ namespace Daphne
 
         public void Step(double dt)
         {
+
             List<int> removalList = null;
             List<Cell> daughterList = null;
 
@@ -157,7 +158,7 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
-                    SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id, kvp.Value.generation);
+                    SimulationBase.dataBasket.DivisionEvent(kvp.Value, c);
                 }
             }
 

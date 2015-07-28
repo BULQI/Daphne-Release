@@ -402,6 +402,7 @@ namespace DaphneGui
                     case "ComponentsToolWindow_Genes":
                     case "CatalogGenes":
                     case "CatalogCells":
+                    case "cellPopDynWindow":
                         return Visibility.Visible;
                 }
             }

@@ -1,0 +1,153 @@
+﻿<local:ToolWinBase x:Class="DaphneGui.CellLineage.CellLineageControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DaphneGui"
+              xmlns:lin="clr-namespace:DaphneGui.CellLineage"
+             xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+             xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
+             Loaded="LineageSciChart_Loaded"               
+             DataContext="."
+             x:Name="lineageWindow"
+             >
+        
+    <local:ToolWinBase.Resources>
+            <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontFamily" Value="Segoe UI"/>
+            </Style>
+    </local:ToolWinBase.Resources>
+    
+    <docking:SplitContainer x:Name="lineageLeftRightSplitContainer" >
+        <!--Left side-->                    
+        <!-- Left-hand content container - Cell Lineage Options -->
+        <docking:SplitContainer>
+            <docking:ToolWindowContainer x:Name="lineageToolWindowContainer" docking:DockSite.ControlSize="500,900" MaxHeight="1200" AutomationProperties.AutomationId="LineageLeftTWContainer">
+                <docking:ToolWindow Title="Cell Lineage Options" >
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Margin="20,20">
+                                <!--this window's datacontext is 'this', i,e CellLineageControl -->
+                                <StackPanel>
+                                    <TextBlock Text="Cell populations and types" HorizontalAlignment="Left" FontSize="14" />
+                                    <ListBox x:Name="cellPopsListBox" 
+                                ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=OneWay}"
+                                SelectedIndex="0" Width="360" HorizontalAlignment="Left" 
+                                SelectionChanged="cellPopsListBox_SelectionChanged"  >
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" >
+                                                    <TextBlock Text="{Binding Path=cellpopulation_name}" Width="100" HorizontalAlignment="Left" />
+                                                    <TextBlock Text="Cell type:  " Width="50" HorizontalAlignment="Left" />
+                                                    <TextBlock Text="{Binding Path=Cell.CellName}" Width="150" Margin="4,0" HorizontalAlignment="Right" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,10">
+                                    <TextBlock Text="Founder cells by lineage id" HorizontalAlignment="Left" FontSize="14" />
+                                    <ListBox x:Name="founderCellsListBox" 
+                                        SelectedIndex="0" Width="160" HorizontalAlignment="Left" 
+                                        ItemsSource="{Binding Path=FounderCellsByCellPop, Mode=OneWay}"
+                                        DisplayMemberPath="Lineage_Id">
+                                    </ListBox>
+                                </StackPanel>
+
+                            </StackPanel>
+
+                            <!--Command Buttons Panel-->
+                            <TextBox Background="#FFE0E0E0" BorderBrush="Black" BorderThickness="0" IsReadOnly="True" Text="  Actions" Height="24" Grid.Row="1"></TextBox>
+                            <Border BorderBrush="Black" BorderThickness="0" Background="#FFE0E0E0" Grid.Row="2">
+                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2,0">
+                                    <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
+                                    <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
+                                </WrapPanel>
+                            </Border>
+                        </Grid>
+                    </ScrollViewer>
+                </docking:ToolWindow>
+            </docking:ToolWindowContainer>
+        </docking:SplitContainer>
+
+        <!--Right side-->
+        <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" >
+                                                                                                                                                                                                                                        <docking:ToolWindow Title="Graph" >
+            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                <Grid SciChart:ThemeManager.Theme="BrightSpark">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                            <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" >
+                            <!--<CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >-->
+
+                            <!--Tooltip-->
+                            <SciChart:SciChartSurface.ToolTip>
+                                <ToolTip x:Name="LineageToolTip">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbLineageSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" MaxWidth="300" IsReadOnly="True" >
+                                        </TextBox>
+                                    </StackPanel>
+                                </ToolTip>
+                            </SciChart:SciChartSurface.ToolTip>
+
+                            <SciChart:SciChartSurface.ContextMenu>
+                                <ContextMenu >
+                                    <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
+                                </ContextMenu>
+                            </SciChart:SciChartSurface.ContextMenu>
+
+                            <!--  Declare Axes  -->
+                            <SciChart:SciChartSurface.XAxis>
+                                <SciChart:NumericAxis VisibleRange="0, 1000" x:Name="linXAxis" GrowBy="0.1, 0.2" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
+                            </SciChart:SciChartSurface.XAxis>
+
+                            <SciChart:SciChartSurface.YAxis>
+                                <SciChart:NumericAxis x:Name="ourYAxis" GrowBy="0.1, 0.2" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
+                            </SciChart:SciChartSurface.YAxis>
+                                            
+                            <!--Annotations-->
+                            <SciChart:SciChartSurface.Annotations>
+                                <SciChart:TextAnnotation x:Name="textAnnot" FontSize="11" Text="This is an annotation" X1="300.0" Y1="200"/>
+                            </SciChart:SciChartSurface.Annotations>
+
+                            <!--  Declare ChartModifiers  -->
+                            <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
+                            <!--  Adding the RubberBandXyZoomModifier gives SciChart the ability to zoom in by rectangle  -->
+                            <SciChart:SciChartSurface.ChartModifier>
+                                <SciChart:ModifierGroup>
+                                    <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
+                                    <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                    <SciChart:ZoomExtentsModifier x:Name="zoomExtentsModifier" ExecuteOn="MouseDoubleClick" IsAnimated="True"/>
+                                    <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                    <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
+                                    <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>
+                                    <SciChart:SeriesSelectionModifier>
+                                        <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                            <Style TargetType="SciChart:BaseRenderableSeries">
+                                                <Setter Property="StrokeThickness" Value="3" />
+                                            </Style>
+                                        </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                    </SciChart:SeriesSelectionModifier>
+                                </SciChart:ModifierGroup>
+                            </SciChart:SciChartSurface.ChartModifier>
+                        </SciChart:SciChartSurface>
+                    </ScrollViewer>
+                </Grid>
+            </ScrollViewer>
+        </docking:ToolWindow>
+        </docking:ToolWindowContainer>
+                    
+    </docking:SplitContainer>
+</local:ToolWinBase>

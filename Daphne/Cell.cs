@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 using Ninject;
@@ -42,7 +43,7 @@ namespace Daphne
         public string renderLabel;
         public int generation;
 
-        public Cell(double radius, int id) :base (radius)
+        public Cell(double radius) :base (radius)
         {
             if (radius <= 0)
             {
@@ -61,23 +62,6 @@ namespace Daphne
             spatialState.X = new Nt_Darray(Nt_CellSpatialState.SingleDim);
             spatialState.V = new Nt_Darray(Nt_CellSpatialState.SingleDim);
             spatialState.F = new Nt_Darray(Nt_CellSpatialState.SingleDim);
-            
-            if (id > -1)
-            {
-                Cell_id = id;
-                if (id >= SafeCell_id)
-                {
-                    SafeCell_id = id + 1;
-                }
-            }
-            else
-            {
-                Cell_id = SafeCell_id++;
-            }
-            //C++/Cli instance
-            //ntCell = new Nt_Cell(Radius,Cell_id);
-            //ntCell.SpatialState = new Nt_CellSpatialState(SpatialState.X, SpatialState.V, SpatialState.F);
-            //Nt_Cell.SafeCell_id = SafeCell_id;
         }
 
         [Inject]
@@ -179,6 +163,16 @@ namespace Daphne
         /// <param name="state">the state</param>
         public void SetCellState(CellState state)
         {
+            // cell id
+            if (state.Cell_id > -1)
+            {
+                Cell_id = state.Cell_id;
+            }
+            // lineage id
+            if (state.Lineage_id != "")
+            {
+                Lineage_id = BigInteger.Parse(state.Lineage_id);
+            }
             // spatial
             setSpatialState(state.spState);
             // generation
@@ -392,12 +386,17 @@ namespace Daphne
             }
 
             // create daughter
-            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius), new ConstructorArgument("id", -1));
+            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
+            // generate new cell id, pass -1 to use safeCellId++
+            daughter.Cell_id = DataBasket.GenerateSafeCellId(-1);
             // same population id
             daughter.Population_id = Population_id;
             daughter.renderLabel = renderLabel;
             this.generation++;
             daughter.generation = generation;
+            // lineage ids
+            this.Lineage_id *= 2;
+            daughter.Lineage_id = this.Lineage_id + 1;
             // same state
             daughter.setSpatialState(spatialState);
             // but offset the daughter randomly
@@ -442,12 +441,9 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
-            string cell_guid;
-
             if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // only the TissueScenario has cell populations
-                cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
                 configComp[0] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.cytosol;
                 configComp[1] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.membrane;
             }
@@ -577,6 +573,7 @@ namespace Daphne
         public int DifferentiationState, DividerState;
 
         private Locomotor locomotor;
+
         public Locomotor Locomotor 
         {
             get
@@ -598,6 +595,8 @@ namespace Daphne
                 }
             }
         }
+
+        public BigInteger Lineage_id { get; set; }
 
         public Compartment Cytosol { get; private set; }
         public Compartment PlasmaMembrane { get; private set; }
@@ -732,7 +731,7 @@ namespace Daphne
     /// <summary>
     /// data structure for single cell track data
     /// </summary>
-    public class CellTrackData
+    public class CellTrackData : ReporterData
     {
         public List<double> Times { get; set; }
         public List<double[]> Positions { get; set; }
@@ -744,6 +743,46 @@ namespace Daphne
         {
             Times = new List<double>();
             Positions = new List<double[]>();
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // position
+                    for (int j = 0; j < 3; j++)
+                    {
+                        dtmp = Positions[i][j];
+                        Positions[i][j] = Positions[minloc][j];
+                        Positions[minloc][j] = dtmp;
+                    }
+                }
+            }
         }
     }
 }

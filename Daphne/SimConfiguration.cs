@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Numerics;
 
 using System.Xml.Serialization;
 using Newtonsoft.Json;
@@ -4431,6 +4432,15 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Helper class makes it easier to display Cell population dynamics GUI
+    /// </summary>
+    public class DriverState
+    {
+        public string name { get; set; }
+        public bool plot { get; set; }
+    }
+
     public class ConfigTransitionDriver : ConfigEntity
     {
         public string Name { get; set; }
@@ -4439,7 +4449,23 @@ namespace Daphne
 
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
-        public ObservableCollection<bool> plotStates { get; set; }
+        //public ObservableCollection<bool> plotStates { get; set; }
+
+        private ObservableCollection<bool> _plotStates;
+        public ObservableCollection<bool> plotStates
+        {
+            get
+            {
+                return _plotStates;
+            }
+            set
+            {
+                _plotStates = value;
+                OnPropertyChanged("plotStates");
+            }
+        }
+
+        //public ObservableCollection<DriverState> PlotStatePairs { get; set; }
 
         public ConfigTransitionDriver()
             : base()
@@ -4447,6 +4473,7 @@ namespace Daphne
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
             plotStates = new ObservableCollection<bool>();
+            //PlotStatePairs = new ObservableCollection<DriverState>();
             CurrentState = new DistributedParameter(0);
         }
 
@@ -4520,8 +4547,22 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void AddStateNamePlot(string name, bool plot)
         {
+            name = name.Trim();
+            if (name.Length == 0)
+                return;
+
             states.Add(name);
             plotStates.Add(plot);
+
+            DriverState ds = new DriverState { name = name, plot = plot };
+            ds.name = name;
+            ds.plot = plot;
+
+            //DriverState existingDS = PlotStatePairs.Where(m => m.name == name).First();
+
+            ////add if doesn't exist already
+            //if (existingDS == null)
+            //    PlotStatePairs.Add(ds);
         }
 
         /// <summary>
@@ -4532,8 +4573,18 @@ namespace Daphne
         /// <param name="plot">initial plot on / off value</param>
         public void InsertStateNamePlot(int index, string name, bool plot)
         {
+            name = name.Trim();
+            if (name.Length == 0)
+                return;
+
             states.Insert(index, name);
             plotStates.Insert(index, plot);
+
+            ////PlotStatePairs.Insert(index, (new DriverState { name = name, plot = plot }));
+            //DriverState ds = new DriverState();
+            //ds.name = name;
+            //ds.plot = plot;
+            //PlotStatePairs.Insert(index, ds);
         }
 
         /// <summary>
@@ -4542,6 +4593,7 @@ namespace Daphne
         /// <param name="index">index at which to remove</param>
         public void RemoveStateNamePlot(int index)
         {
+            //PlotStatePairs.RemoveAt(index);
             states.RemoveAt(index);
             plotStates.RemoveAt(index);
         }
@@ -6872,6 +6924,67 @@ namespace Daphne
         }
 
         /// <summary>
+        /// This method returns true if the cell has at least one driver - death, diff or div.
+        /// Returns false if there are no drivers.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasDriver()
+        {
+            if (death_driver != null)
+                return true;
+
+            if (diff_scheme != null)
+                if (diff_scheme.Driver != null)
+                    return true;
+
+            if (div_scheme != null)
+                if (div_scheme.Driver != null)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// This method returns true if at least one plotState is selected.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAnyPlotStateSelected()
+        {
+            if (death_driver != null)
+            {
+                if (death_driver.plotStates.Contains(true))
+                {
+                    return true;
+                }
+            }
+
+            if (diff_scheme != null)
+            {
+                if (diff_scheme.Driver != null)
+                {
+                    if (diff_scheme.Driver.plotStates.Contains(true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (div_scheme != null)
+            {
+                if (div_scheme.Driver != null)
+                {
+                    if (div_scheme.Driver.plotStates.Contains(true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
         /// Force distributed parameters to reinitialize on the next Sample.
         /// This is needed in order to get reproducible results for the same global seed value.
         /// </summary>
@@ -7424,6 +7537,8 @@ namespace Daphne
         public CellBehaviorState cbState;
         public CellGeneState cgState;
         public int CellGeneration;
+        public int Cell_id;
+        public string Lineage_id;
 
         [JsonIgnore]
         public double X
@@ -7456,9 +7571,12 @@ namespace Daphne
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
             cgState = new CellGeneState();
+
+            Cell_id = -1;
+            Lineage_id = "";
         }
 
-        public CellState(double x, double y, double z)
+        public CellState(double x, double y, double z) : this()
         {
             spState = new Nt_CellSpatialState();
             spState.X = new Nt_Darray(3);
@@ -7467,9 +7585,6 @@ namespace Daphne
             spState.X[2] = z;
             spState.V = new Nt_Darray(3);
             spState.F = new Nt_Darray(3);
-            cmState = new CellMolPopState();
-            cbState = new CellBehaviorState();
-            cgState = new CellGeneState();
         }
 
         public void setSpatialState(CellSpatialState state)
@@ -7587,12 +7702,6 @@ namespace Daphne
                 cgState.geneDict[key] = activation;
             }
         }
-
-        public void setCellGeneration(int generation)
-        {
-            CellGeneration = generation;
-        }
-
     }
 
     public class ReportXVF
