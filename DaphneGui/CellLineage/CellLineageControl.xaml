@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DaphneGui"
-              xmlns:lin="clr-namespace:DaphneGui.CellLineage"
+             xmlns:lin="clr-namespace:DaphneGui.CellLineage"
              xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
              xmlns:SciChart="http://schemas.abtsoftware.co.uk/scichart"
              Loaded="LineageSciChart_Loaded"               
@@ -43,18 +43,23 @@
                                 <StackPanel>
                                     <TextBlock Text="Cell populations and types" HorizontalAlignment="Left" FontSize="14" />
                                     <ListBox x:Name="cellPopsListBox" 
-                                ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=OneWay}"
-                                SelectedIndex="0" Width="360" HorizontalAlignment="Left" 
-                                SelectionChanged="cellPopsListBox_SelectionChanged"  >
+                                        ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellPops, Mode=OneWay}"
+                                        SelectedIndex="0" Width="280" HorizontalAlignment="Left" 
+                                        SelectionChanged="cellPopsListBox_SelectionChanged"  >
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" >
                                                     <TextBlock Text="{Binding Path=cellpopulation_name}" Width="100" HorizontalAlignment="Left" />
                                                     <TextBlock Text="Cell type:  " Width="50" HorizontalAlignment="Left" />
-                                                    <TextBlock Text="{Binding Path=Cell.CellName}" Width="150" Margin="4,0" HorizontalAlignment="Right" />
+                                                    <TextBlock Text="{Binding Path=Cell.CellName}" Width="100" Margin="4,0" HorizontalAlignment="Right" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
+                                        <!--<ListBox.RenderTransform>
+                                            <RotateTransform Angle="-20" 
+                                            CenterX="50" CenterY="50" /> 
+                                        </ListBox.RenderTransform>-->
+                                        
                                     </ListBox>
                                 </StackPanel>
 
@@ -75,6 +80,7 @@
                                 <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2,0">
                                     <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
                                     <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
+                                    <!--<Button x:Name="lineageExportXpsButton" Width="50"  Height="24" Content="Export to XPS" Click="lineageExportXpsButton_Click"></Button>-->
                                 </WrapPanel>
                             </Border>
                         </Grid>
@@ -85,47 +91,55 @@
 
         <!--Right side-->
         <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="LineageTWContainer" >
-                                                                                                                                                                                                                                        <docking:ToolWindow Title="Graph" >
+            <docking:ToolWindow Title="Graph" >
             <ScrollViewer VerticalScrollBarVisibility="Auto" >
                 <Grid SciChart:ThemeManager.Theme="BrightSpark">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                            <SciChart:SciChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" >
-                            <!--<CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" >-->
+                        <lin:CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="1" ChartTitle="Cell Lineage" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" >
+
+                            <!-- LayoutTransform not used - just for testing-->
+                            <SciChart:SciChartSurface.LayoutTransform>
+                                    <ScaleTransform x:Name="scaleTransf"
+                                        CenterX="8000"
+                                        CenterY="0"
+                                        ScaleX="4"
+                                        ScaleY="4l" />
+                            </SciChart:SciChartSurface.LayoutTransform>
 
                             <!--Tooltip-->
-                            <SciChart:SciChartSurface.ToolTip>
+                            <lin:CellLineageChartSurface.ToolTip>
                                 <ToolTip x:Name="LineageToolTip">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBox x:Name="tbLineageSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" MaxWidth="300" IsReadOnly="True" >
                                         </TextBox>
                                     </StackPanel>
                                 </ToolTip>
-                            </SciChart:SciChartSurface.ToolTip>
+                            </lin:CellLineageChartSurface.ToolTip>
 
-                            <SciChart:SciChartSurface.ContextMenu>
+                            <lin:CellLineageChartSurface.ContextMenu>
                                 <ContextMenu >
                                     <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
                                 </ContextMenu>
-                            </SciChart:SciChartSurface.ContextMenu>
+                            </lin:CellLineageChartSurface.ContextMenu>
 
                             <!--  Declare Axes  -->
-                            <SciChart:SciChartSurface.XAxis>
+                            <lin:CellLineageChartSurface.XAxis>
                                 <SciChart:NumericAxis VisibleRange="0, 1000" x:Name="linXAxis" GrowBy="0.1, 0.2" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
-                            </SciChart:SciChartSurface.XAxis>
+                            </lin:CellLineageChartSurface.XAxis>
 
-                            <SciChart:SciChartSurface.YAxis>
+                            <lin:CellLineageChartSurface.YAxis>
                                 <SciChart:NumericAxis x:Name="ourYAxis" GrowBy="0.1, 0.2" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
-                            </SciChart:SciChartSurface.YAxis>
+                            </lin:CellLineageChartSurface.YAxis>
                                             
                             <!--Annotations-->
-                            <SciChart:SciChartSurface.Annotations>
+                            <lin:CellLineageChartSurface.Annotations>
                                 <SciChart:TextAnnotation x:Name="textAnnot" FontSize="11" Text="This is an annotation" X1="300.0" Y1="200"/>
-                            </SciChart:SciChartSurface.Annotations>
+                            </lin:CellLineageChartSurface.Annotations>
 
                             <!--  Declare ChartModifiers  -->
                             <!--  Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag  -->
                             <!--  Adding the RubberBandXyZoomModifier gives SciChart the ability to zoom in by rectangle  -->
-                            <SciChart:SciChartSurface.ChartModifier>
+                            <lin:CellLineageChartSurface.ChartModifier>
                                 <SciChart:ModifierGroup>
                                     <!--<SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseLeftButton"/>-->
                                     <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
@@ -141,8 +155,8 @@
                                         </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
                                     </SciChart:SeriesSelectionModifier>
                                 </SciChart:ModifierGroup>
-                            </SciChart:SciChartSurface.ChartModifier>
-                        </SciChart:SciChartSurface>
+                            </lin:CellLineageChartSurface.ChartModifier>
+                        </lin:CellLineageChartSurface>
                     </ScrollViewer>
                 </Grid>
             </ScrollViewer>
