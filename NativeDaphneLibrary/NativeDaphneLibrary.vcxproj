@@ -148,6 +148,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NtInterpolatedRectangularPrism.h" />
     <ClInclude Include="NTRandomNumberGenerator.h" />
     <ClInclude Include="NtUtility.h" />
     <ClInclude Include="stdafx.h" />
@@ -169,6 +170,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NativeDaphneLibrary.cpp" />
+    <ClCompile Include="NtInterpolatedRectangularPrism.cpp" />
     <ClCompile Include="NTRandomNumberGenerator.cpp" />
     <ClCompile Include="NtUtility.cpp" />
     <ClCompile Include="stdafx.cpp">

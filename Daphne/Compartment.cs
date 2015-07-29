@@ -98,12 +98,6 @@ namespace Daphne
         /// <param name="dt">The time interval.</param>
         public void Step(double dt)
         {
-
-            if (this.Interior is TinyBall == true || this.Interior is TinySphere == true)
-            {
-                throw new Exception("wrong place");
-            }
-
             baseComp.step(dt);
         }
 
@@ -193,7 +187,8 @@ namespace Daphne
         public void AddBoundaryTransform(int boundary_id, Transform t)
         {
             BoundaryTransforms.Add(boundary_id, t);
-            baseComp.AddBoundaryTransform(boundary_id, t.Translation);
+            //AH - this is duplicate, since transform is implemented in middle layer now.
+            baseComp.AddBoundaryTransform(boundary_id, t);
         }
 
         public void RemoveBoundaryReactions(int boundaryId)
@@ -532,10 +527,16 @@ namespace Daphne
             }
 
             //update ECS/Memrante boundary
+
+            //current method
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
                 kvp.Value.UpdateECSMembraneBoundary();
             }
+
+
+            //new methods.
+            //this.comp.BaseComp.UpdateBoundary();
         }
 
         protected override void Dispose(bool disposing)

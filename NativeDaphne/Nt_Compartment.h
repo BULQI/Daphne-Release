@@ -4,6 +4,7 @@
 #include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
 #include "Nt_Reaction.h"
+#include "NtInterpolatedRectangularPrism.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -305,7 +306,7 @@ namespace NativeDaphne
 			src->RemoveAt(src->Count-1);
 		}
 
-		virtual void AddBoundaryTransform(int key, Nt_Darray^ pos)
+		virtual void AddBoundaryTransform(int key, Transform^ pos)
 		{
 			//this should only be callsed for ECS
 			throw gcnew Exception("NotImplementedException");
@@ -396,6 +397,11 @@ namespace NativeDaphne
 		virtual void AddBulkReaction(Nt_Reaction ^rxn)
 		{
 			NtBulkReactions->Add(rxn);
+		}
+
+		virtual void UpdateBoundary()
+		{
+			throw gcnew Exception("NotImplementedException");
 		}
 
 		//set up native data structure for molecular population and reactions.
@@ -533,15 +539,15 @@ namespace NativeDaphne
 		int* NodesPerSide;
 		double StepSize;
 		bool IsToroidal;
-		//NtInterpolatedRectangularPrism *ir_prism;
+		NtInterpolatedRectangularPrism *ir_prism;
 		bool initialized;
 
 		//here boundary reactions need to be organized diffrently than in cytosol
 		//here we need to explicitely organize them by cell population id.
 		Dictionary<int, Nt_ReactionSet^>^ boundaryReactions;
 
-		//<cell_population_id, List<interior->id, transformation>>
-		Dictionary<int, Nt_Darray^>^ BoundaryTransforms;
+		//interior->id, transformation
+		Dictionary<int, Transform^>^ BoundaryTransforms;
 		double **Positions;
 
 		List<int>^ BoundaryKeys; //to keep sync with boundary in molpop
@@ -554,8 +560,8 @@ namespace NativeDaphne
 			NodesPerSide[2] = extents[2];
 			StepSize = step_size;
 			IsToroidal = toroidal;
-			BoundaryTransforms = gcnew Dictionary<int, Nt_Darray^>();
-			//ir_prism = new NtInterpolatedRectangularPrism(NodesPerSide, StepSize, IsToroidal);
+			BoundaryTransforms = gcnew Dictionary<int, Transform^>();
+			ir_prism = new NtInterpolatedRectangularPrism(NodesPerSide, StepSize, IsToroidal);
 			initialized = false;
 			Positions = NULL;
 			BoundaryKeys = gcnew List<int>();
@@ -569,13 +575,13 @@ namespace NativeDaphne
 
 		!Nt_ECS()
 		{
-			//delete ir_prism;
+			delete ir_prism;
 		}
 
 		//here key is membrane's interor id
-		virtual void AddBoundaryTransform(int key, Nt_Darray^ pos) override
+		virtual void AddBoundaryTransform(int key, Transform^ t) override
 		{
-			BoundaryTransforms->Add(key, pos);
+			BoundaryTransforms->Add(key, t);
 			initialized = false;
 		}
 
@@ -597,10 +603,10 @@ namespace NativeDaphne
 			int items_count = BoundaryTransforms->Count;
 			Positions = (double **)realloc(Positions, items_count * sizeof(double *));
 			int n = 0;
-			for each (KeyValuePair<int, Nt_Darray^>^ kvp in BoundaryTransforms)
+			for each (KeyValuePair<int, Transform^>^ kvp in BoundaryTransforms)
 			{
 				BoundaryKeys->Add(kvp->Key);
-				Positions[n++] = kvp->Value->NativePointer;
+				Positions[n++] = kvp->Value->Translation->NativePointer;
 			}
 			for (int i=0; i< NtPopulations->Count; i++)
 			{
@@ -666,14 +672,18 @@ namespace NativeDaphne
 			//this is disabled for handling reactions ONLY
 			for (int i=0; i< NtPopulations->Count; i++)
 			{
-				if (NtPopulations[i]->IsDiffusing == true)
-				{
-					NtPopulations[i]->step(this, dt);
-				}
+				NtPopulations[i]->step(this, dt);
+			}
+		}
+
+		virtual void UpdateBoundary() override
+		{
+			for (int i=0; i< NtPopulations->Count; i++)
+			{
+				NtPopulations[i]->UpdateBoundary(this);
 			}
 		}
 		
-
 	};
 	
 }

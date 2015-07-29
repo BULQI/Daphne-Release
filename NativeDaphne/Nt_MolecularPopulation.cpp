@@ -71,8 +71,13 @@ namespace NativeDaphne
 
 		if (IsDiffusing == true)
 		{
+			//may implement special method for Cytosol Laplacian()
 			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
 		}
+
+
+
+
 
 		//handle diffusion flux terms, cytosol has only one boundary plasma membrane
 		Nt_MolecluarPopulationBoundary^ molbound = BoundaryConcAndFlux[0];
@@ -133,15 +138,47 @@ namespace NativeDaphne
 
 	void Nt_MolecularPopulation::step(Nt_ECS^ ECS, double dt)
 	{
-		//generic verison
-		step(dt);
-		return;
+		if (IsDiffusing == true)
+		{
+			//note: this is the generic approach, we can implement specialized laplacian for ecs
+			//to speed this up.
+			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
 
-		//faster verion
-		/*NtInterpolatedRectangularPrism *ir_prism = ECS->ir_prism;
-		double *sfarray = this->molpopConc->NativePointer;
+
+			/* apply ECS/membrane boundary Flux */
+			/* this is done in th upper level - including natural boundaries */
+			//Dictionary<int, Transform^>^ boundaryTransforms = ECS->BoundaryTransforms;
+			//for each (KeyValuePair<int, Nt_MolecluarPopulationBoundary^>^kvp in this->BoundaryConcAndFlux)
+			//{
+			//	Nt_MolecluarPopulationBoundary^ boundary = kvp->Value;
+			//	if (boundary->IsContainer() == false)
+			//	{
+			//		throw gcnew Exception("ECS should have collection of boundary");
+			//	}
+			//	List<Nt_MolecluarPopulationBoundary^>^ boundary_components = boundary->Component;
+
+			//	for (int i = 0; i< boundary_components->Count; i++)
+			//	{
+			//		Nt_MolecluarPopulationBoundary^ molbound = boundary_components[i];
+			//		int bound_id = molbound->BoundaryId;
+			//		concentration->DiffusionFluxTerm(molbound->Flux, boundaryTransforms[bound_id], dt);
+			//	}
+			//}
+		}
+
+		//moved to do profileing
+		//UpdateBoundary(ECS);
+		
+	}
+
+	//update boundary for ECS
+	void Nt_MolecularPopulation::UpdateBoundary(Nt_ECS^ ECS)
+	{
+		//this is the speed up versoin
+		NtInterpolatedRectangularPrism *ir_prism = ECS->ir_prism;
+		double *sfarray = this->ConcPointer;
 		int item_count = ECS->BoundaryKeys->Count;
-		ir_prism->MultithreadNativeRestrict(sfarray, ECS->Positions, item_count, _boundaryConcPtrs);*/
+		ir_prism->MultithreadNativeRestrict(sfarray, ECS->Positions, item_count, _boundaryConcPtrs);
 	}
 
 	void Nt_MolecularPopulation::AddMolecularPopulation(Nt_MolecularPopulation^ molpop)

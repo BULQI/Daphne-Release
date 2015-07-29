@@ -171,6 +171,7 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_MolecularPopulation
 	{
+
 	protected:
 		ScalarField^ concentration;
 		initonly Manifold^ manifold;
@@ -245,6 +246,7 @@ namespace NativeDaphne
 		void initialize(Nt_PlasmaMembrane ^membrane);
 
 		void initialize(Nt_ECS^ ecs);
+		void UpdateBoundary(Nt_ECS^ ECS);
 
 		Nt_Compartment^ Compartment;
 
