@@ -35,6 +35,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
            
+            <!--LEFT SIDE-->
             <Border CornerRadius="0" BorderBrush="#415578" BorderThickness="2" Grid.Column="0" Grid.Row="0" >
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid>
@@ -98,8 +99,13 @@
                             <Border BorderBrush="Black" BorderThickness="0" Background="#FFE0E0E0" >
                                 <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2,0">
                                     <Button x:Name="drawButton" Width="50" Height="24" Content="Draw" Click="drawButton_Click"></Button>
-                                    <Button x:Name="lineageExportButton" Width="50"  Height="24" Content="Export" Click="lineageExportButton_Click"></Button>
-                                    <!--<Button x:Name="lineageExportXpsButton" Width="50"  Height="24" Content="Export to XPS" Click="lineageExportXpsButton_Click"></Button>-->
+                                    <Button x:Name="lineageExportButton" Width="50"  Height="24" IsEnabled="False" Content="Export" Click="lineageExportButton_Click"></Button>
+                                    <ComboBox x:Name="lineageTimeUnitsComboBox" SelectionChanged="lineageTimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
+                                        <ComboBoxItem>Minutes</ComboBoxItem>
+                                        <ComboBoxItem>Hours</ComboBoxItem>
+                                        <ComboBoxItem>Days</ComboBoxItem>
+                                        <ComboBoxItem>Weeks</ComboBoxItem>
+                                    </ComboBox>
                                 </WrapPanel>
                             </Border>
                         </StackPanel>
@@ -109,6 +115,7 @@
 
             <GridSplitter Width="3" Grid.Column="1" Background="#415578" ResizeBehavior="PreviousAndNext"/>
 
+            <!--RIGHT SIDE-->
             <Border CornerRadius="0" BorderBrush="#415578" BorderThickness="2" Grid.Column="2" Grid.Row="0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                     <Grid SciChart:ThemeManager.Theme="BrightSpark" >

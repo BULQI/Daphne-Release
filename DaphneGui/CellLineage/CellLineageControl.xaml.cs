@@ -43,8 +43,10 @@ namespace DaphneGui.CellLineage
         public ObservableCollection<CellPopulation> FounderCellPops { get; set; }
         public TissueScenario ScenarioHandle {get;set;}
 
-        private SciChartSurface MemSurface;
+        private CellPopChartSurface MemSurface;
         private List<Series> MemSeries;
+
+        private double pdfScaleFactor = 8;
 
         public CellLineageControl()
         {
@@ -58,7 +60,7 @@ namespace DaphneGui.CellLineage
             DataContext = this;
 
             MemSeries = new List<Series>();
-            MemSurface = new SciChartSurface();
+            MemSurface = new CellPopChartSurface();
             MemSurface.ChartTitle = "Rendered In Memory";
         }
         
@@ -142,6 +144,8 @@ namespace DaphneGui.CellLineage
                 FounderCellsByCellPop.Add(fi);
             }
 
+            lineageExportButton.IsEnabled = false;
+
         }
 
         /// <summary>
@@ -195,71 +199,44 @@ namespace DaphneGui.CellLineage
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void lineageExportButton_Click(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "CellLineage"; // Default file name
-            dlg.DefaultExt = ".bmp"; // Default file extension
-            //dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
-            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
-            dlg.FilterIndex = 1;
-            dlg.RestoreDirectory = true;
+        {           
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+            saveFileDialog.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Png Image|*.png|Pdf Image|*.pdf|Xps Image|*.xps|Xps Image|*.xps";
+            saveFileDialog.Title = "Export to File";
+            saveFileDialog.RestoreDirectory = true;
 
             // Show save file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
+            Nullable<bool> result = saveFileDialog.ShowDialog();
 
-            // Process save file dialog box results
-
+            //Need to move the SavePdf code to CellLineageChartSurface class
             if (result == true)
-                LineageSciChart.SaveToFile(dlg.FileName);
-
-            ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
-            //if (result == true)
-            //{
-            //    // Save file
-            //    if (dlg.FileName.EndsWith("pdf"))
-            //    {
-            //        this.SavePdf(dlg.FileName);
-            //    }
-            //    else 
-            //    {
-            //        LineageSciChart.SaveToFile(dlg.FileName);
-            //    }
-            //}
+            {
+                // Save file
+                if (saveFileDialog.FileName.EndsWith("pdf"))
+                {
+                    this.SavePdf(saveFileDialog.FileName);
+                    //LineageSciChart.ExportToPDF(saveFileDialog.FileName);
+                }
+                else
+                {
+                    //LineageSciChart.SaveToFile(saveFileDialog.FileName);
+                }
+            }
         }
 
         private void SavePdf(string filename)
         {
             ThemeManager.SetTheme(MemSurface, "BrightSpark");
-            GetDataSeries();
 
             Document doc = new Document(PageSize.LETTER);
             PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
             doc.Open();
 
-            MemSurface.Width = doc.PageSize.Width;      //500;
-            MemSurface.Height = doc.PageSize.Height;    //500;
+            GetMemDataSeries();
 
-            //MemSurface.RenderTransform = new ScaleTransform(4,4);
-            //MemSurface.RenderTransform.TransformBounds(new Rect(new System.Windows.Size();
-
-            //ScaleTransform scaler = new ScaleTransform(20.0, 20.0);
-            //LayoutTransformer ltf = new LayoutTransformer();
-            //ltf.Content = MemSurface.RenderableSeries;
-            //ltf.ApplyLayoutTransform();
-
-            //MemSurface.LayoutTransform = scaler;
-            //MemSurface.LayoutTransform.
-
-            //MemSurface.Width = doc.PageSize.Width; //500;
-            //MemSurface.Height = doc.PageSize.Height; //500;
-            //LayoutTransformer ltf = new LayoutTransformer();
-            //ltf.Content = MemSurface;
-            //ltf.LayoutTransform = scaler;
-            //ltf.ApplyLayoutTransform();
-            ////MemSurface.ZoomExtents();
-
-            //Matrix m = scaler.Value;
-            //int i = m.Transform(MemSurface.RenderableSeries[0].DataSeries.
+            MemSurface.Width = doc.PageSize.Width * pdfScaleFactor;
+            MemSurface.Height = doc.PageSize.Height * pdfScaleFactor;
+            
             //Export this surface to bitmap source
             var source = MemSurface.ExportToBitmapSource();
 
@@ -269,40 +246,49 @@ namespace DaphneGui.CellLineage
             ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
             source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
             bmp.UnlockBits(data);
-
+            
+            //Now create an image from the bitmap and convert it to iTextSharp.text.Image
             System.Drawing.Image image = bmp;
-            iTextSharp.text.Image pdfImage = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
+            iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
 
-            //Document doc = new Document(PageSize.LETTER);            
-            //PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
-            //doc.Open();
+            //Scale to page size
+            float w, h;
+            w = doc.PageSize.Width;
+            h = doc.PageSize.Height;
+            pic.ScaleAbsolute(w, h);
 
-            doc.Add(pdfImage);
-            //A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
-            //You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
-            // Add meta information to the document
-            doc.AddAuthor("Sanjeev Gupta");
-            doc.AddCreator("Daphne PDF output");
-            doc.AddKeywords("PDF export daphne");
-            doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
-            doc.AddTitle("The document title - Daphne graph in PDF format");
+            //Add the image to the doc
+            pic.Border = iTextSharp.text.Rectangle.BOX;
+            pic.BorderColor = iTextSharp.text.BaseColor.BLACK;
+            pic.BorderWidth = 3f;
+            doc.Add(pic);
+
+            ////A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
+            ////You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
+            //// Add meta information to the document
+            //doc.AddAuthor("Sanjeev Gupta");
+            //doc.AddCreator("Daphne PDF output");
+            //doc.AddKeywords("PDF export daphne");
+            //doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
+            //doc.AddTitle("The document title - Daphne graph in PDF format");
             doc.Close();
         }
 
         /// <summary>
-        /// Gets series for the memory chart surface.
+        /// Gets series for the memory chart surface. This method assumes that each series is only two points.
+        /// Do not use this method if your series is goint to be more than two points.
         /// </summary>
-        private void GetDataSeries()
-        {
+        private void GetMemDataSeries()
+        {            
             foreach (Series s in MemSeries)
             {
                 var dataSeries = new XyDataSeries<double, double>();
                 dataSeries.SeriesName = "";
                 EllipsePointMarker marker = new EllipsePointMarker();
-                marker.Height = 12; marker.Width = 12;
+                marker.Height = 12 * pdfScaleFactor;   marker.Width = 12 * pdfScaleFactor;
                 marker.Fill = new System.Windows.Media.Color { A = 255, R = 148, G = 249, B = 146 };
                 marker.Stroke = Colors.Green;
-                marker.StrokeThickness = 1;
+                marker.StrokeThickness = 1 * pdfScaleFactor;
 
                 double[] x;
                 double[] y;
@@ -310,16 +296,16 @@ namespace DaphneGui.CellLineage
                 List<double> tempX = new List<double>();
                 List<double> tempY = new List<double>();
                 tempX.Add(s.Points[0].XValue);
-                tempX.Add(s.Points[1].XValue);
+                tempX.Add(s.Points[1].XValue );
                 tempY.Add(s.Points[0].YValues[0]);
-                tempY.Add(s.Points[1].YValues[0]);
+                tempY.Add(s.Points[1].YValues[0] );
+
                 x = tempX.ToArray();
                 y = tempY.ToArray();
 
                 dataSeries.Append(x, y);
 
                 //Annotations
-
                 //For founder cell, the annotation should be the y-axis label
                 if (x[0] == 0)
                 {
@@ -327,11 +313,10 @@ namespace DaphneGui.CellLineage
                     {
                         Name = s.Name,
                         Text = MemSurface.YAxis.AxisTitle,
-                        FontSize = 6.0,
                         X1 = x[0],
                         Y1 = y[0],
                     };
-                    textAnnot0.FontSize = 9.0;
+                    textAnnot0.FontSize = 9.0 * pdfScaleFactor;
                     MemSurface.Annotations.Add(textAnnot0);
                 }
 
@@ -340,11 +325,10 @@ namespace DaphneGui.CellLineage
                 {
                     Name = s.Name,
                     Text = s.Points[0].Label,
-                    FontSize = 6.0,
                     X1 = x[0],
                     Y1 = y[0],
                 };
-                textAnnot1.FontSize = 9.0;
+                textAnnot1.FontSize = 9.0 * pdfScaleFactor;
                 MemSurface.Annotations.Add(textAnnot1);
 
                 //For the 2nd point
@@ -355,7 +339,7 @@ namespace DaphneGui.CellLineage
                     X1 = x[1],
                     Y1 = y[1],
                 };
-                textAnnot2.FontSize = 9.0;
+                textAnnot2.FontSize = 9.0 * pdfScaleFactor;
                 MemSurface.Annotations.Add(textAnnot2);
 
                 FastLineRenderableSeries flrs = new FastLineRenderableSeries();
@@ -363,10 +347,12 @@ namespace DaphneGui.CellLineage
                 flrs.DataSeries = dataSeries;
                 flrs.SeriesColor = col;
                 flrs.PointMarker = marker;
+                flrs.StrokeThickness *= (int)pdfScaleFactor;
 
                 MemSurface.RenderableSeries.Add(flrs);
             }
 
+            MemSurface.FontSize *= pdfScaleFactor;
         }
 
         /// <summary>
@@ -385,12 +371,14 @@ namespace DaphneGui.CellLineage
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void drawButton_Click(object sender, RoutedEventArgs e)
-        {
+        {            
+            lineageExportButton.IsEnabled = true;
             Draw();
         }
 
         /// <summary>
-        /// This method draws the lineage.
+        /// This method draws the lineage.  
+        /// During the draw operation, the data is rendered to a memory surface to for exporting a high res image later
         /// </summary>
         private void Draw()
         {
@@ -405,6 +393,12 @@ namespace DaphneGui.CellLineage
             pda.SetReport(MainWindow.Sim.Reporter);
             List<Series> s = pda.GetPedigreeTreeSeries(FounderCellsByCellPop[index]);
 
+            if (s == null || s.Count == 0)
+            {
+                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             //MEMORY RENDERING FOR HIGHER RESOLUTION
             List<Series> tempSer = pda.GetPedigreeTreeSeries(FounderCellsByCellPop[index]);
             foreach (Series ser in tempSer)
@@ -417,15 +411,8 @@ namespace DaphneGui.CellLineage
             MemSurface.XAxis.AxisTitle = pda.GetChartXTitle(); 
             MemSurface.YAxis.AxisTitle = pda.GetChartYTitle(); 
             MemSurface.BorderBrush = System.Windows.Media.Brushes.Transparent;
-            
             //END MEMORY
-
-            if (s == null || s.Count == 0)
-            {
-                MessageBox.Show("Pedigree was not found.", "Cell lineage error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
+            
             ClearChart();
             
             //last 3 things are the chart tile, x-axis and y-axis titles.
@@ -478,8 +465,8 @@ namespace DaphneGui.CellLineage
 
                 List<double> tempX = new List<double>();
                 List<double> tempY = new List<double>();
-                tempX.Add(s.Points[0].XValue);
-                tempX.Add(s.Points[1].XValue);
+                tempX.Add(s.Points[0].XValue * LineageSciChart.XScale);
+                tempX.Add(s.Points[1].XValue * LineageSciChart.XScale);
                 tempY.Add(s.Points[0].YValues[0]);
                 tempY.Add(s.Points[1].YValues[0]);
                 x = tempX.ToArray();
@@ -537,10 +524,31 @@ namespace DaphneGui.CellLineage
 
             //Other chart attributes
             LineageSciChart.ChartTitle = chartTitle;
-            LineageSciChart.XAxis.AxisTitle = xTitle;
+            //LineageSciChart.XAxis.AxisTitle = xTitle;
             LineageSciChart.YAxis.AxisTitle = yTitle;
             LineageSciChart.BorderBrush = System.Windows.Media.Brushes.Transparent;
             LineageSciChart.ZoomExtents();
+        }
+
+        /// <summary>
+        /// Event handler called when user changes time units (minutes, hours, days, weeks).
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lineageTimeUnitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            if (combo == null || combo.SelectedIndex == -1)
+                return;
+            // Only want to respond to purposeful user interaction - so if initializing combo box, ignore                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count == 0)
+                return;
+
+            LineageSciChart.SetTimeUnits(combo.SelectedIndex);
+            
+            if (MemSeries.Count != 0)
+                Draw();
+
         }
 
         
