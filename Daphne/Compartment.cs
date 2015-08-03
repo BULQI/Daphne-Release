@@ -69,7 +69,6 @@ namespace Daphne
                 r.Step(dt);
             }
 
-            //if (!(this.Interior is PointManifold))
             foreach (List<Reaction> rlist in BoundaryReactions.Values)
             {
                 foreach (Reaction r in rlist)
@@ -346,7 +345,7 @@ namespace Daphne
         {
             this.Comp.Step(dt);
 
-            //apply ECS/membrane boundary flux - specific to ECS/Membran
+            //apply ECS/membrane boundary flux - specific to ECS/Membrane
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
                 MolecularPopulation molpop = kvp.Value;
@@ -375,7 +374,7 @@ namespace Daphne
 
             }
 
-            //update ECS/Memrante boundary
+            //update ECS/Membrane boundary
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
                 kvp.Value.UpdateECSMembraneBoundary();
