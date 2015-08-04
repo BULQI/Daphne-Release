@@ -48,17 +48,14 @@ namespace DaphneGui.CellPopDynamics
         private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "CellPopDynamics"; // Default file name
-            dlg.DefaultExt = ".bmp"; // Default file extension
-            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
-            dlg.FilterIndex = 1;
+            dlg.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Png Image|*.png|Pdf Image|*.pdf|Tiff Image|*.tif|Xps Image|*.xps";
+            dlg.Title = "Export to File";
             dlg.RestoreDirectory = true;
 
             // Show save file dialog box
             Nullable<bool> result = dlg.ShowDialog();
 
             // Process save file dialog box results
-
             if (result == true)
             {
                 legendModifier.GetLegendDataFor = SourceMode.AllVisibleSeries;

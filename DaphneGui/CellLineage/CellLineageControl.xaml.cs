@@ -201,7 +201,7 @@ namespace DaphneGui.CellLineage
         private void lineageExportButton_Click(object sender, RoutedEventArgs e)
         {           
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
-            saveFileDialog.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Png Image|*.png|Pdf Image|*.pdf|Xps Image|*.xps|Xps Image|*.xps";
+            saveFileDialog.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Png Image|*.png|Pdf Image|*.pdf|Tiff Image|*.tif|Xps Image|*.xps";
             saveFileDialog.Title = "Export to File";
             saveFileDialog.RestoreDirectory = true;
 
