@@ -58,9 +58,14 @@ namespace DaphneGui.CellPopDynamics
             // Process save file dialog box results
             if (result == true)
             {
+                //Set legend to show only visible series for export
                 legendModifier.GetLegendDataFor = SourceMode.AllVisibleSeries;
                 legendModifier.UpdateLegend();
+
+                //Export to file
                 mySciChart.SaveToFile(dlg.FileName);
+
+                //Set legend back to show all series
                 legendModifier.GetLegendDataFor = SourceMode.AllSeries;
                 legendModifier.UpdateLegend();                
             }
