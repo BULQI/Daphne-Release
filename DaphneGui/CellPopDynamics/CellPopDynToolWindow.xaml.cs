@@ -21,6 +21,7 @@ using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Abt.Controls.SciChart.Visuals.PointMarkers;
 using Abt.Controls.SciChart;
 using Abt.Controls.SciChart.Visuals.Axes;
+using System.Collections.ObjectModel;
 
 namespace DaphneGui.CellPopDynamics
 {
@@ -47,19 +48,22 @@ namespace DaphneGui.CellPopDynamics
         private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "CellPopDynamics"; // Default file name
-            dlg.DefaultExt = ".bmp"; // Default file extension
-            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
-            dlg.FilterIndex = 1;
+            dlg.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Png Image|*.png|Pdf Image|*.pdf|Tiff Image|*.tif|Xps Image|*.xps";
+            dlg.Title = "Export to File";
             dlg.RestoreDirectory = true;
 
             // Show save file dialog box
             Nullable<bool> result = dlg.ShowDialog();
 
             // Process save file dialog box results
-
             if (result == true)
+            {
+                legendModifier.GetLegendDataFor = SourceMode.AllVisibleSeries;
+                legendModifier.UpdateLegend();
                 mySciChart.SaveToFile(dlg.FileName);
+                legendModifier.GetLegendDataFor = SourceMode.AllSeries;
+                legendModifier.UpdateLegend();                
+            }
 
             ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
             //if (result == true)
@@ -131,6 +135,44 @@ namespace DaphneGui.CellPopDynamics
             tbSurfaceTooltip.AppendText("To pan:");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
+        }
+
+        private void testButton_Click(object sender, RoutedEventArgs e)
+        {            
+        }
+
+        private bool allStatesChecked = false;
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                DataGrid dg = plotOptions.deathStatesGrid;
+                
+                CellPopulation pop = (CellPopulation)(plotOptions.lbPlotCellPops.SelectedItem);
+                ObservableCollection<bool> states = pop.Cell.death_driver.plotStates;
+
+                for (int i = 0; i < states.Count; i++)
+                {
+                    states[i] = !allStatesChecked;
+                }
+
+                states = pop.Cell.div_scheme.Driver.plotStates;
+
+                for (int i = 0; i < states.Count; i++)
+                {                    
+                    states[i] = !allStatesChecked;
+                }
+
+                states = pop.Cell.diff_scheme.Driver.plotStates;
+
+                for (int i = 0; i < states.Count; i++)
+                {
+                    states[i] = !allStatesChecked;
+                }
+
+                allStatesChecked = !allStatesChecked;
+            }
         }
 
     }

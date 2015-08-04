@@ -54,11 +54,14 @@
 
                         <!--Command Buttons Panel-->
                         <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
-                            <TextBox Background="#FFE0E0E0" BorderBrush="Black" BorderThickness="0" IsReadOnly="True" Text="  Actions" Height="24" ></TextBox>
+                            <TextBox Background="#FFE0E0E0" BorderBrush="Black" BorderThickness="0" IsReadOnly="True" Text="  Actions" Height="24" 
+                                     KeyDown="TextBox_KeyDown"
+                                     />
                             <Border BorderBrush="Black" BorderThickness="0" Background="#FFE0E0E0" >
                                 <WrapPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0"  >
                                     <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
                                     <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
+                                    <!--<Button x:Name="testButton" Visibility="Collapsed" Width="50" Height="24" Content="Test" Click="testButton_Click"></Button>-->
                                     <ComboBox x:Name="TimeUnitsComboBox" SelectionChanged="TimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
                                         <ComboBoxItem>Minutes</ComboBoxItem>
                                         <ComboBoxItem>Hours</ComboBoxItem>
