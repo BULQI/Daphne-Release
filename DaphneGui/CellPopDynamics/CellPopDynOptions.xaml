@@ -20,7 +20,7 @@
         <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="True"
                             Header="Plot options by cell state"
-                            Margin="0,4,0,0" 
+                            Margin="0,0,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
                             BorderBrush="Black"

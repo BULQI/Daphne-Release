@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Numerics;
 
 using System.Xml.Serialization;
 using Newtonsoft.Json;
@@ -7533,6 +7534,8 @@ namespace Daphne
         public CellBehaviorState cbState;
         public CellGeneState cgState;
         public int CellGeneration;
+        public int Cell_id;
+        public string Lineage_id;
 
         [JsonIgnore]
         public double X
@@ -7564,16 +7567,16 @@ namespace Daphne
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
             cgState = new CellGeneState();
+
+            Cell_id = -1;
+            Lineage_id = "";
         }
 
-        public CellState(double x, double y, double z)
+        public CellState(double x, double y, double z) : this()
         {
-            spState.X = new double[3] { x, y, z };
-            spState.V = new double[3];
-            spState.F = new double[3];
-            cmState = new CellMolPopState();
-            cbState = new CellBehaviorState();
-            cgState = new CellGeneState();
+            spState.X[0] = x;
+            spState.X[1] = y;
+            spState.X[2] = z;
         }
 
         public void setSpatialState(CellSpatialState state)
@@ -7691,12 +7694,6 @@ namespace Daphne
                 cgState.geneDict[key] = activation;
             }
         }
-
-        public void setCellGeneration(int generation)
-        {
-            CellGeneration = generation;
-        }
-
     }
 
     public class ReportXVF

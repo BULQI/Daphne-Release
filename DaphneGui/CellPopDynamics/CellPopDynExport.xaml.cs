@@ -28,8 +28,8 @@ namespace DaphneGui.CellPopDynamics
         private void btnDynFolderBrowse_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Image"; // Default file name
-            dlg.DefaultExt = ".jpg"; // Default file extension
+            dlg.FileName = "CellDynamics"; // Default file name
+            dlg.DefaultExt = ".bmp"; // Default file extension
             dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
 
             dlg.FilterIndex = 2;

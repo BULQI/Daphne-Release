@@ -44,6 +44,31 @@ namespace Daphne
         /// dictionary of raw cell track sets data
         /// </summary>
         private Dictionary<int, CellTrackData> trackData;
+        // safe cell id
+        public static int SafeCell_id = 0;
+
+        /// <summary>
+        /// generate a safe cell id, update safeCell_id when needed
+        /// </summary>
+        /// <param name="id">reference id</param>
+        /// <returns>the id to use</returns>
+        public static int GenerateSafeCellId(int id)
+        {
+            // the safe id must be larger than the largest one in use
+            // if the cell id is legitimate (> 0), use it
+            if (id > -1)
+            {
+                if (id >= DataBasket.SafeCell_id)
+                {
+                    DataBasket.SafeCell_id = id + 1;
+                }
+            }
+            else
+            {
+                id = DataBasket.SafeCell_id++;
+            }
+            return id;
+        }
 
         /// <summary>
         /// constructor
@@ -64,7 +89,7 @@ namespace Daphne
         public void Clear()
         {
             cells.Clear();
-            Cell.SafeCell_id = 0;
+            SafeCell_id = 0;
             populations.Clear();
             molecules.Clear();
             genes.Clear();
@@ -232,6 +257,7 @@ namespace Daphne
         {
             List<int> removalList = new List<int>();
             CellState state = new CellState();
+            Cell cell;
 
             foreach (int key in cells.Keys)
             {
@@ -240,15 +266,13 @@ namespace Daphne
 
             for (int i = 0; i < frame.CellCount; i++)
             {
-                int cell_id = frame.CellIDs[i];
-
-                // take off the removal list
-                removalList.Remove(cell_id);
-
                 frame.applyStateByIndex(i, ref state);
 
+                // take off the removal list
+                removalList.Remove(state.Cell_id);
+
                 // if the cell doesn't exist, create it
-                if (cells.ContainsKey(cell_id) == false)
+                if (cells.ContainsKey(state.Cell_id) == false)
                 {
                     ConfigCompartment[] configComp = new ConfigCompartment[2];
                     List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
@@ -265,10 +289,19 @@ namespace Daphne
 
                     // create the cell
                     hSim.prepareCellInstantiation(cp, configComp, bulk_reacs, ref boundary_reacs, ref transcription_reacs);
-                    hSim.instantiateCell(cell_id, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, false);
+                    cell = hSim.instantiateCell(cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, false);
+                }
+                else
+                {
+                    cell = cells[state.Cell_id];
                 }
                 // now apply the state
-                cells[cell_id].SetCellState(state);
+                cell.SetCellState(state);
+                // add the cell
+                if (cells.ContainsKey(state.Cell_id) == false)
+                {
+                    SimulationBase.AddCell(cell);
+                }
             }
 
             // remove cells

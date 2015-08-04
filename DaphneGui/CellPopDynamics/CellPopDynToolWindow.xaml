@@ -10,126 +10,140 @@
     Title="CellPopDynToolWindow" 
     Loaded="CellPopDynWindow_Loaded"
     >
+    
+    <local:ToolWinBase.Resources>
+        <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+    </local:ToolWinBase.Resources>
 
-    <docking:SplitContainer x:Name="plotSplitContainer" >
+    <Grid>
 
-        <docking:SplitContainer.Resources>
-                    <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
-                        <Setter Property="FontSize" Value="20"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
-                        <Setter Property="FontFamily" Value="Segoe UI"/>
-                    </Style>
-        </docking:SplitContainer.Resources>
-                
-        <!-- Left-hand content container - GUI for plotting options -->
-        <!--Plot Options panel-->
-        <docking:ToolWindowContainer docking:DockSite.ControlSize="300,900" x:Name="plotToolWindowContainer" MaxHeight="1200" AutomationProperties.AutomationId="PlotLeftTWContainer">
-            <docking:ToolWindow Title="Plot Options">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border CornerRadius="0" BorderBrush="#415578" BorderThickness="2" Grid.Column="0" Grid.Row="0" >
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
+
+                        <!--Plot options panel-->
                         <StackPanel Grid.Row="0">
                             <!--this window's datacontext is Protocol.Scenario-->
                             <plot:CellPopDynOptions x:Name="plotOptions" Tag="Analysis"></plot:CellPopDynOptions>
                         </StackPanel>
-                                    
+
                         <!--Command Buttons Panel-->
-                        <TextBox Background="#FFE0E0E0" BorderBrush="Black" BorderThickness="0" IsReadOnly="True" Text="  Actions" Height="24" Grid.Row="1"></TextBox>
-                        <Border BorderBrush="Black" BorderThickness="0" Background="#FFE0E0E0" Grid.Row="2">
-                            <WrapPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0" Grid.Row="3" >
-                                <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
-                                <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
-                                <ComboBox x:Name="TimeUnitsComboBox" SelectionChanged="TimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
-                                    <ComboBoxItem>Minutes</ComboBoxItem>
-                                    <ComboBoxItem>Hours</ComboBoxItem>
-                                    <ComboBoxItem>Days</ComboBoxItem>
-                                    <ComboBoxItem>Weeks</ComboBoxItem>
-                                </ComboBox>
-                            </WrapPanel>
-                        </Border>
+                        <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                            <TextBox Background="#FFE0E0E0" BorderBrush="Black" BorderThickness="0" IsReadOnly="True" Text="  Actions" Height="24" ></TextBox>
+                            <Border BorderBrush="Black" BorderThickness="0" Background="#FFE0E0E0" >
+                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0"  >
+                                    <Button x:Name="plotButton" Width="50" Height="24" Content="Plot" Click="plotButton_Click"></Button>
+                                    <Button x:Name="plotExportButton" Width="50"  Height="24" Content="Export" Click="plotExportButton_Click"></Button>
+                                    <ComboBox x:Name="TimeUnitsComboBox" SelectionChanged="TimeUnitsComboBox_SelectionChanged" SelectedIndex="0">
+                                        <ComboBoxItem>Minutes</ComboBoxItem>
+                                        <ComboBoxItem>Hours</ComboBoxItem>
+                                        <ComboBoxItem>Days</ComboBoxItem>
+                                        <ComboBoxItem>Weeks</ComboBoxItem>
+                                    </ComboBox>
+                                </WrapPanel>
+                            </Border>
+                        </StackPanel>
+                        
                     </Grid>
                 </ScrollViewer>
-            </docking:ToolWindow>
-        </docking:ToolWindowContainer>
-                
-                <!-- Right-hand content containers - Chart window -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="500,800" AutomationProperties.AutomationId="PlotRightTWContainer" >
-                    <docking:ToolWindow Title="Graph" >
+            </Border>
+
+            <GridSplitter Width="3" Grid.Column="1" Background="#415578" ResizeBehavior="PreviousAndNext"/>
+
+            <Border CornerRadius="0" BorderBrush="#415578" BorderThickness="2" Grid.Column="2" Grid.Row="0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid SciChart:ThemeManager.Theme="BrightSpark" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                            <!--Moved the graph code here because it was not resizing-->
-                            <!--<Grid SciChart:ThemeManager.Theme="ExpressionLight">-->
-                            <Grid SciChart:ThemeManager.Theme="BrightSpark">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" >
 
-                                    <!--SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface"-->
-                                    <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold" Margin="10,10" >
-                                        <!--Tooltip for main surface-->
-                                                                        <dyn:CellPopDynamicsChartSurface.ToolTip>
-                                        <ToolTip >
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBox x:Name="tbSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                            <!--SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface"-->
+                            <dyn:CellPopDynamicsChartSurface x:Name="mySciChart" FontSize="20" FontFamily="Segoe UI" FontWeight="Bold" Margin="10,10" >
+                                <!--Tooltip for main surface-->
+                                <dyn:CellPopDynamicsChartSurface.ToolTip>
+                                    <ToolTip >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="tbSurfaceTooltip" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
                                                         Padding="5" MaxWidth="300" IsReadOnly="True" ToolTipService.ShowDuration="2000">
-                                                </TextBox>
-                                            </StackPanel>
-                                        </ToolTip>
-                                    </dyn:CellPopDynamicsChartSurface.ToolTip>
+                                            </TextBox>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </dyn:CellPopDynamicsChartSurface.ToolTip>
 
-                                        <!--ContextMenu for main surface-->
-                                                        <dyn:CellPopDynamicsChartSurface.ContextMenu>
-                                        <ContextMenu >
-                                            <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
-                                        </ContextMenu>
-                                    </dyn:CellPopDynamicsChartSurface.ContextMenu>
+                                <!--ContextMenu for main surface-->
+                                <dyn:CellPopDynamicsChartSurface.ContextMenu>
+                                    <ContextMenu >
+                                        <MenuItem Header="Zoom Out" Name="menuZoomOut" Click="menuZoomOut_Click"></MenuItem>
+                                    </ContextMenu>
+                                </dyn:CellPopDynamicsChartSurface.ContextMenu>
 
-                                        <!--  Declare Axes  -->
-                                                    <SciChart:SciChartSurface.XAxis>
-                                        <SciChart:NumericAxis VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
-                                        </SciChart:NumericAxis>
-                                    </SciChart:SciChartSurface.XAxis>
+                                <!--  Declare Axes  -->
+                                <SciChart:SciChartSurface.XAxis>
+                                    <SciChart:NumericAxis VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
+                                    </SciChart:NumericAxis>
+                                </SciChart:SciChartSurface.XAxis>
 
-                                                <SciChart:SciChartSurface.YAxis>
-                                        <SciChart:NumericAxis VisibleRange="0, 200" GrowBy="0.1, 0.2" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
-                                    </SciChart:SciChartSurface.YAxis>
+                                <SciChart:SciChartSurface.YAxis>
+                                    <SciChart:NumericAxis VisibleRange="0, 200" GrowBy="0.1, 0.2" AxisAlignment="Left" AxisTitle="Number of cells" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="False" DrawMajorGridLines="False" />
+                                </SciChart:SciChartSurface.YAxis>
 
-                                        <!--  Declare ChartModifiers  -->
-                                                                                                                        <SciChart:SciChartSurface.ChartModifier>
-                                        <SciChart:ModifierGroup>
-                                            <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
-                                            <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
-                                            <SciChart:SeriesSelectionModifier>
-                                                <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
-                                                    <Style TargetType="SciChart:BaseRenderableSeries">
-                                                        <Setter Property="StrokeThickness" Value="3" />
-                                                    </Style>
-                                                </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
-                                            </SciChart:SeriesSelectionModifier>
-                                                        
-                                            <!--MouseWheelZoomModifier allows user to zoom in and out using the mouse wheel-->
-                                            <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
+                                <!--  Declare ChartModifiers  -->
+                                <SciChart:SciChartSurface.ChartModifier>
+                                    <SciChart:ModifierGroup>
+                                        <SciChart:RubberBandXyZoomModifier x:Name="rubberBandZoomModifier" IsEnabled="True" IsXAxisOnly="False" ZoomExtentsY="False" IsAnimated="True"/>
+                                        <SciChart:LegendModifier x:Name="legendModifier" ShowLegend="True" Orientation="Vertical"/>
+                                        <SciChart:SeriesSelectionModifier>
+                                            <SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                                <Style TargetType="SciChart:BaseRenderableSeries">
+                                                    <Setter Property="StrokeThickness" Value="3" />
+                                                </Style>
+                                            </SciChart:SeriesSelectionModifier.SelectedSeriesStyle>
+                                        </SciChart:SeriesSelectionModifier>
 
-                                            <!--ExecuteOn="MouseDoubleClick" allows user to zoom out on double click-->
-                                            <SciChart:ZoomExtentsModifier IsAnimated="True" ExecuteOn="MouseDoubleClick"/>
+                                        <!--MouseWheelZoomModifier allows user to zoom in and out using the mouse wheel-->
+                                        <SciChart:MouseWheelZoomModifier x:Name="mouseWheelZoomModifier"/>
 
-                                            <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
-                                            <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>
-                                                                
-                                        </SciChart:ModifierGroup>
-                                    </SciChart:SciChartSurface.ChartModifier>
-                                    </dyn:CellPopDynamicsChartSurface>
-                                </ScrollViewer>
-                            </Grid>
+                                        <!--ExecuteOn="MouseDoubleClick" allows user to zoom out on double click-->
+                                        <SciChart:ZoomExtentsModifier IsAnimated="True" ExecuteOn="MouseDoubleClick"/>
+
+                                        <!-- Adding the ZoomPanModifier gives SciChart the ability to pan on mouse-drag - WORKS BUT SOMETIMES IT STRETCHES INSTEAD OF PANNING! -->
+                                        <SciChart:ZoomPanModifier x:Name="zoomPanModifier" IsEnabled="True" ExecuteOn="MouseMiddleButton"/>
+
+                                    </SciChart:ModifierGroup>
+                                </SciChart:SciChartSurface.ChartModifier>
+                            </dyn:CellPopDynamicsChartSurface>
                         </ScrollViewer>
-                    </docking:ToolWindow>
-                </docking:ToolWindowContainer>
-            </docking:SplitContainer>
-        <!--</docking:DockSite>-->
-    <!--</DockPanel>-->            
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+
+        </Grid>
+
+    </Grid>
 </local:ToolWinBase>

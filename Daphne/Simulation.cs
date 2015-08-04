@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Numerics;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 
@@ -229,15 +230,13 @@ namespace Daphne
         /// <summary>
         /// instantiate a cell based on given values
         /// </summary>
-        /// <param name="id">cell id</param>
         /// <param name="cp">the population this cell is part of</param>
         /// <param name="configComp">the two cell compartments (cytosol, membrane)</param>
         /// <param name="bulk_reacs">bulk reactions (cytosol, membrane)</param>
         /// <param name="boundary_reacs">boundary reactions</param>
         /// <param name="transcription_reacs">transcription reactions</param>
         /// <param name="report">when true, prepare boundary reaction report</param>
-        public Cell instantiateCell(int id,
-                                    CellPopulation cp,
+        public Cell instantiateCell(CellPopulation cp,
                                     ConfigCompartment[] configComp,
                                     List<ConfigReaction>[] bulk_reacs,
                                     List<ConfigReaction> boundary_reacs,
@@ -252,7 +251,7 @@ namespace Daphne
                 prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
             }
 
-            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius), new ConstructorArgument("id", id));
+            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius));
 
             simCell.renderLabel = cp.Cell.renderLabel ?? cp.Cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
@@ -379,9 +378,6 @@ namespace Daphne
                 // Set gene activity levels now that the current state is set
                 simCell.SetGeneActivities(simCell.Differentiator);
             }
-
-            // add the cell
-            AddCell(simCell);
 
             if (report == true && result != null)
             {
@@ -1088,13 +1084,30 @@ namespace Daphne
 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell c = instantiateCell(-1, cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
+                    Cell c = instantiateCell(cp, configComp, bulk_reacs, boundary_reacs, transcription_reacs, i == 0);
+                    int cell_id = cp.CellStates[i].Cell_id;
+                    string lineage_id = cp.CellStates[i].Lineage_id;
+
+                    // the safe id must be larger than the largest one in use
+                    // if the cell id is legitimate (> 0), use it
+                    c.Cell_id = DataBasket.GenerateSafeCellId(cell_id);
 
                     // assign lineage
-                    c.Lineage_id = idCount + idStart;
-                    idCount++;
+                    if (lineage_id != "")
+                    {
+                        c.Lineage_id = BigInteger.Parse(lineage_id);
+                    }
+                    else
+                    {
+                        c.Lineage_id = idCount + idStart;
+                        idCount++;
+                    }
+
                     // state
                     c.SetCellState(cp.CellStates[i]);
+
+                    // add the cell
+                    AddCell(c);
                 }
             }
 

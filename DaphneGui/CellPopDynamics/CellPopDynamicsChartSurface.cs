@@ -24,18 +24,6 @@ namespace DaphneGui.CellPopDynamics
     /// </summary>
     class CellPopDynamicsChartSurface : CellPopChartSurface
     {
-        //x axis default units are minutes 
-        // For minutes, xScale = 1.0;
-        // For hours,   xScale = 1.0/60 
-        // For days,    xScale = 1.0/(60*24)
-        // For weeks,   xScale = 1.0/(60*24*7)
-
-        private double[] xScaleValues = { 1.0, 1.0 / 60, 1.0 / (60 * 24), 1.0 / (60 * 24 * 7) };
-        private string[] xAxisLabels = { "Time in minutes", "Time in hours", "Time in days", "Time in weeks" };
-
-        public string XAxisLabel { get; set; }
-        public double XScale { get; set; }
-
         private Dictionary<int, System.Windows.Media.Color> lineColors;
         private int NextColorIndex = 0;
 
@@ -44,9 +32,6 @@ namespace DaphneGui.CellPopDynamics
         /// </summary>
         public CellPopDynamicsChartSurface()
         {
-            XAxisLabel = "Time in minutes";
-            XScale = 1.0;
-
             lineColors = new Dictionary<int, System.Windows.Media.Color>();
             lineColors.Add(0, Colors.Blue);
             lineColors.Add(1, Colors.Red);
@@ -169,7 +154,10 @@ namespace DaphneGui.CellPopDynamics
                     RenderableSeries.Add(flrs);
                 }
             }
-        }       
+        }
 
+        //public override void ExportToPDF(string filename)
+        //{
+        //}
     }
 }

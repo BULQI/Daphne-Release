@@ -39,26 +39,46 @@ namespace DaphneGui.CellPopDynamics
             mySciChart.Plot(this, plotOptions);
         }
 
+        /// <summary>
+        /// Export the chart to a file.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.FileName = "CellPopDynamics"; // Default file name
             dlg.DefaultExt = ".bmp"; // Default file extension
-            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
-
-            dlg.FilterIndex = 2;
+            dlg.Filter = "Bitmap Image (.bmp)|*.bmp|JPEG Image (.jpg)|*.jpg |PNG Image (.png)|*.png |TIFF Image (.tif)|*.tif |PDF Image (.pdf)|*.pdf |XPS Image (.xps)|*.xps";
+            dlg.FilterIndex = 1;
             dlg.RestoreDirectory = true;
 
             // Show save file dialog box
             Nullable<bool> result = dlg.ShowDialog();
 
             // Process save file dialog box results
+
             if (result == true)
             {
-                // Save file
+                LegendModifier legend = new LegendModifier();
+                Type elementType = legend.GetType();
+                legendModifier.IsEnabled = false;
                 mySciChart.SaveToFile(dlg.FileName);
             }
-           
+
+            ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
+            //if (result == true)
+            //{
+            //    // Save file
+            //    if (dlg.FileName.EndsWith("pdf"))
+            //    {
+            //        this.SavePdf(dlg.FileName);
+            //    }
+            //    else
+            //    {
+            //        LineageSciChart.SaveToFile(dlg.FileName);
+            //    }
+            //}
         }
 
         /// <summary>

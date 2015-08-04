@@ -28,7 +28,7 @@ namespace DaphneGui
         }
 
         void App_Deactivated(object sender, EventArgs e)
-        {
+        {            
             // Application deactivated - close open items that don't automatically
             MainWindow mw = (DaphneGui.MainWindow)this.MainWindow;
             mw.CellOptionsExpander.IsExpanded = false;
