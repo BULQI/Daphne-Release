@@ -6,7 +6,7 @@
 #include "Nt_CellPopulation.h"
 #include "Nt_DArray.h"
 
-//#include "Nt_CollisionManager.h"
+#include "Nt_CollisionManager.h"
 
 
 using namespace System;

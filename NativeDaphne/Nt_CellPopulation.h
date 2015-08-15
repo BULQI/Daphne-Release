@@ -156,10 +156,10 @@ namespace NativeDaphne
 					for (int i=0; i< itemCount; i++)
 					{
 						ComponentCells[i]->SpatialState->X->NativePointer = _X + i * 3;
-						//ComponentCells[i]->nt_cell->X = _X + i * 3;
+						ComponentCells[i]->nt_cell->X = _X + i * 3;
 						ComponentCells[i]->SpatialState->V->NativePointer = _V + i * 3;
 						ComponentCells[i]->SpatialState->F->NativePointer = _F + i * 3;
-						//ComponentCells[i]->nt_cell->F = _F + i * 3;
+						ComponentCells[i]->nt_cell->F = _F + i * 3;
 
 					}
 
@@ -178,12 +178,11 @@ namespace NativeDaphne
 					_fptr[i] = cell->SpatialState->F[i];
 				}
 				cell->SpatialState->X->NativePointer = _xptr;
-				//cell->nt_cell->X = _xptr;
+				cell->nt_cell->X = _xptr;
 				cell->SpatialState->V->NativePointer = _vptr;
 				cell->SpatialState->F->NativePointer = _fptr;
-				//cell->nt_cell->F = _fptr;
+				cell->nt_cell->F = _fptr;
 
-				//todo set sigma values etc....
 				for (int i= itemCount *3; i < itemCount *3 + 3; i++)
 				{
 					_Sigma[i] = cell->Sigma;

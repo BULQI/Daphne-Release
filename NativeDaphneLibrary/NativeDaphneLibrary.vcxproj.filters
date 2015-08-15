@@ -33,6 +33,15 @@
     <ClInclude Include="NtInterpolatedRectangularPrism.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NtCellPair.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NtGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NtCollisionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NtInterpolatedRectangularPrism.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NtCellPair.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NtCollisionManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

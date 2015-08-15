@@ -174,10 +174,13 @@ namespace NativeDaphne
 	//update boundary for ECS
 	void Nt_MolecularPopulation::UpdateBoundary(Nt_ECS^ ECS)
 	{
-		//this is the speed up versoin
+		//this is the speed up version
 		NtInterpolatedRectangularPrism *ir_prism = ECS->ir_prism;
 		double *sfarray = this->ConcPointer;
 		int item_count = ECS->BoundaryKeys->Count;
+		
+		//ir_prism->NativeRestrict(sfarray, ECS->Positions, item_count, _boundaryConcPtrs);
+		//multithread version
 		ir_prism->MultithreadNativeRestrict(sfarray, ECS->Positions, item_count, _boundaryConcPtrs);
 	}
 

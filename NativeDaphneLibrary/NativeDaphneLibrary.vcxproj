@@ -148,6 +148,9 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NtCellPair.h" />
+    <ClInclude Include="NtCollisionManager.h" />
+    <ClInclude Include="NtGrid.h" />
     <ClInclude Include="NtInterpolatedRectangularPrism.h" />
     <ClInclude Include="NTRandomNumberGenerator.h" />
     <ClInclude Include="NtUtility.h" />
@@ -170,6 +173,8 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NativeDaphneLibrary.cpp" />
+    <ClCompile Include="NtCellPair.cpp" />
+    <ClCompile Include="NtCollisionManager.cpp" />
     <ClCompile Include="NtInterpolatedRectangularPrism.cpp" />
     <ClCompile Include="NTRandomNumberGenerator.cpp" />
     <ClCompile Include="NtUtility.cpp" />

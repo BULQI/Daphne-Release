@@ -1214,7 +1214,6 @@ namespace Daphne
         public override void Burn_inStep()
         {
             double mu = mu_max;
-            Pair pmax = null;
 
             ClearFlag(SIMFLAG_ALL);
             // render every 500 integration steps to show the progress
@@ -1235,33 +1234,14 @@ namespace Daphne
             {
                 c.BoundaryForce();
             }
-            // 5., find the maximum force
-            f_max = 0;
-            foreach (KeyValuePair<long, Pair> kvp in collisionManager.Pairs)
-            {
-                if (kvp.Value.Force > f_max)
-                {
-                    f_max = kvp.Value.Force;
-                    pmax = kvp.Value;
-                }
-            }
-            // find mu such that it allows maximally 10% of (r1 + r2) movement for the pair with f_max
-            if(pmax != null)
-            {
-                double tmp = 0.1 * (pmax.Cell(0).Radius + pmax.Cell(1).Radius) / (f_max * integratorStep);
-                if (tmp < mu_max)
-                {
-                    mu = tmp;
-                }
-                else
-                {
-                    mu = mu_max;
-                }
-            }
+            // 5., find the maximum force and associated mu values.
+            double tmu = collisionManager.nt_collisionManager.GetBurnInMuValue(integratorStep);
 
-            // 4., cell movement
-            if (f_max > 0.0)
+            mu = tmu < mu_max ? tmu : mu_max;
+
+            if (mu > 0)
             {
+                //cell movement
                 cellManager.Burn_inStep(integratorStep, mu);
             }
         }

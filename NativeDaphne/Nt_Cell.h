@@ -5,7 +5,7 @@
 #include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
 #include "Nt_DArray.h"
-//#include "NtCellPair.h"
+#include "NtCellPair.h"
 #include "Nt_Gene.h"
 #include "Nt_Compartment.h"
 
@@ -222,7 +222,7 @@ namespace NativeDaphne
 
 		List<Nt_Cell^>^ ComponentCells;
 
-		//NtCell *nt_cell;
+		NtCell *nt_cell;
 
 		Nt_Cell(double r)
 		{	
@@ -237,7 +237,7 @@ namespace NativeDaphne
 			GridIndex->NativePointer = gridIndex;
 			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
 			PreviousGridIndex[0] = -1; //evaludate into invalid
-			//nt_cell = new NtCell(radius, gridIndex);
+			nt_cell = new NtCell(radius, gridIndex);
 		}
 
 		~Nt_Cell()
@@ -248,7 +248,7 @@ namespace NativeDaphne
 		!Nt_Cell()
 		{
 			free(gridIndex);
-			//delete nt_cell;
+			delete nt_cell;
 
 		}
 

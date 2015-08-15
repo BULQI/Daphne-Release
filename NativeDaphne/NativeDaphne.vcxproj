@@ -152,10 +152,13 @@
   <ItemGroup>
     <ClInclude Include="Nt_Cell.h" />
     <ClInclude Include="Nt_CellManager.h" />
+    <ClInclude Include="Nt_CellPair.h" />
     <ClInclude Include="Nt_CellPopulation.h" />
+    <ClInclude Include="Nt_CollisionManager.h" />
     <ClInclude Include="Nt_Compartment.h" />
     <ClInclude Include="Nt_Darray.h" />
     <ClInclude Include="Nt_Gene.h" />
+    <ClInclude Include="Nt_Grid.h" />
     <ClInclude Include="Nt_Interpolation.h" />
     <ClInclude Include="Nt_Manifolds.h" />
     <ClInclude Include="Nt_ManifoldUtilities.h" />
@@ -170,6 +173,7 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Nt_Cell.cpp" />
     <ClCompile Include="Nt_CellPopulation.cpp" />
+    <ClCompile Include="Nt_CollisionManager.cpp" />
     <ClCompile Include="Nt_Darray.cpp" />
     <ClCompile Include="Nt_Interpolation.cpp" />
     <ClCompile Include="Nt_Manifolds.cpp" />

@@ -529,14 +529,14 @@ namespace Daphne
             //update ECS/Memrante boundary
 
             //current method
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
-            {
-                kvp.Value.UpdateECSMembraneBoundary();
-            }
+            //foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
+            //{
+            //    kvp.Value.UpdateECSMembraneBoundary();
+            //}
 
 
             //new methods.
-            //this.comp.BaseComp.UpdateBoundary();
+            this.comp.BaseComp.UpdateBoundary();
         }
 
         protected override void Dispose(bool disposing)

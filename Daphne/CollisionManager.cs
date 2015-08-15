@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using NativeDaphne;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -23,11 +24,30 @@ namespace Daphne
         public CollisionManager(Vector gridSize, double gridStep) : base(gridSize, gridStep)
         {
             grid = new Dictionary<int, Cell>[gridPts[0], gridPts[1], gridPts[2]];
+
+            if (useNativeCollisionManager == true)
+            {
+                bool toroidal = false;
+                if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+                {
+                    toroidal = (SimulationBase.dataBasket.Environment as ECSEnvironment).toroidal;
+                }
+
+                nt_collisionManager = new Nt_CollisionManager(gridSize.ToArray(), gridStep, toroidal);
+                nt_collisionManager.set_parameter_Ph1(SimulationBase.ProtocolHandle.sim_params.phi1);
+            }
         }
 
         public void Step(double dt)
         {
-            update();
+            if (useNativeCollisionManager)
+            {
+                nt_collisionManager.Step(dt);
+            }
+            else
+            {
+                update();
+            }
         }
 
         private bool clearSeparation(Pair p)
@@ -521,5 +541,8 @@ namespace Daphne
 
         private Dictionary<long, Pair> pairs;
         private Dictionary<int, Cell>[, ,] grid;
+
+        public Nt_CollisionManager nt_collisionManager;
+        bool useNativeCollisionManager = true;
     }
 }

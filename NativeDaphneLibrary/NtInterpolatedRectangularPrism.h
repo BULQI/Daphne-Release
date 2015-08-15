@@ -14,40 +14,12 @@
 namespace NativeDaphneLibrary
 {
 	//this class stores precomputed gradientMatrix information
-	//boundFlag, will tell if it is left bound, rightbound? for
-	//each component (x, y, z)
-	//the indexArray will be 3 * 20 - maximum indexes for each element is 20
-	class DllExport NtIndexMatrix
+	//indexArray stores 20 x 3 indexes for the 3 gradient matrix components
+	typedef struct DllExport NtIndexMatrix
 	{
-	public:
-		int *indexArray0; 
-		int *indexArray1; //for gradient
-		int *indexArray2;
-		int *indexArray3;
 		int boundFlag;
-
-		NtIndexMatrix()
-		{
-			indexArray0 = (int *)malloc(8 * sizeof(int));
-			indexArray1 = (int *)malloc(20 * sizeof(int));
-			indexArray2 = (int *)malloc(20 * sizeof(int));
-			indexArray3 = (int *)malloc(20 * sizeof(int));
-			if (!indexArray0 || !indexArray1 || !indexArray2 || !indexArray3)
-			{
-				fprintf(stderr, "out of memory in NtLocalMatrix()");
-				exit(1);
-			}
-			boundFlag = 0;
-		}
-
-		~NtIndexMatrix()
-		{
-			free(indexArray0);
-			free(indexArray1);
-			free(indexArray2);
-			free(indexArray3);
-		}
-	};
+		int indexArray[60]; 
+	}NtIndexMatrixStr;
 
 	class NtInterpolatedRectangularPrism;
 
@@ -82,6 +54,8 @@ namespace NativeDaphneLibrary
 		int NodesPerSide1m1;
 		int NodesPerSide2m1;
 		double StepSize;
+		double gradientFactor;
+
 
 		//data for laplacian
 		double coef1;
@@ -99,9 +73,14 @@ namespace NativeDaphneLibrary
 
 		//data for restrict
 		//precomputed localmatrix informaiton
-		NtIndexMatrix **localMatrixArray;
+		NtIndexMatrix *localMatrixArray;
 		bool isToroidal;
 		int NPS01;  //NodesPerSide0 * NodesPerSide1;
+		//more precomputed values.
+		int sf_prefetch_list[12];
+		int array_index_shifts[56];
+
+
 
 		int num_restrict_node;
 		double *NodeIndex;	//for pos/sepsize in x, y z.
@@ -130,15 +109,13 @@ namespace NativeDaphneLibrary
 
 		~NtInterpolatedRectangularPrism();
 
-		void initialize_index_matrix(int index, NtIndexMatrix *lm);
+		void initialize_index_matrix(int index);
 
 		void initialize_laplacian(int* index_operator, double _coef1, double _coef2);
 
 		int Laplacian(double *sfarray, double *retval, int n);
 
 		int NativeRestrict(double *sfarray, double** pos, int n, double **output);
-
-		int NativeRestrict_v0(double *sfarray, double** pos, int n, double **output);
 
 		int NtInterpolatedRectangularPrism::thread_restrict( void* arg);
 
