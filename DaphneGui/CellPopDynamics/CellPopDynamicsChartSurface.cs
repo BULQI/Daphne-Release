@@ -105,9 +105,6 @@ namespace DaphneGui.CellPopDynamics
             DrawStates(pop.Cell, pop.Cell.diff_scheme.Driver, data, CellPopulationDynamicsData.State.DIFF);
             DrawStates(pop.Cell, pop.Cell.div_scheme.Driver, data, CellPopulationDynamicsData.State.DIV);
 
-            // Set initial zoom??
-            //mySciChart.XAxis.VisibleRange = new DoubleRange(3, 6);
-
             //This draws the graph
             ZoomExtents();
             return;
@@ -156,8 +153,8 @@ namespace DaphneGui.CellPopDynamics
             }
         }
 
-        //public override void ExportToPDF(string filename)
-        //{
-        //}
+        public void GetMemDataSeries()
+        {
+        }
     }
 }

@@ -70,19 +70,6 @@ namespace DaphneGui.CellPopDynamics
                 legendModifier.UpdateLegend();                
             }
 
-            ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
-            //if (result == true)
-            //{
-            //    // Save file
-            //    if (dlg.FileName.EndsWith("pdf"))
-            //    {
-            //        this.SavePdf(dlg.FileName);
-            //    }
-            //    else
-            //    {
-            //        LineageSciChart.SaveToFile(dlg.FileName);
-            //    }
-            //}
         }
 
         /// <summary>
@@ -179,6 +166,8 @@ namespace DaphneGui.CellPopDynamics
                 allStatesChecked = !allStatesChecked;
             }
         }
+
+        
 
     }
    
