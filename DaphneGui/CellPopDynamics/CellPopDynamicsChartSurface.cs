@@ -295,11 +295,6 @@ namespace DaphneGui.CellPopDynamics
             }
 
             //Axis related settings for memory surface
-
-            //DefaultTickLabel dtl = new DefaultTickLabel();
-            //dtl.Style = (Style)FindResource("XAxisLabelStyle");
-            //dtl.FontSize = dtl.FontSize * pdfScaleFactor;
-
             NumericAxis xax = new NumericAxis();
             xax.AxisTitle = "Time in minutes";
             xax.TitleFontSize = xax.TitleFontSize * pdfScaleFactor;   // linXAxis.TitleFontSize * pdfScaleFactor;

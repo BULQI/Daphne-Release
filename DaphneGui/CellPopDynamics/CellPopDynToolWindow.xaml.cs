@@ -37,36 +37,9 @@ namespace DaphneGui.CellPopDynamics
     /// </summary>
     public partial class CellPopDynToolWindow : ToolWinBase
     {
-        ////private CellPopChartSurface MemSurface;
-        ////private List<Series> MemSeries;
-
-        ////private double pdfScaleFactor = 8;
-        ////private double defaultFontSize = 20;
-
-        ////private double axisFontSize;
-        ////public double AxisFontSize
-        ////{
-        ////    get { return axisFontSize; }
-        ////    set
-        ////    {
-        ////        if (axisFontSize != value)
-        ////        {
-        ////            axisFontSize = value;
-        ////            OnPropertyChanged("AxisFontSize");
-        ////        }
-        ////    }
-        ////}
-
         public CellPopDynToolWindow()
         {
             InitializeComponent();
-
-            ////AxisFontSize = defaultFontSize;
-
-            ////MemSeries = new List<Series>();
-            ////MemSurface = new CellPopChartSurface();
-            ////MemSurface.ChartTitle = "Rendered In Memory";
-            ////ThemeManager.SetTheme(MemSurface, "BrightSpark");
         }
 
         private void plotButton_Click(object sender, RoutedEventArgs e)
@@ -100,7 +73,6 @@ namespace DaphneGui.CellPopDynamics
                 //Export to file
                 if (dlg.FileName.EndsWith("pdf"))
                 {
-                    ////AxisFontSize *= pdfScaleFactor;
                     mySciChart.SaveCellPopDynToPdf(dlg.FileName);
                 }
                 else
@@ -114,53 +86,6 @@ namespace DaphneGui.CellPopDynamics
             }
 
         }
-
-        ////private void SaveCellPopDynToPdf(string filename)
-        ////{
-        ////    ThemeManager.SetTheme(MemSurface, "BrightSpark");
-
-        ////    Document doc = new Document(PageSize.LETTER);
-        ////    PdfWriter.GetInstance(doc, new FileStream(filename, FileMode.Create));
-        ////    doc.Open();
-
-        ////    GetMemDataSeries();
-
-        ////    MemSurface.Width = doc.PageSize.Width * pdfScaleFactor;
-        ////    MemSurface.Height = doc.PageSize.Height * pdfScaleFactor;
-
-        ////    //linXAxis.TitleFontSize *= pdfScaleFactor;
-        ////    //Export this surface to bitmap source
-        ////    var source = MemSurface.ExportToBitmapSource();
-
-        ////    //Then retrieve from BitmapSource into a Bitmap object
-        ////    Bitmap bmp = new Bitmap(source.PixelWidth, source.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-        ////    BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size),
-        ////    ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-        ////    source.CopyPixels(Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-        ////    bmp.UnlockBits(data);
-
-        ////    //Now create an image from the bitmap and convert it to iTextSharp.text.Image
-        ////    System.Drawing.Image image = bmp;
-        ////    iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
-
-        ////    //Scale to page size, allow for margins         
-        ////    float w, h;
-        ////    w = doc.PageSize.Width - doc.LeftMargin * 2 - 10;
-        ////    h = doc.PageSize.Height - doc.TopMargin * 2 - 10;
-        ////    pic.ScaleAbsolute(w, h);
-
-        ////    //Add the image to the doc
-        ////    pic.Border = iTextSharp.text.Rectangle.BOX;
-        ////    pic.BorderColor = iTextSharp.text.BaseColor.BLACK;
-        ////    pic.BorderWidth = 0;  //3f;
-
-        ////    doc.Add(pic);
-        ////    doc.Close();
-        ////}
-
-        ////public void GetMemDataSeries()
-        ////{
-        ////}
 
         /// <summary>
         /// Event handler called when user changes time units (minutes, hours, days, weeks).
