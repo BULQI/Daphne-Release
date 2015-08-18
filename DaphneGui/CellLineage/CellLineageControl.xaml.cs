@@ -242,7 +242,7 @@ namespace DaphneGui.CellLineage
                 }
                 else
                 {
-                    //LineageSciChart.SaveToFile(saveFileDialog.FileName);
+                    LineageSciChart.SaveToFile(saveFileDialog.FileName);
                 }
             }
         }
