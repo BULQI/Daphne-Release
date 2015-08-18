@@ -301,7 +301,7 @@ namespace DaphneGui.CellLineage
 
         /// <summary>
         /// Gets series for the memory chart surface. This method assumes that each series is only two points.
-        /// Do not use this method if your series is goint to be more than two points.
+        /// Do not use this method if your series is going to be more than two points.
         /// </summary>
         private void GetMemDataSeries()
         {            
@@ -479,6 +479,7 @@ namespace DaphneGui.CellLineage
             string XTitle = pda.GetChartXTitle();
             string YTitle = pda.GetChartYTitle();
 
+            //This draws all the series to the graph on the screen
             ConvertAndDraw(chartTitle, XTitle, YTitle, s);
         }
 

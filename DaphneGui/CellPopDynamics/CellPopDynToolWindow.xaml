@@ -17,6 +17,10 @@
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
         </Style>
+
+        <Style x:Key="XAxisLabelStyle" TargetType="SciChart:DefaultTickLabel">
+            <Setter Property="FontSize" Value="{Binding ElementName=lineageWindow, Path=AxisFontSize, Converter={StaticResource DebugConverter}, ConverterParameter=AxisFontSize}" />
+        </Style>
     </local:ToolWinBase.Resources>
 
     <Grid>
@@ -108,7 +112,7 @@
 
                                 <!--  Declare Axes  -->
                                 <SciChart:SciChartSurface.XAxis>
-                                    <SciChart:NumericAxis VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
+                                    <SciChart:NumericAxis x:Name="linXAxis" VisibleRange="0, 10000" GrowBy="0.1, 0.2" DrawMinorGridLines="False" DrawMajorGridLines="False" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}">
                                     </SciChart:NumericAxis>
                                 </SciChart:SciChartSurface.XAxis>
 
