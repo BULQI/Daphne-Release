@@ -220,8 +220,8 @@ namespace NativeDaphne
             // update cell locations in the grid tiles and update pairs
             updateGridAndPairs();
             // handle all pairs and find the forces
-			native_collisionManager->pairInteract(dt);
-			//native_collisionManager->MultiThreadPairInteract(dt);
+			//native_collisionManager->pairInteract(dt);
+			native_collisionManager->MultiThreadPairInteract(dt);
         }
 
 		array<Dictionary<int, Nt_Cell^>^, 3>^ grid;

@@ -171,7 +171,7 @@ namespace Daphne
                 X_coordinateID = dicCellID[0][0];//this is cellID for the founder cell at generation 0 and index 0;
             else
                 X_coordinateID = dicCellID[generationID - 1][motherIndexID];
-            X_CoordinateString = "cell:" + X_coordinateID + "\n" + familytree[X_coordinateID].IgAffinity;
+            X_CoordinateString = "cell:" + X_coordinateID;// +"\n"; +familytree[X_coordinateID].IgAffinity;  //here we remove the IgAffinity display for now. might need it later
             return X_CoordinateString;
         }
         //assume the eventTime has been update by adding the LastEventTime
@@ -194,7 +194,7 @@ namespace Daphne
             //get the event_time as the X coordinate for this current timepoint
 
             X_CoordinateCellID = dicCellID[generationID][indexID];
-            X_CoordinateString = "Cell:" + X_CoordinateCellID + "\n" + familytree[X_CoordinateCellID].IgAffinity.ToString("e2");
+            X_CoordinateString = "Cell:" + X_CoordinateCellID;// +"\n" + familytree[X_CoordinateCellID].IgAffinity.ToString("e2");//remove this IgAffinity display for now and might need it later.
             return X_CoordinateString;
         }
 
@@ -446,7 +446,7 @@ namespace Daphne
             //pChart.AutoScroll = true;
             pChart.Controls.Add(cChart);*/
 
-            chartTitle = "Cell Division Pedigree\nFounder Cell " + founder.Lineage_Id + "; Affinity: " + familytree[founder.Lineage_Id].IgAffinity.ToString("e2");
+            chartTitle = "Cell Division Pedigree\nFounder Cell " + founder.Lineage_Id;// +"; Affinity: " + familytree[founder.Lineage_Id].IgAffinity.ToString("e2"); //remove this IgAffinity diplay for now and might need it later.
             chartXTitle = " Time ";
             chartYTitle = chartTitle;
             return chartingSeries;

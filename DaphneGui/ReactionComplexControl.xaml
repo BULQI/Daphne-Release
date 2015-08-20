@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="DaphneGui.ReactionComplexControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DaphneGui"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
@@ -90,7 +91,7 @@
         <!--REACTIONS-->
         <StackPanel Margin="0,2" >
             <TextBlock Text="Reactions" />
-            <ListView x:Name="ListViewReacComplexReactions" MaxHeight="150"
+            <ListView x:Name="ListViewReacComplexReactions" MaxHeight="500"
                     ItemsSource="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.reactions, Mode=TwoWay}"
                     SelectedIndex="0" >
                 <ListView.View>
@@ -128,6 +129,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <local:ResizeThumb DataContext="{Binding ElementName=ListViewReacComplexReactions}" />
         </StackPanel>
 
     </StackPanel>

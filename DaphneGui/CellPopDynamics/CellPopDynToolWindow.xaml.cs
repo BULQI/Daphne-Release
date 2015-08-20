@@ -21,6 +21,7 @@ using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Abt.Controls.SciChart.Visuals.PointMarkers;
 using Abt.Controls.SciChart;
 using Abt.Controls.SciChart.Visuals.Axes;
+using System.Collections.ObjectModel;
 
 namespace DaphneGui.CellPopDynamics
 {
@@ -39,14 +40,16 @@ namespace DaphneGui.CellPopDynamics
             mySciChart.Plot(this, plotOptions);
         }
 
+        /// <summary>
+        /// Export the chart to a file.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void plotExportButton_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Image"; // Default file name
-            dlg.DefaultExt = ".jpg"; // Default file extension
-            dlg.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png|TIFF (*.tif)|*.tif|PDF (*.pdf)|*.pdf";
-
-            dlg.FilterIndex = 2;
+            dlg.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Png Image|*.png|Pdf Image|*.pdf|Tiff Image|*.tif|Xps Image|*.xps";
+            dlg.Title = "Export to File";
             dlg.RestoreDirectory = true;
 
             // Show save file dialog box
@@ -55,53 +58,33 @@ namespace DaphneGui.CellPopDynamics
             // Process save file dialog box results
             if (result == true)
             {
-                // Save file
-                SaveToFile(dlg.FileName);
+                legendModifier.GetLegendDataFor = SourceMode.AllVisibleSeries;
+                legendModifier.UpdateLegend();
+                mySciChart.SaveToFile(dlg.FileName);
+                legendModifier.GetLegendDataFor = SourceMode.AllSeries;
+                legendModifier.UpdateLegend();                
             }
-           
+
+            ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
+            //if (result == true)
+            //{
+            //    // Save file
+            //    if (dlg.FileName.EndsWith("pdf"))
+            //    {
+            //        this.SavePdf(dlg.FileName);
+            //    }
+            //    else
+            //    {
+            //        LineageSciChart.SaveToFile(dlg.FileName);
+            //    }
+            //}
         }
 
-        public void SaveToFile(string filename)
-        {
-            if (filename.EndsWith("png"))
-            {
-                mySciChart.ExportToFile(filename, ExportType.Png);
-            }
-            else if (filename.EndsWith("bmp"))
-            {
-                mySciChart.ExportToFile(filename, ExportType.Bmp);
-            }
-            else if (filename.EndsWith("jpg"))
-            {
-                mySciChart.ExportToFile(filename, ExportType.Jpeg);
-            }
-            else if (filename.EndsWith("pdf"))
-            {
-                mySciChart.OutputToPDF(filename);                
-            }
-            else if (filename.EndsWith("tif"))
-            {
-                mySciChart.ExportToTiff(filename);
-            }
-        }
-        
-        private Visual CreateSciChartSurfaceWithoutShowingIt()
-        {
-            SciChartSurface surf = new SciChartSurface();
-            // We must set a width and height. If you are rendering off screen without showing
-            // we have to tell the control what size to render C:\Projects\Daphne\Daphne-skg\DaphneGui\CellPopDynamics\CellPopDynToolWindow.xaml
-            surf.Width = mySciChart.Width;
-            surf.Height = mySciChart.Height;
-
-            // Doing an export sets up the chart for rendering off screen, including handling all the horrible layout issues
-            // that occur when a WPF element is created and rendered without showing it.
-            //
-            // You must call this before printing, even if you don't intend to use the bitmap.
-            surf.ExportToBitmapSource();
-
-            return surf;
-        }
-
+        /// <summary>
+        /// Event handler called when user changes time units (minutes, hours, days, weeks).
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TimeUnitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
@@ -116,6 +99,11 @@ namespace DaphneGui.CellPopDynamics
 
         }
 
+        /// <summary>
+        /// User selected "zoom out" from right-click context menu on chart
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void menuZoomOut_Click(object sender, RoutedEventArgs e)
         {
             mySciChart.ZoomExtents();            
@@ -147,6 +135,44 @@ namespace DaphneGui.CellPopDynamics
             tbSurfaceTooltip.AppendText("To pan:");
             tbSurfaceTooltip.AppendText(Environment.NewLine);
             tbSurfaceTooltip.AppendText("    Press mouse wheel and drag.");
+        }
+
+        private void testButton_Click(object sender, RoutedEventArgs e)
+        {            
+        }
+
+        private bool allStatesChecked = false;
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                DataGrid dg = plotOptions.deathStatesGrid;
+                
+                CellPopulation pop = (CellPopulation)(plotOptions.lbPlotCellPops.SelectedItem);
+                ObservableCollection<bool> states = pop.Cell.death_driver.plotStates;
+
+                for (int i = 0; i < states.Count; i++)
+                {
+                    states[i] = !allStatesChecked;
+                }
+
+                states = pop.Cell.div_scheme.Driver.plotStates;
+
+                for (int i = 0; i < states.Count; i++)
+                {                    
+                    states[i] = !allStatesChecked;
+                }
+
+                states = pop.Cell.diff_scheme.Driver.plotStates;
+
+                for (int i = 0; i < states.Count; i++)
+                {
+                    states[i] = !allStatesChecked;
+                }
+
+                allStatesChecked = !allStatesChecked;
+            }
         }
 
     }

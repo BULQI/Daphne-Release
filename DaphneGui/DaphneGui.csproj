@@ -127,11 +127,16 @@
     <Reference Include="HDF5DotNet">
       <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
     </Reference>
-    <Reference Include="itextsharp">
-      <HintPath>..\dependencies\itextsharp.dll</HintPath>
+    <Reference Include="itextsharp, Version=5.5.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\iTextSharp\itextsharp.dll</HintPath>
     </Reference>
-    <Reference Include="itextsharp.pdfa">
-      <HintPath>..\dependencies\itextsharp.pdfa.dll</HintPath>
+    <Reference Include="itextsharp.pdfa, Version=5.5.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\iTextSharp\itextsharp.pdfa.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.xtra">
+      <HintPath>..\dependencies\iTextSharp\itextsharp.xtra.dll</HintPath>
     </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
@@ -153,6 +158,7 @@
       <HintPath>..\packages\Ninject.Extensions.Factory.3.0.2-unstable-6\lib\net40\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="ReachFramework" />
     <Reference Include="SBMLayer">
       <HintPath>..\dependencies\SBMLayer.dll</HintPath>
     </Reference>
@@ -160,6 +166,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
@@ -215,7 +222,7 @@
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CellPopChartSurface.cs" />
+    <Compile Include="Charting\CellPopChartSurface.cs" />
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
