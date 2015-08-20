@@ -408,7 +408,8 @@ namespace Nt_ManifoldRing
 			{
 				throw gcnew ArgumentException("noncompatabile array length");
 			}
-            for (int i = 0; i < darray->Length; i++) darray[i] = src->darray[i];
+			memcpy(this->ArrayPointer, src->ArrayPointer, darray->Length * sizeof(double));
+            //for (int i = 0; i < darray->Length; i++) darray[i] = src->darray[i];
             return this;
         }
 

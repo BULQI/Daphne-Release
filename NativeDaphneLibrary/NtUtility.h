@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <xmmintrin.h>
+#include <emmintrin.h>
 
 namespace NativeDaphneLibrary
 {
@@ -27,18 +28,22 @@ namespace NativeDaphneLibrary
 		  inc - each scalar component contains inc elements
 		  result saved in x
 		*/
-		static int NtMultiplyScalar(int n, int inc, double *x, double *y, double *z);
+		static int MomentExpansion_NtMultiplyScalar(int n, double *x, double *y);
 
 
-		/* y = y +  a * x; 
-		  but for x, skip 1 and then do 3  a * x */
-		static int daxpy3_skip1(int n, double alpha, double *x, double *y);
 
-		/* z = z + x * y;  for x, skip 1 and then do 3 x * y */
-		static int dxypz3_skip1(int n, double *x, double *y, double *z);
+		//for same transduction constnat
+		static int cell_apply_chemotactic_force(int n, double tc, double *dconc, double *_F);
+
+		//for different transdcution constant
+		static int cell_apply_chemotactic_force2(int n, double *tc, double *dconc, double *_F);
 		
 
-		static int apply_boundary_force(int n, double *_x, double *ECSExtentLimit, double radius, double PairPhi1, double *_F);
+		static int cell_apply_boundary_force(int n, double *_x, double *ECSExtentLimit, double radius, double PairPhi1, double *_F);
+
+		static int TinyBall_laplacian(int n, double alpha, double *sf, double *laplacian);
+
+		static int TinyBall_DiffusionFluxTerm(int n, double alpha, double *flux, double *dst);
 
 		//compute memory size to be allocted, given data size
 		//the memory doubles when not enough
@@ -49,8 +54,27 @@ namespace NativeDaphneLibrary
 			return size;
 		}
 
+		static int mem_zero_d(double*dst, int count);
+
+		static int mem_copy_d(double *dst, double *src, int count);
+
+#define USE_SSE
 		static void AddDoubleArray(double *a, double *b, int length)
 		{
+#if defined(USE_SSE)
+			int i;
+			for (i=0; i< length; i+= 2)
+			{
+				__m128d v0 = _mm_load_pd(&a[i]);
+				__m128d v1 = _mm_load_pd(&b[i]);
+				__m128d c = _mm_add_pd(v0, v1);
+				_mm_store_pd(&a[i], c);
+			}
+			if (i != length + 1)
+			{
+				a[length-1] += b[length-1];
+			}
+#else
 			double *s = a + length;
 			while (a < s)
 			{
@@ -58,6 +82,7 @@ namespace NativeDaphneLibrary
 				a++;
 				b++;
 			}
+#endif
 		}
 
 

@@ -52,7 +52,8 @@ namespace NativeDaphneLibrary
 		HANDLE* JobFinishedEvents;
 
 		PairInteractArg** pairInteractArgs;
-		unsigned long AcitveJobCount;
+		//unsigned long AcitveJobCount;
+		volatile long AcitveJobCount;
 
 
 		NtCollisionManager(double *gsize, double gstep, bool gtoroidal);
@@ -138,7 +139,7 @@ namespace NativeDaphneLibrary
 				max_pair_count = numPairs;
 				if (max_pair_count%100 == 0)
 				{
-					fprintf(stdout, "Maximum pair count = %d\n", max_pair_count);
+					//fprintf(stdout, "Maximum pair count = %d\n", max_pair_count);
 				}
 			}
 			return true;
@@ -148,6 +149,8 @@ namespace NativeDaphneLibrary
 		{
 			return (*pairs)[key];
 		}
+
+		NtCellPair *NewCellPair(NtCell* _a, NtCell* _b);
 
 		void removePairFromArray(NtCellPair *p)
 		{
@@ -203,6 +206,9 @@ namespace NativeDaphneLibrary
 			pairs->clear();
 			numPairs = 0;
 		}
+
+		
+
 	};
 }
 

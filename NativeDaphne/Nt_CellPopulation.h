@@ -93,14 +93,13 @@ namespace NativeDaphne
 		{
 			if (allocedItemCount > 0)
 			{
-				free(_random_samples);
-//				free(_driver_gradient);
-				free(_X);
-				free(_V);
-				free(_F);
-				free(_Sigma);
-				free(_TransductionConstant);
-				free(_DragCoefficient);
+				_aligned_free(_random_samples);
+				_aligned_free(_X);
+				_aligned_free(_V);
+				_aligned_free(_F);
+				_aligned_free(_Sigma);
+				_aligned_free(_TransductionConstant);
+				_aligned_free(_DragCoefficient);
 			}
 			free(ECSExtentLimit);
 		}
@@ -119,6 +118,14 @@ namespace NativeDaphne
 
 		void AddCell(Nt_Cell ^cell)
 		{
+
+			if (cell->Alive == false)
+			{
+				cell->nt_cell->X = cell->SpatialState->X->NativePointer;
+				cell->nt_cell->F = cell->SpatialState->F->NativePointer;
+				deadCells->Add(cell->Cell_id, cell);
+				return;
+			}
 			if (ComponentCells->Count == 0)
 			{
 				this->PopulationId = cell->Population_id;
@@ -141,36 +148,34 @@ namespace NativeDaphne
 				if (itemCount + 1 > allocedItemCount)
 				{
 					allocedItemCount = NtUtility::GetAllocSize(itemCount+1, allocedItemCount);
-					int alloc_size = allocedItemCount * 3 * sizeof(double);
-					_random_samples = (double *)realloc(_random_samples, alloc_size);
-//					_driver_gradient = (double *)realloc(_driver_gradient, alloc_size);
-					_X = (double *)realloc(_X, alloc_size);
-					_V = (double *)realloc(_V, alloc_size);
-					_F = (double *)realloc(_F, alloc_size);
+					int alloc_size = allocedItemCount * 4 * sizeof(double);
+					_random_samples = (double *)_aligned_realloc(_random_samples, alloc_size, 32);
+					_X = (double *)_aligned_realloc(_X, alloc_size, 32);
+					_V = (double *)_aligned_realloc(_V, alloc_size, 32);
+					_F = (double *)_aligned_realloc(_F, alloc_size, 32);
 					if (_X == NULL || _V == NULL || _F == NULL)
 					{
-						int tt = errno;
 						throw gcnew Exception("Error realloc memory");
 					}
 					//reassign memory address
 					for (int i=0; i< itemCount; i++)
 					{
-						ComponentCells[i]->SpatialState->X->NativePointer = _X + i * 3;
-						ComponentCells[i]->nt_cell->X = _X + i * 3;
-						ComponentCells[i]->SpatialState->V->NativePointer = _V + i * 3;
-						ComponentCells[i]->SpatialState->F->NativePointer = _F + i * 3;
-						ComponentCells[i]->nt_cell->F = _F + i * 3;
+						ComponentCells[i]->SpatialState->X->NativePointer = _X + i * 4;
+						ComponentCells[i]->nt_cell->X = _X + i * 4;
+						ComponentCells[i]->SpatialState->V->NativePointer = _V + i * 4;
+						ComponentCells[i]->SpatialState->F->NativePointer = _F + i * 4;
+						ComponentCells[i]->nt_cell->F = _F + i * 4;
 
 					}
 
-					_Sigma = (double *)realloc(_Sigma, alloc_size * sizeof(double));
-					_TransductionConstant = (double *)realloc(_TransductionConstant, alloc_size * sizeof(double));
-					_DragCoefficient = (double *)realloc(_DragCoefficient, alloc_size * sizeof(double));
+					_Sigma = (double *)_aligned_realloc(_Sigma, alloc_size * sizeof(double), 32);
+					_TransductionConstant = (double *)_aligned_realloc(_TransductionConstant, alloc_size * sizeof(double), 32);
+					_DragCoefficient = (double *)_aligned_realloc(_DragCoefficient, alloc_size * sizeof(double), 32);
 				}
 				//copy new values
-				double *_xptr = _X + itemCount * 3;
-				double *_vptr = _V + itemCount * 3;
-				double *_fptr = _F + itemCount * 3;
+				double *_xptr = _X + itemCount * 4;
+				double *_vptr = _V + itemCount * 4;
+				double *_fptr = _F + itemCount * 4;
 				for (int i=0; i<3; i++)
 				{
 					_xptr[i] = cell->SpatialState->X[i];
@@ -183,7 +188,7 @@ namespace NativeDaphne
 				cell->SpatialState->F->NativePointer = _fptr;
 				cell->nt_cell->F = _fptr;
 
-				for (int i= itemCount *3; i < itemCount *3 + 3; i++)
+				for (int i= itemCount *4; i < itemCount *4 + 4; i++)
 				{
 					_Sigma[i] = cell->Sigma;
 					_TransductionConstant[i] = cell->TransductionConstant;
@@ -204,7 +209,7 @@ namespace NativeDaphne
 				}	
 
 				ComponentCells->Add(cell);
-				array_length = ComponentCells->Count * 3;
+				array_length = ComponentCells->Count * 4;
 			}
 
 
@@ -283,8 +288,8 @@ namespace NativeDaphne
 		{
 			//debug
 			double *xptr = c->SpatialState->X->NativePointer;
-			int index = (int)(xptr - _X)/c->SpatialState->X->Length;
-			if (index < 0 || index >= ComponentCells->Count || ComponentCells[index] != c)
+			int index = (int)(xptr - _X)/4;
+			if ( (unsigned)index >= (unsigned)ComponentCells->Count || ComponentCells[index] != c)
 			{
 				throw gcnew Exception("Error removing cells - index out of range");
 			}
@@ -295,8 +300,12 @@ namespace NativeDaphne
 			{
 				//swap cell contents
 				c->SpatialState->X->MemSwap(last_cell->SpatialState->X);
+				c->nt_cell->X = c->SpatialState->X->NativePointer;
+				last_cell->nt_cell->X = last_cell->SpatialState->X->NativePointer;
 				c->SpatialState->V->MemSwap(last_cell->SpatialState->V);
 				c->SpatialState->F->MemSwap(last_cell->SpatialState->F);
+				c->nt_cell->F = c->SpatialState->F->NativePointer;
+				last_cell->nt_cell->F = last_cell->SpatialState->F->NativePointer;
 				ComponentCells[index] = last_cell;
 				ComponentCells[last_index] = c;
 
@@ -306,19 +315,21 @@ namespace NativeDaphne
 			}
 			//deatch the data's storage
 			c->SpatialState->X->detach();
+			c->nt_cell->X = c->SpatialState->X->NativePointer;
 			c->SpatialState->V->detach();
 			c->SpatialState->F->detach();
+			c->nt_cell->F = c->SpatialState->F->NativePointer;
 
 			//cellIds->RemoveAt(last_index);
 			ComponentCells->RemoveAt(last_index);
-			array_length = ComponentCells->Count * 3;
+			array_length = ComponentCells->Count * 4;
 			return index;
 		}
 
 		int GetCellIndex(Nt_Cell^ c)
 		{
 			double *xptr = c->SpatialState->X->NativePointer;
-			int index = (int)(xptr - _X)/c->SpatialState->X->Length;
+			int index = (int)(xptr - _X)/4;
 			if (index < 0 || index >= ComponentCells->Count || ComponentCells[index] != c)
 			{
 				throw gcnew Exception("Error GetCellIndex - index out of range");

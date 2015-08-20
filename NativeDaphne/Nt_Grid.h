@@ -10,6 +10,42 @@ using namespace System::Security;
 namespace NativeDaphne 
 {
 
+	typedef struct LongIndex
+	{
+		short index[4];
+
+		LongIndex(){}
+
+		LongIndex(long long value)
+		{			
+			Set(value);
+		}
+
+		void Set(long long value)
+		{
+			if (value < 0)
+			{
+				index[0] = -1;
+				index[1] = -1;
+				index[2] = -1;
+				index[3] = -1;
+				return;
+			}
+			index[0] = value >>48;
+			index[1] = (value <<16) >> 48;
+			index[2] = (value <<32) >> 48;
+			index[3] = (value <<48) >> 48;
+		}
+
+		long long Value()
+		{
+			return  ((unsigned long long)index[0] <<48) | ((unsigned long long)index[1] <<32) | (unsigned long long)index[2] << 16 | index[3];
+		}
+
+	}IndexStr;
+
+
+
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_Grid
 	{
@@ -22,7 +58,10 @@ namespace NativeDaphne
             }
 
 			this->gridStep = _gridStep;
+			this->gridStepInverse = 1.0/_gridStep;
+
             this->gridSize = _gridSize;
+
             // volumes
             volume = gridSize[0] * gridSize[1] * gridSize[2];
             volumeVoxel = gridStep * gridStep * gridStep;
@@ -85,6 +124,22 @@ namespace NativeDaphne
             }
         }
 
+		//compute the index and store the value in a long long integer
+		//return -1 if out of range.
+		long long findGridIndex(double *pos_ptr)
+		{
+			int index = (int)(pos_ptr[0] * gridStepInverse);
+			if ( (unsigned)index > (unsigned)gridPts[0] - 1) return -1;
+			long long retval = (unsigned long long)index <<48;
+			index = (int)(pos_ptr[1] * gridStepInverse);
+			if ( (unsigned)index > (unsigned)gridPts[1] - 1) return -1;
+			retval |= (unsigned long long)index << 32;
+			index = (int)(pos_ptr[2] * gridStepInverse);
+			if ( (unsigned)index > (unsigned)gridPts[2] - 1) return -1;
+			retval |= (unsigned long long)index << 16;
+			return retval;
+		}
+
         /// <summary>
         /// test an index tuple regaring whether it specifies legal indices
         /// </summary>
@@ -92,12 +147,12 @@ namespace NativeDaphne
         /// <returns>true or false</returns>
         bool legalIndex(int *idx)
         {
-            return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];
+            return (unsigned)idx[0] < (unsigned)gridPts[0] && (unsigned)idx[1] < (unsigned)gridPts[1] && (unsigned)idx[2] < (unsigned)gridPts[2];;
         }
 
 		bool legalIndex(array<int>^ idx)
 		{
-			return idx[0] >= 0 && idx[0] < gridPts[0] && idx[1] >= 0 && idx[1] < gridPts[1] && idx[2] >= 0 && idx[2] < gridPts[2];
+			return (unsigned)idx[0] < (unsigned)gridPts[0] && (unsigned)idx[1] < (unsigned)gridPts[1] && (unsigned)idx[2] < (unsigned)gridPts[2];
 		}
 
 		//default voxel = false;
@@ -123,6 +178,8 @@ namespace NativeDaphne
         /// width of a voxel in microns
         /// </summary>
         double gridStep;
+
+		double gridStepInverse;
         /// <summary>
         /// grid extents in microns
         /// </summary>

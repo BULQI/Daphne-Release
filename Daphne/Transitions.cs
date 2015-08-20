@@ -117,6 +117,10 @@ namespace Daphne
     {
         private Dictionary<int, Dictionary<int, TransitionDriverElement>> drivers;
         private List<int> events;
+        /// <summary>
+        /// added to speed up access - AH
+        /// </summary>
+        Dictionary<int, TransitionDriverElement> CurrentDriver;
 
         /// <summary>
         /// Constructor
@@ -129,6 +133,7 @@ namespace Daphne
             PreviousState = 0;
             FinalState = 0;
             events = new List<int>();
+            CurrentDriver = null;
         }
 
         /// <summary>
@@ -156,6 +161,7 @@ namespace Daphne
             {
                 FinalState = destination;
             }
+            if (drivers.ContainsKey(CurrentState)) CurrentDriver = drivers[CurrentState];
         }
 
         /// <summary>
@@ -172,12 +178,9 @@ namespace Daphne
         /// <param name="dt">The time interval for the evolution (double).</param>
         public override void Step(double dt)
         {
-            if ( (drivers.Count == 0) || (!drivers.ContainsKey(CurrentState)) )
-            {
-                return;
-            }
+            if (CurrentDriver == null) return;
 
-            foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+            foreach (KeyValuePair<int, TransitionDriverElement> kvp in CurrentDriver)
             {
                 if (kvp.Value.TransitionOccurred(dt) == true)
                 {
@@ -224,6 +227,7 @@ namespace Daphne
                 {
                     kvp.Value.Initialize();
                 }
+                CurrentDriver = drivers[CurrentState];
             }
         }
     }

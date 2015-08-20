@@ -141,9 +141,14 @@ namespace NativeDaphne
 	{	
 		  
 		//this handles the scalar muliplication.
-		intensity->reset(Reactant1->Conc)->Multiply(Reactant2->Conc)->Multiply(RateConstant * dt);
-		
 		double* _intensity = intensity->ArrayPointer;
+		NtUtility::mem_copy_d(_intensity, Reactant1->Conc->ArrayPointer, array_length);
+
+		//this handles the scalar muliplication.
+		intensity->Multiply(Reactant2->Conc);
+		dscal(array_length, RateConstant * dt, _intensity, 1);
+		//intensity->reset(Reactant1->Conc)->Multiply(Reactant2->Conc)->Multiply(RateConstant * dt);
+		
 		daxpy(array_length, -1.0, _intensity, 1, _reactant1, 1);
 		daxpy(array_length, -1.0, _intensity, 1, _reactant2, 1);
 		daxpy(array_length, 1.0, _intensity, 1, _product, 1);

@@ -66,18 +66,30 @@ namespace NativeDaphne
 
 	}
 
+
+	//for debugging - check memeory alignment
+	//bool mem_aligned(void *ptr, int alignment)
+	//{
+	//	if (((unsigned long long)ptr % alignment ) == 0)
+	//	{
+	//		return true;
+	//	}
+	//	else 
+	//	{
+	//		return false;
+	//	}
+	//}
+
+
 	void Nt_MolecularPopulation::step(Nt_Cytosol^ cytosol, double dt)
 	{
 
 		if (IsDiffusing == true)
 		{
-			//may implement special method for Cytosol Laplacian()
-			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
+			//concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
+			ScalarField^ laplacian = concentration->Laplacian();
+			daxpy(concentration->darray->Length, dt * DiffusionCoefficient, laplacian->ArrayPointer, 1, concentration->ArrayPointer, 1);
 		}
-
-
-
-
 
 		//handle diffusion flux terms, cytosol has only one boundary plasma membrane
 		Nt_MolecluarPopulationBoundary^ molbound = BoundaryConcAndFlux[0];
@@ -85,12 +97,15 @@ namespace NativeDaphne
 
 		//clear flux
 		Nt_Darray^ flux = molbound->Flux->darray;
-		memset(flux->NativePointer, 0, flux->Length*sizeof(double));
+		NtUtility::mem_zero_d(flux->NativePointer, flux->Length);
+		//memset(flux->NativePointer, 0, flux->Length*sizeof(double));
 
 		//update membrane boundary
-		memcpy(molbound->Conc->ArrayPointer, concentration->ArrayPointer, molbound->Conc->ArrayLength * sizeof(double));
+		NtUtility::mem_copy_d(molbound->Conc->ArrayPointer, concentration->ArrayPointer, molbound->Conc->ArrayLength);
+		//memcpy(molbound->Conc->ArrayPointer, concentration->ArrayPointer, molbound->Conc->ArrayLength * sizeof(double));
 
 
+		//older implementaiton.
 		//double *_boundaryConc = BoundaryConcAndFlux[0]->ConcPointer;
 		//double *_boundaryFlux = BoundaryConcAndFlux[0]->FluxPointer;
 

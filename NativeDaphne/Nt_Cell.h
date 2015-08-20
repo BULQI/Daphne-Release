@@ -115,8 +115,11 @@ namespace NativeDaphne
 		}
 
 	internal:
-		int *gridIndex;
-		int* PreviousGridIndex;
+
+		//"tmp" variable used to track previous grid index
+		//after a cell moved to another voxel
+		long long PrevLongGridIndex;
+
 		//to be remvoed
 		int Membrane_id;
 
@@ -194,6 +197,9 @@ namespace NativeDaphne
 
 		property Nt_Iarray^ GridIndex;
 
+		//grid index encoded in an long long integer
+		//if equal -1 => not legal index
+		long long LongGridIndex;
 
 		property Dictionary<String^, Nt_Gene^>^ Genes
 		{
@@ -227,17 +233,14 @@ namespace NativeDaphne
 		Nt_Cell(double r)
 		{	
 			radius = r;
-			//cellIds = gcnew List<int>();
-			//only need 3, but 4 needed when using ssc2
-			GridIndex = gcnew Nt_Iarray(3);
+			GridIndex = gcnew Nt_Iarray(4);
 			GridIndex[0] = -1;
 			GridIndex[1] = -1;
 			GridIndex[2] = -1;
-			gridIndex = (int*)malloc(4 *sizeof(int));
-			GridIndex->NativePointer = gridIndex;
-			PreviousGridIndex = (int*)malloc(4 *sizeof(int));
-			PreviousGridIndex[0] = -1; //evaludate into invalid
-			nt_cell = new NtCell(radius, gridIndex);
+
+			LongGridIndex = -1;
+			PrevLongGridIndex = -1;
+			nt_cell = new NtCell(radius, GridIndex->NativePointer);
 		}
 
 		~Nt_Cell()
@@ -247,7 +250,6 @@ namespace NativeDaphne
 
 		!Nt_Cell()
 		{
-			free(gridIndex);
 			delete nt_cell;
 
 		}

@@ -59,98 +59,71 @@ namespace Daphne
             iteration_count++;
 
             //steps through cell populations - it is ONLY handling reactions for now.
-            foreach (KeyValuePair<int, CellsPopulation> kvp in SimulationBase.dataBasket.Populations)
+            foreach (CellsPopulation cellpop in SimulationBase.dataBasket.Populations.Values)
             {
                 //currently all reactions are handled in population level.
-                kvp.Value.step(dt);
+                cellpop.step(dt);
             }
 
-            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
+            foreach (Cell cell in SimulationBase.dataBasket.Cells.Values)
             {
                 // cell takes a step - only handling cells trans
-                if (kvp.Value.Alive == true)
+                if (cell.Alive == true)
                 {
-                    kvp.Value.Step(dt);
+                    cell.Step(dt);
                 }
 
-                // still alive and motile - these are handle ind in the middle layer cell population
-                //if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
+                // for debugging
+                //if (iteration_count < 0) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
                 //{
-                //    if (kvp.Value.IsChemotactic)
+                //    Debug.WriteLine("\n----membrane----");
+                //    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
                 //    {
-                //        // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
-                //        // add the chemotactic force (accumulate it into the force variable)
-                //        kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
-                //    }
-                //    // apply the boundary force
-                //    kvp.Value.BoundaryForce();
-                //    // apply stochastic force
-                //    if (kvp.Value.IsStochastic)
-                //    {
-                //        kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
+                //        var tmp = item.Value.Conc;
+                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                //            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
                 //    }
 
-                //    // A simple implementation of movement. For testing.
-                //    for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
+                //    Debug.WriteLine("----Cytosol----");
+                //    foreach (var item in kvp.Value.Cytosol.Populations)
                 //    {
-                //        kvp.Value.SpatialState.X[i] += kvp.Value.SpatialState.V[i] * dt;
-                //        kvp.Value.SpatialState.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.SpatialState.V[i] + kvp.Value.SpatialState.F[i]) * dt;
+                //        var tmp = item.Value.Conc;
+                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                //            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
                 //    }
 
-                //    // enforce boundary condition
-                //    kvp.Value.EnforceBC();
+                //    Debug.WriteLine("---locaiton---");
+                //    Debug.WriteLine("positon = {0} {1} {2}", kvp.Value.SpatialState.X[0], kvp.Value.SpatialState.X[1], kvp.Value.SpatialState.X[2]);
+
                 //}
 
-                if (iteration_count < 0) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
-                {
-                    Debug.WriteLine("\n----membrane----");
-                    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
-                    {
-                        var tmp = item.Value.Conc;
-                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
-                    }
-
-                    Debug.WriteLine("----Cytosol----");
-                    foreach (var item in kvp.Value.Cytosol.Populations)
-                    {
-                        var tmp = item.Value.Conc;
-                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
-                    }
-
-                    Debug.WriteLine("---locaiton---");
-                    Debug.WriteLine("positon = {0} {1} {2}", kvp.Value.SpatialState.X[0], kvp.Value.SpatialState.X[1], kvp.Value.SpatialState.X[2]);
-
-                }
-
                 // if the cell  moved out of bounds schedule its removal
-                if (kvp.Value.Exiting == true)
+                if (cell.Exiting == true)
                 {
                     if (removalList == null)
                     {
                         removalList = new List<int>();
                     }
-                    removalList.Add(kvp.Value.Cell_id);
+                    removalList.Add(cell.Cell_id);
                 }
 
                 // if the cell died schedule its (stochastic) removal
-                if (kvp.Value.Alive == false)
+                if (cell.Alive == false)
                 {
-                    if (!deadDict.ContainsKey(kvp.Value.Cell_id))
+                    if (!deadDict.ContainsKey(cell.Cell_id))
                     {
                         // start clock at 0 and sample the distribution for the time of removal
-                        deadDict.Add(kvp.Value.Cell_id, new double[] { 0.0, Phagocytosis.Sample() });
+                        deadDict.Add(cell.Cell_id, new double[] { 0.0, Phagocytosis.Sample() });
                         //remove the cell's chemistry and all its associated boundaries
-                        SimulationBase.dataBasket.RemoveCell(kvp.Value.Cell_id, false);
+                        SimulationBase.dataBasket.RemoveCell(cell.Cell_id, false);
                     }
                 }
 
                 // cell division
-                if (kvp.Value.Cytokinetic == true)
+                if (cell.Cytokinetic == true)
                 {
                     // divide the cell, return daughter
-                    Cell c = kvp.Value.Divide();
+                    Cell c = cell.Divide();
 
                     if (daughterList == null)
                     {
@@ -158,7 +131,7 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
-                    SimulationBase.dataBasket.DivisionEvent(kvp.Value, c);
+                    SimulationBase.dataBasket.DivisionEvent(cell, c);
                 }
             }
 

@@ -55,7 +55,7 @@ namespace NativeDaphne
 		//constructor with fixed array length
 		Nt_Darray(int len)
 		{
-			_array = (double *)malloc(len *sizeof(double));
+			_array = (double *)_aligned_malloc(len *sizeof(double), 32);
 			memset(_array, 0, len *sizeof(double));
 			length = len;
 			capacity = len;
@@ -71,7 +71,7 @@ namespace NativeDaphne
 		{
 			if (is_pointer_owner == true && _array != NULL)
 			{
-				free(_array);
+				_aligned_free(_array);
 				_array = NULL;
 			}
 		}
@@ -93,7 +93,7 @@ namespace NativeDaphne
 			if (len > capacity)
 			{
 				capacity = len;
-				_array = (double *)realloc(_array, capacity * sizeof(double));
+				_array = (double *)_aligned_realloc(_array, capacity * sizeof(double), 32);
 			}
 			length = len;
 		}
@@ -127,7 +127,7 @@ namespace NativeDaphne
 			if (length + src->Length > capacity)
 			{
 				capacity = NtUtility::GetAllocSize(length + src->Length, capacity);
-				_array = (double *)realloc(_array, capacity * sizeof(double));
+				_array = (double *)_aligned_realloc(_array, capacity * sizeof(double), 32);
 				double *head = _array;
 				for (int i=0; i< component->Count; i++)
 				{
@@ -254,7 +254,7 @@ namespace NativeDaphne
 			{
 				if (is_pointer_owner == true && _array != NULL)
 				{
-					free(_array);
+					_aligned_free(_array);
 				}
 				_array = dptr;
 				is_pointer_owner = false;
@@ -266,7 +266,7 @@ namespace NativeDaphne
 		void detach()
 		{
 			if (is_pointer_owner == true || _array == NULL || length == 0)return;
-			double *tmp = (double *)malloc(length *sizeof(double));
+			double *tmp = (double *)_aligned_malloc(length *sizeof(double), 32);
 			memcpy(tmp, _array, length * sizeof(double));
 			_array = tmp;
 			is_pointer_owner = true;

@@ -97,6 +97,20 @@ namespace NativeDaphneLibrary
             }
         }
 
+		long long findGridIndex(double *pos_ptr)
+		{
+			int index = (int)(pos_ptr[0] / gridStep);
+			if ( (unsigned int)index > (unsigned)gridPts[0] - 1) return -1;
+			long long retval = (unsigned long long)index <<48;
+			index = (int)(pos_ptr[1] / gridStep);
+			if ( (unsigned int)index > (unsigned)gridPts[1] - 1) return -1;
+			retval |= (unsigned long long)index << 32;
+			index = (int)(pos_ptr[2] / gridStep);
+			if ( (unsigned int)index > (unsigned)gridPts[2] - 1) return -1;
+			retval |= (unsigned long long)index << 16;
+			return retval;
+		}
+
         /// <summary>
         /// test an index tuple regaring whether it specifies legal indices
         /// </summary>

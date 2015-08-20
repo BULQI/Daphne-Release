@@ -201,6 +201,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// base for the ME manifolds
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class MomentExpansionManifold abstract: Manifold
     {
 	public:
@@ -258,6 +259,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// tiny sphere manifold
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class TinySphere : MomentExpansionManifold
     {
 	private:
@@ -413,6 +415,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// tiny ball manifold
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class TinyBall : MomentExpansionManifold
     {
 	private:
@@ -572,6 +575,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// interpolated lattice base
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class InterpolatedNodes abstract: Manifold
     {
 	protected:
@@ -844,6 +848,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// IL line
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class InterpolatedLine : InterpolatedNodes
     {
 	public:
@@ -903,6 +908,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// IL rectangle
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class InterpolatedRectangle : InterpolatedNodes
     {
 	public:
@@ -962,6 +968,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// IL prism
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class InterpolatedRectangularPrism : InterpolatedNodes
     {
 	public:
@@ -1021,6 +1028,7 @@ namespace Nt_ManifoldRing
     /// <summary>
     /// A point manifold with no spatial extent.
     /// </summary>
+	[SuppressUnmanagedCodeSecurity]
     public ref class PointManifold : Manifold
     {
 	public:

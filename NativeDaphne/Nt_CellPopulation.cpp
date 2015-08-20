@@ -39,20 +39,20 @@ namespace NativeDaphne
 			//handle boudnaryForce - only cells that are close to boudnary needs this.
 			if (Nt_CellManager::boundaryForceFlag == true)
 			{
-				NtUtility::apply_boundary_force(array_length, _X, ECSExtentLimit, radius, Nt_CellManager::PairPhi1, _F);
+				NtUtility::cell_apply_boundary_force(array_length, _X, ECSExtentLimit, radius, Nt_CellManager::PairPhi1, _F);
 			}
 
 			//handle chemotaxis
 			if (this->isChemotactic)
 			{
 				double *driverConc = ComponentCells[0]->Driver->ConcPointer;
-				if (TransductionConstant != -1)
+				if (TransductionConstant != -1) //TransductionConstant all same
 				{
-					NtUtility::daxpy3_skip1(array_length, TransductionConstant, driverConc, _F);
+					NtUtility::cell_apply_chemotactic_force(array_length, TransductionConstant, driverConc, _F);
 				}
-				else 
+				else //TransductionConstant all different
 				{
-					NtUtility::dxypz3_skip1(array_length, driverConc, _TransductionConstant, _F);
+					NtUtility::cell_apply_chemotactic_force2(array_length, driverConc, _TransductionConstant, _F);
 				}
 			}
 
@@ -64,6 +64,7 @@ namespace NativeDaphne
 				{
 					double factor = Sigma /Math::Sqrt(dt);
 					daxpy(array_length, factor, _random_samples, 1, _F, 1);
+					_F[3] = 0;
 				}
 				else 
 				{

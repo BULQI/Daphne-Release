@@ -125,6 +125,58 @@ namespace NativeDaphne
             return idx;
         }
 
+
+		// find a neighbor index of a grid tile; return -1 for illegal index
+        array<int>^ neighbor(long long longIndex, int dx, int dy, int dz)
+        {
+
+			//using tmp rather allocate
+			//array<int>^ idx = gcnew array<int>{ current[0], current[1], current[2] }; 
+			IndexStr indexStr(longIndex);
+			array<int>^ idx = tmp_idx;
+			idx[0] = indexStr.index[0] + dx;
+			idx[1] = indexStr.index[1] + dy;
+            idx[2] = indexStr.index[2] + dz;
+
+            if (legalIndex(idx) == false)
+            {
+                // correction for periodic boundary conditions
+                if (isToroidal)
+                {
+                    if (idx[0] < 0 || idx[0] >= gridPts[0])
+                    {
+                        idx[0] %= gridPts[0];
+                        if (idx[0] < 0)
+                        {
+                            idx[0] += gridPts[0];
+                        }
+                    }
+                    if (idx[1] < 0 || idx[1] >= gridPts[1])
+                    {
+                        idx[1] %= gridPts[1];
+                        if (idx[1] < 0)
+                        {
+                            idx[1] += gridPts[1];
+                        }
+                    }
+                    if (idx[2] < 0 || idx[2] >= gridPts[2])
+                    {
+                        idx[2] %= gridPts[2];
+                        if (idx[2] < 0)
+                        {
+                            idx[2] += gridPts[2];
+                        }
+                    }
+                }
+                else
+                {
+                    idx[0] = idx[1] = idx[2] = -1;
+                }
+            }
+            return idx;
+        }
+
+
 	public:
         /// <summary>
         /// remove all pairs containing a cell
@@ -136,30 +188,14 @@ namespace NativeDaphne
         /// remove a cell from the grid
         /// </summary>
         /// <param name="del">the cell to be removed</param>
-        void RemoveCellFromGrid(Nt_Cell^ del)
-        {
-            // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
-            if (legalIndex(del->gridIndex) == true && grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]] != nullptr)
-            {
-                grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]]->Remove(del->Cell_id);
-            }
-        }
-
-        /// <summary>
-        /// rekey a cell in the grid
-        /// </summary>
-        /// <param name="cell">the cell to be rekeyed with its new key</param>
-        /// <param name="oldKey">the cell's old key</param>
-        void RekeyCellInGrid(Nt_Cell^ cell, int oldKey)
-        {
-            // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
-            if (legalIndex(cell->gridIndex) == true && grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]] != nullptr)
-            {
-                grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Add(cell->Cell_id, cell);
-                grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Remove(oldKey);
-            }
-        }
-
+        //void RemoveCellFromGrid(Nt_Cell^ del)
+        //{
+        //    // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
+        //    if (legalIndex(del->gridIndex) == true && grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]] != nullptr)
+        //    {
+        //        grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]]->Remove(del->Cell_id);
+        //    }
+        //}
 
 		double GetBurnInMuValue(double integratorStep)
 		{
@@ -171,6 +207,7 @@ namespace NativeDaphne
         /// <summary>
         /// this version of the function avoids excessive loops
         /// </summary>
+		[SuppressUnmanagedCodeSecurity]
         void updateGridAndPairs();
         
         /// <summary>
@@ -182,8 +219,8 @@ namespace NativeDaphne
             // update cell locations in the grid tiles and update pairs
             updateGridAndPairs();
             // handle all pairs and find the forces
-			//native_collisionManager->pairInteract(dt);
-			native_collisionManager->MultiThreadPairInteract(dt);
+			native_collisionManager->pairInteract(dt);
+			//native_collisionManager->MultiThreadPairInteract(dt);
         }
 
 		array<Dictionary<int, Nt_Cell^>^, 3>^ grid;

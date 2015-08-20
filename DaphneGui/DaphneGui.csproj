@@ -98,11 +98,13 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Abt.Controls.SciChart.Wpf">
-      <HintPath>..\..\Daphne-main\dependencies\SciChart\Abt.Controls.SciChart.Wpf.dll</HintPath>
+    <Reference Include="Abt.Controls.SciChart.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Abt.Controls.SciChart3D.Wpf">
-      <HintPath>..\..\Daphne-main\dependencies\SciChart\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
+    <Reference Include="Abt.Controls.SciChart3D.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="ActiproSoftware.Docking.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -126,13 +128,10 @@
       <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
     </Reference>
     <Reference Include="itextsharp">
-      <HintPath>..\..\Daphne-main\dependencies\iTextSharp\itextsharp.dll</HintPath>
+      <HintPath>..\dependencies\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="itextsharp.pdfa">
-      <HintPath>..\..\Daphne-main\dependencies\iTextSharp\itextsharp.pdfa.dll</HintPath>
-    </Reference>
-    <Reference Include="itextsharp.xtra">
-      <HintPath>..\..\Daphne-main\dependencies\iTextSharp\itextsharp.xtra.dll</HintPath>
+      <HintPath>..\dependencies\itextsharp.pdfa.dll</HintPath>
     </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>

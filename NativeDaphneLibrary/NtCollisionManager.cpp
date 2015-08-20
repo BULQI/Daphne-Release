@@ -8,6 +8,7 @@
 #include <time.h>
 #include <unordered_map>
 #include <xmmintrin.h>
+#include <emmintrin.h>
 
 #include "NtCollisionManager.h"
 
@@ -108,6 +109,8 @@ namespace NativeDaphneLibrary
 	//non-toroidal only
 	void NtCollisionManager::pairInteractEx(int start_index, int n, double dt)
 	{
+		double sum_squares = 0;
+		double dx, dy, dz;
 
 		for (int i=start_index, end=start_index+n; i < end; ++i)
 		{
@@ -118,11 +121,12 @@ namespace NativeDaphneLibrary
 
 			double *a_X = pair->a->X;
 			double *b_X = pair->b->X;
+			dx = b_X[0] - a_X[0];
+			dy = b_X[1] - a_X[1];
+			dz = b_X[2] - a_X[2];
+			sum_squares = dx * dx + dy * dy + dz * dz;
 
-			double dx = b_X[0] - a_X[0];
-			double dy = b_X[1] - a_X[1];
-			double dz = b_X[2] - a_X[2];
-			double sum_squares = dx * dx + dy * dy + dz * dz;
+
 			if (sum_squares > pair->sumRadius2 || sum_squares == 0)continue;
 
 			double dist_inverse = 1.0/sqrt(sum_squares);
@@ -131,7 +135,7 @@ namespace NativeDaphneLibrary
 			//double force = Phi1 * (1.0/pair->distance - 1.0/pair->sumRadius)/pair->distance;
 			//this is not actullay force, but combined normalization step.
 			double force = Phi1 * (dist_inverse - pair->sumRadiusInverse) * dist_inverse; 
-						 
+
 			dx *= force;
             dy *= force;
             dz *= force;
@@ -183,9 +187,6 @@ namespace NativeDaphneLibrary
 		return mu;
 	}
 
-
-
-
 	int NtCollisionManager::MultiThreadPairInteract(double dt)
 	{
 
@@ -224,5 +225,10 @@ namespace NativeDaphneLibrary
 		return 0;
 	}
 
+	NtCellPair* NtCollisionManager::NewCellPair(NtCell* _a, NtCell* _b)
+	{
+		void *buffer = _aligned_malloc(sizeof(NtCellPair), 64);
+		return new (buffer) NtCellPair(_a, _b);
+	}
 }
 

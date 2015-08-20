@@ -38,48 +38,47 @@ namespace NativeDaphne
             List<Nt_Cell^>^ criticalCells = nullptr;
             List<int>^ removalPairKeys = nullptr;
 
-            array<double>^ gridSizeArr = gridSize;
-
-            array<int>^ idx = tmp_idx;
             // look at all cells to see if they changed in the grid
-			Dictionary<int, Nt_Cell^>^ tmp_dict = Nt_CellManager::cellDictionary;
-			int nn3 = tmp_dict->Count;
-            for each (KeyValuePair<int, Nt_Cell^>^ kvpc in Nt_CellManager::cellDictionary)
+			Dictionary<int, Nt_Cell^>::ValueCollection^ cellColl = Nt_CellManager::cellDictionary->Values;
+            for each (Nt_Cell^ cell in cellColl)
             {
-				Nt_Cell^ cell = kvpc->Value;
-                //double check idx is get updated, does not seem need reference
-                findGridIndex(cell->SpatialState->X, idx);
+				long long newIndex = findGridIndex(cell->nt_cell->X);
 
+				//if (cell->nt_cell->X != cell->SpatialState->X->NativePointer)
+				//{
+				//	int wrong = 1;
+				//}
                 // if the grid index changed we have to:
                 // -put it in its new one
                 // -find new pairs
-                if (idx[0] != cell->GridIndex[0] || idx[1] != cell->GridIndex[1] || idx[2] != cell->GridIndex[2])
+                if (newIndex != cell->LongGridIndex)
                 {
-                    // was inserted before? we have to remove it
-                    // NOTE: if fdcs were to start moving we would need special case handling for that here
-                    // where the whole array of voxels that had an fdc gets cleared
-                    //if (legalIndex(cell->GridIndex) == true && grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]] != nullptr)
-                    //{
-                    //    grid[cell->GridIndex[0], cell->GridIndex[1], cell->GridIndex[2]]->Remove(cell->Cell_id);
-                    //}
 
-                    // have the cell remember its position in the grid
-					cell->PreviousGridIndex[0] = cell->GridIndex[0];
-					cell->PreviousGridIndex[1] = cell->GridIndex[1];
-					cell->PreviousGridIndex[2] = cell->GridIndex[2];
-                    cell->GridIndex[0] = idx[0];
-                    cell->GridIndex[1] = idx[1];
-                    cell->GridIndex[2] = idx[2];
+					findGridIndex(cell->SpatialState->X, tmp_idx);
+					IndexStr idx(newIndex);
+                    cell->GridIndex[0] = idx.index[0];
+                    cell->GridIndex[1] = idx.index[1];
+                    cell->GridIndex[2] = idx.index[2];
+
+					//verify....
+					//findGridIndex(cell->SpatialState->X, tmp_idx);
+					//{
+					//	if (tmp_idx[0] != cell->GridIndex[0] || tmp_idx[1] != cell->GridIndex[1] ||
+					//		tmp_idx[2] != cell->GridIndex[2])
+					//	{
+					//		int wrong = 1;
+					//	}
+					//}
+
+					cell->PrevLongGridIndex = cell->LongGridIndex;
+					cell->LongGridIndex = newIndex;
                     // insert into grid and determine critical cells
-                    if (legalIndex(idx) == true)
+                    if (newIndex != -1)
                     {
-                        if (grid[idx[0], idx[1], idx[2]] == nullptr)
+                        if (grid[idx.index[0], idx.index[1], idx.index[2]] == nullptr)
                         {
-                            grid[idx[0], idx[1], idx[2]] = gcnew Dictionary<int, Nt_Cell^>();
+                            grid[idx.index[0], idx.index[1], idx.index[2]] = gcnew Dictionary<int, Nt_Cell^>();
                         }
-                        // use the cell's list index as key
-                        //grid[idx[0], idx[1], idx[2]]->Add(cell->Cell_id, cell);
-
                         // schedule to find any new pairs
                         if (criticalCells == nullptr)
                         {
@@ -92,22 +91,18 @@ namespace NativeDaphne
 
             if (criticalCells != nullptr)
             {
-				//remove old pairs
+				//remove pairs from previous grid index
 				for each (Nt_Cell^ cell in criticalCells)
                 {
-					if (legalIndex(cell->PreviousGridIndex) == false)continue;
-					//if (cell->Cell_id == 0 && cell->GridIndex[2] == 22 && cell->GridIndex[0] == 21 && cell->GridIndex[1] == 20)
-					//{
-					//	int check_here = true;
-					//}
-					bool curIndexLegal = legalIndex(cell->gridIndex);
+					//check if previous index legal
+					if (cell->PrevLongGridIndex == -1)continue;
                     for (int i = -1; i <= 1; i++)
                     {
                         for (int j = -1; j <= 1; j++)
                         {
                             for (int k = -1; k <= 1; k++)
                             {
-                                array<int>^ test = neighbor(cell->PreviousGridIndex, i, j, k);
+                                array<int>^ test = neighbor(cell->PrevLongGridIndex, i, j, k);
 
                                 // don't go outside the grid
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != nullptr)
@@ -121,7 +116,7 @@ namespace NativeDaphne
                                             continue;
                                         }
                                         long key = pairKey(cell->Cell_id, kvpg->Value->Cell_id);
-										if (curIndexLegal == true)
+										if (cell->LongGridIndex != -1) //leagal index
 										{
 											//if exist and clear-separated - rmeove
 											native_collisionManager->removePairOnClearSeparation(key);
@@ -141,9 +136,10 @@ namespace NativeDaphne
 				//move the cells to new slots.
 				for each (Nt_Cell^ cell in criticalCells)
                 {
-					if (legalIndex(cell->PreviousGridIndex) == true)
+					if (cell->PrevLongGridIndex != -1)
 					{
-						Dictionary<int, Nt_Cell^>^ cell_dict = grid[cell->PreviousGridIndex[0], cell->PreviousGridIndex[1], cell->PreviousGridIndex[2]];
+						IndexStr idx(cell->PrevLongGridIndex);
+						Dictionary<int, Nt_Cell^>^ cell_dict = grid[idx.index[0], idx.index[1], idx.index[2]];
 						if (cell_dict != nullptr)
 						{
 							cell_dict->Remove(cell->Cell_id);
@@ -161,7 +157,7 @@ namespace NativeDaphne
                         {
                             for (int k = -1; k <= 1; k++)
                             {
-                                array<int>^ test = neighbor(cell->gridIndex, i, j, k);
+                                array<int>^ test = neighbor(cell->GridIndex->NativePointer, i, j, k);
 
                                 // don't go outside the grid
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != nullptr)
@@ -178,12 +174,10 @@ namespace NativeDaphne
                                         long key = pairKey(cell->Cell_id, kvpg->Value->Cell_id);
 
                                         // not already inserted
-
                                         if (native_collisionManager->itemExists(key) == false)
                                         {
 											Nt_Cell^ cell2 = kvpg->Value;
-											void *buffer = _aligned_malloc(sizeof(NtCellPair), 64);
-											NtCellPair* pair1 = new (buffer) NtCellPair(cell->nt_cell, kvpg->Value->nt_cell);
+											NtCellPair* pair1 = native_collisionManager->NewCellPair(cell->nt_cell, kvpg->Value->nt_cell);
                                             //NtCellPair* pair1 = new NtCellPair(cell->nt_cell, kvpg->Value->nt_cell);
 											pair1->set_distance();
 											native_collisionManager->addCellPair(key, pair1);

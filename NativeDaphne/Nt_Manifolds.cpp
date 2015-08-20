@@ -2,7 +2,9 @@
 #include "Nt_Manifolds.h"
 #include "Nt_Scalarfield.h"
 #include "Nt_Interpolation.h"
+#include "NtUtility.h"
 #include <acml.h>
+using namespace NativeDaphneLibrary;
 
 namespace Nt_ManifoldRing
 {
@@ -19,21 +21,8 @@ namespace Nt_ManifoldRing
 	/// <returns>resulting field</returns>
 	ScalarField^ MomentExpansionManifold::Multiply(ScalarField^ sf1, ScalarField^ sf2)
 	{
-		int itemCount = sf1->ArrayLength/this->ArraySize;
-		double *array1 = sf1->ArrayPointer;
-		double *array2 = sf2->ArrayPointer;
-		for (int i=0; i< itemCount; i++)
-		{
-			double s1 = array1[0];
-			double s2 = array2[0];
-			array1[0] = s1 * s2;
-			for (int j = 1; j < ArraySize; j++)
-			{
-				array1[j] = array1[j] * s2 + s1 * array2[j];
-			}
-			array1 += ArraySize;
-			array2 += ArraySize;
-		}
+		NtUtility::MomentExpansion_NtMultiplyScalar(sf1->ArrayLength, sf1->ArrayPointer, sf2->ArrayPointer);
+		return sf1;
 
 		//double s1 = sf1->darray[0];
 		//double s2 = sf2->darray[0];
@@ -236,9 +225,11 @@ namespace Nt_ManifoldRing
 			laplacian->darray->resize(n);
 		}
 		double *laplacian_ptr = laplacian->ArrayPointer;
-		memcpy(laplacian_ptr, sf->ArrayPointer, n * sizeof(double));
+		NtUtility::TinyBall_laplacian(n, -5.0/(radius * radius), sf->ArrayPointer, laplacian_ptr);
+
+		/*memcpy(laplacian_ptr, sf->ArrayPointer, n * sizeof(double));
 		for (int i=0; i<n; i+=4)laplacian_ptr[i] = 0;
-		dscal(n, -5.0/(radius * radius), laplacian_ptr, 1);
+		dscal(n, -5.0/(radius * radius), laplacian_ptr, 1);*/
 		return laplacian;
 		/*
 		Nt_Darray^ array = laplacian->darray;
@@ -283,12 +274,8 @@ namespace Nt_ManifoldRing
 		{
 			throw gcnew Exception("Manifold mismatch: flux for TinyBall must be on TinySphere.");
 		}
-		
-		int n = dst->ArrayLength;
-		dscal(n/4, 0.6, flux->ArrayPointer, 4);
-		daxpy(n, -5.0 * dt /radius, flux->ArrayPointer, 1, dst->ArrayPointer, 1);
-		return dst;
-
+	
+		NtUtility::TinyBall_DiffusionFluxTerm(dst->ArrayLength, -dt/radius, flux->ArrayPointer, dst->ArrayPointer);
 		/*
 		Nt_Darray^ array = diffusionField->darray;
 		array[0] = 3 * flux->darray[0] / radius;
