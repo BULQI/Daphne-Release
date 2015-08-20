@@ -157,33 +157,10 @@ namespace NativeDaphne
 		{
 			//note: this is the generic approach, we can implement specialized laplacian for ecs
 			//to speed this up.
-			concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
-
-
-			/* apply ECS/membrane boundary Flux */
-			/* this is done in th upper level - including natural boundaries */
-			//Dictionary<int, Transform^>^ boundaryTransforms = ECS->BoundaryTransforms;
-			//for each (KeyValuePair<int, Nt_MolecluarPopulationBoundary^>^kvp in this->BoundaryConcAndFlux)
-			//{
-			//	Nt_MolecluarPopulationBoundary^ boundary = kvp->Value;
-			//	if (boundary->IsContainer() == false)
-			//	{
-			//		throw gcnew Exception("ECS should have collection of boundary");
-			//	}
-			//	List<Nt_MolecluarPopulationBoundary^>^ boundary_components = boundary->Component;
-
-			//	for (int i = 0; i< boundary_components->Count; i++)
-			//	{
-			//		Nt_MolecluarPopulationBoundary^ molbound = boundary_components[i];
-			//		int bound_id = molbound->BoundaryId;
-			//		concentration->DiffusionFluxTerm(molbound->Flux, boundaryTransforms[bound_id], dt);
-			//	}
-			//}
-		}
-
-		//moved to do profileing
-		//UpdateBoundary(ECS);
-		
+			ScalarField^ laplacian = concentration->Laplacian();
+			daxpy(concentration->darray->Length, dt * DiffusionCoefficient, laplacian->ArrayPointer, 1, concentration->ArrayPointer, 1);
+			//concentration->Add(concentration->Laplacian()->Multiply(dt * DiffusionCoefficient));
+		}		
 	}
 
 	//update boundary for ECS

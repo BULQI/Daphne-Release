@@ -169,12 +169,14 @@ namespace NativeDaphne
 		_reactant = Reactant->ConcPointer;
 		_product = Product->ConcPointer;
 		array_length = Reactant->Length;
+		intensity = gcnew ScalarField(Reactant->Conc->M);
 	}
 
 	void Nt_Dimerization::AddReaction(Nt_Reaction ^ src_rxn)
 	{
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 		_reactant = Reactant->ConcPointer;
 		_product = Product->ConcPointer;
 	}
@@ -183,6 +185,7 @@ namespace NativeDaphne
 	{
 		ComponentReactions->RemoveAt(index);
 		array_length = Reactant->Length;
+		intensity->darray->resize(array_length);
 	}
 
 	Nt_Reaction^ Nt_Dimerization::CloneParent()
@@ -192,12 +195,17 @@ namespace NativeDaphne
 		rxn->Reactant = Reactant->parent != nullptr ? Reactant->parent : Reactant;
 		rxn->Product = Product->parent != nullptr ? Product->parent : Product;
 		rxn->AddReaction(this);
+		rxn->intensity = gcnew ScalarField(Reactant->Conc->M);
 		return rxn;
 	}
 
 	void Nt_Dimerization::Step(double dt)
 	{
-		daxpy(array_length, dt*RateConstant, _reactant, 1, _product, 1);
+		double* _intensity = intensity->ArrayPointer;
+		NtUtility::mem_copy_d(_intensity, _reactant, array_length);
+		//handle scalar muliplication.
+		intensity->Multiply(Reactant->Conc);
+		daxpy(array_length, dt*RateConstant, _intensity, 1, _product, 1);
 		dscal(array_length, (1.0-RateConstant * dt *2), _reactant, 1);
 	}
 
@@ -644,10 +652,13 @@ namespace NativeDaphne
 	void Nt_CatalyzedDimerization::Step(double dt)
 	{
 		//handle scalar multiplicaiton
-		intensity->reset(Catalyst->Conc)->Multiply(Reactant->Conc);
+		double* _intensity = intensity->ArrayPointer;
+		NtUtility::mem_copy_d(_intensity, _catalyst, array_length);
 
-		daxpy(array_length, dt*RateConstant, intensity->ArrayPointer, 1, _product, 1);
-		daxpy(array_length, -dt*RateConstant, intensity->ArrayPointer, 1, _reactant, 1);
+		//handles scalar muliplication.
+		intensity->Multiply(Reactant->Conc)->Multiply(Reactant->Conc);
+		daxpy(array_length, dt*RateConstant, _intensity, 1, _product, 1);
+		daxpy(array_length, -dt*RateConstant*2, _intensity, 1, _reactant, 1);
 	}
 
 
@@ -877,7 +888,8 @@ namespace NativeDaphne
 	void Nt_Transcription::Step(double dt)
 	{
 		double factor = RateConstant * CopyNumber * dt;
-		daxpy(array_length/4, factor, _activation, 1, _product, 4);
+		int dim = Product->Conc->M->ArraySize;
+		daxpy(array_length/dim, factor, _activation, 1, _product, dim);
 	}
 
 	//**************************************************

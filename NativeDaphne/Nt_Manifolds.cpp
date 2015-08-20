@@ -297,7 +297,7 @@ namespace Nt_ManifoldRing
 	}
 
 	//****************************************************
-	// imlementation of InterpolatedNodes
+	// implementation of InterpolatedNodes
 	//****************************************************
 
 	/// <summary>
@@ -472,7 +472,7 @@ namespace Nt_ManifoldRing
 
 
 	//****************************************************
-	// imlementation of InterpolatedLine
+	// implementation of InterpolatedLine
 	//****************************************************
 
 	/// <summary>
@@ -498,7 +498,7 @@ namespace Nt_ManifoldRing
 	}
 
 	//****************************************************
-	// imlementation of InterpolatedRectangle
+	// implementation of InterpolatedRectangle
 	//****************************************************
 
 
@@ -529,7 +529,7 @@ namespace Nt_ManifoldRing
 	}
 
 	//****************************************************
-	// imlementation of InterpolatedRectangularPrism
+	// implementation of InterpolatedRectangularPrism
 	//****************************************************
 
 	/// <summary>
@@ -563,7 +563,7 @@ namespace Nt_ManifoldRing
 	}
 
 	//****************************************************
-	// imlementation of PointManifold
+	// implementation of PointManifold
 	//****************************************************
 
 

@@ -57,7 +57,7 @@ namespace NativeDaphne
 				{
 					if (rxn->ComponentReactions->Count != 1)
 					{
-						//this is used add cell's boundary reaciton
+						//this is used add cell's boundary reaction
 						//it should only contain one component
 						throw gcnew Exception("reaction count error");
 					}
@@ -381,7 +381,7 @@ namespace NativeDaphne
 
 			if (this->BoundaryToCellpopMap->ContainsKey(key) == false)
 			{
-				throw gcnew Exception("Error removing boundary reaciton: key not found");
+				throw gcnew Exception("Error removing boundary reaction: key not found");
 			}
 
 			if (NtBoundaryReactions->Count == 0)
@@ -449,7 +449,7 @@ namespace NativeDaphne
 				}
 				else if (componentCount != com_count)
 				{
-					throw gcnew Exception("Wong number of reacitons");
+					throw gcnew Exception("Wrong number of reactions");
 				}
 
 				NtBulkReactions[i]->Step(dt);
@@ -468,7 +468,7 @@ namespace NativeDaphne
 					}
 					else if (componentCount != com_count)
 					{
-						throw gcnew Exception("Wong number of reacitons");
+						throw gcnew Exception("Wrong number of reactions");
 					}
 
 					 ReactionList[i]->Step(dt);

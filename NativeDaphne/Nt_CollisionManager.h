@@ -43,6 +43,7 @@ namespace NativeDaphne
 			
 			pin_ptr<double> gs_ptr = &gridSize[0];
 			native_collisionManager = new NtCollisionManager(gs_ptr, gridStep, _isEcsToroidal);
+
 			//this->pairs = native_collisionManager->pairs;
 			tmp_idx = gcnew array<int>(3);
 			initialized = false;

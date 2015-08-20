@@ -42,13 +42,12 @@ namespace NativeDaphneLibrary
 	public:
 		NtGrid(double * _gridSize, double _gridStep, bool _isToroidal)
 		{
-			gridSize = (double *)malloc(3 * sizeof(double));
+			gridSize = (double *)_aligned_malloc(3 * sizeof(double), 32);
 			for (int i=0; i< 3; i++)
 			{
 				gridSize[i] = _gridSize[i];
 			}
-			this->gridStep = _gridStep;
-            this->gridSize = _gridSize;
+			this->gridStep = _gridStep;;
 			isToroidal = _isToroidal;
             // volumes
             volume = gridSize[0] * gridSize[1] * gridSize[2];
@@ -62,6 +61,7 @@ namespace NativeDaphneLibrary
 
 		~NtGrid()
 		{
+			if (gridSize != NULL)_aligned_free(gridSize);
 		}
 
 		//void linearIndexToIndexArray(int lin, int* idx)

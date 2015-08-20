@@ -217,7 +217,7 @@ namespace Daphne
                 {
                     hSim.RemoveCell(cell);
                     Populations[cell.Population_id].RemoveCell(cell.Cell_id, false);
-                    hSim.RemoveCellBoudnaryReacitons(cell);
+                    hSim.RemoveCellBoudnaryReactions(cell);
                     return true;
                 }
 
@@ -237,7 +237,7 @@ namespace Daphne
                 Populations[cell.Population_id].RemoveCell(cell.Cell_id);
                 if (cell.Alive)
                 {
-                    hSim.RemoveCellBoudnaryReacitons(cell);
+                    hSim.RemoveCellBoudnaryReactions(cell);
                 }
                 CellManager.cellDictionary.Remove(cell.Cell_id);
                 return true;

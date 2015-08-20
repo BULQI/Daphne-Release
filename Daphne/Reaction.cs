@@ -302,7 +302,7 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity.reset(reactant.Conc).Multiply(catalyst.Conc).Multiply(RateConstant * dt);
+            intensity.reset(reactant.Conc).Multiply(reactant.Conc).Multiply(catalyst.Conc).Multiply(RateConstant * dt);
             product.Conc.Add(intensity);
             reactant.Conc.Subtract(intensity.Multiply(2));
         }

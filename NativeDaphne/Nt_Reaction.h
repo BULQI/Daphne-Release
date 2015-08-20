@@ -171,6 +171,7 @@ namespace NativeDaphne
 		Nt_MolecularPopulation ^Product;
 
 	private:
+		ScalarField^ intensity;
 		double *_reactant;
 		double *_product;
 		int array_length;

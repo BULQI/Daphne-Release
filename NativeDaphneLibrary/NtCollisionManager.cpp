@@ -28,8 +28,6 @@ namespace NativeDaphneLibrary
 
 	NtCollisionManager::NtCollisionManager(double *gsize, double gstep, bool gtoroidal) : NtGrid(gsize, gstep, gtoroidal)
 	{
-
-			GridSize = gsize;
 			GridStep = gstep;
 			IsToroidal = gtoroidal;
 			GridSize = gridSize;

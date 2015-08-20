@@ -195,7 +195,7 @@ namespace Daphne
         }
 
 
-        internal void InitializeNtCellManger()
+        internal void InitializeNtCellManager()
         {
             double extend1 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0);
             double extend2 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1);

@@ -866,7 +866,7 @@ namespace Daphne
 
             // remove the boundary reactions involving this cell
             //handled both comp and baseComp
-            //delayed removal to RemoveCellBoudnaryReacitons(Cell c)
+            //delayed removal to RemoveCellBoudnaryReactions(Cell c)
             //dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
 
             // remove the cell's membrane from the ecs boundary
@@ -879,7 +879,7 @@ namespace Daphne
         }
 
         //rmeove boundary reactions associated with this cell
-        public void RemoveCellBoudnaryReacitons(Cell c)
+        public void RemoveCellBoudnaryReactions(Cell c)
         {
             dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
         }
@@ -1192,7 +1192,7 @@ namespace Daphne
             cellManager.Phagocytosis = protocol.sim_params.Phagocytosis.Clone();
 
             //set up some middle layer parameters
-            cellManager.InitializeNtCellManger();
+            cellManager.InitializeNtCellManager();
             dataBasket.Environment.Comp.InitilizeBase();
 
         }

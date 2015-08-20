@@ -65,9 +65,10 @@ namespace NativeDaphneLibrary
 		double dy = y > 0 ? y : -y;
 		double dz = z > 0 ? z : -z;
 
-		if (dx > NtCollisionManager::GridSize[0] * 0.5) x = NtCollisionManager::GridSize[0] - dx;
-		if (dy > NtCollisionManager::GridSize[1] * 0.5) y = NtCollisionManager::GridSize[1] - dy;
-		if (dz > NtCollisionManager::GridSize[2] * 0.5) z = NtCollisionManager::GridSize[2] - dz;
+		double *gsize = NtCollisionManager::GridSize;
+		if (dx > gsize[0] * 0.5) x = gsize[0] - dx;
+		if (dy > gsize[1] * 0.5) y = gsize[1] - dy;
+		if (dz > gsize[2] * 0.5) z = gsize[2] - dz;
 
         distance = sqrt(x * x + y * y + z * z);
 	}

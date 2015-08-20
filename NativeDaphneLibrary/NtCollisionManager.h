@@ -60,12 +60,6 @@ namespace NativeDaphneLibrary
 		
 		~NtCollisionManager()
 		{
-			if (GridSize != NULL)
-			{
-				//free(GridSize);
-				GridSize = NULL;
-			}
-
 			delete pairs;
 
 			//step threads

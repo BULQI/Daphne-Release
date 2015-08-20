@@ -60,7 +60,7 @@ namespace NativeDaphne
 		int PopulationId;
 
 		/// <summary>
-		/// create a new instance of Nt_CellManger
+		/// create a new instance of Nt_CellManager
 		/// </summary>
 		/// <returns>none</returns>
 		Nt_CellPopulation(void)
