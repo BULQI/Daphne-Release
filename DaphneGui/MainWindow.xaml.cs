@@ -2840,7 +2840,7 @@ namespace DaphneGui
 
         //timer used to measure performace
         public static Stopwatch mywatch;
-        public static bool enable_clock = false;
+        public static bool enable_clock = true;
 
         private void runSim_Tissue(bool repeat)
         {

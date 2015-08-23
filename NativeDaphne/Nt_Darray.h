@@ -337,7 +337,7 @@ namespace NativeDaphne
 
 		Nt_Iarray(int len)
 		{
-			_array = (int *)malloc(len *sizeof(int));
+			_array = (int *)_aligned_malloc(len *sizeof(int), 16);
 			memset(_array, 0, len *sizeof(int));
 			length = len;
 			is_pointer_owner = true;
@@ -353,7 +353,7 @@ namespace NativeDaphne
 			if (is_pointer_owner == true && _array != NULL)
 			{
 				//there might be a problem for this free
-				free(_array);
+				_aligned_free(_array);
 			}
 			_array = NULL;
 		}
@@ -410,11 +410,45 @@ namespace NativeDaphne
 			{
 				if (is_pointer_owner == true && _array != NULL)
 				{
-					free(_array);
+					_aligned_free(_array);
 				}
 				_array = dptr;
 				is_pointer_owner = false;
 			}
+		}
+
+		void MemSwap(Nt_Iarray^ item)
+		{
+			if (item->Length != this->length)
+			{
+				throw gcnew Exception("Nt_Iarray.memswap, item length mismatch");
+			}
+			//this is enforced to avoid memory leak
+			//need to handle ownership if swaping item with different ownership is needed.
+			if (item->is_pointer_owner != this->is_pointer_owner)
+			{
+				throw gcnew Exception("Nt_Iarray.memswap only allowed for item in same collection");
+			}
+			int *array2 = item->NativePointer;
+			for (int i=0; i< length; i++)
+			{
+				int tmp = _array[i];
+				_array[i] = array2[i];
+				array2[i] = tmp;
+			}
+			item->NativePointer = _array;
+			this->_array = array2;
+		}
+
+		//allocate and take owner ship of the pointer
+		//called when remoe this object from a collection
+		void detach()
+		{
+			if (is_pointer_owner == true || _array == NULL || length == 0)return;
+			int *tmp = (int *)_aligned_malloc(length *sizeof(int), 16);
+			memcpy(tmp, _array, length * sizeof(int));
+			_array = tmp;
+			is_pointer_owner = true;
 		}
 	};
 

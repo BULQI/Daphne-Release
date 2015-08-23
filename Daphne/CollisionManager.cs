@@ -159,6 +159,12 @@ namespace Daphne
         /// <param name="del">cell to be deleted</param>
         public void RemoveAllPairsContainingCell(Cell del)
         {
+            if (useNativeCollisionManager == true)
+            {
+                nt_collisionManager.RemoveAllPairsContainingCell(del);
+                return;
+            }
+
             if (pairs != null && pairs.Count > 0 && del != null)
             {
                 foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)

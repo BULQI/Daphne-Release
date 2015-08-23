@@ -120,6 +120,9 @@ namespace NativeDaphne
 		//after a cell moved to another voxel
 		long long PrevLongGridIndex;
 
+		//alias for GridIndex, store for fast reference
+		int *gridIndex;
+
 		//to be remvoed
 		int Membrane_id;
 
@@ -197,6 +200,8 @@ namespace NativeDaphne
 
 		property Nt_Iarray^ GridIndex;
 
+
+
 		//grid index encoded in an long long integer
 		//if equal -1 => not legal index
 		long long LongGridIndex;
@@ -237,10 +242,12 @@ namespace NativeDaphne
 			GridIndex[0] = -1;
 			GridIndex[1] = -1;
 			GridIndex[2] = -1;
+			GridIndex[3] = -1;
 
 			LongGridIndex = -1;
 			PrevLongGridIndex = -1;
-			nt_cell = new NtCell(radius, GridIndex->NativePointer);
+			gridIndex = GridIndex->NativePointer;
+			nt_cell = new NtCell(radius, gridIndex);
 		}
 
 		~Nt_Cell()

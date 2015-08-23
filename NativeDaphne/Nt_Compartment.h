@@ -442,15 +442,15 @@ namespace NativeDaphne
 			for (int i=0; i< NtBulkReactions->Count; i++)
 			{
 				//debug
-				int com_count = NtBulkReactions[i]->ComponentCount();
-				if (componentCount == -1)
-				{
-					componentCount = com_count;
-				}
-				else if (componentCount != com_count)
-				{
-					throw gcnew Exception("Wrong number of reactions");
-				}
+				//int com_count = NtBulkReactions[i]->ComponentCount();
+				//if (componentCount == -1)
+				//{
+				//	componentCount = com_count;
+				//}
+				//else if (componentCount != com_count)
+				//{
+				//	throw gcnew Exception("Wrong number of reactions");
+				//}
 
 				NtBulkReactions[i]->Step(dt);
 			}
@@ -460,16 +460,16 @@ namespace NativeDaphne
 				 List<Nt_Reaction^>^ ReactionList = kvp->Value->ReactionList;
 				 for (int i= 0; i< ReactionList->Count; i++)
 				 {
-					 //debug
-					int com_count = ReactionList[i]->ComponentCount();
-					if (componentCount == -1)
-					{
-						componentCount = com_count;
-					}
-					else if (componentCount != com_count)
-					{
-						throw gcnew Exception("Wrong number of reactions");
-					}
+					//debug
+					//int com_count = ReactionList[i]->ComponentCount();
+					//if (componentCount == -1)
+					//{
+					//	componentCount = com_count;
+					//}
+					//else if (componentCount != com_count)
+					//{
+					//	throw gcnew Exception("Wrong number of reactions");
+					//}
 
 					 ReactionList[i]->Step(dt);
 				 }

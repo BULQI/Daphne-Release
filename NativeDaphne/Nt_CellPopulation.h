@@ -7,6 +7,7 @@
 #include "Nt_MolecularPopulation.h"
 #include "Nt_Cell.h"
 #include "Nt_CellManager.h"
+#include "Nt_CollisionManager.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -79,6 +80,7 @@ namespace NativeDaphne
 			_X = NULL;
 			_V = NULL;
 			_F = NULL;
+			_GridIndex = NULL;
 			_random_samples = NULL;
 
 			ECSExtentLimit = (double *)malloc(3 *sizeof(double));
@@ -97,6 +99,7 @@ namespace NativeDaphne
 				_aligned_free(_X);
 				_aligned_free(_V);
 				_aligned_free(_F);
+				_aligned_free(_GridIndex);
 				_aligned_free(_Sigma);
 				_aligned_free(_TransductionConstant);
 				_aligned_free(_DragCoefficient);
@@ -121,6 +124,7 @@ namespace NativeDaphne
 
 			if (cell->Alive == false)
 			{
+				//it is possible to add dead cell, when loading from saved experment
 				cell->nt_cell->X = cell->SpatialState->X->NativePointer;
 				cell->nt_cell->F = cell->SpatialState->F->NativePointer;
 				deadCells->Add(cell->Cell_id, cell);
@@ -153,7 +157,8 @@ namespace NativeDaphne
 					_X = (double *)_aligned_realloc(_X, alloc_size, 32);
 					_V = (double *)_aligned_realloc(_V, alloc_size, 32);
 					_F = (double *)_aligned_realloc(_F, alloc_size, 32);
-					if (_X == NULL || _V == NULL || _F == NULL)
+					_GridIndex = (int *)_aligned_realloc(_GridIndex, allocedItemCount * 4 * sizeof(int), 16);
+					if (_X == NULL || _V == NULL || _F == NULL || _GridIndex == NULL)
 					{
 						throw gcnew Exception("Error realloc memory");
 					}
@@ -161,32 +166,45 @@ namespace NativeDaphne
 					for (int i=0; i< itemCount; i++)
 					{
 						ComponentCells[i]->SpatialState->X->NativePointer = _X + i * 4;
-						ComponentCells[i]->nt_cell->X = _X + i * 4;
 						ComponentCells[i]->SpatialState->V->NativePointer = _V + i * 4;
 						ComponentCells[i]->SpatialState->F->NativePointer = _F + i * 4;
-						ComponentCells[i]->nt_cell->F = _F + i * 4;
-
+						ComponentCells[i]->GridIndex->NativePointer = _GridIndex + i * 4;
+						ComponentCells[i]->gridIndex = _GridIndex + i * 4;
 					}
 
 					_Sigma = (double *)_aligned_realloc(_Sigma, alloc_size * sizeof(double), 32);
 					_TransductionConstant = (double *)_aligned_realloc(_TransductionConstant, alloc_size * sizeof(double), 32);
 					_DragCoefficient = (double *)_aligned_realloc(_DragCoefficient, alloc_size * sizeof(double), 32);
+					Nt_CollisionManager::cellStateAddressChanged = true;
 				}
 				//copy new values
 				double *_xptr = _X + itemCount * 4;
 				double *_vptr = _V + itemCount * 4;
 				double *_fptr = _F + itemCount * 4;
+				int *_gridptr = _GridIndex + itemCount * 4;
 				for (int i=0; i<3; i++)
 				{
 					_xptr[i] = cell->SpatialState->X[i];
 					_vptr[i] = cell->SpatialState->V[i];
 					_fptr[i] = cell->SpatialState->F[i];
+					_gridptr[i] = cell->GridIndex[3];
 				}
+				_gridptr[3] = cell->GridIndex[3];
+
 				cell->SpatialState->X->NativePointer = _xptr;
-				cell->nt_cell->X = _xptr;
 				cell->SpatialState->V->NativePointer = _vptr;
 				cell->SpatialState->F->NativePointer = _fptr;
-				cell->nt_cell->F = _fptr;
+				cell->GridIndex->NativePointer = _gridptr;
+				cell->gridIndex = _gridptr;
+
+				if (Nt_CollisionManager::cellStateAddressChanged == false)
+				{
+					//if memory is not reallocated, there is no cell pair containing this cell yet
+					//so it is safe to set these pointers without the need to updae pair pointer dataq
+					cell->nt_cell->X = _xptr;
+					cell->nt_cell->F = _fptr;
+					cell->nt_cell->gridIndex = _gridptr;
+				}
 
 				for (int i= itemCount *4; i < itemCount *4 + 4; i++)
 				{
@@ -279,6 +297,8 @@ namespace NativeDaphne
 			}
 
 			ntCellDictionary->Remove(cell_id);
+
+			
 		}
 
 		//remove cells spatialStates, sigma, transdcutionConsant and Dragcoefficient from array
@@ -300,12 +320,9 @@ namespace NativeDaphne
 			{
 				//swap cell contents
 				c->SpatialState->X->MemSwap(last_cell->SpatialState->X);
-				c->nt_cell->X = c->SpatialState->X->NativePointer;
-				last_cell->nt_cell->X = last_cell->SpatialState->X->NativePointer;
 				c->SpatialState->V->MemSwap(last_cell->SpatialState->V);
 				c->SpatialState->F->MemSwap(last_cell->SpatialState->F);
-				c->nt_cell->F = c->SpatialState->F->NativePointer;
-				last_cell->nt_cell->F = last_cell->SpatialState->F->NativePointer;
+				c->GridIndex->MemSwap(last_cell->GridIndex);
 				ComponentCells[index] = last_cell;
 				ComponentCells[last_index] = c;
 
@@ -315,14 +332,15 @@ namespace NativeDaphne
 			}
 			//deatch the data's storage
 			c->SpatialState->X->detach();
-			c->nt_cell->X = c->SpatialState->X->NativePointer;
 			c->SpatialState->V->detach();
 			c->SpatialState->F->detach();
-			c->nt_cell->F = c->SpatialState->F->NativePointer;
+			c->GridIndex->detach();
+			c->gridIndex = c->GridIndex->NativePointer;
 
 			//cellIds->RemoveAt(last_index);
 			ComponentCells->RemoveAt(last_index);
 			array_length = ComponentCells->Count * 4;
+			Nt_CollisionManager::cellStateAddressChanged = true;
 			return index;
 		}
 
@@ -370,6 +388,7 @@ namespace NativeDaphne
 		double *_X;
 		double *_V;
 		double *_F;
+		int *_GridIndex;
 
 		//used if all cells have identical value, otherwise = -1.0.
 		double TransductionConstant;

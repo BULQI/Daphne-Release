@@ -33,6 +33,7 @@ namespace NativeDaphneLibrary
 
 	class DllExport NtCollisionManager : public NtGrid
 	{
+
 	public:
 		static double *GridSize;
 		static double GridStep;
@@ -43,8 +44,13 @@ namespace NativeDaphneLibrary
 
 		unordered_map<long, NtCellPair *> *pairs;
 
-		//testing thread stuff
-		NtCellPair **pairArray;
+		int ReserveStorageSize;
+		NtCellPair *PairArrayStorage;
+		int NextFreeIndex;
+		vector<NtCellPair *> FreePairList;
+
+
+		//thread stuff
 		int numPairs;
 		int MaxNumThreads;
 		HANDLE* jobHandles;
@@ -52,9 +58,8 @@ namespace NativeDaphneLibrary
 		HANDLE* JobFinishedEvents;
 
 		PairInteractArg** pairInteractArgs;
-		//unsigned long AcitveJobCount;
-		volatile long AcitveJobCount;
 
+		unsigned long AcitveJobCount;
 
 		NtCollisionManager(double *gsize, double gstep, bool gtoroidal);
 		
@@ -62,7 +67,9 @@ namespace NativeDaphneLibrary
 		{
 			delete pairs;
 
-			//step threads
+			_aligned_free(PairArrayStorage);
+
+			//stop threads
 			for (int i=0; i<MaxNumThreads; i++)
 			{
 				PairInteractArg *arg = pairInteractArgs[i];
@@ -114,27 +121,23 @@ namespace NativeDaphneLibrary
 			return (pairs->count(key) > 0);
 		}
 
+		//do we really have to add, there is nothing to do to add
+		//except setting its pairkey? if key = -1, then it is a free one.
 		bool addCellPair(long key, NtCellPair *p)
 		{
 			//if we already have it
 			if (pairs->count(key) > 0)return false;
 			pairs->insert(make_pair(key, p));
-
-			p->index = numPairs;
-			pairArray[numPairs] = p; 
-			numPairs++;
-			if (numPairs >= 1000000)
+			
+			//debug - checking maximum pairs
+			int nPairs = NextFreeIndex - (int)FreePairList.size();
+			if (nPairs > max_pair_count)
 			{
-				throw std::runtime_error("Error in AddCellPair: allocated array size full");
-			}
-
-			if (numPairs > max_pair_count)
-			{
-				max_pair_count = numPairs;
-				if (max_pair_count%100 == 0)
-				{
-					//fprintf(stdout, "Maximum pair count = %d\n", max_pair_count);
-				}
+				max_pair_count = nPairs;
+				//if (max_pair_count%100 == 0)
+				/*{
+					fprintf(stdout, "Maximum pair count = %d\n", max_pair_count);
+				}*/
 			}
 			return true;
 		}
@@ -144,64 +147,55 @@ namespace NativeDaphneLibrary
 			return (*pairs)[key];
 		}
 
-		NtCellPair *NewCellPair(NtCell* _a, NtCell* _b);
-
-		void removePairFromArray(NtCellPair *p)
-		{
-			int index = p->index;
-			if (index < 0 || index >= numPairs)
-			{
-				throw std::invalid_argument("Error in RemovePairFromArray: index out of range");
-			}
-			pairArray[index] = pairArray[numPairs-1];
-			pairArray[index]->index = index;
-			p->index = -1;
-			numPairs--;
-		}
+		NtCellPair *NewCellPair(long key, NtCell* _a, NtCell* _b);
 
 		bool removePair(long key)
 		{
 			if (pairs->count(key) == 0)return false;
 			NtCellPair *p = (*pairs)[key];
+			p->pairKey = -1; //free slot now
+			FreePairList.push_back(p);
 			pairs->erase(key);
-			removePairFromArray(p);
-			_aligned_free(p);
 			return true;
 		}
 
-		//return if removed.
-		bool removePairOnClearSeparation(long key)
-		{
-			if (pairs->count(key) == 0)return false;
-			NtCellPair *pair = getPair(key);
-			if (!IsToroidal)
-			{
-				if (ClearSeperation_nobond(pair) == true)
-				{
-					removePair(key);
-					return true;
-				}
-			}
-			else if (ClearSeperationToroidal(pair->a->gridIndex, pair->b->gridIndex, pair->MaxSeparation) == true)
-			{
-				removePair(key);
-				return true;
-			}
-			return false;
-		}
+		////return if removed.
+		//bool removePairOnClearSeparation(long key)
+		//{
+		//	if (pairs->count(key) == 0)return false;
+		//	NtCellPair *pair = getPair(key);
+		//	if (!IsToroidal)
+		//	{
+		//		if (ClearSeperation(pair) == true)
+		//		{
+		//			removePair(key);
+		//			return true;
+		//		}
+		//	}
+		//	else if (ClearSeperationToroidal(pair) == true)
+		//	{
+		//		removePair(key);
+		//		return true;
+		//	}
+		//	return false;
+		//}
 
 		bool isEmpty()
 		{
-			return numPairs == 0;
+			return getPairCount() == 0;
 		}
 
 		void ClearPairs()
 		{
 			pairs->clear();
-			numPairs = 0;
 		}
 
-		
+		//fill holes in cell pair array
+		void balance();
+
+		//reset pair pointers
+		NtCellPair* resetPair(long key, NtCell* _a, NtCell* _b);
+
 
 	};
 }

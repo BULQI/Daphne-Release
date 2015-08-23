@@ -26,6 +26,9 @@ namespace NativeDaphne
 	public:
 
 		static bool isToroidal = false;
+
+		//this signals that some 
+		static bool cellStateAddressChanged = false;
 		
 		bool initialized;
 		NtCollisionManager *native_collisionManager;
@@ -208,7 +211,6 @@ namespace NativeDaphne
         /// <summary>
         /// this version of the function avoids excessive loops
         /// </summary>
-		[SuppressUnmanagedCodeSecurity]
         void updateGridAndPairs();
         
         /// <summary>
@@ -223,6 +225,45 @@ namespace NativeDaphne
 			//native_collisionManager->pairInteract(dt);
 			native_collisionManager->MultiThreadPairInteract(dt);
         }
+
+
+		//given two cell voxel indices, check if clearly separated
+		bool clearSeparation(int *a, int *b)
+		{
+			if (!isToroidal)
+			{
+				int d1 = a[0] - b[0];
+				if (d1 > 1 || d1 < -1)return true;
+				d1 = a[1] - b[1];
+				if (d1 > 1 || d1 < -1)return true;
+				d1 = a[2] - b[2];
+				if (d1 > 1 || d1 < -1)return true;
+				return false;
+			}
+			else 
+			{
+				int d1 = a[0] > b[0] ? a[0] - b[0] : b[0] - a[0];
+				if (d1 > 0.5 * gridPts[0])
+				{
+					d1 = gridPts[0] - d1;
+				}
+				if (d1 >1) return true; 
+
+				d1 = a[1] > b[1] ? a[1] - b[1] : b[1] - a[1];
+				if (d1 > 0.5 * gridPts[1])
+				{
+					d1 = gridPts[1] - d1;
+				}
+				if (d1 > 1) return true; 
+
+				d1 = a[2] > b[2] ? a[2] - b[2] : b[2] - a[2];
+				if (d1 > 0.5 * gridPts[2])
+				{
+					d1 = gridPts[2] - d1;
+				}
+				return d1 > 1;
+			}
+		}
 
 		array<Dictionary<int, Nt_Cell^>^, 3>^ grid;
 

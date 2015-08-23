@@ -21,6 +21,14 @@ namespace NativeDaphne
 			Set(value);
 		}
 
+		LongIndex(int *src)
+		{
+			index[0] = src[0];
+			index[1] = src[1];
+			index[2] = src[2];
+			index[3] = src[3];
+		}
+
 		void Set(long long value)
 		{
 			if (value < 0)
@@ -58,7 +66,7 @@ namespace NativeDaphne
             }
 
 			this->gridStep = _gridStep;
-			this->gridStepInverse = 1.0/_gridStep;
+			static_GridStepInverse = 1.0/_gridStep;
 
             this->gridSize = _gridSize;
 
@@ -69,6 +77,7 @@ namespace NativeDaphne
             gridPts = gcnew array<int>{ (int)Math::Ceiling(gridSize[0] / gridStep),
                                   (int)Math::Ceiling(gridSize[1] / gridStep),
                                   (int)Math::Ceiling(gridSize[2] / gridStep) };
+			static_GridPts = gridPts;
         }
 
 		/// <summary>
@@ -128,13 +137,13 @@ namespace NativeDaphne
 		//return -1 if out of range.
 		long long findGridIndex(double *pos_ptr)
 		{
-			int index = (int)(pos_ptr[0] * gridStepInverse);
+			int index = (int)(pos_ptr[0] * static_GridStepInverse);
 			if ( (unsigned)index > (unsigned)gridPts[0] - 1) return -1;
 			long long retval = (unsigned long long)index <<48;
-			index = (int)(pos_ptr[1] * gridStepInverse);
+			index = (int)(pos_ptr[1] * static_GridStepInverse);
 			if ( (unsigned)index > (unsigned)gridPts[1] - 1) return -1;
 			retval |= (unsigned long long)index << 32;
-			index = (int)(pos_ptr[2] * gridStepInverse);
+			index = (int)(pos_ptr[2] * static_GridStepInverse);
 			if ( (unsigned)index > (unsigned)gridPts[2] - 1) return -1;
 			retval |= (unsigned long long)index << 16;
 			return retval;
@@ -173,13 +182,17 @@ namespace NativeDaphne
             }
         }
 
+
+		static double static_GridStepInverse;
+
+		static array<int>^ static_GridPts;
+
 		protected:
         /// <summary>
         /// width of a voxel in microns
         /// </summary>
         double gridStep;
 
-		double gridStepInverse;
         /// <summary>
         /// grid extents in microns
         /// </summary>

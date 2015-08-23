@@ -78,6 +78,8 @@ namespace NativeDaphne
 		//contains all current cells, <cell_id, Nt_Cell^>
 		static Dictionary<int, Nt_Cell^> ^cellDictionary = gcnew Dictionary<int, Nt_Cell^>();
 
+		static array<Nt_Cell^>^ cellArray;
+
 	private:
 
 		//population_id -> cell population
