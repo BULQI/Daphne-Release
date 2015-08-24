@@ -2828,6 +2828,20 @@ namespace DaphneGui
                     runSim_Tissue(!firstRun);
                     break;
                 case ToolWindowType.VatRC:
+                    VatReactionComplexScenario ScenarioHandle = (VatReactionComplexScenario)SOP.Protocol.scenario;
+                    //RenderPop pop = null;
+                    bool molChecked = ScenarioHandle.popOptions.molPopOptions.Where(x => x.renderOn == true).Any();
+
+                    if (molChecked == false)
+                    {
+                        // Configure the message box to be displayed
+                        string messageBoxText = "No molecular populations were selected for rendering in the Rendering tab.";
+                        string caption = "Reaction complex error";
+                        MessageBoxButton button = MessageBoxButton.OK;
+                        MessageBoxImage icon = MessageBoxImage.Warning;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        return;
+                    }
                     runSim_VatRc();
                     break;
                 default:

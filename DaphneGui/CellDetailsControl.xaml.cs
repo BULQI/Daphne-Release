@@ -1199,6 +1199,13 @@ namespace DaphneGui
             ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
+
+                // These next two statements are needed to prevent a crash during the Refresh operations, below.
+                // The crash occurs when the user is still in editing mode in a cell and the Refresh method is called.
+                // This is a known bug and fix.
+                dataGrid.CommitEdit();
+                dataGrid.CommitEdit();
+
                 //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
                 //otherwise, it is the old way, remove those code when all changed to this new way.
                 ConfigGene gene1 = (ConfigGene)combo.SelectedItem;
