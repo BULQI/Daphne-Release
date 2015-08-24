@@ -293,7 +293,6 @@ namespace DaphneGui
             ST_CellPopDynToolWindow.Visibility = Visibility.Collapsed;
             ST_CellLineageWindow = lineageWindow;
 
-
             this.ToolWinCellInfo.Close();
 
             SelectedCellInfo = new CellInfo();
@@ -1345,7 +1344,7 @@ namespace DaphneGui
             vcrControl.CurrentFrame = 1;
 
             ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
-            ST_CellLineageWindow.Float(new Size(1000, 824));
+            ST_CellLineageWindow.Float(new Point(this.Left + 40, this.Top + 30), new Size(1000, 824));
             ST_CellLineageWindow.Activate();
 
             #region MyRegion
@@ -2829,6 +2828,19 @@ namespace DaphneGui
                     runSim_Tissue(!firstRun);
                     break;
                 case ToolWindowType.VatRC:
+                    //If no molecules are selected for rendering, inform user and return.
+                    VatReactionComplexScenario ScenarioHandle = (VatReactionComplexScenario)SOP.Protocol.scenario;
+                    bool molChecked = ScenarioHandle.popOptions.molPopOptions.Where(x => x.renderOn == true).Any();
+                    if (molChecked == false)
+                    {
+                        // Configure the message box to be displayed
+                        string messageBoxText = "No molecular populations were selected for rendering in the Rendering tab.";
+                        string caption = "Reaction complex error";
+                        MessageBoxButton button = MessageBoxButton.OK;
+                        MessageBoxImage icon = MessageBoxImage.Warning;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        return;
+                    }
                     runSim_VatRc();
                     break;
                 default:
@@ -3794,13 +3806,8 @@ namespace DaphneGui
 
         private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
-            //TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            //CellPopDynamics.CellPopDynWindow dynWindow = new CellPopDynamics.CellPopDynWindow();
-            //dynWindow.DataContext = scenario;
-            //dynWindow.ShowDialog();
-            
             ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
-            ST_CellPopDynToolWindow.Float(new Size(1000, 824));
+            ST_CellPopDynToolWindow.Float(new Point(this.Left + 30, this.Top + 40), new Size(1000, 824));
             ST_CellPopDynToolWindow.Activate();
         }
 

@@ -255,7 +255,7 @@ namespace DaphneGui
                         if (MainWindow.SOP.Protocol.scenario.GetType() == typeof(VatReactionComplexScenario))
                         {
                             VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
-                            s.InitializeAllMols();
+                            s.InitializeAllMols(true);
                             s.InitializeAllReacs();
                         }
                     }

@@ -47,6 +47,21 @@ namespace DaphneGui.CellLineage
         private List<Series> MemSeries;
 
         private double pdfScaleFactor = 8;
+        private double defaultFontSize = 20;
+
+        private double axisFontSize;
+        public double AxisFontSize
+        {
+            get { return axisFontSize; }
+            set
+            {
+                if (axisFontSize != value)
+                {
+                    axisFontSize = value;
+                    OnPropertyChanged("AxisFontSize");
+                }
+            }
+        }
 
         public CellLineageControl()
         {
@@ -58,10 +73,12 @@ namespace DaphneGui.CellLineage
             InitializeComponent();
 
             DataContext = this;
+            AxisFontSize = defaultFontSize;
 
             MemSeries = new List<Series>();
             MemSurface = new CellPopChartSurface();
             MemSurface.ChartTitle = "Rendered In Memory";
+            //MemSurface.XAxis = new NumericAxis();            
         }
         
         /// <summary>
@@ -205,6 +222,8 @@ namespace DaphneGui.CellLineage
             saveFileDialog.Title = "Export to File";
             saveFileDialog.RestoreDirectory = true;
 
+            axisFontSize = defaultFontSize;
+
             // Show save file dialog box
             Nullable<bool> result = saveFileDialog.ShowDialog();
 
@@ -212,14 +231,18 @@ namespace DaphneGui.CellLineage
             if (result == true)
             {
                 // Save file
+                //public Style TitleStyle {get; set;}
                 if (saveFileDialog.FileName.EndsWith("pdf"))
                 {
+                    
+                    AxisFontSize *= pdfScaleFactor;
                     this.SavePdf(saveFileDialog.FileName);
+                    AxisFontSize = defaultFontSize;
                     //LineageSciChart.ExportToPDF(saveFileDialog.FileName);
                 }
                 else
                 {
-                    //LineageSciChart.SaveToFile(saveFileDialog.FileName);
+                    LineageSciChart.SaveToFile(saveFileDialog.FileName);
                 }
             }
         }
@@ -236,7 +259,8 @@ namespace DaphneGui.CellLineage
 
             MemSurface.Width = doc.PageSize.Width * pdfScaleFactor;
             MemSurface.Height = doc.PageSize.Height * pdfScaleFactor;
-            
+
+            //linXAxis.TitleFontSize *= pdfScaleFactor;
             //Export this surface to bitmap source
             var source = MemSurface.ExportToBitmapSource();
 
@@ -251,16 +275,17 @@ namespace DaphneGui.CellLineage
             System.Drawing.Image image = bmp;
             iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(image, System.Drawing.Imaging.ImageFormat.Bmp);
 
-            //Scale to page size
+            //Scale to page size, allow for margins         
             float w, h;
-            w = doc.PageSize.Width;
-            h = doc.PageSize.Height;
+            w = doc.PageSize.Width - doc.LeftMargin * 2 - 10;
+            h = doc.PageSize.Height - doc.TopMargin * 2 - 10;
             pic.ScaleAbsolute(w, h);
 
             //Add the image to the doc
             pic.Border = iTextSharp.text.Rectangle.BOX;
             pic.BorderColor = iTextSharp.text.BaseColor.BLACK;
-            pic.BorderWidth = 3f;
+            pic.BorderWidth = 0;  //3f;
+            
             doc.Add(pic);
 
             ////A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
@@ -276,7 +301,7 @@ namespace DaphneGui.CellLineage
 
         /// <summary>
         /// Gets series for the memory chart surface. This method assumes that each series is only two points.
-        /// Do not use this method if your series is goint to be more than two points.
+        /// Do not use this method if your series is going to be more than two points.
         /// </summary>
         private void GetMemDataSeries()
         {            
@@ -350,10 +375,44 @@ namespace DaphneGui.CellLineage
                 flrs.StrokeThickness *= (int)pdfScaleFactor;
 
                 MemSurface.RenderableSeries.Add(flrs);
+
             }
 
+            //Axis related settings for memory surface
+            
+            //DefaultTickLabel dtl = new DefaultTickLabel();
+            //dtl.Style = (Style)FindResource("XAxisLabelStyle");
+            //dtl.FontSize = dtl.FontSize * pdfScaleFactor;
+
+            NumericAxis na = new NumericAxis();
+            na.AxisTitle = "Time in minutes";
+            na.TitleFontSize = linXAxis.TitleFontSize * pdfScaleFactor;
+            na.DrawMinorGridLines = true;
+            na.DrawMajorGridLines = true;
+            na.DrawLabels = true;
+            na.TickLabelStyle = (Style)FindResource("XAxisLabelStyle");
+            
+            MemSurface.XAxis = na;
+            MemSurface.XAxis.GrowBy = new DoubleRange(0.1, 0.2);    //Makes sure not to clip away data at the boundaries
+            MemSurface.YAxis.GrowBy = new DoubleRange(0.2, 0.2);    //Makes sure Y-Axis is not clipped away for data at boundaries
+            MemSurface.YAxis.Visibility = Visibility.Hidden;
+
+            MemSurface.ZoomExtents();
             MemSurface.FontSize *= pdfScaleFactor;
+            
         }
+
+        private double GetSeriesMin(IList<double> values) 
+        {            
+            return (from v in values select v).Min();
+        }
+
+        private double GetSeriesMax(IList<double> values)
+        {
+            return (from v in values select v).Max();
+        }
+
+
 
         /// <summary>
         /// Right-click Menu Zoom Out handler.
@@ -420,6 +479,7 @@ namespace DaphneGui.CellLineage
             string XTitle = pda.GetChartXTitle();
             string YTitle = pda.GetChartYTitle();
 
+            //This draws all the series to the graph on the screen
             ConvertAndDraw(chartTitle, XTitle, YTitle, s);
         }
 
@@ -489,7 +549,7 @@ namespace DaphneGui.CellLineage
                     var textAnnot0 = new Abt.Controls.SciChart.Visuals.Annotations.TextAnnotation()
                     {
                         Name = s.Name,
-                        Text = MemSurface.YAxis.AxisTitle,
+                        Text = LineageSciChart.YAxis.AxisTitle,
                         FontSize = 6.0,
                         X1 = x[0],
                         Y1 = y[0],

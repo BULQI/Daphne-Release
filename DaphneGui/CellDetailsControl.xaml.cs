@@ -1199,6 +1199,13 @@ namespace DaphneGui
             ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
             if (scheme != null)
             {
+
+                // These next two statements are needed to prevent a crash during the Refresh operations, below.
+                // The crash occurs when the user is still in editing mode in a cell and the Refresh method is called.
+                // This is a known bug and fix.
+                dataGrid.CommitEdit();
+                dataGrid.CommitEdit();
+
                 //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
                 //otherwise, it is the old way, remove those code when all changed to this new way.
                 ConfigGene gene1 = (ConfigGene)combo.SelectedItem;
@@ -1250,16 +1257,16 @@ namespace DaphneGui
                     cell.div_scheme.InsertState("G1-S-G2-M", 0);
                     cell.div_scheme.InsertState("cytokinetic", 1);
 
-                    // Add a transition driver with arbitrary values
-                    ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
-                    distr_element.Distr = new DistributedParameter();
-                    distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                    distr_element.Distr.ConstValue = 60; // minutes
-                    distr_element.CurrentState = 0;
-                    distr_element.CurrentStateName = cell.div_scheme.Driver.states[0];
-                    distr_element.DestState = 1;
-                    distr_element.DestStateName = cell.div_scheme.Driver.states[1];
-                    cell.div_scheme.Driver.DriverElements[0].elements[1] = distr_element;
+                    //// Add a transition driver with arbitrary values
+                    //ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
+                    //distr_element.Distr = new DistributedParameter();
+                    //distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                    //distr_element.Distr.ConstValue = 60; // minutes
+                    //distr_element.CurrentState = 0;
+                    //distr_element.CurrentStateName = cell.div_scheme.Driver.states[0];
+                    //distr_element.DestState = 1;
+                    //distr_element.DestStateName = cell.div_scheme.Driver.states[1];
+                    //cell.div_scheme.Driver.DriverElements[0].elements[1] = distr_element;
                     level.entity_repository.diff_schemes.Add(cell.div_scheme.Clone(true));
             }
             else if (schemeName == "Differentiation")
@@ -1270,15 +1277,15 @@ namespace DaphneGui
                     cell.diff_scheme.Name = cell.diff_scheme.GenerateNewName(level, "_");
                     cell.diff_scheme.InsertState("State0", 0);
                     cell.diff_scheme.InsertState("State1", 1);
-                    ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
-                    distr_element.Distr = new DistributedParameter();
-                    distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                    distr_element.Distr.ConstValue = 180; // minutes
-                    distr_element.CurrentState = 0;
-                    distr_element.CurrentStateName = cell.diff_scheme.Driver.states[0];
-                    distr_element.DestState = 1;
-                    distr_element.DestStateName = cell.diff_scheme.Driver.states[1];
-                    cell.diff_scheme.Driver.DriverElements[0].elements[1] = distr_element;
+                    //ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
+                    //distr_element.Distr = new DistributedParameter();
+                    //distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                    //distr_element.Distr.ConstValue = 180; // minutes
+                    //distr_element.CurrentState = 0;
+                    //distr_element.CurrentStateName = cell.diff_scheme.Driver.states[0];
+                    //distr_element.DestState = 1;
+                    //distr_element.DestStateName = cell.diff_scheme.Driver.states[1];
+                    //cell.diff_scheme.Driver.DriverElements[0].elements[1] = distr_element;
                     level.entity_repository.diff_schemes.Add(cell.diff_scheme.Clone(true));
             }
             else return;
@@ -1300,12 +1307,27 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            //Remove scheme from the cell
+            if (schemeName == "Division")
+            {
+                cell.div_scheme = null;
+            }
+            else if (schemeName == "Differentiation")
+            {
+                cell.diff_scheme = null;
+            }
+            
+            //Now remove scheme from the cell population
             ToolWinTissue twt = Tag as ToolWinTissue;
+
+            //If we're looking at the cells library, that has no cell population, so return.
+            if (twt == null)
+                return;
+
             CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
 
             if (schemeName == "Division")
             {
-                cell.div_scheme = null;
                 if (cp != null)
                 {
                     cp.reportStates.Division = false;
@@ -1313,7 +1335,6 @@ namespace DaphneGui
             }
             else if (schemeName == "Differentiation")
             {
-                cell.diff_scheme = null;
                 if (cp != null)
                 {
                     cp.reportStates.Differentiation = false;

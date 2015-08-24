@@ -22,6 +22,7 @@ using System.Windows.Media.Imaging;
 using Abt.Controls.SciChart.Visuals.RenderableSeries;
 using Daphne;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
@@ -30,7 +31,7 @@ namespace DaphneGui
     /// This class derives from SciChartSurface and serves as a base class for Lineage and Cell Pop Dynamics chart surface classes.
     /// Common methods are located here.  This is not an abstract class.
     /// </summary>
-    public class CellPopChartSurface : SciChartSurface
+    public class CellPopChartSurface : SciChartSurface, INotifyPropertyChanged
     {
         // x axis default units are minutes 
         // For minutes, xScale = 1.0;
@@ -120,14 +121,6 @@ namespace DaphneGui
             doc.Open();
             
             doc.Add(pdfImage);
-            // A good thing is always to add meta information to files, this does it easier to index the file in a proper way. 
-            // You can easilly add meta information by using these methods. (NOTE: This is optional, you don't have to do it, just keep in mind that it's good to do it!)
-            // Add meta information to the document
-            //doc.AddAuthor("Sanjeev Gupta");
-            //doc.AddCreator("Daphne PDF output");
-            //doc.AddKeywords("PDF export daphne");
-            //doc.AddSubject("Document subject - Save the SciChart graph to a PDF document");
-            //doc.AddTitle("The document title - Daphne graph in PDF format");
             doc.Close();
             //------------------------------------------------------------------------------------------
            
@@ -169,6 +162,16 @@ namespace DaphneGui
             }
 
             //OutputXpsDoc(filename);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
         }
 
     }

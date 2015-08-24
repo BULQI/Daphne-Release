@@ -227,9 +227,6 @@
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynamicsChartSurface.cs" />
-    <Compile Include="CellPopDynamics\CellPopDynExport.xaml.cs">
-      <DependentUpon>CellPopDynExport.xaml</DependentUpon>
-    </Compile>
     <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
       <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
     </Compile>
@@ -374,10 +371,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CellPopControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="CellPopDynamics\CellPopDynExport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
