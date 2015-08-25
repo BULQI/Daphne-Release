@@ -2615,6 +2615,7 @@ namespace DaphneGui
                 }
 
                 this.ExportMenu.IsEnabled = true;
+                this.pushMenu.IsEnabled = true;
                 // And show stats results chart
                 // NOTE: If the stats charts can be displayed without the database saving, then these
                 //   ChartViewDocWindow calls can be moved outside this if() block
@@ -2654,6 +2655,7 @@ namespace DaphneGui
                 applyButton.IsEnabled = true;
                 saveButton.IsEnabled = true;
                 enableFileMenu(true);
+                pushMenu.IsEnabled = true;
 
                 //Here, turn off Tracks option in White Hand ToolMode combo box
                 if (gc is VTKFullGraphicsController)
@@ -2834,6 +2836,9 @@ namespace DaphneGui
 
                     if (molChecked == false)
                     {
+                        //Reset menu items
+                        GUIUpdate(0, false);
+
                         // Configure the message box to be displayed
                         string messageBoxText = "No molecular populations were selected for rendering in the Rendering tab.";
                         string caption = "Reaction complex error";
