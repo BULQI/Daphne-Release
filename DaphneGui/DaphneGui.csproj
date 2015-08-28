@@ -561,6 +561,7 @@
     <Content Include="Config\vatRC_ligand_receptor.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Config\receptor_homeostasis.json" />
     <None Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
