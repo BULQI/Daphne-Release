@@ -226,7 +226,7 @@ namespace DaphneGui
                 }
             }
 
-            var er = MainWindow.SOP.Protocol.entity_repository;
+            var er = MainWindow.SOP.UserStore.entity_repository;
             RenderSkin newrs = new RenderSkin(skinName, er);
             //serialize to file
             string SkinFilePath = new Uri(MainWindow.appPath + @"\Config\RenderSkin\" + skinName + ".json").LocalPath;
