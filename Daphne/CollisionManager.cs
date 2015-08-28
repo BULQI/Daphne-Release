@@ -224,6 +224,12 @@ namespace Daphne
         /// <param name="del">the cell to be removed</param>
         public void RemoveCellFromGrid(Cell del)
         {
+            if (useNativeCollisionManager == true)
+            {
+                nt_collisionManager.RemoveCellFromGrid(del);
+                return;
+            }
+
             // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
             if (legalIndex(del.GridIndex) == true && grid[del.GridIndex[0], del.GridIndex[1], del.GridIndex[2]] != null)
             {

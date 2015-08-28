@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <xmmintrin.h>
 
-#define DO_PREFETCH
+//#define DO_PREFETCH
 
 using namespace std;
 

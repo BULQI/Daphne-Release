@@ -1015,7 +1015,11 @@ namespace Daphne
             base.reset();
             mu_max = 1.0;
             alpha = 2.0;
-            burn_in_iter = 0;
+            //-1 for no burn_in
+            if (burn_in_iter > 0)
+            {
+                burn_in_iter = 0;
+            }
         }
         protected override int linearDistributionCase(int dim)
         {
@@ -1127,6 +1131,16 @@ namespace Daphne
 
                     // state
                     c.SetCellState(cp.CellStates[i]);
+
+                    //check if cell's molpop has explicite value, if yes,
+                    //do not do burn_in step.
+                    if (this.burn_in_iter != -1)
+                    {
+                        if (cp.CellStates[i].cmState.molPopDict.Count != 0)
+                        {
+                            this.burn_in_iter = -1;
+                        }
+                    }
 
                     // add the cell
                     AddCell(c);

@@ -44,6 +44,7 @@ namespace Daphne
                 {
                     kvp.Value.SpatialState.X[i] += mu * kvp.Value.SpatialState.F[i] * dt;
                 }
+                kvp.Value.updateGridIndex();
             }
         }
 
@@ -200,9 +201,17 @@ namespace Daphne
             double extend1 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0);
             double extend2 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1);
             double extend3 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2);
-            bool boundary_force_flag = SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false;
 
-            base.SetEnvironmentExtents(extend1, extend2, extend3, boundary_force_flag, Pair.Phi1);
+            bool ECS_flag = SimulationBase.dataBasket.Environment is ECSEnvironment;
+            bool toroidal_flag = false;
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+            {
+                toroidal_flag = ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal;
+            }
+
+            //bool boundary_force_flag = SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false;
+
+            base.SetEnvironmentExtents(extend1, extend2, extend3, ECS_flag, toroidal_flag, Pair.Phi1);
             int seed = SimulationBase.ProtocolHandle.sim_params.globalRandomSeed;
             base.InitializeNormalDistributionSampler(0.0, 1.0, seed);
         }

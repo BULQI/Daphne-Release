@@ -24,11 +24,6 @@ namespace Daphne
     public class Cell : Nt_Cell, IDynamic
     {
         /// <summary>
-        /// used in toroidal boundary condition
-        /// </summary>
-        public static double SafetySlab = 1e-3;
-
-        /// <summary>
         /// the cell's behaviors (death, division, differentiation)
         /// </summary>
         private ITransitionDriver deathBehavior;
@@ -295,10 +290,11 @@ namespace Daphne
                 DifferentiationState = Differentiator.CurrentState;
             }
             
-            if (alive && isMotile && (!exiting))
-            {
-                this.EnforceBC();
-            }
+            //moved to middle layer
+            //if (alive && isMotile && (!exiting))
+            //{
+            //    this.EnforceBC();
+            //}
         }
 
         public void SetGeneActivities(ITransitionScheme scheme)

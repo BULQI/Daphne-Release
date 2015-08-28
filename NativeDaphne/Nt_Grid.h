@@ -26,7 +26,7 @@ namespace NativeDaphne
 			index[0] = src[0];
 			index[1] = src[1];
 			index[2] = src[2];
-			index[3] = src[3];
+			index[3] = 0; //src[3];
 		}
 
 		void Set(long long value)
@@ -36,17 +36,18 @@ namespace NativeDaphne
 				index[0] = -1;
 				index[1] = -1;
 				index[2] = -1;
-				index[3] = -1;
+				index[3] = 0; //-1;
 				return;
 			}
 			index[0] = value >>48;
 			index[1] = (value <<16) >> 48;
 			index[2] = (value <<32) >> 48;
-			index[3] = (value <<48) >> 48;
+			index[3] = 0; //(value <<48) >> 48;
 		}
 
 		long long Value()
 		{
+			if (index[0] == -1)return -1;
 			return  ((unsigned long long)index[0] <<48) | ((unsigned long long)index[1] <<32) | (unsigned long long)index[2] << 16 | index[3];
 		}
 

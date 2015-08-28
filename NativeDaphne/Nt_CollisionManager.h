@@ -22,8 +22,10 @@ namespace NativeDaphne
 	[SuppressUnmanagedCodeSecurity]
 	public ref class Nt_CollisionManager: Nt_Grid
 	{
-
 	public:
+		
+		//signal if any cell changed there voxel position
+		static bool CellGridIndexChanged;
 
 		static bool isToroidal = false;
 
@@ -46,10 +48,9 @@ namespace NativeDaphne
 			
 			pin_ptr<double> gs_ptr = &gridSize[0];
 			native_collisionManager = new NtCollisionManager(gs_ptr, gridStep, _isEcsToroidal);
-
-			//this->pairs = native_collisionManager->pairs;
 			tmp_idx = gcnew array<int>(3);
 			initialized = false;
+			CellGridIndexChanged = false;
         }
 
         void Step(double dt)
@@ -192,14 +193,29 @@ namespace NativeDaphne
         /// remove a cell from the grid
         /// </summary>
         /// <param name="del">the cell to be removed</param>
-        //void RemoveCellFromGrid(Nt_Cell^ del)
-        //{
-        //    // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
-        //    if (legalIndex(del->gridIndex) == true && grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]] != nullptr)
-        //    {
-        //        grid[del->gridIndex[0], del->gridIndex[1], del->gridIndex[2]]->Remove(del->Cell_id);
-        //    }
-        //}
+        void RemoveCellFromGrid(Nt_Cell^ del)
+        {
+            // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
+			//		 
+			//		 the gridIndex may or may not be the actuall location of where the cell is, 
+			//		 since we are now updating gridIndex when spatialState->X changes.
+			//		 but the value in LongGridIndex is only updated when the cell is placed in 
+			//		 collisionManager and thus have the right location of the cell - AH
+			bool found = false;
+			if (del->LongGridIndex != -1)
+			{
+				IndexStr idx(del->LongGridIndex);
+				if (grid[idx.index[0], idx.index[1], idx.index[2]] != nullptr)
+				{
+					found = grid[idx.index[0], idx.index[1], idx.index[2]]->Remove(del->Cell_id);
+				}
+
+				if (!found)
+				{
+					fprintf(stdout, "Warning: cell to be removed not found in grid. Cell_id= %d\n", del->Cell_id);
+				}
+			}
+        }
 
 		double GetBurnInMuValue(double integratorStep)
 		{

@@ -134,6 +134,11 @@ namespace NativeDaphne
 		property int Cell_id;
 		static int SafeCell_id = 0;
 		static double defaultRadius = 5.0;
+
+		/// <summary>
+        /// used in toroidal boundary condition
+        /// </summary>
+		static double SafetySlab = 1e-3;
 		property int Population_id;
 
 		//Nt_Compartment^ cytosol;
@@ -242,7 +247,10 @@ namespace NativeDaphne
 			GridIndex[0] = -1;
 			GridIndex[1] = -1;
 			GridIndex[2] = -1;
-			GridIndex[3] = -1;
+			//GridIndex[3]: -1 not set
+			//				 1 changed
+			//				 0 not changed.
+			GridIndex[3] = -1;  //new cell
 
 			LongGridIndex = -1;
 			PrevLongGridIndex = -1;
@@ -267,6 +275,8 @@ namespace NativeDaphne
             spatialState->F[1] += f[1];
             spatialState->F[2] += f[2];
         }
+
+		void updateGridIndex();
 
 	};
 }

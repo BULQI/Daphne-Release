@@ -49,12 +49,15 @@ namespace NativeDaphne
 			IsDistributionSamplerInitialized = true;
 		}
 
-		void SetEnvironmentExtents(double extent0, double extent1, double extent2, bool do_boundary_force, double pair_phi1 )
+		void SetEnvironmentExtents(double extent0, double extent1, double extent2, bool ecs_flag, bool toroidal_flag, double pair_phi1 )
 		{
 			EnvironmentExtent[0] = extent0;
 			EnvironmentExtent[1] = extent1;
 			EnvironmentExtent[2] = extent2;
-			boundaryForceFlag = do_boundary_force;
+
+			ECS_flag = ecs_flag;
+			ECS_IsToroidal = toroidal_flag;
+			boundaryForceFlag = ECS_flag && !ECS_IsToroidal;
 			PairPhi1 = pair_phi1;
 			IsEnvironmentInitialzed = true;
 		}
@@ -67,6 +70,10 @@ namespace NativeDaphne
 		static Nt_NormalDistribution ^normalDist;
 
 		static array<double> ^EnvironmentExtent;
+
+		static bool ECS_flag;
+
+		static bool ECS_IsToroidal;
 
 		//flag indicating if ECS and toroidal = false
 		static bool boundaryForceFlag;

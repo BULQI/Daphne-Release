@@ -80,30 +80,6 @@ namespace NativeDaphne
 		//handle movement
 		daxpy(array_length, dt, _V, 1, _X, 1);
 
-		//compute gridIndex
-		double gridStepInverse = Nt_Grid::static_GridStepInverse;
-		array<int> ^gridPts = Nt_Grid::static_GridPts;
-		for (int i=0; i< array_length; i+= 4)
-		{
-			int x = (int)_X[i] * gridStepInverse;
-			int y = (int)_X[i+1] * gridStepInverse;
-			int z = (int)_X[i+2] * gridStepInverse;
-			if ( (unsigned)x < (unsigned)gridPts[0] && (unsigned)y < (unsigned)gridPts[1] || (unsigned)z >(unsigned)gridPts[2])
-			{
-				//fourth elements signal the index has changed.
-				_GridIndex[i+3] = (x == _GridIndex[i] && y == _GridIndex[i+1] && z == _GridIndex[i+2]) ? 0 : 1;
-				_GridIndex[i] = x;
-				_GridIndex[i+1] = y;
-				_GridIndex[i+2] = z;
-			}
-			else if (_GridIndex[i] != -1) 
-			{
-				_GridIndex[i] = -1;
-				_GridIndex[i+1] = -1;
-				_GridIndex[i+2] = -1;
-				_GridIndex[i+3] = -1;
-			}
-		}
 
 		if (DragCoefficient != -1)
 		{
@@ -117,10 +93,93 @@ namespace NativeDaphne
 			}
 
 		}
+
 		daxpy(array_length, dt, _F, 1, _V, 1);
 
 		//reset cell force
 		memset(_F, 0, array_length*sizeof(double));
+
+		//apply boundary condition - BoundaryBC
+		array<double>^ extents = Nt_CellManager::EnvironmentExtent;
+		if (Nt_CellManager::ECS_flag == true && Nt_CellManager::ECS_IsToroidal == true)
+		{
+			
+			for (int i=0; i< array_length; i+= 4)
+			{
+				if (_X[i] < 0.0)
+				{
+					_X[i] = extents[0] - Nt_Cell::SafetySlab;
+				}
+				else if (_X[i] > extents[0])
+				{
+					_X[i] = 0.0;
+				}
+				
+				if (_X[i+1] < 0.0)
+				{
+					_X[i+1] = extents[1] - Nt_Cell::SafetySlab;
+				}
+				else if (_X[i+1] > extents[1])
+				{
+					_X[i+1] = 0.0;
+				}
+			
+				if (_X[i+2] < 0.0)
+				{
+					_X[i+2] = extents[2] - Nt_Cell::SafetySlab;
+				}
+				else if (_X[i+2] > extents[2])
+				{
+					_X[i+2] = 0.0;
+				}
+			}
+		}
+		else 
+		{
+			for (int i=0; i< array_length; i+= 4)
+			{
+				if (_X[i] < 0.0 || _X[i] > extents[0] || _X[i+1] < 0.0 || _X[i+1] > extents[1] || _X[i+2] < 0.0 || _X[i+2] > extents[2])
+				{
+					ComponentCells[i%4]->Exiting = true;
+				}
+			}
+		}
+
+		//computing grid index.
+		double gridStepInverse = Nt_Grid::static_GridStepInverse;
+		array<int> ^gridPts = Nt_Grid::static_GridPts;
+		bool cellGridChanged = true;
+		for (int i=0; i< array_length; i+= 4)
+		{
+			int x = (int)(_X[i] * gridStepInverse);
+			int y = (int)(_X[i+1] * gridStepInverse);
+			int z = (int)(_X[i+2] * gridStepInverse);
+			if ( (unsigned)x < (unsigned)gridPts[0] && (unsigned)y < (unsigned)gridPts[1] && (unsigned)z < (unsigned)gridPts[2])
+			{
+				//fourth elements signal the index has changed.
+				if (x != _GridIndex[i] || y != _GridIndex[i+1] && z != _GridIndex[i+2])
+				{
+					_GridIndex[i] = x;
+					_GridIndex[i+1] = y;
+					_GridIndex[i+2] = z;
+					_GridIndex[i+3] = 1;
+					cellGridChanged = true;
+				}
+			}
+			else if (_GridIndex[i] != -1) 
+			{
+				_GridIndex[i] = -1;
+				_GridIndex[i+1] = -1;
+				_GridIndex[i+2] = -1;
+				_GridIndex[i+3] = 1;
+				cellGridChanged = true;
+			}
+		}
+
+		if (cellGridChanged == true)
+		{
+			Nt_CollisionManager::CellGridIndexChanged = true;
+		}
 
 	}
 }

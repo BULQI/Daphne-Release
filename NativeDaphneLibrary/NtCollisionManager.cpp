@@ -248,7 +248,11 @@ namespace NativeDaphneLibrary
 	{
 		
 		unsigned count = FreePairList.size();
-		if (count == 0)return;
+		if (count == 0)
+		{
+			numPairs = NextFreeIndex;
+			return;
+		}
 
 		NtCellPair *pairArray = PairArrayStorage;
 		for (int i=0; i< count; i++)
@@ -276,27 +280,19 @@ namespace NativeDaphneLibrary
 			}
 		}
 		numPairs = NextFreeIndex;
-		//if (numPairs != (int)pairs->size())
-		//{
-		//	int error = 1;
-		//}
-
-		//for (int i=0; i<numPairs; i++)
-		//{
-		//	if (itemExists(pairArray[i].pairKey) == false)
-		//	{
-		//		int error = 2;
-		//	}
-		//}
 		FreePairList.clear();
 	}
 
 	NtCellPair* NtCollisionManager::resetPair(long key, NtCell* _a, NtCell* _b)
 	{
+		if (pairs->count(key) == 0)
+		{
+			throw new exception("Error: pair with key not found!");
+		}
 		NtCellPair *pair = (*pairs)[key];
 		if (pair == NULL)
 		{
-			throw new exception("Error: pair with key not found!");
+			throw new exception("Error: pair with key is NULL!");
 		}
 		return new (pair) NtCellPair(key, _a, _b);
 	}

@@ -17,6 +17,7 @@ namespace NativeDaphne
 
 	void Nt_CollisionManager::RemoveAllPairsContainingCell(Nt_Cell^ del)
 	{
+
 		if (!native_collisionManager->isEmpty() && del != nullptr)
 		{
 			for each (KeyValuePair<int, Nt_Cell^>^ kvp in Nt_CellManager::cellDictionary)
@@ -37,7 +38,6 @@ namespace NativeDaphne
 	void Nt_CollisionManager::updateGridAndPairs()
 	{
             List<Nt_Cell^>^ criticalCells = nullptr;
-            List<int>^ removalPairKeys = nullptr;
 
 			// look at all cells to see if they changed in the grid
 			Dictionary<int, Nt_Cell^>::ValueCollection^ cellColl = Nt_CellManager::cellDictionary->Values;
@@ -65,15 +65,19 @@ namespace NativeDaphne
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != nullptr)
                                 {
                                     // add all pairs in the test grid location
-                                    for each (KeyValuePair<int, Nt_Cell^>^ kvpg in grid[test[0], test[1], test[2]])
+                                    for each (Nt_Cell^ cell2 in grid[test[0], test[1], test[2]]->Values)
                                     {
                                         // do not allow self-collisions
-                                        if (cell == kvpg->Value)
+                                        if (cell == cell2)
                                         {
                                             continue;
                                         }
-                                        long key = pairKey(cell->Cell_id, kvpg->Value->Cell_id);
-										native_collisionManager->resetPair(key, cell->nt_cell, kvpg->Value->nt_cell);
+                                        long key = pairKey(cell->Cell_id, cell2->Cell_id);
+										if (native_collisionManager->itemExists(key) == false)
+										{
+											throw gcnew Exception("cell pair does not exist in updateGridAndPairs");
+										}
+										native_collisionManager->resetPair(key, cell->nt_cell, cell2->nt_cell);
                                     }
                                 }
                             }
@@ -83,23 +87,25 @@ namespace NativeDaphne
 				cellStateAddressChanged = false;
 			}
 
+			//if no cell changed there gridIndex return;
+			if (CellGridIndexChanged == false)return;
+
             // look at all cells to see if they changed in the grid
+			long long newIndex = 0;
             for each (Nt_Cell^ cell in cellColl)
             {
-
 				if (cell->gridIndex[3] == 0)continue;
-
-				//long long newIndex = findGridIndex(cell->nt_cell->X);
 
                 // if the grid index changed we have to:
                 // -put it in its new one
                 // -find new pairs
 				cell->PrevLongGridIndex = cell->LongGridIndex;
 				IndexStr idx(cell->gridIndex);
-				long long newIndex = idx.Value();
+				newIndex = idx.Value();
 				cell->LongGridIndex = newIndex;
-			
-				// insert into grid and determine critical cells
+				cell->GridIndex[3] = 0; //set to unchanged
+
+				// insert into grid and determine critical cells if valid
 				if (newIndex != -1 || cell->PrevLongGridIndex != -1)
 				{
 					if (newIndex != -1 && grid[idx.index[0], idx.index[1], idx.index[2]] == nullptr)
@@ -114,9 +120,11 @@ namespace NativeDaphne
 					criticalCells->Add(cell);
 				}
             }
+			CellGridIndexChanged = false;
 
             if (criticalCells != nullptr)
             {
+
 				//remove pairs from previous gridindex if clearSeparated
 				for each (Nt_Cell^ cell in criticalCells)
                 {

@@ -121,6 +121,13 @@ namespace NativeDaphne
 
 		void AddCell(Nt_Cell ^cell)
 		{
+			//inform collision manager that the cell is entering the system
+			cell->gridIndex[3] = 0;
+			cell->updateGridIndex();
+			if (cell->gridIndex[3] != 0)
+			{
+				Nt_CollisionManager::CellGridIndexChanged = true;
+			}
 
 			if (cell->Alive == false)
 			{
@@ -187,7 +194,7 @@ namespace NativeDaphne
 					_xptr[i] = cell->SpatialState->X[i];
 					_vptr[i] = cell->SpatialState->V[i];
 					_fptr[i] = cell->SpatialState->F[i];
-					_gridptr[i] = cell->GridIndex[3];
+					_gridptr[i] = cell->GridIndex[i];
 				}
 				_gridptr[3] = cell->GridIndex[3];
 
@@ -258,7 +265,9 @@ namespace NativeDaphne
 				if (deadCells->ContainsKey(cell_id) == true)
 				{
 					deadCells->Remove(cell_id);
+#if defined (_DEBUG)
 					fprintf(stderr, "Dead cell id=%d removed from system.\n", cell_id);
+#endif
 				}
 				else 
 				{
@@ -293,7 +302,10 @@ namespace NativeDaphne
 			if (cell->Alive == false)
 			{
 				deadCells->Add(cell->Cell_id, cell);
-				fprintf(stderr, "Cell id=%d is marked as dead\n", cell_id);
+
+#if defined (_DEBUG)
+				fprintf(stdout, "Cell id=%d is marked as dead\n", cell_id);
+#endif
 			}
 
 			ntCellDictionary->Remove(cell_id);
@@ -323,6 +335,7 @@ namespace NativeDaphne
 				c->SpatialState->V->MemSwap(last_cell->SpatialState->V);
 				c->SpatialState->F->MemSwap(last_cell->SpatialState->F);
 				c->GridIndex->MemSwap(last_cell->GridIndex);
+				last_cell->gridIndex = last_cell->GridIndex->NativePointer;
 				ComponentCells[index] = last_cell;
 				ComponentCells[last_index] = c;
 
