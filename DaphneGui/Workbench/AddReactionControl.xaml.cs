@@ -420,7 +420,7 @@ namespace DaphneGui
                             //crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
                             crc.AddReactionMolPopsAndGenes(cr, level.entity_repository);
 
-                            s.InitializeAllMols();
+                            s.InitializeAllMols(true);
                             s.InitializeAllReacs();
                         }
                     }

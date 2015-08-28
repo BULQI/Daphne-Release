@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{93211B2D-B05D-4B80-8552-E882D2273DC0}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DaphneGui</RootNamespace>
     <AssemblyName>DaphneGui</AssemblyName>
@@ -227,9 +227,6 @@
       <DependentUpon>CellPopControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPopDynamics\CellPopDynamicsChartSurface.cs" />
-    <Compile Include="CellPopDynamics\CellPopDynExport.xaml.cs">
-      <DependentUpon>CellPopDynExport.xaml</DependentUpon>
-    </Compile>
     <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
       <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
     </Compile>
@@ -374,10 +371,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CellPopControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="CellPopDynamics\CellPopDynExport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -566,6 +559,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Config\vatRC_ligand_receptor.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\receptor_homeostasis.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="help\Documentation.chm">

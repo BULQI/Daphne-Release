@@ -13,12 +13,22 @@
              >
         
     <local:ToolWinBase.Resources>
-            <Style x:Key="AxisStyle" TargetType="SciChart:AxisTitle">
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="FontFamily" Value="Segoe UI"/>
-            </Style>
+
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        
+        <Style x:Key="AxisStyle" x:Name="axisStyle" TargetType="SciChart:AxisTitle">
+            <!--<Setter Property="FontSize"  Value="{Binding ElementName=lineageWindow, Path=AxisFontSize}"/>-->  
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+
+        <Style x:Key="XAxisLabelStyle" TargetType="SciChart:DefaultTickLabel">
+            <Setter Property="FontSize" Value="{Binding ElementName=lineageWindow, Path=AxisFontSize, Converter={StaticResource DebugConverter}, ConverterParameter=AxisFontSize}" />
+        </Style>
+        
     </local:ToolWinBase.Resources>
+    
+    
     <Grid>
         
         <Grid.RowDefinitions>
@@ -134,15 +144,6 @@
                             
                                 <lin:CellLineageChartSurface x:Name="LineageSciChart" Grid.Row="0"   ChartTitle="Cell Lineage" SciChart:RenderSurfaceBase.RenderSurfaceType="Abt.Controls.SciChart.Rendering.HighQualityRasterizer.HighQualityRenderSurface" >
 
-                                <!-- LayoutTransform not used - just for testing-->
-                                <!--<SciChart:SciChartSurface.LayoutTransform>
-                                    <ScaleTransform x:Name="scaleTransf"
-                                        CenterX="8000"
-                                        CenterY="0"
-                                        ScaleX="4"
-                                        ScaleY="4" />
-                                </SciChart:SciChartSurface.LayoutTransform>-->
-
                                 <!--Tooltip-->
                                 <lin:CellLineageChartSurface.ToolTip>
                                     <ToolTip x:Name="LineageToolTip">
@@ -161,11 +162,13 @@
 
                                 <!--  Declare Axes  -->
                                 <lin:CellLineageChartSurface.XAxis>
-                                    <SciChart:NumericAxis VisibleRange="0, 1000" x:Name="linXAxis" GrowBy="0.1, 0.2" AxisTitle="Time in minutes" TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
+                                        <SciChart:NumericAxis VisibleRange="0, 1000" x:Name="linXAxis" GrowBy="0.1, 0.2" AxisTitle="Time in minutes" 
+                                              TitleStyle="{StaticResource AxisStyle}" DrawMinorGridLines="True" DrawMajorGridLines="True" DrawLabels="True" />
                                 </lin:CellLineageChartSurface.XAxis>
 
                                 <lin:CellLineageChartSurface.YAxis>
-                                    <SciChart:NumericAxis x:Name="ourYAxis" GrowBy="0.1, 0.2" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
+                                    <SciChart:NumericAxis x:Name="ourYAxis" GrowBy="0.1, 0.2" AxisAlignment="Left" Opacity="0" VisibleRange="0, 1000" AxisTitle="" 
+                                              DrawMinorGridLines="False" DrawMajorGridLines="False" DrawLabels="False" DrawMajorTicks="False"/>
                                 </lin:CellLineageChartSurface.YAxis>
 
                                 <!--Annotations-->

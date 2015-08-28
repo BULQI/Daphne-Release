@@ -23,13 +23,20 @@ using Abt.Controls.SciChart;
 using Abt.Controls.SciChart.Visuals.Axes;
 using System.Collections.ObjectModel;
 
+using System.Windows.Forms.DataVisualization.Charting;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
+
 namespace DaphneGui.CellPopDynamics
 {
     /// <summary>
     /// Interaction logic for CellPopDynToolWindow.xaml
     /// </summary>
     public partial class CellPopDynToolWindow : ToolWinBase
-    {       
+    {
         public CellPopDynToolWindow()
         {
             InitializeComponent();
@@ -41,7 +48,8 @@ namespace DaphneGui.CellPopDynamics
         }
 
         /// <summary>
-        /// Export the chart to a file.
+        /// Export the chart to a file. 
+        /// Must have first plotted the chart on screen.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -58,26 +66,25 @@ namespace DaphneGui.CellPopDynamics
             // Process save file dialog box results
             if (result == true)
             {
+                //Set legend to show only visible series for export
                 legendModifier.GetLegendDataFor = SourceMode.AllVisibleSeries;
                 legendModifier.UpdateLegend();
-                mySciChart.SaveToFile(dlg.FileName);
+
+                //Export to file
+                if (dlg.FileName.EndsWith("pdf"))
+                {
+                    mySciChart.SaveCellPopDynToPdf(dlg.FileName);
+                }
+                else
+                {
+                    mySciChart.SaveToFile(dlg.FileName);
+                }
+
+                //Set legend back to show all series
                 legendModifier.GetLegendDataFor = SourceMode.AllSeries;
                 legendModifier.UpdateLegend();                
             }
 
-            ////The SavePdf is not working.  It is not outputting in high res so commenting it out for now.
-            //if (result == true)
-            //{
-            //    // Save file
-            //    if (dlg.FileName.EndsWith("pdf"))
-            //    {
-            //        this.SavePdf(dlg.FileName);
-            //    }
-            //    else
-            //    {
-            //        LineageSciChart.SaveToFile(dlg.FileName);
-            //    }
-            //}
         }
 
         /// <summary>
@@ -174,7 +181,5 @@ namespace DaphneGui.CellPopDynamics
                 allStatesChecked = !allStatesChecked;
             }
         }
-
     }
-   
 }

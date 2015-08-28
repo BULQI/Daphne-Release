@@ -2222,7 +2222,7 @@ namespace Daphne
         /// <summary>
         /// Initializes AllMols after user added/removed a reaction to/from reaction complex
         /// </summary>
-        public void InitializeAllMols()
+        public void InitializeAllMols(bool renderon = false)
         {
             AllMols.Clear();
 
@@ -2236,6 +2236,8 @@ namespace Daphne
                         AllMols.Add(molpop);
                         popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
                         RenderPop rp = popOptions.GetMolRenderPop(molpop.renderLabel);
+                        if (renderon == true)
+                            rp.renderOn = true;
                     }
                 }
             }
