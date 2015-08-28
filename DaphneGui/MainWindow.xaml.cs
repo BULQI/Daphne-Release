@@ -740,11 +740,11 @@ namespace DaphneGui
             ////Serialize to json
             //protocol.SerializeToFile();
 
-            ////LIGAND-RECEPTOR SCENARIO - no longer needed
-            //protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-            //ProtocolCreators.CreateLigandReceptorProtocol(protocol);
-            ////serialize to json
-            //protocol.SerializeToFile();
+            //RECEPTOR HOMEOSTASIS SCENARIO - no longer needed
+            protocol = new Protocol("Config\\receptor_homeostasis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            ProtocolCreators.CreateLigandReceptorProtocol(protocol);
+            //serialize to json
+            protocol.SerializeToFile();
 
             //GC SCENARIO
             protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
