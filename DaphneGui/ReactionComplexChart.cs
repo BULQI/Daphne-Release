@@ -448,11 +448,18 @@ namespace DaphneGui
             x = ListTimes.ToArray();
             int colorCount = 0;
 
+            ////Cannot graph the following case - if both axes are logarithmic and all init concs are zero
+            //if (IsXLogarithmic && IsYLogarithmic && FoundPositiveInitConc() == false)
+            //{
+            //    MessageBox.Show("Both axes are logarithmic and all initial concentrations are zero.");
+            //}
+
             //For each molecule, call a function to create and draw the series 
             foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
             {
                 y = entry.Value.ToArray();
                 string molname = ConvertMolGuidToMolName(entry.Key);
+                
                 drawSeries(x, y, chartArear1, TitleXY, molname, colorCount);
                 colorCount++;
             }
@@ -521,6 +528,36 @@ namespace DaphneGui
                 SetXAxisLimits();
                 SetYAxisLimits();
             }
+            else
+            {
+                //TextAnnotation ann = new TextAnnotation();
+                //ann.Text = "No valid series found to plot";
+
+                //Annotations.Add(ann);
+                //Series.Clear();
+                //Invalidate();
+                //panelRC.Controls.Add(this);
+
+                string sNoSeries = "There are no series to plot or none of the series has any valid points.";
+                //MessageBox.Show(sNoSeries);
+                System.Windows.MessageBox.Show(sNoSeries, "No series", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+                //Series.Clear();
+                //ChartAreas.Clear();
+                Clear();
+                //Annotations.Clear();
+
+                //TextAnnotation ann = new TextAnnotation();
+                //ann.Text = "No valid series found to plot";
+                //ann.X = 20;
+                //ann.Y = 20;
+                //ann.ForeColor = new Color();
+                //ann.ForeColor. = 255;
+                //Annotations.Add(ann);
+
+
+               //return;
+            }
             
             //// For debugging
             //Console.WriteLine("Draw() final: {0}, {1}\t {2}, {3}", ChartAreas.First().AxisX.Minimum, ChartAreas.First().AxisX.Maximum, 
@@ -530,6 +567,21 @@ namespace DaphneGui
             Invalidate();
 
             panelRC.Controls.Add(this);
+        }
+
+        private bool FoundPositiveInitConc()
+        {
+            bool bResult = false;
+
+            foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
+            {
+                if (entry.Value[0] > 0)
+                {
+                    bResult = true;
+                    break;
+                }
+            }
+            return bResult;
         }
 
         /// <summary>
