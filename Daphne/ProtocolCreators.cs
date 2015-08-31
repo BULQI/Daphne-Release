@@ -75,7 +75,7 @@ namespace Daphne
             if (protocol == null)
                 return;
 
-            Level store = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level store = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             store = store.Deserialize();
 
             var Settings = new JsonSerializerSettings();
@@ -248,7 +248,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -466,7 +466,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -627,7 +627,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -725,7 +725,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
             // Load reaction templates from userstore
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
             LoadProtocolReactionTemplates(protocol, userstore);
 
@@ -747,8 +747,8 @@ namespace Daphne
             }
 
             protocol.InitializeStorageClasses();
-            
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -775,7 +775,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
 
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore
@@ -861,7 +861,7 @@ namespace Daphne
         //    protocol.scenario.time_config.integrator_step = 0.001;
 
         //    //Load needed entities from User Store
-        //    Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+        //    Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
         //    userstore = userstore.Deserialize();
 
         //    // bulk molecules
@@ -911,7 +911,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates
@@ -4531,7 +4531,7 @@ namespace Daphne
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 
-            Level userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
             // Load reaction templates from userstore

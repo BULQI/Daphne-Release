@@ -714,8 +714,8 @@ namespace DaphneGui
         /// </summary>
         public void CreateDaphneAndUserStores()
         {
-            var userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
-            var daphnestore = new Level("Config\\daphnestore.json", "Config\\temp_daphnestore.json");
+            var userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
+            var daphnestore = new Level("Config\\Stores\\daphnestore.json", "Config\\Stores\\temp_daphnestore.json");
             ProtocolCreators.CreateDaphneAndUserStores(daphnestore, userstore);
         }
 
@@ -2100,10 +2100,10 @@ namespace DaphneGui
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     ////      Do this once up front instead of doing each time user clicks Userstore or Daphnestore.
                     string storesPath = new Uri(appPath).LocalPath;
-                    sop.UserStore.FileName = storesPath + @"\Config\userstore.json";
-                    sop.UserStore.TempFile = storesPath + "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = storesPath + @"\Config\daphnestore.json";
-                    sop.DaphneStore.TempFile = storesPath + "Config\\temp_daphnestore.json";
+                    sop.UserStore.FileName = storesPath + @"\Config\Stores\userstore.json";
+                    sop.UserStore.TempFile = storesPath + @"\Config\Stores\temp_userstore.json";
+                    sop.DaphneStore.FileName = storesPath + @"\Config\Stores\daphnestore.json";
+                    sop.DaphneStore.TempFile = storesPath + @"\Config\Stores\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
                     orig_daphne_store_content = sop.DaphneStore.SerializeToString();

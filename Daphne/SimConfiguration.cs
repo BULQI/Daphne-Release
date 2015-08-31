@@ -93,8 +93,8 @@ namespace Daphne
         {
             Protocol = new Protocol();
 
-            DaphneStore = new Level("", "Config\\temp_daphnestore.json");
-            UserStore = new Level("", "Config\\temp_userstore.json");
+            DaphneStore = new Level("", "Config\\Stores\\temp_daphnestore.json");
+            UserStore = new Level("", "Config\\Stores\\temp_userstore.json");
 
             SkinList = new ObservableCollection<RenderSkin>();
         }
