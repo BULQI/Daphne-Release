@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NtUtility.h"
-#include "Nt_NormalDist.h"
+#include "NTRandomNumberGenerator.h"
 #include "Nt_Gene.h"
 #include "Nt_Compartment.h"
 #include "Nt_MolecularPopulation.h"
@@ -196,7 +196,7 @@ namespace NativeDaphne
 					_fptr[i] = cell->SpatialState->F[i];
 					_gridptr[i] = cell->GridIndex[i];
 				}
-				_gridptr[3] = cell->GridIndex[3];
+				_gridptr[3] = cell->GridIndex[3]; //signal index changed.
 
 				cell->SpatialState->X->NativePointer = _xptr;
 				cell->SpatialState->V->NativePointer = _vptr;

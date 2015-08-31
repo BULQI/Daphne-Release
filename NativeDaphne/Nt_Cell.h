@@ -2,7 +2,6 @@
 
 #include <errno.h>
 #include "NtUtility.h"
-#include "Nt_NormalDist.h"
 #include "Nt_MolecularPopulation.h"
 #include "Nt_DArray.h"
 #include "NtCellPair.h"

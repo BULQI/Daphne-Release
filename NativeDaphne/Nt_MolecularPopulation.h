@@ -3,7 +3,6 @@
 #include <acml.h>
 
 #include "NtUtility.h"
-#include "Nt_NormalDist.h"
 #include "Nt_DArray.h"
 #include "Nt_Scalarfield.h"
 

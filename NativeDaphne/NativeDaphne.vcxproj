@@ -165,7 +165,6 @@
     <ClInclude Include="Nt_Manifolds.h" />
     <ClInclude Include="Nt_ManifoldUtilities.h" />
     <ClInclude Include="Nt_MolecularPopulation.h" />
-    <ClInclude Include="Nt_NormalDist.h" />
     <ClInclude Include="Nt_Reaction.h" />
     <ClInclude Include="Nt_Scalarfield.h" />
     <ClInclude Include="resource.h" />
@@ -180,7 +179,6 @@
     <ClCompile Include="Nt_Interpolation.cpp" />
     <ClCompile Include="Nt_Manifolds.cpp" />
     <ClCompile Include="Nt_MolecularPopulation.cpp" />
-    <ClCompile Include="Nt_NormalDist.cpp" />
     <ClCompile Include="Nt_Reaction.cpp" />
     <ClCompile Include="Nt_Scalarfield.cpp" />
     <ClCompile Include="Stdafx.cpp">

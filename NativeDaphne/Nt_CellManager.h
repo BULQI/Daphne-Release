@@ -1,7 +1,6 @@
 #pragma once
 
 #include "NtUtility.h"
-#include "Nt_NormalDist.h"
 #include "Nt_Cell.h"
 #include "Nt_CellPopulation.h"
 #include "Nt_DArray.h"
@@ -27,25 +26,41 @@ namespace NativeDaphne
 		{
 			//for gloable access
 			cellPopulations = gcnew Dictionary<int, Nt_CellPopulation^>();
-
-
-			//for reandom number generation
-			normalDist = gcnew Nt_NormalDistribution();
-
 			EnvironmentExtent = gcnew array<double>(3);
+			normalDist = NULL;
 		}
 
-		~Nt_CellManager(void){}
+		~Nt_CellManager(void)
+		{
+			this->!Nt_CellManager();
+		}
 
+
+		!Nt_CellManager()
+		{
+			if (normalDist != NULL)
+			{
+				delete normalDist;
+				normalDist = NULL;
+			}
+
+		}
 		void Clear()
 		{
 			cellDictionary->Clear();
+			if (normalDist != NULL)
+			{
+				delete normalDist;
+				normalDist = NULL;
+				IsDistributionSamplerInitialized = true;
+			}
+
 		}
 
 		void InitializeNormalDistributionSampler(double mean, double variance, int seed)
 		{
-			normalDist = gcnew Nt_NormalDistribution();
-			normalDist->initialize(mean, variance, seed);
+			normalDist = new NativeDaphneLibrary::NtNormalDistribution();
+			normalDist->Initialize(seed, mean, variance);
 			IsDistributionSamplerInitialized = true;
 		}
 
@@ -67,7 +82,7 @@ namespace NativeDaphne
 			return IsEnvironmentInitialzed && IsDistributionSamplerInitialized;
 		}
 
-		static Nt_NormalDistribution ^normalDist;
+		static NtNormalDistribution* normalDist;
 
 		static array<double> ^EnvironmentExtent;
 

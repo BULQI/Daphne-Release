@@ -60,11 +60,13 @@ namespace NativeDaphne
 		//stochastic
 		if (this->isStochastic)
 		{
-			Nt_CellManager::normalDist->Sample(array_length, _random_samples);
+			double *random_samples = Nt_CellManager::normalDist->GetSample(array_length);
+			//Nt_CellManager::normalDist->Sample(array_length, _random_samples);
+			//to do remove random samples..
 			if (Sigma != -1)
 			{
 				double factor = Sigma /Math::Sqrt(dt);
-				daxpy(array_length, factor, _random_samples, 1, _F, 1);
+				daxpy(array_length, factor, random_samples, 1, _F, 1);
 				_F[3] = 0;
 			}
 			else 
@@ -72,7 +74,7 @@ namespace NativeDaphne
 				double sqrt_dt = Math::Sqrt(dt);
 				for (int i=0; i< array_length; i++)
 				{
-					_F[i] += _random_samples[i] * _Sigma[i]/sqrt_dt;
+					_F[i] += random_samples[i] * _Sigma[i]/sqrt_dt;
 				}
 			}
 
@@ -140,7 +142,8 @@ namespace NativeDaphne
 			{
 				if (_X[i] < 0.0 || _X[i] > extents[0] || _X[i+1] < 0.0 || _X[i+1] > extents[1] || _X[i+2] < 0.0 || _X[i+2] > extents[2])
 				{
-					ComponentCells[i%4]->Exiting = true;
+					ComponentCells[i/4]->Exiting = true;
+					
 				}
 			}
 		}

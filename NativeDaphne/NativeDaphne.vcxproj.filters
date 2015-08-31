@@ -42,9 +42,6 @@
     <ClInclude Include="Nt_Reaction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Nt_NormalDist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Nt_CellManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,9 +87,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Nt_Reaction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Nt_NormalDist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Nt_Manifolds.cpp">
