@@ -1791,6 +1791,17 @@ namespace DaphneGui
             devHelpProc = System.Diagnostics.Process.Start(new Uri(appPath + @"\help\documentation.chm").LocalPath);
         }
 
+        private void techHelp_click(object sender, RoutedEventArgs e)
+        {
+            if (dw.HasBeenClosed)
+            {
+                dw = new DocWindow();
+            }
+            dw.webBrowser.Navigate(new Uri("http://computationalimmunology.bu.edu/"));
+            dw.topicBox.Text = "Gaussian Processes";
+            dw.Show();
+        }
+
         private void fittingHelp_click(object sender, RoutedEventArgs e)
         {
             if (dw.HasBeenClosed)
