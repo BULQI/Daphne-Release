@@ -1514,7 +1514,7 @@ namespace Daphne
         {
             NeedsFileNameWrite = true;
             vatRCfiles.clearFileStrings();
-            createUniqueFolderName(protocolFileName, reportOn == false);
+            createUniqueFolderName(protocolFileName, reportOn == true);
 
             if (reportOn == false)
             {
