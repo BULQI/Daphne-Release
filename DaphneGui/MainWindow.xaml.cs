@@ -1309,6 +1309,18 @@ namespace DaphneGui
             }
         }
 
+        private void cellTracksMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (gc is VTKFullGraphicsController == true)
+            {
+                VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)gc;
+                gcHandle.HandToolButton_IsEnabled = true;
+                gcHandle.HandToolButton_IsChecked = true;
+                gcHandle.HandToolOption_IsEnabled = true;
+                ToolModesCombo.SelectedIndex = 1;
+            }
+        }
+
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
         {
             #region MyRegion
