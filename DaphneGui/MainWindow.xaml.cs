@@ -740,7 +740,7 @@ namespace DaphneGui
             ////Serialize to json
             //protocol.SerializeToFile();
 
-            //RECEPTOR HOMEOSTASIS SCENARIO - no longer needed
+            //RECEPTOR HOMEOSTASIS SCENARIO
             protocol = new Protocol("Config\\receptor_homeostasis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateLigandReceptorProtocol(protocol);
             //serialize to json

@@ -1993,7 +1993,7 @@ namespace Daphne
             diffScheme = new ConfigTransitionScheme();
             diffScheme.Name = "GC B cell differentiation scheme";
 
-            stateNames = new string[] {  "activated", "initialization", "centroblast", "centrocyte", "rescued", "apoptotic" };
+            stateNames = new string[] {  "activated", "pre-centroblast", "centroblast", "centrocyte", "rescued", "apoptotic" };
             geneNames = new string[] {             "gCXCR4", "gCXCR5", "gE1", "gW", "gE2",  "gDif1", "gApop", "gA" };
             activations = new double[,]          { { 0,        0,  6.4e-3,      0,      0,       0,     0 ,   0 },  // activated
                                                    { 0,        0,       0,      1,      1,       0,     0 ,   1 },  // pre-centroblast            
@@ -2042,7 +2042,7 @@ namespace Daphne
 
             // Add distribution driver elements
 
-            // activated to initialization 
+            // activated to pre-centroblast 
             ConfigDistrTransitionDriverElement distrTdE1 = new ConfigDistrTransitionDriverElement();
             distrTdE1.Distr = new DistributedParameter();
             distrTdE1.Distr.DistributionType = ParameterDistributionType.WEIBULL;
@@ -2055,7 +2055,7 @@ namespace Daphne
             distrTdE1.DestStateName = stateNames[1];
             diffScheme.Driver.DriverElements[0].elements[1] = distrTdE1;
 
-            // initialization to centroblast 
+            // pre-centroblast to centroblast 
             ConfigDistrTransitionDriverElement distrTdE2 = new ConfigDistrTransitionDriverElement();
             distrTdE2.Distr = new DistributedParameter();
             distrTdE2.Distr.DistributionType = ParameterDistributionType.CONSTANT;
@@ -4698,10 +4698,12 @@ namespace Daphne
             }
             foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
             {
-                ReportECM reportECM = new ReportECM();
-                reportECM.molpop_guid_ref = mpECM.molpop_guid;
-                reportECM.mp_extended = ExtendedReport.NONE;
-                cellPop.ecm_probe.Add(reportECM);
+                // Turn off ECM probe reporting
+                mpECM.report_mp.mp_extended = ExtendedReport.NONE;
+                //ReportECM reportECM = new ReportECM();
+                //reportECM.molpop_guid_ref = mpECM.molpop_guid;
+                //reportECM.mp_extended = ExtendedReport.NONE;
+                //cellPop.ecm_probe.Add(reportECM);
             }
 
             cellPop.reportStates.Differentiation = true;
