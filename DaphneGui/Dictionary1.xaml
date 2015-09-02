@@ -539,38 +539,6 @@
                                         />
         </Grid>
     </DataTemplate>
-    
-    <!-- molpop homogeneous distribution details -->
-    <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="70" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-
-            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
-
-                <StackPanel Orientation="Horizontal" Margin="20,0">
-
-                    <uc:DoublesBox     HorizontalAlignment="Left"
-                                                TextFieldWidth="100"
-                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
-                                                DecimalPlaces="2" 
-                                                RangeFactor="2"
-                                                SNLowerThreshold="0.001"
-                                                SNUpperThreshold="1000"
-                                                SliderEnabled="False"                                                
-                                                >
-                    </uc:DoublesBox>
-
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-    </DataTemplate>
 
     <DataTemplate x:Key="cellRenderMethodTemplate">
         <StackPanel Orientation="Horizontal">

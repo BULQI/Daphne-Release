@@ -398,7 +398,37 @@
 
             </StackPanel>
         </DataTemplate>
-        
+
+
+        <!-- MolpopHomogeneous distribution template for cells environment -->
+        <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
+                <StackPanel Orientation="Vertical" Margin="20,0">
+                    <uc:DoublesBox     HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                >
+                    </uc:DoublesBox>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
     </UserControl.Resources>
 
     <Grid x:Name="CellDetailsGrid">
@@ -443,7 +473,7 @@
                                 <!-- Cell Membrane Mol Pops -->
                                 <TabItem >
                                     <TabItem.Header>
-                                        <TextBlock Text="Membrane" FontWeight="Bold" />
+                                        <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                     </TabItem.Header>
 
                                     <StackPanel Orientation="Vertical">
@@ -519,7 +549,8 @@
                                                         </ComboBox>
                                                     </StackPanel>
 
-                                                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+                                                    <!-- molpop name-->
+                                                    <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                         <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                                         <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
                                                             <TextBox.ToolTip>
@@ -532,7 +563,7 @@
                                                                 </ToolTip>
                                                             </TextBox.ToolTip>
                                                         </TextBox>
-                                                    </StackPanel>
+                                                    </StackPanel>-->
 
                                                 </Grid>
                                             </StackPanel>
@@ -547,20 +578,18 @@
                                                         <RowDefinition />
                                                         <RowDefinition />
                                                     </Grid.RowDefinitions>
-                                                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0"  Margin="0,6,0,0">
                                                         <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                        <StackPanel Orientation="Horizontal" Margin="28,10">
-                                                            <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                                            <TextBlock Text="molec/µm^2" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                                                            <TextBlock Text=")" VerticalAlignment="Center" />
-                                                        </StackPanel>
+                                                            <TextBlock HorizontalAlignment="Center">concentration (molec/µm<Run 
+                                                                    FontFamily="Palatino Linotype" Typography.Variants="Superscript">2</Run>)
+                                                            </TextBlock>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                                         <ContentControl Name="membraneMolPopDistributionDetails"
                                                                     Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
                                                                     ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                                    Margin="6,2"/>
+                                                                    Margin="6,2" Tag="Boundary"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </StackPanel>
@@ -675,7 +704,10 @@
 
                                                             </ComboBox>
                                                         </StackPanel>
-                                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+
+
+                                                            <!-- molpop name-->
+                                                            <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                             <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                                             <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
                                                                 <TextBox.ToolTip>
@@ -688,7 +720,7 @@
                                                                     </ToolTip>
                                                                 </TextBox.ToolTip>
                                                             </TextBox>
-                                                        </StackPanel>
+                                                        </StackPanel>-->
 
                                                     </Grid>
                                                 </StackPanel>
@@ -704,20 +736,18 @@
                                                             <RowDefinition />
                                                             <RowDefinition />
                                                         </Grid.RowDefinitions>
-                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0" Margin="0,6,0,0">
                                                             <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                            <StackPanel Orientation="Horizontal" Margin="28,10">
-                                                                <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                                                <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                                                                <TextBlock Text=")" VerticalAlignment="Center" />
-                                                            </StackPanel>
+                                                                <TextBlock HorizontalAlignment="Center">concentration (molec/µm<Run 
+                                                                    FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                                                                    </TextBlock>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                                             <ContentControl Name="MolPopDistributionDetails"
-                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
-                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                        Margin="6,2"/>
+                                                                    Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
+                                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                                                    Margin="6,2" Tag="Bulk"/>
                                                         </StackPanel>
 
                                                     </Grid>
@@ -890,7 +920,7 @@
                                 <!-- Reactions in cell Membrane -->
                                 <TabItem >
                                     <TabItem.Header>
-                                        <TextBlock Text="Membrane" FontWeight="Bold" />
+                                        <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical">
                                         <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
@@ -1173,7 +1203,7 @@
                             <!-- Reaction Complexes in cell Membrane -->
                             <TabItem >
                                 <TabItem.Header>
-                                    <TextBlock Text="Membrane" FontWeight="Bold" />
+                                    <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                 </TabItem.Header>
 
                                 <StackPanel>
