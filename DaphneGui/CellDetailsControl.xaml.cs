@@ -68,7 +68,7 @@ namespace DaphneGui
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = DataContext as ConfigCell;
@@ -750,7 +750,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
 
                 //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "New");
 
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = this.Tag;    //DataContext as ConfigCell

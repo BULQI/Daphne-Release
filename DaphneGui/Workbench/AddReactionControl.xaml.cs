@@ -858,7 +858,7 @@ namespace DaphneGui
             Level level = MainWindow.GetLevelContext(this);
 
             ConfigMolecule newLibMol = new ConfigMolecule();
-            newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+            newLibMol.Name = newLibMol.GenerateNewName(level, "New");
             AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
             aem.Tag = this.Tag;
 

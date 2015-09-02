@@ -89,7 +89,7 @@ namespace DaphneGui
         {
             Level level = (Level)(this.DataContext);
             ConfigMolecule gm = new ConfigMolecule();
-            gm.Name = gm.GenerateNewName(level, "_New");
+            gm.Name = gm.GenerateNewName(level, "New");
 
             level.entity_repository.molecules.Add(gm);
             MainWindow.SOP.SelectedRenderSkin.AddRenderMol(gm.renderLabel, gm.Name);

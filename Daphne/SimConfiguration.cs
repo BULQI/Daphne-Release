@@ -3893,7 +3893,7 @@ namespace Daphne
         public ConfigMolecule()
             : base()
         {
-            Name = "Molecule_New001"; // +"_" + DateTime.Now.ToString("hhmmssffff");
+            Name = "molNew001"; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 1e-7;
@@ -3904,7 +3904,7 @@ namespace Daphne
         /// <summary>
         /// Generates a unique molecule name when creating a new molecule or copying a molecule.
         /// A molecule name consists of 3 parts - the base name, the ending, and an ordinal suffix.
-        /// As an example, consider Molecule_New001 (or Molecule_Copy001).  The base name is "Molecule",
+        /// As an example, consider MoleculeNew001 (or MoleculeCopy001).  The base name is "Molecule",
         /// the ending is "New" and the ordinal suffix is "001". 
         /// 
         /// We also have to consider whether the molecul is membrane bound or not.  If membrane bound,
@@ -3957,14 +3957,13 @@ namespace Daphne
         private string GetBaseName(string name)
         {
             string TempMolName = name;
-            string ending = "_New";
-
+            string ending = "New";
             if (TempMolName.Contains(ending))
             {
-                int index = TempMolName.IndexOf(ending);
+                int index = TempMolName.IndexOf(ending); 
                 TempMolName = TempMolName.Substring(0, index);
             }
-            ending = "_Copy";
+            ending = "Copy";
             if (TempMolName.Contains(ending))
             {
                 int index = TempMolName.IndexOf(ending);
@@ -4009,7 +4008,7 @@ namespace Daphne
                 Guid id = Guid.NewGuid();
 
                 newmol.entity_guid = id.ToString();
-                newmol.Name = newmol.GenerateNewName(level, "_Copy");
+                newmol.Name = newmol.GenerateNewName(level, "Copy");
                 newmol.renderLabel = newmol.entity_guid;
             }
 
@@ -4081,7 +4080,7 @@ namespace Daphne
 
             if (found)
             {
-                Name = GenerateNewName(protocol, "_Copy");
+                Name = GenerateNewName(protocol, "Copy");
             }
         }
 
