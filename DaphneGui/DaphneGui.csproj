@@ -527,7 +527,7 @@
     <Resource Include="Images\RightArrow_48x48.png" />
     <Resource Include="Images\arrow-32x32.png" />
     <Resource Include="Daphne.ico" />
-    <Content Include="help\DaphneDevHelp.shfbproj" />
+    <None Include="help\DaphneDevHelp.shfbproj" />
     <EmbeddedResource Include="Licences.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -564,9 +564,9 @@
     <Content Include="Config\Stores\userstore.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="help\Documentation.chm">
+    <Content Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

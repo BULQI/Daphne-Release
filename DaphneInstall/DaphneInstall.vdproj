@@ -15,12 +15,6 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_05DCAEA463B74033A2F34A0A011E31A0"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_0CFD25D73665AAD5A7E9E454800DEE1F"
         "OwnerKey" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
         "MsmSig" = "8:_UNDEFINED"
@@ -89,6 +83,12 @@
         {
         "MsmKey" = "8:_25B0FA596593563F4EEA7F6C5BFF3F68"
         "OwnerKey" = "8:_57BDE838D28C1B25427E1A514E7A6B0C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_2E4AC79C55764B8298E0394A8FBCFCB6"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -610,7 +610,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_FCA79FA46B606D609F17FD8B13FE49BD"
+        "OwnerKey" = "8:_4AD1ECA89CCE0823AF68F934D94ED16C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -622,7 +622,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4AD1ECA89CCE0823AF68F934D94ED16C"
+        "OwnerKey" = "8:_FCA79FA46B606D609F17FD8B13FE49BD"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -730,26 +730,6 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_05DCAEA463B74033A2F34A0A011E31A0"
-            {
-            "SourcePath" = "8:..\\DaphneGui\\bin\\x64\\Release\\help\\Documentation.chm"
-            "TargetName" = "8:Documentation.chm"
-            "Tag" = "8:"
-            "Folder" = "8:_F6B311BE1C8F4C9782C33AD988B0EF4F"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_0CFD25D73665AAD5A7E9E454800DEE1F"
             {
             "AssemblyRegister" = "3:1"
@@ -872,6 +852,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2E4AC79C55764B8298E0394A8FBCFCB6"
+            {
+            "SourcePath" = "8:..\\DaphneGui\\help\\Documentation.chm"
+            "TargetName" = "8:Documentation.chm"
+            "Tag" = "8:"
+            "Folder" = "8:_F6B311BE1C8F4C9782C33AD988B0EF4F"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_304C9B3835684044AF537EA16C98361A"
@@ -2180,7 +2180,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:DaphneInstall"
         "ProductCode" = "8:{69199841-3934-4040-A109-2B48AC3FA38E}"
-        "PackageCode" = "8:{C06B421C-F067-47F6-818C-4774AF803505}"
+        "PackageCode" = "8:{09FA3E9B-8ACD-4CA2-B4E3-708D01F5CFF6}"
         "UpgradeCode" = "8:{642F6AE4-CB8E-48B2-B116-3AF0C7AD12C7}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
