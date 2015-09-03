@@ -160,8 +160,11 @@ namespace DaphneGui.Pushing
                 case PushLevelEntityType.Molecule:
                     //LeftList = LevelA.entity_repository.molecules;
                     //RightList = LevelB.entity_repository.molecules;
+                    
                     LeftList = new ObservableCollection<ConfigMolecule>(from i in LevelA.entity_repository.molecules orderby i.Name select i);
+                    MainWindow.ToolWin.PushMoleculeFilter(LeftList, LevelA);
                     RightList = new ObservableCollection<ConfigMolecule>(from i in LevelB.entity_repository.molecules orderby i.Name select i);
+                    MainWindow.ToolWin.PushMoleculeFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.Gene:
                     //LeftList = LevelA.entity_repository.genes;
