@@ -697,6 +697,11 @@ namespace DaphneGui
             postConstruction = true;
         }
 
+        private void defaultFolder(object sender, RoutedEventArgs e)
+        {
+            orig_path = System.IO.Path.GetDirectoryName(new Uri(appPath + @"\Config\").LocalPath);
+        }
+
         public void UpdateGraphics()
         {
             if (gc == null)

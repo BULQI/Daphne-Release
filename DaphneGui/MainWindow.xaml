@@ -89,6 +89,7 @@
                 <MenuItem Header="File" Name="fileMenu">
                     <MenuItem Header="New Protocol" Name="newScenario" Click="newScenario_Click"></MenuItem>
                     <MenuItem Header="Load Protocol..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
+                    <MenuItem Header="Restore default path" Name="defaultPath" Click="defaultFolder" />
                     <MenuItem Header="Save Protocol" Name="saveScenario" Command="ApplicationCommands.Save" />
                     <MenuItem Header="Save Protocol As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
