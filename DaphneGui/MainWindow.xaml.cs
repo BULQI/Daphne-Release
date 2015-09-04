@@ -184,7 +184,8 @@ namespace DaphneGui
         /// </summary>
         public static byte MOUSE_LEFT_NONE = 0,
                            MOUSE_LEFT_TRACK = 1,
-                           MOUSE_LEFT_CELL_MOLCONCS = 2;
+                           MOUSE_LEFT_CELL_MOLCONCS = 2,
+                           MOUSE_LEFT_CELL_TOOLTIP = 3;
 
         public static byte mouseLeftState = MOUSE_LEFT_NONE;
 
@@ -3335,7 +3336,7 @@ namespace DaphneGui
             {
                 cb.SelectedIndex = 0;
             }
-
+            
             byte index = (byte)(cb.SelectedIndex);
 
             SetMouseLeftState(index, true);

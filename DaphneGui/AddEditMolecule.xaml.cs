@@ -55,6 +55,13 @@ namespace DaphneGui
         {
             string caller = Tag as string;
 
+            //Cannot have hyphens in molecule names
+            if (Mol.Name.Contains("-")) 
+            {
+                MessageBox.Show("Hyphens may not be used in a molecule name.");
+                return;
+            }
+
             if (caller == "ecs")
             {
                 if (Mol.Name.Contains("|") || Mol.molecule_location == MoleculeLocation.Boundary)
@@ -95,5 +102,6 @@ namespace DaphneGui
             //If called by ecs, we need to hide the membrane bound check box, by using a different template from xaml.
             Caller = Tag as string;
         }
+
     }
 }
