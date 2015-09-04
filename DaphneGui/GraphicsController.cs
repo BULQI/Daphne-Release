@@ -926,6 +926,7 @@ namespace DaphneGui
             CellSelectionToolModes.Add("None");
             CellSelectionToolModes.Add("Tracks");
             CellSelectionToolModes.Add("Cell Information");
+            CellSelectionToolModes.Add("Hovering Tooltip");
             CellSelectionToolMode = CellSelectionToolModes[0];
 
             trackTool = new CellTrackTool();
@@ -1528,19 +1529,23 @@ namespace DaphneGui
                         return;
                     }
 
-                    Cell cell = SimulationBase.dataBasket.Cells[cellID];
+                    if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_TOOLTIP) == true)
+                    {
 
-                    infoPop.AllowsTransparency = true;
-                    infoPop.PopupAnimation = PopupAnimation.Fade;
-                    infoPop.PlacementTarget = MW.VTKDisplayDocWindow;
-                    infoPop.Placement = PlacementMode.Mouse;
+                        Cell cell = SimulationBase.dataBasket.Cells[cellID];
 
-                    //Here, gather the necessary information
-                    TextBox tb = new TextBox();
-                    GetCellInfo(cellID, cell, tb);
+                        infoPop.AllowsTransparency = true;
+                        infoPop.PopupAnimation = PopupAnimation.Fade;
+                        infoPop.PlacementTarget = MW.VTKDisplayDocWindow;
+                        infoPop.Placement = PlacementMode.Mouse;
 
-                    infoPop.Child = tb;
-                    infoPop.IsOpen = true;
+                        //Here, gather the necessary information
+                        TextBox tb = new TextBox();
+                        GetCellInfo(cellID, cell, tb);
+
+                        infoPop.Child = tb;
+                        infoPop.IsOpen = true;
+                    }
                 }
             }
             else if (infoPop.IsOpen == true)
@@ -1701,7 +1706,7 @@ namespace DaphneGui
                         //Cell c = Simulation.dataBasket.Cells[cellID];
 
                         MW.DisplayCellInfo(cellID);
-                    }
+                    }                    
                     else
                     {
                         ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).SetTolerance(orig_tolerance); 
