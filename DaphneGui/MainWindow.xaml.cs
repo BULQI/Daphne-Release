@@ -1218,63 +1218,70 @@ namespace DaphneGui
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            // if the file is open we'll have to close it
-            if (sim.HDF5FileHandle.isOpen() == true)
+            try
             {
-                // close the file and all open groups
+                // if the file is open we'll have to close it
+                if (sim.HDF5FileHandle.isOpen() == true)
+                {
+                    // close the file and all open groups
+                    sim.HDF5FileHandle.close(true);
+                }
+
+                Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+                dlg.InitialDirectory = sim.Reporter.AppPath;
+                dlg.DefaultExt = ".hdf5";
+                dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5";
+
+                // Show open file dialog box
+                Nullable<bool> result = dlg.ShowDialog();
+
+                // Process open file dialog box results
+                if (result == true)
+                {
+                    sim.HDF5FileHandle.initialize(dlg.FileName);
+                }
+                else
+                {
+                    return;
+                }
+
+                if (sim.HDF5FileHandle.openRead() == false)
+                {
+                    MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
+                    return;
+                }
+
+                string protocolString = null;
+
+                // open the experiment parent group
+                sim.HDF5FileHandle.openGroup("/Experiment");
+                // read the protocol string
+                sim.HDF5FileHandle.readString("Protocol", ref protocolString);
+                // close the file and all groups
                 sim.HDF5FileHandle.close(true);
+
+                // do the loading
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                lockAndResetSim(true, ReadJson(protocolString));
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+
+                // open, read reporter file names, close hdf5
+                sim.HDF5FileHandle.ReadReporterFileNamesFromClosedFile(dlg.FileName);
+
+                // this function does not exist currently, do we need this call?
+                //sim.runStatSummary();
+                GUIUpdate(0, true);
+                displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
             }
-
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            dlg.InitialDirectory = sim.Reporter.AppPath;
-            dlg.DefaultExt = ".hdf5";
-            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5";
-
-            // Show open file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
-
-            // Process open file dialog box results
-            if (result == true)
+            catch
             {
-                sim.HDF5FileHandle.initialize(dlg.FileName);
+                MessageBox.Show("The experiment could not be opened. This could be due to a version mismatch (trying to open an old HDF5 file).", "HDF5 open error");
             }
-            else
-            {
-                return;
-            }
-
-            if (sim.HDF5FileHandle.openRead() == false)
-            {
-                MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
-                return;
-            }
-
-            string protocolString = null;
-
-            // open the experiment parent group
-            sim.HDF5FileHandle.openGroup("/Experiment");
-            // read the protocol string
-            sim.HDF5FileHandle.readString("Protocol", ref protocolString);
-            // close the file and all groups
-            sim.HDF5FileHandle.close(true);
-
-            // do the loading
-            MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
-            lockAndResetSim(true, ReadJson(protocolString));
-            if (loadSuccess == false)
-            {
-                return;
-            }
-            MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
-
-            // open, read reporter file names, close hdf5
-            sim.HDF5FileHandle.ReadReporterFileNamesFromClosedFile(dlg.FileName);
-
-            // this function does not exist currently, do we need this call?
-            //sim.runStatSummary();
-            GUIUpdate(0, true);
-            displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
         }
 
         private void ExportAVI(object sender, RoutedEventArgs e)
