@@ -1281,7 +1281,9 @@ namespace DaphneGui
             }
             catch
             {
-                MessageBox.Show("The experiment could not be opened. This could be due to a version mismatch (trying to open an old HDF5 file).", "HDF5 open error");
+                MessageBox.Show("The experiment could not be opened. Reverting to previously open protocol. " +
+                                "This could be due to a version mismatch (trying to open an old HDF5 file).", "HDF5 open error");
+                loadScenarioFromFile(protocol_path.LocalPath);
             }
         }
 
