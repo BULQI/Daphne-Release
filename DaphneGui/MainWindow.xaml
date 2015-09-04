@@ -115,7 +115,7 @@
                 </MenuItem>
                 
                 <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
-                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
+                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="CellPopDynMenu_Click"/>
                     <MenuItem Header="Cell Lineage..." Name="LineageAnalMenu" Click="OpenLineageWindow" />
                     <MenuItem Header="Cell Tracks" Name="fitMenu" Click="cellTracksMenu_Click" Visibility="Collapsed" />
                 </MenuItem>

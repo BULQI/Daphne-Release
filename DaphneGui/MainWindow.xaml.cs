@@ -1358,6 +1358,12 @@ namespace DaphneGui
 
         private void OpenLineageWindow(object sender, RoutedEventArgs e)
         {
+            if (protocolChanged() == true)
+            {
+                MessageBox.Show("This analysis is not possible after making a change in the protocol.", "Protocol changed");
+                return;
+            }
+
             vcrControl.CurrentFrame = 1;
 
             ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
@@ -2731,15 +2737,26 @@ namespace DaphneGui
             runButton.IsEnabled = true;
         }
 
+        private bool protocolChanged()
+        {
+            bool ret = false;
+
+            if (sop != null)
+            {
+                string refs = sop.Protocol.SerializeToString();
+
+                ret = refs != orig_content;
+            }
+            return ret;
+        }
+
         private bool saveTempFiles()
         {
             // no temp file saving when the vcr is open
             if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
                 // check if there were changes
-                string refs = sop.Protocol.SerializeToString();
-
-                if (sop != null && refs != orig_content)
+                if (sop != null && protocolChanged() == true)
                 {
                     sop.Protocol.SerializeToFile(true);
                     tempFileContent = true;
@@ -3837,8 +3854,14 @@ namespace DaphneGui
             }
         }
 
-        private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
+        private void CellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
+            if (protocolChanged() == true)
+            {
+                MessageBox.Show("This analysis is not possible after making a change in the protocol.", "Protocol changed");
+                return;
+            }
+
             ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
             ST_CellPopDynToolWindow.Float(new Point(this.Left + 30, this.Top + 40), new Size(1000, 824));
             ST_CellPopDynToolWindow.Activate();
