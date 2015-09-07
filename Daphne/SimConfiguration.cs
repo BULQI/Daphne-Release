@@ -4256,6 +4256,9 @@ namespace Daphne
         public int DestState { get; set; }
         public string DestStateName { get; set; }
         public TransitionDriverElementType Type { get; set; }
+        // Useful for user/GUI interaction
+        [JsonIgnore]
+        public ConfigTransitionDriverElement previous_value;
 
         public ConfigTransitionDriverElement()
         {
@@ -5639,6 +5642,7 @@ namespace Daphne
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
+            rate_constant_units = "";
         }
 
         public ConfigReaction(ConfigReaction reac)
@@ -5655,6 +5659,7 @@ namespace Daphne
             reactants_molecule_guid_ref = reac.reactants_molecule_guid_ref;
             products_molecule_guid_ref = reac.products_molecule_guid_ref;
             modifiers_molecule_guid_ref = reac.modifiers_molecule_guid_ref;
+            rate_constant_units  = reac.rate_constant_units;
         }
 
         /// <summary>
@@ -5871,7 +5876,6 @@ namespace Daphne
             return false;
         }
 
-
         public bool IsBoundaryReaction(EntityRepository repos)
         {
             if (HasBoundaryMolecule(repos) == true && HasBulkMolecule(repos) == true)
@@ -5900,6 +5904,7 @@ namespace Daphne
         public ObservableCollection<string> reactants_molecule_guid_ref;
         public ObservableCollection<string> products_molecule_guid_ref;
         public ObservableCollection<string> modifiers_molecule_guid_ref;
+        public string rate_constant_units;
 
         public string TotalReactionString { get; set; }
 
