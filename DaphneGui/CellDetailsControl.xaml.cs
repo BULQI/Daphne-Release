@@ -1995,30 +1995,38 @@ namespace DaphneGui
             string CurrentStateName = tde.CurrentStateName,
                     DestStateName = tde.DestStateName;
 
-            if (tde.Type == TransitionDriverElementType.MOLECULAR)
-            {
-                tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                //stack_panel.DataContext = tde;
-            }
-            else
-            {
-                tde = new ConfigMolTransitionDriverElement();                
-            }
-            tde.CurrentStateName = CurrentStateName;
-            tde.DestStateName = DestStateName;
-            tde.CurrentState = CurrentState;
-            tde.DestState = DestState;
-
             // update the transition scheme
             DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
             if (dataGrid == null) return;
+
             ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-            if (scheme != null)
+            if (scheme == null) return;
+
+            if (scheme.Driver.DriverElements[CurrentState].elements[DestState].previous_value != null)
             {
-                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+                tde = scheme.Driver.DriverElements[CurrentState].elements[DestState].previous_value;
             }
+            else
+            {
+                if (tde.Type == TransitionDriverElementType.MOLECULAR)
+                {
+                    tde = new ConfigDistrTransitionDriverElement();
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                }
+                else
+                {
+                    tde = new ConfigMolTransitionDriverElement();
+                }
+                tde.CurrentStateName = CurrentStateName;
+                tde.DestStateName = DestStateName;
+                tde.CurrentState = CurrentState;
+                tde.DestState = DestState;
+            }
+
+            // update the transition scheme
+            tde.previous_value = scheme.Driver.DriverElements[CurrentState].elements[DestState];
+            scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
         }
 
         public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
