@@ -926,12 +926,14 @@
                                         <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical">
-                                        <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="10,0" Text="Rate Constant" />
+                                                <TextBlock Margin="10,0" Text="Reaction" />
+                                            </StackPanel>
+                                            <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
-
-
                                             <ListBox.ContextMenu>
                                                 <ContextMenu >
                                                     <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
@@ -1054,7 +1056,11 @@
                                         <TextBlock Text="Cytosol" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical" >
-                                        <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="10,0" Text="Rate Constant" />
+                                                <TextBlock Margin="10,0" Text="Reaction" />
+                                            </StackPanel>
+                                            <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
