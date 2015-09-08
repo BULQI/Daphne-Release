@@ -146,13 +146,13 @@
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                                <DataTrigger Binding="{Binding Path=boundary_face}" Value="X">
                                                     <Setter Property="Text" Value="x=0"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                                <DataTrigger Binding="{Binding Path=boundary_face}" Value="Y">
                                                     <Setter Property="Text" Value="y=0"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                                <DataTrigger Binding="{Binding Path=boundary_face}" Value="Z">
                                                     <Setter Property="Text" Value="z=0"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -187,13 +187,13 @@
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                    <DataTrigger Binding="{Binding Path=boundary_face}" Value="X">
                                         <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SOP.Protocol.scenario.environment.extent_x, StringFormat='x={0}'}"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                    <DataTrigger Binding="{Binding Path=boundary_face}" Value="Y">
                                         <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SOP.Protocol.scenario.environment.extent_y, StringFormat='y={0}'}"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                    <DataTrigger Binding="{Binding Path=boundary_face}" Value="Z">
                                         <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SOP.Protocol.scenario.environment.extent_z, StringFormat='z={0}'}"/>
                                     </DataTrigger>
                                 </Style.Triggers>

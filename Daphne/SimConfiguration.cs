@@ -8521,7 +8521,7 @@ namespace Daphne
         }
     }
 
-    public class MolPopLinear : MolPopDistribution
+    public class MolPopLinear : MolPopDistribution, INotifyPropertyChanged
     {
         public double x1 { get; set; }
         public int dim { get; set; }
@@ -8534,8 +8534,12 @@ namespace Daphne
             }
             set
             {
-                _boundary_face = value;
-                dim = (int)_boundary_face - 1;
+                if (_boundary_face != value)
+                {
+                    _boundary_face = value;
+                    dim = (int)_boundary_face - 1;
+                    OnPropertyChanged("boundary_face");
+                }
             }
         }
 
