@@ -1374,11 +1374,19 @@ namespace DaphneGui
                 return;
             }
 
-            vcrControl.CurrentFrame = 1;
+            if (vcrControl.TotalFrames > 0)
+            {
+                vcrControl.CurrentFrame = 0;
 
-            ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
-            ST_CellLineageWindow.Float(new Point(this.Left + 40, this.Top + 30), new Size(1000, 824));
-            ST_CellLineageWindow.Activate();
+                ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
+                ST_CellLineageWindow.Float(new Point(this.Left + 40, this.Top + 30), new Size(1000, 824));
+                ST_CellLineageWindow.Activate();
+            }
+            else
+            {
+                MessageBox.Show("Lineage data not found.", "No data.");
+            }
+
 
             #region MyRegion
             //if (cdm == null)
