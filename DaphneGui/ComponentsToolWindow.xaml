@@ -216,7 +216,8 @@
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
                                         <!--<TextBox Width="80" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
-                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiff, Path=Width-8}"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                                        <!--<uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiff, Path=Width-8}"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
+                                        <uc:DoublesBox TextFieldWidth="75"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
