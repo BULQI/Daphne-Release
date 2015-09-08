@@ -1951,31 +1951,36 @@ namespace DaphneGui
             string CurrentStateName = tde.CurrentStateName,
                     DestStateName = tde.DestStateName;
 
-            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            if (cell.death_driver.DriverElements[0].elements[1].previous_value != null)
             {
-                // Switch to Distribution-driven
-                tde = new ConfigDistrTransitionDriverElement();
-
-                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
-                poisson.Mean = 1.0;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                tde = cell.death_driver.DriverElements[0].elements[1].previous_value;
             }
             else
             {
-                if (cell.cytosol.molpops.Count == 0)
+                if (tde.Type == TransitionDriverElementType.MOLECULAR)
                 {
-                    MessageBox.Show("Death can only be controlled by a probability distribution because there are no molecules in the cytosol. Add molecules from the store to control the death by molecular concentrations.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Switch to Distribution-driven
+                    tde = new ConfigDistrTransitionDriverElement();
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
                 }
+                else
+                {
+                    if (cell.cytosol.molpops.Count == 0)
+                    {
+                        MessageBox.Show("Death can only be controlled by a probability distribution because there are no molecules in the cytosol. Add molecules from the store to control the death by molecular concentrations.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
 
-                // Switch to Molecule-driven
-                tde = new ConfigMolTransitionDriverElement();
+                    // Switch to Molecule-driven
+                    tde = new ConfigMolTransitionDriverElement();
+                }
+                tde.CurrentStateName = CurrentStateName;
+                tde.DestStateName = DestStateName;
+                tde.CurrentState = CurrentState;
+                tde.DestState = DestState;
             }
-            tde.CurrentStateName = CurrentStateName;
-            tde.DestStateName = DestStateName;
-            tde.CurrentState = CurrentState;
-            tde.DestState = DestState;
-           
+
+            tde.previous_value = cell.death_driver.DriverElements[0].elements[1];
             cell.death_driver.DriverElements[0].elements[1] = tde;
         }
 
@@ -2284,6 +2289,15 @@ namespace DaphneGui
         {
             isUserInteraction = true;
         }
+
+        //private void Distr_TDE_info_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigDistrTransitionDriverElement distr_tde = sender as ConfigDistrTransitionDriverElement;
+        //    if (distr_tde == null) return;
+
+        //    double mean_val = distr_tde.Distr.ParamDistr.MeanValue();
+
+        //}
     }
 
 }

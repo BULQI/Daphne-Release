@@ -141,6 +141,20 @@
                 <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
                 <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
+                <StackPanel Orientation="Horizontal" IsEnabled="False" HorizontalAlignment="Left">
+                    <TextBlock Text="mean = " HorizontalAlignment="Left"/>
+                    <uc:DoublesBox     HorizontalAlignment="Left"
+                                        TextFieldWidth="75" TextBorderThickness="0"
+                                        Number="{Binding Path=Distr.ParamDistr.Mean_val, UpdateSourceTrigger=PropertyChanged}"   
+                                        DecimalPlaces="1" 
+                                        RangeFactor="2"
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
+                                        SliderEnabled="False"
+                                        >
+                    </uc:DoublesBox>
+                    <TextBlock Text=" min" TextAlignment="Left" HorizontalAlignment="Left" MaxWidth="50"/>
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
 
@@ -208,6 +222,20 @@
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
                 <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
+                <StackPanel Orientation="Horizontal" IsEnabled="False" HorizontalAlignment="Left">
+                    <TextBlock Text="mean = " HorizontalAlignment="Left"/>
+                    <uc:DoublesBox     HorizontalAlignment="Left"
+                                        TextFieldWidth="75" TextBorderThickness="0"
+                                        Number="{Binding Path=death_driver.DriverElements[0].elements[1].Distr.ParamDistr.Mean_val, UpdateSourceTrigger=PropertyChanged}"   
+                                        DecimalPlaces="1" 
+                                        RangeFactor="2"
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
+                                        SliderEnabled="False"
+                                        >
+                    </uc:DoublesBox>
+                    <TextBlock Text=" min" TextAlignment="Left" HorizontalAlignment="Left" MaxWidth="50"/>
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
         
@@ -323,17 +351,19 @@
                 </StackPanel>
 
                 <StackPanel Name="spTransitionDriverElementDetailsContentControl" HorizontalAlignment="Left">
-                    <Button HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Transition Driver Type" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,6" />
+                        <Button HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200" 
                             Click="ChangeDeathTDEType_Click" 
                             Style="{StaticResource selectable_Death_TDE_Type_ButtonContent}">
-
-                        <Button.ToolTip>
-                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                            <Button.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                 Pressing this button toggles between two methods for driving apoptotic transitions: by molecular concentration or by probability distribution.
-                            </TextBlock>
-                        </Button.ToolTip>
-
-                    </Button>
+                                </TextBlock>
+                            </Button.ToolTip>
+                        </Button>
+                        <TextBlock Text="(toggle)" VerticalAlignment="Center" Margin="6,0"/>
+                    </StackPanel>
                     <ContentControl x:Name="TransitionDriverElementDetails"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectable_death_TDE_template}"
@@ -380,7 +410,9 @@
         <DataTemplate x:Key="DataGridCell_TDE_Editing_Template" DataType="daph:ConfigTransitionDriverElement">
             
             <StackPanel Name="TransitionSchemeStackPanel" Orientation="Vertical">
-                <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinWidth="20" MinHeight="20"
+                <TextBlock Text="Transition Driver Type" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinWidth="20" MinHeight="20"
                         FontSize="10"
                         Click="ChangeDataGridTDEType_Click" 
                         DataContext="{Binding}"
@@ -388,16 +420,16 @@
 
                     <Button.ToolTip>
                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                            Pressing this button toggles between two methods for driving apoptotic transitions: by molecular concentration or by probability distribution.                         
+                            Pressing this button toggles between two methods for driving transitions: by molecular concentration or by probability distribution.                         
                         </TextBlock>
                     </Button.ToolTip>
                 </Button>
-
+                    <TextBlock Text="(toggle)" VerticalAlignment="Center"/>
+                </StackPanel>
                 <ContentControl x:Name="TransitionDriverElementDetails2"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectable_DataGrid_TDE_editing_template}"
                                     />
-
             </StackPanel>
         </DataTemplate>
 
