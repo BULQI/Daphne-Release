@@ -44,6 +44,36 @@
     <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
     <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
+    <!-- Style for hiding the display of the mean value for a probability transition when the distribution type is CONSTANT -->
+    <!-- DataContext is a DistributedParameter -->
+    <Style x:Key="mean_value_visibility_style" TargetType="{x:Type StackPanel}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=DistributionType, Converter={StaticResource ParamDistTypeEnumConv}}" Value="Constant">
+                <Setter Property="Visibility" Value="Hidden"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Display the mean value of a probablity distribution (ParameterDistribution) -->
+    <!-- DataContext is a DistributedParameter -->
+    <DataTemplate x:Key="ProbDistrMeanValue_Template">
+        <StackPanel Orientation="Horizontal" IsEnabled="False" HorizontalAlignment="Left" Style="{StaticResource mean_value_visibility_style}">
+            <TextBlock Text="mean = " HorizontalAlignment="Left"/>
+            <uc:DoublesBox     HorizontalAlignment="Left"
+                                        TextFieldWidth="75" TextBorderThickness="0"
+                                        Number="{Binding Path=ParamDistr.Mean_val, UpdateSourceTrigger=PropertyChanged}"   
+                                        DecimalPlaces="1" 
+                                        RangeFactor="2"
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
+                                        SliderEnabled="False"
+                                        >
+            </uc:DoublesBox>
+            <TextBlock Text=" min" TextAlignment="Left" HorizontalAlignment="Left" MaxWidth="50"/>
+        </StackPanel>
+    </DataTemplate>
+    
+    
     <DataTemplate DataType="{x:Type DataGrid}">
         
     </DataTemplate>

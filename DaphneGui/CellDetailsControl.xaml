@@ -138,23 +138,13 @@
         <!-- Distr_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element. -->
         <DataTemplate x:Key="Distr_TDE_dgCell_Editing">
             <StackPanel Orientation="Vertical">
-                <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
                 <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
-                <StackPanel Orientation="Horizontal" IsEnabled="False" HorizontalAlignment="Left">
-                    <TextBlock Text="mean = " HorizontalAlignment="Left"/>
-                    <uc:DoublesBox     HorizontalAlignment="Left"
-                                        TextFieldWidth="75" TextBorderThickness="0"
-                                        Number="{Binding Path=Distr.ParamDistr.Mean_val, UpdateSourceTrigger=PropertyChanged}"   
-                                        DecimalPlaces="1" 
-                                        RangeFactor="2"
-                                        SNLowerThreshold="0.001"
-                                        SNUpperThreshold="1000"
-                                        SliderEnabled="False"
-                                        >
-                    </uc:DoublesBox>
-                    <TextBlock Text=" min" TextAlignment="Left" HorizontalAlignment="Left" MaxWidth="50"/>
-                </StackPanel>
+                <ContentControl Name="MeanValueDisplay"
+                                Content="{Binding Path=Distr}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6"
+                        />
             </StackPanel>
         </DataTemplate>
 
@@ -222,20 +212,11 @@
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
                 <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
-                <StackPanel Orientation="Horizontal" IsEnabled="False" HorizontalAlignment="Left">
-                    <TextBlock Text="mean = " HorizontalAlignment="Left"/>
-                    <uc:DoublesBox     HorizontalAlignment="Left"
-                                        TextFieldWidth="75" TextBorderThickness="0"
-                                        Number="{Binding Path=death_driver.DriverElements[0].elements[1].Distr.ParamDistr.Mean_val, UpdateSourceTrigger=PropertyChanged}"   
-                                        DecimalPlaces="1" 
-                                        RangeFactor="2"
-                                        SNLowerThreshold="0.001"
-                                        SNUpperThreshold="1000"
-                                        SliderEnabled="False"
-                                        >
-                    </uc:DoublesBox>
-                    <TextBlock Text=" min" TextAlignment="Left" HorizontalAlignment="Left" MaxWidth="50"/>
-                </StackPanel>
+                <ContentControl Name="Death_MeanValueDisplay"
+                                Content="{Binding Path=death_driver.DriverElements[0].elements[1].Distr}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6"
+                        />
             </StackPanel>
         </DataTemplate>
         
