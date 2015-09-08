@@ -5706,22 +5706,35 @@ namespace Daphne
         public void GetTotalReactionString(EntityRepository repos)
         {
             string s = "";
-            int i = 0;
+
+            //// Save - gmk 9/8/2015
+            //// spatial dimension for bulk and boundary molecules
+            //int[] dim = new int[sizeof(MoleculeLocation)];
+            //dim[(int)MoleculeLocation.Bulk] = 3;
+            //dim[(int)MoleculeLocation.Boundary] = 2;
+            //string[] superscriptDigits = new string[] {"\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"};
+            //int molec_cnt = 0,
+            //    micron_cnt = 0;
 
             // Reactants
+            int i = 0;
             foreach (string mol_guid_ref in reactants_molecule_guid_ref)
             {
                 //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
                 i++;
-                if (n > 1)
-                    s += n;
+
+                if (n > 1) s += n;
+
+                //molec_cnt -= n;
+                //micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+
                 s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
             }
 
+            // Reactant Modifiers
             i = 0;
-            // Modifiers
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
                 //stoichiometry
@@ -5736,6 +5749,8 @@ namespace Daphne
                 }
                 else
                 {
+                    //molec_cnt -= n;
+                    //micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
                     s += repos.molecules_dict[mol_guid_ref].Name;
                 }
                 s += " + ";
@@ -5746,8 +5761,9 @@ namespace Daphne
 
             s = s + " -> ";
 
-            i = 0;
             // Products
+            i = 0;
+            int num_products = 0;
             foreach (string mol_guid_ref in products_molecule_guid_ref)
             {
                 //stoichiometry
@@ -5756,11 +5772,19 @@ namespace Daphne
                 if (n > 1)
                     s += n;
 
+                if (num_products == 0)
+                {
+                    //molec_cnt += n;
+                    //micron_cnt -= n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+                    num_products++;
+                }
+
                 s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
             }
+
+            // Product Modifiers
             i = 0;
-            // Modifiers
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
                 //stoichiometry
@@ -5775,6 +5799,12 @@ namespace Daphne
                 }
                 else
                 {
+                    if (num_products == 0)
+                    {
+                        //molec_cnt += n;
+                        //micron_cnt -= n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+                        num_products++;
+                    }
                     s += repos.molecules_dict[mol_guid_ref].Name;
                 }
                 s += " + ";
@@ -5782,6 +5812,42 @@ namespace Daphne
 
             s = s.Trim(trimChars);
             TotalReactionString = s;
+
+            //// Determine the units for the rate constant
+            //rate_constant_units = "";
+
+            //if (molec_cnt > 0)
+            //{
+            //    rate_constant_units += "molec";
+            //    // Skip the exponent if it is 1
+            //    if (molec_cnt > 1)
+            //    {
+            //        rate_constant_units += superscriptDigits[molec_cnt];
+            //    }
+            //    rate_constant_units += "-";
+            //}
+            //else if (molec_cnt < 0)
+            //{
+            //    rate_constant_units += "molec" + "\x207B" + superscriptDigits[Math.Abs(molec_cnt)] + "-";
+            //}
+
+            //if (micron_cnt > 0)
+            //{
+            //    rate_constant_units += "µm";
+            //    // Skip the exponent if it is 1
+            //    if (micron_cnt > 1)
+            //    {
+            //        rate_constant_units += superscriptDigits[micron_cnt]; 
+            //    }
+            //    rate_constant_units += "-";
+            //}
+            //else if (micron_cnt < 0)
+            //{
+            //    rate_constant_units += "µm" + "\x207B" + superscriptDigits[Math.Abs(micron_cnt)] + "-";
+            //}
+
+            //rate_constant_units += "min" + "\x207B" + "\xB9";  // min-1
+
         }
 
         public bool HasMolecule(string molguid)
@@ -10333,6 +10399,21 @@ namespace Daphne
     {
         [JsonIgnore]
         public bool isInitialized;
+        [JsonIgnore]
+        private double mean_val;
+        [JsonIgnore]
+        public double Mean_val
+        {
+            get
+            {
+                return mean_val;
+            }
+            set
+            {
+                mean_val = value;
+                OnPropertyChanged("Mean_val");
+            }
+        }
 
         public ParameterDistribution()
         {
@@ -10342,6 +10423,7 @@ namespace Daphne
         public abstract double Sample();
         public abstract bool Equals(ParameterDistribution pd);
         public abstract ParameterDistribution Clone();
+        public abstract double MeanValue();
     }
 
     /// <summary>
@@ -10351,7 +10433,27 @@ namespace Daphne
     /// </summary>
     public class DiracDeltaParameterDistribution : ParameterDistribution
     {
-        public double ConstValue { get; set; }
+        private double constValue;
+        public double ConstValue 
+        {
+            get
+            {
+                return constValue;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    constValue = value;
+                }
+                else
+                {
+                    constValue = 0.0;
+                }
+                OnPropertyChanged("ConstValue");
+                MeanValue();
+            }
+        }
 
         public DiracDeltaParameterDistribution()
             : base()
@@ -10392,6 +10494,12 @@ namespace Daphne
 
             return newDistr;
         }
+
+        public override double MeanValue()
+        {
+            Mean_val = ConstValue;
+            return Mean_val;
+        }
     }
 
     /// <summary>
@@ -10417,6 +10525,7 @@ namespace Daphne
                     minValue = 0.0;
                 }
                 OnPropertyChanged("MinValue");
+                MeanValue();
             }
         }
 
@@ -10438,6 +10547,7 @@ namespace Daphne
                     maxValue = minValue + 1.0;
                 }
                 OnPropertyChanged("MaxValue");
+                MeanValue();
             }
         }
 
@@ -10493,6 +10603,19 @@ namespace Daphne
             return newDistr;
         }
 
+        public override double MeanValue()
+        {
+            if (MaxValue <= MinValue)
+            {
+                Mean_val = 0.0;
+            }
+            else
+            {
+                ContinuousUniform dist = new ContinuousUniform(MinValue, MaxValue);
+                Mean_val = dist.Mean;
+            }
+            return Mean_val;
+         }
     }
 
     /// <summary>
@@ -10518,6 +10641,7 @@ namespace Daphne
                     mean = 1.0;
                 }
                 OnPropertyChanged("Mean");
+                MeanValue();
             }
         }
 
@@ -10571,6 +10695,11 @@ namespace Daphne
             return newDistr;
         }
 
+        public override double MeanValue()
+        {
+            Mean_val = Mean;
+            return Mean_val;
+        }
     }
 
     /// <summary>
@@ -10596,6 +10725,7 @@ namespace Daphne
                     shape = 1.0;
                 }
                 OnPropertyChanged("Shape");
+                MeanValue();
             }
         }
 
@@ -10617,6 +10747,7 @@ namespace Daphne
                     rate = 1.0;
                 }
                 OnPropertyChanged("Rate");
+                MeanValue();
             }
         }
 
@@ -10676,6 +10807,19 @@ namespace Daphne
             return newDistr;
         }
 
+        public override double MeanValue()
+        {
+            if (Rate <= 0 || Shape <= 0)
+            {
+                Mean_val = 0.0;
+            }
+            else
+            {
+                Gamma dist = new Gamma(Shape, Rate);
+                Mean_val = dist.Mean;
+            }
+            return Mean_val;
+        }
     }
 
     /// <summary>
@@ -10746,6 +10890,7 @@ namespace Daphne
             {
                 probMass = value;
                 OnPropertyChanged("ProbMass");
+                MeanValue();
             }
         }
 
@@ -10854,6 +10999,11 @@ namespace Daphne
             return newDistr;
         }
 
+        public override double MeanValue()
+        {
+            Mean_val = this.MeanCategoryValue();
+            return Mean_val;
+        }
     }
 
     /// <summary>
@@ -10879,6 +11029,7 @@ namespace Daphne
                     shape = 1.0;
                 }
                 OnPropertyChanged("Shape");
+                MeanValue();
             }
         }
 
@@ -10900,11 +11051,12 @@ namespace Daphne
                     scale = 1.0;
                 }
                 OnPropertyChanged("Scale");
+                MeanValue();
             }
         }
 
         [JsonIgnore]
-        private Weibull WeibulllDist;
+        private Weibull WeibullDist;
 
         public WeibullParameterDistribution()
             : base()
@@ -10924,7 +11076,7 @@ namespace Daphne
                 Shape = 1.0;
             }
 
-            WeibulllDist = new Weibull(Shape, Scale, Rand.MersenneTwister);
+            WeibullDist = new Weibull(Shape, Scale, Rand.MersenneTwister);
             isInitialized = true;
         }
 
@@ -10934,7 +11086,7 @@ namespace Daphne
             {
                 Initialize();
             }
-            return WeibulllDist.Sample();
+            return WeibullDist.Sample();
         }
 
         public override bool Equals(ParameterDistribution pd)
@@ -10956,6 +11108,21 @@ namespace Daphne
             WeibullParameterDistribution newDistr = JsonConvert.DeserializeObject<WeibullParameterDistribution>(jsonSpec, Settings);
 
             return newDistr;
+        }
+
+        public override double MeanValue()
+        {
+            if (Scale <= 0 || Shape <= 0)
+            {
+                Mean_val = 0.0;
+            }
+            else
+            {
+                Weibull dist = new Weibull(Shape, Scale);
+                Mean_val = dist.Mean;
+            }
+
+            return Mean_val;
         }
     }
 
@@ -10982,11 +11149,12 @@ namespace Daphne
                     rate = 1.0;
                 }
                 OnPropertyChanged("Rate");
+                MeanValue();
             }
         }
 
         [JsonIgnore]
-        private Exponential ExplDist;
+        private Exponential ExpDist;
 
         public NegExpParameterDistribution()
             : base()
@@ -11001,7 +11169,7 @@ namespace Daphne
                 Rate = 1.0;
             }
 
-            ExplDist = new Exponential(Rate, Rand.MersenneTwister);
+            ExpDist = new Exponential(Rate, Rand.MersenneTwister);
             isInitialized = true;
         }
 
@@ -11012,7 +11180,7 @@ namespace Daphne
                 Initialize();
             }
 
-            return ExplDist.Sample();
+            return ExpDist.Sample();
         }
 
         public override bool Equals(ParameterDistribution pd)
@@ -11033,6 +11201,21 @@ namespace Daphne
             NegExpParameterDistribution newDistr = JsonConvert.DeserializeObject<NegExpParameterDistribution>(jsonSpec, Settings);
 
             return newDistr;
+        }
+
+        public override double MeanValue()
+        {
+            if (Rate < 0)
+            {
+                Mean_val = 0.0;
+            }
+            else
+            {
+                Exponential dist = new Exponential(Rate);
+                Mean_val = dist.Mean;
+            }
+
+            return Mean_val;
         }
 
     }
