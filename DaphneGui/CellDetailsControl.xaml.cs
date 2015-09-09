@@ -68,7 +68,7 @@ namespace DaphneGui
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
                 //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = DataContext as ConfigCell;
@@ -750,7 +750,7 @@ namespace DaphneGui
                 ConfigMolecule newLibMol = new ConfigMolecule();
 
                 //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                newLibMol.Name = newLibMol.GenerateNewName(level, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(level, "New");
 
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = this.Tag;    //DataContext as ConfigCell
@@ -1257,16 +1257,16 @@ namespace DaphneGui
                     cell.div_scheme.InsertState("G1-S-G2-M", 0);
                     cell.div_scheme.InsertState("cytokinetic", 1);
 
-                    // Add a transition driver with arbitrary values
-                    ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
-                    distr_element.Distr = new DistributedParameter();
-                    distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                    distr_element.Distr.ConstValue = 60; // minutes
-                    distr_element.CurrentState = 0;
-                    distr_element.CurrentStateName = cell.div_scheme.Driver.states[0];
-                    distr_element.DestState = 1;
-                    distr_element.DestStateName = cell.div_scheme.Driver.states[1];
-                    cell.div_scheme.Driver.DriverElements[0].elements[1] = distr_element;
+                    //// Add a transition driver with arbitrary values
+                    //ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
+                    //distr_element.Distr = new DistributedParameter();
+                    //distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                    //distr_element.Distr.ConstValue = 60; // minutes
+                    //distr_element.CurrentState = 0;
+                    //distr_element.CurrentStateName = cell.div_scheme.Driver.states[0];
+                    //distr_element.DestState = 1;
+                    //distr_element.DestStateName = cell.div_scheme.Driver.states[1];
+                    //cell.div_scheme.Driver.DriverElements[0].elements[1] = distr_element;
                     level.entity_repository.diff_schemes.Add(cell.div_scheme.Clone(true));
             }
             else if (schemeName == "Differentiation")
@@ -1277,15 +1277,15 @@ namespace DaphneGui
                     cell.diff_scheme.Name = cell.diff_scheme.GenerateNewName(level, "_");
                     cell.diff_scheme.InsertState("State0", 0);
                     cell.diff_scheme.InsertState("State1", 1);
-                    ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
-                    distr_element.Distr = new DistributedParameter();
-                    distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                    distr_element.Distr.ConstValue = 180; // minutes
-                    distr_element.CurrentState = 0;
-                    distr_element.CurrentStateName = cell.diff_scheme.Driver.states[0];
-                    distr_element.DestState = 1;
-                    distr_element.DestStateName = cell.diff_scheme.Driver.states[1];
-                    cell.diff_scheme.Driver.DriverElements[0].elements[1] = distr_element;
+                    //ConfigDistrTransitionDriverElement distr_element = new ConfigDistrTransitionDriverElement();
+                    //distr_element.Distr = new DistributedParameter();
+                    //distr_element.Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                    //distr_element.Distr.ConstValue = 180; // minutes
+                    //distr_element.CurrentState = 0;
+                    //distr_element.CurrentStateName = cell.diff_scheme.Driver.states[0];
+                    //distr_element.DestState = 1;
+                    //distr_element.DestStateName = cell.diff_scheme.Driver.states[1];
+                    //cell.diff_scheme.Driver.DriverElements[0].elements[1] = distr_element;
                     level.entity_repository.diff_schemes.Add(cell.diff_scheme.Clone(true));
             }
             else return;
@@ -1307,12 +1307,27 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            //Remove scheme from the cell
+            if (schemeName == "Division")
+            {
+                cell.div_scheme = null;
+            }
+            else if (schemeName == "Differentiation")
+            {
+                cell.diff_scheme = null;
+            }
+            
+            //Now remove scheme from the cell population
             ToolWinTissue twt = Tag as ToolWinTissue;
+
+            //If we're looking at the cells library, that has no cell population, so return.
+            if (twt == null)
+                return;
+
             CellPopulation cp = twt.CellPopControl.CellPopsListBox.SelectedItems[0] as CellPopulation;
 
             if (schemeName == "Division")
             {
-                cell.div_scheme = null;
                 if (cp != null)
                 {
                     cp.reportStates.Division = false;
@@ -1320,7 +1335,6 @@ namespace DaphneGui
             }
             else if (schemeName == "Differentiation")
             {
-                cell.diff_scheme = null;
                 if (cp != null)
                 {
                     cp.reportStates.Differentiation = false;
@@ -1746,14 +1760,13 @@ namespace DaphneGui
             cvs.Filter += ToolWinBase.FilterFactory.BoundaryMolecules_Filter;
             cvs.SortDescriptions.Insert(0, sd);
 
+            PropertiesGrid.IsEnabled = true;
+
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
             {
                 return;
             }
-
-            //Level level = null;
-            //SetCurrentLevel(level);
 
             updateCollections(cell);
             updateSelectedMoleculesAndGenes(cell);
@@ -1761,6 +1774,21 @@ namespace DaphneGui
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            if (cvs.Source == null)
+            {
+                cvs.Source = new ObservableCollection<ConfigMolecule>();
+            }
+            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
+
+            CollectionViewSource cvs2 = (CollectionViewSource)(FindResource("driverMoleculesListView"));
+            if (cvs2.Source == null)
+            {
+                cvs2.Source = new ObservableCollection<ConfigMolecule>();
+            }
+            ((ObservableCollection<ConfigMolecule>)cvs2.Source).Clear();
+
+
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
             {
@@ -1769,69 +1797,19 @@ namespace DaphneGui
 
             updateCollections(cell);
 
-            //CollectionViewSource cvs;
+            int locoMol = -1;
 
-            //// MOLECULES
-
-            //// cyto_molecule_combo_box - filtered for bulk molecules in EntityRepository
-            //cvs = (CollectionViewSource)(FindResource("availableBulkMoleculesListView"));
-            //cvs.Source = new ObservableCollection<ConfigMolecule>();
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-            
-            //// memb_molecule_combo_box - filtered for boundary molecules in EntityRepository
-            //cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
-            //cvs.Source = new ObservableCollection<ConfigMolecule>();
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-
-            //// list of cytosol molecules for use by division and differentitiation schemes
-            //cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            //cvs.Source = new ObservableCollection<ConfigMolecule>();
-            //foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
-            //{
-            //    ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
-            //}
-
-            //// REACTIONS
-
-            //// lvCellAvailableReacs
-            //cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
-            //cvs.Source = new ObservableCollection<ConfigReaction>();
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
-
-            //// lvCytosolAvailableReacs
-            //cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
-            //cvs.Source = new ObservableCollection<ConfigReaction>();
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
-
-            //cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
-            //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
-
-            //cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
-            //cvs.Source = new ObservableCollection<ConfigReactionComplex>();
-            //cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            {
+                ((ObservableCollection<ConfigMolecule>)cvs2.Source).Add(configMolpop.molecule);
+                if (configMolpop.molecule.entity_guid == cell.locomotor_mol_guid_ref)
+                {
+                    locoMol = cell.cytosol.molpops.IndexOf(configMolpop);
+                }
+            }
+            cbLocomotorDriver1.SelectedIndex = locoMol;
 
             updateSelectedMoleculesAndGenes(cell);
-
-            ////EventHandler cytosolEventHandler = null;
-            ////cytosolEventHandler = new EventHandler(delegate
-            ////{
-            ////    if (CellCytosolMolPopsListBox.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-            ////    {
-            ////        ConfigCell currcell = DataContext as ConfigCell;
-            ////        if (currcell != null)
-            ////        {
-            ////            CellCytosolMolPopsListBox.SelectedIndex = 0;
-            ////            //updateCytoMolCollection();
-            ////            //cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
-            ////        }
-
-            ////        CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged -= cytosolEventHandler;
-            ////    }
-            ////});
-
-            ////CellCytosolMolPopsListBox.ItemContainerGenerator.StatusChanged += cytosolEventHandler;
-
         }
 
         public void updateCollections(ConfigCell cell)
@@ -1918,22 +1896,8 @@ namespace DaphneGui
             // so do it manually here.
 
             CellMembraneMolPopsListBox.SelectedIndex = 0;
-            //if (cell.membrane.molpops.Count > 0)
-            //{
-            //    memb_molecule_combo_box.SelectedItem = cell.membrane.molpops.First().molecule;
-            //}
-
             CellCytosolMolPopsListBox.SelectedIndex = 0;
-            //if (cell.cytosol.molpops.Count > 0)
-            //{
-            //    cyto_molecule_combo_box.SelectedItem = cell.cytosol.molpops.First().molecule;
-            //}
-
             CellNucleusGenesListBox.SelectedItem = 0;
-            //if (cell.genes.Count > 0)
-            //{
-            //    CellNucleusGenesListBox.SelectedItem = cell.genes.First();
-            //}
         }
 
         /// <summary>
@@ -1987,31 +1951,36 @@ namespace DaphneGui
             string CurrentStateName = tde.CurrentStateName,
                     DestStateName = tde.DestStateName;
 
-            if (tde.Type == TransitionDriverElementType.MOLECULAR)
+            if (cell.death_driver.DriverElements[0].elements[1].previous_value != null)
             {
-                // Switch to Distribution-driven
-                tde = new ConfigDistrTransitionDriverElement();
-
-                PoissonParameterDistribution poisson = new PoissonParameterDistribution();
-                poisson.Mean = 1.0;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = poisson;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.POISSON;
+                tde = cell.death_driver.DriverElements[0].elements[1].previous_value;
             }
             else
             {
-                if (cell.cytosol.molpops.Count == 0)
+                if (tde.Type == TransitionDriverElementType.MOLECULAR)
                 {
-                    MessageBox.Show("Death can only be controlled by a probability distribution because there are no molecules in the cytosol. Add molecules from the store to control the death by molecular concentrations.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Switch to Distribution-driven
+                    tde = new ConfigDistrTransitionDriverElement();
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
                 }
+                else
+                {
+                    if (cell.cytosol.molpops.Count == 0)
+                    {
+                        MessageBox.Show("Death can only be controlled by a probability distribution because there are no molecules in the cytosol. Add molecules from the store to control the death by molecular concentrations.", "No molecules available", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
 
-                // Switch to Molecule-driven
-                tde = new ConfigMolTransitionDriverElement();
+                    // Switch to Molecule-driven
+                    tde = new ConfigMolTransitionDriverElement();
+                }
+                tde.CurrentStateName = CurrentStateName;
+                tde.DestStateName = DestStateName;
+                tde.CurrentState = CurrentState;
+                tde.DestState = DestState;
             }
-            tde.CurrentStateName = CurrentStateName;
-            tde.DestStateName = DestStateName;
-            tde.CurrentState = CurrentState;
-            tde.DestState = DestState;
-           
+
+            tde.previous_value = cell.death_driver.DriverElements[0].elements[1];
             cell.death_driver.DriverElements[0].elements[1] = tde;
         }
 
@@ -2031,30 +2000,38 @@ namespace DaphneGui
             string CurrentStateName = tde.CurrentStateName,
                     DestStateName = tde.DestStateName;
 
-            if (tde.Type == TransitionDriverElementType.MOLECULAR)
-            {
-                tde = new ConfigDistrTransitionDriverElement();
-                ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
-                ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
-                //stack_panel.DataContext = tde;
-            }
-            else
-            {
-                tde = new ConfigMolTransitionDriverElement();                
-            }
-            tde.CurrentStateName = CurrentStateName;
-            tde.DestStateName = DestStateName;
-            tde.CurrentState = CurrentState;
-            tde.DestState = DestState;
-
             // update the transition scheme
             DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(button);
             if (dataGrid == null) return;
+
             ConfigTransitionScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
-            if (scheme != null)
+            if (scheme == null) return;
+
+            if (scheme.Driver.DriverElements[CurrentState].elements[DestState].previous_value != null)
             {
-                scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
+                tde = scheme.Driver.DriverElements[CurrentState].elements[DestState].previous_value;
             }
+            else
+            {
+                if (tde.Type == TransitionDriverElementType.MOLECULAR)
+                {
+                    tde = new ConfigDistrTransitionDriverElement();
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.ParamDistr = null;
+                    ((ConfigDistrTransitionDriverElement)tde).Distr.DistributionType = ParameterDistributionType.CONSTANT;
+                }
+                else
+                {
+                    tde = new ConfigMolTransitionDriverElement();
+                }
+                tde.CurrentStateName = CurrentStateName;
+                tde.DestStateName = DestStateName;
+                tde.CurrentState = CurrentState;
+                tde.DestState = DestState;
+            }
+
+            // update the transition scheme
+            tde.previous_value = scheme.Driver.DriverElements[CurrentState].elements[DestState];
+            scheme.Driver.DriverElements[CurrentState].elements[DestState] = tde;
         }
 
         public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
@@ -2279,6 +2256,66 @@ namespace DaphneGui
             element.BringIntoView();
         }
 
+
+        private void cbLocoDriver_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //Don't want to do anything when first display this combo box
+            //Only do something if user really clicked and selected a different scheme
+
+            if (isUserInteraction == false)
+                return;
+
+            isUserInteraction = false;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+                return;
+
+            ComboBox combo = sender as ComboBox;
+
+            if (combo.SelectedIndex == -1)
+                return;
+
+            ConfigMolecule cm = (ConfigMolecule)cbLocomotorDriver1.SelectedItem;
+            string guid = cm.entity_guid;
+            if (cm.Name == "None")
+                guid = "";
+
+            cell.locomotor_mol_guid_ref = guid;
+        }
+
+        bool isUserInteraction;
+        private void cbLocomotorDriver1_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            isUserInteraction = true;
+        }
+
+        //private void Distr_TDE_info_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigDistrTransitionDriverElement distr_tde = sender as ConfigDistrTransitionDriverElement;
+        //    if (distr_tde == null) return;
+
+        //    double mean_val = distr_tde.Distr.ParamDistr.MeanValue();
+
+        //}
+
+        private void memb_molecule_combo_box_Loaded(object sender, RoutedEventArgs e)
+        {
+            var item = CellMembraneMolPopsListBox.SelectedItem;
+            if (item != null)
+            {
+                memb_molecule_combo_box.SelectedValue = ((ConfigMolecularPopulation)item).molecule.entity_guid;
+            }
+        }
+
+        private void cyto_molecule_combo_box_Loaded(object sender, RoutedEventArgs e)
+        {
+            var item = CellCytosolMolPopsListBox.SelectedItem;
+            if (item != null)
+            {
+                cyto_molecule_combo_box.SelectedValue = ((ConfigMolecularPopulation)item).molecule.entity_guid;
+            }
+        }
     }
 
 }

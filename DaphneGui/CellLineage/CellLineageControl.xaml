@@ -96,7 +96,7 @@
                                 <TextBlock Text="Founder cells by lineage id" HorizontalAlignment="Left" FontSize="14" />
                                 <ListBox x:Name="founderCellsListBox" 
                                             SelectedIndex="0" Width="160" HorizontalAlignment="Left" 
-                                            ItemsSource="{Binding Path=FounderCellsByCellPop, Mode=OneWay}"
+                                            ItemsSource="{Binding ElementName=lineageWindow, Path=FounderCellsByCellPop, Mode=OneWay}"
                                             DisplayMemberPath="Lineage_Id">
                                 </ListBox>
                             </StackPanel>

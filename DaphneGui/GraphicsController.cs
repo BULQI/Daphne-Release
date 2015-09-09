@@ -1529,7 +1529,7 @@ namespace DaphneGui
                         return;
                     }
 
-                    if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_TOOLTIP) == true)
+                    if (HandToolButton_IsChecked && MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_TOOLTIP) == true)
                     {
 
                         Cell cell = SimulationBase.dataBasket.Cells[cellID];

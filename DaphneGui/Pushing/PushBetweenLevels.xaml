@@ -248,6 +248,7 @@
                               RowHeaderWidth="12"
                               SelectionChanged="datagrid_SelectionChanged"
                               CanUserDeleteRows="False"
+                              SelectedIndex="0"
                               >
 
                         <DataGrid.CommandBindings>

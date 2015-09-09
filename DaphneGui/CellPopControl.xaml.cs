@@ -559,6 +559,9 @@ namespace DaphneGui
             {
                 int rows_to_add = numNew - numOld;
                 cp.cellPopDist.AddByDistr(rows_to_add);
+                // Causes a new random seed for the random source
+                // Otherwise we will get the same values every time if this is followed by Apply()
+                cp.cellPopDist.Reset();
             }
             else if (numNew < numOld)
             {

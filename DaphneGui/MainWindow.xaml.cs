@@ -698,6 +698,11 @@ namespace DaphneGui
             postConstruction = true;
         }
 
+        private void defaultFolder(object sender, RoutedEventArgs e)
+        {
+            orig_path = System.IO.Path.GetDirectoryName(new Uri(appPath + @"\Config\").LocalPath);
+        }
+
         public void UpdateGraphics()
         {
             if (gc == null)
@@ -715,8 +720,8 @@ namespace DaphneGui
         /// </summary>
         public void CreateDaphneAndUserStores()
         {
-            var userstore = new Level("Config\\userstore.json", "Config\\temp_userstore.json");
-            var daphnestore = new Level("Config\\daphnestore.json", "Config\\temp_daphnestore.json");
+            var userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
+            var daphnestore = new Level("Config\\Stores\\daphnestore.json", "Config\\Stores\\temp_daphnestore.json");
             ProtocolCreators.CreateDaphneAndUserStores(daphnestore, userstore);
         }
 
@@ -741,11 +746,11 @@ namespace DaphneGui
             ////Serialize to json
             //protocol.SerializeToFile();
 
-            ////LIGAND-RECEPTOR SCENARIO - no longer needed
-            //protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-            //ProtocolCreators.CreateLigandReceptorProtocol(protocol);
-            ////serialize to json
-            //protocol.SerializeToFile();
+            //RECEPTOR HOMEOSTASIS SCENARIO
+            protocol = new Protocol("Config\\receptor_homeostasis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            ProtocolCreators.CreateLigandReceptorProtocol(protocol);
+            //serialize to json
+            protocol.SerializeToFile();
 
             //GC SCENARIO
             protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
@@ -1214,63 +1219,72 @@ namespace DaphneGui
 
         private void OpenExpSelectWindow(object sender, RoutedEventArgs e)
         {
-            // if the file is open we'll have to close it
-            if (sim.HDF5FileHandle.isOpen() == true)
+            try
             {
-                // close the file and all open groups
+                // if the file is open we'll have to close it
+                if (sim.HDF5FileHandle.isOpen() == true)
+                {
+                    // close the file and all open groups
+                    sim.HDF5FileHandle.close(true);
+                }
+
+                Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+                dlg.InitialDirectory = sim.Reporter.AppPath;
+                dlg.DefaultExt = ".hdf5";
+                dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5";
+
+                // Show open file dialog box
+                Nullable<bool> result = dlg.ShowDialog();
+
+                // Process open file dialog box results
+                if (result == true)
+                {
+                    sim.HDF5FileHandle.initialize(dlg.FileName);
+                }
+                else
+                {
+                    return;
+                }
+
+                if (sim.HDF5FileHandle.openRead() == false)
+                {
+                    MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
+                    return;
+                }
+
+                string protocolString = null;
+
+                // open the experiment parent group
+                sim.HDF5FileHandle.openGroup("/Experiment");
+                // read the protocol string
+                sim.HDF5FileHandle.readString("Protocol", ref protocolString);
+                // close the file and all groups
                 sim.HDF5FileHandle.close(true);
+
+                // do the loading
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
+                lockAndResetSim(true, ReadJson(protocolString));
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+                MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
+
+                // open, read reporter file names, close hdf5
+                sim.HDF5FileHandle.ReadReporterFileNamesFromClosedFile(dlg.FileName);
+
+                // this function does not exist currently, do we need this call?
+                //sim.runStatSummary();
+                GUIUpdate(0, true);
+                displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
             }
-
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            dlg.InitialDirectory = sim.Reporter.AppPath;
-            dlg.DefaultExt = ".hdf5";
-            dlg.Filter = "HDF5 VCR files (.hdf5)|*.hdf5";
-
-            // Show open file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
-
-            // Process open file dialog box results
-            if (result == true)
+            catch
             {
-                sim.HDF5FileHandle.initialize(dlg.FileName);
+                MessageBox.Show("The experiment could not be opened. Reverting to previously open protocol. " +
+                                "This could be due to a version mismatch (trying to open an old HDF5 file).", "HDF5 open error");
+                loadScenarioFromFile(protocol_path.LocalPath);
             }
-            else
-            {
-                return;
-            }
-
-            if (sim.HDF5FileHandle.openRead() == false)
-            {
-                MessageBox.Show("The HDF5 file could not be opened or does not exist.", "HDF5 error", MessageBoxButton.OK);
-                return;
-            }
-
-            string protocolString = null;
-
-            // open the experiment parent group
-            sim.HDF5FileHandle.openGroup("/Experiment");
-            // read the protocol string
-            sim.HDF5FileHandle.readString("Protocol", ref protocolString);
-            // close the file and all groups
-            sim.HDF5FileHandle.close(true);
-
-            // do the loading
-            MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, true);
-            lockAndResetSim(true, ReadJson(protocolString));
-            if (loadSuccess == false)
-            {
-                return;
-            }
-            MainWindow.SetControlFlag(MainWindow.CONTROL_PAST_LOAD, false);
-
-            // open, read reporter file names, close hdf5
-            sim.HDF5FileHandle.ReadReporterFileNamesFromClosedFile(dlg.FileName);
-
-            // this function does not exist currently, do we need this call?
-            //sim.runStatSummary();
-            GUIUpdate(0, true);
-            displayTitle("Loaded past run " + sim.HDF5FileHandle.FileName);
         }
 
         private void ExportAVI(object sender, RoutedEventArgs e)
@@ -1310,6 +1324,18 @@ namespace DaphneGui
             }
         }
 
+        private void cellTracksMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (gc is VTKFullGraphicsController == true)
+            {
+                VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)gc;
+                gcHandle.HandToolButton_IsEnabled = true;
+                gcHandle.HandToolButton_IsChecked = true;
+                gcHandle.HandToolOption_IsEnabled = true;
+                ToolModesCombo.SelectedIndex = 1;
+            }
+        }
+
         private void OpenLPFittingWindow(object sender, RoutedEventArgs e)
         {
             #region MyRegion
@@ -1342,11 +1368,25 @@ namespace DaphneGui
 
         private void OpenLineageWindow(object sender, RoutedEventArgs e)
         {
-            vcrControl.CurrentFrame = 1;
+            if (protocolChanged() == true)
+            {
+                MessageBox.Show("This analysis is not possible after making a change in the protocol.", "Protocol changed");
+                return;
+            }
 
-            ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
-            ST_CellLineageWindow.Float(new Point(this.Left + 40, this.Top + 30), new Size(1000, 824));
-            ST_CellLineageWindow.Activate();
+            if (vcrControl.TotalFrames > 0)
+            {
+                vcrControl.CurrentFrame = 0;
+
+                ST_CellLineageWindow.Visibility = System.Windows.Visibility.Visible;
+                ST_CellLineageWindow.Float(new Point(this.Left + 40, this.Top + 30), new Size(1000, 824));
+                ST_CellLineageWindow.Activate();
+            }
+            else
+            {
+                MessageBox.Show("Lineage data not found.", "No data.");
+            }
+
 
             #region MyRegion
             //if (cdm == null)
@@ -1792,6 +1832,17 @@ namespace DaphneGui
             devHelpProc = System.Diagnostics.Process.Start(new Uri(appPath + @"\help\documentation.chm").LocalPath);
         }
 
+        private void techHelp_click(object sender, RoutedEventArgs e)
+        {
+            if (dw.HasBeenClosed)
+            {
+                dw = new DocWindow();
+            }
+            dw.webBrowser.Navigate(new Uri("http://computationalimmunology.bu.edu/"));
+            dw.topicBox.Text = "Gaussian Processes";
+            dw.Show();
+        }
+
         private void fittingHelp_click(object sender, RoutedEventArgs e)
         {
             if (dw.HasBeenClosed)
@@ -2101,10 +2152,10 @@ namespace DaphneGui
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     ////      Do this once up front instead of doing each time user clicks Userstore or Daphnestore.
                     string storesPath = new Uri(appPath).LocalPath;
-                    sop.UserStore.FileName = storesPath + @"\Config\userstore.json";
-                    sop.UserStore.TempFile = storesPath + "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = storesPath + @"\Config\daphnestore.json";
-                    sop.DaphneStore.TempFile = storesPath + "Config\\temp_daphnestore.json";
+                    sop.UserStore.FileName = storesPath + @"\Config\Stores\userstore.json";
+                    sop.UserStore.TempFile = storesPath + @"\Config\Stores\temp_userstore.json";
+                    sop.DaphneStore.FileName = storesPath + @"\Config\Stores\daphnestore.json";
+                    sop.DaphneStore.TempFile = storesPath + @"\Config\Stores\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
                     orig_daphne_store_content = sop.DaphneStore.SerializeToString();
@@ -2704,15 +2755,26 @@ namespace DaphneGui
             runButton.IsEnabled = true;
         }
 
+        private bool protocolChanged()
+        {
+            bool ret = false;
+
+            if (sop != null)
+            {
+                string refs = sop.Protocol.SerializeToString();
+
+                ret = refs != orig_content;
+            }
+            return ret;
+        }
+
         private bool saveTempFiles()
         {
             // no temp file saving when the vcr is open
             if (vcrControl.CheckFlag(VCRControl.VCR_OPEN) == false)
             {
                 // check if there were changes
-                string refs = sop.Protocol.SerializeToString();
-
-                if (sop != null && refs != orig_content)
+                if (sop != null && protocolChanged() == true)
                 {
                     sop.Protocol.SerializeToFile(true);
                     tempFileContent = true;
@@ -2831,10 +2893,9 @@ namespace DaphneGui
                     runSim_Tissue(!firstRun);
                     break;
                 case ToolWindowType.VatRC:
+                    //If no molecules are selected for rendering, inform user and return.
                     VatReactionComplexScenario ScenarioHandle = (VatReactionComplexScenario)SOP.Protocol.scenario;
-                    //RenderPop pop = null;
                     bool molChecked = ScenarioHandle.popOptions.molPopOptions.Where(x => x.renderOn == true).Any();
-
                     if (molChecked == false)
                     {
                         //Reset menu items
@@ -3811,8 +3872,14 @@ namespace DaphneGui
             }
         }
 
-        private void analCellPopDynMenu_Click(object sender, RoutedEventArgs e)
+        private void CellPopDynMenu_Click(object sender, RoutedEventArgs e)
         {
+            if (protocolChanged() == true)
+            {
+                MessageBox.Show("This analysis is not possible after making a change in the protocol.", "Protocol changed");
+                return;
+            }
+
             ST_CellPopDynToolWindow.Visibility = System.Windows.Visibility.Visible;
             ST_CellPopDynToolWindow.Float(new Point(this.Left + 30, this.Top + 40), new Size(1000, 824));
             ST_CellPopDynToolWindow.Activate();
