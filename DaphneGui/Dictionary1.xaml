@@ -300,9 +300,22 @@
         </StackPanel>
     </DataTemplate>
 
+    <!-- template for displaying reaction complexes in a list with tooltip showing description field -->
     <DataTemplate x:Key="reacCxListItemTemplate">
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="{Binding Path=Name}" ToolTipService.ShowOnDisabled="True" > 
+                <TextBlock.ToolTip>
+                    <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
+                    </TextBlock>
+                </TextBlock.ToolTip>
+            </TextBlock>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- template for displaying cells in a list with tooltip showing description field -->
+    <DataTemplate x:Key="cellsListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=CellName}" ToolTipService.ShowOnDisabled="True" > 
                 <TextBlock.ToolTip>
                     <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=description}">
                     </TextBlock>
