@@ -2298,6 +2298,24 @@ namespace DaphneGui
         //    double mean_val = distr_tde.Distr.ParamDistr.MeanValue();
 
         //}
+
+        private void memb_molecule_combo_box_Loaded(object sender, RoutedEventArgs e)
+        {
+            var item = CellMembraneMolPopsListBox.SelectedItem;
+            if (item != null)
+            {
+                memb_molecule_combo_box.SelectedValue = ((ConfigMolecularPopulation)item).molecule.entity_guid;
+            }
+        }
+
+        private void cyto_molecule_combo_box_Loaded(object sender, RoutedEventArgs e)
+        {
+            var item = CellCytosolMolPopsListBox.SelectedItem;
+            if (item != null)
+            {
+                cyto_molecule_combo_box.SelectedValue = ((ConfigMolecularPopulation)item).molecule.entity_guid;
+            }
+        }
     }
 
 }

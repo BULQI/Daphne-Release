@@ -543,6 +543,7 @@
                                                                     SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                     SelectedValuePath="entity_guid"
                                                                     SelectionChanged="memb_molecule_combo_box_SelectionChanged"
+                                                                    Loaded="memb_molecule_combo_box_Loaded"
                                                                     GotFocus="memb_molecule_combo_box_GotFocus">
 
                                                             <ComboBox.ItemsSource>
@@ -693,18 +694,19 @@
                                                         </Grid.RowDefinitions>
                                                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                                             <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                                            <ComboBox   x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                                                <ComboBox   x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                                     DisplayMemberPath="Name"            
                                                                     SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                     SelectedValuePath="entity_guid"
                                                                     SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
+                                                                    Loaded="cyto_molecule_combo_box_Loaded"
                                                                     GotFocus="cyto_molecule_combo_box_GotFocus"
                                                                     >
 
                                                                 <ComboBox.ItemsSource>
                                                                     <CompositeCollection>
-                                                                        <CollectionContainer Collection="{Binding Source={StaticResource availableBulkMoleculesListView}}" />
-                                                                        <daph:ConfigMolecule Name="New Molecule"/>
+                                                                            <CollectionContainer Collection="{Binding Source={StaticResource availableBulkMoleculesListView}}" />
+                                                                            <daph:ConfigMolecule Name="New Molecule"/>
                                                                     </CompositeCollection>
                                                                 </ComboBox.ItemsSource>
 
