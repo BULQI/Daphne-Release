@@ -6,6 +6,7 @@ using System.IO;
 using NativeDaphne;
 using Gene = NativeDaphne.Nt_Gene;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace Daphne
 {
@@ -25,6 +26,8 @@ namespace Daphne
             }
         }
         public DistributedParameter Phagocytosis;
+
+        Dictionary<BigInteger, int> item_to_keep;
 
         public CellManager()
         {
@@ -75,28 +78,29 @@ namespace Daphne
                 }
 
                 // for debugging
-                //if (iteration_count < 0) //> 0 && iteration_count % 10000 == 0) //> 0 && kvp.Value.Cell_id == 40)
-                //{
-                //    Debug.WriteLine("\n----membrane----");
-                //    foreach (var item in kvp.Value.PlasmaMembrane.Populations)
-                //    {
-                //        var tmp = item.Value.Conc;
-                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                //            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
-                //    }
+                if (false)
+                {
+                    Debug.WriteLine("===============cell id = {0}=================", cell.Cell_id);
+                    Debug.WriteLine("----membrane----");
+                    foreach (var item in cell.PlasmaMembrane.Populations)
+                    {
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
+                    }
 
-                //    Debug.WriteLine("----Cytosol----");
-                //    foreach (var item in kvp.Value.Cytosol.Populations)
-                //    {
-                //        var tmp = item.Value.Conc;
-                //        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                //            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
-                //    }
+                    Debug.WriteLine("----Cytosol----");
+                    foreach (var item in cell.Cytosol.Populations)
+                    {
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
+                    }
 
-                //    Debug.WriteLine("---locaiton---");
-                //    Debug.WriteLine("positon = {0} {1} {2}", kvp.Value.SpatialState.X[0], kvp.Value.SpatialState.X[1], kvp.Value.SpatialState.X[2]);
+                    Debug.WriteLine("---location---");
+                    Debug.WriteLine("positon = {0} {1} {2}", cell.SpatialState.X[0], cell.SpatialState.X[1], cell.SpatialState.X[2]);
 
-                //}
+                }
 
                 // if the cell  moved out of bounds schedule its removal
                 if (cell.Exiting == true)
@@ -125,7 +129,6 @@ namespace Daphne
                 {
                     // divide the cell, return daughter
                     Cell c = cell.Divide();
-
                     if (daughterList == null)
                     {
                         daughterList = new List<Cell>();
@@ -189,9 +192,9 @@ namespace Daphne
         /// </summary>
         public void ResetCellForces()
         {
-            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+            foreach (CellsPopulation cellpop in SimulationBase.dataBasket.Populations.Values)
             {
-                c.resetForce();
+                cellpop.resetForce();
             }
         }
 

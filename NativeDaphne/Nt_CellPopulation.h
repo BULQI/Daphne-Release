@@ -368,7 +368,13 @@ namespace NativeDaphne
 			return index;
 		}
 
-
+		void resetForce()
+		{
+			if (_F != NULL)
+			{
+				memset(_F, 0, array_length*sizeof(double));
+			}
+		}
 		/// <summary>
 		/// remove all reactions
 		/// </summary>

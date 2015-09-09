@@ -223,12 +223,17 @@ namespace NativeDaphne
 			{
 				throw gcnew Exception("Error Nt_Darray.Add: dimension mismsatch");
 			}
-			if (length == 1)
+			double *dst = d->NativePointer;
+
+			//only call lower level for long arrays.
+			if (length <= 4)
 			{
-				*_array += d->_array[0];
+				for (int i=0; i<length; i++)
+				{
+					_array[i] += dst[i];
+				}
 				return this;
 			}
-			double *dst = d->NativePointer;
 			NtUtility::AddDoubleArray(_array, dst, length);
 			return this;
 		}

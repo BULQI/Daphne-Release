@@ -225,7 +225,7 @@ namespace NativeDaphneLibrary
 	NtCellPair* NtCollisionManager::NewCellPair(long key, NtCell* _a, NtCell* _b)
 	{
 		NtCellPair* cellpair = NULL;
-		unsigned count = FreePairList.size();
+		unsigned count = (unsigned)FreePairList.size();
 		if (count > 0)
 		{
 			cellpair = FreePairList[count-1];
@@ -247,7 +247,7 @@ namespace NativeDaphneLibrary
 	void NtCollisionManager::balance()
 	{
 		
-		unsigned count = FreePairList.size();
+		unsigned count = (unsigned)FreePairList.size();
 		if (count == 0)
 		{
 			numPairs = NextFreeIndex;
@@ -255,7 +255,7 @@ namespace NativeDaphneLibrary
 		}
 
 		NtCellPair *pairArray = PairArrayStorage;
-		for (int i=0; i< count; i++)
+		for (int i=0; i< (int)count; i++)
 		{
 			NtCellPair* cellpair = FreePairList[i];
 			int index = (int)(cellpair - pairArray);

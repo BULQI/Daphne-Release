@@ -14,7 +14,7 @@ namespace Daphne
     public abstract class ITransitionDriver : IDynamic
     {
         public bool TransitionOccurred { get; set; }
-        public int CurrentState { get; set; }
+        public virtual int CurrentState { get; set; }
         public int PreviousState { get; set; }
         public int FinalState { get; set; }
         public abstract void AddDriverElement(int origin, int destination, TransitionDriverElement driverElement);
@@ -134,6 +134,27 @@ namespace Daphne
             FinalState = 0;
             events = new List<int>();
             CurrentDriver = null;
+        }
+
+        public override int CurrentState
+        {
+            get
+            {
+                return base.CurrentState;
+            }
+
+            set
+            {
+                if (drivers != null && drivers.ContainsKey(value))
+                {
+                    CurrentDriver = drivers[value];
+                }
+                else
+                {
+                    CurrentDriver = null;
+                }
+                base.CurrentState = value;
+            }
         }
 
         /// <summary>

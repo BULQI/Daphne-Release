@@ -47,6 +47,7 @@ namespace NativeDaphne
 		if (this->isChemotactic)
 		{
 			double *driverConc = ComponentCells[0]->Driver->ConcPointer;
+
 			if (TransductionConstant != -1) //TransductionConstant all same
 			{
 				NtUtility::cell_apply_chemotactic_force(array_length, TransductionConstant, driverConc, _F);
@@ -99,7 +100,7 @@ namespace NativeDaphne
 		daxpy(array_length, dt, _F, 1, _V, 1);
 
 		//reset cell force
-		memset(_F, 0, array_length*sizeof(double));
+		//memset(_F, 0, array_length*sizeof(double));
 
 		//apply boundary condition - BoundaryBC
 		array<double>^ extents = Nt_CellManager::EnvironmentExtent;

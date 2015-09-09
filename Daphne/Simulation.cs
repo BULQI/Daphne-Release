@@ -1290,8 +1290,7 @@ namespace Daphne
                 dataBasket.Environment.Step(localStep);
                 
                 // zero all cell forces; needs to happen first
-                //handled in the middle layer
-                //cellManager.ResetCellForces();
+                cellManager.ResetCellForces();
 
                 // handle collisions
                 if (collisionManager != null)

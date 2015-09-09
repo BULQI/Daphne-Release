@@ -62,18 +62,19 @@ namespace NativeDaphneLibrary
 		static void AddDoubleArray(double *a, double *b, int length)
 		{
 #if defined(USE_SSE)
-			int i;
-			for (i=0; i< length; i+= 2)
+			int n = (length >> 1)<<1;
+			for (int i=0; i< n; i+= 2)
 			{
 				__m128d v0 = _mm_load_pd(&a[i]);
 				__m128d v1 = _mm_load_pd(&b[i]);
 				__m128d c = _mm_add_pd(v0, v1);
 				_mm_store_pd(&a[i], c);
 			}
-			if (i != length + 1)
+			if (n < length)
 			{
-				a[length-1] += b[length-1];
+				a[n] += b[n];
 			}
+
 #else
 			double *s = a + length;
 			while (a < s)

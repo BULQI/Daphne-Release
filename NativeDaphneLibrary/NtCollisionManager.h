@@ -31,8 +31,17 @@ namespace NativeDaphneLibrary
 		int threadId;
 	};
 
+	#pragma warning (disable : 4251)
+
 	class DllExport NtCollisionManager : public NtGrid
 	{
+	private:
+
+		//note: using vector template here causing a compiler warning C4251
+		//but does not affect the running.
+		//to remove the warning, use another container
+		//or other tricks. we are disabling it for now
+		vector<NtCellPair *> FreePairList;
 
 	public:
 		static double *GridSize;
@@ -47,7 +56,7 @@ namespace NativeDaphneLibrary
 		int ReserveStorageSize;
 		NtCellPair *PairArrayStorage;
 		int NextFreeIndex;
-		vector<NtCellPair *> FreePairList;
+		//vector<NtCellPair *> FreePairList;
 
 
 		//thread stuff

@@ -76,7 +76,7 @@ namespace NativeDaphneLibrary
 
 	void NtNormalDistribution::initialize_buffer()
 	{
-		int alloc_size = buffer_size + 10;
+		int alloc_size = buffer_size;
 		buffer = (double *)_aligned_realloc(buffer, alloc_size * sizeof(double), 32);
 		buffer_backup = (double *)_aligned_realloc(buffer_backup, alloc_size * sizeof(double), 32);
 		if (buffer == NULL || buffer_backup == NULL)
@@ -92,12 +92,6 @@ namespace NativeDaphneLibrary
 		if (info != 0)
 		{
 			throw new exception("Error generating random number");
-		}
-
-		for (int i=buffer_size; i< alloc_size; i++)
-		{
-			 buffer[i] = 1000 * i;
-			 buffer_backup[i] = -1000 * i;
 		}
 
 		backup_ready = 1;
@@ -135,7 +129,7 @@ namespace NativeDaphneLibrary
 		//if requested number is larege, adjust to buffer size to 4 times of the requested number
 		if (n * 4 > buffer_size)
 		{
-			buffer_size = n * 4;
+			buffer_size = n * 8;
 			::InterlockedExchange(&thread_done, 1);
 			::SetEvent(this->JobReadyEvent);
 			WaitForSingleObject(ThreadHandle, INFINITE);
