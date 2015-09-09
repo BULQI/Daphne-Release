@@ -489,7 +489,7 @@ namespace Daphne
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
             {
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.Cytosol));
-
+                newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
                 daughter.Cytosol.Populations.Add(kvp.Key, newMP);
             }
@@ -497,7 +497,7 @@ namespace Daphne
             foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
             {
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.PlasmaMembrane));
-
+                newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
                 daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
             }
@@ -573,7 +573,10 @@ namespace Daphne
             // death
             LoadTransitionDriverElements(daughter, daughter.DeathBehavior, DeathBehavior);
             daughter.DeathBehavior.CurrentState = DeathBehavior.CurrentState;
-            daughter.DeathBehavior.InitializeState();
+            // For distribution-driven transitions, the daughter will be assigned the same clock and time-to-next event values as the mother.
+            // InitializeState() doesn't do anything, for molecule-driven transitions.
+            // So, no need to run InitializeState.            
+            // daughter.DeathBehavior.InitializeState();
 
             // division
             if (Divider.nStates > 1)
