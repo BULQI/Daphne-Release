@@ -201,6 +201,7 @@
                 <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Weight"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Radius"></TextBlock>
+                <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Guid"></TextBlock>
             </StackPanel>
             
             <StackPanel Orientation="Horizontal">
@@ -216,6 +217,7 @@
                     <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> </uc:DoublesBox>
                     <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                     <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                    <TextBox Visibility="Collapsed" Width="250" Text="{Binding Path=entity_guid}" IsEnabled="False"></TextBox>
                 </StackPanel>
                 
             </StackPanel>

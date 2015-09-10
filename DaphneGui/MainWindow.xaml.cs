@@ -3538,25 +3538,25 @@ namespace DaphneGui
                 if (erMol != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erMol;
-                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
+                newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
             }
             else if (source is ConfigReaction)
             {
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
                 {
                     pm.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-                    newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
                 }
+                newEntity = ((ConfigReaction)source).Clone(false);  //to be used only if user wants to save as new entity
             }
             else if (source is ConfigCell)
             {
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
                 {
                     pm.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
-                    ((ConfigCell)newEntity).CellName = ((ConfigCell)newEntity).GenerateNewName(MainWindow.SOP.Protocol, "_Copy");
                 }
+                newEntity = ((ConfigCell)source).Clone(false);  //to be used only if user wants to save as new entity
+                ((ConfigCell)newEntity).CellName = ((ConfigCell)newEntity).GenerateNewName(MainWindow.SOP.Protocol, "_Copy");
             }
             else if (source is ConfigGene)
             {
@@ -3564,8 +3564,8 @@ namespace DaphneGui
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
-                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
                 }
+                newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);  //to be used only if user wants to save as new entity
             }
             else if (source is ConfigReactionComplex)
             {
@@ -3573,9 +3573,9 @@ namespace DaphneGui
                 {
                     ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
                     pm.ComponentLevelDetails.DataContext = erRC;
-                    newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
-                    ((ConfigReactionComplex)newEntity).Name = ((ConfigReactionComplex)newEntity).GenerateNewName(MainWindow.SOP.Protocol, " Copy");
                 }
+                newEntity = ((ConfigReactionComplex)source).Clone(false);  //to be used only if user wants to save as new entity
+                ((ConfigReactionComplex)newEntity).Name = ((ConfigReactionComplex)newEntity).GenerateNewName(MainWindow.SOP.Protocol, " Copy");
             }
             else if (source is ConfigTransitionScheme)
             {

@@ -807,7 +807,11 @@ namespace DaphneGui
                         {
                             cell.cytosol.molecules_dict.Remove(curr_mol_guid);
                         }
-                        cell.cytosol.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+
+                        if (cell.cytosol.molecules_dict.ContainsKey(molpop.molecule.entity_guid) == false)
+                        {
+                            cell.cytosol.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
+                        }
                     }
                 }
             }

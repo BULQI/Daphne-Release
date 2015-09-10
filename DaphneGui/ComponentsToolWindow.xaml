@@ -248,6 +248,14 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            
+                            <DataGridTemplateColumn Visibility="Collapsed" Header="Guid" Width="240" MaxWidth="300" SortMemberPath="entity_guid">
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <TextBox Width="230" IsEnabled="False" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=entity_guid, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
                         </DataGrid.Columns>
                     </DataGrid>

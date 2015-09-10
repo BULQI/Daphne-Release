@@ -4008,7 +4008,7 @@ namespace Daphne
                 Guid id = Guid.NewGuid();
 
                 newmol.entity_guid = id.ToString();
-                newmol.Name = newmol.GenerateNewName(level, "Copy");
+                //newmol.Name = newmol.GenerateNewName(level, "Copy");
                 newmol.renderLabel = newmol.entity_guid;
             }
 
