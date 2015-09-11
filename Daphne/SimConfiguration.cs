@@ -26,7 +26,7 @@ namespace Daphne
     /// <summary>
     /// ties together all levels of storage
     /// </summary>
-    public class SystemOfPersistence
+    public class SystemOfPersistence:INotifyPropertyChanged
     {
         /// <summary>
         /// Protocol level, contains Entity level
@@ -39,8 +39,12 @@ namespace Daphne
             }
             set
             {
-                protocol = value;
-                HProtocol = protocol;
+                if (protocol != value)
+                {
+                    protocol = value;
+                    HProtocol = protocol;
+                    OnPropertyChanged("Protocol");
+                }
             }
         }
 
@@ -188,7 +192,17 @@ namespace Daphne
             return SelectedRenderSkin.renderMols.Where(x => x.renderLabel == label).SingleOrDefault();
         }
 
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public enum PushLevel { Protocol = 0, UserStore, DaphneStore }
