@@ -503,7 +503,7 @@ namespace Daphne
             } 
 
             //CELLS - recursive
-            item = new string[1] { "Leukocyte_staticReceptor_motile" };
+            item = new string[1] { "chemotactic with static receptor" };
             itemsLoaded = LoadProtocolCells(protocol, item, userstore);
             if (itemsLoaded != item.Length)
             {
@@ -514,7 +514,7 @@ namespace Daphne
 
             // Linear CXCL13 distribution
             //
-            double CXCL13conc = 3;
+            double CXCL13conc = 0.2;
             double[] conc = new double[1] { CXCL13conc };
             item = new string[1] { "CXCL13" };
             for (int i = 0; i < item.Length; i++)
@@ -554,7 +554,7 @@ namespace Daphne
 
             // Add cell
             //This code will add the cell and the predefined ConfigCell already has the molecules needed
-            ConfigCell configCell = findCell("Leukocyte_staticReceptor_motile", protocol);
+            ConfigCell configCell = findCell("chemotactic with static receptor", protocol);
             //protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
@@ -1121,69 +1121,20 @@ namespace Daphne
             // Barroso2012:  13,851 per cell = 44 um^{-2} for cells with 5 um radius
             double cxcr5Conc_5umRadius = 44;
 
-            //
-            // Leukocyte_staticReceptor
-            // Leukocyte with fixed number of receptor molecules and no locomotion
-            //
+            /////////////////////////////
+            // stochastic locomotion
+            /////////////////////////////
+
             gc = new ConfigCell();
-            gc.CellName = "Leukocyte_staticReceptor";
+            gc.CellName = "stochastic locomotion";
             gc.CellRadius = 5.0;
 
-            //MOLECULES IN MEMBRANE
-            conc = new double[2] { cxcr5Conc_5umRadius, 0 };
-            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            gc.description = string.Format("{0}{1}", gc.description, "This cell has a 10 um diameter and undergoes stochastic locomotion.  ");
 
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.membrane.molpops.Add(gmp);
-                }
-            }
-
-            //MOLECULES IN Cytosol
-#if LEUKOCYTE_HAS_DEATH // remove to reenable death as a default behavior for leukocytes
-            conc = new double[1] { 0 };
-            type = new string[1] { "sApop" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
-                    gmp.Name = cm.Name;
-
-                    gmp.mp_render_blending_weight = 2.0;
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.cytosol.molpops.Add(gmp);
-                }
-            }
-
-            // Add genes
-            type = new string[1] { "gApop" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                gc.genes.Add(findGene(type[i], sc));
-            }
-
-            //
-            // ToDo: Add gene transcription for sApop
-
-            // Add death driver
-            // Cell cytoplasm must contain sApop molecular population
-            gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
-#endif
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: none");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
 
             gc.DragCoefficient = new DistributedParameter(1.0);
             gc.TransductionConstant = new DistributedParameter(100);
@@ -1191,17 +1142,31 @@ namespace Daphne
 
             store.entity_repository.cells.Add(gc);
 
-            //////////////////////////////////////////////
-            // Leukocyte_staticReceptor_motile
-            // Leukocyte with fixed number of receptor molecules with locomotion driven by A*.
-            //
+            /////////////////////////////////////////////////////////////////////////////////////
+            // chemotactic with static receptor
+            //////////////////////////////////////////////////////////////////////////////////////
+
             gc = new ConfigCell();
-            gc.CellName = "Leukocyte_staticReceptor_motile";
+            gc.CellName = "chemotactic with static receptor";
             gc.CellRadius = 5.0;
 
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter and undergoes stochastic locomotion.  ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The plasma membrane has 14,000 CXCR4 and CXCR5 receptors (Barroso2012), ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "corresponding to a concentration of 44 molec/um^2 for each. ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The cell moves chemotactically in the presence of CXCL12 or CXCL13 gradients. ");
+            gc.description = string.Format("{0}{1}", gc.description, "The (pseudo) molecule A* is the chemotaxis 'driver': the chemotactic force is proportional to the gradient of [A*], ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "which is induced by gradients in bound chemokine receptors (CXCL12:CXCR4| and CXCL13:CXCR5|). ");
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: none");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
+
             //MOLECULES IN MEMBRANE
-            conc = new double[2] { cxcr5Conc_5umRadius, 0 };
-            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            conc = new double[] { cxcr5Conc_5umRadius, 0, cxcr5Conc_5umRadius, 0 };
+            type = new string[] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
@@ -1219,8 +1184,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[3] { 250, 0, 0 };
-            type = new string[3] { "A", "A*", "sApop" };
+            conc = new double[] { 250, 0, };
+            type = new string[] { "A", "A*" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -1238,16 +1203,9 @@ namespace Daphne
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
-            // Add genes
-            type = new string[1] { "gApop" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                gc.genes.Add(findGene(type[i], store));
-            }
-
             // Reactions in Cytosol
-            type = new string[3] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-                                          "A* -> A", "gApop -> sApop + gApop" };
+            type = new string[] { "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|" };
+                                          //"A* -> A", "gApop -> sApop + gApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], store);
@@ -1263,17 +1221,33 @@ namespace Daphne
 
             store.entity_repository.cells.Add(gc);
 
-            /////////////////////////////////////////////
-            // Leukocyte_dynamicReceptor_motile
-            // Leukocyte with dynamic concentration of receptor molecules with locomotion driven by A*.
-            //
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // chemotactic with receptor homeostasis
+            //////////////////////////////////////////////////////////////////////////////////////////////
+
             gc = new ConfigCell();
-            gc.CellName = "Leukocyte_dynamicReceptor_motile";
+            gc.CellName = "chemotactic with receptor homeostasis";
             gc.CellRadius = 5.0;
 
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter and undergoes stochastic locomotion.  ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The plasma membrane has CXCR4 and CXCR5 receptors which are homeostatically maintained ");
+            gc.description = string.Format("{0}{1}", gc.description, "through gene transcription, transport to the plasma membrane, internalization, and degrdation. ");
+            gc.description = string.Format("{0}{1}", gc.description, "CXCR4 and CXCR5 production rates are based on data from de Guinoa et al. (2011). ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "CXCR4 and CXCR5 receptor interanlization rates are based on data from Barrosso et al. (2012) and Hesselgesser et al. (1998). ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The cell moves chemotactically in the presence of CXCL12 or CXCL13 gradients. ");
+            gc.description = string.Format("{0}{1}", gc.description, "The (pseudo) molecule A* is the chemotaxis 'driver': the chemotactic force is proportional to the gradient of [A*], ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "which is induced by gradients in bound chemokine receptors (CXCL12:CXCR4| and CXCL13:CXCR5|). ");
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: none");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
+
             //MOLECULES IN MEMBRANE
-            conc = new double[2] { cxcr5Conc_5umRadius, 0 };
-            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            conc = new double[] { cxcr5Conc_5umRadius, 0, cxcr5Conc_5umRadius, 0 };
+            type = new string[] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
@@ -1291,8 +1265,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[5] { 250, 0, 0, 0, 0 };
-            type = new string[5] { "A", "A*", "CXCR5", "CXCL13:CXCR5", "sApop" };
+            conc = new double[] { 250,  0,     0,        0,              0,          0};
+            type = new string[] { "A", "A*", "CXCR5", "CXCL13:CXCR5", "CXCR4", "CXCL12:CXCR4" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
@@ -1311,14 +1285,15 @@ namespace Daphne
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Add genes
-            type = new string[2] { "gApop", "gCXCR5" };
+            type = new string[] { "gCXCR4", "gCXCR5" };
             for (int i = 0; i < type.Length; i++)
             {
                 gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
-            type = new string[9] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+            type = new string[] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", 
+                                  "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|",
                                   "A* -> A",
                                   "gCXCR5 -> CXCR5 + gCXCR5",
                                   "CXCR5 -> CXCR5|",
@@ -1326,7 +1301,12 @@ namespace Daphne
                                   "CXCR5 ->",
                                   "CXCL13:CXCR5| -> CXCL13:CXCR5", 
                                   "CXCL13:CXCR5 ->",
-                                  "gApop -> sApop + gApop"
+                                   "gCXCR4 -> CXCR4 + gCXCR4",
+                                  "CXCR4 -> CXCR4|",
+                                  "CXCR4| -> CXCR4",
+                                  "CXCR4 ->",
+                                  "CXCL12:CXCR4| -> CXCL12:CXCR4", 
+                                  "CXCL12:CXCR4 ->",
                                 };
             for (int i = 0; i < type.Length; i++)
             {
@@ -1343,118 +1323,136 @@ namespace Daphne
 
             store.entity_repository.cells.Add(gc);
 
-            /////////////////////////////////////
-            //// B cell
-            //// B cell with differentiation states: 
-            ////      Naive, Activated, Short-lived plasmacyte, Long-lived plasmacyte, Centroblast, Centrocyte, Memory
+            /////////////////////////////////////////
+            // centroblast-centrocyte recycling
+            ////////////////////////////////////////
 
-            //gc = new ConfigCell();
-            //gc.CellName = "B";
-            //gc.CellRadius = 5.0;
+            gc = new ConfigCell();
+            gc.CellName = "centroblast-centrocyte recycling";
+            gc.CellRadius = 5.0;
 
-            ////MOLECULES IN MEMBRANE
-            //conc = new double[4] { cxcr5Conc_5umRadius, 0, 0, 0};
-            //type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
-            //for (int i = 0; i < type.Length; i++)
-            //{
-            //    cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
-            //    if (cm != null)
-            //    {
-            //        gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            //        gmp.molecule = cm.Clone(null);
-            //        gmp.Name = cm.Name;
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter and undergoes stochastic locomotion.  ");
 
-            //        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-            //        hl.concentration = conc[i];
-            //        gmp.mp_distribution = hl;
-            //        gc.membrane.molpops.Add(gmp);
-            //    }
-            //}
+            gc.description = string.Format("{0}{1}", gc.description, "The plasma membrane has CXCR4 and CXCR5 receptors which are homeostatically maintained ");
+            gc.description = string.Format("{0}{1}", gc.description, "through gene transcription, transport to the plasma membrane, internalization, and degrdation. ");
+            gc.description = string.Format("{0}{1}", gc.description, "CXCR4 and CXCR5 production rates are based on data from de Guinoa et al. (2011). ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "CXCR4 and CXCR5 receptor interanlization rates are based on data from Barrosso et al. (2012) and Hesselgesser et al. (1998). ");
 
-            ////MOLECULES IN Cytosol
-            //conc = new double[19] { 250,  0,     0,       0,       0,       0,        0,      0,       0,     0,        0,
-            //                        0,          0,      0,    0,    0,      0,      0,      0 };
-            //type = new string[19] { "A", "A*", "sDif1", "sDif2", "sDif3", "sDif4", "sDif5", "sDif6", "sDif7", "sApop", "sDiv",
-            //                        "CXCR4", "CXCR5", "IgH", "IgL", "IgS", "AID", "BL1", "MHCII" };
+            gc.description = string.Format("{0}{1}", gc.description, "The cell moves chemotactically in the presence of CXCL12 or CXCL13 gradients. ");
+            gc.description = string.Format("{0}{1}", gc.description, "The (pseudo) molecule A* is the chemotaxis 'driver': the chemotactic force is proportional to the gradient of [A*], ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "which is induced by gradients in bound chemokine receptors (CXCL12:CXCR4| and CXCL13:CXCR5|). ");
 
-            //for (int i = 0; i < type.Length; i++)
-            //{
-            //    cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-            //    if (cm != null)
-            //    {
-            //        gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            //        gmp.molecule = cm.Clone(null);
-            //        gmp.Name = cm.Name;
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: centroblast, centrocyte");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
 
-            //        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-            //        hl.concentration = conc[i];
-            //        gmp.mp_distribution = hl;
-            //        gc.cytosol.molpops.Add(gmp);
-            //    }
-            //}
-            //gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
+            //MOLECULES IN MEMBRANE
+            conc = new double[] { 0, 0, 0, 0 };
+            type = new string[] { "CXCR4|", "CXCR5|", "CXCL12:CXCR4|", "CXCL13:CXCR5|" };
 
-            //// Genes
-            //type = new string[17] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII", "gApop",
-            //                        "gDif1", "gDif2", "gDif3", "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
-            //for (int i = 0; i < type.Length; i++)
-            //{
-            //    gc.genes.Add(findGene(type[i], store));
-            //}
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
 
-            //// Reactions in Cytosol
-            //type = new string[34] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-            //                        "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
-            //                        "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
-            //                        "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
-            //                        "gDif1 -> sDif1 + gDif1", "gDif2 -> sDif2 + gDif2", "gDif3 -> sDif3 + gDif3", "gDif4 -> sDif4 + gDif4",
-            //                        "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv", "sApop ->",
-            //                        "sDif1 ->", "sDif2 ->", "sDif3 ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->",
-            //                        "IgH ->", "IgL ->", "IgS ->", "AID ->", "BL1 ->", "MHCII ->", "sDiv ->"
-            //                      };
-            //for (int i = 0; i < type.Length; i++)
-            //{
-            //    reac = findReaction(type[i], store);
-            //    if (reac != null)
-            //    {
-            //        gc.cytosol.Reactions.Add(reac.Clone(true));
-            //    }
-            //}
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
 
-            //gc.DragCoefficient = new DistributedParameter(1.0);
-            //gc.TransductionConstant = new DistributedParameter(100.0);
-            //gc.Sigma = new DistributedParameter(4.0);
+            //MOLECULES IN Cytosol
+            conc = new double[] { 250, 0, 0, 0, 0, 0 };
+            type = new string[] { "A", "A*", "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
 
-            //// Add differentiatior
-            //// Assumes all genes and signal molecules are present
-            //string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", store);
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
 
-            //if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
-            //{
-            //    gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
-            //}
+            // Add genes
+            type = new string[] { "gCXCR4", "gCXCR5" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes.Add(findGene(type[i], store));
+            }
 
-            //// Add apoptosis
-            //string death_driver_guid = findTransitionDriverGuid("generic apoptosis", store);
+            // Reactions in Cytosol
+            type = new string[] { "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|", "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A", 
+                                  "gCXCR4 -> CXCR4 + gCXCR4", 
+                                  "CXCR4 ->", "CXCR4 -> CXCR4|", 
+                                  "CXCR4| -> CXCR4",
+                                  "CXCL12:CXCR4| -> CXCL12:CXCR4",  
+                                  "CXCL12:CXCR4 ->",
+                                  "gCXCR5 -> CXCR5 + gCXCR5", 
+                                  "CXCR5 ->", "CXCR5 -> CXCR5|", 
+                                  "CXCR5| -> CXCR5",
+                                  "CXCL13:CXCR5| -> CXCL13:CXCR5",  
+                                  "CXCL13:CXCR5 ->" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], store);
+                if (reac != null)
+                {
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
+                }
+            }
 
-            //if (store.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
-            //{
-            //    gc.death_driver = store.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
-            //}
+            string guid = findDiffSchemeGuid("cycling cb-cc diff scheme", store);
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(guid) == true)
+            {
+                gc.diff_scheme = store.entity_repository.diff_schemes_dict[guid].Clone(true);
+            }
 
-            //// add division
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(4.0);
 
-            //store.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
-            ///////////////////////////////////
-            // GC B cell
-            // B cell with differentiation states: 
-            //      Activated, Initialization, Centroblast, Centrocyte states       
+
+            //////////////////////////////////////////////////////////////////////////////////
+            // simple Germinal Center B cell
+            // 
+            // states: activated, pre-centroblast, centroblast, centrocyte, rescued, apoptotic       
+            //////////////////////////////////////////////////////////////////////////////////
     
             gc = new ConfigCell();
-            gc.CellName = "GC B";
+            gc.CellName = "simple Germinal Center B cell";
             gc.CellRadius = 5.0;
-            gc.description = "Germinal Center B cell.";
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter and undergoes stochastic locomotion.  ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The plasma membrane has CXCR4 and CXCR5 receptors which are homeostatically maintained ");
+            gc.description = string.Format("{0}{1}", gc.description, "through gene transcription, transport to the plasma membrane, internalization, and degrdation. ");
+            gc.description = string.Format("{0}{1}", gc.description, "CXCR4 and CXCR5 production rates are based on data from de Guinoa et al. (2011). ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "CXCR4 and CXCR5 receptor interanlization rates are based on data from Barrosso et al. (2012) and Hesselgesser et al. (1998). ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The cell moves chemotactically in the presence of CXCL12 or CXCL13 gradients. ");
+            gc.description = string.Format("{0}{1}", gc.description, "The (pseudo) molecule A* is the chemotaxis 'driver': the chemotactic force is proportional to the gradient of [A*], ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "which is induced by gradients in bound chemokine receptors (CXCL12:CXCR4| and CXCL13:CXCR5|). ");
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: activated, pre-centroblast, centroblast, centrocyte, rescued, apoptotic");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: G0, G1, S, G2-M, cytokinetic");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death (after reaching apoptotic state)");
 
             //MOLECULES IN MEMBRANE
             conc = new double[4] { 0, 0, 0, 0 };
@@ -1536,7 +1534,7 @@ namespace Daphne
             gc.Sigma = new DistributedParameter(4.0);
 
             // DIFFERENTIATOR
-            string guid = findDiffSchemeGuid("GC B cell differentiation scheme", store);
+            guid = findDiffSchemeGuid("GC B cell differentiation scheme", store);
             if (store.entity_repository.diff_schemes_dict.ContainsKey(guid) == true)
             {
                 gc.diff_scheme = store.entity_repository.diff_schemes_dict[guid].Clone(true);
@@ -1558,12 +1556,103 @@ namespace Daphne
 
             store.entity_repository.cells.Add(gc);
 
-            ////////////////////////
-            // Stromal CXCL12-secreting
-            //
+
+            ////////////////////////////////
+            // simple germinal center T cell
+            ///////////////////////////////
+
             gc = new ConfigCell();
-            gc.CellName = "Stromal CXCL12-secreting";
+            gc.CellName = "simple germinal center T cell";
             gc.CellRadius = 5.0;
+
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter and undergoes stochastic locomotion.  ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The plasma membrane has fixed numbers of T cell receptor (TCR) and CXCR5 receptors.  ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Chemotactic receptor (CXCR5) and T cell receptor (TCR) total molecular concentrations are fixed. ");
+
+            gc.description = string.Format("{0}{1}", gc.description, "The cell moves chemotactically in the presence of CXCL13 gradients. ");
+            gc.description = string.Format("{0}{1}", gc.description, "The (pseudo) molecule A* is the chemotaxis 'driver': the chemotactic force is proportional to the gradient of [A*], ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "which is induced by gradients in bound chemokine receptor CXCL13:CXCR5|. ");
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: none");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
+
+
+            gc.description = gc.description + "TCR density based on data from Hessengesser 2013.";
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[] { 50, 0, 300 };
+            type = new string[] { "CXCR5|", "CXCL13:CXCR5|", "TCR|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[] { 250, 0 };
+            type = new string[] { "A", "A*" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule = cm.Clone(null);
+                    gmp.Name = cm.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
+
+            // Reactions in Cytosol
+            type = new string[] { "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], store);
+                if (reac != null)
+                {
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
+                }
+            }
+
+            gc.DragCoefficient = new DistributedParameter(1.0);
+            gc.TransductionConstant = new DistributedParameter(100.0);
+            gc.Sigma = new DistributedParameter(4.0);
+
+            store.entity_repository.cells.Add(gc);
+
+            ////////////////////////////////////
+            // CXCL12-secreting
+            ////////////////////////////////////
+
+            gc = new ConfigCell();
+            gc.CellName = "CXCL12-secreting";
+            gc.CellRadius = 5.0;
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter, no locomotion, and secretes CXCL12. ");
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: none");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
 
             //MOLECULES IN MEMBRANE
             conc = new double[1] { 0 };
@@ -1629,11 +1718,19 @@ namespace Daphne
             store.entity_repository.cells.Add(gc);
 
             ////////////////////////////////
-            // Stromal CXCL13-secreting
-            //
+            // CXCL13-secreting
+            ///////////////////////////////
+
             gc = new ConfigCell();
-            gc.CellName = "Stromal CXCL13-secreting";
+            gc.CellName = "CXCL13-secreting";
             gc.CellRadius = 5.0;
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "This cell has a 10 um diameter, no locomotion, and secretes CXCL13. ");
+
+            gc.description = string.Format("{0}{1}\n", gc.description, "The cell has the following behaviors: ");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Differentiation states: none");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Division (cell cycle) states: no cell division");
+            gc.description = string.Format("{0}{1}\n", gc.description, "Death: none");
 
             //MOLECULES IN MEMBRANE
             conc = new double[1] { 0 };
@@ -1697,157 +1794,6 @@ namespace Daphne
             gc.Sigma = new DistributedParameter(0.0);
 
             store.entity_repository.cells.Add(gc);
-
-            ////////////////////////////////
-            // Cycling cb-cc cell
-            //
-            gc = new ConfigCell();
-            gc.CellName = "cb-cc_cycling";
-            gc.CellRadius = 5.0;
-
-            //MOLECULES IN MEMBRANE
-            conc = new double[] { 0, 0, 0, 0 };
-            type = new string[] { "CXCR4|", "CXCR5|", "CXCL12:CXCR4|", "CXCL13:CXCR5|" };
-
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.membrane.molpops.Add(gmp);
-                }
-            }
-
-            //MOLECULES IN Cytosol
-            conc = new double[] { 250, 0, 0, 0, 0, 0 };
-            type = new string[] { "A", "A*", "CXCR4", "CXCR5", "CXCL12:CXCR4", "CXCL13:CXCR5" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.cytosol.molpops.Add(gmp);
-                }
-            }
-
-            // Add genes
-            type = new string[] { "gCXCR4", "gCXCR5" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                gc.genes.Add(findGene(type[i], store));
-            }
-
-            // Reactions in Cytosol
-            type = new string[] { "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|", "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A", 
-                                  "gCXCR4 -> CXCR4 + gCXCR4", 
-                                  "CXCR4 ->", "CXCR4 -> CXCR4|", "CXCR4| -> CXCR4",
-                                  "CXCL12:CXCR4| -> CXCL12:CXCR4",  "CXCL12:CXCR4 ->",
-                                  "gCXCR5 -> CXCR5 + gCXCR5", 
-                                  "CXCR5 ->", "CXCR5 -> CXCR5|", "CXCR5| -> CXCR5",
-                                  "CXCL13:CXCR5| -> CXCL13:CXCR5",  "CXCL13:CXCR5 ->" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                reac = findReaction(type[i], store);
-                if (reac != null)
-                {
-                    gc.cytosol.Reactions.Add(reac.Clone(true));
-                }
-            }
-
-            guid = findDiffSchemeGuid("cycling cb-cc diff scheme", store);
-            if (store.entity_repository.diff_schemes_dict.ContainsKey(guid) == true)
-            {
-                gc.diff_scheme = store.entity_repository.diff_schemes_dict[guid].Clone(true);
-            }
-
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
-            gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(4.0);
-
-            store.entity_repository.cells.Add(gc);
-
-            ////////////////////////////////
-            // T cell
-            //
-            gc = new ConfigCell();
-            gc.CellName = "T";
-            gc.CellRadius = 5.0;
-            gc.description = "Minimal implementation of a T cell. ";
-            gc.description = gc.description + "Chemotactic receptor (CXCR5) and T cell receptor (TCR) total molecular concentrations are fixed. ";
-            gc.description = gc.description + "[CXCR5|] value based on data from Hessengesser 2013. ";
-            gc.description = gc.description + "TCR density based on data from Hessengesser 2013.";
-
-            //MOLECULES IN MEMBRANE
-            conc = new double[] { 520, 0, 0 };
-            type = new string[] { "CXCR5|", "CXCL13:CXCR5|", "TCR|" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.membrane.molpops.Add(gmp);
-                }
-            }
-
-            //MOLECULES IN Cytosol
-            conc = new double[] { 250, 0 };
-            type = new string[] { "A", "A*" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-                if (cm != null)
-                {
-                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule = cm.Clone(null);
-                    gmp.Name = cm.Name;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = conc[i];
-                    gmp.mp_distribution = hl;
-                    gc.cytosol.molpops.Add(gmp);
-                }
-            }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
-
-            // Reactions in Cytosol
-            type = new string[] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                reac = findReaction(type[i], store);
-                if (reac != null)
-                {
-                    gc.cytosol.Reactions.Add(reac.Clone(true));
-                }
-            }
-
-            gc.DragCoefficient = new DistributedParameter(1.0);
-            gc.TransductionConstant = new DistributedParameter(100.0);
-            gc.Sigma = new DistributedParameter(4.0);
-
-            store.entity_repository.cells.Add(gc);
-
 
         }
 
@@ -2225,17 +2171,11 @@ namespace Daphne
                                            { 0,     1 },   // centrocyte
                                          };
             
-            // centrocyte/centroblast transition
-            // [Allen2007].
-            // Our estimate that GC B cells spend only several hours in the light zone ...
-            // Gamma distribution with rate=15 and shape=8 has mean value of 120 minutes
-            // pdf(60) = 1.1e-4, pdf(180) = 7.1e-4
-            //
+            // centrocyte/centroblast recycling transition
+            //      These numbers are more closely aligned to centroblasts as rescued centrocytes.
+            //      mean of 417 min = 7 hours: 1 hour to get from DZ to LZ and 6 hours in the LZ
             // centroblast/centrocyte transition 
-            // Assume new centroblasts undergo 6 rounds of division at 12 hours per division.
-            // GC B cells can divide after differentiating to centrocytes (Allen 2007), but have the bulk of division in the DZ.
-            // Then make the mean transition time of centrocyte/centroblast transition ~4320 minutes.
-            // Weibull distribution with s=4312 and shape=6 gives a broad distribution with mean 4000 minutes.
+            //      mean of 775 min = 13 hr
             //
             diffScheme = new ConfigTransitionScheme();
             diffScheme.Name = "cycling cb-cc diff scheme";
@@ -2243,6 +2183,15 @@ namespace Daphne
             driver.Name = "cycling cb-cc driver";
             driver.CurrentState = new DistributedParameter(0);
             driver.StateName = stateNames[0];
+
+            // Distribute starting cell population between the two states (centroblast and centrocyte)
+            driver.CurrentState.DistributionType = ParameterDistributionType.CATEGORICAL;
+            CategoricalParameterDistribution cat_dist = new CategoricalParameterDistribution();
+            CategoricalDistrItem cdi1 = new CategoricalDistrItem(0, 0.5);
+            CategoricalDistrItem cdi2 = new CategoricalDistrItem(1, 0.5);
+            cat_dist.ProbMass.Add(cdi1);
+            cat_dist.ProbMass.Add(cdi2);
+            driver.CurrentState.ParamDistr = cat_dist;
 
             // Attach transition driver to differentiation scheme
             diffScheme.Driver = driver;
@@ -2274,7 +2223,6 @@ namespace Daphne
             }
 
             //// Add DriverElements to TransitionDriver
-            //LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
             // Create driver with default, empty molecule-driven transition driver elements
             for (int i = 0; i < diffScheme.Driver.states.Count; i++)
             {
@@ -2292,7 +2240,8 @@ namespace Daphne
             distrTdE1.Distr = new DistributedParameter();
             distrTdE1.Distr.DistributionType = ParameterDistributionType.WEIBULL;
             distrTdE1.Distr.ParamDistr = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Scale = 400;
+            // scale=775, shape=6:  mean = 719 min = 12 hr
+            ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Scale = 775;  
             ((WeibullParameterDistribution)distrTdE1.Distr.ParamDistr).Shape = 6.0;
             diffScheme.Driver.DriverElements[0].elements[1] = distrTdE1;
             distrTdE1.CurrentState = 0;
@@ -2300,10 +2249,11 @@ namespace Daphne
 
             distrTdE2 = new ConfigDistrTransitionDriverElement();
             distrTdE2.Distr = new DistributedParameter();
+            // scale=450, shape=6:  mean = 417 min = 7 hr
             distrTdE2.Distr.DistributionType = ParameterDistributionType.WEIBULL;
             distrTdE2.Distr.ParamDistr = new WeibullParameterDistribution();
-            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Scale = 1000;
-            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 8.0;
+            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Scale = 450;
+            ((WeibullParameterDistribution)distrTdE2.Distr.ParamDistr).Shape = 6.0;
             diffScheme.Driver.DriverElements[1].elements[0] = distrTdE2;
             distrTdE2.CurrentState = 1;
             distrTdE2.DestState = 0;
@@ -2480,6 +2430,29 @@ namespace Daphne
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+            // Membrane-bound MHCII
+            cm = new ConfigMolecule("MHCII|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            // IL21 receptor
+            cm = new ConfigMolecule("IL21R|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            // Membrane-bound IL21 - needed for secretion of IL21
+            cm = new ConfigMolecule("IL21|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("CD4|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
             //
             // The following are generally intended as cytosol molecules 
             //
@@ -2505,6 +2478,7 @@ namespace Daphne
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+
             // These are pseudo cytoplasmic molecules
             //
             // Set diffusion coefficient for A to same as other cytoplasmic proteins
@@ -2513,8 +2487,10 @@ namespace Daphne
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             // Make the diffusion coefficient for A* much less than A
             // A* encompasses the tubulin structure and polarity of the cell 
-            // If the diffusion coefficient is too large, the polarity will not be maintained and the cell will not move
-            double f = 1e-2;
+            // If the diffusion coefficient is too large, the polarity will not be maintained and the cell will not move.
+            // double f = 1e-2;
+            // 9-11-2013 gmk: reducing by another factor of 10 (A* diffusion coefficient = 0.75)
+            double f = 1e-3;
             cm = new ConfigMolecule("A*", 1.0, 1.0, f * cytoDiffCoeff);
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
@@ -2568,10 +2544,35 @@ namespace Daphne
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+            // Cytosolic MHCII
             cm = new ConfigMolecule("MHCII", 1.0, 1.0, 1.0);
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+            // IL21
+            cm = new ConfigMolecule("IL21R", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("IRF4", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("IRF8", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("BCL6", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("Blimp1", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
+            cm = new ConfigMolecule("CD4", 1.0, 1.0, 1.0);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // molecules for Goldbeter-Koshland system of reactions
             cm = new ConfigMolecule("W", 1.0, 1.0, 1e-7);
@@ -4544,12 +4545,13 @@ namespace Daphne
             string descr="";
             descr = string.Format("{0}{1}", descr, "Cells go through an activation phase (~25 h), followed by a brief phase to initialize molecules for the cell cycle."); 
             descr = string.Format("{0}\n{1}", descr, "Cells then transition into a centroblast state where they upregulate CXCR4 receptor and migrate to the Dark Zone.");
-            descr = string.Format("{0}\n{1}", descr, "While in the centroblast state, cells undergo 3 to 4 cell divisions (~ 6 h cell cycle time) before transitioning to centrocytes.");
+            descr = string.Format("{0}{1}", descr, "While in the centroblast state, cells undergo ~10 cell divisions (~ 6 h cell cycle time) before transitioning to centrocytes.");
             descr = string.Format("{0}\n{1}", descr, "Centrocytes down-regulate CXCR4 receptor and upregulate CXCR5 receptor, causing them to migrate to the Light Zone.");
-            descr = string.Format("{0}\n{1}", descr, "Centrocytes are rescued and transition back to centroblasts with a mean time of 6 h.");
-            descr = string.Format("{0}\n{1}", descr, "The E1 molecule that drives the transition out to the G0 cell cycle phase is not renewed after centrocyte rescue, so rescued cell undergo fewer rounds of division.");
-            descr = string.Format("{0}\n{1}", descr, "Centrocytes also upregulate production of the sApop molecule which drives cell death.");
-            descr = string.Format("{0}\n{1}", descr, "The mean time for removal of dead cells from the simulation is 15 h.");
+            descr = string.Format("{0}{1}", descr, "Centrocytes are rescued and transition back to centroblasts with a mean time of 6 h.");
+            descr = string.Format("{0}\n{1}", descr, "The E1 molecule that drives the transition out to the G0 cell cycle phase is renewed after centrocyte rescue, ");
+            descr = string.Format("{0}{1}", descr, "but at a lower level than after activation, so rescued cells undergo ~2-3 rounds of division.");
+            descr = string.Format("{0}\n{1}", descr, "Centrocytes that transition into the apoptotic state upregulate production of the sApop molecule which drives cell death.");
+            descr = string.Format("{0}{1}", descr, "The mean time for removal of dead cells from the simulation is 15 h.");
             descr = string.Format("{0}\n\n{1}", descr, "Light Zone: ");
             descr = string.Format("{0}\n{1}", descr, "Gaussian distribution of CXCL13 centered in the simulation space");
             descr = string.Format("{0}\n{1}", descr, "coordinates=(130, 130, 130), standard deviations=200");
@@ -4561,7 +4563,7 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 60.0;
             protocol.scenario.time_config.sampling_interval = 15.0;
             protocol.scenario.time_config.integrator_step = 0.001;
-            protocol.reporter_file_name = "centroblast-centrocyte_recycling";
+            protocol.reporter_file_name = "simple_germinal_center";
 
             protocol.scenario.reactionsReport = true;
 
@@ -4588,7 +4590,7 @@ namespace Daphne
             }
 
             //CELLS - recursive
-            string[] cells = new string[] { "GC B" };
+            string[] cells = new string[] { "simple Germinal Center B cell" };
             itemsLoaded = itemsLoaded = LoadProtocolCells(protocol, cells, userstore);
             if (itemsLoaded != cells.Length)
             {
@@ -4668,7 +4670,7 @@ namespace Daphne
             //CELLS
 
             // GC B cell
-            ConfigCell configCell = findCell("GC B", protocol);
+            ConfigCell configCell = findCell("simple Germinal Center B cell", protocol);
 
             // Cell placement
             CellPopulation cellPop = new CellPopulation();
@@ -4700,10 +4702,6 @@ namespace Daphne
             {
                 // Turn off ECM probe reporting
                 mpECM.report_mp.mp_extended = ExtendedReport.NONE;
-                //ReportECM reportECM = new ReportECM();
-                //reportECM.molpop_guid_ref = mpECM.molpop_guid;
-                //reportECM.mp_extended = ExtendedReport.NONE;
-                //cellPop.ecm_probe.Add(reportECM);
             }
 
             cellPop.reportStates.Differentiation = true;
@@ -4715,6 +4713,192 @@ namespace Daphne
             //rendering
             ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
             //((TissueScenario)protocol.scenario).popOptions.cellPopOptions[0].renderMethod = RenderMethod.CELL_DIFF_STATE;
+
+            ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
+
+        }
+
+        /// <summary>
+        /// New default scenario for first pass of Daphne germinal center simulation
+        /// </summary>
+        public static void Create_CB_CC_Recycling_Protocol(Protocol protocol)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            protocol.InitializeStorageClasses();
+
+            //Load needed entities from User Store 
+            Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // Load reaction templates from userstore
+            LoadProtocolReactionTemplates(protocol, userstore);
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            //EXPERIMENT
+            protocol.experiment_name = "recycling of centroblasts and centrocytes";
+            string descr = "";
+            descr = string.Format("{0}{1}", descr, "This is a simple example of cell transitions and movemente between the Dark and Light zones, ");
+            descr = string.Format("{0}{1}", descr, "with no cell division or death.");
+            descr = string.Format("{0}{1}", descr, "Cells start in the centroblast state, where they upregulate CXCR4 receptor and migrate to the Dark Zone.");
+            descr = string.Format("{0}\n{1}", descr, "Centrocytes down-regulate CXCR4 receptor and upregulate CXCR5 receptor, causing them to migrate to the Light Zone.");
+            descr = string.Format("{0}\n{1}", descr, "Centrocytes transition back to centroblasts with a mean time of 6 h.");
+            descr = string.Format("{0}\n\n{1}", descr, "Light Zone: ");
+            descr = string.Format("{0}\n{1}", descr, "Gaussian distribution of CXCL13 centered in the simulation space");
+            descr = string.Format("{0}\n{1}", descr, "coordinates=(130, 130, 130), standard deviations=200");
+            descr = string.Format("{0}\n\n{1}", descr, "Dark Zone");
+            descr = string.Format("{0}\n{1}", descr, "Gaussian distribution of CXCL12 centered in the upper right corner of the simulation space");
+            descr = string.Format("{0}\n{1}", descr, "coordinates=(222, 222, 222), standard deviation=100");
+            protocol.experiment_description = descr;
+            protocol.scenario.time_config.duration = 2000.0;
+            protocol.scenario.time_config.rendering_interval = 15.0;
+            protocol.scenario.time_config.sampling_interval = 15.0;
+            protocol.scenario.time_config.integrator_step = 0.001;
+            protocol.reporter_file_name = "centroblast-centrocyte_recycling";
+
+            protocol.scenario.reactionsReport = true;
+
+            envHandle.extent_x = 260;
+            envHandle.extent_y = 260;
+            envHandle.extent_z = 260;
+            envHandle.gridstep = 10;
+
+            //ECS REACTION COMPLEXES - recursive
+            string[] ecsReacComplex = new string[] { "GC B cell chemotaxis: ECM reactions" };
+            int itemsLoaded = LoadProtocolRCs(protocol, ecsReacComplex, userstore);
+            if (itemsLoaded != ecsReacComplex.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            }
+
+            //CELLS - recursive
+            string[] cells = new string[] { "centroblast-centrocyte recycling" };
+            itemsLoaded = itemsLoaded = LoadProtocolCells(protocol, cells, userstore);
+            if (itemsLoaded != cells.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol cells.");
+            }
+
+            //ECM
+            double sep = 130;
+            double d = sep * Math.Cos(Math.PI / 4.0);
+            double[] c = new double[] { envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2 };
+            double lz_sigma = 400,
+                    dz_sigma = 200;
+            double[,] box_trans = new double[,] { { c[0], c[1], c[2] }, 
+                                                  { c[0] + d, c[1] + d, c[2] + d} };
+            double[,] box_scale = new double[,] { { lz_sigma, lz_sigma, lz_sigma }, { dz_sigma, dz_sigma, dz_sigma } };
+
+            System.Windows.Media.Color[] box_color = new System.Windows.Media.Color[] { System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.0f, 0.3f), 
+                                                                                        System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 1.0f, 0.0f) };
+            ConfigMolecularPopulation configMolPop = null;
+            // ECM molecules
+            string[] ecs_mols = new string[] { "CXCL13", "CXCL12" };
+            for (int i = 0; i < ecs_mols.Count(); i++)
+            {
+                ConfigMolecule cm = userstore.entity_repository.molecules_dict[findMoleculeGuid(ecs_mols[i], MoleculeLocation.Bulk, userstore)];
+                if (cm != null)
+                {
+                    configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+                    configMolPop.molecule = cm.Clone(null);
+                    configMolPop.Name = cm.Name;
+
+                    // Set the diffusion coefficient to zero
+                    configMolPop.molecule.DiffusionCoefficient = 0.0;
+
+                    // Gaussian Distrtibution
+                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
+                    // box x,y,z_scale parameters are 2*sigma
+                    GaussianSpecification gaussSpec = new GaussianSpecification();
+                    BoxSpecification box = new BoxSpecification();
+                    box.x_trans = box_trans[i, 0];
+                    box.y_trans = box_trans[i, 1];
+                    box.z_trans = box_trans[i, 2];
+                    box.x_scale = box_scale[i, 0];
+                    box.y_scale = box_scale[i, 1];
+                    box.z_scale = box_scale[i, 2];
+                    gaussSpec.box_spec = box;
+                    gaussSpec.gaussian_spec_color = box_color[i];
+                    gaussSpec.gaussian_region_visibility = false;
+                    gaussSpec.current_gaussian_region_visibility = false;
+                    gaussSpec.box_spec.current_box_visibility = false;
+                    gaussSpec.box_spec.box_visibility = false;
+
+                    MolPopGaussian molPopGaussian = new MolPopGaussian();
+                    molPopGaussian.peak_concentration = 500;
+                    molPopGaussian.gauss_spec = gaussSpec;
+
+                    configMolPop.mp_distribution = molPopGaussian;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    ReportECM r = configMolPop.report_mp as ReportECM;
+                    r.mean = false;
+
+                    //rendering
+                    ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
+
+                    protocol.scenario.environment.comp.molpops.Add(configMolPop);
+                }
+            }
+
+            //ECM reaction complexes
+            foreach (string s in ecsReacComplex)
+            {
+                ConfigReactionComplex crc = findReactionComplexByName(s, userstore);
+                protocol.scenario.environment.comp.reaction_complexes.Add(crc.Clone(true));
+            }
+
+            //CELLS
+
+            // CB-CC cycling cell
+            ConfigCell configCell = findCell("centroblast-centrocyte recycling", protocol);
+
+            // Cell placement
+            CellPopulation cellPop = new CellPopulation();
+            cellPop.Cell = configCell.Clone(true);
+            cellPop.cellpopulation_name = configCell.CellName;
+            cellPop.number = 20;
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
+            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
+            minDisSquared *= minDisSquared;
+            cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
+            cellPop.cellPopDist.Initialize();
+
+            // Cell reporting
+            cellPop.report_xvf.position = false;
+            cellPop.report_xvf.velocity = false;
+            cellPop.report_xvf.force = false;
+
+            foreach (ConfigMolecularPopulation cmp in cellPop.Cell.membrane.molpops)
+            {
+                // Mean only
+                cmp.report_mp.mp_extended = ExtendedReport.NONE;
+            }
+            foreach (ConfigMolecularPopulation cmp in cellPop.Cell.cytosol.molpops)
+            {
+                // Mean only
+                cmp.report_mp.mp_extended = ExtendedReport.LEAN;
+            }
+            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
+            {
+                // Turn off ECM probe reporting
+                mpECM.report_mp.mp_extended = ExtendedReport.NONE;
+            }
+
+            cellPop.reportStates.Differentiation = true;
+            cellPop.reportStates.Division = false;
+            cellPop.reportStates.Generation = false;
+            cellPop.reportStates.Death = false;
+            cellPop.reportStates.Exit = false;
+
+            //rendering
+            ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
+            ((TissueScenario)protocol.scenario).popOptions.cellPopOptions[0].renderMethod = RenderMethod.CELL_DIFF_STATE;
 
             ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
 

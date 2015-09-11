@@ -1,7 +1,7 @@
 {
   "experiment_name": "Blank Tissue Simulation",
   "experiment_reps": 1,
-  "experiment_guid": "db6720d4-877e-43c2-bf93-c0f4fd12e0f6",
+  "experiment_guid": "4cf91528-9831-444c-8c1b-b4737caa874b",
   "experiment_description": "",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -47,7 +47,7 @@
     },
     "phi1": 100.0,
     "phi2": 0.0,
-    "globalRandomSeed": 190241619
+    "globalRandomSeed": -1438878124
   },
   "reporter_file_name": "",
   "entity_repository": {
@@ -66,7 +66,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 2,
-        "entity_guid": "7f35dc68-421a-4c1e-a040-aa75d7549c2e",
+        "entity_guid": "0005707e-0875-4571-821b-da39b7dd90c0",
         "description": ""
       },
       {
@@ -81,7 +81,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 0,
-        "entity_guid": "7107e6a7-cf30-4d3e-94a0-edc38ffa3855",
+        "entity_guid": "455337fe-5e8f-430d-8318-fcf0a55ce8f7",
         "description": ""
       },
       {
@@ -95,7 +95,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 3,
-        "entity_guid": "9791d087-838d-4dae-ad08-ed03e04c205c",
+        "entity_guid": "476f5e28-0a53-4579-89c2-930df0a24c7d",
         "description": ""
       },
       {
@@ -109,7 +109,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 4,
-        "entity_guid": "d1cf0c4d-2a60-4c1f-b3b4-4641115c7f0e",
+        "entity_guid": "24969dca-ac9e-4774-bd6d-de2fa218b040",
         "description": ""
       },
       {
@@ -124,7 +124,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 1,
-        "entity_guid": "dceca4a9-1a9d-4ae2-b38e-94de4669656f",
+        "entity_guid": "13cffd9b-ceb1-4e92-90f1-a13738dea7db",
         "description": ""
       },
       {
@@ -138,7 +138,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 5,
-        "entity_guid": "9c02df50-eb1c-4598-a4a9-551f0955e0f6",
+        "entity_guid": "7b7f3fad-6ce4-4d7b-a33d-e421a8f9597e",
         "description": ""
       },
       {
@@ -154,7 +154,7 @@
         ],
         "isBoundary": true,
         "reac_type": 14,
-        "entity_guid": "32a08cfc-d71c-4d7c-9948-2237b757c685",
+        "entity_guid": "fd6caa9f-065b-4fe2-a663-05b8f4489d67",
         "description": ""
       },
       {
@@ -169,7 +169,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 15,
-        "entity_guid": "83d5bc22-5c03-4fd4-a777-13b30bfb481b",
+        "entity_guid": "7f7ae95a-a820-4a50-b7a3-18a3233e4baf",
         "description": ""
       },
       {
@@ -184,7 +184,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 16,
-        "entity_guid": "e327abcf-908d-4e9f-b055-601bd3717582",
+        "entity_guid": "5cdcb03f-1621-4646-ae75-3c99528b053c",
         "description": ""
       },
       {
@@ -198,7 +198,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 18,
-        "entity_guid": "d1dd117e-2bb5-4317-ba5c-4deedd907d98",
+        "entity_guid": "9aca60e0-10d2-4b12-bf14-87f37fa7ddf5",
         "description": ""
       },
       {
@@ -212,7 +212,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 19,
-        "entity_guid": "268a4e00-105d-45a8-944b-416c6ca6cd99",
+        "entity_guid": "3414e3fc-c8b0-4835-98a0-44fc39399a26",
         "description": ""
       },
       {
@@ -227,7 +227,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 6,
-        "entity_guid": "de304a7a-dedc-44b0-87e0-ab4e389391ba",
+        "entity_guid": "505f7049-a5d8-4aa7-a7a4-7aa6f26207fa",
         "description": ""
       },
       {
@@ -241,7 +241,7 @@
         ],
         "isBoundary": false,
         "reac_type": 7,
-        "entity_guid": "0d702084-f629-4bdb-9bce-da99510767e3",
+        "entity_guid": "1a499097-9c1e-46a4-bf37-b3a244b34510",
         "description": ""
       },
       {
@@ -258,7 +258,7 @@
         ],
         "isBoundary": false,
         "reac_type": 8,
-        "entity_guid": "17b6ee65-2e5f-482e-95d3-87405db98f2f",
+        "entity_guid": "90942ac9-dc3c-410e-ba64-c7ce2c62b916",
         "description": ""
       },
       {
@@ -272,7 +272,7 @@
         ],
         "isBoundary": false,
         "reac_type": 9,
-        "entity_guid": "23a1ab74-f693-41d0-a8c0-aa5372973ee3",
+        "entity_guid": "57234acd-4b63-498e-987c-b97cc816d113",
         "description": ""
       },
       {
@@ -288,7 +288,7 @@
         ],
         "isBoundary": false,
         "reac_type": 10,
-        "entity_guid": "b14afe6b-3953-44e7-8345-eb95bac61a9b",
+        "entity_guid": "e99bf85e-1d3f-4caf-b821-3c0467f401e9",
         "description": ""
       },
       {
@@ -304,7 +304,7 @@
         ],
         "isBoundary": false,
         "reac_type": 11,
-        "entity_guid": "f5d7a886-5fa6-4c59-a749-d800e0c895a0",
+        "entity_guid": "acc07850-ceea-490e-bc7b-a36bfba605a4",
         "description": ""
       },
       {
@@ -321,7 +321,7 @@
         ],
         "isBoundary": false,
         "reac_type": 13,
-        "entity_guid": "5e99e331-e188-49a2-a08c-859d6b725d8f",
+        "entity_guid": "d84477e4-3550-4ee4-bd9b-2f0d8a09ee54",
         "description": ""
       },
       {
@@ -337,7 +337,7 @@
         ],
         "isBoundary": false,
         "reac_type": 12,
-        "entity_guid": "fba40a2d-96a7-4cdb-b197-4f1a2772d757",
+        "entity_guid": "c801b95a-5887-4bde-a44a-07da0b59613b",
         "description": ""
       },
       {
@@ -351,7 +351,7 @@
         ],
         "isBoundary": false,
         "reac_type": 20,
-        "entity_guid": "0e60da89-bcd3-4742-8f84-a92b695715bb",
+        "entity_guid": "7db828c2-cd6d-4ec3-b5e5-ece19e000179",
         "description": ""
       }
     ],

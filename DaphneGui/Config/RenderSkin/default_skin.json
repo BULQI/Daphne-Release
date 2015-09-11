@@ -297,8 +297,8 @@
         }
       ],
       "shades": 0,
-      "name": "Leukocyte_staticReceptor",
-      "renderLabel": "602cbde9-2ba8-4f9b-8a2f-1ec601b3de01"
+      "name": "stochastic locomotion",
+      "renderLabel": "f1b3dad3-2279-419f-b6c8-1eb2078c7636"
     },
     {
       "base_color": {
@@ -596,8 +596,8 @@
         }
       ],
       "shades": 0,
-      "name": "Leukocyte_staticReceptor_motile",
-      "renderLabel": "c7a75fca-8c2e-40b4-9aa5-41dd9a67414d"
+      "name": "chemotactic with static receptor",
+      "renderLabel": "198223b1-31f5-4754-a648-7c687bc116bd"
     },
     {
       "base_color": {
@@ -895,8 +895,8 @@
         }
       ],
       "shades": 0,
-      "name": "Leukocyte_dynamicReceptor_motile",
-      "renderLabel": "2c92a729-9b7b-49a9-8399-7bdc007099be"
+      "name": "chemotactic with receptor homeostasis",
+      "renderLabel": "b7759a60-aa63-4efa-8fcc-bff4a7ada796"
     },
     {
       "base_color": {
@@ -1194,8 +1194,8 @@
         }
       ],
       "shades": 0,
-      "name": "GC B",
-      "renderLabel": "f747c5bc-32f8-4d8a-b18a-8d9cdd57cbd4"
+      "name": "centroblast-centrocyte recycling",
+      "renderLabel": "c1b82cda-533e-4021-b512-560d72a989cc"
     },
     {
       "base_color": {
@@ -1493,8 +1493,8 @@
         }
       ],
       "shades": 0,
-      "name": "Stromal CXCL12-secreting",
-      "renderLabel": "c1a5f7f4-5804-4ef2-92e1-228d27b8677c"
+      "name": "simple Germinal Center B cell",
+      "renderLabel": "1eb1e0fe-4357-413d-a103-6f6e5169f01c"
     },
     {
       "base_color": {
@@ -1792,8 +1792,8 @@
         }
       ],
       "shades": 0,
-      "name": "Stromal CXCL13-secreting",
-      "renderLabel": "5ddc4786-e4e1-4f5d-a610-208c07e859fc"
+      "name": "simple germinal center T cell",
+      "renderLabel": "9be1ddb8-d091-4e2b-9d3f-726a5e0a231f"
     },
     {
       "base_color": {
@@ -2091,8 +2091,8 @@
         }
       ],
       "shades": 0,
-      "name": "cb-cc_cycling",
-      "renderLabel": "37943e2c-c2d7-47a4-af48-b48a9349c15c"
+      "name": "CXCL12-secreting",
+      "renderLabel": "51de842e-c2dd-45a9-af1c-528e5fe42bc4"
     },
     {
       "base_color": {
@@ -2390,8 +2390,8 @@
         }
       ],
       "shades": 0,
-      "name": "T",
-      "renderLabel": "c8330eda-186d-4876-83dc-f34e015a7b20"
+      "name": "CXCL13-secreting",
+      "renderLabel": "32174727-87cd-40f7-9842-78944d1012f4"
     }
   ],
   "renderMols": [
@@ -2405,7 +2405,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12",
-      "renderLabel": "e4aa27a5-2c15-4295-96b7-6f71260a2d90"
+      "renderLabel": "da37d7fa-49fb-4f6b-9ad5-0049b8bd0c4a"
     },
     {
       "color": {
@@ -2417,7 +2417,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13",
-      "renderLabel": "669300c5-5b34-4c87-bafa-fa4720594c5b"
+      "renderLabel": "282fdb97-93e8-49b5-9eda-6be35479bc90"
     },
     {
       "color": {
@@ -2429,7 +2429,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR4|",
-      "renderLabel": "f5386e91-21db-49bd-9ac2-af1867be949b"
+      "renderLabel": "e03da98c-00db-48e8-9404-1f98c7756c52"
     },
     {
       "color": {
@@ -2441,7 +2441,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCR5|",
-      "renderLabel": "7496b933-466f-4cf7-9208-a6ac83740234"
+      "renderLabel": "b5cb7a78-06c0-49e9-b2b9-da05c572ce8e"
     },
     {
       "color": {
@@ -2453,7 +2453,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12:CXCR4|",
-      "renderLabel": "040417fa-7f41-41ef-84ab-5b29a2e92b62"
+      "renderLabel": "12eb0ac8-776e-4ae7-acfd-0a5c19d91abb"
     },
     {
       "color": {
@@ -2465,7 +2465,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13:CXCR5|",
-      "renderLabel": "bd9b8d12-409d-4134-ab65-583c8616fbbc"
+      "renderLabel": "11762012-dfa0-4a79-89b9-a5cc43672219"
     },
     {
       "color": {
@@ -2477,7 +2477,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL12|",
-      "renderLabel": "0c166727-6607-48a4-8307-22041c626c22"
+      "renderLabel": "b489f334-1a27-4e8a-8a36-0af0ad13ef64"
     },
     {
       "color": {
@@ -2489,7 +2489,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "CXCL13|",
-      "renderLabel": "8e120997-2692-4968-a04f-8b8b5fc6e447"
+      "renderLabel": "6328c58f-24e9-404a-af5c-141ccf8b8598"
     },
     {
       "color": {
@@ -2501,7 +2501,7 @@
       "shades": 10,
       "blendingWeight": 10.0,
       "name": "TCR|",
-      "renderLabel": "680ed16b-1c8f-4703-b87f-2e91b32838bf"
+      "renderLabel": "e066652b-0569-40d9-849d-580a3e43f511"
     },
     {
       "color": {
@@ -2512,8 +2512,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "CXCR5",
-      "renderLabel": "b857c4b0-c355-4924-aeef-9fa8f24cde4e"
+      "name": "MHCII|",
+      "renderLabel": "b2ed6928-576f-4808-bc51-6487f34f6426"
     },
     {
       "color": {
@@ -2524,8 +2524,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "CXCR4",
-      "renderLabel": "db401ea8-93dc-4797-b6d8-4484d15bffdb"
+      "name": "IL21R|",
+      "renderLabel": "9ebfcb0e-c9d5-4bb3-9beb-db2e858003f2"
     },
     {
       "color": {
@@ -2536,8 +2536,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "CXCL13:CXCR5",
-      "renderLabel": "a56fccb5-62b0-424d-8769-c6dc79615a55"
+      "name": "IL21|",
+      "renderLabel": "9e614720-b2e9-4ddf-a892-5c25c0c2adf2"
     },
     {
       "color": {
@@ -2548,8 +2548,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "CXCL12:CXCR4",
-      "renderLabel": "aafedd56-1582-45e1-a2ac-8031a2f7c2e1"
+      "name": "CD4|",
+      "renderLabel": "e6785394-4159-40db-a262-f037b586cbf4"
     },
     {
       "color": {
@@ -2560,8 +2560,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "A",
-      "renderLabel": "87c28ad9-f8ed-45b7-a92d-586196b50a97"
+      "name": "CXCR5",
+      "renderLabel": "e9bf5974-2fe1-4735-bbf1-d6e375f065bd"
     },
     {
       "color": {
@@ -2572,8 +2572,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "A*",
-      "renderLabel": "49e63993-4306-4360-93ea-13f83f6b57d4"
+      "name": "CXCR4",
+      "renderLabel": "d479ee29-0ca4-4c26-bb86-df446f2c201e"
     },
     {
       "color": {
@@ -2584,8 +2584,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDiv",
-      "renderLabel": "9e3d2a18-d193-43aa-8350-c2ec92531494"
+      "name": "CXCL13:CXCR5",
+      "renderLabel": "b15153c1-7be7-4ef0-ab1a-6ece42a31fe8"
     },
     {
       "color": {
@@ -2596,8 +2596,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif1",
-      "renderLabel": "d3069871-d26e-467a-9991-8c10a30a87e1"
+      "name": "CXCL12:CXCR4",
+      "renderLabel": "9fd05cd3-a650-4bc0-a707-5c9b7b41add0"
     },
     {
       "color": {
@@ -2608,8 +2608,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif2",
-      "renderLabel": "d8cc56d5-7911-499a-be36-933b9c0aed37"
+      "name": "A",
+      "renderLabel": "d753a11c-bbd1-407f-b87a-e8e696afe18c"
     },
     {
       "color": {
@@ -2620,8 +2620,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif3",
-      "renderLabel": "a7aa5393-51f3-48e7-9d49-adce79a1a6dc"
+      "name": "A*",
+      "renderLabel": "c2f904ba-6be0-4e0a-8a10-8aa4743f8531"
     },
     {
       "color": {
@@ -2632,8 +2632,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif4",
-      "renderLabel": "28c67837-4c61-4d26-b3ca-4e112409ecd7"
+      "name": "sDiv",
+      "renderLabel": "7dfd6da9-30a8-4070-be0d-e689e99f1b13"
     },
     {
       "color": {
@@ -2644,8 +2644,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif5",
-      "renderLabel": "e44bc5fd-57e6-46c2-a61f-97bd06ea0a7b"
+      "name": "sDif1",
+      "renderLabel": "26388655-6bb2-4d09-8330-02a59c297ec7"
     },
     {
       "color": {
@@ -2656,8 +2656,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif6",
-      "renderLabel": "68a7bab0-6746-4fcd-80c9-2bf15aebf427"
+      "name": "sDif2",
+      "renderLabel": "d42afada-92b2-4b2a-adc6-bf79d64d1eab"
     },
     {
       "color": {
@@ -2668,8 +2668,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sDif7",
-      "renderLabel": "de88e151-e4c1-4862-b351-6a3578261233"
+      "name": "sDif3",
+      "renderLabel": "493e9469-f137-44f4-ad79-a15e380ae22e"
     },
     {
       "color": {
@@ -2680,8 +2680,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sApop",
-      "renderLabel": "f6da220e-42e6-43cf-9623-89601cae872e"
+      "name": "sDif4",
+      "renderLabel": "ee56d695-3ba4-4b25-a1fd-5f9a62a8538d"
     },
     {
       "color": {
@@ -2692,8 +2692,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sResc1",
-      "renderLabel": "aba936e6-7af7-42ae-8d8b-22bf2710a390"
+      "name": "sDif5",
+      "renderLabel": "6b5e6d2c-54f1-4059-93c4-5b74f6484a76"
     },
     {
       "color": {
@@ -2704,8 +2704,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "sResc2",
-      "renderLabel": "e927fceb-d386-4757-85b3-1f050115c280"
+      "name": "sDif6",
+      "renderLabel": "b73449af-30f0-4ba8-89de-d435c7cc0bd2"
     },
     {
       "color": {
@@ -2716,8 +2716,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "IgL",
-      "renderLabel": "040094b1-981c-4b1c-8e69-d23f16486e79"
+      "name": "sDif7",
+      "renderLabel": "c44cf6bb-25e1-4ae6-9563-2dc4f473660b"
     },
     {
       "color": {
@@ -2728,8 +2728,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "IgS",
-      "renderLabel": "37a9c4a9-bc51-450c-90b1-393f071b692d"
+      "name": "sApop",
+      "renderLabel": "e98e610e-1f0c-44bd-852a-59cfe932a7f0"
     },
     {
       "color": {
@@ -2740,8 +2740,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "IgH",
-      "renderLabel": "3322a811-8cf7-4412-8ed1-ba7769f45f8a"
+      "name": "sResc1",
+      "renderLabel": "4a6c6d35-3b79-4393-90f9-5a2af1fc7fde"
     },
     {
       "color": {
@@ -2752,8 +2752,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "AID",
-      "renderLabel": "28e8aba3-4721-4e90-8bdd-4b34ad188610"
+      "name": "sResc2",
+      "renderLabel": "18085c8a-f04b-434d-bb4d-f90994029a48"
     },
     {
       "color": {
@@ -2764,8 +2764,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "BL1",
-      "renderLabel": "0af079f8-e4f5-4fc2-b7fa-885ee788f8a6"
+      "name": "IgL",
+      "renderLabel": "5e66da97-388c-4e11-9790-5444a5f871fe"
     },
     {
       "color": {
@@ -2776,8 +2776,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "MHCII",
-      "renderLabel": "f764f983-c272-43e2-b131-1fe76030475b"
+      "name": "IgS",
+      "renderLabel": "47e3fed8-08c1-4ca3-89c0-6f62745f7633"
     },
     {
       "color": {
@@ -2788,8 +2788,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "W",
-      "renderLabel": "99d3ed82-dee1-4508-bb68-db79e6635094"
+      "name": "IgH",
+      "renderLabel": "eab8ff08-0419-4db2-905e-d513f086aa46"
     },
     {
       "color": {
@@ -2800,8 +2800,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "Wp",
-      "renderLabel": "055da34c-38fb-4853-ac96-e7a121637bba"
+      "name": "AID",
+      "renderLabel": "5c28da2e-6266-4514-b3b5-1fc68ee4dced"
     },
     {
       "color": {
@@ -2812,8 +2812,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "E1",
-      "renderLabel": "a05d9218-6767-49fa-8c37-1254e61f872d"
+      "name": "BL1",
+      "renderLabel": "41370bb8-7928-40e0-87f7-712124bc0cae"
     },
     {
       "color": {
@@ -2824,8 +2824,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "E2",
-      "renderLabel": "ba4f22e0-9a74-4f39-a170-471438a136dc"
+      "name": "MHCII",
+      "renderLabel": "35a96481-c37c-4807-9d8e-b7f25b69e5f8"
     },
     {
       "color": {
@@ -2836,8 +2836,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "W:E1",
-      "renderLabel": "bcdb1cd7-7fbb-4c19-9fc5-b8bda09eb969"
+      "name": "IL21R",
+      "renderLabel": "639ad1c8-34d6-40d2-a9d2-28e9b616d24f"
     },
     {
       "color": {
@@ -2848,8 +2848,8 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
-      "name": "Wp:E2",
-      "renderLabel": "8c9cd2c6-2273-4642-9cab-e05439baad5b"
+      "name": "IRF4",
+      "renderLabel": "79b2361e-f138-4ae8-864b-1559fca3d75f"
     },
     {
       "color": {
@@ -2860,8 +2860,128 @@
       "max": 1.0,
       "shades": 10,
       "blendingWeight": 10.0,
+      "name": "IRF8",
+      "renderLabel": "94cbb33b-7e56-40f2-92ca-6e7b72933eaa"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FFA0A0A0"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "BCL6",
+      "renderLabel": "5ebfffe9-ffa9-463f-96f1-117f90c8e7cf"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FFE00000"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "Blimp1",
+      "renderLabel": "3623a122-6b51-4614-904b-d3d9840b9290"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FF00E000"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "CD4",
+      "renderLabel": "f2fa84ac-3d02-47fc-b3db-416aad25e0df"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FF0000E0"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "W",
+      "renderLabel": "128a3017-8544-4f7e-b0a1-6fa050cf1135"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FFE0E000"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "Wp",
+      "renderLabel": "360286d8-1b62-45e2-af8e-fbd655a792e1"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FFE000E0"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "E1",
+      "renderLabel": "5039c33a-7c91-41a4-ba3c-c512c7243636"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FF00E0E0"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "E2",
+      "renderLabel": "d9a731e6-c095-496a-bbd5-afb45a509280"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FFE0E0E0"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "W:E1",
+      "renderLabel": "87b5b49a-c671-405b-a00b-ef6ccb4dcd05"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FFFF0000"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
+      "name": "Wp:E2",
+      "renderLabel": "d6bd5e38-7d9d-4378-9c28-5f70cc52e487"
+    },
+    {
+      "color": {
+        "hint": "",
+        "EntityColor": "#FF00FF00"
+      },
+      "min": 0.0,
+      "max": 1.0,
+      "shades": 10,
+      "blendingWeight": 10.0,
       "name": "H",
-      "renderLabel": "135e1d44-3c62-419e-8e83-780cac8429a5"
+      "renderLabel": "d7bb4d94-d36c-4e83-89c1-000f1c1faca7"
     }
   ]
 }

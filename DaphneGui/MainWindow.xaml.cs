@@ -754,8 +754,14 @@ namespace DaphneGui
 
             //GC SCENARIO
             protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
+            ProtocolCreators.Create_CB_CC_Recycling_Protocol(protocol);
+            protocol.SerializeToFile();
+
+            //GC SCENARIO
+            protocol = new Protocol("Config\\simple_germinal_center.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateGCProtocol(protocol);
             protocol.SerializeToFile();
+
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
             protocol = new Protocol("Config\\vatRC_blank.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);

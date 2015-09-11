@@ -527,6 +527,9 @@
     <Resource Include="Images\RightArrow_48x48.png" />
     <Resource Include="Images\arrow-32x32.png" />
     <Resource Include="Daphne.ico" />
+    <Content Include="Config\simple_germinal_center.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="help\DaphneDevHelp.shfbproj" />
     <EmbeddedResource Include="Licences.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
