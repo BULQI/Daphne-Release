@@ -12,8 +12,7 @@
              DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="407" d:DesignWidth="575">
     <UserControl.Resources>
-        <CollectionViewSource x:Key="MoleculesListView"  Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"/>
-        
+
         <x:Array x:Key="WordList" Type="sys:String">
             <sys:String>CXCR5</sys:String>
             <sys:String>CXCL13</sys:String>
@@ -201,24 +200,10 @@
                     </ListBox>-->
 
                     <ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2"       
-                        SelectedIndex="-1"
-                        SelectionMode="Multiple"
-                        Style="{StaticResource myListboxStyle}"
-                        MaxHeight="150" Width="250"
-                        DisplayMemberPath="Name" 
-                        ItemsSource="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"
-                        >
-
-                        <!--ItemsSource="{Binding Source={StaticResource MoleculesListView}}"-->
-                        
-                        <!--<ListBox.ItemsSource>
-                            <CompositeCollection>
-                                <CollectionContainer Collection="{Binding MainWindow.SOP.Protocol.entity_repository.molecules}"/>
-                            </CompositeCollection>
-                        </ListBox.ItemsSource>-->
-
-                        <!--ItemsSource="{DynamicResource MoleculesListView}">-->
-
+                            SelectedIndex="-1"
+                            SelectionMode="Multiple"
+                            Style="{StaticResource myListboxStyle}"
+                            MaxHeight="150" Width="250">
                     </ListBox>
                     
                 </StackPanel>

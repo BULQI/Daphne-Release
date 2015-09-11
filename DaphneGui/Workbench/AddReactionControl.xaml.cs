@@ -30,8 +30,6 @@ namespace DaphneGui
         private Dictionary<string, int> inputModifiers;
         public double inputRateConstant { get; set; }
 
-        public int iTest { get; set; }
-
         public ConfigCompartment ARCComp
         {
             get { return (ConfigCompartment)GetValue(ARCCompProperty); }
@@ -420,18 +418,10 @@ namespace DaphneGui
                             ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
 
                             //crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
-                            if (crc != null)
-                            {
-                                crc.AddReactionMolPopsAndGenes(cr, level.entity_repository);
+                            crc.AddReactionMolPopsAndGenes(cr, level.entity_repository);
 
-                                s.InitializeAllMols(true);
-                                s.InitializeAllReacs();
-                            }
-
-                            if (lbMol2.ItemsSource != null)
-                            {
-                                CollectionViewSource.GetDefaultView(lbMol2.ItemsSource).Refresh();
-                            }
+                            s.InitializeAllMols(true);
+                            s.InitializeAllReacs();
                         }
                     }
                     break;
@@ -448,11 +438,8 @@ namespace DaphneGui
                     return;    
             }
 
-            if (cr != null && ARCReactions != null)
-            {
-                ARCReactions.Add(cr);
-                wasAdded = true;
-            }
+            ARCReactions.Add(cr);
+            wasAdded = true;
 
             //Add the reaction to repository collection if it doesn't already exist there.
 
@@ -781,10 +768,6 @@ namespace DaphneGui
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
                         coll.Add(cc);
                     }
-                    //if (lbMol2.ItemsSource != null)
-                    //{
-                    //    CollectionViewSource.GetDefaultView(lbMol2.ItemsSource).Refresh();
-                    //}
                     break;
 
                 case "component_reacs":
@@ -825,11 +808,8 @@ namespace DaphneGui
 
             }
 
-            //if (coll.Count > 0)
-            //{
-            //    lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
-            //    lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");
-            //}
+            lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
+            lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");
         }
 
         private void txtSearch_SelectionChanged(object sender, RoutedEventArgs e)
