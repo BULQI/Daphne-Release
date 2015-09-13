@@ -202,44 +202,39 @@ namespace Daphne
             return false;
         }
 
+
         /// <summary>
-        /// remove a cell
+        /// remove a cell.
+        /// when a cell is dead but before removed, they don't participate in chemistry, but they still
+        /// particiapte in collision, the complete removal is set to false to indicate that.
         /// </summary>
-        /// <param name="key">the cell's key</param>
-        /// <returns>true if the cell was successfully removed</returns>
+        /// <param name="key">Cell_id</param>
+        /// <param name="complete_removal">false if removing chemistry only</param>
+        /// <returns>false if cel l not found in the system, otherwise true</returns>
         public bool RemoveCell(int key, bool complete_removal = true)
         {
+
             if (cells.ContainsKey(key) == true)
             {
                 Cell cell = cells[key];
 
-                if (complete_removal == false)
-                {
-                    hSim.RemoveCell(cell);
-                    Populations[cell.Population_id].RemoveCell(cell.Cell_id, false);
-                    hSim.RemoveCellBoudnaryReactions(cell);
-                    return true;
-                }
-
-                // remove all pairs that contain this cell
-                hSim.CollisionManager.RemoveAllPairsContainingCell(cell);
-                // remove the cell from the grid
-                hSim.CollisionManager.RemoveCellFromGrid(cell);
-
-                // remove the cell chemistry
-                //for dead cells, the chemistry has been removed when found dead
-                if (cell.Alive == true)
+                Populations[cell.Population_id].RemoveCell(cell.Cell_id, complete_removal);
+                //remove chemistry if exists
+                if (Environment.Comp.Boundaries.ContainsKey(cell.PlasmaMembrane.Interior.Id) == true)
                 {
                     hSim.RemoveCell(cell);
                 }
 
-                Cells.Remove(cell.Cell_id);
-                Populations[cell.Population_id].RemoveCell(cell.Cell_id);
-                if (cell.Alive)
+                if (complete_removal == true)
                 {
-                    hSim.RemoveCellBoudnaryReactions(cell);
+                    // remove all pairs that contain this cell
+                    hSim.CollisionManager.RemoveAllPairsContainingCell(cell);
+                    // remove the cell from the grid
+                    hSim.CollisionManager.RemoveCellFromGrid(cell);
+                    CellManager.cellDictionary.Remove(cell.Cell_id);
+
+                    Cells.Remove(cell.Cell_id);
                 }
-                CellManager.cellDictionary.Remove(cell.Cell_id);
                 return true;
             }
             return false;

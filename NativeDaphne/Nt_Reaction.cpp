@@ -21,6 +21,7 @@ namespace NativeDaphne
 	Nt_Reaction::Nt_Reaction(double rate_const)
 	{
 		RateConstant = rate_const;
+		Index = -1;
 	}
 
 	void Nt_Reaction::AddReaction(Nt_Reaction ^src_rxn)
@@ -31,8 +32,21 @@ namespace NativeDaphne
 
 	void Nt_Reaction::RemoveReaction(int index)
 	{
-		//add in derived class
-		throw gcnew NotImplementedException();
+		//in the current implementation, the collection of 
+		//ComponentReactions does not participate in any logic
+		//it was kept for information only
+		int n = ComponentReactions->Count;
+		if (index <0 || index >= n)
+		{
+			throw gcnew Exception("Remove Reaction: index out of range");
+		}
+		ComponentReactions[index]->Index = -1;
+		if (index != n-1)
+		{
+			ComponentReactions[index] = ComponentReactions[n-1];
+			ComponentReactions[index]->Index = index;
+		}
+		ComponentReactions->RemoveAt(n-1);
 	}
 
 	void Nt_Reaction::Step(double dt)
@@ -54,6 +68,7 @@ namespace NativeDaphne
 
 	void Nt_Annihilation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		_reactant = Reactant->ConcPointer;
 		array_length = Reactant->Length;
@@ -61,7 +76,7 @@ namespace NativeDaphne
 
 	void Nt_Annihilation:: RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 	}
 
@@ -104,6 +119,7 @@ namespace NativeDaphne
 
 	void Nt_Association::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant1->Length;
 		intensity->darray->resize(array_length);
@@ -114,12 +130,8 @@ namespace NativeDaphne
 
 	void Nt_Association::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant1->Length;
-		if (array_length != ComponentReactions->Count * Reactant1->Man->ArraySize)
-		{
-			throw gcnew Exception("incorrect array length");
-		}
 		intensity->darray->resize(array_length);
 	}
 
@@ -174,6 +186,7 @@ namespace NativeDaphne
 
 	void Nt_Dimerization::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
@@ -183,7 +196,7 @@ namespace NativeDaphne
 
 	void Nt_Dimerization::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -227,6 +240,7 @@ namespace NativeDaphne
 
 	void Nt_DimerDissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		_reactant = Reactant->ConcPointer;
@@ -235,7 +249,7 @@ namespace NativeDaphne
 
 	void Nt_DimerDissociation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 	}
 
@@ -277,6 +291,7 @@ namespace NativeDaphne
 
 	void Nt_Dissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		_reactant = Reactant->ConcPointer;
 		_product1 = Product1->ConcPointer;
@@ -286,7 +301,7 @@ namespace NativeDaphne
 
 	void Nt_Dissociation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 	}
 
@@ -336,6 +351,7 @@ namespace NativeDaphne
 
 	void Nt_Transformation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		_reactant = Reactant->ConcPointer;
 		_product = Product->ConcPointer;
@@ -344,7 +360,7 @@ namespace NativeDaphne
 
 	void Nt_Transformation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 	}
 
@@ -400,6 +416,7 @@ namespace NativeDaphne
 
 	void Nt_AutocatalyticTransformation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
@@ -409,7 +426,7 @@ namespace NativeDaphne
 
 	void Nt_AutocatalyticTransformation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -456,6 +473,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedAnnihilation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
@@ -465,7 +483,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedAnnihilation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -512,6 +530,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedAssociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant1->Length;
 		intensity->darray->resize(array_length);
@@ -523,7 +542,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedAssociation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant1->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -570,6 +589,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedCreation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Product->Length;
 		_catalyst = Catalyst->ConcPointer;
@@ -578,7 +598,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedCreation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Product->Length;
 	}
 
@@ -621,6 +641,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedDimerization::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
@@ -632,7 +653,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedDimerization::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -685,8 +706,8 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedDimerDissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
-
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 		_catalyst = Catalyst->ConcPointer;
@@ -696,7 +717,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedDimerDissociation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -746,6 +767,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedDissociation::AddReaction(Nt_Reaction ^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
@@ -757,7 +779,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedDissociation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -807,6 +829,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedTransformation::AddReaction(Nt_Reaction^ src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
@@ -818,7 +841,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedTransformation::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Reactant->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -861,6 +884,7 @@ namespace NativeDaphne
 
 	void Nt_Transcription::AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Product->Length;
 		_product = Product->ConcPointer;
@@ -871,7 +895,7 @@ namespace NativeDaphne
 
 	void Nt_Transcription::RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Product->Length;
 	}
 
@@ -924,6 +948,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedBoundaryActivation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Receptor->Length;
 		intensity->darray->resize(array_length);
@@ -935,7 +960,7 @@ namespace NativeDaphne
 
 	void Nt_CatalyzedBoundaryActivation:: RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Receptor->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -992,6 +1017,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryTransportTo:: AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Membrane->Length;
 		_bulk_BoundaryConc = Bulk->BoundaryConcAndFlux[boundaryId]->ConcPointer;
@@ -1001,7 +1027,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryTransportTo:: RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Membrane->Length;
 	}
 
@@ -1056,6 +1082,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryTransportFrom:: AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Membrane->Length;
 		_bulk_BoundaryFlux = Bulk->BoundaryConcAndFlux[boundaryId]->FluxPointer;
@@ -1065,7 +1092,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryTransportFrom:: RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Membrane->Length;
 	}
 
@@ -1116,6 +1143,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryAssociation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Receptor->Length;
 		intensity->darray->resize(array_length);
@@ -1127,7 +1155,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryAssociation:: RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Receptor->Length;
 		intensity->darray->resize(array_length);
 	}
@@ -1186,6 +1214,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryDissociation:: AddReaction(Nt_Reaction ^src_rxn)
 	{
+		src_rxn->Index = ComponentReactions->Count;
 		ComponentReactions->Add(src_rxn);
 		array_length = Receptor->Length;
 		intensity->darray->resize(array_length);
@@ -1198,7 +1227,7 @@ namespace NativeDaphne
 
 	void Nt_BoundaryDissociation:: RemoveReaction(int index)
 	{
-		ComponentReactions->RemoveAt(index);
+		Nt_Reaction::RemoveReaction(index);
 		array_length = Receptor->Length;
 		intensity->darray->resize(array_length);
 	}

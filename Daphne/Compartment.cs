@@ -124,18 +124,12 @@ namespace Daphne
             BoundaryReactions[key].Add(r);
             
             //for the middle layer.
-            int index = BoundaryReactions[key].Count-1;
-            var tmp = r as Nt_Reaction;
-            if (tmp == null)
-            {
-                throw new Exception("reaction casting error");
-            }
             Nt_Reaction ntr = r as Nt_Reaction;
             if (ntr == null)
             {
                 throw new Exception("invalid reaction error");
             }
-            baseComp.AddBoundaryReaction(key, r as Nt_Reaction, index);
+            baseComp.AddBoundaryReaction(key, ntr);
         }
 
 

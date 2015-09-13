@@ -853,7 +853,6 @@ namespace Daphne
             // set translation by reference: when the cell moves then the transform gets updated automatically
             t.setTranslationByReference(c.SpatialState.X);
             dataBasket.Environment.Comp.AddBoundaryTransform(c.PlasmaMembrane.Interior.Id, t);
-            //dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
         public void RemoveCell(Cell c)
@@ -864,18 +863,16 @@ namespace Daphne
                 mp.RemoveBoundaryFluxConc(c.PlasmaMembrane.Interior.Id);
             }
 
-            // remove the boundary reactions involving this cell
-            //handled both comp and baseComp
-            //delayed removal to RemoveCellBoudnaryReactions(Cell c)
-            //dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
+            //done after removeBoundaryFluxConc, so that the reaction element length can be correctly set
+            dataBasket.Environment.Comp.RemoveBoundaryReactions(c.PlasmaMembrane.Interior.Id);
 
             // remove the cell's membrane from the ecs boundary
             dataBasket.Environment.Comp.RemoveBoundary(c.PlasmaMembrane.Interior.Id);
             dataBasket.Environment.Comp.RemoveBoundaryTransform(c.PlasmaMembrane.Interior.Id);
 
             // remove the actual cell - moved to databasket.RemoveCell
+            // here is mostly handling removel of chemistry
             //dataBasket.Cells.Remove(c.Cell_id);
-            //dataBasket.Populations[c.Population_id].RemoveCell(c.Cell_id);
         }
 
         //rmeove boundary reactions associated with this cell

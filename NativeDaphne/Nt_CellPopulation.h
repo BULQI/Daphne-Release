@@ -250,14 +250,15 @@ namespace NativeDaphne
 			this->Cytosol->AddMolecularPopulation(cell->cytosol->NtPopulations);
 			this->PlasmaMembrane->AddMolecularPopulation(cell->plasmaMembrane->NtPopulations);
 
-			this->Cytosol->AddCompartmentReactions(cell->cytosol);
-			this->PlasmaMembrane->AddCompartmentReactions(cell->plasmaMembrane);
+			int boundary_id = cell->plasmaMembrane->InteriorId;
+			this->Cytosol->AddCompartmentReactions(boundary_id, cell->cytosol);
+			this->PlasmaMembrane->AddCompartmentReactions(-1, cell->plasmaMembrane);
 			ntCellDictionary->Add(cell->Cell_id, cell);
 		}
 		
 
-		//remove cell 
-		void RemoveCell(int cell_id, bool completeRemoval)
+		//remove cell
+		void RemoveCell(int cell_id)
 		{
 			if (ntCellDictionary->ContainsKey(cell_id) == false)
 			{
@@ -266,12 +267,12 @@ namespace NativeDaphne
 				{
 					deadCells->Remove(cell_id);
 #if defined (_DEBUG)
-					fprintf(stderr, "Dead cell id=%d removed from system.\n", cell_id);
+					fprintf(stdout, "Dead cell id=%d removed from system.\n", cell_id);
 #endif
 				}
 				else 
 				{
-					throw gcnew Exception("Error RemoveCell: cell id not exists");
+					throw gcnew Exception("Error RemoveCell: cell_id does not exist");
 				}
 				return;
 			}
@@ -308,9 +309,7 @@ namespace NativeDaphne
 #endif
 			}
 
-			ntCellDictionary->Remove(cell_id);
-
-			
+			ntCellDictionary->Remove(cell_id);	
 		}
 
 		//remove cells spatialStates, sigma, transdcutionConsant and Dragcoefficient from array

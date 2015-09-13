@@ -27,6 +27,9 @@ namespace NativeDaphne
 
 		List<Nt_Reaction ^> ^ComponentReactions;
 
+		//the index of this reaciton in parent collection
+		int Index;
+
 		virtual void AddReaction(Nt_Reaction ^ rxn);
 
 		virtual void RemoveReaction(int index);

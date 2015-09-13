@@ -47,7 +47,7 @@ namespace NativeDaphne
 
 		// gmk: terminology
 		//with default populaiton id = 0, like cytosol and plasmambrane boundaries
-		void AddBoundaryReaction(List<Nt_Reaction^>^ rxns)
+		void AddBoundaryReaction(int boundary_id, List<Nt_Reaction^>^ rxns)
 		{
 			for (int i=0; i< rxns->Count; i++)
 			{
@@ -60,11 +60,11 @@ namespace NativeDaphne
 						//it should only contain one component
 						throw gcnew Exception("reaction count error");
 					}
-					AddBoundaryReaction(0, rxn->ComponentReactions[0], i);
+					AddBoundaryReaction(boundary_id, rxn->ComponentReactions[0]);
 				}
 				else
 				{
-					AddBoundaryReaction(0, rxns[i], i);
+					AddBoundaryReaction(boundary_id, rxns[i]);
 				}
 
 			}
@@ -99,13 +99,13 @@ namespace NativeDaphne
 			}
         }
 
-		void AddCompartmentReactions(Nt_Compartment^ comp)
+		void AddCompartmentReactions(int boundary_id, Nt_Compartment^ comp)
 		{
 			this->AddBulkReaction(comp->NtBulkReactions);
 			if (comp->NtBoundaryReactions->Count > 0)
 			{
 				//default popid = 0
-				this->AddBoundaryReaction(comp->NtBoundaryReactions[0]->ReactionList);
+				this->AddBoundaryReaction(boundary_id, comp->NtBoundaryReactions[0]->ReactionList);
 			}
 		}
 
@@ -211,6 +211,9 @@ namespace NativeDaphne
 		//key - populaiton id; vlaue - boudnaryReactions
 		Dictionary<int, Nt_ReactionSet^>^ NtBoundaryReactions;
 
+		//boundary reactions for each boundary, key - boundaryId
+		Dictionary<int, List<Nt_Reaction^>^>^ ComponentNtBoundaryReactions;
+
 		//one major difference between Nt_Compartment and upper level compartment
 		//is that in Nt_Compartment, the compartment is orgnanized by cell populaiton
 		//and within each cell pupulation, the "compartments" is ordered.
@@ -234,6 +237,7 @@ namespace NativeDaphne
             NtPopulations = gcnew List<Nt_MolecularPopulation^>();
             NtBulkReactions = gcnew List<Nt_Reaction^>();
 			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+			ComponentNtBoundaryReactions = gcnew Dictionary<int, List<Nt_Reaction^>^>();
             NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
 			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
 			BoundaryIndexMap = gcnew Dictionary<int, int>();
@@ -248,6 +252,7 @@ namespace NativeDaphne
             NtPopulations = gcnew List<Nt_MolecularPopulation^>();
             NtBulkReactions = gcnew List<Nt_Reaction^>();
 			NtBoundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+			ComponentNtBoundaryReactions = gcnew Dictionary<int, List<Nt_Reaction^>^>();
             NtBoundaries = gcnew Dictionary<int, List<Nt_Compartment^>^>();
 			BoundaryToCellpopMap = gcnew Dictionary<int, int>();
 			BoundaryIndexMap = gcnew Dictionary<int, int>();
@@ -286,11 +291,10 @@ namespace NativeDaphne
 		{
 			if (BoundaryToCellpopMap->ContainsKey(boundary_id) == false)
 			{
-				throw gcnew Exception("RemoveNtBoudnary: id not found");
+				throw gcnew Exception("RemoveNtBoudnary: boundary_id not found");
 			}
 			int population_id = BoundaryToCellpopMap[boundary_id];
 			int boundary_index = BoundaryIndexMap[boundary_id];
-
 			List<Nt_Compartment^>^ src = NtBoundaries[population_id];
 			if (boundary_index != src->Count-1)//if not last one.
 			{
@@ -298,10 +302,11 @@ namespace NativeDaphne
 				Nt_Compartment^ last = src[src->Count -1];
 				Nt_Compartment^ curr = src[boundary_index];
 				BoundaryIndexMap[last->InteriorId] = boundary_index;
-				BoundaryIndexMap[boundary_id] = src->Count-1;
 				src[boundary_index] = last;
 				src[src->Count-1] = curr;
 			}
+			//indicate the boundary has alrady be removed, for debug
+			BoundaryIndexMap[boundary_id] = - (boundary_index + 1);
 			src->RemoveAt(src->Count-1);
 		}
 
@@ -353,14 +358,26 @@ namespace NativeDaphne
 		//that the "same" reaction will have same index in the list of reactions
 		//for that boundary. if not, we will need some kind of key
 		//to identify the reaction.
-		void AddBoundaryReaction(int key, Nt_Reaction^ rxn, int _index)
+		void AddBoundaryReaction(int key, Nt_Reaction^ rxn)
 		{
 			//note if the key is in the CellToCellPopMap, dictionary, then it is cells.
 			int population_id = 0;
+			
+			auto tmp = this->BoundaryToCellpopMap->Keys;
+			int keycount = tmp->Count;
+
 			if (this->BoundaryToCellpopMap->ContainsKey(key) == true)
 			{
 				population_id = this->BoundaryToCellpopMap[key];
 			}
+
+			if (ComponentNtBoundaryReactions->ContainsKey(key) == false)
+			{
+				ComponentNtBoundaryReactions->Add(key, gcnew List<Nt_Reaction^>());
+			}
+			List<Nt_Reaction^>^ rxnlist = ComponentNtBoundaryReactions[key];
+			int _index = rxnlist->Count;
+			rxnlist->Add(rxn);
 
 			if (NtBoundaryReactions->ContainsKey(population_id) == false)
 			{
@@ -374,7 +391,7 @@ namespace NativeDaphne
 			}
 		}
 
-		//remove all boundary reaction with the given key, bundaryID;
+		//remove all boundary reaction with the given BoundaryId;
 		void RemoveBoundaryReaction(int key)
 		{
 
@@ -387,8 +404,15 @@ namespace NativeDaphne
 				return;
 
 			int population_id = BoundaryToCellpopMap[key];
-			int reaction_index = BoundaryIndexMap[key];
 
+			if (ComponentNtBoundaryReactions->ContainsKey(key) == false)
+			{
+				return;
+			}
+			List<Nt_Reaction^>^ boundaryReactionList = ComponentNtBoundaryReactions[key];
+			if (boundaryReactionList->Count == 0)return;
+
+			int reaction_index = boundaryReactionList[0]->Index;
 			Nt_ReactionSet^ rset = NtBoundaryReactions[population_id];
 			rset->RemoveReactions(reaction_index);
 		}

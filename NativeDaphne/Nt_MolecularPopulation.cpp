@@ -27,6 +27,7 @@ namespace NativeDaphne
 
 		concentration = gcnew ScalarField(m);
 		BoundaryConcAndFlux = gcnew Dictionary<int, Nt_MolecluarPopulationBoundary^>();
+		ComponentBoundaryConcAndFlux = gcnew Dictionary<int, Nt_MolecluarPopulationBoundary^>();
 		parent = nullptr;
 		_laplacian = NULL;
 		_boundaryConcPtrs = NULL;
@@ -241,7 +242,8 @@ namespace NativeDaphne
 				{
 					throw gcnew Exception("cytosol should only have one boundary");
 				}
-				this->RemoveNtBoundaryFluxConc(boundary->BoundaryId);
+				//this->RemoveNtBoundaryFluxConc(boundary->BoundaryId);
+				this->RemoveNtBoundaryFluxConc(boundary);
 			}
 		}
 	}
@@ -249,73 +251,80 @@ namespace NativeDaphne
 	//add - add to a collection
 	void Nt_MolecularPopulation::AddNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux)
 	{
-
-			if (Compartment == nullptr)
-			{
-				throw gcnew Exception("parent compartment is null");
-			}
-			if (Compartment->manifoldType == Nt_ManifoldType::TinyBall)
-			{
-				//BoundaryConcAndFlux->Add(boundId, gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
-				SetNtBoundaryFluxConc(boundId, conc, flux);
-				return;
-			}
-			
-			int pop_id = Compartment->GetCellPulationId(boundId);
-			if (pop_id == -1)
-			{
-				throw gcnew Exception("unknown boundary population id");
-			}
-			if (BoundaryConcAndFlux->ContainsKey(pop_id) == false)
-			{
-				Nt_MolecluarPopulationBoundary^ boundary = gcnew Nt_MolecluarPopulationBoundary(conc->M, true); 				
-				boundary->AddBoundaryConcAndFlux(gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
-				BoundaryConcAndFlux->Add(pop_id, boundary);
-			}
-			else 
-			{
-				BoundaryConcAndFlux[pop_id]->AddBoundaryConcAndFlux(gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
-			}
+		AddNtBoundaryFluxConc(gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
 	}
 
-	//set boundary and flux - for cytosol which has only one boundary
-	void Nt_MolecularPopulation::SetNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux)
-	{
-
-			if (Compartment == nullptr)
-			{
-				throw gcnew Exception("parent compartment is null");
-			}
-			
-			int pop_id = Compartment->GetCellPulationId(boundId);
-			if (pop_id == -1)
-			{
-				throw gcnew Exception("unknown boundary population id");
-			}
-			Nt_MolecluarPopulationBoundary^ boundary = gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux);
-			if (BoundaryConcAndFlux->ContainsKey(pop_id) == false)
-			{
-				BoundaryConcAndFlux->Add(pop_id, boundary);
-			}
-			else 
-			{
-				BoundaryConcAndFlux[pop_id] = boundary;
-			}
-	}
 
 	void Nt_MolecularPopulation::AddNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ boundary)
 	{
 
-		AddNtBoundaryFluxConc(boundary->BoundaryId, boundary->Conc, boundary->Flux);
+		if (Compartment == nullptr)
+		{
+			throw gcnew Exception("parent compartment is null");
+		}
+		if (Compartment->manifoldType == Nt_ManifoldType::TinyBall)
+		{
+			//BoundaryConcAndFlux->Add(boundId, gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux));
+			SetNtBoundaryFluxConc(boundary);
+			return;
+		}
+
+		int pop_id = Compartment->GetCellPulationId(boundary->BoundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		int boundaryId = boundary->BoundaryId;
+		if (BoundaryConcAndFlux->ContainsKey(pop_id) == false)
+		{
+			Nt_MolecluarPopulationBoundary^ boundaryContainer = gcnew Nt_MolecluarPopulationBoundary(boundary->Conc->M, true); 
+			boundaryContainer->AddBoundaryConcAndFlux(boundary);
+			BoundaryConcAndFlux->Add(pop_id, boundaryContainer);
+			ComponentBoundaryConcAndFlux->Add(boundaryId, boundary);
+		}
+		else 
+		{
+			BoundaryConcAndFlux[pop_id]->AddBoundaryConcAndFlux(boundary);
+			ComponentBoundaryConcAndFlux->Add(boundaryId, boundary);
+		}
+	}
+
+	//set boundary and flux - for cytosol which has only one boundary
+	void Nt_MolecularPopulation::SetNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ boundary)
+	{
+
+		int pop_id = Compartment->GetCellPulationId(boundary->BoundaryId);
+		if (pop_id == -1)
+		{
+			throw gcnew Exception("unknown boundary population id");
+		}
+		if (BoundaryConcAndFlux->ContainsKey(pop_id) == false)
+		{
+			BoundaryConcAndFlux->Add(pop_id, boundary);
+		}
+		else 
+		{
+			BoundaryConcAndFlux[pop_id] = boundary;
+		}
 	}
 
 	void Nt_MolecularPopulation::RemoveNtBoundaryFluxConc(int boundary_id)
+	{
+		if (ComponentBoundaryConcAndFlux->ContainsKey(boundary_id) == false)
+		{
+			return;
+		}
+		RemoveNtBoundaryFluxConc(ComponentBoundaryConcAndFlux[boundary_id]);
+	}
+			
+
+	void Nt_MolecularPopulation::RemoveNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ boundary)
 	{
 		if (Compartment == nullptr)
 		{
 			throw gcnew Exception("parent compartment is null");
 		}
-		int pop_id = Compartment->GetCellPulationId(boundary_id);
+		int pop_id = Compartment->GetCellPulationId(boundary->BoundaryId);
 		if (pop_id == -1)
 		{
 			throw gcnew Exception("unknown boundary population id");
@@ -326,15 +335,19 @@ namespace NativeDaphne
 			throw gcnew Exception("Error RemoveNtBoundayrFluxCon - no poulation id found");
 		}
 
-		Nt_MolecluarPopulationBoundary^ boundary = BoundaryConcAndFlux[pop_id];
+		Nt_MolecluarPopulationBoundary^ src_boundary = BoundaryConcAndFlux[pop_id];
 
-		if (boundary->IsContainer() == false)
+		if (src_boundary->IsContainer() == false)
 		{
 			throw gcnew Exception("Error RemoveNtBoundayrFluxCon - not collection");
 		}
-		int index = Compartment->GetCellPopulationIndex(boundary_id);
-				
-		boundary->RemoveBoundaryConcAndFlux(index);
+
+		src_boundary->RemoveBoundaryConcAndFlux(boundary);
+		
+		if (ComponentBoundaryConcAndFlux != nullptr && ComponentBoundaryConcAndFlux->ContainsKey(boundary->BoundaryId) == true)
+		{
+			ComponentBoundaryConcAndFlux->Remove(boundary->BoundaryId);
+		}
 	}
 
 

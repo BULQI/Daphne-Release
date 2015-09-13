@@ -18,13 +18,13 @@ namespace Daphne
             cellDictionary = new Dictionary<int, Cell>();
         }
 
-        public new void RemoveCell(int cell_id, bool completeRemoval = true)
+        public void RemoveCell(int cell_id, bool completeRemoval = true)
         {
             if (completeRemoval == true)
             {
                 cellDictionary.Remove(cell_id);
             }
-            base.RemoveCell(cell_id, completeRemoval);
+            base.RemoveCell(cell_id);
         }
 
         public void AddCell(int cell_id, Cell cell)

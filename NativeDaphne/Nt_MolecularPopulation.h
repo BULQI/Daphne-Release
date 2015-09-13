@@ -72,12 +72,6 @@ namespace NativeDaphne
 			components->Add(boundary);
 		}
 
-		void AddBoundaryConcAndFlux(int boundId, ScalarField^ conc, ScalarField^ flux)
-		{
-			Nt_MolecluarPopulationBoundary^ boundary = gcnew Nt_MolecluarPopulationBoundary(boundId, conc, flux);
-			AddBoundaryConcAndFlux(boundary);
-		}
-
 		//remove a boundary by its component conc
 		void RemoveBoundaryConcAndFlux(Nt_MolecluarPopulationBoundary^ item)
 		{
@@ -87,39 +81,17 @@ namespace NativeDaphne
 			}
 			int index = this->Conc->RemoveComponent(item->Conc);
 			this->Flux->RemoveComponent(item->Flux);
+
+			if (components[index] != item)
+			{
+				throw gcnew Exception("boundary mismatch error");
+			}
+			
 			if (index != components->Count-1 )
 			{
 				components[index] = components[components->Count -1];
-			}
+			}	
 			components->RemoveAt(components->Count -1);
-		}
-
-		void RemoveBoundaryConcAndFlux(int index)
-		{
-			if (components->Count == 0)
-			{
-				throw gcnew Exception("remoeve boundary error 2: component is empty");
-			}
-			if (index < 0 || index >= components->Count)
-			{
-				throw gcnew Exception("remove boundary error: index out of range");
-			}
-			RemoveBoundaryConcAndFlux(components[index]);
-		}
-
-
-		void RemoveBoundaryConcAndFlux(ScalarField^ boundary_conc)
-		{
-			if (components->Count == 0)
-			{
-				throw gcnew Exception("remove boundary error: component is empty");
-			}
-			int index = (int)(boundary_conc->ArrayPointer - this->Conc->ArrayPointer)/boundary_conc->ArrayLength;
-			if (index < 0 || index >= components->Count || components[index]->Conc != boundary_conc)
-			{
-				throw gcnew Exception("remove boundary error: index out range");
-			}
-			RemoveBoundaryConcAndFlux(components[index]);
 		}
 				
 		Nt_MolecluarPopulationBoundary^ firstComponent()
@@ -208,10 +180,14 @@ namespace NativeDaphne
 
 		List<Nt_MolecularPopulation^> ^ComponentPopulations;
 
-		//for molpop in ECS, the key is population_Id
+		//this is the boundary grouped by cellpopulation.
+		//for molpop in ECS, the key is cell, population_Id
 		//for molpop in Cytosol, the key does not matter, default to 0
 		Dictionary<int, Nt_MolecluarPopulationBoundary^>^ BoundaryConcAndFlux;
 
+		//the is the individual boundary that is not organized into colleciton
+		//it exist to facilitate removal of individual boundaries.
+		Dictionary<int, Nt_MolecluarPopulationBoundary^>^ ComponentBoundaryConcAndFlux;
 
 		//constructor
 		Nt_MolecularPopulation(Manifold^ m, String^ _molguid, String^ _name, double diff_coeff);
@@ -226,11 +202,13 @@ namespace NativeDaphne
 
 		virtual void AddNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux);
 
-		virtual void SetNtBoundaryFluxConc(int boundId, ScalarField^ conc, ScalarField^ flux);
+		virtual void SetNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ boundary);
 
 		virtual void AddNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ boundary);
 
-		virtual void RemoveNtBoundaryFluxConc(int boundId);
+		virtual void RemoveNtBoundaryFluxConc(int boundary_id);
+
+		virtual void RemoveNtBoundaryFluxConc(Nt_MolecluarPopulationBoundary^ item);
 		
 		virtual void step(double dt);
 

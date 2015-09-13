@@ -27,8 +27,6 @@ namespace Daphne
         }
         public DistributedParameter Phagocytosis;
 
-        Dictionary<BigInteger, int> item_to_keep;
-
         public CellManager()
         {
             deadDict = new Dictionary<int, double[]>();
@@ -62,6 +60,7 @@ namespace Daphne
 
             iteration_count++;
 
+            int cell_count = SimulationBase.dataBasket.Cells.Count;
             //steps through cell populations - it is ONLY handling reactions for now.
             foreach (CellsPopulation cellpop in SimulationBase.dataBasket.Populations.Values)
             {
@@ -125,7 +124,7 @@ namespace Daphne
                 }
 
                 // cell division
-                if (cell.Cytokinetic == true)
+                if (cell.Cytokinetic == true) //if (cell_count < 50 && cell.Cytokinetic == true)
                 {
                     // divide the cell, return daughter
                     Cell c = cell.Divide();
