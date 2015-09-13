@@ -160,8 +160,11 @@ namespace DaphneGui.Pushing
                 case PushLevelEntityType.Molecule:
                     //LeftList = LevelA.entity_repository.molecules;
                     //RightList = LevelB.entity_repository.molecules;
+                    
                     LeftList = new ObservableCollection<ConfigMolecule>(from i in LevelA.entity_repository.molecules orderby i.Name select i);
+                    MainWindow.ToolWin.PushMoleculeFilter(LeftList, LevelA);
                     RightList = new ObservableCollection<ConfigMolecule>(from i in LevelB.entity_repository.molecules orderby i.Name select i);
+                    MainWindow.ToolWin.PushMoleculeFilter(RightList, LevelB);
                     break;
                 case PushLevelEntityType.Gene:
                     //LeftList = LevelA.entity_repository.genes;
@@ -577,7 +580,16 @@ namespace DaphneGui.Pushing
                         e.CanExecute = false;
                     }
                     else
-                        e.CanExecute = true;
+                    {
+                        if (equalGuids.Contains(((ConfigEntity)obj).entity_guid))
+                        {
+                            e.CanExecute = false;
+                        }
+                        else
+                        {
+                            e.CanExecute = true;
+                        }
+                    }
                 }
             }
             
@@ -708,7 +720,7 @@ namespace DaphneGui.Pushing
                 // Set the background color of the DataGrid row based on whatever data you like from the row.
                 Color col = Color.FromRgb(228, 228, 228);
                 e.Row.Background = new SolidColorBrush(col);                    //Brushes.LightGray;
-                e.Row.IsEnabled = false;
+                //e.Row.IsEnabled = false;
             }
             else
             {

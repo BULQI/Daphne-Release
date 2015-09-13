@@ -89,6 +89,7 @@
                 <MenuItem Header="File" Name="fileMenu">
                     <MenuItem Header="New Protocol" Name="newScenario" Click="newScenario_Click"></MenuItem>
                     <MenuItem Header="Load Protocol..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
+                    <MenuItem Header="Restore default path" Name="defaultPath" Click="defaultFolder" />
                     <MenuItem Header="Save Protocol" Name="saveScenario" Command="ApplicationCommands.Save" />
                     <MenuItem Header="Save Protocol As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
@@ -114,9 +115,9 @@
                 </MenuItem>
                 
                 <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
-                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="analCellPopDynMenu_Click"/>
+                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="CellPopDynMenu_Click"/>
                     <MenuItem Header="Cell Lineage..." Name="LineageAnalMenu" Click="OpenLineageWindow" />
-                    <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
+                    <MenuItem Header="Cell Tracks" Name="fitMenu" Click="cellTracksMenu_Click" Visibility="Collapsed" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
@@ -201,11 +202,13 @@
               
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
-                    <MenuItem Header="Tech help" Name="techHelp"  IsEnabled="False">
+                    <MenuItem Header="Tech help" Name="techHelp" Click="techHelp_click" />
+                    <!-- Commented out for now. Do we need this? -->
+                    <!--<MenuItem Header="Tech help" Name="techHelp" >
                         <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
                         <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
                         <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
-                    </MenuItem>
+                    </MenuItem>-->
                     <MenuItem Header="About..." Name="helpAbout" Click="helpAbout_Click" />
                 </MenuItem>
             </Menu>

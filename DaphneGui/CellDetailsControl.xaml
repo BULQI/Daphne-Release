@@ -28,11 +28,13 @@
         <daph:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        <local:TransductionConstantVisibilityConverter x:Key="TransductionConstantVisibilityConv" />
 
         <CollectionViewSource x:Key="availableBulkMoleculesListView"/>
         <CollectionViewSource x:Key="availableBoundaryMoleculesListView"/>
         <CollectionViewSource x:Key="moleculesListView"  />
-   
+        <CollectionViewSource x:Key="driverMoleculesListView"  />
+
         <CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
                                   Filter="cytosolAvailableReactionsListView_Filter"/>
 
@@ -136,9 +138,13 @@
         <!-- Distr_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element. -->
         <DataTemplate x:Key="Distr_TDE_dgCell_Editing">
             <StackPanel Orientation="Vertical">
-                <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
                 <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
+                <ContentControl Name="MeanValueDisplay"
+                                Content="{Binding Path=Distr}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6"
+                        />
             </StackPanel>
         </DataTemplate>
 
@@ -206,6 +212,11 @@
                 <TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>
                 <local:ParamDistrControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding death_driver.DriverElements[0].elements[1].Distr, UpdateSourceTrigger=PropertyChanged}" />
+                <ContentControl Name="Death_MeanValueDisplay"
+                                Content="{Binding Path=death_driver.DriverElements[0].elements[1].Distr}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6"
+                        />
             </StackPanel>
         </DataTemplate>
         
@@ -321,17 +332,19 @@
                 </StackPanel>
 
                 <StackPanel Name="spTransitionDriverElementDetailsContentControl" HorizontalAlignment="Left">
-                    <Button HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Transition Driver Type" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,6" />
+                        <Button HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="200" 
                             Click="ChangeDeathTDEType_Click" 
                             Style="{StaticResource selectable_Death_TDE_Type_ButtonContent}">
-
-                        <Button.ToolTip>
-                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                            <Button.ToolTip>
+                                <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                 Pressing this button toggles between two methods for driving apoptotic transitions: by molecular concentration or by probability distribution.
-                            </TextBlock>
-                        </Button.ToolTip>
-
-                    </Button>
+                                </TextBlock>
+                            </Button.ToolTip>
+                        </Button>
+                        <TextBlock Text="(toggle)" VerticalAlignment="Center" Margin="6,0"/>
+                    </StackPanel>
                     <ContentControl x:Name="TransitionDriverElementDetails"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectable_death_TDE_template}"
@@ -378,7 +391,9 @@
         <DataTemplate x:Key="DataGridCell_TDE_Editing_Template" DataType="daph:ConfigTransitionDriverElement">
             
             <StackPanel Name="TransitionSchemeStackPanel" Orientation="Vertical">
-                <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinWidth="20" MinHeight="20"
+                <TextBlock Text="Transition Driver Type" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="btnTDEswitch" HorizontalAlignment="Left" Margin="0,5,0,5"  MinWidth="20" MinHeight="20"
                         FontSize="10"
                         Click="ChangeDataGridTDEType_Click" 
                         DataContext="{Binding}"
@@ -386,18 +401,48 @@
 
                     <Button.ToolTip>
                         <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                            Pressing this button toggles between two methods for driving apoptotic transitions: by molecular concentration or by probability distribution.                         
+                            Pressing this button toggles between two methods for driving transitions: by molecular concentration or by probability distribution.                         
                         </TextBlock>
                     </Button.ToolTip>
                 </Button>
-
+                    <TextBlock Text="(toggle)" VerticalAlignment="Center"/>
+                </StackPanel>
                 <ContentControl x:Name="TransitionDriverElementDetails2"
                                     Content="{Binding UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                     Style="{StaticResource selectable_DataGrid_TDE_editing_template}"
                                     />
-
             </StackPanel>
         </DataTemplate>
+
+
+        <!-- MolpopHomogeneous distribution template for cells environment -->
+        <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
+                <StackPanel Orientation="Vertical" Margin="20,0">
+                    <uc:DoublesBox     HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                >
+                    </uc:DoublesBox>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
         
     </UserControl.Resources>
 
@@ -407,6 +452,7 @@
 
         <StackPanel Orientation="Vertical">
             
+            <!-- Chemistry -->
             <Expander  Padding="5"
                         ExpandDirection="Down"
                         IsExpanded="False"
@@ -443,7 +489,7 @@
                                 <!-- Cell Membrane Mol Pops -->
                                 <TabItem >
                                     <TabItem.Header>
-                                        <TextBlock Text="Membrane" FontWeight="Bold" />
+                                        <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                     </TabItem.Header>
 
                                     <StackPanel Orientation="Vertical">
@@ -519,7 +565,8 @@
                                                         </ComboBox>
                                                     </StackPanel>
 
-                                                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+                                                    <!-- molpop name-->
+                                                    <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                         <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                                         <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
                                                             <TextBox.ToolTip>
@@ -532,7 +579,7 @@
                                                                 </ToolTip>
                                                             </TextBox.ToolTip>
                                                         </TextBox>
-                                                    </StackPanel>
+                                                    </StackPanel>-->
 
                                                 </Grid>
                                             </StackPanel>
@@ -547,20 +594,18 @@
                                                         <RowDefinition />
                                                         <RowDefinition />
                                                     </Grid.RowDefinitions>
-                                                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0"  Margin="0,6,0,0">
                                                         <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                        <StackPanel Orientation="Horizontal" Margin="28,10">
-                                                            <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                                            <TextBlock Text="molec/µm^2" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                                                            <TextBlock Text=")" VerticalAlignment="Center" />
-                                                        </StackPanel>
+                                                            <TextBlock HorizontalAlignment="Center">concentration (molec/µm<Run 
+                                                                    FontFamily="Palatino Linotype" Typography.Variants="Superscript">2</Run>)
+                                                            </TextBlock>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                                         <ContentControl Name="membraneMolPopDistributionDetails"
                                                                     Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
                                                                     ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                                    Margin="6,2"/>
+                                                                    Margin="6,2" Tag="Boundary"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </StackPanel>
@@ -675,7 +720,10 @@
 
                                                             </ComboBox>
                                                         </StackPanel>
-                                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+
+
+                                                            <!-- molpop name-->
+                                                            <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                                             <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                                             <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
                                                                 <TextBox.ToolTip>
@@ -688,7 +736,7 @@
                                                                     </ToolTip>
                                                                 </TextBox.ToolTip>
                                                             </TextBox>
-                                                        </StackPanel>
+                                                        </StackPanel>-->
 
                                                     </Grid>
                                                 </StackPanel>
@@ -704,20 +752,18 @@
                                                             <RowDefinition />
                                                             <RowDefinition />
                                                         </Grid.RowDefinitions>
-                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                                        <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0" Margin="0,6,0,0">
                                                             <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                            <StackPanel Orientation="Horizontal" Margin="28,10">
-                                                                <TextBlock Text="concentration (" VerticalAlignment="Center" />
-                                                                <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                                                                <TextBlock Text=")" VerticalAlignment="Center" />
-                                                            </StackPanel>
+                                                                <TextBlock HorizontalAlignment="Center">concentration (molec/µm<Run 
+                                                                    FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                                                                    </TextBlock>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                                             <ContentControl Name="MolPopDistributionDetails"
-                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
-                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                        Margin="6,2"/>
+                                                                    Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
+                                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                                                    Margin="6,2" Tag="Bulk"/>
                                                         </StackPanel>
 
                                                     </Grid>
@@ -890,15 +936,17 @@
                                 <!-- Reactions in cell Membrane -->
                                 <TabItem >
                                     <TabItem.Header>
-                                        <TextBlock Text="Membrane" FontWeight="Bold" />
+                                        <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical">
-                                        <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="10,0" Text="Rate Constant" />
+                                                <TextBlock Margin="10,0" Text="Reaction" />
+                                            </StackPanel>
+                                            <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
-
-
                                             <ListBox.ContextMenu>
                                                 <ContextMenu >
                                                     <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
@@ -1021,7 +1069,11 @@
                                         <TextBlock Text="Cytosol" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical" >
-                                        <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="10,0" Text="Rate Constant" />
+                                                <TextBlock Margin="10,0" Text="Reaction" />
+                                            </StackPanel>
+                                            <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
@@ -1173,7 +1225,7 @@
                             <!-- Reaction Complexes in cell Membrane -->
                             <TabItem >
                                 <TabItem.Header>
-                                    <TextBlock Text="Membrane" FontWeight="Bold" />
+                                    <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                 </TabItem.Header>
 
                                 <StackPanel>
@@ -1422,6 +1474,123 @@
                 </local:DaphneStackPanel>
             </Expander>
 
+            <!-- Locomotion -->
+            <Expander Padding="6" ExpandDirection="Down"
+                        IsExpanded="False"
+                        Header="Locomotion"                                                  
+                        x:Name="MotionPropertiesExpander"
+                        Margin="0,5,0,0" 
+                        Canvas.ZIndex="1"     
+                        Visibility="Visible"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                        >
+
+                    <Grid Width="Auto" x:Name="PropertiesGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel x:Name="spProps" Orientation="Vertical" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
+                            <GroupBox >
+                                <!-- 
+                                cbLocomotorDriver1 binding needs to be OneWay.
+                                When the user selects a different cell population, the selected cell type updates before this control updates. 
+                                This causes the locomoter driver molecule of the first cell type to get changed to that of the second (newly-selected) cell type.
+                                -->
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" x:Name="panelLocoDriver">
+                                        <TextBlock Text="chemotactic driver molecule" Margin="6,5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="160"/>
+                                        <ComboBox   x:Name="cbLocomotorDriver1" MinWidth="100" Width="160" Margin="6,0"
+                                                    DisplayMemberPath="Name"
+                                                    SelectedValue="{Binding Path=locomotor_mol_guid_ref, Converter={StaticResource DebugConverter}, Mode=OneWay}"
+                                                    SelectionChanged="cbLocoDriver_SelectionChanged"
+                                                    SelectedValuePath="entity_guid"
+                                                    IsSynchronizedWithCurrentItem="True"
+                                                    PreviewMouseDown="cbLocomotorDriver1_PreviewMouseDown"
+                                                    ToolTipService.ShowDuration="10000">
+
+                                            <ComboBox.ItemsSource>
+                                                <CompositeCollection>
+                                                    <CollectionContainer  Collection="{Binding Source={StaticResource driverMoleculesListView}}" />
+                                                    <daph:ConfigMolecule Name="None" entity_guid=""/>
+                                                </CompositeCollection>
+                                            </ComboBox.ItemsSource>
+
+                                            <ComboBox.ToolTip>
+                                                <ToolTip>
+                                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                            The cytosol molecular that will produce the chemotactic force. 
+                                                            The chemotactic force that the cell experiences is proportional to the gradient (polarity) of the distribution of this molecule in the cytosol. 
+                                                            Gradients in molecular distributions can be produced through interactions with non-uniform distributions of membrane-bound molecules,
+                                                            which are, in turn, can be generated throught binding with non-uniform distributions of chemokines in the extracellular medium. 
+                                                            Load the simple_chemotaxis scenario for an example of chemotaxis.
+                                                    </TextBlock>
+                                                </ToolTip>
+                                            </ComboBox.ToolTip>
+
+
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Vertical" Margin="50,0" 
+                                                Visibility="{Binding locomotor_mol_guid_ref, Converter={StaticResource TransductionConstantVisibilityConv}}">
+                                        <TextBlock Text="transduction constant" Margin="6,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" TextWrapping="Wrap">
+                                            <TextBlock.ToolTip>
+                                                       <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                            A coefficient that multiplies the gradient of the chemotactic driver molecule. 
+                                                           A default value of 100 is recommended. 
+                                                           A probabilty distribution can also be selected to allow this parameter to vary among the cells in a cell population.
+                                                        </TextBlock>                                                
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                        <local:ParamDistrControl Margin="6,0"  Tag="CONTINUOUS"  
+                                                                 DataContext="{Binding TransductionConstant, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+
+                        <GroupBox Grid.Row="1" Grid.Column="0">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="drag coefficient" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                                <TextBlock.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            A parameter that determines the magnitude of the drag force experienced by the cell.
+                                            The drag will cause the cell to slow down or stop, in the absence of chemotactic or stochastic forces. 
+                                            A default value of 1 is recommended. 
+                                            A probabilty distribution can also be selected to allow this parameter to vary among the cells in a cell population.
+                                    </TextBlock>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                                <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding DragCoefficient, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Row="1" Grid.Column="1">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="stochastic motion (force parameter)" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap">
+                                <TextBlock.ToolTip>
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                            A parameter that determines the magnitude of the stochastic force experienced by the cell. 
+                                            A default value of 4 is recommended for germinal center B cells. 
+                                            A probabilty distribution can also be selected to allow this parameter to vary among the cells in a cell population.
+                                    </TextBlock>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                                <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                    </Grid>
+                </Expander>
+
+            <!-- Transitions -->
             <Expander  Padding="5"
                         ExpandDirection="Down"
                         IsExpanded="False"

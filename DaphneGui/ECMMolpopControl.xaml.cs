@@ -505,7 +505,7 @@ namespace DaphneGui
             if (nIndex == (cb.Items.Count - 1))
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
                 aem.Tag = "ecs";
 

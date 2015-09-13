@@ -132,12 +132,6 @@
                             Expanded="CellDeathParamsExpander_Expanded">
 
                         <StackPanel Orientation="Vertical" >
-                            <!--<StackPanel.ToolTip>
-                                <StackPanel Width="400" >
- 
-                                </StackPanel>
-                            </StackPanel.ToolTip>-->
-
                             <TextBlock Text="Rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" >
                                 <TextBlock.ToolTip>
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
@@ -148,6 +142,11 @@
 
                             </TextBlock>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <ContentControl Name="CellRemoval_MeanValueDisplay"
+                                Content="{Binding Path=Protocol.sim_params.Phagocytosis}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6"
+                                />
                         </StackPanel>
 
                     </Expander>

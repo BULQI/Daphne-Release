@@ -203,14 +203,13 @@ namespace DaphneGui
             cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
             cvs.Filter += ToolWinBase.FilterFactory.BoundaryMolecules_Filter;
 
+            PropertiesGrid.IsEnabled = false;
+
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
             {
                 return;
             }
-
-            //Level level = null;
-            //SetCurrentLevel(level);
 
             updateSelectedMoleculesAndGenes(cell);
         }
@@ -238,6 +237,24 @@ namespace DaphneGui
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
             }
+
+            CollectionViewSource cvs2 = (CollectionViewSource)(FindResource("driverMoleculesListView"));
+            if (cvs2.Source == null)
+            {
+                cvs2.Source = new ObservableCollection<ConfigMolecule>();
+            }
+            ((ObservableCollection<ConfigMolecule>)cvs2.Source).Clear();
+
+            int locoMol = -1;
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            {
+                ((ObservableCollection<ConfigMolecule>)cvs2.Source).Add(configMolpop.molecule);
+                if (configMolpop.molecule.entity_guid == cell.locomotor_mol_guid_ref)
+                {
+                    locoMol = cell.cytosol.molpops.IndexOf(configMolpop);
+                }
+            }
+            cbLocomotorDriver1.SelectedIndex = locoMol;
 
         }
 
