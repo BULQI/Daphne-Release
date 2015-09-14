@@ -414,7 +414,6 @@ namespace Daphne
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.Cytosol));
                 newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
-                newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 daughter.Cytosol.AddMolecularPopulation(kvp.Key, newMP);
             }
             // membrane molpops
@@ -423,7 +422,7 @@ namespace Daphne
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.PlasmaMembrane));
                 newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
-                daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
+                daughter.PlasmaMembrane.AddMolecularPopulation(kvp.Key, newMP);
             }
             // genes
             foreach (KeyValuePair<string, Gene> kvp in Genes)
