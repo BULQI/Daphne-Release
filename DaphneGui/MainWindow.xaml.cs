@@ -2098,7 +2098,7 @@ namespace DaphneGui
         /// <returns></returns>
         private Protocol ReadJson(string jsonScenarioString)
         {
-            Protocol protocol;
+            Protocol protocol, retval;
 
             // load past experiment
             if (jsonScenarioString != "")
@@ -2110,12 +2110,12 @@ namespace DaphneGui
                 {
                     SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
                     LevelContext = protocol;
-                    return protocol;
+                    retval = protocol;
                 }
                 catch
                 {
                     handleLoadFailure("That configuration has problems. Please select another experiment.");
-                    return null;
+                    retval = null;
                 }
             }
             else
@@ -2128,15 +2128,37 @@ namespace DaphneGui
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
                     SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
                     LevelContext = protocol;
-                    return protocol;
+                    retval = protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
                 catch
                 {
                     handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
-                    return null;
+                    retval = null;
                 }
             }
+            // check for protocol version
+            if (retval != null && retval.Version != SystemOfPersistence.VERSION)
+            {
+                MessageBoxResult res;
+                string message = string.Format("Protocol version mismatch. You are using Daphne version {0} and are trying to open a protocol with version {1}.\n\n" +
+                                               "Press 'No' to abort, then open a different protocol (recommended).\n\n" +
+                                               "Press 'Yes' to proceed. This will attempt to update the protocol, allowing you to save it.\n" +
+                                               "Note: proceeding can have unexpected consequences in the execution." , SystemOfPersistence.VERSION, retval.Version);
+
+                res = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+                if (res == MessageBoxResult.No)
+                {
+                    handleLoadFailure("");
+                    retval = null;
+                }
+                else
+                {
+                    // update the version
+                    retval.Version = SystemOfPersistence.VERSION;
+                }
+            }
+            return retval;
         }
 
         private void initialState(bool newFile, bool completeReset, Protocol protocol)
@@ -2199,7 +2221,9 @@ namespace DaphneGui
                     ToolWin.Tag = sop;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
+                    {
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    }
 
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinTissue)ToolWin);
@@ -2269,7 +2293,13 @@ namespace DaphneGui
             }
             else
             {
-                throw new NotImplementedException();
+                // only create during construction or when the type changes
+                if (sim == null || sim is NullSimulation == false)
+                {
+                    // create the simulation
+                    sim = new NullSimulation();
+                    gc = new VTKNullGraphicsController();
+                }
             }
 
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
@@ -2284,12 +2314,20 @@ namespace DaphneGui
             if (postConstruction == true && AssumeIDE() == true)
             {
                 sim.Load(sop.Protocol, completeReset, repetition);
+                if (sim is NullSimulation == true)
+                {
+                    return;
+                }
             }
             else
             {
                 try
                 {
                     sim.Load(sop.Protocol, completeReset, repetition);
+                    if (sim is NullSimulation == true)
+                    {
+                        return;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -2385,7 +2423,7 @@ namespace DaphneGui
         /// <summary>
         /// handle a problem during loading: blank the vtk screen and bulk of the gui
         /// </summary>
-        /// <param name="s">message to display</param>
+        /// <param name="s">message to display, pass "" to skip displaying the exception</param>
         private void handleLoadFailure(string s)
         {
             loadSuccess = false;
@@ -2401,7 +2439,10 @@ namespace DaphneGui
             //////////gc.Cleanup();
             //////////gc.Rwc.Invalidate();
             displayTitle("");
-            showExceptionBox(s);
+            if (s != "")
+            {
+                showExceptionBox(s);
+            }
         }
 
         /// <summary>
@@ -2439,6 +2480,10 @@ namespace DaphneGui
         /// </summary>
         private void closeOutputFiles()
         {
+            if (sim is NullSimulation == true)
+            {
+                return;
+            }
             sim.Reporter.CloseReporter();
             finishHDF5();
         }
@@ -3458,12 +3503,6 @@ namespace DaphneGui
 
         private void prepareProtocol(Protocol protocol)
         {
-            // prevent further loading if the protocol is invalid
-            if (protocol == null)
-            {
-                return;
-            }
-
             // show the inital state
             lockAndResetSim(true, protocol);
             if (loadSuccess == false)

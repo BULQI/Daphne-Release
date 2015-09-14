@@ -22,6 +22,7 @@ namespace Daphne
         {
             //Create DaphneStore
             LoadDefaultGlobalParameters(daphneStore);
+            daphneStore.Version = SystemOfPersistence.VERSION;
             daphneStore.SerializeToFile();
 
             //Clone UserStore from DaphneStore
@@ -30,6 +31,7 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
             userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            userStore.Version = SystemOfPersistence.VERSION;
             userStore.SerializeToFile();
             //update renderSkin
             RenderSkin sk = new RenderSkin("default_skin", userStore.entity_repository);
@@ -244,6 +246,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = SystemOfPersistence.VERSION;
 
             protocol.InitializeStorageClasses();
 
@@ -463,6 +467,8 @@ namespace Daphne
             // We need this to successfully execute cellPop.cellPopDist.Initialize();
             SystemOfPersistence.HProtocol = protocol;
 
+            protocol.Version = SystemOfPersistence.VERSION;
+
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store
@@ -491,7 +497,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.integrator_step = 0.001;
- 
 
             //ECM REACTIONS - recursive
             string[] item = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
@@ -624,6 +629,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.Version = SystemOfPersistence.VERSION;
+
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 
@@ -722,6 +729,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.Version = SystemOfPersistence.VERSION;
+
             protocol.InitializeStorageClasses();
 
             // Load reaction templates from userstore
@@ -736,7 +745,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
             protocol.scenario.time_config.integrator_step = 0.001;
-
         }
 
         public static void CreateVatRC_Blank_Protocol(Protocol protocol)
@@ -745,6 +753,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = SystemOfPersistence.VERSION;
 
             protocol.InitializeStorageClasses();
 
@@ -772,8 +782,9 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.InitializeStorageClasses();
+            protocol.Version = SystemOfPersistence.VERSION;
 
+            protocol.InitializeStorageClasses();
 
             Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -907,6 +918,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = SystemOfPersistence.VERSION;
 
             protocol.InitializeStorageClasses();
 
@@ -4528,6 +4541,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = SystemOfPersistence.VERSION;
 
             protocol.InitializeStorageClasses();
 

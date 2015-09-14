@@ -28,6 +28,9 @@ namespace Daphne
     /// </summary>
     public class SystemOfPersistence:INotifyPropertyChanged
     {
+        // to change the protocol version, change / increment this; assume 1 to be the lowest value
+        public static int VERSION = 1;
+
         /// <summary>
         /// Protocol level, contains Entity level
         /// </summary>
@@ -274,6 +277,8 @@ namespace Daphne
 
             FileName = fileName;
             TempFile = tempFile;
+            // 1 is the lowest version in use; -1 denotes protocols that were created prior to establishing the version
+            Version = -1;
             entity_repository = new EntityRepository();
         }
 
@@ -1698,6 +1703,10 @@ namespace Daphne
         /// entity repository storing all available entities in this level
         /// </summary>
         public EntityRepository entity_repository { get; set; }
+        /// <summary>
+        /// file version; applies to stores and protocols alike
+        /// </summary>
+        public int Version { get; set; }
     }
 
     /// <summary>

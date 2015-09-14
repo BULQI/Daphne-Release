@@ -529,6 +529,11 @@ namespace Daphne
         {
             ProtocolHandle = protocol;
 
+            if (this is NullSimulation == true)
+            {
+                return;
+            }
+
             duration = protocol.scenario.time_config.duration;
             sampleStep = protocol.scenario.time_config.sampling_interval;
             renderStep = protocol.scenario.time_config.rendering_interval;
@@ -939,8 +944,12 @@ namespace Daphne
             get { return renderCount; }
         }
 
+        protected virtual int linearDistributionCase(int dim)
+        {
+            return 0;
+        }
+
         public abstract void Step(double dt);
-        protected abstract int linearDistributionCase(int dim);
 
         /// <summary>
         /// constants used to set the run status
@@ -972,6 +981,21 @@ namespace Daphne
         protected ReporterBase reporter;
         protected HDF5FileBase hdf5file;
         protected IFrameData frameData;
+    }
+
+    /// <summary>
+    /// this is to handle the case of protocol version mismatch when the user decides to abort the load;
+    /// we still need to have a simulation container to keep the framework going, keep the simulation thread from crashing
+    /// </summary>
+    public class NullSimulation : SimulationBase
+    {
+        public NullSimulation()
+        {
+        }
+
+        public override void Step(double dt)
+        {
+        }
     }
 
     public class TissueSimulation : SimulationBase
@@ -1382,11 +1406,6 @@ namespace Daphne
         public override void RunForward()
         {
                 base.RunForward();
-        }
-
-        protected override int linearDistributionCase(int dim)
-        {
-            return 0;
         }
 
         private ConfigPointEnvironment envHandle;
