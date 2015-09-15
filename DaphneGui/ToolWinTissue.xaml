@@ -14,7 +14,6 @@
                     >
 
     <docking:ToolWindow.Resources>
-        <CollectionViewSource x:Key="EcsBulkMoleculesListView" Source="{Binding Path=Protocol.entity_repository.molecules}"/>
 
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
@@ -237,7 +236,7 @@
         </TabItem>
 
         <!-- SIM SETUP -->
-        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
+        <TabItem x:Name="tabSimSetup" Header="Simulation Settings"  AutomationProperties.AutomationId="DaphneSimSetupTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>
             </ScrollViewer>
@@ -786,7 +785,7 @@
                             >
 
                             <StackPanel  Orientation="Horizontal" >
-                                <TextBlock  HorizontalAlignment="Left" Text="ECM and cell reactions" Margin="0,0,6,0"/>
+                                <TextBlock  HorizontalAlignment="Left" Text="Text file listing ECM and cell reactions" Margin="0,0,6,0"/>
                                 <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Protocol.scenario.reactionsReport, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                             </StackPanel>
                     </Expander>
@@ -795,7 +794,7 @@
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="True"
                             Header="Cell Population Dynamics"
-                            Margin="0,4,0,0" 
+                            Margin="0,16,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"
                             BorderBrush="Black"
