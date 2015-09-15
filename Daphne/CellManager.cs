@@ -76,24 +76,24 @@ namespace Daphne
                     cell.Step(dt);
                 }
 
-                // for debugging
-                if (false)
+                // for debugging checking between 4230282 and 4245283, 15000 iterations in between. 
+                if (iteration_count <0)
                 {
                     Debug.WriteLine("===============cell id = {0}=================", cell.Cell_id);
                     Debug.WriteLine("----membrane----");
                     foreach (var item in cell.PlasmaMembrane.Populations)
                     {
                         var tmp = item.Value.Conc;
-                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]= {3}\tconc[3]= {4}\t{5}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], tmp.darray[3], item.Value.Molecule.Name);
                     }
 
                     Debug.WriteLine("----Cytosol----");
                     foreach (var item in cell.Cytosol.Populations)
                     {
                         var tmp = item.Value.Conc;
-                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]={3}\t{4}",
-                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], item.Value.Molecule.Name);
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]= {3}\tconc[3]= {4}\t{5}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], tmp.darray[3], item.Value.Molecule.Name);
                     }
 
                     Debug.WriteLine("---location---");
@@ -124,7 +124,7 @@ namespace Daphne
                 }
 
                 // cell division
-                if (cell.Cytokinetic == true) //if (cell_count < 50 && cell.Cytokinetic == true)
+                if (cell_count < 50 && cell.Cytokinetic == true) //if (cell_count < 50 && cell.Cytokinetic == true)
                 {
                     // divide the cell, return daughter
                     Cell c = cell.Divide();

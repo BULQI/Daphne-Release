@@ -161,7 +161,7 @@ namespace NativeDaphne
 			if ( (unsigned)x < (unsigned)gridPts[0] && (unsigned)y < (unsigned)gridPts[1] && (unsigned)z < (unsigned)gridPts[2])
 			{
 				//fourth elements signal the index has changed.
-				if (x != _GridIndex[i] || y != _GridIndex[i+1] && z != _GridIndex[i+2])
+				if (x != _GridIndex[i] || y != _GridIndex[i+1] || z != _GridIndex[i+2])
 				{
 					_GridIndex[i] = x;
 					_GridIndex[i+1] = y;
