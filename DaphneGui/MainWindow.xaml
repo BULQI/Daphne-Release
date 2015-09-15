@@ -201,8 +201,8 @@
                 </MenuItem>
               
                 <MenuItem Header="Help">
-                    <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
-                    <MenuItem Header="Tech help" Name="techHelp" Click="techHelp_click" />
+                    <MenuItem Header="Developer documentation..." Name="devHelp" Click="devHelp_click" />
+                    <MenuItem Header="User documentation..." Name="techHelp" Click="techHelp_click" />
                     <!-- Commented out for now. Do we need this? -->
                     <!--<MenuItem Header="Tech help" Name="techHelp" >
                         <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
