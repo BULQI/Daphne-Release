@@ -500,15 +500,7 @@ namespace DaphneGui
             //THIS CODE PARSES REACTION INPUT BY USER
             //LEFT SIDE
             string phrase = txtReac.Text;
-            phrase = phrase.Replace(" ", "");
-
-            if (phrase.Contains("-"))
-            {
-                string msg = string.Format("Reactants field contains invalid character '-'.  \nPlease fix and re-try.");
-                MessageBox.Show(msg);
-                txtReac.Focus();
-                return false;
-            }
+            phrase = phrase.Replace(" ", "");            
 
             string[] tokensLeft;
             string[] stringSeparators = new string[] { "+" };
@@ -524,14 +516,6 @@ namespace DaphneGui
             //RIGHT SIDE
             phrase = txtProd.Text;
             phrase = phrase.Replace(" ", "");
-
-            if (phrase.Contains("-"))
-            {
-                string msg = string.Format("Products field contains invalid character '-'.  \nPlease fix and re-try.");
-                MessageBox.Show(msg);
-                txtProd.Focus();
-                return false;
-            }
 
             string[] tokensRight;
 
