@@ -543,6 +543,7 @@
                                                                     SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                     SelectedValuePath="entity_guid"
                                                                     SelectionChanged="memb_molecule_combo_box_SelectionChanged"
+                                                                    Loaded="memb_molecule_combo_box_Loaded"
                                                                     GotFocus="memb_molecule_combo_box_GotFocus">
 
                                                             <ComboBox.ItemsSource>
@@ -698,6 +699,7 @@
                                                                     SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                     SelectedValuePath="entity_guid"
                                                                     SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
+                                                                    Loaded="cyto_molecule_combo_box_Loaded"
                                                                     GotFocus="cyto_molecule_combo_box_GotFocus"
                                                                     >
 
