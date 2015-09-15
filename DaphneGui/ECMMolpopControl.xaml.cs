@@ -462,7 +462,12 @@ namespace DaphneGui
         {
             bool bOK = true;
 
-            if (cr.HasGene(MainWindow.ToolWin.Protocol.entity_repository))
+            // Gene transcription reactions not allowed in ECM
+            if (cr.HasGene(MainWindow.ToolWin.Protocol.entity_repository) == true)
+                return false;
+
+            // Acceptable reactions must involve at least one bulk molecule
+            if (cr.HasBulkMolecule(MainWindow.ToolWin.Protocol.entity_repository) == false)
                 return false;
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
@@ -474,7 +479,7 @@ namespace DaphneGui
             //skg 5/8/15 - MUST ALSO EXCLUDE REACTIONS THAT ARE IN THE REACTION COMPLEXES
             foreach (ConfigReactionComplex crc in MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes)
             {
-                if (crc.reactions_dict.ContainsKey(cr.entity_guid))
+                if (crc.reactions_dict.ContainsKey(cr.entity_guid) == true)
                 {
                     return false;
                 }

@@ -19,9 +19,11 @@
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"
                               Source="{Binding Path=Protocol.entity_repository.molecules}" 
                               />
+        
         <CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
                                   Source="{Binding Path=Protocol.entity_repository.reactions}"
-                                  Filter="ecmAvailableReactionsListView_Filter" />
+                                  Filter="ecmAvailableReactionsListView_Filter" />       
+        
         <CollectionViewSource x:Key="ecmAvailableReactionComplexesListView"  
                               Source="{Binding Path=Protocol.entity_repository.reaction_complexes}"
                               Filter="ecmAvailableReactionComplexesListView_Filter" />
@@ -843,7 +845,7 @@
                                Expanded="AddReacExpander_Expanded"
                                 >
                         <StackPanel Orientation="Vertical" Margin="10,0">
-                            <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
+                            <!--<TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />-->
                             <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
                                                 ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
                                                 SelectedIndex="0"
@@ -1017,8 +1019,7 @@
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <StackPanel Orientation="Vertical" Margin="10,0">
-
-                            <TextBlock Text="Available Reaction Complexes"  Margin="0,0,6,0" />
+                            <!--<TextBlock Text="Available Reaction Complexes"  Margin="0,0,6,0" />-->
                             <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                                                                                             
                                      ItemsSource="{Binding Source={StaticResource ecmAvailableReactionComplexesListView}}"   
                                      ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
