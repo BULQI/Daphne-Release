@@ -2696,6 +2696,152 @@ namespace Daphne
 
             return false;
         }
+
+        /// <summary>
+        /// Add any missing components ECM or cell membrane molecules for the given reaction
+        /// </summary>
+        /// <param name="reac">the reaction of interest</param>
+        /// <param name="entity_repository">the source for any missing molecules</param>
+        /// <returns>true if all the missing molecules were added</returns>
+        public bool AddEcmReactionComponents(ConfigReaction reac, EntityRepository entity_repository)
+        {
+            //If any molecules from new reaction don't exist in the ecm, add them if bulk
+            foreach (string molguid in reac.reactants_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+
+                    //Bulk
+                    if (mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        if (environment.comp.HasMolecule(molguid) == false)
+                        {
+                            environment.comp.AddMolPop(mol, false);
+                        }
+                    }
+                    else  //If Boundary, then see if any of the cells have this molecule.
+                    {
+                        if (AddBoundaryMoleculeToCell(mol) == false) return false;
+                    }
+                }
+                else
+                {
+                    // We shouldn't get here if everything is working properly
+                    return false;
+                }
+            }
+            foreach (string molguid in reac.products_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+
+                    if (mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        if (environment.comp.HasMolecule(molguid) == false)
+                        {
+                            environment.comp.AddMolPop(mol, false);
+                        }
+                    }
+                    else  //If Boundary, then see if any of the cells have this molecule.
+                    {
+                        if (AddBoundaryMoleculeToCell(mol) == false) return false;
+                    }
+                }
+                else
+                {
+                    // We shouldn't get here if everything is working properly
+                    return false;
+                }
+            }
+            foreach (string molguid in reac.modifiers_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+
+                    if (mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        if (environment.comp.HasMolecule(molguid) == false)
+                        {
+                            environment.comp.AddMolPop(mol, false);
+                        }
+                    }
+                    else  //If Boundary, then see if any of the cells have this molecule.
+                    {
+                        if (AddBoundaryMoleculeToCell(mol) == false) return false;
+                    }
+                }
+                else
+                {
+                    // We shouldn't get here if everything is working properly
+                    return false;
+                }
+            }
+ 
+            return true;
+        }
+
+        /// <summary>
+        /// This method checks if the given boundary molecule exists in any of the cells.
+        /// 
+        /// If so, then do nothing.
+        /// 
+        /// If the molecule does not exist in any cell, then the user is provided
+        /// with the option to add molecule to any of the cells.
+        /// 
+        /// It returns true if the molecule exists in a cell at the end of the method
+        /// 
+        /// </summary>
+        /// <param name="mol"></param>
+        private bool AddBoundaryMoleculeToCell(ConfigMolecule mol)
+        {
+            bool cellHasMolecule = false;
+
+            // Check to see if any of the cells have the boundary molecule in their membrane.
+            // If this boundary molecule exists on at least one cell, then we are done.
+            foreach (CellPopulation cellpop in cellpopulations)
+            {
+                if (cellpop.Cell.membrane.HasMolecule(mol))
+                {
+                    cellHasMolecule = true;
+                    break;
+                }
+            }
+
+            // Otherwise, see if the user wants to add this boundary molecule to any of the cells.
+            if (cellHasMolecule == false)
+            {
+                string message = ("One or more reactions depend on molecule " + mol.Name + ", which is not currently in the simulation. ");
+                message = message + "You will be prompted to add this molecule to the cell membrane of one, or more, of the cell populations.";
+                MessageBox.Show(message);
+
+                foreach (CellPopulation cellpop in cellpopulations)
+                {
+                    message = "Add molecule " + mol.Name + " to cell population " + cellpop.cellpopulation_name + "?";
+                    MessageBoxResult result = MessageBox.Show(message, "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        cellpop.Cell.membrane.AddMolPop(mol, false);
+                        cellHasMolecule = true;
+                    }
+                }
+
+                // Finally, if the user did not add the missing molecule to any of the cells, 
+                // issue a warning that some reactions won't be included in the simulation.
+                if (cellHasMolecule == false)
+                {
+                    message = "Molecule " + mol.Name + " was not added to any of the cells. ";
+                    message = message + "Reactions that require this molecule will not be included in the simulation.";
+                    MessageBox.Show(message, "Warning");
+                }
+            }
+
+            return cellHasMolecule;
+        }
+
     }
 
     public class SimulationParams : EntityModelBase
@@ -4005,6 +4151,9 @@ namespace Daphne
         {
             string TempMolName = name;
             int pipeIndex = TempMolName.Length - 1;
+
+            if (pipeIndex < 0) return TempMolName;
+
             string pipe = TempMolName.Substring(pipeIndex, 1);
             if (pipe == "|")
             {
@@ -4091,20 +4240,64 @@ namespace Daphne
         public void ValidateName(Level protocol)
         {
             bool found = false;
-            string tempMolName = Name;
+            //string tempMolName = Name;
+
+            // Check for empty Name
+            if (Name.Length == 0)
+            {
+                Name = GenerateNewName(protocol, "molNew");
+            }
+
+            // Check for pipe-only Name
+            if (Name.Length == 1 && Name.Substring(0, 1) == "|")
+            {
+                Name = GenerateNewName(protocol, "molNew");
+            }
+
+            // Check for duplicated Name
             foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
-                if (mol.Name == tempMolName && mol.entity_guid != entity_guid)
+                if (mol.Name == Name && mol.entity_guid != entity_guid)
                 {
                     found = true;
                     break;
                 }
             }
-
             if (found)
             {
                 Name = GenerateNewName(protocol, "Copy");
             }
+
+            // Check that pipe is used appropriately 
+            string pipe = Name.Substring(Name.Length - 1, 1);
+            if (molecule_location == MoleculeLocation.Boundary && pipe != "|")
+            {
+                Name = Name + "|";
+            }
+            else if (molecule_location == MoleculeLocation.Bulk && pipe == "|")
+            {
+                Name = Name.Substring(0, Name.Length - 1);
+            }
+
+            if (Name.Length == 1 && Name.Substring(0, 1) == "|")
+            {
+                Name = GenerateNewName(protocol, "molNew");
+            }
+
+            // Check again for duplicates in case adding or removing a pipe creates a duplicate name
+            foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
+            {
+                if (mol.Name == Name && mol.entity_guid != entity_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (found)
+            {
+                Name = GenerateNewName(protocol, "Copy");
+            }
+
         }
 
     }
@@ -5887,20 +6080,29 @@ namespace Daphne
         {
             foreach (string molguid in reactants_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        return true;
+                }
             }
             foreach (string molguid in products_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        return true;
+                }
             }
             foreach (string molguid in modifiers_molecule_guid_ref)
             {
                 if (!repos.genes_dict.ContainsKey(molguid))
                 {
-                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                        return true;
+                    if (repos.molecules_dict.ContainsKey(molguid) == true)
+                    {
+                        if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                            return true;
+                    }
                 }
             }
 
@@ -5911,20 +6113,29 @@ namespace Daphne
         {
             foreach (string molguid in reactants_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                        return true;
+                }
             }
             foreach (string molguid in products_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                        return true;
+                }
             }
             foreach (string molguid in modifiers_molecule_guid_ref)
             {
                 if (!repos.genes_dict.ContainsKey(molguid))
                 {
-                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
-                        return true;
+                    if (repos.molecules_dict.ContainsKey(molguid) == true)
+                    {
+                        if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                            return true;
+                    }
                 }
             }
 
@@ -7097,6 +7308,141 @@ namespace Daphne
                 {
                     div_scheme.Driver.CurrentState.Reset();
                 }
+        }
+
+        /// <summary>
+        /// Add any missing cytosol or membrane molecules or genes needed for the given reaction.
+        /// </summary>
+        /// <param name="cr">the reaction to be added</param>
+        /// <param name="entity_repository">the source for the missing molecules or genes</param>
+        /// <returns>true if the reaction was added</returns>
+        public bool AddCytosolReactionComponents(ConfigReaction cr, EntityRepository entity_repository)
+        {
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                //If molecule - can be bulk or boundary so have to add to appropriate compartment - membrane or cytosol
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+                    if (mol.molecule_location == MoleculeLocation.Boundary && membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(mol.Clone(null), true);
+                    else if (mol.molecule_location == MoleculeLocation.Bulk && cytosol.HasMolecule(molguid) == false)
+                        cytosol.AddMolPop(mol.Clone(null), true);
+                }
+                //If gene, add to genes list
+                else if (entity_repository.genes_dict.ContainsKey(molguid))
+                {
+                    if (HasGene(molguid) == false)
+                        genes.Add(entity_repository.genes_dict[molguid].Clone(null));
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            foreach (string molguid in cr.products_molecule_guid_ref)
+            {
+                //If molecule - can be bulk or boundary so have to add to appropriate compartment - membrane or cytosol
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+                    if (mol.molecule_location == MoleculeLocation.Boundary && membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(mol.Clone(null), true);
+                    else if (mol.molecule_location == MoleculeLocation.Bulk && cytosol.HasMolecule(molguid) == false)
+                        cytosol.AddMolPop(mol.Clone(null), true);
+                }
+                //If gene, add to genes list
+                else if (entity_repository.genes_dict.ContainsKey(molguid))
+                {
+                    if (HasGene(molguid) == false)
+                        genes.Add(entity_repository.genes_dict[molguid].Clone(null));
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            foreach (string molguid in cr.modifiers_molecule_guid_ref)
+            {
+                //If molecule - can be bulk or boundary so have to clone and add to appropriate compartment - membrane or cytosol
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+                    if (mol.molecule_location == MoleculeLocation.Boundary && membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(mol.Clone(null), true);
+                    else if (mol.molecule_location == MoleculeLocation.Bulk && cytosol.HasMolecule(molguid) == false)
+                        cytosol.AddMolPop(mol.Clone(null), true);
+                }
+                //If gene, clone and add to genes list
+                else if (entity_repository.genes_dict.ContainsKey(molguid))
+                {
+                    if (HasGene(molguid) == false)
+                        genes.Add(entity_repository.genes_dict[molguid].Clone(null));
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Add any missing membrane molecules needed for the given reaction
+        /// </summary>
+        /// <param name="cr">the reaction of interest</param>
+        /// <param name="entity_repository">the source for any missing molecules</param>
+        /// <returns>true if all the needed components were added</returns>
+        public bool AddMembraneReactionComponents(ConfigReaction cr, EntityRepository entity_repository)
+        {
+            //If any molecules from new reaction don't exist in the membrane, clone and add them (can only be boundary molecules)                        
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    if (membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(entity_repository.molecules_dict[molguid].Clone(null), true);
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+            foreach (string molguid in cr.products_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    if (membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(entity_repository.molecules_dict[molguid].Clone(null), true);
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+            foreach (string molguid in cr.modifiers_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    if (membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(entity_repository.molecules_dict[molguid].Clone(null), true);
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 

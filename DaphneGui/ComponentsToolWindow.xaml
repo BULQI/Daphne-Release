@@ -205,8 +205,9 @@
                             <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200" SortMemberPath="Name"  >
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          LostFocus="MolTextBox_LostFocus">
+                                        <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" 
+                                                 Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                 LostFocus="MolTextBox_LostFocus" LostKeyboardFocus="MolTextBox_LostFocus">
                                         </TextBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -243,8 +244,9 @@
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"  IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}">
-                                        </CheckBox>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"  
+                                                  IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}"
+                                                  Click="MolLocation_Changed"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

@@ -30,7 +30,7 @@ namespace DaphneGui
         private Dictionary<string, int> inputModifiers;
         public double inputRateConstant { get; set; }
 
-        public int iTest { get; set; }
+        //public int iTest { get; set; }
 
         public ConfigCompartment ARCComp
         {
@@ -371,45 +371,41 @@ namespace DaphneGui
                 }
             }
 
-            bool wasAdded = false;
+            bool addReaction = false;
             string reacEnvironment = Tag as string;
 
             switch(reacEnvironment)
             {                  
                 case "ecs":
-                    //Dont need to use "level" for ecs - cannot come here if user or daphne store
                     TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
                     ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
-                    if (configEcs.ValidateReaction(cr, MainWindow.SOP.Protocol) == false)
-                    {
-                        MessageBox.Show("Not a valid reaction for this environment."); 
-                        return;
-                    }
- 
+                    addReaction = ts.AddEcmReactionComponents(cr, MainWindow.SOP.Protocol.entity_repository);
                     break;
 
                 case "cytosol":
                     ObservableCollection<string> bulkMols = cr.GetBulkMolecules(level.entity_repository);
                     if (bulkMols.Count < 1)
                     {
-                        MessageBox.Show("Not a valid reaction for this environment.");
+                        MessageBox.Show("Not a valid reaction. Cytosol reactions must involve at least one bulk molecule.");
                         return;
                     }
+                    addReaction = ARCCell.AddCytosolReactionComponents(cr, level.entity_repository);
                     break;
 
 
                 case "membrane":
                     if (isBoundaryReaction == true)
                     {
-                        MessageBox.Show("Boundary reactions are not supported in this environment.");
+                        MessageBox.Show("Not a valid reaction. Plasma membrane reactions cannot include bulk molecules. Try adding this reaction to the cytosol.");
                         return;
                     }
+                    addReaction = ARCCell.AddMembraneReactionComponents(cr, level.entity_repository);
                     break;
 
                 case "vatRC":
                     if (isBoundaryReaction == true)
                     {
-                        MessageBox.Show("Boundary reactions are not supported in this environment.");
+                        MessageBox.Show("Not a valid reaction. Vat Reaction Complex reactions cannot include membrane-bound molecules. ");
                         return;
                     }
                     else
@@ -418,12 +414,10 @@ namespace DaphneGui
                         {
                             VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
                             ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
-
-                            //crc.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
                             if (crc != null)
                             {
                                 crc.AddReactionMolPopsAndGenes(cr, level.entity_repository);
-
+                                addReaction = true;
                                 s.InitializeAllMols(true);
                                 s.InitializeAllReacs();
                             }
@@ -437,29 +431,26 @@ namespace DaphneGui
                     break;
 
                 case "component_reacs":
+                    addReaction = true;
                     break;
 
                 case "component_rc":
-                    //this.CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, MainWindow.SOP.Protocol.entity_repository);
                     this.CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, level.entity_repository);
+                    addReaction = true;
                     break;
 
                 default:
                     return;    
             }
 
-            if (cr != null && ARCReactions != null)
+            if (cr != null && ARCReactions != null && addReaction == true)
             {
                 ARCReactions.Add(cr);
-                wasAdded = true;
-            }
 
-            //Add the reaction to repository collection if it doesn't already exist there.
-
-            //if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol) && wasAdded)
-            if (!level.findReactionByTotalString(cr.TotalReactionString, level) && wasAdded)
-            {
-                level.entity_repository.reactions.Add(cr.Clone(true));
+                if (!level.findReactionByTotalString(cr.TotalReactionString, level))
+                {
+                    level.entity_repository.reactions.Add(cr.Clone(true));
+                }
             }
 
             txtReac.Text = "";
@@ -697,24 +688,25 @@ namespace DaphneGui
         {
             CompositeCollection coll = new CompositeCollection();
             CollectionContainer cc = new CollectionContainer();
-            //Protocol protocol;
             Level level;
             string reacEnvironment = Tag as string;
             switch (reacEnvironment)
             {
                 case "ecs":
-                    //For ecs, don't need to use "level"
+                    ARCCell = null;
                     TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
                     ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
-                    ARCComp = configEcs.comp;
-                    ARCCell = null;
-                    if (ARCComp != null)
-                    {
-                        ARCReactions = ARCComp.Reactions ?? null;
-                    }
                     if (configEcs != null)
                     {
-                        //cc.Collection = configEcs.comp.molecules_dict.Values.ToArray();
+                        ARCComp = configEcs.comp;
+                    //}
+                    //if (ARCComp != null)
+                    //{
+                        ARCReactions = ARCComp.Reactions ?? null;
+                    //}
+                    //if (configEcs != null)
+                    //{
+                        ////cc.Collection = configEcs.comp.molecules_dict.Values.ToArray();
                         cc.Collection = ARCComp.molecules_dict.Values.ToArray();
                         coll.Add(cc);
                         foreach (CellPopulation cellpop in ts.cellpopulations)

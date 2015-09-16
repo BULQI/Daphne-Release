@@ -173,6 +173,11 @@ namespace DaphneGui
             dgLibMolecules.ScrollIntoView(cm);
         }
 
+        private void MolLocation_Changed(object sender, RoutedEventArgs e)
+        {
+            MolTextBox_LostFocus(sender, e);
+        }
+
         //LIBRARY REACTIONS EVENT HANDLERS        
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
