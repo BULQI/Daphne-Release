@@ -558,6 +558,9 @@
     <Content Include="Config\receptor_homeostasis.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Config\simple_germinal_center.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Config\Stores\daphnestore.json" />
     <None Include="Config\Stores\userstore.json" />
     <None Include="help\Documentation.chm">
