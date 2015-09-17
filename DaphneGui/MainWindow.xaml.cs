@@ -3453,6 +3453,11 @@ namespace DaphneGui
 
             SetMouseLeftState(index, true);
 
+            if (index == 2)
+            {
+                HandToolButton.IsChecked = true;
+            }
+
             if (gc is VTKFullGraphicsController == true)
             {
                 VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)gc;
@@ -3941,6 +3946,14 @@ namespace DaphneGui
                 bgPicker.Visibility = Visibility.Visible;
             else
                 bgPicker.Visibility = Visibility.Collapsed;
+        }
+
+        private void Workspace_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (tabbedMdiHost.ActualHeight < 150)
+            {
+                dockingSplitContainer.ResizeSlots(1, 3);
+            }
         }
 
     }
