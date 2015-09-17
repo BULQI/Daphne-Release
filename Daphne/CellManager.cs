@@ -77,7 +77,7 @@ namespace Daphne
                 }
 
                 // for debugging checking between 4230282 and 4245283, 15000 iterations in between. 
-                if (iteration_count <0)
+                if (iteration_count < 0)
                 {
                     Debug.WriteLine("===============cell id = {0}=================", cell.Cell_id);
                     Debug.WriteLine("----membrane----");
@@ -124,7 +124,7 @@ namespace Daphne
                 }
 
                 // cell division
-                if (cell_count < 50 && cell.Cytokinetic == true) //if (cell_count < 50 && cell.Cytokinetic == true)
+                if (cell.Cytokinetic == true) //if (cell_count < 50 && cell.Cytokinetic == true)
                 {
                     // divide the cell, return daughter
                     Cell c = cell.Divide();
