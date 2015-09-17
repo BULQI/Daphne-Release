@@ -22,7 +22,7 @@ namespace Daphne
         {
             //Create DaphneStore
             LoadDefaultGlobalParameters(daphneStore);
-            daphneStore.Version = SystemOfPersistence.VERSION;
+            daphneStore.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
             daphneStore.SerializeToFile();
 
             //Clone UserStore from DaphneStore
@@ -31,7 +31,7 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
             userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
-            userStore.Version = SystemOfPersistence.VERSION;
+            userStore.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
             userStore.SerializeToFile();
             //update renderSkin
             RenderSkin sk = new RenderSkin("default_skin", userStore.entity_repository);
@@ -247,7 +247,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -467,7 +467,7 @@ namespace Daphne
             // We need this to successfully execute cellPop.cellPopDist.Initialize();
             SystemOfPersistence.HProtocol = protocol;
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -629,7 +629,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -729,7 +729,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -754,7 +754,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -782,7 +782,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -919,7 +919,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -4542,7 +4542,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.Version = SystemOfPersistence.VERSION;
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 

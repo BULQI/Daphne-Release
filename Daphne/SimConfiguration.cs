@@ -28,9 +28,6 @@ namespace Daphne
     /// </summary>
     public class SystemOfPersistence:INotifyPropertyChanged
     {
-        // to change the protocol version, change / increment this; assume 1 to be the lowest value
-        public static int VERSION = 1;
-
         /// <summary>
         /// Protocol level, contains Entity level
         /// </summary>

@@ -2138,13 +2138,13 @@ namespace DaphneGui
                 }
             }
             // check for protocol version
-            if (retval != null && retval.Version != SystemOfPersistence.VERSION)
+            if (retval != null && retval.Version != System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor)
             {
                 MessageBoxResult res;
                 string message = string.Format("Protocol version mismatch. You are using Daphne version {0} and are trying to open a protocol with version {1}.\n\n" +
                                                "Press 'No' to abort, then open a different protocol (recommended).\n\n" +
                                                "Press 'Yes' to proceed. This will attempt to update the protocol, allowing you to save it.\n" +
-                                               "Note: proceeding can have unexpected consequences in the execution." , SystemOfPersistence.VERSION, retval.Version);
+                                               "Note: proceeding can have unexpected consequences in the execution.", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor, retval.Version);
 
                 res = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
                 if (res == MessageBoxResult.No)
@@ -2155,7 +2155,7 @@ namespace DaphneGui
                 else
                 {
                     // update the version
-                    retval.Version = SystemOfPersistence.VERSION;
+                    retval.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
                 }
             }
             return retval;
