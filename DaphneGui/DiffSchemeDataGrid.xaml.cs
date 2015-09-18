@@ -501,16 +501,12 @@ namespace DaphneGui
             ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
 
-            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
             if (DiffSchemeTarget == "EpigeneticMap")
-            {
-                //CreateGeneColumns(dataGrid, diffScheme.genes);
+            {               
             }
             else
             {
-                //CreateStateColumns(dataGrid, diffScheme.Driver.states);
                 dataGrid.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
                 dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
             }

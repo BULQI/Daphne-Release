@@ -298,6 +298,15 @@ namespace DaphneGui
 
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
 
+            if (DiffSchemeTarget == "EpigeneticMap")
+            {
+            }
+            else
+            {
+                dataGrid.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
+                dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
+            }
+
             dataGrid.LoadingRow -= new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             dataGrid.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             dataGrid.TargetUpdated -= new EventHandler<DataTransferEventArgs>(dataGrid_TargetUpdated);

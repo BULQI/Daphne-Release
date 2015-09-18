@@ -123,9 +123,12 @@
         <!-- Distr_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element. -->
         <DataTemplate x:Key="Distr_TDE_dgCell_Editing">
             <StackPanel Orientation="Vertical">
-                <!--<TextBlock Text="Distribution on the time-to-transition (minutes)" Margin="5,0,5,0" MinHeight="20" HorizontalAlignment="Left"/>-->
                 <local:ParamDistrReadOnlyControl Tag="CONTINUOUS" HorizontalAlignment="Left"
                                          DataContext="{Binding Path=Distr, UpdateSourceTrigger=PropertyChanged}" />
+                <ContentControl Name="MeanValueDisplay"
+                                Content="{Binding Path=Distr}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6" />
             </StackPanel>
         </DataTemplate>
 
