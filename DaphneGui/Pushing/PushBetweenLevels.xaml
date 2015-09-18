@@ -206,11 +206,19 @@
                         </DataGrid.CommandBindings>
                         
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn x:Name="colRate" Header="Rate constant" Width="100" IsReadOnly="True"
+                            <DataGridTemplateColumn x:Name="colRate" Header="Rate constant" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False" >
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
                                         <uc:DoublesBox SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=rate_const, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn x:Name="colUnits" Header="Units" Width="120" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -348,11 +356,18 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            <DataGridTemplateColumn x:Name="colUnits" Header="Units" Width="120" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="colTotString" Header="Reaction" Width="300" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=TotalReactionString, Mode=OneWay}" 
                             />
-                            
 
                         </DataGrid.Columns>
                     </DataGrid>

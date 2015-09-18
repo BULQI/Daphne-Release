@@ -5855,7 +5855,7 @@ namespace Daphne
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
-            rate_constant_units = "";
+            rate_const_units = "";
         }
 
         public ConfigReaction(ConfigReaction reac)
@@ -5872,7 +5872,7 @@ namespace Daphne
             reactants_molecule_guid_ref = reac.reactants_molecule_guid_ref;
             products_molecule_guid_ref = reac.products_molecule_guid_ref;
             modifiers_molecule_guid_ref = reac.modifiers_molecule_guid_ref;
-            rate_constant_units  = reac.rate_constant_units;
+            rate_const_units  = reac.rate_const_units;
         }
 
         /// <summary>
@@ -5920,14 +5920,16 @@ namespace Daphne
         {
             string s = "";
 
-            //// Save - gmk 9/8/2015
-            //// spatial dimension for bulk and boundary molecules
-            //int[] dim = new int[sizeof(MoleculeLocation)];
-            //dim[(int)MoleculeLocation.Bulk] = 3;
-            //dim[(int)MoleculeLocation.Boundary] = 2;
-            //string[] superscriptDigits = new string[] {"\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"};
-            //int molec_cnt = 0,
-            //    micron_cnt = 0;
+            // Save - gmk 9/8/2015
+            // spatial dimension for bulk and boundary molecules
+            int[] dim = new int[sizeof(MoleculeLocation)];
+            dim[(int)MoleculeLocation.Bulk] = 3;
+            dim[(int)MoleculeLocation.Boundary] = 2;
+            string[] superscriptDigits = new string[] { "\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079" };
+            int molec_cnt = 0,
+                micron_cnt = 0,
+                prod_molec_cnt = 1,
+                prod_micron_cnt = 3;
 
             // Reactants
             int i = 0;
@@ -5939,8 +5941,8 @@ namespace Daphne
 
                 if (n > 1) s += n;
 
-                //molec_cnt -= n;
-                //micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+                molec_cnt -= n;
+                micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
 
                 s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
@@ -5962,8 +5964,8 @@ namespace Daphne
                 }
                 else
                 {
-                    //molec_cnt -= n;
-                    //micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+                    molec_cnt -= n;
+                    micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
                     s += repos.molecules_dict[mol_guid_ref].Name;
                 }
                 s += " + ";
@@ -5985,11 +5987,9 @@ namespace Daphne
                 if (n > 1)
                     s += n;
 
-                if (num_products == 0)
+                if (dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location] < prod_micron_cnt)
                 {
-                    //molec_cnt += n;
-                    //micron_cnt -= n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
-                    num_products++;
+                    prod_micron_cnt = dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
                 }
 
                 s += repos.molecules_dict[mol_guid_ref].Name;
@@ -6012,12 +6012,6 @@ namespace Daphne
                 }
                 else
                 {
-                    if (num_products == 0)
-                    {
-                        //molec_cnt += n;
-                        //micron_cnt -= n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
-                        num_products++;
-                    }
                     s += repos.molecules_dict[mol_guid_ref].Name;
                 }
                 s += " + ";
@@ -6026,40 +6020,42 @@ namespace Daphne
             s = s.Trim(trimChars);
             TotalReactionString = s;
 
-            //// Determine the units for the rate constant
-            //rate_constant_units = "";
+            // Determine the units for the rate constant
+            rate_const_units = "";
 
-            //if (molec_cnt > 0)
-            //{
-            //    rate_constant_units += "molec";
-            //    // Skip the exponent if it is 1
-            //    if (molec_cnt > 1)
-            //    {
-            //        rate_constant_units += superscriptDigits[molec_cnt];
-            //    }
-            //    rate_constant_units += "-";
-            //}
-            //else if (molec_cnt < 0)
-            //{
-            //    rate_constant_units += "molec" + "\x207B" + superscriptDigits[Math.Abs(molec_cnt)] + "-";
-            //}
+            molec_cnt += prod_molec_cnt;
+            if (molec_cnt > 0)
+            {
+                rate_const_units += "molec";
+                // Skip the exponent if it is 1
+                if (molec_cnt > 1)
+                {
+                    rate_const_units += superscriptDigits[molec_cnt];
+                }
+                rate_const_units += "-";
+            }
+            else if (molec_cnt < 0)
+            {
+                rate_const_units += "molec" + "\x207B" + superscriptDigits[Math.Abs(molec_cnt)] + "-";
+            }
 
-            //if (micron_cnt > 0)
-            //{
-            //    rate_constant_units += "µm";
-            //    // Skip the exponent if it is 1
-            //    if (micron_cnt > 1)
-            //    {
-            //        rate_constant_units += superscriptDigits[micron_cnt]; 
-            //    }
-            //    rate_constant_units += "-";
-            //}
-            //else if (micron_cnt < 0)
-            //{
-            //    rate_constant_units += "µm" + "\x207B" + superscriptDigits[Math.Abs(micron_cnt)] + "-";
-            //}
+            micron_cnt -= prod_micron_cnt;
+            if (micron_cnt > 0)
+            {
+                rate_const_units += "µm";
+                // Skip the exponent if it is 1
+                if (micron_cnt > 1)
+                {
+                    rate_const_units += superscriptDigits[micron_cnt];
+                }
+                rate_const_units += "-";
+            }
+            else if (micron_cnt < 0)
+            {
+                rate_const_units += "µm" + "\x207B" + superscriptDigits[Math.Abs(micron_cnt)] + "-";
+            }
 
-            //rate_constant_units += "min" + "\x207B" + "\xB9";  // min-1
+            rate_const_units += "min" + "\x207B" + "\xB9";  // min-1
 
         }
 
@@ -6201,7 +6197,19 @@ namespace Daphne
         public ObservableCollection<string> reactants_molecule_guid_ref;
         public ObservableCollection<string> products_molecule_guid_ref;
         public ObservableCollection<string> modifiers_molecule_guid_ref;
-        public string rate_constant_units;
+        private string rate_const_units;
+        public string Rate_constant_units
+        {
+            get
+            {
+                return rate_const_units;
+            }
+            set
+            {
+                rate_const_units = value;
+                OnPropertyChanged("Rate_const_units");
+            }
+        }
 
         public string TotalReactionString { get; set; }
 

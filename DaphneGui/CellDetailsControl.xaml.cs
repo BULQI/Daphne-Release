@@ -173,28 +173,6 @@ namespace DaphneGui
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
         }
 
-        //// appears to be unused
-        //private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    CollectionViewSource cvs = (CollectionViewSource)(FindResource("availableBoundaryMoleculesListView"));
-        //    if (cvs == null || cvs.View == null)
-        //        return;
-
-        //    cvs.View.Refresh();
-
-        //    if (e.AddedItems.Count == 0) return;
-        //    var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
-        //    //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
-        //    foreach (ConfigMolecule cm in cvs.View)
-        //    {
-        //        if (cm.Name == tmp.molecule.Name)
-        //        {
-        //            cvs.View.MoveCurrentTo(cm);
-        //            return;
-        //        }
-        //    }
-        //}
-
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
@@ -616,34 +594,34 @@ namespace DaphneGui
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
-        //I DON'T THINK THIS METHOD IS USED - SKG
-        //IN ANY CASE, IT IS RELEVANT ONLY FOR CELL POPULATIONS, NOT RELEVANT FOR USERSTORE OR DAPHNESTORE
-        private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
-        {
-            CheckBox cb = e.OriginalSource as CheckBox;
+        ////I DON'T THINK THIS METHOD IS USED - SKG
+        ////IN ANY CASE, IT IS RELEVANT ONLY FOR CELL POPULATIONS, NOT RELEVANT FOR USERSTORE OR DAPHNESTORE
+        //private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
+        //{
+        //    CheckBox cb = e.OriginalSource as CheckBox;
 
-            if (cb.CommandParameter == null)
-            {
-                return;
-            }
+        //    if (cb.CommandParameter == null)
+        //    {
+        //        return;
+        //    }
 
-            string guid = cb.CommandParameter as string;
+        //    string guid = cb.CommandParameter as string;
 
-            if (guid.Length > 0)
-            {
-                GaussianSpecification next;
+        //    if (guid.Length > 0)
+        //    {
+        //        GaussianSpecification next;
 
-                ((TissueScenario)MainWindow.SOP.Protocol.scenario).resetGaussRetrieve();
-                while ((next = ((TissueScenario)MainWindow.SOP.Protocol.scenario).nextGaussSpec()) != null)
-                {
-                    if (next.box_spec.box_guid == guid)
-                    {
-                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
-                        break;
-                    }
-                }
-            }
-        }
+        //        ((TissueScenario)MainWindow.SOP.Protocol.scenario).resetGaussRetrieve();
+        //        while ((next = ((TissueScenario)MainWindow.SOP.Protocol.scenario).nextGaussSpec()) != null)
+        //        {
+        //            if (next.box_spec.box_guid == guid)
+        //            {
+        //                next.gaussian_region_visibility = (bool)(cb.IsChecked);
+        //                break;
+        //            }
+        //        }
+        //    }
+        //}
 
         private void cyto_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -845,8 +823,6 @@ namespace DaphneGui
             e.Accepted = true;
         }
 
-        //THIS METHOD NEEDS TO BE IMPLEMENTED
-
         private void membraneAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
@@ -882,7 +858,6 @@ namespace DaphneGui
             e.Accepted = bOK;
         }
 
-        //THIS METHOD NEEDS TO BE IMPLEMENTED
         private void cytosolAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
@@ -906,16 +881,6 @@ namespace DaphneGui
 
             e.Accepted = true;
         }
-
-        //private bool EcmHasMolecule(string molguid)
-        //{
-        //    foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
-        //    {
-        //        if (molpop.molecule.entity_guid == molguid)
-        //            return true;
-        //    }
-        //    return false;
-        //}
 
         private bool MembraneHasMolecule(ConfigCell cell, string molguid)
         {
@@ -972,19 +937,6 @@ namespace DaphneGui
             }
 
             return ret;
-        }
-
-        private void menu2PushToProto_Click(object sender, RoutedEventArgs e)
-        {            
-            if (CytosolReacListBox.SelectedIndex < 0)
-            {
-                MessageBox.Show("Please select a reaction.");
-                return;
-            }
-
-            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
-            ConfigReaction newreac = reac.Clone(true);
-            MainWindow.GenericPush(newreac);
         }
 
         private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
@@ -1963,62 +1915,6 @@ namespace DaphneGui
                 return FindLogicalParent<T>(parentObject);
             }
         }
-        private void menu2PullFromProto_Click(object sender, RoutedEventArgs e)
-        {
-            Level level = MainWindow.GetLevelContext(this);
-            if (level == null)
-            {
-                level = CurrentLevel;
-            }
-            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
-
-            //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            if (level.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            {
-                //ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction protReaction = level.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction newreac = protReaction.Clone(true);
-
-                ConfigCell cell = DataContext as ConfigCell;
-                cell.cytosol.Reactions.Remove(reac);
-                cell.cytosol.Reactions.Add(newreac);
-            }
-        }
-
-        private void menuMembPushReacToProto_Click(object sender, RoutedEventArgs e)
-        {
-            if (MembReacListBox.SelectedIndex < 0)
-            {
-                MessageBox.Show("Please select a reaction.");
-                return;
-            }
-
-            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-            ConfigReaction newreac = reac.Clone(true);
-            MainWindow.GenericPush(newreac);
-        }
-
-        private void menuMembPullReacFromProto_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-            Level level = MainWindow.GetLevelContext(this);
-            if (level == null)
-            {
-                level = CurrentLevel;
-            }
-
-            //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            if (level.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            {
-                //ConfigReaction protReaction = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction protReaction = level.entity_repository.reactions_dict[reac.entity_guid];
-                ConfigReaction newreac = protReaction.Clone(true);
-
-                ConfigCell cell = DataContext as ConfigCell;
-                cell.membrane.Reactions.Remove(reac);
-                cell.membrane.Reactions.Add(newreac);
-            }
-        }
 
         private void comboDeathMolPop2_Loaded(object sender, RoutedEventArgs e)
         {
@@ -2177,15 +2073,6 @@ namespace DaphneGui
         {
             isUserInteraction = true;
         }
-
-        //private void Distr_TDE_info_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigDistrTransitionDriverElement distr_tde = sender as ConfigDistrTransitionDriverElement;
-        //    if (distr_tde == null) return;
-
-        //    double mean_val = distr_tde.Distr.ParamDistr.MeanValue();
-
-        //}
 
         private void memb_molecule_combo_box_Loaded(object sender, RoutedEventArgs e)
         {

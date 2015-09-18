@@ -695,18 +695,15 @@ namespace DaphneGui
                 case "ecs":
                     ARCCell = null;
                     TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+                    if (ts == null)
+                    {
+                        break;
+                    }
                     ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
                     if (configEcs != null)
                     {
                         ARCComp = configEcs.comp;
-                    //}
-                    //if (ARCComp != null)
-                    //{
                         ARCReactions = ARCComp.Reactions ?? null;
-                    //}
-                    //if (configEcs != null)
-                    //{
-                        ////cc.Collection = configEcs.comp.molecules_dict.Values.ToArray();
                         cc.Collection = ARCComp.molecules_dict.Values.ToArray();
                         coll.Add(cc);
                         foreach (CellPopulation cellpop in ts.cellpopulations)

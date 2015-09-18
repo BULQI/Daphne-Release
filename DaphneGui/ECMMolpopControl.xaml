@@ -47,9 +47,7 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
-
             <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
-
                 <StackPanel Orientation="Vertical" Margin="20,0">
                     <TextBlock>
                         concentration (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
@@ -64,11 +62,10 @@
                                                 SliderEnabled="False"                                                
                                                 >
                     </uc:DoublesBox>
-
                 </StackPanel>
-            </StackPanel>
+            </StackPanel> 
         </Grid>
-    </DataTemplate>
+    </DataTemplate>       
            
         <!-- molpop explicit -->
         <DataTemplate DataType="{x:Type daph:MolPopExplicit}">
@@ -749,18 +746,6 @@
                 <StackPanel>
                     
                     <!-- Reactions -->
-                    <!--<StackPanel>
-                        <StackPanel.ToolTip>
-                            <StackPanel Width="200" Orientation="Horizontal">
-                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                Click Add button to add a reaction to the extracellular medium from a list of reactions in the list box below.
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel.ToolTip>
-                        <TextBlock Text="Reactions in ECM" FontWeight="Bold" Margin="0,-10,0,0" >
-                        </TextBlock>
-                    </StackPanel>-->
-
                     <ListView x:Name="lvEcsReactions"
                               ItemsSource="{Binding Path=Protocol.scenario.environment.comp.Reactions}"
                               SelectedIndex="-1" ToolTipService.ShowDuration="80000">
@@ -768,7 +753,7 @@
                         <ListView.ToolTip>
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200" >
                                     This is a list of the reactions involving molecules in the extracellular medium. 
-                                    Some of these reactions may involve molecules in the cell membrane.
+                                    Molecules in the cell plasma membrane have a pipe "|" appended to the molecule name.
                                 </TextBlock>
                         </ListView.ToolTip>
                         
@@ -787,8 +772,7 @@
                                         </Setter>
                                     </Style>
                                 </GridView.ColumnHeaderContainerStyle>
-
-                                <GridViewColumn Width="100" Header="Rate constant">
+                                <GridViewColumn Width="90" Header="Rate constant">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <uc:DoublesBox SliderEnabled="False" Width="70" Number="{Binding rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -796,7 +780,14 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                    <GridViewColumn Width="300" Header="Reaction" >
+                                <GridViewColumn Width="120" Header="Units">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="300" Header="Reaction" >
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding TotalReactionString}">
@@ -876,6 +867,13 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
+                                        <GridViewColumn Width="120" Header="Units">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                         <GridViewColumn Width="300" Header="Reaction" >
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
@@ -934,18 +932,18 @@
 
             <!-- Reaction Complexes -->
             <Expander
-                        Visibility="Visible"
-                        Padding="5" 
-                        ExpandDirection="Down"
-                            IsExpanded="False"
-                            Header="Reaction Complexes"                                            
-                            x:Name="ReacCompExpander"
-                            Margin="0,5,0,0" 
-                            Canvas.ZIndex="1"
-                        BorderThickness="1"
-                        BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                        Expanded="ReacCompExpander_Expanded">                               
+                Visibility="Visible"
+                Padding="5" 
+                ExpandDirection="Down"
+                IsExpanded="False"
+                Header="Reaction Complexes"                                            
+                x:Name="ReacCompExpander"
+                Margin="0,5,0,0" 
+                Canvas.ZIndex="1"
+                BorderThickness="1"
+                BorderBrush="Black"
+                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                Expanded="ReacCompExpander_Expanded">                               
 
                 <StackPanel>
                     <StackPanel>
@@ -959,7 +957,7 @@
                         <TextBlock Text="Reaction Complexes" Margin="0,-10,0,0" >
                         </TextBlock>
 
-                        <ListBox x:Name="ReactionComplexListBox" MinHeight="20" 
+                        <ListBox x:Name="ReactionComplexListBox" MinHeight="20"
                                     ItemsSource="{Binding Path=Protocol.scenario.environment.comp.reaction_complexes}" 
                                     ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                     DisplayMemberPath="Name"
@@ -980,19 +978,19 @@
                     </StackPanel>
 
                     <Expander ExpandDirection="Down"
-                                    IsExpanded="False"
-                                    Header="Details"
-                                    x:Name="ReactionComplexDetailsExpander"
-                                    Margin="0,5,0,0" 
-                                    Canvas.ZIndex="1"
-                                    BorderThickness="1"
-                                    BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                IsExpanded="False"
+                                Header="Details"
+                                x:Name="ReactionComplexDetailsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <StackPanel Orientation="Vertical" >
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
+                                <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" MinWidth="100"
                                                 Text="{Binding  ElementName=ReactionComplexListBox, 
                                                                 Path=SelectedItem.Name}" 
                                                                 />

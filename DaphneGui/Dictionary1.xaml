@@ -198,7 +198,7 @@
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Molecule Name"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                <TextBlock Width="150" Text="Diffusion Coefficient"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Weight"></TextBlock>
                 <TextBlock Width="80" Margin="20,0" Visibility="Collapsed" Text="Radius"></TextBlock>
             </StackPanel>
@@ -213,7 +213,7 @@
                             A value of zero maintains inhomogeneous distributions that are needed to drive chemotaxis and speeds up the simulation.               
                         </TextBlock>
                     </StackPanel.ToolTip>              
-                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> </uc:DoublesBox>
+                    <uc:DoublesBox SliderEnabled="False" TextFieldWidth="150" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> </uc:DoublesBox>
                     <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                     <uc:DoublesBox Visibility="Collapsed" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                 </StackPanel>
@@ -346,8 +346,47 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
+    
+    <!-- Template for displaying a reaction: (editable) rate constant, units, reaction string -->
+    <DataTemplate x:Key="editableReacListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <uc:DoublesBox Width="90" MinWidth="40" SliderEnabled="False" Number="{Binding rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+            <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" Foreground="Black"/>
+            <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
+        </StackPanel>
+    </DataTemplate>
 
-    <!-- Reaction list view template -->
+    <!-- Template for displaying a reaction: (non-editable) rate constant, units, reaction string -->
+    <DataTemplate x:Key="nonEditableReacListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <uc:DoublesBox Width="90" MinWidth="40" IsEnabled="False" SliderEnabled="False" Number="{Binding rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+            <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" Foreground="Black"/>
+            <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
+        </StackPanel>
+    </DataTemplate>
+    
+    <!-- Header for list of reactions -->
+    <DataTemplate x:Key="ReacListHeaderTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="10,0" Text="Rate Constant" Width="90"/>
+            <TextBlock Margin="10,0" Text="Units" Width="120"/>
+            <TextBlock Margin="10,0" Text="Reaction" />
+        </StackPanel>
+    </DataTemplate>
+    
+    <!-- DataTemplate for list of reactions in an ObservableCollection -->
+    <DataTemplate x:Key="nonEditableConfigCompartmentReactionList">
+        <StackPanel Orientation="Vertical">
+            <ContentControl ContentTemplate="{Binding Source={StaticResource ReacListHeaderTemplate}}" />
+            <ListBox x:Name="ObsCollReacListBox" MinHeight="20" MaxHeight="200"
+                        ItemsSource="{Binding }"
+                        ItemTemplate="{Binding Source={StaticResource nonEditableReacListItemTemplate}}"
+                        >
+            </ListBox>
+        </StackPanel>
+    </DataTemplate>
+    
+    <!-- Reaction list view template. List of reactions in a Reaction Complex -->
     <DataTemplate x:Key="reacListViewTemplate">
         <ListView x:Name="lvReacComplexReactions" ItemsSource="{Binding Path=reactions, Mode=TwoWay}" SelectedIndex="0"  >
             <ListView.View>
@@ -366,15 +405,21 @@
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
 
-                    <GridViewColumn Width="120" Header="Rate constant">
+                    <GridViewColumn Width="90" Header="Rate constant">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    <GridViewColumn Width="120" Header="Units">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Width="300" Header="Reaction" >
-
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=TotalReactionString}">

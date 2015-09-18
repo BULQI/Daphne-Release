@@ -735,7 +735,7 @@ namespace DaphneGui
             ProtocolCreators.CreateBlankProtocol(protocol);
             protocol.SerializeToFile();
 
-            //DRIVER-LOCOMOTOR SCENARIO
+            // DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\simple_chemotaxis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             protocol.SerializeToFile();
@@ -746,34 +746,33 @@ namespace DaphneGui
             ////Serialize to json
             //protocol.SerializeToFile();
 
-            //RECEPTOR HOMEOSTASIS SCENARIO
+            // RECEPTOR HOMEOSTASIS Protocol
             protocol = new Protocol("Config\\receptor_homeostasis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateLigandReceptorProtocol(protocol);
-            //serialize to json
             protocol.SerializeToFile();
 
-            //GC SCENARIO
+            // Centroblast-Centrocyte recycling protocol
             protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.Create_CB_CC_Recycling_Protocol(protocol);
             protocol.SerializeToFile();
 
-            //GC SCENARIO
+            // Germinal Center Protocol
             protocol = new Protocol("Config\\simple_germinal_center.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateGCProtocol(protocol);
             protocol.SerializeToFile();
 
 
-            // BLANK VAT-REACTION-COMPLEX SCENARIO
+            // BLANK VAT-REACTION-COMPLEX Protocol
             protocol = new Protocol("Config\\vatRC_blank.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
             protocol.SerializeToFile();
 
-            // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
+            // VAT REACTION-COMPLEX - LIGAND RECEPTOR Protocol
             protocol = new Protocol("Config\\vatRC_ligand_receptor.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
             protocol.SerializeToFile();
 
-            // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
+            // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING Protocol
             protocol = new Protocol("Config\\vatRC_2SiteAbBinding.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
             protocol.SerializeToFile();

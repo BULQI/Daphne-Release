@@ -925,12 +925,6 @@
                     <StackPanel>
                         <!-- Reactions in cell -->
                         <StackPanel.Resources>
-                            <DataTemplate x:Key="cellReacListItemTemplate">
-                                <StackPanel Orientation="Horizontal">
-                                    <uc:DoublesBox Width="60" MinWidth="40" SliderEnabled="False" Number="{Binding rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-                                    <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
-                                </StackPanel>
-                            </DataTemplate>
                         </StackPanel.Resources>
 
                         <StackPanel>
@@ -941,21 +935,12 @@
                                         <TextBlock Text="Plasma Membrane" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Margin="10,0" Text="Rate Constant" />
-                                                <TextBlock Margin="10,0" Text="Reaction" />
-                                            </StackPanel>
+                                            <ContentControl ContentTemplate="{Binding Source={StaticResource ReacListHeaderTemplate}}" />
                                             <ListBox x:Name="MembReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
-                                                             ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
+                                                             ItemTemplate="{Binding Source={StaticResource editableReacListItemTemplate}}"
                                                              >
-                                            <ListBox.ContextMenu>
-                                                <ContextMenu >
-                                                    <MenuItem Header="Push to Protocol level" Name="menuMembPushReacToProto" Click="menuMembPushReacToProto_Click"></MenuItem>
-                                                    <MenuItem Header="Pull from Potocol level" Name="menuMembPullReacFromProto" Click="menuMembPullReacFromProto_Click"></MenuItem>
-                                                </ContextMenu>
-                                            </ListBox.ContextMenu>
-                                        </ListBox>
+                                            </ListBox> 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                             <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click">
                                                 <Button.ToolTip>
@@ -985,12 +970,10 @@
                                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                                     <!--<TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />-->
                                                     <ListView x:Name="lvCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
-                                                                                ItemsSource="{Binding Source={StaticResource membraneAvailableReactionsListView}}"
-                                                                                SelectedIndex="-1"
-                                                                                MinHeight="50" MaxHeight="150"
-                                                                                >
-
-
+                                                                        ItemsSource="{Binding Source={StaticResource membraneAvailableReactionsListView}}"
+                                                                        SelectedIndex="-1"
+                                                                        MinHeight="50" MaxHeight="150"
+                                                                        >
                                                         <ListView.View>
                                                             <GridView>
                                                                 <GridView.ColumnHeaderContainerStyle>
@@ -1016,21 +999,27 @@
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
+                                                                <GridViewColumn Width="120" Header="Units">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
                                                                 <GridViewColumn Width="300" Header="Reaction" >
                                                                     <GridViewColumn.CellTemplate>
                                                                         <DataTemplate>
                                                                             <TextBlock Text="{Binding TotalReactionString}">
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
-                                                                        Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
+                                                                                <TextBlock.Style>
+                                                                                    <Style>
+                                                                                        <Setter Property="TextBlock.Foreground" 
+                                                                                                Value="Black">
+                                                                                        </Setter>
+                                                                                    </Style>
+                                                                                </TextBlock.Style>
                                                                             </TextBlock>
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
-
                                                                 </GridViewColumn>
                                                             </GridView>
                                                         </ListView.View>
@@ -1071,24 +1060,13 @@
                                         <TextBlock Text="Cytosol" FontWeight="Bold" />
                                     </TabItem.Header>
                                     <StackPanel Orientation="Vertical" >
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Margin="10,0" Text="Rate Constant" />
-                                                <TextBlock Margin="10,0" Text="Reaction" />
-                                            </StackPanel>
+                                            <ContentControl ContentTemplate="{Binding Source={StaticResource ReacListHeaderTemplate}}" />
                                             <ListBox x:Name="CytosolReacListBox" MinHeight="20" MaxHeight="200"
                                                              ItemsSource="{Binding Path=cytosol.Reactions}"
-                                                             ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
+                                                             ItemTemplate="{Binding Source={StaticResource editableReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
                                                              >
-
-                                            <ListBox.ContextMenu>
-                                                <ContextMenu >
-                                                    <MenuItem Header="Save to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
-                                                    <MenuItem Header="Get from Potocol level" Name="menu2PullFromProto" Click="menu2PullFromProto_Click"></MenuItem>
-                                                </ContextMenu>
-                                            </ListBox.ContextMenu>
-
-                                        </ListBox>
+                                            </ListBox>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                             <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click">
                                                 <Button.ToolTip>
@@ -1151,7 +1129,14 @@
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
-                                                                <GridViewColumn Width="300" Header="Reaction" >
+                                                                    <GridViewColumn Width="120" Header="Units">
+                                                                        <GridViewColumn.CellTemplate>
+                                                                            <DataTemplate>
+                                                                                <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                                                                            </DataTemplate>
+                                                                        </GridViewColumn.CellTemplate>
+                                                                    </GridViewColumn>
+                                                                    <GridViewColumn Width="300" Header="Reaction" >
                                                                     <GridViewColumn.CellTemplate>
                                                                         <DataTemplate>
                                                                             <TextBlock Text="{Binding TotalReactionString}">
@@ -1224,6 +1209,7 @@
                     <StackPanel>
                         
                             <TabControl SelectionChanged="TabControl_SelectionChanged">
+                                
                             <!-- Reaction Complexes in cell Membrane -->
                             <TabItem >
                                 <TabItem.Header>
@@ -1261,20 +1247,20 @@
                                     </StackPanel>
 
                                     <Expander ExpandDirection="Down"
-                                    IsExpanded="False"
-                                    Header="Details"
-                                    x:Name="MembRCDetailsExpander"
-                                    Margin="0,5,0,0" 
-                                    Canvas.ZIndex="1"
-                                    BorderThickness="1"
-                                    BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                          Expanded="MembRCDetailsExpander_Expanded">
+                                                IsExpanded="False"
+                                                Header="Details"
+                                                x:Name="MembRCDetailsExpander"
+                                                Margin="0,5,0,0" 
+                                                Canvas.ZIndex="1"
+                                                BorderThickness="1"
+                                                BorderBrush="Black"
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                                Expanded="MembRCDetailsExpander_Expanded">
 
                                         <StackPanel Orientation="Vertical" >
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" Width="400" MinWidth="100"
+                                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" MinWidth="100"
                                                 Text="{Binding  ElementName=MembReactionComplexListBox, 
                                                                 Path=SelectedItem.Name}">
                                                     <TextBox.ToolTip>
@@ -1290,34 +1276,26 @@
                                             </StackPanel >
                                             <StackPanel x:Name="spReacComp"  >
                                                 <StackPanel.Resources>
-                                                    <DataTemplate x:Key="cellReacListItemTemplate">
-                                                        <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                        </TextBlock>
-                                                    </DataTemplate>
                                                 </StackPanel.Resources>
-
                                                 <TextBlock Text="Reactions" Margin="6,0"  />
-
                                                 <ContentControl
-                                            Content="{Binding ElementName=MembReactionComplexListBox, Path=SelectedItem}" 
+                                                    Content="{Binding ElementName=MembReactionComplexListBox, Path=SelectedItem}" 
                                                               ContentTemplate="{StaticResource reacListViewTemplate}">
                                                 </ContentControl>
-
                                             </StackPanel>
                                         </StackPanel>
                                     </Expander>
 
                                     <Expander ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Add reaction complex"
-                                x:Name="MembAddReacCxExpander"
-                                Margin="0,5,0,0" 
-                                Canvas.ZIndex="1"
-                                BorderThickness="1"
-                                BorderBrush="Black"
-                                Expanded="MembAddReacCxExpander_Expanded"
-                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                            IsExpanded="False"
+                                            Header="Add reaction complex"
+                                            x:Name="MembAddReacCxExpander"
+                                            Margin="0,5,0,0" 
+                                            Canvas.ZIndex="1"
+                                            BorderThickness="1"
+                                            BorderBrush="Black"
+                                            Expanded="MembAddReacCxExpander_Expanded"
+                                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                                         <StackPanel Orientation="Vertical" Margin="10,0">                                            
                                             <!--<TextBlock Text="Available Reaction Complexes"  Margin="0,0,6,0" />-->
@@ -1385,22 +1363,22 @@
                                     </StackPanel>
 
                                     <Expander ExpandDirection="Down"
-                                    IsExpanded="False"
-                                    Expanded="CytoRCDetailsExpander_Expanded"
-                                    Header="Details"
-                                    x:Name="CytoRCDetailsExpander"
-                                    Margin="0,5,0,0" 
-                                    Canvas.ZIndex="1"
-                                    BorderThickness="1"
-                                    BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                            IsExpanded="False"
+                                            Expanded="CytoRCDetailsExpander_Expanded"
+                                            Header="Details"
+                                            x:Name="CytoRCDetailsExpander"
+                                            Margin="0,5,0,0" 
+                                            Canvas.ZIndex="1"
+                                            BorderThickness="1"
+                                            BorderBrush="Black"
+                                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                                           >
 
                                         <StackPanel Orientation="Vertical" >
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                                <TextBox Margin="0,2" x:Name="txtCytoReacComplexName" IsReadOnly="True" 
-                                                Text="{Binding  ElementName=CytoReactionComplexListBox, Path=SelectedItem.Name}">
+                                                    <TextBox Margin="0,2" x:Name="txtCytoReacComplexName" IsReadOnly="True" MinWidth="100"
+                                                        Text="{Binding  ElementName=CytoReactionComplexListBox, Path=SelectedItem.Name}">
                                                     <TextBox.ToolTip>
                                                         <ToolTip>
                                                             <StackPanel Width="200" Orientation="Horizontal">
@@ -1413,16 +1391,9 @@
                                                 </TextBox>
                                             </StackPanel >
                                             <StackPanel x:Name="spCytoReacComp"  >
-                                                <StackPanel.Resources>
-                                                    <DataTemplate x:Key="cellReacListItemTemplate">
-                                                        <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                        </TextBlock>
-                                                    </DataTemplate>
+                                                <StackPanel.Resources> 
                                                 </StackPanel.Resources>
-
                                                 <TextBlock Text="Reactions" Margin="6,0"  />
-
                                                 <ContentControl
                                                     Content="{Binding ElementName=CytoReactionComplexListBox, Path=SelectedItem}" 
                                                     ContentTemplate="{StaticResource reacListViewTemplate}">

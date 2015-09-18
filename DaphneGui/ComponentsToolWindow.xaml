@@ -264,18 +264,18 @@
             </Expander>
                 <!-- LIBRARY REACTIONS -->
                 <Expander
-                                Padding="5" 
-                                ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Reactions"                                              
-                                x:Name="ReactionsExpander"
-                                Margin="0,4,0,0" 
-                                Canvas.ZIndex="1"
-                                BorderThickness="1"
-                                BorderBrush="Black"                        
-                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"  
-                                Expanded="ReactionsExpander_Expanded"
-                                >
+                    Padding="5" 
+                    ExpandDirection="Down"
+                    IsExpanded="False"
+                    Header="Reactions"                                              
+                    x:Name="ReactionsExpander"
+                    Margin="0,4,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"                        
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"  
+                    Expanded="ReactionsExpander_Expanded"
+                    >
                     <StackPanel>
                         <ListView x:Name="lvReactions" 
                                           ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
@@ -304,7 +304,7 @@
                                         </Style>
                                     </GridView.ColumnHeaderContainerStyle>
 
-                                    <GridViewColumn x:Name="colRate" Width="120" Header="Rate constant">
+                                    <GridViewColumn x:Name="colRate" Width="90" Header="Rate constant">
                                         <GridViewColumn.CellTemplate>
 
                                             <DataTemplate>
@@ -318,6 +318,13 @@
                                                                    >
                                                 </uc:DoublesBox>
 
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn x:Name="colUnits" Width="120" Header="Units">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" Foreground="Black"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>

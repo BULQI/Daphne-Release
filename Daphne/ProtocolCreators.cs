@@ -2466,6 +2466,11 @@ namespace Daphne
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+            cm = new ConfigMolecule("CXCR4|:CXCR4|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
             //
             // The following are generally intended as cytosol molecules 
             //
@@ -3511,25 +3516,121 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
-            //// degradation of A
-            //targetValue = 250.0;
-            ////cr = new ConfigReaction();
-            ////cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            ////// reactants
-            ////cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            ////cr.rate_const = copyNumber * transcriptionRate / targetValue;
-            ////cr.GetTotalReactionString(store.entity_repository);
-            ////store.entity_repository.reactions.Add(cr);
+            // Dimerizaton: 2 CXCR4| -> CXCR4|:CXCR4|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dimerization);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Dimer dissociation: CXCR4|:CXCR4| -> 2 CXCR4| 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.DimerDissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // These are for testing these reaction templates and units. Uncomment if needed.
+            ///////////////////////////////////////////////////////////////////////////////////
+
+            //// Autocatalytic transformation: A + A* -> A* + A*  
             //cr = new ConfigReaction();
-            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
-            //// modifiers
-            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.AutocatalyticTransformation);
             //// reactants
             //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            //cr.rate_const = 2 * A_transcription / (targetValue * house_equil);
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
             //cr.GetTotalReactionString(store.entity_repository);
             //store.entity_repository.reactions.Add(cr);
 
+            //// Catalyzed association: Wp + E2 + E1 -> Wp:E2 + E1  
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAssociation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Dissociation: Wp:E2 + E1 -> Wp + E2 + E1
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedDissociation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Creation: E1 -> W + E1
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedCreation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Transformation: W + E1 -> Wp + E1
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedTransformation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Dimerizaton: 2 CXCR4| + CXCL12:CXCR4| -> CXCR4|:CXCR4| + CXCL12:CXCR4|
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedDimerization);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catlayzed Dimer dissociation: CXCR4|:CXCR4| + CXCL12:CXCR4| -> 2 CXCR4| + CXCL12:CXCR4|
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedDimerDissociation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
         }
 
         private static void PredefinedReactionComplexesCreator(Level store)
@@ -4743,6 +4844,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
+            
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 
