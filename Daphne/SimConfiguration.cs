@@ -9543,7 +9543,7 @@ namespace Daphne
                     RenderSkin renderSkin = SystemOfPersistence.static_SelectedRenderSkin;
                     if (renderSkin != null)
                     {
-                        this.RenderColors = renderSkin.GetUsedRenderColors(renderLabel, renderMethod);
+                        this.renderColors = renderSkin.GetUsedRenderColors(renderLabel, renderMethod);
                     }
                 }
 
@@ -9672,6 +9672,7 @@ namespace Daphne
                 List<string> div_states = cell.div_scheme == null ? null : cell.div_scheme.States;
                 ObservableCollection<RenderColor> colors1 = this.GetRenderColors(label, RenderMethod.CELL_DIV_STATE);
                 ObservableCollection<RenderColor> colors2 = this.GetRenderColors(label, RenderMethod.CELL_DIV_SHADE);
+                if (colors1 == null || colors2 == null) continue;
                 int i = 0;
                 if (div_states != null)
                 {
@@ -9697,6 +9698,7 @@ namespace Daphne
                 List<string> diff_states = cell.diff_scheme == null ? null : cell.diff_scheme.States;
                 colors1 = this.GetRenderColors(label, RenderMethod.CELL_DIFF_STATE);
                 colors2 = this.GetRenderColors(label, RenderMethod.CELL_DIFF_SHADE);
+                if (colors1 == null || colors2 == null) continue;
                 i = 0;
                 if (diff_states != null)
                 {
