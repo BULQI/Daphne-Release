@@ -1839,13 +1839,26 @@ namespace DaphneGui
 
         private void techHelp_click(object sender, RoutedEventArgs e)
         {
-            if (dw.HasBeenClosed)
-            {
-                dw = new DocWindow();
-            }
-            dw.webBrowser.Navigate(new Uri("http://computationalimmunology.bu.edu/"));
-            dw.topicBox.Text = "Gaussian Processes";
-            dw.Show();
+            //if (dw.HasBeenClosed)
+            //{
+            //    dw = new DocWindow();
+            //}
+            //dw.webBrowser.Navigate(new Uri("http://computationalimmunology.bu.edu/"));
+            //dw.topicBox.Text = "Gaussian Processes";
+            //dw.Show();
+
+            //---------------------------------------------------------------------------------------
+
+            //Method 1 - This works fine except for title cut off at top plus some missing toolbar items.
+            System.Diagnostics.Process.Start("http://computationalimmunology.bu.edu");
+
+            //Method 2
+            //openit("http://computationalimmunology.bu.edu");
+
+            //Method 3
+            //ProcessStartInfo startInfo = new ProcessStartInfo("iexplore.exe", "http://computationalimmunology.bu.edu/");
+            //Process.Start(startInfo);
+
         }
 
         private void fittingHelp_click(object sender, RoutedEventArgs e)
