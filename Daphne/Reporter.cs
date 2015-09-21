@@ -187,6 +187,27 @@ namespace Daphne
         public abstract void clearFileStrings();
     }
 
+    public class NullReporter : ReporterBase
+    {
+        public NullReporter()
+        {
+        }
+
+        public override void StartReporter(string protocolFileName) { }
+        public override void AppendReporter() { }
+        public override void CloseReporter() { }
+
+        public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File) { }
+        public override void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File) { }
+
+        public override void AppendDeathEvent(Cell cell) { }
+        public override void AppendDivisionEvent(Cell cell, Cell daughter) { }
+        public override void AppendExitEvent(Cell cell) { }
+
+        public override void ReactionsReport() { }
+
+    }
+
     public class TissueSimulationReporterFiles : SimulationReporterFiles
     {
         public string ECMMeanReport { get; set; }

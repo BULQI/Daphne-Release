@@ -991,6 +991,8 @@ namespace Daphne
     {
         public NullSimulation()
         {
+            reporter = new NullReporter();
+            hdf5file = new NullHDF5File();
         }
 
         public override void Step(double dt)

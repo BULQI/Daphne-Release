@@ -1424,13 +1424,32 @@ namespace DaphneGui
             #endregion
         }
 
+        private bool vcrExecutionTest()
+        {
+            if (protocolChanged() == true)
+            {
+                MessageBox.Show("The protocol changed. Playback can no longer be executed and will get disabled.", "Playback warning");
+                VCR_Toolbar.IsEnabled = false;
+                return false;
+            }
+            return true;
+        }
+
         private void VCRbutton_First_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.MoveToFrame(0, false);
         }
 
         private void VCRbutton_Play_Checked(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             DataStorageMenu.IsEnabled = false;
             vcrControl.SetFlag(VCRControl.VCR_ACTIVE);
         }
@@ -1443,21 +1462,37 @@ namespace DaphneGui
 
         private void VCRbutton_Back_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.Advance(-1);
         }
 
         private void VCRbutton_Forward_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.Advance(1);
         }
 
         private void VCRbutton_Last_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.MoveToFrame(vcrControl.TotalFrames - 1);
         }
 
         private void VCRSlider_LeftMouse_Down(object sender, MouseButtonEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.SaveFlags();
             vcrControl.SetInactive();
         }
@@ -2254,8 +2289,6 @@ namespace DaphneGui
                 {
                     // create the simulation
                     sim = new TissueSimulation();
-                    // set the reporter's path
-                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     // vtk data basket to hold vtk data for entities with graphical representation
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
@@ -2286,7 +2319,9 @@ namespace DaphneGui
                     ReacComplexChartWindow.redraw_flag = false;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
+                    {
                         ProtocolToolWindowContainer.Items.Clear();
+                    }
 
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
@@ -2297,8 +2332,6 @@ namespace DaphneGui
                 {
                     // create the simulation
                     sim = new VatReactionComplex();
-                    // set the reporter's path
-                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     vtkDataBasket = new VTKVatRCDataBasket();
                     gc = new VTKNullGraphicsController();
                 }
@@ -2313,6 +2346,8 @@ namespace DaphneGui
                     gc = new VTKNullGraphicsController();
                 }
             }
+            // set the reporter's path
+            sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
 
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             if (vtkDisplay_DockPanel.DataContext != gc)
