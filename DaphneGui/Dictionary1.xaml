@@ -739,7 +739,7 @@
 
     <!-- datatempalte for display cell options detail -->
     <DataTemplate x:Key="CellOptionRowDetailTemplate">
-        <Border BorderThickness="0" Background="BlanchedAlmond" Padding="5">
+        <Border BorderThickness="0" Background="LightGray" Padding="5">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="{Binding Path=renderMethod, Converter={StaticResource RenderMethodEnumDescriptionConverter}}" />
                 <ItemsControl ItemsSource="{Binding Path=RenderColors, Converter={StaticResource DebugConverter}, ConverterParameter=rendercolor}"

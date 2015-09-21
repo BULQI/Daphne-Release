@@ -3,40 +3,40 @@
   "renderCells": [
     {
       "base_color": {
-        "hint": "",
+        "hint": "stochastic locomotion",
         "EntityColor": "#FFFF0000"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF7FC97F"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFBEAED4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFFDC086"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF386CB0"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFF0027F"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFBF5B17"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FF666666"
         }
       ],
@@ -178,121 +178,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFBB4AE"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFB3CDE3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFE0000"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFFF9D81"
+          "hint": "dead",
+          "EntityColor": "#FFFE0000"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFA6CEE3"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF1F78B4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFB2DF8A"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF33A02C"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFFB9A99"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFE31A1C"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFFDBF6F"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFF7F00"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCAB2D6"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FF6A3D9A"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFB15928"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF0000FF"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF4825FF"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF673DFF"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7E51FF"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF9165FF"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA378FF"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB28BFF"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFC19EFF"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCFB1FF"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDCC4FF"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE8D7FF"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3EBFF"
         }
       ],
@@ -302,46 +302,46 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "chemotactic with static receptor",
         "EntityColor": "#FF00FF00"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFB3E2CD"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFDCDAC"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFCBD5E8"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFF4CAE4"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFE6F5C9"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFFF2AE"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFF1E2CC"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFCCCCCC"
         }
       ],
       "diff_state_colors": [
         {
-          "hint": "",
+          "hint": "Unspecified",
           "EntityColor": "#FFE41A1C"
         },
         {
@@ -375,7 +375,7 @@
       ],
       "diff_shade_colors": [
         {
-          "hint": "",
+          "hint": "Unspecified",
           "EntityColor": "#FFFE0000"
         },
         {
@@ -409,7 +409,7 @@
       ],
       "div_state_colors": [
         {
-          "hint": "",
+          "hint": "Unspecified",
           "EntityColor": "#FF66C2A5"
         },
         {
@@ -443,7 +443,7 @@
       ],
       "div_shade_colors": [
         {
-          "hint": "",
+          "hint": "Unspecified",
           "EntityColor": "#FF00FF00"
         },
         {
@@ -477,121 +477,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFFFFFB3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFB1FF9A"
+          "hint": "dead",
+          "EntityColor": "#FF00FF00"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFFFFB3"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFBEBADA"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFB8072"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF80B1D3"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFDB462"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB3DE69"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFCCDE5"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFD9D9D9"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFBC80BD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFCCEBC5"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFFFED6F"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF47FF34"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF66FF4E"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7CFF63"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF90FF76"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA1FF89"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB1FF9A"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFBFFFAB"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCDFFBC"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDAFFCD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE7FFDD"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3FFEE"
         }
       ],
@@ -601,40 +601,40 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "chemotactic with receptor homeostasis",
         "EntityColor": "#FF0000FF"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF7FC97F"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFBEAED4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFFDC086"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF386CB0"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFF0027F"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFBF5B17"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FF666666"
         }
       ],
@@ -776,121 +776,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFBB4AE"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFB3CDE3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFE0000"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFFF9D81"
+          "hint": "dead",
+          "EntityColor": "#FFFE0000"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFA6CEE3"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF1F78B4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFB2DF8A"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF33A02C"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFFB9A99"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFE31A1C"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFFDBF6F"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFF7F00"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCAB2D6"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FF6A3D9A"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFB15928"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF0000FF"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF4825FF"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF673DFF"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7E51FF"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF9165FF"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA378FF"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB28BFF"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFC19EFF"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCFB1FF"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDCC4FF"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE8D7FF"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3EBFF"
         }
       ],
@@ -900,40 +900,40 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "centroblast-centrocyte recycling",
         "EntityColor": "#FFFFFF00"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFB3E2CD"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFDCDAC"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFCBD5E8"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFF4CAE4"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFE6F5C9"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFFF2AE"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFF1E2CC"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFCCCCCC"
         }
       ],
@@ -1075,121 +1075,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFFFFFB3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFB1FF9A"
+          "hint": "dead",
+          "EntityColor": "#FF00FF00"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFFFFB3"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFBEBADA"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFB8072"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF80B1D3"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFDB462"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB3DE69"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFCCDE5"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFD9D9D9"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFBC80BD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFCCEBC5"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFFFED6F"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF47FF34"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF66FF4E"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7CFF63"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF90FF76"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA1FF89"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB1FF9A"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFBFFFAB"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCDFFBC"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDAFFCD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE7FFDD"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3FFEE"
         }
       ],
@@ -1199,40 +1199,40 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "simple Germinal Center B cell",
         "EntityColor": "#FFFF00FF"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF7FC97F"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFBEAED4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFFDC086"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF386CB0"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFF0027F"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFBF5B17"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FF666666"
         }
       ],
@@ -1374,121 +1374,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFBB4AE"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFB3CDE3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFE0000"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFFF9D81"
+          "hint": "dead",
+          "EntityColor": "#FFFE0000"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFA6CEE3"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF1F78B4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFB2DF8A"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF33A02C"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFFB9A99"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFE31A1C"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFFDBF6F"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFF7F00"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCAB2D6"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FF6A3D9A"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFB15928"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF0000FF"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF4825FF"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF673DFF"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7E51FF"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF9165FF"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA378FF"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB28BFF"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFC19EFF"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCFB1FF"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDCC4FF"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE8D7FF"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3EBFF"
         }
       ],
@@ -1498,40 +1498,40 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "simple germinal center T cell",
         "EntityColor": "#FF00FFFF"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFB3E2CD"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFDCDAC"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFCBD5E8"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFF4CAE4"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFE6F5C9"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFFF2AE"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFF1E2CC"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFCCCCCC"
         }
       ],
@@ -1673,121 +1673,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFFFFFB3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFB1FF9A"
+          "hint": "dead",
+          "EntityColor": "#FF00FF00"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFFFFB3"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFBEBADA"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFB8072"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF80B1D3"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFDB462"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB3DE69"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFCCDE5"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFD9D9D9"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFBC80BD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFCCEBC5"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFFFED6F"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF47FF34"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF66FF4E"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7CFF63"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF90FF76"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA1FF89"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB1FF9A"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFBFFFAB"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCDFFBC"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDAFFCD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE7FFDD"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3FFEE"
         }
       ],
@@ -1797,40 +1797,40 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "CXCL12-secreting",
         "EntityColor": "#FF800000"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF7FC97F"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFBEAED4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFFDC086"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF386CB0"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFF0027F"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFBF5B17"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FF666666"
         }
       ],
@@ -1972,121 +1972,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFBB4AE"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFB3CDE3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FFFE0000"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFFF9D81"
+          "hint": "dead",
+          "EntityColor": "#FFFE0000"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFA6CEE3"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF1F78B4"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFB2DF8A"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF33A02C"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFFB9A99"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFE31A1C"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFFDBF6F"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFF7F00"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCAB2D6"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FF6A3D9A"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFFFFF99"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFB15928"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF0000FF"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF4825FF"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF673DFF"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7E51FF"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF9165FF"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA378FF"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB28BFF"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFC19EFF"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCFB1FF"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDCC4FF"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE8D7FF"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3EBFF"
         }
       ],
@@ -2096,40 +2096,40 @@
     },
     {
       "base_color": {
-        "hint": "",
+        "hint": "CXCL13-secreting",
         "EntityColor": "#FF008000"
       },
       "cell_pop_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FFB3E2CD"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFDCDAC"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFCBD5E8"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFF4CAE4"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FFE6F5C9"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFFF2AE"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFF1E2CC"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFCCCCCC"
         }
       ],
@@ -2271,121 +2271,121 @@
       ],
       "death_state_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "dead",
           "EntityColor": "#FFFFFFB3"
         }
       ],
       "death_shade_colors": [
         {
-          "hint": "",
+          "hint": "live",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
-          "EntityColor": "#FFB1FF9A"
+          "hint": "dead",
+          "EntityColor": "#FF00FF00"
         }
       ],
       "gen_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF8DD3C7"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FFFFFFB3"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FFBEBADA"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FFFB8072"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF80B1D3"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFFDB462"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB3DE69"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFFCCDE5"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFD9D9D9"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFBC80BD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFCCEBC5"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFFFED6F"
         }
       ],
       "gen_shade_colors": [
         {
-          "hint": "",
+          "hint": "0",
           "EntityColor": "#FF00FF00"
         },
         {
-          "hint": "",
+          "hint": "1",
           "EntityColor": "#FF47FF34"
         },
         {
-          "hint": "",
+          "hint": "2",
           "EntityColor": "#FF66FF4E"
         },
         {
-          "hint": "",
+          "hint": "3",
           "EntityColor": "#FF7CFF63"
         },
         {
-          "hint": "",
+          "hint": "4",
           "EntityColor": "#FF90FF76"
         },
         {
-          "hint": "",
+          "hint": "5",
           "EntityColor": "#FFA1FF89"
         },
         {
-          "hint": "",
+          "hint": "6",
           "EntityColor": "#FFB1FF9A"
         },
         {
-          "hint": "",
+          "hint": "7",
           "EntityColor": "#FFBFFFAB"
         },
         {
-          "hint": "",
+          "hint": "8",
           "EntityColor": "#FFCDFFBC"
         },
         {
-          "hint": "",
+          "hint": "9",
           "EntityColor": "#FFDAFFCD"
         },
         {
-          "hint": "",
+          "hint": "10",
           "EntityColor": "#FFE7FFDD"
         },
         {
-          "hint": "",
+          "hint": "11",
           "EntityColor": "#FFF3FFEE"
         }
       ],
