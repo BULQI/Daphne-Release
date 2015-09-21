@@ -542,7 +542,7 @@
                                                 </ContentControl>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
 
-                                                <Grid>
+                                                <Grid PreviewMouseDown="Grid_PreviewMouseDown">
                                                     <Expander x:Name="CellOptionsExpander"
                                                               ExpandDirection="Down" 
                                                               MinWidth="112"
@@ -553,7 +553,6 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                              Expanded="CellOptionsExpander_Expanded"
                                                                 >
                                                     </Expander>
                                                     <Popup x:Name="CellOptionsPopup"  AllowsTransparency="True" PopupAnimation="Fade"
@@ -562,15 +561,16 @@
                                                            ComboBox.SelectionChanged="CellsColorByCB_SelectionChanged"
                                                            CheckBox.Checked="CellRenderOnOffChanged"
                                                            CheckBox.Unchecked="CellRenderOnOffChanged"
+                                                           StaysOpen="False"
                                                            >
                                                         <StackPanel Orientation="Vertical">
-                                                            <local:CellOptions DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}"
+                                                            <local:CellOptions x:Name="cell_ops" DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}"
                                                                                Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
                                                         </StackPanel>
                                                     </Popup>
                                                 </Grid>
 
-                                                <Grid>
+                                                <Grid Mouse.PreviewMouseDown="Grid_PreviewMouseDown_1">
                                                     <Expander x:Name="ECMOptionsExpander"
                                                               MinWidth="114"
                                                               ExpandDirection="Down" 
@@ -581,7 +581,6 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                              Expanded="ECMOptionsExpander_Expanded"
                                                             >
                                                     </Expander>
                                                     <Popup x:Name="ECMOptionsPopup"  AllowsTransparency="False"
@@ -590,9 +589,10 @@
                                                            IsOpen="{Binding ElementName=ECMOptionsExpander, Path=IsExpanded}"
                                                            CheckBox.Checked="MolPopRenderOnOffChanged"
                                                            CheckBox.Unchecked="MolPopRenderOnOffChanged"
+                                                           StaysOpen="False"
                                                            >
-                                                        <StackPanel Orientation="Vertical">
-                                                            <local:ECMMolecules DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
+                                                        <StackPanel x:Name="ecm_options_stackpanel" Orientation="Vertical">
+                                                            <local:ECMMolecules x:Name="ecm_mol_ops" DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
                                                                                 Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
                                                         </StackPanel>
                                                     </Popup>

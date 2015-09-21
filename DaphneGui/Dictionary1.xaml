@@ -44,6 +44,8 @@
     <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
     <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
+    <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+    
     <!-- Style for hiding the display of the mean value for a probability transition when the distribution type is CONSTANT -->
     <!-- DataContext is a DistributedParameter -->
     <Style x:Key="mean_value_visibility_style" TargetType="{x:Type StackPanel}">
@@ -734,6 +736,52 @@
             <AdornedElementPlaceholder x:Name="ErrorAdorner" ></AdornedElementPlaceholder>
         </DockPanel>
     </ControlTemplate>
+
+    <!-- datatempalte for display cell options detail -->
+    <DataTemplate x:Key="CellOptionRowDetailTemplate">
+        <Border BorderThickness="0" Background="BlanchedAlmond" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding Path=renderMethod, Converter={StaticResource RenderMethodEnumDescriptionConverter}}" />
+                <ItemsControl ItemsSource="{Binding Path=RenderColors, Converter={StaticResource DebugConverter}, ConverterParameter=rendercolor}"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            ScrollViewer.CanContentScroll="False"
+                            x:Name="lb"
+                            Background="White"
+                            >
+                    <ItemsControl.Style>
+                        <Style TargetType="ItemsControl">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding renderOn}" Value="False">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.Style>
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                IsItemsHost="True" >
+                            </WrapPanel>
+
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <Border Width="20" Height="20" BorderBrush="Black" BorderThickness=".5" 
+                                                Margin="10, 5, 10, 2"
+                                                Background="{Binding EntityColor, Converter={StaticResource ColorToBrushConverter}}"/>
+                                <TextBlock Text="{Binding hint}" TextAlignment="Center" Margin="5, 0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
 
 
 </ResourceDictionary>

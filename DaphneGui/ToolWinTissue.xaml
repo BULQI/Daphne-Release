@@ -15,23 +15,28 @@
 
     <docking:ToolWindow.Resources>
 
-        <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
-        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
-        <local:CellToVisibilityConverter x:Key="CellToVisibilityConv" />
-        
-        <ObjectDataProvider x:Key="RenderMethodEnum"
+            <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+            <local:CellToVisibilityConverter x:Key="CellToVisibilityConv" />
+
+            <ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="daph:RenderMethod" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        
-        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
-        
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="daph:RenderMethod" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        </ResourceDictionary>
     </docking:ToolWindow.Resources>
-    
+
     <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
         <TabControl.Resources>
@@ -873,6 +878,7 @@
                               CanUserAddRows="False"
                               BorderThickness="1"
                               BorderBrush="Black"
+                              RowDetailsTemplate="{StaticResource CellOptionRowDetailTemplate}"
                             >
 
                             <DataGrid.ColumnHeaderStyle>

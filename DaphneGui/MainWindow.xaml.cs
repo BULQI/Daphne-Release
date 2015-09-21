@@ -3890,16 +3890,6 @@ namespace DaphneGui
             DisplayCellInfo(cellid);
         }
 
-        private void CellOptionsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            ECMOptionsExpander.IsExpanded = false;
-        }
-
-        private void ECMOptionsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            CellOptionsExpander.IsExpanded = false;
-        }
-
         private void MolPopRenderOnOffChanged(object sender, RoutedEventArgs e)
         {
             vtkDataBasket.SetupVTKData(sop.Protocol);
@@ -4003,6 +3993,41 @@ namespace DaphneGui
             }
         }
 
+        //mehtod related to close popup for ecmoptions and celloptions
+        private void Grid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+
+            if (CellOptionsPopup.IsOpen == true)
+            {
+                Visual visual = e.OriginalSource as Visual;
+                if (visual.IsDescendantOf(cell_ops)) return;
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void Grid_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
+        {
+            if (ECMOptionsPopup.IsOpen == true)
+            {
+                Visual visual = e.OriginalSource as Visual;
+                if (visual.IsDescendantOf(ecm_mol_ops)) return;
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void ECMOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ECMOptionsExpander.IsExpanded = false;
+        }
+
+        private void Grid_LostFocus(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
 

@@ -43,6 +43,10 @@ namespace Daphne
                 {
                     protocol = value;
                     HProtocol = protocol;
+                    if (this._selectedRenderSkin != null && protocol != null)
+                    {
+                        _selectedRenderSkin.UpdateColorHint(protocol.entity_repository);
+                    }
                     OnPropertyChanged("Protocol");
                 }
             }
@@ -69,6 +73,7 @@ namespace Daphne
         /// The main palette containing graphics properties used to render various objects (i.e. colors, etc)
         /// </summary>
         private RenderSkin _selectedRenderSkin;
+        public static RenderSkin static_SelectedRenderSkin; 
         public RenderSkin SelectedRenderSkin
         {
             get
@@ -76,8 +81,16 @@ namespace Daphne
                 if (_selectedRenderSkin == null && SkinList.Count > 0)
                 {
                     _selectedRenderSkin = SkinList.Where(x => x.Name == "default_skin").SingleOrDefault();
-                    if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList.First();
+                    if (_selectedRenderSkin == null)
+                    {
+                        _selectedRenderSkin = SkinList.First();
+                        if (_selectedRenderSkin != null && this.protocol != null)
+                        {
+                            _selectedRenderSkin.UpdateColorHint(this.protocol.entity_repository);
+                        }
+                    }
                 }
+                static_SelectedRenderSkin = _selectedRenderSkin;
                 return _selectedRenderSkin;
             }
             set
@@ -85,6 +98,16 @@ namespace Daphne
                 if (value != _selectedRenderSkin)
                 {
                     _selectedRenderSkin = value;
+                    static_SelectedRenderSkin = value;
+                    if (value != null && this.protocol != null)
+                    {
+                        _selectedRenderSkin.UpdateColorHint(this.protocol.entity_repository);
+                        if (protocol.scenario is TissueScenario)
+                        {
+                            var render_pop = (protocol.scenario as TissueScenario).popOptions;
+                            render_pop.RenderSkinChanged();
+                        }
+                    }
                 }
             }
 
@@ -5004,6 +5027,15 @@ namespace Daphne
             return false;
         }
 
+        //return states
+        public List<String> States
+        {
+            get
+            {
+                return Driver.states.ToList();
+            }
+        }
+
         public string GenerateStateName()
         {
             string OriginalName = "State";
@@ -9312,7 +9344,7 @@ namespace Daphne
     public class RenderColor : INotifyPropertyChanged
     {
         //for future use, this is a hint as to what is this color being used, such as for the diff state of
-        public string hint { get; set; } //this is a hint as to what is this color being used, such as for the diff state of 
+        public string hint { get; set; } 
 
         private Color _entityColor;
 
@@ -9332,9 +9364,9 @@ namespace Daphne
 
         public RenderColor() { }
 
-        public RenderColor(Color c)
+        public RenderColor(Color c, string h="")
         {
-            hint = "";
+            hint = h;
             EntityColor = c;
         }
 
@@ -9404,6 +9436,37 @@ namespace Daphne
 
             renderLabel = "";
         }
+
+        public ObservableCollection<RenderColor> GetColors(RenderMethod renderMethod)
+        {
+                switch(renderMethod)
+               {
+                   case RenderMethod.CELL_TYPE:
+                       ObservableCollection<RenderColor> tmp = new ObservableCollection<RenderColor>();
+                       tmp.Add(this.base_color);
+                       return tmp;
+                   case RenderMethod.CELL_POP:
+                       return cell_pop_colors;
+                   case RenderMethod.CELL_DIV_STATE:
+                       return div_state_colors;
+                   case RenderMethod.CELL_DIV_SHADE:
+                       return div_shade_colors;
+                   case RenderMethod.CELL_DIFF_STATE:
+                       return diff_state_colors;
+                   case RenderMethod.CELL_DIFF_SHADE:
+                       return diff_shade_colors;
+                   case RenderMethod.CELL_DEATH_STATE:
+                       return death_state_colors;
+                   case RenderMethod.CELL_DEATH_SHADE:
+                       return death_shade_colors;
+                   case RenderMethod.CELL_GEN:
+                       return gen_colors;
+                   case RenderMethod.CELL_GEN_SHADE:
+                       return gen_shade_colors;
+               }
+            return null;
+        }
+
     }
 
     public class RenderMol
@@ -9441,17 +9504,93 @@ namespace Daphne
 
     }
 
-    public class RenderPop
+    public class RenderPop:INotifyPropertyChanged
     {
-        public bool renderOn { get; set; }                 // toggles rendering
-        public RenderMethod renderMethod { get; set; }      // indicates the render option
+        private RenderMethod _renderMethod;                 // indicates the render option
+
+        private bool _renderOn;
+
+        public bool renderOn 
+        {
+            get
+            {
+                return _renderOn;
+            }
+
+            set
+            {
+                if (_renderOn != value)
+                {
+                    _renderOn = value;
+                    OnPropertyChanged("renderOn");
+                }
+            }
+        }
+
         public string name { get; set; }                    // exist to facilitate eding scheme
-        public string renderLabel { get; set; }                   // cell or mol population's label
+        public string renderLabel { get; set; }             // cell or mol population's label
+
+        //information used to display legend
+        [JsonIgnore]
+        private List<RenderColor> renderColors;
+        [JsonIgnore]
+        public List<RenderColor> RenderColors
+        {
+            get
+            {
+                if (renderColors == null)
+                {
+                    RenderSkin renderSkin = SystemOfPersistence.static_SelectedRenderSkin;
+                    if (renderSkin != null)
+                    {
+                        this.RenderColors = renderSkin.GetUsedRenderColors(renderLabel, renderMethod);
+                    }
+                }
+
+                return renderColors;
+            }
+            set
+            {
+                renderColors = value;
+                OnPropertyChanged("RenderColors");
+            }
+        }
 
         public RenderPop()
         {
             renderLabel = "";
         }
+
+        public RenderMethod renderMethod 
+        {
+            get
+            {
+                return _renderMethod;
+            }
+            set
+            {
+                if (_renderMethod == value) return;
+                _renderMethod = value;
+                RenderSkin renderSkin = SystemOfPersistence.static_SelectedRenderSkin;
+                if (renderSkin != null)
+                {
+                    this.RenderColors = renderSkin.GetUsedRenderColors(renderLabel, renderMethod);
+                }
+                OnPropertyChanged("renderMethod");
+            }
+        }
+
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
     }
 
@@ -9509,7 +9648,76 @@ namespace Daphne
                 var mol = er.molecules[i];
                 AddRenderMol(mol.entity_guid, mol.Name);
             }
+        }
 
+        /// <summary>
+        /// update hint that is used to display legend.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="er"></param>
+        public void UpdateColorHint(EntityRepository er)
+        {
+            foreach (var cell in er.cells)
+            {
+                string label = cell.renderLabel;
+                RenderCell rc = null;
+                foreach (RenderCell r in this.renderCells)
+                {
+                    if (r.renderLabel == label)
+                    {
+                        rc = r;
+                        break;
+                    }
+                }
+                List<string> div_states = cell.div_scheme == null ? null : cell.div_scheme.States;
+                ObservableCollection<RenderColor> colors1 = this.GetRenderColors(label, RenderMethod.CELL_DIV_STATE);
+                ObservableCollection<RenderColor> colors2 = this.GetRenderColors(label, RenderMethod.CELL_DIV_SHADE);
+                int i = 0;
+                if (div_states != null)
+                {
+                    for (i = 0; i < div_states.Count && i < colors1.Count; i++)
+                    {
+                        colors1[i].hint = div_states[i];
+                        colors2[i].hint = div_states[i];
+                    }
+                }
+                else
+                {
+                    colors1[i].hint = "Unspecified";
+                    colors2[i].hint = "Unspecified";
+                    i++;
+                }
+                for (; i < colors1.Count; i++)
+                {
+                    colors1[i].hint = "";
+                    colors2[i].hint = "";
+                }
+
+
+                List<string> diff_states = cell.diff_scheme == null ? null : cell.diff_scheme.States;
+                colors1 = this.GetRenderColors(label, RenderMethod.CELL_DIFF_STATE);
+                colors2 = this.GetRenderColors(label, RenderMethod.CELL_DIFF_SHADE);
+                i = 0;
+                if (diff_states != null)
+                {
+                    for (i = 0; i < diff_states.Count && i < colors1.Count; i++)
+                    {
+                        colors1[i].hint = diff_states[i];
+                        colors2[i].hint = diff_states[i];
+                    }
+                }
+                else
+                {
+                    colors1[i].hint = "Unspecified";
+                    colors2[i].hint = "Unspecified";
+                    i++;
+                }
+                for (; i < colors1.Count; i++)
+                {
+                    colors1[i].hint = "";
+                    colors2[i].hint = "";
+                }
+            }
         }
 
         //default color
@@ -9537,15 +9745,15 @@ namespace Daphne
                 if (ColorHelper.resetColorPicker(c) == true) break;
             }
 
-            renc.base_color = new RenderColor(ColorHelper.pickASolidColor());
-
-
+            renc.base_color = new RenderColor(ColorHelper.pickASolidColor(), name);
+          
             //cell_pop
             ColorHelper.resetColorPicker();
             List<Color> colorlist = ColorHelper.pickASetOfColor(8);
-            foreach (Color color in colorlist)
+            for (int i = 0; i < colorlist.Count; i++)
             {
-                renc.cell_pop_colors.Add(new RenderColor(color));
+                var color = colorlist[i];
+                renc.cell_pop_colors.Add(new RenderColor(color, i.ToString()));
             }
 
             //diff_state
@@ -9579,34 +9787,31 @@ namespace Daphne
 
             //death_state
             colorlist = ColorHelper.pickASetOfColor(2);
-            foreach (Color color in colorlist)
-            {
-                renc.death_state_colors.Add(new RenderColor(color));
-            }
+            renc.death_state_colors.Add(new RenderColor(colorlist[0], "live"));
+            renc.death_state_colors.Add(new RenderColor(colorlist[1], "dead"));
 
             //death_state_shade
             //colorlist = ColorHelper.pickColorShades(ColorHelper.pickASolidColor(), 2);
             colorlist = ColorHelper.pickColorShades(colorlist[0], 2, true);
-            foreach (Color color in colorlist)
-            {
-                renc.death_shade_colors.Add(new RenderColor(color));
-            }
+            renc.death_shade_colors.Add(new RenderColor(colorlist[0], "live"));
+            renc.death_shade_colors.Add(new RenderColor(colorlist[0], "dead"));
 
             //gen_colors
             colorlist = ColorHelper.pickASetOfColor(12);
-            foreach (Color color in colorlist)
+            for (int i = 0; i < colorlist.Count; i++)
             {
-                renc.gen_colors.Add(new RenderColor(color));
+                var color = colorlist[i];
+                renc.gen_colors.Add(new RenderColor(color, i.ToString()));
             }
 
             //gene_color_shade
             //colorlist = ColorHelper.pickColorShades(ColorHelper.pickASolidColor(), 12);
             colorlist = ColorHelper.pickColorShades(colorlist[0], 12, true);
-            foreach (Color color in colorlist)
+            for (int i = 0; i < colorlist.Count; i++)
             {
-                renc.gen_shade_colors.Add(new RenderColor(color));
-            }
-            
+                var color = colorlist[i];
+                renc.gen_shade_colors.Add(new RenderColor(color, i.ToString()));
+            }            
             renderCells.Add(renc);
         }
 
@@ -9715,6 +9920,49 @@ namespace Daphne
             SerializeToFile();
             this.originalContent = jsonSpec;
         }
+
+        internal List<RenderColor> GetUsedRenderColors(string renderLabel, RenderMethod renderMethod)
+        {
+            RenderCell rc = null;
+            List<RenderColor> ret_colors = null;
+            for (int i = 0; i < this.renderCells.Count; i++)
+            {
+                if (renderCells[i].renderLabel == renderLabel)
+                {
+                    rc = renderCells[i];
+                    break;
+                }
+            }
+            if (rc != null)
+            {
+                ret_colors = new List<RenderColor>();
+                var src_colors = rc.GetColors(renderMethod);
+                foreach (var c in src_colors)
+                {
+                    if (c.hint != "") ret_colors.Add(c);
+                }
+            }
+            return ret_colors;
+        }
+
+        internal ObservableCollection<RenderColor> GetRenderColors(string renderLabel, RenderMethod renderMethod)
+        {
+            RenderCell rc = null;
+            ObservableCollection<RenderColor> src_colors = null;
+            for (int i = 0; i < this.renderCells.Count; i++)
+            {
+                if (renderCells[i].renderLabel == renderLabel)
+                {
+                    rc = renderCells[i];
+                    break;
+                }
+            }
+            if (rc != null)
+            {
+                src_colors = rc.GetColors(renderMethod);
+            }
+            return src_colors;
+        }
     }
 
     public class RenderPopOptions
@@ -9789,6 +10037,17 @@ namespace Daphne
         {
             return this.molPopOptions.Where(x => x.renderLabel == label).SingleOrDefault();
         }
+    
+    
+        public void RenderSkinChanged()
+        {
+            foreach (RenderPop rp in this.cellPopOptions)
+            {
+                //force refresh
+                rp.RenderColors = null;
+            }
+        }
+    
     }
 
 
