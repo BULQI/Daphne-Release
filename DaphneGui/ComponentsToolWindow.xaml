@@ -377,7 +377,9 @@
                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
                                     HorizontalAlignment="Left">
                             <Grid>
-                            <local:AddReactionControl Tag="component_reacs"  MoleculeCollection="{Binding Source={StaticResource ComponentMoleculesListView}}"/>
+                            <local:AddReactionControl Tag="component_reacs"  MoleculeCollection="{Binding Source={StaticResource ComponentMoleculesListView}}"
+                                     ARCReactions ="{Binding Path=entity_repository.reactions}"                       
+                                    />
                             </Grid>
                         </Expander>
                     </StackPanel>
@@ -436,7 +438,9 @@
                             >
                             
                             <Grid>
-                                <local:AddReactionControl Tag="component_rc" MoleculeCollection="{Binding Source={StaticResource ER_Molecules}}" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" />
+                                <local:AddReactionControl Tag="component_rc" MoleculeCollection="{Binding Source={StaticResource ER_Molecules}}" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" 
+                                    ARCReactions="{Binding ElementName=RCControl, Path=SelectedReactionComplex.reactions}"                          
+                                    />
                             </Grid>
                         </Expander>
                     </StackPanel>

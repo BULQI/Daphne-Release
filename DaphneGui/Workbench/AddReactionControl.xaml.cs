@@ -753,10 +753,10 @@ namespace DaphneGui
 
                 case "vatRC":
                     ARCCell = null;
-                    ARCComp = null;                  
+                    ARCComp = null;
                     ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
                     level = MainWindow.GetLevelContext(this);
-                    if (crc != null  && level is Protocol)
+                    if (crc != null && level is Protocol)
                     {
                         ARCReactions = crc.reactions;
                         cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
@@ -786,11 +786,11 @@ namespace DaphneGui
 
                 case "component_rc":
                     ARCCell = null;
-                    ARCComp = null;                   
+                    ARCComp = null;
                     level = this.DataContext as Level;
                     crc = this.CurrentReactionComplex as ConfigReactionComplex;
                     if (crc != null)
-                    {                        
+                    {
                         ARCReactions = crc.reactions;
                         cc.Collection = level != null ? level.entity_repository.molecules : null;
                         coll.Add(cc);

@@ -16,6 +16,8 @@
 
     <UserControl.Resources>
 
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"
                               Source="{Binding Path=Protocol.entity_repository.molecules}" 
                               />
@@ -925,7 +927,10 @@
                                 >
 
                         <Grid>
-                            <local:AddReactionControl Tag ="ecs" MoleculeCollection="{Binding Source={StaticResource EcsMoleculesListView}}" Margin="0,6" />
+                            <local:AddReactionControl Tag ="ecs" MoleculeCollection="{Binding Source={StaticResource EcsMoleculesListView}}" Margin="0,6" 
+                                ARCComp="{Binding Path=Protocol.scenario.(daph:TissueScenario.environment).(daph:ConfigECSEnvironment.comp)}"
+                                ARCReactions="{Binding Path=Protocol.scenario.(daph:TissueScenario.environment).(daph:ConfigECSEnvironment.comp).Reactions}"
+                            />
                         </Grid>
                     </Expander>
 

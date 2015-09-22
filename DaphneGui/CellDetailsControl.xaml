@@ -1060,7 +1060,11 @@
                                                    Expanded="MembCreateNewReaction_Expanded"
                                                     >
                                                 <Grid>
-                                                        <local:AddReactionControl Margin="0,6" Tag="membrane" MoleculeCollection="{Binding Source={StaticResource MembraneMoleculesListView}}" />
+                                                        <local:AddReactionControl Margin="0,6" Tag="membrane" MoleculeCollection="{Binding Source={StaticResource MembraneMoleculesListView}}" 
+                                                            ARCCell="{Binding}"
+                                                            ARCComp="{Binding Path=membrane}"
+                                                            ARCReactions="{Binding Path=membrane.Reactions}"                 
+                                                            />
                                                 </Grid>
                                             </Expander>
 
@@ -1192,7 +1196,11 @@
                                                     Canvas.ZIndex="1"
                                             >
                                                 <Grid>
-                                                        <local:AddReactionControl Margin="0,6" Tag="cytosol"  MoleculeCollection="{Binding Source={StaticResource CytosolMoleculesListView}}" />
+                                                        <local:AddReactionControl Margin="0,6" Tag="cytosol"  MoleculeCollection="{Binding Source={StaticResource CytosolMoleculesListView}}" 
+                                                            ARCCell="{Binding}"
+                                                            ARCComp="{Binding Path=cytosol}"
+                                                            ARCReactions="{Binding Path=cytosol.Reactions}"
+                                                         />
                                                 </Grid>
                                             </Expander>
                                         </StackPanel>
