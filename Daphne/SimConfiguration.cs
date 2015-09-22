@@ -7762,7 +7762,6 @@ namespace Daphne
                         {
                             DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
                             cbState.differentiationDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
-                            Console.WriteLine("diff: {0}\t{1}\t{2}", behavior.CurrentState, d.timeToNextEvent, d.clock);
                         }
                     }
                 }
