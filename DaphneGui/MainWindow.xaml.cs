@@ -262,8 +262,6 @@ namespace DaphneGui
         }
 
         public CellInfo SelectedCellInfo { get; set; }
-        public ObservableCollection<CellMolecularInfo> currentConcs { get; set; }
-
         public static RoutedCommand SelectReportFolderCommand = new RoutedCommand();
         public static DocumentWindow ST_VTKDisplayDocWindow;
         public static CellStudioToolWindow ST_CellStudioToolWindow;
@@ -297,8 +295,7 @@ namespace DaphneGui
             this.ToolWinCellInfo.Close();
 
             SelectedCellInfo = new CellInfo();
-            currentConcs = new ObservableCollection<CellMolecularInfo>();
-
+ 
             //DO NOT DELETE THIS
             //This code creates the DaphneStore and UserStore.
             //Only run this code during development.
@@ -3208,16 +3205,15 @@ namespace DaphneGui
             }
 
             Cell selectedCell = SimulationBase.dataBasket.Cells[cellID];
-            List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
+            List<CellMolecularInfo> membraneConcs = new List<CellMolecularInfo>();
+            List<CellMolecularInfo> cytosolConcs = new List<CellMolecularInfo>();
+            List<CellMolecularInfo> ecmConcs = new List<CellMolecularInfo>();
 
             txtCellIdent.Text = cellID.ToString();
-
-            //enhancement - get cell location, velocity, force
-            //double cellConc = selectedCell.
-            tbMolConcs.Text = "Cell Id: " + cellID;
-
             SelectedCellInfo.ciList.Clear();
-            currentConcs.Clear();
+            membraneConcs.Clear();
+            cytosolConcs.Clear();
+            ecmConcs.Clear();
 
             CellXVF xvf = new CellXVF();
             xvf.name = "Location (μm)";
@@ -3234,13 +3230,12 @@ namespace DaphneGui
             SelectedCellInfo.ciList.Add(xvf);
 
             xvf = new CellXVF();
-            xvf.name = "Force (μm/min2)";
+            xvf.name = "Force (μm/min" + "\u00b2" + ")";
             xvf.x = selectedCell.SpatialState.F[0];
             xvf.y = selectedCell.SpatialState.F[1];
             xvf.z = selectedCell.SpatialState.F[2];
             SelectedCellInfo.ciList.Add(xvf);
 
-            //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
 
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
@@ -3249,29 +3244,24 @@ namespace DaphneGui
                 string mol_name = er.molecules_dict[kvp.Key].Name;
                 double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
-
-                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Molecule = mol_name;
                 cmi.Concentration = conc;
-                // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
-                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                membraneConcs.Add(cmi);
             }
+            lvMembraneMolConcs.ItemsSource = membraneConcs;
+
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
                 double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
-
-                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Molecule = mol_name;
                 cmi.Concentration = conc;
-                // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
-                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                cytosolConcs.Add(cmi);
             }
+            lvCytosolMolConcs.ItemsSource = cytosolConcs;
 
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
@@ -3279,16 +3269,13 @@ namespace DaphneGui
                 string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
                 double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
-
-                cmi.Molecule = "ECM: " + name;
+                cmi.Molecule = name;
                 cmi.Concentration = conc;
                 cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
                 cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                ecmConcs.Add(cmi);
             }
-
-            lvCellMolConcs.ItemsSource = currConcs;
+            lvECMMolConcs.ItemsSource = ecmConcs;
 
             //Cell differentiation
             int nDiffState = selectedCell.DifferentiationState;
@@ -3303,11 +3290,8 @@ namespace DaphneGui
                     CellGeneInfo cgi = new CellGeneInfo();
                     cgi.Name = selectedCell.Genes[selectedCell.Differentiator.gene_id[i]].Name;
                     cgi.Activation = selectedCell.Differentiator.activity[nDiffState, i];
-                    //double d = selectedCell.Differentiator.activity[nDiffState, i];
-                    //activities.Add(d);  // = selectedCell.Differentiator.activity[nDiffState];
                     gene_activations.Add(cgi);
                 }
-                //lvCellDiff.ItemsSource = activities;
                 lvCellDiff.ItemsSource = gene_activations;
             }
 
@@ -3334,7 +3318,6 @@ namespace DaphneGui
             }
 
             ToolWinCellInfo.Open();
-            TabItemMolConcs.Visibility = System.Windows.Visibility.Visible;
         }
 
         // This sets whether the Open command can be executed, which enables/disables the menu item
