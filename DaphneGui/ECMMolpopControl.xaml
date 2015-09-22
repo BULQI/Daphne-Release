@@ -925,7 +925,7 @@
                                 >
 
                         <Grid>
-                            <local:AddReactionControl Tag="{Binding Source={StaticResource EcsMoleculesListView}}" Margin="0,6" />
+                            <local:AddReactionControl Tag ="ecs" MoleculeCollection="{Binding Source={StaticResource EcsMoleculesListView}}" Margin="0,6" />
                         </Grid>
                     </Expander>
 

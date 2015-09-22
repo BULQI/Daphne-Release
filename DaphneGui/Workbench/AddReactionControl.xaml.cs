@@ -88,6 +88,14 @@ namespace DaphneGui
             arc.CurrentReactionComplex = (ConfigReactionComplex)(e.NewValue);
         }
 
+        public object MoleculeCollection
+        {
+            get { return GetValue(MoleculeCollectionProperty); }
+            set { SetValue(MoleculeCollectionProperty, value); }
+        }
+        public static readonly DependencyProperty MoleculeCollectionProperty =
+            DependencyProperty.Register("MoleculeCollection", typeof(object), typeof(AddReactionControl), null);
+
         ///
         //Notification handling
         /// 

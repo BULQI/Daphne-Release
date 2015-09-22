@@ -197,7 +197,7 @@
                         Style="{StaticResource myListboxStyle}"
                         MaxHeight="150" Width="250"
                         DisplayMemberPath="Name" 
-                        ItemsSource="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},Path=Tag}"
+                        ItemsSource="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},Path=MoleculeCollection}"
                         >
                     </ListBox>
                     

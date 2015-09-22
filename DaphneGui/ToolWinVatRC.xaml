@@ -72,7 +72,7 @@
                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
                                     HorizontalAlignment="Left">
                                         <Grid>
-                                            <local:AddReactionControl Tag="{Binding Source={StaticResource BulkMoleculesListView}}" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
+                                            <local:AddReactionControl Tag="vatRC"  MoleculeCollection="{Binding Source={StaticResource BulkMoleculesListView}}" DataContext="{Binding ElementName=RCControl, Path=SelectedReactionComplex}"/>
                                         </Grid>
                                     </Expander>
                                 </StackPanel>
