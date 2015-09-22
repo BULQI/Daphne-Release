@@ -54,4 +54,4 @@ using System.Windows;
 // major version, first number: Daphne features or install version
 // minor version, second number: protocol version
 [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("1.0.*")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
