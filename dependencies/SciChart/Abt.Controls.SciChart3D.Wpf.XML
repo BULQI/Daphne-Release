@@ -60,6 +60,14 @@
             Determines if the current hardware &amp; software configuration fully supports DirectX10 or later
             </summary>
         </member>
+        <member name="T:Abt.Controls.SciChart3D.Context.D3D10.DirectXHelper">
+            <summary>
+            A helper class to enable the Direct3D10RenderSurface 
+            
+            Usage:
+            &gt;SciChartSurface DirectXHelper.TryApplyDirectXRenderer="True"/&lt;
+            </summary>
+        </member>
         <member name="T:Abt.Controls.SciChart3D.Context.D3D10.IRenderContext3D">
             <summary>
             Defines the interface to a 3D RenderContext
@@ -338,6 +346,11 @@
         <member name="M:Abt.Controls.SciChart3D.Modifiers.ChartModifier3DBase.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Abt.Controls.SciChart3D.Modifiers.ChartModifier3DBase"/> class.
+            </summary>
+        </member>
+        <member name="M:Abt.Controls.SciChart3D.Modifiers.ChartModifier3DBase.CanReceiveMouseEvents">
+            <summary>
+            Returns a value indicating whether mouse events should be propagated to the mouse target.
             </summary>
         </member>
         <member name="M:Abt.Controls.SciChart3D.Modifiers.ChartModifier3DBase.OnDataContextChanged(System.Object,System.Windows.DependencyPropertyChangedEventArgs)">
