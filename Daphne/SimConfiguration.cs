@@ -6239,7 +6239,7 @@ namespace Daphne
             set
             {
                 rate_const_units = value;
-                OnPropertyChanged("Rate_const_units");
+                OnPropertyChanged("Rate_constant_units");
             }
         }
 

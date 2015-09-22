@@ -41,11 +41,18 @@
 
         <local:selectedRCToBoolConverter x:Key="selectedRCToBoolConv"/>
 
-        <!--<Style TargetType="DataGridColumnHeader">
-            <Setter Property="ToolTip" Value="{Binding RelativeSource Mode=FindAncestor AncestorType={x:Type DataGrid}, Path=Items.Count}}}" "/>
-        </Style>-->
+        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"/>
+        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.genes}"/>
+        <CompositeCollection x:Key="MoleculesAndGenes">
+            <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Molecules}}" />
+            <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Genes}}" />
+        </CompositeCollection>
+        <CollectionViewSource x:Key="ComponentMoleculesListView"  
+            Source="{Binding Source={StaticResource ResourceKey=MoleculesAndGenes}}"
+            />
 
-        <!--Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridCell}}, Path=Tag}"-->
+
+
 
     </docking:ToolWindow.Resources>
 
@@ -370,7 +377,7 @@
                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
                                     HorizontalAlignment="Left">
                             <Grid>
-                                <local:AddReactionControl Tag="component_reacs"/>
+                            <local:AddReactionControl Tag="{Binding Source={StaticResource ComponentMoleculesListView}}"/>
                             </Grid>
                         </Expander>
                     </StackPanel>
@@ -429,7 +436,7 @@
                             >
                             
                             <Grid>
-                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" />
+                                <local:AddReactionControl Tag="{Binding Source={StaticResource ER_Molecules}}" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" />
                             </Grid>
                         </Expander>
                     </StackPanel>

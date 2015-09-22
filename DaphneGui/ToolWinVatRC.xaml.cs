@@ -197,5 +197,10 @@ namespace DaphneGui
             }
         }
 
+        private void BulkMoleculeFilter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule m = e.Item as ConfigMolecule;
+            e.Accepted = (m.molecule_location == MoleculeLocation.Bulk);
+        }
     }
 }

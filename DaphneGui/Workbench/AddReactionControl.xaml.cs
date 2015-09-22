@@ -681,7 +681,7 @@ namespace DaphneGui
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.BringIntoView();
-            populateCollection();
+            //populateCollection();
         }
 
         private void populateCollection()

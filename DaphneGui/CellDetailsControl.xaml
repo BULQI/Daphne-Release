@@ -48,6 +48,20 @@
 
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
 
+        <CollectionViewSource x:Key="MembraneMoleculesListView"  
+            Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"
+            Filter="MembraneMoleculeFilter"/>
+
+        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"/>
+        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.genes}"/>
+        <CompositeCollection x:Key="MoleculesAndGenes">
+            <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Molecules}}" />
+            <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Genes}}" />                           
+        </CompositeCollection>
+        <CollectionViewSource x:Key="CytosolMoleculesListView"  
+            Source="{Binding Source={StaticResource ResourceKey=MoleculesAndGenes}}"
+            />
+
         <!-- Mol_TDE_dgCell_Editing: DataGrid cell editing of Molecular Transition driver element.  -->
         <DataTemplate x:Key="Mol_TDE_dgCell_Editing" >
             <StackPanel Orientation="Vertical">
@@ -1046,7 +1060,7 @@
                                                    Expanded="MembCreateNewReaction_Expanded"
                                                     >
                                                 <Grid>
-                                                    <local:AddReactionControl Margin="0,6" Tag="membrane" />
+                                                        <local:AddReactionControl Margin="0,6" Tag="{Binding Source={StaticResource MembraneMoleculesListView}}" />
                                                 </Grid>
                                             </Expander>
 
@@ -1178,7 +1192,7 @@
                                                     Canvas.ZIndex="1"
                                             >
                                                 <Grid>
-                                                    <local:AddReactionControl Margin="0,6" Tag="cytosol" />
+                                                        <local:AddReactionControl Margin="0,6" Tag="{Binding Source={StaticResource CytosolMoleculesListView}}" />
                                                 </Grid>
                                             </Expander>
                                         </StackPanel>

@@ -19,7 +19,9 @@
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"
                               Source="{Binding Path=Protocol.entity_repository.molecules}" 
                               />
-        
+        <CollectionViewSource x:Key="EcsMoleculesListView"
+                              Source="{Binding Path=Protocol.entity_repository.molecules}" 
+                              />
         <CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
                                   Source="{Binding Path=Protocol.entity_repository.reactions}"
                                   Filter="ecmAvailableReactionsListView_Filter" />       
@@ -923,7 +925,7 @@
                                 >
 
                         <Grid>
-                            <local:AddReactionControl Tag="ecs" Margin="0,6" />
+                            <local:AddReactionControl Tag="{Binding Source={StaticResource EcsMoleculesListView}}" Margin="0,6" />
                         </Grid>
                     </Expander>
 

@@ -2091,6 +2091,12 @@ namespace DaphneGui
                 cyto_molecule_combo_box.SelectedValue = ((ConfigMolecularPopulation)item).molecule.entity_guid;
             }
         }
+
+        private void MembraneMoleculeFilter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule m = e.Item as ConfigMolecule;
+            e.Accepted = (m.molecule_location == MoleculeLocation.Boundary);
+        }
     }
 
 }
