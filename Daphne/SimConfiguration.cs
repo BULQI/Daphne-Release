@@ -6469,6 +6469,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation cm = nn as ConfigMolecularPopulation;
+                    cm.PropertyChanged += mp_PropertyChanged;
 
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == false)
                     {
@@ -6481,11 +6482,33 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecularPopulation cm = dd as ConfigMolecularPopulation;
+                    cm.PropertyChanged -= mp_PropertyChanged;
 
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == true)
                     {
                         molecules_dict.Remove(cm.molecule.entity_guid);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// rebuild the molecules_dict that is used to screen reactions available to add
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void mp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "molecule")
+            {
+                return;
+            }
+            molecules_dict.Clear();
+            foreach (ConfigMolecularPopulation mp in molpops)
+            {
+                if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == false)
+                {
+                    molecules_dict.Add(mp.molecule.entity_guid, mp.molecule);
                 }
             }
         }
