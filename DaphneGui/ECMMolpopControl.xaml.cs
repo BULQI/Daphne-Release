@@ -465,6 +465,10 @@ namespace DaphneGui
                 if (molpop != null)
                 {
                     molpop.molecule = newLibMol.Clone(null);
+                    //if (MainWindow.SOP.Protocol.scenario.environment.comp.molecules_dict.ContainsKey(newLibMol.entity_guid) == false)
+                    //{
+                    //    MainWindow.SOP.Protocol.scenario.environment.comp.molecules_dict.Add(newLibMol.entity_guid, newLibMol);
+                    //}
                     molpop.Name = newLibMol.Name;
                 }
                 else
