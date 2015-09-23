@@ -102,9 +102,7 @@ namespace DaphneGui
             if (finished)
             {
                 MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
-                MW.ReacComplexChartWindow.MW = MW;
                 MW.ReacComplexChartWindow.DataContext = this.Protocol;
-                MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
                 
             }

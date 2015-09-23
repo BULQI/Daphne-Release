@@ -1523,14 +1523,14 @@ namespace DaphneGui
                     GraphicsProp prop = CellController.CellActor;
                     vtkProp vProp = prop.Prop;
 
-                    if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
-                    {
-                        MessageBox.Show("No information available. This cell may no longer exist.", "Mouse hover error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
                     if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_TOOLTIP) == true)
                     {
+
+                        if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
+                        {
+                            //MessageBox.Show("No information available. This cell may no longer exist.", "Mouse hover error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
 
                         Cell cell = SimulationBase.dataBasket.Cells[cellID];
 
@@ -1656,6 +1656,10 @@ namespace DaphneGui
                 {
                     int cellID = CellController.GetCellIndex(p);
 
+                    if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
+                    {
+                        return;
+                    }
                     MainWindow.selectedCell = SimulationBase.dataBasket.Cells[cellID];
 
                     if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_TRACK) == true)

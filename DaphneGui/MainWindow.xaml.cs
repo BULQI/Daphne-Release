@@ -282,7 +282,9 @@ namespace DaphneGui
 
             InitializeComponent();
 
+            ReacComplexChartWindow.MW = this;
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
+
             ST_RenderSkinWindow = renderSkinWindow;
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
@@ -1970,6 +1972,13 @@ namespace DaphneGui
             AdminMenu.IsEnabled = false;
             mutex = true;
 
+            //activate chartwindow when run button is clicked
+            //instead of calling activate repeated when use draw slider
+            //in the ReacComplexChartWindow
+            if (SOP.Protocol.scenario is VatReactionComplexScenario)
+            {
+                ReacComplexChartWindow.Activate();
+            }
             runSim(true);
         }
 
@@ -4074,6 +4083,8 @@ namespace DaphneGui
         {
             if (values[0] == null || values[1] == null)
                 return null;
+            //added to avoid a crash - need more investigation - AH
+            if (values[0] is string == false) return null;
 
             string text = (string)values[0];
             bool tracksActive = (bool)values[1];

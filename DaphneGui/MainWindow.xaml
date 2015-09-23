@@ -159,9 +159,11 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ReacComplexChartWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />
-                    <MenuItem x:Name="menu_CellPopDyn" Header="Cell Population Dynamics"  
+                    <MenuItem x:Name="menu_CellPopDyn" Header="Cell Population Dynamics"
+                              IsEnabled="{Binding ElementName=analysisMenu, Path=IsEnabled}"
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=plotToolWindow}" />
-                    <MenuItem x:Name="menu_CellLineage" Header="Cell Lineage"  
+                    <MenuItem x:Name="menu_CellLineage" Header="Cell Lineage" 
+                               IsEnabled="{Binding ElementName=analysisMenu, Path=IsEnabled}"
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=lineageWindow}" />
 
                     <!-- This one is not yet functional -->
