@@ -3492,7 +3492,7 @@ namespace DaphneGui
 
             SetMouseLeftState(index, true);
 
-            if (index == 2)
+            if (index ==1 || index == 2)
             {
                 HandToolButton.IsChecked = true;
             }
@@ -3508,6 +3508,16 @@ namespace DaphneGui
                 else
                 {
                     gcHandle.HandToolButton_IsEnabled = true;
+                }
+
+                if (e.RemovedItems.Count > 0)
+                {
+                    var item = e.RemovedItems[0];
+                    int old_index = cb.Items.IndexOf(item);
+                    if (old_index == 1)
+                    {
+                        gcHandle.HideCellTracks();
+                    }
                 }
             }
         }

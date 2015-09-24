@@ -1512,8 +1512,10 @@ namespace DaphneGui
             {
                 p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
 
+                bool isCellPicked = (((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetDataSet() == cellController.GlyphData);
+                
                 //If info box already displayed, skip all this
-                if (p >= 0 && infoPop.IsOpen == false)
+                if (p >= 0 && infoPop.IsOpen == false && isCellPicked)
                 {
                     //This statement for debugging only
                     //Console.WriteLine("In onMouseMove over cell");
@@ -1950,6 +1952,15 @@ namespace DaphneGui
         public VTKCellTrackController CreateVTKCellTrackController()
         {
             return new VTKCellTrackController(rw);
+        }
+
+        //hide tracks
+        public void HideCellTracks()
+        {
+            if (this.trackTool != null)
+            {
+                trackTool.HideCellTracks();
+            }
         }
 
         /// <summary>
