@@ -832,7 +832,6 @@ namespace DaphneGui
             tempFileContent = false;
         }
 
-
         /// <summary>
         /// Imports a model specification in SBML
         /// </summary>
@@ -1075,7 +1074,7 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
             dlg.OverwritePrompt = true;
-            dlg.InitialDirectory = orig_path;
+            dlg.InitialDirectory = orig_path + @"\Stores";
             dlg.FileName = "new_store"; // Default file name
             dlg.DefaultExt = ".json"; // Default file extension
             dlg.Filter = "Daphne Stores JSON docs (.json)|*.json"; // Filter files by extension
@@ -1950,7 +1949,7 @@ namespace DaphneGui
             pushMenu.IsEnabled = true;
             AdminMenu.IsEnabled = true;
 
-            saveStoreFiles();
+            //saveStoreFiles();
             saveTempFiles();
             // don't handle the vcr
             updateGraphicsAndGUI(-1);
@@ -2888,24 +2887,57 @@ namespace DaphneGui
             return false;
         }
 
-        private void saveStore(Level store, string storeName)
+        private bool isWriteProtected(string FileName)
         {
-            FileInfo info = new FileInfo(store.FileName);
+            FileInfo info = new FileInfo(FileName);
+
             if (info.IsReadOnly == false || !info.Exists)
             {
-                store.SerializeToFile(false);
-                if (storeName == "DaphneStore")
+                return false;
+            }
+
+            return true;
+        }
+
+        private void updateOrigStoreContent(Level store, string storeName)
+        {
+            if (storeName == "DaphneStore")
+            {
+                orig_daphne_store_content = store.SerializeToString();
+            }
+            else if (storeName == "UserStore")
+            {
+                orig_user_store_content = store.SerializeToString();
+            }
+        }
+
+        private void saveStore(Level store, string storeName)
+        {
+            if (isWriteProtected(store.FileName) == false)
+            {
+                MessageBoxResult result = saveStoreDialog(store.FileName);
+
+                // apply changes, save if needed
+                if (result == MessageBoxResult.Yes)
                 {
-                    orig_daphne_store_content = store.SerializeToString();
+                    store.SerializeToFile(false);
+                    updateOrigStoreContent(store, storeName);
                 }
-                else if (storeName == "UserStore")
+                else if (result == MessageBoxResult.No)
                 {
-                    orig_user_store_content = store.SerializeToString();
+                    if (saveStoreUsingDialog(store, storeName) == true)
+                    {
+                        updateOrigStoreContent(store, storeName);
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
             else
             {
-                string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                string messageBoxText = "The file is write protected: " + store.FileName;
                 string caption = "File write protected";
                 MessageBoxButton button = MessageBoxButton.OK;
                 MessageBoxImage icon = MessageBoxImage.Warning;
@@ -2916,13 +2948,13 @@ namespace DaphneGui
         private void saveStoreFiles()
         {
             //DaphneStore
-            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content && CellStudioToolWindow.DataContext == SOP.DaphneStore)
+            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
                 saveStore(sop.DaphneStore, "DaphneStore");
             }
 
             //UserStore
-            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content && CellStudioToolWindow.DataContext == SOP.UserStore)
+            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
                 saveStore(sop.UserStore, "UserStore");
             }
@@ -3205,6 +3237,18 @@ namespace DaphneGui
             return MessageBox.Show(messageBoxText, caption, button, icon);
         }
 
+        public MessageBoxResult saveStoreDialog(string storeName)
+        {
+            // Configure the message box to be displayed
+            string messageBoxText = "Store entities have changed. Do you want to overwrite the information in " + storeName + "?";
+            string caption = "Store changed";
+            MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            MessageBoxImage icon = MessageBoxImage.Warning;
+
+            // Display message box
+            return MessageBox.Show(messageBoxText, caption, button, icon);
+        }
+
         public void DisplayCellInfo(int cellID)
         {
             if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
@@ -3357,6 +3401,13 @@ namespace DaphneGui
             {
                 applyTempFilesAndSave(true);
             }
+
+            saveStoreFiles();
+            ////UserStore
+            //if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
+            //{
+            //    saveStore(sop.UserStore, "UserStore");
+            //}
 
             Nullable<bool> result = loadScenarioUsingDialog();
 
@@ -3805,7 +3856,16 @@ namespace DaphneGui
 
         private void menuAdminSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            saveStoreUsingDialog(sop.UserStore, "UserStore");
+            if (CellStudioToolWindow.DataContext == SOP.UserStore)
+            {
+                saveStoreUsingDialog(sop.UserStore, "UserStore");
+                updateOrigStoreContent(sop.UserStore, "UserStore");
+            }
+            else
+            {
+                saveStoreUsingDialog(sop.DaphneStore, "DaphneStore");
+                updateOrigStoreContent(sop.DaphneStore, "DaphneStore");
+            }
         }
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
@@ -3900,28 +3960,6 @@ namespace DaphneGui
             (gc as VTKFullGraphicsController).RWC.Invalidate();
         }
 
-        private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)
-        {
-            statusBarMessagePanel.Content = "Ready:  Protocol";
-            ProtocolToolWindow.Open();
-            LevelContext = SOP.Protocol;
-            ComponentsToolWindow.DataContext = SOP.Protocol;
-            CellStudioToolWindow.DataContext = SOP.Protocol;
-            applyButton.IsEnabled = true;
-            ReturnToProtocolButton.Visibility = Visibility.Collapsed;
-            menuProtocolStore.IsEnabled = false;
-            pushMenu.Visibility = Visibility.Visible;
-
-            if (SOP.Protocol.scenario is TissueScenario)
-            {
-                VTKDisplayDocWindow.Activate();
-            }
-            else
-            {
-                ReacComplexChartWindow.Activate();
-            }
-        }
-
         //This code moves the popup controls if main window moves
         private void mainWindow_LocationChanged(object sender, EventArgs e)
         {
@@ -3930,9 +3968,6 @@ namespace DaphneGui
                 var offset = CellOptionsPopup.HorizontalOffset;
                 CellOptionsPopup.HorizontalOffset = offset + 1;
                 CellOptionsPopup.HorizontalOffset = offset;
-
-                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
-                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             }
 
             if (ECMOptionsPopup.IsOpen)
@@ -3940,23 +3975,21 @@ namespace DaphneGui
                 var offset = ECMOptionsPopup.HorizontalOffset;
                 ECMOptionsPopup.HorizontalOffset = offset + 1;
                 ECMOptionsPopup.HorizontalOffset = offset;
-
-                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;    
-                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             }
         }
 
         private void menuAdminSave_Click(object sender, RoutedEventArgs e)
         {
-            //If we're in UserStore or DaphneStore mode, do this and return.
             if (CellStudioToolWindow.DataContext == SOP.UserStore)
             {
-                saveStore(sop.UserStore, "UserStore");
+                SOP.UserStore.SerializeToFile(false);
+                updateOrigStoreContent(SOP.UserStore, "UserStore");
                 return;
             }
             else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
             {
-                saveStore(sop.DaphneStore, "DaphneStore");
+                SOP.DaphneStore.SerializeToFile(false);
+                updateOrigStoreContent(SOP.DaphneStore, "DaphneStore"); 
                 return;
             }
         }
