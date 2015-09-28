@@ -153,6 +153,10 @@ namespace DaphneGui
 
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
             Level level = MainWindow.GetLevelContext(cdc);
+            if (level == null)
+            {
+                return;
+            }
             EntityRepository er = level.entity_repository;
 
             ConfigCell cell = cdc.DataContext as ConfigCell;

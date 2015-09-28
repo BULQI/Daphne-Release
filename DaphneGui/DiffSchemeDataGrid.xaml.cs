@@ -353,6 +353,10 @@ namespace DaphneGui
             
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
             Level level = MainWindow.GetLevelContext(cdc);
+            if (level == null)
+            {
+                return;
+            } 
             EntityRepository er = level.entity_repository;
 
             //create columns
