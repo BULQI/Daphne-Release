@@ -71,6 +71,20 @@ namespace DaphneGui
 
         }
 
+        //public ConfigReactionComplex ARCReactionComplex
+        //{
+        //    get { return (ConfigReactionComplex)GetValue(ARCReactionComplexProperty); }
+        //    set { SetValue(ARCReactionComplexProperty, value); }
+        //}
+        //public static DependencyProperty ARCReactionComplexProperty = 
+        //    DependencyProperty.Register("ARCReactionComplex", typeof(ConfigReactionComplex), typeof(AddReactionControl),
+        //    new FrameworkPropertyMetadata(null, ARCReactionComplexChanged));
+        //private static void ARCReactionComplexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        //{
+        //    //AddReactionControl arc = d as AddReactionControl;
+        //    //arc.CurrentReactionComplex = (ConfigReactionComplex)(e.NewValue);
+        //}
+
 
         public static DependencyProperty CurrentReactionComplexProperty = DependencyProperty.Register("CurrentReactionComplex", typeof(ConfigReactionComplex), typeof(AddReactionControl), new FrameworkPropertyMetadata(null, CurrentReactionComplexPropertyChanged));
         public ConfigReactionComplex CurrentReactionComplex
@@ -87,6 +101,7 @@ namespace DaphneGui
             AddReactionControl arc = d as AddReactionControl;
             arc.CurrentReactionComplex = (ConfigReactionComplex)(e.NewValue);
         }
+
 
         public object MoleculeCollection
         {
@@ -386,8 +401,9 @@ namespace DaphneGui
             {                  
                 case "ecs":
                     TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-                    ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
-                    addReaction = ts.AddEcmReactionComponents(cr, MainWindow.SOP.Protocol.entity_repository);
+                    //ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
+                    //addReaction = ts.AddEcmReactionComponents(cr, MainWindow.SOP.Protocol.entity_repository);
+                    addReaction = ts.AddEcmReactionComponents(cr, level.entity_repository);
                     break;
 
                 case "cytosol":
@@ -421,10 +437,11 @@ namespace DaphneGui
                         if (level is Protocol)
                         {
                             VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
-                            ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
-                            if (crc != null)
+                            //ConfigReactionComplex crc = DataContext as ConfigReactionComplex;
+                            //if (crc != null)
+                            if (CurrentReactionComplex != null)
                             {
-                                crc.AddReactionMolPopsAndGenes(cr, level.entity_repository);
+                                CurrentReactionComplex.AddReactionMolPopsAndGenes(cr, level.entity_repository);
                                 addReaction = true;
                                 s.InitializeAllMols(true);
                                 s.InitializeAllReacs();
@@ -434,6 +451,10 @@ namespace DaphneGui
                             {
                                 CollectionViewSource.GetDefaultView(lbMol2.ItemsSource).Refresh();
                             }
+                        }
+                        else
+                        {
+                            int foo = 1;
                         }
                     }
                     break;
@@ -692,126 +713,126 @@ namespace DaphneGui
             //populateCollection();
         }
 
-        private void populateCollection()
-        {
-            CompositeCollection coll = new CompositeCollection();
-            CollectionContainer cc = new CollectionContainer();
-            Level level;
-            string reacEnvironment = Tag as string;
-            switch (reacEnvironment)
-            {
-                case "ecs":
-                    ARCCell = null;
-                    TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-                    if (ts == null)
-                    {
-                        break;
-                    }
-                    ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
-                    if (configEcs != null)
-                    {
-                        ARCComp = configEcs.comp;
-                        ARCReactions = ARCComp.Reactions ?? null;
-                        cc.Collection = ARCComp.molecules_dict.Values.ToArray();
-                        coll.Add(cc);
-                        foreach (CellPopulation cellpop in ts.cellpopulations)
-                        {
-                            cc = new CollectionContainer();
-                            cc.Collection = cellpop.Cell.membrane.molecules_dict.Values.ToArray();
-                            coll.Add(cc);
-                        }
-                    }
-                    break;
+        //private void populateCollection()
+        //{
+        //    CompositeCollection coll = new CompositeCollection();
+        //    CollectionContainer cc = new CollectionContainer();
+        //    Level level;
+        //    string reacEnvironment = Tag as string;
+        //    switch (reacEnvironment)
+        //    {
+        //        case "ecs":
+        //            ARCCell = null;
+        //            TissueScenario ts = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+        //            if (ts == null)
+        //            {
+        //                break;
+        //            }
+        //            ConfigECSEnvironment configEcs = (ConfigECSEnvironment)ts.environment;
+        //            if (configEcs != null)
+        //            {
+        //                ARCComp = configEcs.comp;
+        //                ARCReactions = ARCComp.Reactions ?? null;
+        //                cc.Collection = ARCComp.molecules_dict.Values.ToArray();
+        //                coll.Add(cc);
+        //                foreach (CellPopulation cellpop in ts.cellpopulations)
+        //                {
+        //                    cc = new CollectionContainer();
+        //                    cc.Collection = cellpop.Cell.membrane.molecules_dict.Values.ToArray();
+        //                    coll.Add(cc);
+        //                }
+        //            }
+        //            break;
 
-                case "cytosol":
-                    ARCCell = this.DataContext as ConfigCell;
-                    if (ARCCell != null)
-                    {
-                        ARCComp = ARCCell.cytosol;
-                        ARCReactions = ARCComp.Reactions;
-                        cc.Collection = ARCCell.cytosol.molecules_dict.Values.ToArray();
-                        coll.Add(cc);
-                        cc = new CollectionContainer();
-                        cc.Collection = ARCCell.membrane.molecules_dict.Values.ToArray();
-                        coll.Add(cc);
-                        cc = new CollectionContainer();
-                        cc.Collection = ARCCell.genes;
-                        coll.Add(cc);
-                    }
-                    break;
+        //        case "cytosol":
+        //            ARCCell = this.DataContext as ConfigCell;
+        //            if (ARCCell != null)
+        //            {
+        //                ARCComp = ARCCell.cytosol;
+        //                ARCReactions = ARCComp.Reactions;
+        //                cc.Collection = ARCCell.cytosol.molecules_dict.Values.ToArray();
+        //                coll.Add(cc);
+        //                cc = new CollectionContainer();
+        //                cc.Collection = ARCCell.membrane.molecules_dict.Values.ToArray();
+        //                coll.Add(cc);
+        //                cc = new CollectionContainer();
+        //                cc.Collection = ARCCell.genes;
+        //                coll.Add(cc);
+        //            }
+        //            break;
 
-                case "membrane":
-                    ARCCell = this.DataContext as ConfigCell;
-                    if (ARCCell != null)
-                    {
-                        ARCComp = ARCCell.membrane;
-                        ARCReactions = ARCComp.Reactions;
-                        cc.Collection = ARCComp.molecules_dict.Values.ToArray();
-                        coll.Add(cc);
-                    }
-                    break;
+        //        case "membrane":
+        //            ARCCell = this.DataContext as ConfigCell;
+        //            if (ARCCell != null)
+        //            {
+        //                ARCComp = ARCCell.membrane;
+        //                ARCReactions = ARCComp.Reactions;
+        //                cc.Collection = ARCComp.molecules_dict.Values.ToArray();
+        //                coll.Add(cc);
+        //            }
+        //            break;
 
-                case "vatRC":
-                    ARCCell = null;
-                    ARCComp = null;
-                    ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
-                    level = MainWindow.GetLevelContext(this);
-                    if (crc != null && level is Protocol)
-                    {
-                        ARCReactions = crc.reactions;
-                        cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
-                        coll.Add(cc);
-                    }
-                    //if (lbMol2.ItemsSource != null)
-                    //{
-                    //    CollectionViewSource.GetDefaultView(lbMol2.ItemsSource).Refresh();
-                    //}
-                    break;
+        //        case "vatRC":
+        //            ARCCell = null;
+        //            ARCComp = null;
+        //            ConfigReactionComplex crc = this.DataContext as ConfigReactionComplex;
+        //            level = MainWindow.GetLevelContext(this);
+        //            if (crc != null && level is Protocol)
+        //            {
+        //                ARCReactions = crc.reactions;
+        //                cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
+        //                coll.Add(cc);
+        //            }
+        //            //if (lbMol2.ItemsSource != null)
+        //            //{
+        //            //    CollectionViewSource.GetDefaultView(lbMol2.ItemsSource).Refresh();
+        //            //}
+        //            break;
 
-                case "component_reacs":
-                    ARCCell = null;
-                    ARCComp = null;
-                    level = this.DataContext as Level;
-                    if (level != null)
-                    {
-                        ARCReactions = level.entity_repository.reactions;
-                        cc.Collection = level.entity_repository.molecules;
-                        coll.Add(cc);
+        //        case "component_reacs":
+        //            ARCCell = null;
+        //            ARCComp = null;
+        //            level = this.DataContext as Level;
+        //            if (level != null)
+        //            {
+        //                ARCReactions = level.entity_repository.reactions;
+        //                cc.Collection = level.entity_repository.molecules;
+        //                coll.Add(cc);
 
-                        cc = new CollectionContainer();
-                        cc.Collection = level.entity_repository.genes;
-                        coll.Add(cc);
-                    }
-                    break;
+        //                cc = new CollectionContainer();
+        //                cc.Collection = level.entity_repository.genes;
+        //                coll.Add(cc);
+        //            }
+        //            break;
 
-                case "component_rc":
-                    ARCCell = null;
-                    ARCComp = null;
-                    level = this.DataContext as Level;
-                    crc = this.CurrentReactionComplex as ConfigReactionComplex;
-                    if (crc != null)
-                    {
-                        ARCReactions = crc.reactions;
-                        cc.Collection = level != null ? level.entity_repository.molecules : null;
-                        coll.Add(cc);
+        //        case "component_rc":
+        //            ARCCell = null;
+        //            ARCComp = null;
+        //            level = this.DataContext as Level;
+        //            crc = this.CurrentReactionComplex as ConfigReactionComplex;
+        //            if (crc != null)
+        //            {
+        //                ARCReactions = crc.reactions;
+        //                cc.Collection = level != null ? level.entity_repository.molecules : null;
+        //                coll.Add(cc);
 
-                        cc = new CollectionContainer();
-                        cc.Collection = level != null ? level.entity_repository.genes : null;
-                        coll.Add(cc);
-                    }
-                    break;
+        //                cc = new CollectionContainer();
+        //                cc.Collection = level != null ? level.entity_repository.genes : null;
+        //                coll.Add(cc);
+        //            }
+        //            break;
 
-                default:
-                    break;
+        //        default:
+        //            break;
 
-            }
+        //    }
 
-            //if (coll.Count > 0)
-            //{
-            //    lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
-            //    lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");
-            //}
-        }
+        //    //if (coll.Count > 0)
+        //    //{
+        //    //    lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
+        //    //    lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");
+        //    //}
+        //}
 
         private void txtSearch_SelectionChanged(object sender, RoutedEventArgs e)
         {
@@ -863,44 +884,81 @@ namespace DaphneGui
             AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
             aem.Tag = this.Tag;
 
+            if (environment == "membrane")
+            {
+                newLibMol.molecule_location = MoleculeLocation.Boundary;
+                newLibMol.Name += "|";
+                newLibMol.ValidateName(level);
+            }
+
             //do if user did not cancel from dialog box
             if (aem.ShowDialog() == true)
             {
                 //Add new mol to the correct entity_repository
-                //newLibMol.ValidateName(MainWindow.SOP.Protocol);
                 newLibMol.ValidateName(level);
                 level.entity_repository.molecules.Add(newLibMol);
-                
-                //Need to add a mol pop to cell also
-                if (environment == "membrane")
-                {
-                    ConfigCell cell = this.DataContext as ConfigCell;
-                    if (cell.membrane.HasMolecule(newLibMol) == false)
-                    {
-                        bool isCell = true;
-                        cell.membrane.AddMolPop(newLibMol, isCell);
-                        populateCollection();
-                    }
-                }
-                else if (environment == "cytosol")
-                {
-                    ConfigCell cell = this.DataContext as ConfigCell;
-                    if (cell.cytosol.HasMolecule(newLibMol) == false)
-                    {
-                        bool isCell = true;
-                        cell.cytosol.AddMolPop(newLibMol, isCell);
-                        populateCollection();
-                    }
-                }
 
-                //Add new mol pop to the ecs 
-                //This can only happen for a Protocol, no ecs in User or Daphne store.
-                else if (environment == "ecs")
-                {                    
-                    bool isCell = false;                    
-                    MainWindow.SOP.Protocol.scenario.environment.comp.AddMolPop(newLibMol, isCell);
-                    populateCollection();
+                switch (environment)
+                {
+                    case "ecs":
+                        ARCComp.AddMolPop(newLibMol, false);
+                        break;
+
+                    case "cytosol":
+                        ARCComp.AddMolPop(newLibMol, true);
+                        break;
+
+                    case "membrane":
+                        ARCComp.AddMolPop(newLibMol, true);
+                        break;
+
+                    case "vatRC":
+                        
+                        break;
+
+                    case "component_reacs":
+
+                        break;
+
+                    case "component_rc":
+
+                        break;
+
+                    default:
+                        return;
                 }
+                
+                
+                ////Need to add a mol pop to cell also
+                //if (environment == "membrane")
+                //{
+                //    ConfigCell cell = this.DataContext as ConfigCell;
+                //    if (cell.membrane.HasMolecule(newLibMol) == false)
+                //    {
+                //        bool isCell = true;
+                //        cell.membrane.AddMolPop(newLibMol, isCell);
+                //        //populateCollection();
+                //    }
+                //}
+                //else if (environment == "cytosol")
+                //{
+                //    ConfigCell cell = this.DataContext as ConfigCell;
+                //    if (cell.cytosol.HasMolecule(newLibMol) == false)
+                //    {
+                //        bool isCell = true;
+                //        cell.cytosol.AddMolPop(newLibMol, isCell);
+                //        //populateCollection();
+                //    }
+                //}
+
+                ////Add new mol pop to the ecs 
+                ////This can only happen for a Protocol, no ecs in User or Daphne store.
+                //else if (environment == "ecs")
+                //{                    
+                //    bool isCell = false;                    
+                //    MainWindow.SOP.Protocol.scenario.environment.comp.AddMolPop(newLibMol, isCell);
+                //    //populateCollection();
+                //}
             }
         }
 
@@ -925,7 +983,7 @@ namespace DaphneGui
                 btnCreateNewGene.Visibility = System.Windows.Visibility.Collapsed;
             }
             
-            populateCollection();
+            //populateCollection();
         }
 
         private void btnCreateNewGene_Click(object sender, RoutedEventArgs e)

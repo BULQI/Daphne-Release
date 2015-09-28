@@ -49,11 +49,11 @@
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
 
         <CollectionViewSource x:Key="MembraneMoleculesListView"  
-            Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"
+            Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.molecules}"
             Filter="MembraneMoleculeFilter"/>
+        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.molecules}"/>
+        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.genes}"/>
 
-        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"/>
-        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.genes}"/>
         <CompositeCollection x:Key="MoleculesAndGenes">
             <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Molecules}}" />
             <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Genes}}" />                           

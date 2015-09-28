@@ -41,8 +41,9 @@
 
         <local:selectedRCToBoolConverter x:Key="selectedRCToBoolConv"/>
 
-        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.molecules}"/>
-        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=SOP.Protocol.entity_repository.genes}"/>
+        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.molecules}"/>
+        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.genes}"/>
+
         <CompositeCollection x:Key="MoleculesAndGenes">
             <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Molecules}}" />
             <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Genes}}" />
@@ -366,7 +367,7 @@
                         <Expander 
                                     Padding="5" ExpandDirection="Down"
                                     IsExpanded="False"
-                                    Header="New Reaction"                                                  
+                                    Header="Create New Reaction"                                                  
                                     x:Name="AddReaction"
                                     Margin="0,4,0,0" 
                                     Canvas.ZIndex="1"
@@ -424,7 +425,7 @@
                         <Expander 
                             Padding="5" ExpandDirection="Down"
                             IsExpanded="False"
-                            Header="New Reaction"                                                  
+                            Header="Create New Reaction"                                                  
                             x:Name="AddNewReaction"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
@@ -438,8 +439,9 @@
                             >
                             
                             <Grid>
-                                <local:AddReactionControl Tag="component_rc" MoleculeCollection="{Binding Source={StaticResource ER_Molecules}}" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" 
-                                    ARCReactions="{Binding ElementName=RCControl, Path=SelectedReactionComplex.reactions}"                          
+                                <local:AddReactionControl Tag="component_rc" MoleculeCollection="{Binding Source={StaticResource ER_Molecules}}" DataContext="{Binding}" 
+                                                          CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" 
+                                                           ARCReactions="{Binding ElementName=RCControl, Path=SelectedReactionComplex.reactions}"                          
                                     />
                             </Grid>
                         </Expander>

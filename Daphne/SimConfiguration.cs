@@ -1722,7 +1722,8 @@ namespace Daphne
         /// <summary>
         /// entity repository storing all available entities in this level
         /// </summary>
-        public EntityRepository entity_repository { get; set; }
+        public EntityRepository entity_repository {get; set;}
+
         /// <summary>
         /// file version; applies to stores and protocols alike
         /// </summary>
@@ -4008,12 +4009,11 @@ namespace Daphne
             }
             set
             {
-                bool bFound = false;  // FindMolecule(value);
-                if (bFound == true)
+                if (mol_name != value)
                 {
-                }
-                else
                     mol_name = value;
+                    OnPropertyChanged("Name");
+                }
             }
         }
 
@@ -4066,7 +4066,22 @@ namespace Daphne
             }
         }
 
-        public MoleculeLocation molecule_location { get; set; }
+        private MoleculeLocation _molecule_location;
+        public MoleculeLocation molecule_location
+        {
+            get
+            {
+                return _molecule_location;
+            }
+            set
+            {
+                if (_molecule_location != value)
+                {
+                    _molecule_location = value;
+                    OnPropertyChanged("molecule_location");
+                }
+            }
+        }
 
         public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
             : base()
@@ -4260,7 +4275,6 @@ namespace Daphne
         public void ValidateName(Level protocol)
         {
             bool found = false;
-            //string tempMolName = Name;
 
             // Check for empty Name
             if (Name.Length == 0)

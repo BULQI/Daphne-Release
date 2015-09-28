@@ -159,11 +159,7 @@ namespace DaphneGui
                 return;
 
             Level level = this.DataContext as Level;
-            if (level is Protocol)
-            {
-                Protocol p = level as Protocol;
-                cm.ValidateName(p);
-            }
+            cm.ValidateName(level);
 
             int index = dgLibMolecules.SelectedIndex;
             dgLibMolecules.InvalidateVisual();
