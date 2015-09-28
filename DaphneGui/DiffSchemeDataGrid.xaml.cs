@@ -348,22 +348,12 @@ namespace DaphneGui
 
         private static void CreateGeneColumns(DataGrid dataGrid, ObservableCollection<string> genes)
         {
-            //foreach (var item in dataGrid.Columns)
-            //{
-            //    var col = item as DataGridTextColumn;
-            //    if (col != null) col.Binding = null;
-            //}
             dataGrid.Columns.Clear();
             if (genes == null)return;
             
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            
-
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
-
-            ////Level level = MainWindow.GetLevelContext(cdc);
-            ////EntityRepository er = level.entity_repository;
-
+            Level level = MainWindow.GetLevelContext(cdc);
+            EntityRepository er = level.entity_repository;
 
             //create columns
             int count = 0;
@@ -406,9 +396,8 @@ namespace DaphneGui
             dataGrid.Columns.Clear();
             if (states == null || states.Count == 0) return;
 
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            ////Level level = MainWindow.GetLevelContext(dataGrid);
-            ////EntityRepository er = level.entity_repository;
+            Level level = MainWindow.GetLevelContext(dataGrid);
+            EntityRepository er = level.entity_repository;
 
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
 
