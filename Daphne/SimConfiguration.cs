@@ -2949,6 +2949,7 @@ namespace Daphne
             cells = new ObservableCollection<ConfigCell>();
             cells_dict = new Dictionary<string, ConfigCell>();
             molecules = new ObservableCollection<ConfigMolecule>();
+            molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(MoleculeCollectionChanged);
             molecules_dict = new Dictionary<string, ConfigMolecule>();
             genes = new ObservableCollection<ConfigGene>();
             genes_dict = new Dictionary<string, ConfigGene>();
@@ -2963,6 +2964,49 @@ namespace Daphne
             transition_drivers = new ObservableCollection<ConfigTransitionDriver>();
             transition_drivers_dict = new Dictionary<string, ConfigTransitionDriver>();
         }
+
+        private void MoleculeCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecule mol = nn as ConfigMolecule;
+                    mol.PropertyChanged += moleculePropertyChanged;
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var nn in e.OldItems)
+                {
+                    ConfigMolecule mol = nn as ConfigMolecule;
+                    mol.PropertyChanged -= moleculePropertyChanged;
+                }
+            }
+        }
+
+        void moleculePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "molecule_location")
+            {
+                ConfigMolecule cm = sender as ConfigMolecule;
+                int index = molecules.IndexOf(cm);
+                //force collectionChanged event, so filters on moleclule location can be properly refreshed
+                molecules[index] = cm;
+            }
+        }
+
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public class TimeConfig
