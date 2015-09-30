@@ -67,7 +67,6 @@ namespace DaphneGui
             if (nIndex == (cb.Items.Count - 1))
             {
                 ConfigMolecule newLibMol = new ConfigMolecule();
-                //newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 newLibMol.Name = newLibMol.GenerateNewName(level, "New");
                 newLibMol.molecule_location = MoleculeLocation.Boundary;
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
@@ -86,9 +85,8 @@ namespace DaphneGui
                     }
                     return;
                 }
-                //newLibMol.ValidateName(MainWindow.SOP.Protocol);
+
                 newLibMol.ValidateName(level);
-                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
                 level.entity_repository.molecules.Add(newLibMol);
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
@@ -107,28 +105,22 @@ namespace DaphneGui
                     return;
                 }
 
-                //if molecule changed, then make a clone of the newly selected one from entity repository
                 ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-                molpop.molecule = mol.Clone(null);
 
-                string new_mol_name = mol.Name;
+                // Make sure there isn't a molpop with this molecule type, already.
+                ConfigCell cell = DataContext as ConfigCell;
+                if (cell.membrane.molecules_dict.ContainsKey(mol.entity_guid) == true)
+                {
+                    MessageBox.Show("A molecular population with this molecule type already exists in the plasma membrane. Please choose a different molecule.");
+                    cb.SelectedValue = molpop.molecule.entity_guid;
+                    return;
+                }
+
+                // Make a clone of the newly selected molecule and make sure the molpop name matches
+                molpop.molecule = mol.Clone(null);
                 if (curr_mol_guid != molpop.molecule.entity_guid)
                 {
-                    molpop.Name = new_mol_name;
-
-                    //Must update molecules_dict
-                    ConfigCell cell = DataContext as ConfigCell;
-                    if (cell != null)
-                    {
-                        if (cell.membrane.molecules_dict.ContainsKey(curr_mol_guid))
-                        {
-                            cell.membrane.molecules_dict.Remove(curr_mol_guid);
-                        }
-                        if (cell.membrane.molecules_dict.ContainsKey(molpop.molecule.entity_guid) == false)
-                        {
-                            cell.membrane.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
-                        }
-                    }
+                    molpop.Name = mol.Name;
                 }
             }
 
@@ -672,8 +664,8 @@ namespace DaphneGui
                     }
                     return;
                 }
-                //newLibMol.ValidateName(MainWindow.SOP.Protocol);
-                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+
+
                 newLibMol.ValidateName(level);
                 level.entity_repository.molecules.Add(newLibMol);
 
@@ -694,25 +686,22 @@ namespace DaphneGui
                     return;
                 }
 
-                //if molecule changed, then make a clone of the newly selected one from entity repository
                 ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-                molpop.molecule = mol.Clone(null);
 
-                string new_mol_name = mol.Name;
+                // Check that there isn't a molpop with this molecule type, already.
+                ConfigCell cell = DataContext as ConfigCell;
+                if (cell.cytosol.molecules_dict.ContainsKey(mol.entity_guid) == true)
+                {
+                    MessageBox.Show("A molecular population with this molecule type already exists in the cytosol. Please choose a different molecule.");
+                    cb.SelectedValue = molpop.molecule.entity_guid;
+                    return;
+                }
+
+                // Make a clone of the newly selected molecule and make sure the molpop name matches
+                molpop.molecule = mol.Clone(null);
                 if (curr_mol_guid != molpop.molecule.entity_guid)
                 {
-                    molpop.Name = new_mol_name;
-
-                    //Must update molecules_dict
-                    ConfigCell cell = DataContext as ConfigCell;
-                    if (cell != null)
-                    {
-                        if (cell.cytosol.molecules_dict.ContainsKey(curr_mol_guid)) 
-                        {
-                            cell.cytosol.molecules_dict.Remove(curr_mol_guid);
-                        }
-                        cell.cytosol.molecules_dict.Add(molpop.molecule.entity_guid, molpop.molecule);
-                    }
+                    molpop.Name = mol.Name;
                 }
             }
 

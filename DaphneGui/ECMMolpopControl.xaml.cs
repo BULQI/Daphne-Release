@@ -409,6 +409,8 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
+            ConfigMolecule oldMol = molpop.molecule;
+
             //if user picked 'new molecule' then create new molecule in ER
             if (nIndex == (cb.Items.Count - 1))
             {
@@ -493,7 +495,7 @@ namespace DaphneGui
                 //if molecule has not changed, return
                 if (newmol.entity_guid == curr_mol_guid)
                 {
-                    //update render informaiton
+                    //update render information
                     RenderPopOptions rpo = (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions;
                     if (rpo.molPopOptions.Where(s => s.renderLabel == curr_mol_guid).Any() == false)
                     {
@@ -502,13 +504,20 @@ namespace DaphneGui
                     return;
                 }
 
-                //if molecule changed, then make a clone of the newly selected one from entity repository
                 ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-                molpop.molecule = mol.Clone(null);
 
-                string new_mol_name = mol.Name;
+                // Make sure there isn't a molpop with this molecule type, already.
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.molecules_dict.ContainsKey(mol.entity_guid) == true)
+                {
+                    MessageBox.Show("A molecular population with this molecule type already exists in the ECM. Please choose a different molecule.");
+                    cb.SelectedValue = molpop.molecule.entity_guid;
+                    return;
+                }
+
+                // Make a clone of the newly selected molecule and make sure the molpop name matches
+                molpop.molecule = mol.Clone(null);
                 if (curr_mol_guid != molpop.molecule.entity_guid)
-                    molpop.Name = new_mol_name;
+                    molpop.Name = mol.Name;
             }
 
             if (lvAvailableReacs.ItemsSource != null)
