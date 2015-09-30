@@ -244,11 +244,17 @@ namespace Daphne
                                     bool report)
         {
             bool[] result = null;
+            bool[] cytoBulk_result = null;
+            bool[] transcription_result = null;
+            bool[] membraneBulk_result = null;
 
             // only report on demand
             if (report == true)
             {
-                prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
+                prepareReactionReport(boundary_reacs.Count, ref result);
+                prepareReactionReport(bulk_reacs[0].Count, ref cytoBulk_result);
+                prepareReactionReport(bulk_reacs[1].Count, ref membraneBulk_result);
+                prepareReactionReport(transcription_reacs.Count, ref transcription_result);
             }
 
             Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius));
@@ -278,11 +284,11 @@ namespace Daphne
             }
 
             //CELL REACTIONS
-            AddCompartmentBulkReactions(simCell.Cytosol, ProtocolHandle.entity_repository, bulk_reacs[0]);
-            AddCompartmentBulkReactions(simCell.PlasmaMembrane, ProtocolHandle.entity_repository, bulk_reacs[1]);
+            AddCompartmentBulkReactions(simCell.Cytosol, ProtocolHandle.entity_repository, bulk_reacs[0], cytoBulk_result);
+            AddCompartmentBulkReactions(simCell.PlasmaMembrane, ProtocolHandle.entity_repository, bulk_reacs[1], membraneBulk_result);
             // membrane has no boundary
             AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, ProtocolHandle.entity_repository, boundary_reacs, result);
-            AddCellTranscriptionReactions(simCell, ProtocolHandle.entity_repository, transcription_reacs);
+            AddCellTranscriptionReactions(simCell, ProtocolHandle.entity_repository, transcription_reacs, transcription_result);
 
             double nextValue;
             int nextIntValue;
@@ -379,11 +385,27 @@ namespace Daphne
                 simCell.SetGeneActivities(simCell.Differentiator);
             }
 
-            if (report == true && result != null)
+            if (report == true)
             {
                 // report if a reaction could not be inserted
-                boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
+                if (result != null)
+                {
+                    reactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName + ", cytoplasm boundary");
+                }
+                if (result != null)
+                {
+                    reactionReport(bulk_reacs[0], cytoBulk_result, "population " + cp.cellpopulation_id + ", cell" + cp.Cell.CellName + ", cytoplasm bulk");
+                }
+                if (result != null)
+                {
+                    reactionReport(bulk_reacs[1], membraneBulk_result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName + ", membrane bulk");
+                }
+                if (result != null)
+                {
+                    reactionReport(transcription_reacs, transcription_result, "population " + cp.cellpopulation_id + ", cell" + cp.Cell.CellName + ", transcripiton");
+                }
             }
+
 
             return simCell;
         }
@@ -587,7 +609,7 @@ namespace Daphne
             }
         }
 
-        protected void prepareBoundaryReactionReport(int size, ref bool[] result)
+        protected void prepareReactionReport(int size, ref bool[] result)
         {
             result = new bool[size];
             for (int i = 0; i < size; i++)
@@ -596,7 +618,7 @@ namespace Daphne
             }
         }
 
-        protected void boundaryReactionReport(List<ConfigReaction> boundary_reacs, bool[] result, string id)
+        protected void reactionReport(List<ConfigReaction> boundary_reacs, bool[] result, string id)
         {
             // should always be so, but for safety have this check
             if (boundary_reacs.Count == result.Length)
@@ -614,8 +636,8 @@ namespace Daphne
                 if (allPresent == false)
                 {
                     // configure the message box to be displayed
-                    string messageBoxText = "Not all boundary reactions could be added into " + id + ":";
-                    string caption = "Boundary reaction warning";
+                    string messageBoxText = "Not all reactions could be added into " + id + ":";
+                    string caption = "Reaction warning";
                     MessageBoxButton button = MessageBoxButton.OK;
                     MessageBoxImage icon = MessageBoxImage.Warning;
 
@@ -659,12 +681,23 @@ namespace Daphne
                     {
                         continue;
                     }
-                    comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryAssociation(boundary.Populations[cr.reactants_molecule_guid_ref[1]],
-                                                                                           comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                                           boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
+                    if (boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0])
+                                && boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
                     {
-                        result[i] = true;
+                        comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryAssociation(boundary.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                                                               comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                                               boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
                     }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryDissociation)
@@ -673,13 +706,25 @@ namespace Daphne
                     {
                         continue;
                     }
-                    comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryDissociation(boundary.Populations[cr.products_molecule_guid_ref[1]],
-                                                                                            comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                                            boundary.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
+                    if (boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[1]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true
+                                && boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true)
                     {
-                        result[i] = true;
+                        comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryDissociation(boundary.Populations[cr.products_molecule_guid_ref[1]],
+                                                                                                comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                                                boundary.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
                     }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
+
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedBoundaryActivation)
                 {
@@ -687,12 +732,23 @@ namespace Daphne
                     {
                         continue;
                     }
-                    comp.AddBoundaryReaction(boundary.Interior.Id, new CatalyzedBoundaryActivation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                                                   comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                                                   boundary.Populations[cr.modifiers_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true
+                                && boundary.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true)
                     {
-                        result[i] = true;
+                        comp.AddBoundaryReaction(boundary.Interior.Id, new CatalyzedBoundaryActivation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                                                       boundary.Populations[cr.modifiers_molecule_guid_ref[0]], cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
                     }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportTo)
@@ -701,11 +757,21 @@ namespace Daphne
                     {
                         continue;
                     }
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportTo(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                            boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
                     {
-                        result[i] = true;
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
                     }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportFrom)
@@ -714,123 +780,355 @@ namespace Daphne
                     {
                         continue;
                     }
-                    comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportFrom(boundary.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                                             comp.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
+                    if (boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
                     {
-                        result[i] = true;
+                        comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportFrom(boundary.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                                                 comp.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
                     }
                 }
             }
         }
 
-        public static void AddCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
+        public static void AddCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs, bool[] result)
         {
-            foreach (ConfigReaction cr in config_reacs)
+            for (int i = 0; i < config_reacs.Count; i++)
             {
+                ConfigReaction cr = config_reacs[i];
+
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
-                    comp.BulkReactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                           comp.Populations[cr.reactants_molecule_guid_ref[1]],
-                                                           comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                           cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) == true
+                                && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                               comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                               comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                               cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
                 {
-                    comp.BulkReactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                            comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                            comp.Populations[cr.products_molecule_guid_ref[1]],
-                                                            cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true  && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true
+                                && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[1]) == true)
+                    {
+                        comp.BulkReactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                comp.Populations[cr.products_molecule_guid_ref[1]],
+                                                                cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Annihilation)
                 {
-                    comp.BulkReactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                            cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dimerization)
                 {
-                    comp.BulkReactions.Add(new Dimerization(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                            comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                            cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new Dimerization(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.DimerDissociation)
                 {
-                    comp.BulkReactions.Add(new DimerDissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                 cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new DimerDissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                     comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                     cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transformation)
                 {
-                    comp.BulkReactions.Add(new Transformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                              comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                              cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new Transformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                  comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                  cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.AutocatalyticTransformation)
                 {
-                    comp.BulkReactions.Add(new AutocatalyticTransformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                           comp.Populations[cr.reactants_molecule_guid_ref[1]],
-                                                                           comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                           cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) == true
+                                && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new AutocatalyticTransformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                               comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                                               comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                               cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAnnihilation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedAnnihilation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                     comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                     cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedAnnihilation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                         comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                         cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAssociation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedAssociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                    comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                    comp.Populations[cr.reactants_molecule_guid_ref[1]],
-                                                                    comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                    cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true
+                         && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedAssociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                        comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                        comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                                        comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                        cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedCreation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedCreation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                 cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedCreation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                     comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                     cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDimerization)
                 {
-                    comp.BulkReactions.Add(new CatalyzedDimerization(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                     comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                     comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                     cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true
+                                && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedDimerization(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                         comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                         comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                         cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDimerDissociation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedDimerDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                          comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                          comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                          cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true
+                                && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedDimerDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                              comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                              comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                              cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDissociation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                     comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                     comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                     comp.Populations[cr.products_molecule_guid_ref[1]],
-                                                                     cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true
+                            && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[1]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                         comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                         comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                         comp.Populations[cr.products_molecule_guid_ref[1]],
+                                                                         cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedTransformation)
                 {
-                    comp.BulkReactions.Add(new CatalyzedTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                       comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                                       cr.rate_const));
+                    if (comp.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && comp.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) == true
+                                && comp.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                    {
+                        comp.BulkReactions.Add(new CatalyzedTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                           comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                           comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                           cr.rate_const));
+                        if (result != null)
+                        {
+                            result[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            result[i] = false;
+                        }
+                    }
                 }
             }
         }
 
-        public static void AddCellTranscriptionReactions(Cell cell, EntityRepository er, List<ConfigReaction> config_reacs)
+        public static void AddCellTranscriptionReactions(Cell cell, EntityRepository er, List<ConfigReaction> config_reacs, bool[] result)
         {
-            foreach (ConfigReaction cr in config_reacs)
+            for (int i = 0; i < config_reacs.Count; i++)
             {
-                cell.Cytosol.BulkReactions.Add(new Transcription(cell.Genes[cr.modifiers_molecule_guid_ref[0]],
-                                                                cell.Cytosol.Populations[cr.products_molecule_guid_ref[0]],
-                                                                cr.rate_const));
+                ConfigReaction cr = config_reacs[i];
+
+                if (cell.Genes.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && cell.Cytosol.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
+                {
+                    cell.Cytosol.BulkReactions.Add(new Transcription(cell.Genes[cr.modifiers_molecule_guid_ref[0]],
+                                                                    cell.Cytosol.Populations[cr.products_molecule_guid_ref[0]],
+                                                                    cr.rate_const));
+                    if (result != null)
+                    {
+                        result[i] = true;
+                    }
+                }
+                else
+                {
+                    if (result != null)
+                    {
+                        result[i] = false;
+                    }
+                }
             }
 
         }
@@ -1176,17 +1474,22 @@ namespace Daphne
             List<ConfigReaction> reacs = new List<ConfigReaction>();
             bool[] result = null;
 
+            // bulk reactions
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
-            reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
+            prepareReactionReport(reacs.Count, ref result);
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs, result);
+            // report if a reaction could not be inserted
+            reactionReport(reacs, result, "ECM, bulk");
 
-            prepareBoundaryReactionReport(reacs.Count, ref result);
+            // boundary reactions
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
+            prepareReactionReport(reacs.Count, ref result);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
                 AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs, result);
             }
             // report if a reaction could not be inserted
-            boundaryReactionReport(reacs, result, "the ECS");
+            reactionReport(reacs, result, "ECM, boundary");
 
             // general parameters
             Pair.Phi1 = protocol.sim_params.phi1;
@@ -1384,7 +1687,7 @@ namespace Daphne
             List<ConfigReaction> reacs = new List<ConfigReaction>();
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp, MoleculeLocation.Bulk);
-            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs, null);
         }
 
         public override void Step(double dt)
