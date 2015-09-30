@@ -927,38 +927,7 @@ namespace DaphneGui
                     default:
                         return;
                 }
-                
-                
-                ////Need to add a mol pop to cell also
-                //if (environment == "membrane")
-                //{
-                //    ConfigCell cell = this.DataContext as ConfigCell;
-                //    if (cell.membrane.HasMolecule(newLibMol) == false)
-                //    {
-                //        bool isCell = true;
-                //        cell.membrane.AddMolPop(newLibMol, isCell);
-                //        //populateCollection();
-                //    }
-                //}
-                //else if (environment == "cytosol")
-                //{
-                //    ConfigCell cell = this.DataContext as ConfigCell;
-                //    if (cell.cytosol.HasMolecule(newLibMol) == false)
-                //    {
-                //        bool isCell = true;
-                //        cell.cytosol.AddMolPop(newLibMol, isCell);
-                //        //populateCollection();
-                //    }
-                //}
-
-                ////Add new mol pop to the ecs 
-                ////This can only happen for a Protocol, no ecs in User or Daphne store.
-                //else if (environment == "ecs")
-                //{                    
-                //    bool isCell = false;                    
-                //    MainWindow.SOP.Protocol.scenario.environment.comp.AddMolPop(newLibMol, isCell);
-                //    //populateCollection();
-                //}
+                               
             }
         }
 
@@ -973,7 +942,7 @@ namespace DaphneGui
             string environment = this.Tag as string;
 
             //Do not allow "Create New Gene" feature for membrane and ecs
-            if (environment == "membrane" || environment == "ecs")
+            if (environment == "membrane" || environment == "ecs" || environment=="vatRC" )
             {
                 btnCreateNewGene.Visibility = System.Windows.Visibility.Collapsed;
             }
