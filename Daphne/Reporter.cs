@@ -331,7 +331,7 @@ namespace Daphne
             {
                 if (((ReportECM)c.report_mp).mean == true)
                 {
-                    header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    header += "\t" + c.molecule.Name;
                     create = true;
                 }
             }
@@ -369,7 +369,7 @@ namespace Daphne
             {
                 if (c.report_mp.mp_extended > ExtendedReport.NONE)
                 {
-                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    string name = c.molecule.Name;
                     StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + hSim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
@@ -474,7 +474,7 @@ namespace Daphne
 
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
-                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                        string name = mp.molecule.Name;
 
                         if (mp.report_mp.mp_extended > ExtendedReport.NONE)
                         {
@@ -493,7 +493,7 @@ namespace Daphne
                 // ecm probe concentrations
                 foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                 {
-                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                    string name = mp.molecule.Name;
 
                     if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                     {
@@ -597,8 +597,6 @@ namespace Daphne
                     // ecm probe concentrations
                     foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                     {
-                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
-
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
                             cell_files[cp.cellpopulation_id].Write("\t{0:G4}", SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(c.SpatialState.X));
@@ -1587,7 +1585,7 @@ namespace Daphne
                 {
                     if (SimulationBase.dataBasket.Environment.Comp.Populations.ContainsKey(configMolPop.molecule.entity_guid))
                     {
-                        header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[configMolPop.molecule.entity_guid].Name;
+                        header += "\t" + configMolPop.molecule.Name;
                         create = true;
                     }
                 }
