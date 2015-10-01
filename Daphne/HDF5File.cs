@@ -596,6 +596,17 @@ namespace Daphne
         public abstract void ReadReporterFileNames();
     }
 
+    public class NullHDF5File : HDF5FileBase
+    {
+        public NullHDF5File()
+        {
+        }
+
+        public override void StartHDF5File(SimulationBase sim, string protocolString, bool trunc) { }
+        public override void WriteReporterFileNames() { }
+        public override void ReadReporterFileNames() { }
+    }
+
     public class VatReactionComplexHDF5File : HDF5FileBase
     {
         private VatReactionComplex hSim;

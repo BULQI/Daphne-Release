@@ -324,9 +324,6 @@
       <DependentUpon>ChartViewToolWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Workbench\EditRCReactions.xaml.cs">
-      <DependentUpon>EditRCReactions.xaml</DependentUpon>
-    </Compile>
     <Compile Include="GuiExtension.cs" />
     <Compile Include="RecentFileList.cs" />
     <Compile Include="TextSearchFilter.cs" />
@@ -485,10 +482,6 @@
     <Page Include="Workbench\ChartViewToolWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Workbench\EditRCReactions.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

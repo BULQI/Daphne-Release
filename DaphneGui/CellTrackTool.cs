@@ -116,11 +116,22 @@ namespace DaphneGui
                 // zoom
                 if (track.InScene == true)
                 {
-                    ((VTKFullGraphicsController)MainWindow.GC).zoomToPath(track.Prop);
+                   // ((VTKFullGraphicsController)MainWindow.GC).zoomToPath(track.Prop);
                 }
                 // initiate redisplay
                 ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
             }
+        }
+
+        public void HideCellTracks()
+        {
+            foreach (var item in ((VTKFullGraphicsController)MainWindow.GC).CellTrackControllers)
+            {
+                GraphicsProp track = item.Value.ActualTrack;
+                track.addToScene(false);
+            }
+            // initiate redisplay
+            ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
         }
     }
 }

@@ -454,9 +454,9 @@ namespace Daphne
             transcription_reacs = SimulationBase.ProtocolHandle.GetTranscriptionReactions(configComp[0]);
 
             // cytosol bulk reactions
-            SimulationBase.AddCompartmentBulkReactions(daughter.Cytosol, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[0]);
+            SimulationBase.AddCompartmentBulkReactions(daughter.Cytosol, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[0], null);
             // membrane bulk reactions
-            SimulationBase.AddCompartmentBulkReactions(daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[1]);
+            SimulationBase.AddCompartmentBulkReactions(daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[1], null);
 
             // boundary reactions
             // all daughter cells will have the molecules as long as the mother had them,
@@ -464,7 +464,7 @@ namespace Daphne
 
             SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs, null);
             // transcription reactions
-            SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
+            SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs, null);
 
             /* this needs to be added after adding the cell*/
             /*

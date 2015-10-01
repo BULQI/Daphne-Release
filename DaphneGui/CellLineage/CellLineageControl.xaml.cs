@@ -88,6 +88,7 @@ namespace DaphneGui.CellLineage
         {
             DataContext = this;
 
+            if (MainWindow.SOP.Protocol.scenario is TissueScenario == false) return;
             //First, get all the cell populations with division schemes, to display in the ListBox.
             ScenarioHandle = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             FounderCellPops.Clear();

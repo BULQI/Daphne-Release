@@ -147,8 +147,7 @@ namespace DaphneGui
         }
 
         private static void CreateGeneColumns(DataGrid dataGrid, ObservableCollection<string> genes)
-        {
-            
+        {           
             dataGrid.Columns.Clear();
             if (genes == null)return;
 
@@ -156,12 +155,9 @@ namespace DaphneGui
             Level level = MainWindow.GetLevelContext(cdc);
             if (level == null)
             {
-                level = cdc.CurrentLevel;
+                return;
             }
-
-            //EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            //Level level = MainWindow.GetLevelContext(cdc);            
-            //EntityRepository er = level.entity_repository;
+            EntityRepository er = level.entity_repository;
 
             ConfigCell cell = cdc.DataContext as ConfigCell;
 
@@ -169,8 +165,8 @@ namespace DaphneGui
             int count = 0;
             foreach (var gene_guid in genes)
             {
-                //if (!er.genes_dict.ContainsKey(gene_guid))
-                //    continue;
+                if (!er.genes_dict.ContainsKey(gene_guid))
+                    continue;
                 ConfigGene gene = cell.genes.First(g => g.entity_guid == gene_guid);
                 if (gene != null)
                 {
@@ -297,6 +293,15 @@ namespace DaphneGui
             if (diffScheme == null) return;
 
             CellDetailsReadOnlyControl cdc = FindLogicalParent<CellDetailsReadOnlyControl>(dataGrid);
+
+            if (DiffSchemeTarget == "EpigeneticMap")
+            {
+            }
+            else
+            {
+                dataGrid.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
+                dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
+            }
 
             dataGrid.LoadingRow -= new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             dataGrid.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);

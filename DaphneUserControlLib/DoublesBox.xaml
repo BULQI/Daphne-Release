@@ -33,10 +33,12 @@
             </DockPanel>
         </ControlTemplate>
     </UserControl.Resources>
-    
-    <StackPanel x:Name="stpMainPanel" Height="24" Width="230" VerticalAlignment="Center">  
 
-        <StackPanel x:Name="stpControl" Orientation="Horizontal" Height="25" Width="220" VerticalAlignment="Center" HorizontalAlignment="Left">
+    <!-- Width="230"  -->
+    <StackPanel x:Name="stpMainPanel" Height="24" VerticalAlignment="Center">
+
+        <!-- Width="220" -->
+        <StackPanel x:Name="stpControl" Orientation="Horizontal" Height="25" VerticalAlignment="Center" HorizontalAlignment="Left">
 
             <Slider x:Name="slFNumber" Height="24" VerticalAlignment="Top" RenderTransform="1.0,0,0,0.5,0,7"
                     Minimum="{Binding Path=Minimum, Mode=OneWay, ElementName=UC}" 

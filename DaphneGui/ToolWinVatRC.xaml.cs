@@ -102,9 +102,7 @@ namespace DaphneGui
             if (finished)
             {
                 MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
-                MW.ReacComplexChartWindow.MW = MW;
                 MW.ReacComplexChartWindow.DataContext = this.Protocol;
-                MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
                 
             }
@@ -197,5 +195,10 @@ namespace DaphneGui
             }
         }
 
+        private void BulkMoleculeFilter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule m = e.Item as ConfigMolecule;
+            e.Accepted = (m.molecule_location == MoleculeLocation.Bulk);
+        }
     }
 }

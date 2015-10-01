@@ -18,7 +18,7 @@
     <StackPanel x:Name="PlotMainStackPanel" Orientation="Vertical" >       
         <!-- Plot options by Cell -->
         <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="True"
+                            IsExpanded="False"
                             Header="Plot options by cell state"
                             Margin="0,0,0,0" 
                             Canvas.ZIndex="1"
@@ -70,7 +70,7 @@
 
                 <!-- Death State -->
                 <Expander ExpandDirection="Down" Padding="5"
-                                IsExpanded="True"
+                                IsExpanded="False"
                                 Header="Death State"
                                 Margin="0,4,0,0" 
                                 Canvas.ZIndex="1"

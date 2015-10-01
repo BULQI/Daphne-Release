@@ -495,12 +495,12 @@ namespace DaphneUserControlLib
             set
             {
                 SetValue(SliderEnabledProperty, value);
-                stpControl.Width = 220;
-                stpMainPanel.Width = 230;
+                //stpControl.Width = 220;
+                //stpMainPanel.Width = 230;
                 if (value == false)
                 {
-                    stpControl.Width = 110;
-                    stpMainPanel.Width = 120;
+                    //stpControl.Width = 110;
+                    //stpMainPanel.Width = 120;
                 }
                 OnPropertyChanged("SliderEnabled");
             }
@@ -603,12 +603,12 @@ namespace DaphneUserControlLib
             set
             {
                 SetValue(IsReadOnlyProperty, value);
-                stpControl.Width = 220;
-                stpMainPanel.Width = 230;
+                //stpControl.Width = 220;
+                //stpMainPanel.Width = 230;
                 if (value == false)
                 {
-                    stpControl.Width = 110;
-                    stpMainPanel.Width = 120;
+                    //stpControl.Width = 110;
+                    //stpMainPanel.Width = 120;
                 }
                 OnPropertyChanged("IsReadOnly");
             }

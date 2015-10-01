@@ -15,7 +15,7 @@
     <StackPanel Orientation="Vertical" Margin="8">
         <StackPanel>
             <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
-            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150"
+            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150" MinWidth="100"
                             ItemsSource="{Binding reaction_complexes}"
                             ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                             DisplayMemberPath="Name"
@@ -117,7 +117,13 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-
+                        <GridViewColumn x:Name="colUnits" Width="120" Header="Units">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" Foreground="Black"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <GridViewColumn Width="300" Header="Reaction" >
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>

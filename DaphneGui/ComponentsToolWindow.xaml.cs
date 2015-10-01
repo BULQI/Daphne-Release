@@ -159,11 +159,7 @@ namespace DaphneGui
                 return;
 
             Level level = this.DataContext as Level;
-            if (level is Protocol)
-            {
-                Protocol p = level as Protocol;
-                cm.ValidateName(p);
-            }
+            cm.ValidateName(level);
 
             int index = dgLibMolecules.SelectedIndex;
             dgLibMolecules.InvalidateVisual();
@@ -171,6 +167,11 @@ namespace DaphneGui
             dgLibMolecules.SelectedIndex = index;
             cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
             dgLibMolecules.ScrollIntoView(cm);
+        }
+
+        private void MolLocation_Changed(object sender, RoutedEventArgs e)
+        {
+            MolTextBox_LostFocus(sender, e);
         }
 
         //LIBRARY REACTIONS EVENT HANDLERS        

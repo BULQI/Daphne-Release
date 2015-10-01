@@ -22,6 +22,7 @@ namespace Daphne
         {
             //Create DaphneStore
             LoadDefaultGlobalParameters(daphneStore);
+            daphneStore.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
             daphneStore.SerializeToFile();
 
             //Clone UserStore from DaphneStore
@@ -30,6 +31,7 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
             userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            userStore.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
             userStore.SerializeToFile();
             //update renderSkin
             RenderSkin sk = new RenderSkin("default_skin", userStore.entity_repository);
@@ -244,6 +246,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -463,6 +467,8 @@ namespace Daphne
             // We need this to successfully execute cellPop.cellPopDist.Initialize();
             SystemOfPersistence.HProtocol = protocol;
 
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
+
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store
@@ -491,7 +497,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.integrator_step = 0.001;
- 
 
             //ECM REACTIONS - recursive
             string[] item = new string[] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
@@ -589,14 +594,14 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
             }
-            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
-            {
-                ReportECM reportECM = new ReportECM();
-                reportECM.molpop_guid_ref = mpECM.molpop_guid;
-                reportECM.mp_extended = ExtendedReport.COMPLETE;
-                cellPop.ecm_probe.Add(reportECM);
-                //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
-            }
+            //foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
+            //{
+            //    ReportECM reportECM = new ReportECM();
+            //    reportECM.molpop_guid_ref = mpECM.molpop_guid;
+            //    reportECM.mp_extended = ExtendedReport.COMPLETE;
+            //    cellPop.ecm_probe.Add(reportECM);
+            //    //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
+            //}
 
             protocol.reporter_file_name = "Loco_test";
 
@@ -623,6 +628,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -722,6 +729,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
+
             protocol.InitializeStorageClasses();
 
             // Load reaction templates from userstore
@@ -736,7 +745,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
             protocol.scenario.time_config.integrator_step = 0.001;
-
         }
 
         public static void CreateVatRC_Blank_Protocol(Protocol protocol)
@@ -745,6 +753,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -772,8 +782,9 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            protocol.InitializeStorageClasses();
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
+            protocol.InitializeStorageClasses();
 
             Level userstore = new Level("Config\\Stores\\userstore.json", "Config\\Stores\\temp_userstore.json");
             userstore = userstore.Deserialize();
@@ -907,6 +918,8 @@ namespace Daphne
             {
                 throw new InvalidCastException();
             }
+
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
 
@@ -2453,6 +2466,11 @@ namespace Daphne
             store.entity_repository.molecules.Add(cm);
             store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
+            cm = new ConfigMolecule("CXCR4|:CXCR4|", 1.0, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+
             //
             // The following are generally intended as cytosol molecules 
             //
@@ -3498,25 +3516,121 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
-            //// degradation of A
-            //targetValue = 250.0;
-            ////cr = new ConfigReaction();
-            ////cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            ////// reactants
-            ////cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            ////cr.rate_const = copyNumber * transcriptionRate / targetValue;
-            ////cr.GetTotalReactionString(store.entity_repository);
-            ////store.entity_repository.reactions.Add(cr);
+            // Dimerizaton: 2 CXCR4| -> CXCR4|:CXCR4|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dimerization);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Dimer dissociation: CXCR4|:CXCR4| -> 2 CXCR4| 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.DimerDissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // These are for testing these reaction templates and units. Uncomment if needed.
+            ///////////////////////////////////////////////////////////////////////////////////
+
+            //// Autocatalytic transformation: A + A* -> A* + A*  
             //cr = new ConfigReaction();
-            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation);
-            //// modifiers
-            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("H", MoleculeLocation.Bulk, store));
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.AutocatalyticTransformation);
             //// reactants
             //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            //cr.rate_const = 2 * A_transcription / (targetValue * house_equil);
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
             //cr.GetTotalReactionString(store.entity_repository);
             //store.entity_repository.reactions.Add(cr);
 
+            //// Catalyzed association: Wp + E2 + E1 -> Wp:E2 + E1  
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedAssociation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Dissociation: Wp:E2 + E1 -> Wp + E2 + E1
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedDissociation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("Wp:E2", MoleculeLocation.Bulk, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("E2", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Creation: E1 -> W + E1
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedCreation);
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Transformation: W + E1 -> Wp + E1
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedTransformation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("W", MoleculeLocation.Bulk, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("E1", MoleculeLocation.Bulk, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("Wp", MoleculeLocation.Bulk, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catalyzed Dimerizaton: 2 CXCR4| + CXCL12:CXCR4| -> CXCR4|:CXCR4| + CXCL12:CXCR4|
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedDimerization);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
+
+            //// Catlayzed Dimer dissociation: CXCR4|:CXCR4| + CXCL12:CXCR4| -> 2 CXCR4| + CXCL12:CXCR4|
+            //cr = new ConfigReaction();
+            //cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedDimerDissociation);
+            //// reactants
+            //cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|:CXCR4|", MoleculeLocation.Boundary, store));
+            //// modifiers
+            //cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            //// products
+            //cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            //cr.rate_const = 1.0;
+            //cr.GetTotalReactionString(store.entity_repository);
+            //store.entity_repository.reactions.Add(cr);
         }
 
         private static void PredefinedReactionComplexesCreator(Level store)
@@ -4529,6 +4643,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
+
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 
@@ -4728,6 +4844,8 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
+            protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
+            
             protocol.InitializeStorageClasses();
 
             //Load needed entities from User Store 

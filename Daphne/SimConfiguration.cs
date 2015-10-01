@@ -46,6 +46,10 @@ namespace Daphne
                 {
                     protocol = value;
                     HProtocol = protocol;
+                    if (this._selectedRenderSkin != null && protocol != null)
+                    {
+                        _selectedRenderSkin.UpdateColorHint(protocol.entity_repository);
+                    }
                     OnPropertyChanged("Protocol");
                 }
             }
@@ -72,6 +76,7 @@ namespace Daphne
         /// The main palette containing graphics properties used to render various objects (i.e. colors, etc)
         /// </summary>
         private RenderSkin _selectedRenderSkin;
+        public static RenderSkin static_SelectedRenderSkin; 
         public RenderSkin SelectedRenderSkin
         {
             get
@@ -79,8 +84,16 @@ namespace Daphne
                 if (_selectedRenderSkin == null && SkinList.Count > 0)
                 {
                     _selectedRenderSkin = SkinList.Where(x => x.Name == "default_skin").SingleOrDefault();
-                    if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList.First();
+                    if (_selectedRenderSkin == null)
+                    {
+                        _selectedRenderSkin = SkinList.First();
+                        if (_selectedRenderSkin != null && this.protocol != null)
+                        {
+                            _selectedRenderSkin.UpdateColorHint(this.protocol.entity_repository);
+                        }
+                    }
                 }
+                static_SelectedRenderSkin = _selectedRenderSkin;
                 return _selectedRenderSkin;
             }
             set
@@ -88,6 +101,16 @@ namespace Daphne
                 if (value != _selectedRenderSkin)
                 {
                     _selectedRenderSkin = value;
+                    static_SelectedRenderSkin = value;
+                    if (value != null && this.protocol != null)
+                    {
+                        _selectedRenderSkin.UpdateColorHint(this.protocol.entity_repository);
+                        if (protocol.scenario is TissueScenario)
+                        {
+                            var render_pop = (protocol.scenario as TissueScenario).popOptions;
+                            render_pop.RenderSkinChanged();
+                        }
+                    }
                 }
             }
 
@@ -277,6 +300,8 @@ namespace Daphne
 
             FileName = fileName;
             TempFile = tempFile;
+            // 1 is the lowest version in use; -1 denotes protocols that were created prior to establishing the version
+            Version = -1;
             entity_repository = new EntityRepository();
         }
 
@@ -1700,7 +1725,12 @@ namespace Daphne
         /// <summary>
         /// entity repository storing all available entities in this level
         /// </summary>
-        public EntityRepository entity_repository { get; set; }
+        public EntityRepository entity_repository {get; set;}
+
+        /// <summary>
+        /// file version; applies to stores and protocols alike
+        /// </summary>
+        public int Version { get; set; }
     }
 
     /// <summary>
@@ -1882,18 +1912,18 @@ namespace Daphne
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigMolecule cm = dd as ConfigMolecule;
+                //foreach (var dd in e.OldItems)
+                //{
+                //    ConfigMolecule cm = dd as ConfigMolecule;
 
-                    foreach (ConfigMolecularPopulation cmp in scenario.environment.comp.molpops.ToList())
-                    {
-                        if (cmp.molecule.entity_guid == cm.entity_guid)
-                        {
-                            scenario.environment.comp.molpops.Remove(cmp);
-                        }
-                    }
-                }
+                //    foreach (ConfigMolecularPopulation cmp in scenario.environment.comp.molpops.ToList())
+                //    {
+                //        if (cmp.molecule.entity_guid == cm.entity_guid)
+                //        {
+                //            scenario.environment.comp.molpops.Remove(cmp);
+                //        }
+                //    }
+                //}
             }
         }
 
@@ -2690,6 +2720,183 @@ namespace Daphne
 
             return false;
         }
+
+        /// <summary>
+        /// Add any missing components ECM or cell membrane molecules for the given reaction
+        /// </summary>
+        /// <param name="reac">the reaction of interest</param>
+        /// <param name="entity_repository">the source for any missing molecules</param>
+        /// <returns>true if all the missing molecules were added</returns>
+        public bool AddEcmReactionComponents(ConfigReaction reac, EntityRepository entity_repository)
+        {
+            //If any molecules from new reaction don't exist in the ecm, add them if bulk
+            foreach (string molguid in reac.reactants_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+
+                    //Bulk
+                    if (mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        if (environment.comp.HasMolecule(molguid) == false)
+                        {
+                            environment.comp.AddMolPop(mol, false);
+                        }
+                    }
+                    else  //If Boundary, then see if any of the cells have this molecule.
+                    {
+                        if (AddBoundaryMoleculeToCell(mol) == false) return false;
+                    }
+                }
+                else
+                {
+                    // We shouldn't get here if everything is working properly
+                    return false;
+                }
+            }
+            foreach (string molguid in reac.products_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+
+                    if (mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        if (environment.comp.HasMolecule(molguid) == false)
+                        {
+                            environment.comp.AddMolPop(mol, false);
+                        }
+                    }
+                    else  //If Boundary, then see if any of the cells have this molecule.
+                    {
+                        if (AddBoundaryMoleculeToCell(mol) == false) return false;
+                    }
+                }
+                else
+                {
+                    // We shouldn't get here if everything is working properly
+                    return false;
+                }
+            }
+            foreach (string molguid in reac.modifiers_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+
+                    if (mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        if (environment.comp.HasMolecule(molguid) == false)
+                        {
+                            environment.comp.AddMolPop(mol, false);
+                        }
+                    }
+                    else  //If Boundary, then see if any of the cells have this molecule.
+                    {
+                        if (AddBoundaryMoleculeToCell(mol) == false) return false;
+                    }
+                }
+                else
+                {
+                    // We shouldn't get here if everything is working properly
+                    return false;
+                }
+            }
+ 
+            return true;
+        }
+
+        /// <summary>
+        /// This method checks if the given boundary molecule exists in any of the cells.
+        /// 
+        /// If so, then do nothing.
+        /// 
+        /// If the molecule does not exist in any cell, then the user is provided
+        /// with the option to add molecule to any of the cells.
+        /// 
+        /// It returns true if the molecule exists in a cell at the end of the method
+        /// 
+        /// </summary>
+        /// <param name="mol"></param>
+        private bool AddBoundaryMoleculeToCell(ConfigMolecule mol)
+        {
+            bool cellHasMolecule = false;
+
+            // Check to see if any of the cells have the boundary molecule in their membrane.
+            // If this boundary molecule exists on at least one cell, then we are done.
+            foreach (CellPopulation cellpop in cellpopulations)
+            {
+                if (cellpop.Cell.membrane.HasMolecule(mol))
+                {
+                    cellHasMolecule = true;
+                    break;
+                }
+            }
+
+            // Otherwise, see if the user wants to add this boundary molecule to any of the cells.
+            if (cellHasMolecule == false)
+            {
+                string message = ("One or more reactions depend on molecule " + mol.Name + ", which is not currently in the simulation. ");
+                message = message + "You will be prompted to add this molecule to the cell membrane of one, or more, of the cell populations.";
+                MessageBox.Show(message);
+
+                foreach (CellPopulation cellpop in cellpopulations)
+                {
+                    message = "Add molecule " + mol.Name + " to cell population " + cellpop.cellpopulation_name + "?";
+                    MessageBoxResult result = MessageBox.Show(message, "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        cellpop.Cell.membrane.AddMolPop(mol, false);
+                        cellHasMolecule = true;
+                    }
+                }
+
+                // Finally, if the user did not add the missing molecule to any of the cells, 
+                // issue a warning that some reactions won't be included in the simulation.
+                if (cellHasMolecule == false)
+                {
+                    message = "Molecule " + mol.Name + " was not added to any of the cells. ";
+                    message = message + "Reactions that require this molecule will not be included in the simulation.";
+                    MessageBox.Show(message, "Warning");
+                }
+            }
+
+            return cellHasMolecule;
+        }
+
+        private bool ValidateReaction(ConfigReaction cr)
+        {
+            bool valid = true;
+
+            foreach (string guid in cr.reactants_molecule_guid_ref)
+            {
+                //if (comp.molecules_dict.ContainsKey(guid) == true)
+                //{
+                //    cytosol.Reactions.Remove(cr);
+                //    break;
+                //}
+
+
+                //if (cytosol.reactions_dict.ContainsKey(guid) == false && FindGene(guid) == null && membrane.reactions_dict.ContainsKey(guid) == false)
+                //{
+                //    cytosol.Reactions.Remove(cr);
+                //    break;
+                //}
+
+
+                //if (cytosol.reactions_dict.ContainsKey(guid) == false && membrane.reactions_dict.ContainsKey(guid) == false)
+                //{
+                //    cytosol.Reactions.Remove(cr);
+                //    break;
+                //}
+            }
+
+
+            return valid;
+        }
+
     }
 
     public class SimulationParams : EntityModelBase
@@ -2776,6 +2983,7 @@ namespace Daphne
             cells = new ObservableCollection<ConfigCell>();
             cells_dict = new Dictionary<string, ConfigCell>();
             molecules = new ObservableCollection<ConfigMolecule>();
+            molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(MoleculeCollectionChanged);
             molecules_dict = new Dictionary<string, ConfigMolecule>();
             genes = new ObservableCollection<ConfigGene>();
             genes_dict = new Dictionary<string, ConfigGene>();
@@ -2790,6 +2998,49 @@ namespace Daphne
             transition_drivers = new ObservableCollection<ConfigTransitionDriver>();
             transition_drivers_dict = new Dictionary<string, ConfigTransitionDriver>();
         }
+
+        private void MoleculeCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecule mol = nn as ConfigMolecule;
+                    mol.PropertyChanged += moleculePropertyChanged;
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var nn in e.OldItems)
+                {
+                    ConfigMolecule mol = nn as ConfigMolecule;
+                    mol.PropertyChanged -= moleculePropertyChanged;
+                }
+            }
+        }
+
+        void moleculePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "molecule_location")
+            {
+                ConfigMolecule cm = sender as ConfigMolecule;
+                int index = molecules.IndexOf(cm);
+                //force collectionChanged event, so filters on moleclule location can be properly refreshed
+                molecules[index] = cm;
+            }
+        }
+
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public class TimeConfig
@@ -3141,54 +3392,54 @@ namespace Daphne
             return true;
         }
 
-        /// <summary>
-        /// Check for a valid ECS reaction. 
-        /// All bulk molecules must be present in the ECS.
-        /// All boundary molecules must be present, as a whole group, in the membrane of at least one cell type.
-        /// There must be at least one bulk molecule.
-        /// </summary>
-        /// <param name="cr"></param>
-        /// <param name="scenario"></param>
-        /// <returns></returns>
-        public bool ValidateReaction(ConfigReaction cr, Protocol protocol)
-        {
-            bool bBulkOK = false;
-            bool bBoundOK = false;
+        ///// <summary>
+        ///// Check for a valid ECS reaction. 
+        ///// All bulk molecules must be present in the ECS.
+        ///// All boundary molecules must be present, as a whole group, in the membrane of at least one cell type.
+        ///// There must be at least one bulk molecule.
+        ///// </summary>
+        ///// <param name="cr"></param>
+        ///// <param name="scenario"></param>
+        ///// <returns></returns>
+        //public bool ValidateReaction(ConfigReaction cr, Protocol protocol)
+        //{
+        //    bool bBulkOK = false;
+        //    bool bBoundOK = false;
 
-            ObservableCollection<string> boundMols = new ObservableCollection<string>();
-            boundMols = cr.GetBoundaryMolecules(protocol.entity_repository);
-            if (boundMols.Count == 0)
-            {
-                bBoundOK = true;
-            }
-            else
-            {
-                foreach (CellPopulation cellpop in ((TissueScenario)protocol.scenario).cellpopulations)
-                {
-                    if (cellpop.Cell.membrane.HasMolecules(boundMols) == true)
-                    {
-                        bBoundOK = true;
-                        break;
-                    }
-                }
-            }
+        //    ObservableCollection<string> boundMols = new ObservableCollection<string>();
+        //    boundMols = cr.GetBoundaryMolecules(protocol.entity_repository);
+        //    if (boundMols.Count == 0)
+        //    {
+        //        bBoundOK = true;
+        //    }
+        //    else
+        //    {
+        //        foreach (CellPopulation cellpop in ((TissueScenario)protocol.scenario).cellpopulations)
+        //        {
+        //            if (cellpop.Cell.membrane.HasMolecules(boundMols) == true)
+        //            {
+        //                bBoundOK = true;
+        //                break;
+        //            }
+        //        }
+        //    }
 
-            ObservableCollection<string> bulkMols = new ObservableCollection<string>();
-            bulkMols = cr.GetBulkMolecules(protocol.entity_repository);
-            if (bulkMols.Count > 0)
-            {
-                if (comp.HasMolecules(bulkMols) == true)
-                {
-                    bBulkOK = true;
-                }
-            }
-            else
-            {
-                bBulkOK = false;
-            }
+        //    ObservableCollection<string> bulkMols = new ObservableCollection<string>();
+        //    bulkMols = cr.GetBulkMolecules(protocol.entity_repository);
+        //    if (bulkMols.Count > 0)
+        //    {
+        //        if (comp.HasMolecules(bulkMols) == true)
+        //        {
+        //            bBulkOK = true;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        bBulkOK = false;
+        //    }
 
-            return (bBoundOK & bBulkOK);
-        }
+        //    return (bBoundOK & bBulkOK);
+        //}
     }
 
 
@@ -3836,12 +4087,11 @@ namespace Daphne
             }
             set
             {
-                bool bFound = false;  // FindMolecule(value);
-                if (bFound == true)
+                if (mol_name != value)
                 {
-                }
-                else
                     mol_name = value;
+                    OnPropertyChanged("Name");
+                }
             }
         }
 
@@ -3894,7 +4144,22 @@ namespace Daphne
             }
         }
 
-        public MoleculeLocation molecule_location { get; set; }
+        private MoleculeLocation _molecule_location;
+        public MoleculeLocation molecule_location
+        {
+            get
+            {
+                return _molecule_location;
+            }
+            set
+            {
+                if (_molecule_location != value)
+                {
+                    _molecule_location = value;
+                    OnPropertyChanged("molecule_location");
+                }
+            }
+        }
 
         public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
             : base()
@@ -3999,6 +4264,9 @@ namespace Daphne
         {
             string TempMolName = name;
             int pipeIndex = TempMolName.Length - 1;
+
+            if (pipeIndex < 0) return TempMolName;
+
             string pipe = TempMolName.Substring(pipeIndex, 1);
             if (pipe == "|")
             {
@@ -4085,20 +4353,63 @@ namespace Daphne
         public void ValidateName(Level protocol)
         {
             bool found = false;
-            string tempMolName = Name;
+
+            // Check for empty Name
+            if (Name.Length == 0)
+            {
+                Name = GenerateNewName(protocol, "molNew");
+            }
+
+            // Check for pipe-only Name
+            if (Name.Length == 1 && Name.Substring(0, 1) == "|")
+            {
+                Name = GenerateNewName(protocol, "molNew");
+            }
+
+            // Check for duplicated Name
             foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
-                if (mol.Name == tempMolName && mol.entity_guid != entity_guid)
+                if (mol.Name == Name && mol.entity_guid != entity_guid)
                 {
                     found = true;
                     break;
                 }
             }
-
             if (found)
             {
                 Name = GenerateNewName(protocol, "Copy");
             }
+
+            // Check that pipe is used appropriately 
+            string pipe = Name.Substring(Name.Length - 1, 1);
+            if (molecule_location == MoleculeLocation.Boundary && pipe != "|")
+            {
+                Name = Name + "|";
+            }
+            else if (molecule_location == MoleculeLocation.Bulk && pipe == "|")
+            {
+                Name = Name.Substring(0, Name.Length - 1);
+            }
+
+            if (Name.Length == 1 && Name.Substring(0, 1) == "|")
+            {
+                Name = GenerateNewName(protocol, "molNew");
+            }
+
+            // Check again for duplicates in case adding or removing a pipe creates a duplicate name
+            foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
+            {
+                if (mol.Name == Name && mol.entity_guid != entity_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (found)
+            {
+                Name = GenerateNewName(protocol, "Copy");
+            }
+
         }
 
     }
@@ -4808,6 +5119,15 @@ namespace Daphne
             return false;
         }
 
+        //return states
+        public List<String> States
+        {
+            get
+            {
+                return Driver.states.ToList();
+            }
+        }
+
         public string GenerateStateName()
         {
             string OriginalName = "State";
@@ -5428,7 +5748,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
-                    //mp.PropertyChanged += mp_PropertyChanged;
+                    mp.PropertyChanged += mp_PropertyChanged;
 
                     // add molpop into molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
@@ -5584,6 +5904,14 @@ namespace Daphne
                 molpops.Remove(delMolPop);
             }
         }
+
+        //public void CheckReactionsAgainstMolpops()
+        //{
+        //    foreach (ConfigReaction cr in Reactions)
+        //    {
+
+        //    }
+        //}
     }
 
     public enum ReactionType
@@ -5659,7 +5987,7 @@ namespace Daphne
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
-            rate_constant_units = "";
+            rate_const_units = "";
         }
 
         public ConfigReaction(ConfigReaction reac)
@@ -5676,7 +6004,7 @@ namespace Daphne
             reactants_molecule_guid_ref = reac.reactants_molecule_guid_ref;
             products_molecule_guid_ref = reac.products_molecule_guid_ref;
             modifiers_molecule_guid_ref = reac.modifiers_molecule_guid_ref;
-            rate_constant_units  = reac.rate_constant_units;
+            rate_const_units  = reac.rate_const_units;
         }
 
         /// <summary>
@@ -5724,14 +6052,16 @@ namespace Daphne
         {
             string s = "";
 
-            //// Save - gmk 9/8/2015
-            //// spatial dimension for bulk and boundary molecules
-            //int[] dim = new int[sizeof(MoleculeLocation)];
-            //dim[(int)MoleculeLocation.Bulk] = 3;
-            //dim[(int)MoleculeLocation.Boundary] = 2;
-            //string[] superscriptDigits = new string[] {"\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"};
-            //int molec_cnt = 0,
-            //    micron_cnt = 0;
+            // Save - gmk 9/8/2015
+            // spatial dimension for bulk and boundary molecules
+            int[] dim = new int[sizeof(MoleculeLocation)];
+            dim[(int)MoleculeLocation.Bulk] = 3;
+            dim[(int)MoleculeLocation.Boundary] = 2;
+            string[] superscriptDigits = new string[] { "\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079" };
+            int molec_cnt = 0,
+                micron_cnt = 0,
+                prod_molec_cnt = 1,
+                prod_micron_cnt = 3;
 
             // Reactants
             int i = 0;
@@ -5743,8 +6073,8 @@ namespace Daphne
 
                 if (n > 1) s += n;
 
-                //molec_cnt -= n;
-                //micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+                molec_cnt -= n;
+                micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
 
                 s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
@@ -5766,8 +6096,8 @@ namespace Daphne
                 }
                 else
                 {
-                    //molec_cnt -= n;
-                    //micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
+                    molec_cnt -= n;
+                    micron_cnt += n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
                     s += repos.molecules_dict[mol_guid_ref].Name;
                 }
                 s += " + ";
@@ -5789,11 +6119,9 @@ namespace Daphne
                 if (n > 1)
                     s += n;
 
-                if (num_products == 0)
+                if (dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location] < prod_micron_cnt)
                 {
-                    //molec_cnt += n;
-                    //micron_cnt -= n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
-                    num_products++;
+                    prod_micron_cnt = dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
                 }
 
                 s += repos.molecules_dict[mol_guid_ref].Name;
@@ -5816,12 +6144,6 @@ namespace Daphne
                 }
                 else
                 {
-                    if (num_products == 0)
-                    {
-                        //molec_cnt += n;
-                        //micron_cnt -= n * dim[(int)repos.molecules_dict[mol_guid_ref].molecule_location];
-                        num_products++;
-                    }
                     s += repos.molecules_dict[mol_guid_ref].Name;
                 }
                 s += " + ";
@@ -5830,40 +6152,42 @@ namespace Daphne
             s = s.Trim(trimChars);
             TotalReactionString = s;
 
-            //// Determine the units for the rate constant
-            //rate_constant_units = "";
+            // Determine the units for the rate constant
+            rate_const_units = "";
 
-            //if (molec_cnt > 0)
-            //{
-            //    rate_constant_units += "molec";
-            //    // Skip the exponent if it is 1
-            //    if (molec_cnt > 1)
-            //    {
-            //        rate_constant_units += superscriptDigits[molec_cnt];
-            //    }
-            //    rate_constant_units += "-";
-            //}
-            //else if (molec_cnt < 0)
-            //{
-            //    rate_constant_units += "molec" + "\x207B" + superscriptDigits[Math.Abs(molec_cnt)] + "-";
-            //}
+            molec_cnt += prod_molec_cnt;
+            if (molec_cnt > 0)
+            {
+                rate_const_units += "molec";
+                // Skip the exponent if it is 1
+                if (molec_cnt > 1)
+                {
+                    rate_const_units += superscriptDigits[molec_cnt];
+                }
+                rate_const_units += "-";
+            }
+            else if (molec_cnt < 0)
+            {
+                rate_const_units += "molec" + "\x207B" + superscriptDigits[Math.Abs(molec_cnt)] + "-";
+            }
 
-            //if (micron_cnt > 0)
-            //{
-            //    rate_constant_units += "µm";
-            //    // Skip the exponent if it is 1
-            //    if (micron_cnt > 1)
-            //    {
-            //        rate_constant_units += superscriptDigits[micron_cnt]; 
-            //    }
-            //    rate_constant_units += "-";
-            //}
-            //else if (micron_cnt < 0)
-            //{
-            //    rate_constant_units += "µm" + "\x207B" + superscriptDigits[Math.Abs(micron_cnt)] + "-";
-            //}
+            micron_cnt -= prod_micron_cnt;
+            if (micron_cnt > 0)
+            {
+                rate_const_units += "µm";
+                // Skip the exponent if it is 1
+                if (micron_cnt > 1)
+                {
+                    rate_const_units += superscriptDigits[micron_cnt];
+                }
+                rate_const_units += "-";
+            }
+            else if (micron_cnt < 0)
+            {
+                rate_const_units += "µm" + "\x207B" + superscriptDigits[Math.Abs(micron_cnt)] + "-";
+            }
 
-            //rate_constant_units += "min" + "\x207B" + "\xB9";  // min-1
+            rate_const_units += "min" + "\x207B" + "\xB9";  // min-1
 
         }
 
@@ -5881,20 +6205,29 @@ namespace Daphne
         {
             foreach (string molguid in reactants_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        return true;
+                }
             }
             foreach (string molguid in products_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        return true;
+                }
             }
             foreach (string molguid in modifiers_molecule_guid_ref)
             {
                 if (!repos.genes_dict.ContainsKey(molguid))
                 {
-                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                        return true;
+                    if (repos.molecules_dict.ContainsKey(molguid) == true)
+                    {
+                        if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                            return true;
+                    }
                 }
             }
 
@@ -5905,20 +6238,29 @@ namespace Daphne
         {
             foreach (string molguid in reactants_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                        return true;
+                }
             }
             foreach (string molguid in products_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
-                    return true;
+                if (repos.molecules_dict.ContainsKey(molguid) == true)
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                        return true;
+                }
             }
             foreach (string molguid in modifiers_molecule_guid_ref)
             {
                 if (!repos.genes_dict.ContainsKey(molguid))
                 {
-                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
-                        return true;
+                    if (repos.molecules_dict.ContainsKey(molguid) == true)
+                    {
+                        if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Bulk)
+                            return true;
+                    }
                 }
             }
 
@@ -5987,7 +6329,19 @@ namespace Daphne
         public ObservableCollection<string> reactants_molecule_guid_ref;
         public ObservableCollection<string> products_molecule_guid_ref;
         public ObservableCollection<string> modifiers_molecule_guid_ref;
-        public string rate_constant_units;
+        private string rate_const_units;
+        public string Rate_constant_units
+        {
+            get
+            {
+                return rate_const_units;
+            }
+            set
+            {
+                rate_const_units = value;
+                OnPropertyChanged("Rate_constant_units");
+            }
+        }
 
         public string TotalReactionString { get; set; }
 
@@ -6215,6 +6569,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation cm = nn as ConfigMolecularPopulation;
+                    cm.PropertyChanged += mp_PropertyChanged;
 
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == false)
                     {
@@ -6227,11 +6582,33 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecularPopulation cm = dd as ConfigMolecularPopulation;
+                    cm.PropertyChanged -= mp_PropertyChanged;
 
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == true)
                     {
                         molecules_dict.Remove(cm.molecule.entity_guid);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// rebuild the molecules_dict that is used to screen reactions available to add
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void mp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "molecule")
+            {
+                return;
+            }
+            molecules_dict.Clear();
+            foreach (ConfigMolecularPopulation mp in molpops)
+            {
+                if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == false)
+                {
+                    molecules_dict.Add(mp.molecule.entity_guid, mp.molecule);
                 }
             }
         }
@@ -7069,7 +7446,6 @@ namespace Daphne
             return false;
         }
 
-
         /// <summary>
         /// Force distributed parameters to reinitialize on the next Sample.
         /// This is needed in order to get reproducible results for the same global seed value.
@@ -7091,6 +7467,203 @@ namespace Daphne
                 {
                     div_scheme.Driver.CurrentState.Reset();
                 }
+        }
+
+        /// <summary>
+        /// Add any missing cytosol or membrane molecules or genes needed for the given reaction.
+        /// </summary>
+        /// <param name="cr">the reaction to be added</param>
+        /// <param name="entity_repository">the source for the missing molecules or genes</param>
+        /// <returns>true if the reaction was added</returns>
+        public bool AddCytosolReactionComponents(ConfigReaction cr, EntityRepository entity_repository)
+        {
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                //If molecule - can be bulk or boundary so have to add to appropriate compartment - membrane or cytosol
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+                    if (mol.molecule_location == MoleculeLocation.Boundary && membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(mol.Clone(null), true);
+                    else if (mol.molecule_location == MoleculeLocation.Bulk && cytosol.HasMolecule(molguid) == false)
+                        cytosol.AddMolPop(mol.Clone(null), true);
+                }
+                //If gene, add to genes list
+                else if (entity_repository.genes_dict.ContainsKey(molguid))
+                {
+                    if (HasGene(molguid) == false)
+                        genes.Add(entity_repository.genes_dict[molguid].Clone(null));
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            foreach (string molguid in cr.products_molecule_guid_ref)
+            {
+                //If molecule - can be bulk or boundary so have to add to appropriate compartment - membrane or cytosol
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+                    if (mol.molecule_location == MoleculeLocation.Boundary && membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(mol.Clone(null), true);
+                    else if (mol.molecule_location == MoleculeLocation.Bulk && cytosol.HasMolecule(molguid) == false)
+                        cytosol.AddMolPop(mol.Clone(null), true);
+                }
+                //If gene, add to genes list
+                else if (entity_repository.genes_dict.ContainsKey(molguid))
+                {
+                    if (HasGene(molguid) == false)
+                        genes.Add(entity_repository.genes_dict[molguid].Clone(null));
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            foreach (string molguid in cr.modifiers_molecule_guid_ref)
+            {
+                //If molecule - can be bulk or boundary so have to clone and add to appropriate compartment - membrane or cytosol
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    ConfigMolecule mol = entity_repository.molecules_dict[molguid];
+                    if (mol.molecule_location == MoleculeLocation.Boundary && membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(mol.Clone(null), true);
+                    else if (mol.molecule_location == MoleculeLocation.Bulk && cytosol.HasMolecule(molguid) == false)
+                        cytosol.AddMolPop(mol.Clone(null), true);
+                }
+                //If gene, clone and add to genes list
+                else if (entity_repository.genes_dict.ContainsKey(molguid))
+                {
+                    if (HasGene(molguid) == false)
+                        genes.Add(entity_repository.genes_dict[molguid].Clone(null));
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Add any missing membrane molecules needed for the given reaction
+        /// </summary>
+        /// <param name="cr">the reaction of interest</param>
+        /// <param name="entity_repository">the source for any missing molecules</param>
+        /// <returns>true if all the needed components were added</returns>
+        public bool AddMembraneReactionComponents(ConfigReaction cr, EntityRepository entity_repository)
+        {
+            //If any molecules from new reaction don't exist in the membrane, clone and add them (can only be boundary molecules)                        
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    if (membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(entity_repository.molecules_dict[molguid].Clone(null), true);
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+            foreach (string molguid in cr.products_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    if (membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(entity_repository.molecules_dict[molguid].Clone(null), true);
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+            foreach (string molguid in cr.modifiers_molecule_guid_ref)
+            {
+                if (entity_repository.molecules_dict.ContainsKey(molguid))
+                {
+                    if (membrane.HasMolecule(molguid) == false)
+                        membrane.AddMolPop(entity_repository.molecules_dict[molguid].Clone(null), true);
+                }
+                else
+                {
+                    // Shouldn't get here if everything is working correctly
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void CheckCytosolReactions()
+        {
+            foreach (ConfigReaction cr in cytosol.Reactions)
+            {
+                foreach (string guid in cr.reactants_molecule_guid_ref)
+                {
+                    if (cytosol.reactions_dict.ContainsKey(guid) == false && membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (cytosol.reactions_dict.ContainsKey(guid) == false && FindGene(guid) == null && membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.products_molecule_guid_ref)
+                {
+                    if (cytosol.reactions_dict.ContainsKey(guid) == false && membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void CheckMembraneReactions()
+        {
+            foreach (ConfigReaction cr in membrane.Reactions)
+            {
+                foreach (string guid in cr.reactants_molecule_guid_ref)
+                {
+                    if (membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.products_molecule_guid_ref)
+                {
+                    if (membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -8959,7 +9532,7 @@ namespace Daphne
     public class RenderColor : INotifyPropertyChanged
     {
         //for future use, this is a hint as to what is this color being used, such as for the diff state of
-        public string hint { get; set; } //this is a hint as to what is this color being used, such as for the diff state of 
+        public string hint { get; set; } 
 
         private Color _entityColor;
 
@@ -8979,9 +9552,9 @@ namespace Daphne
 
         public RenderColor() { }
 
-        public RenderColor(Color c)
+        public RenderColor(Color c, string h="")
         {
-            hint = "";
+            hint = h;
             EntityColor = c;
         }
 
@@ -9051,6 +9624,37 @@ namespace Daphne
 
             renderLabel = "";
         }
+
+        public ObservableCollection<RenderColor> GetColors(RenderMethod renderMethod)
+        {
+                switch(renderMethod)
+               {
+                   case RenderMethod.CELL_TYPE:
+                       ObservableCollection<RenderColor> tmp = new ObservableCollection<RenderColor>();
+                       tmp.Add(this.base_color);
+                       return tmp;
+                   case RenderMethod.CELL_POP:
+                       return cell_pop_colors;
+                   case RenderMethod.CELL_DIV_STATE:
+                       return div_state_colors;
+                   case RenderMethod.CELL_DIV_SHADE:
+                       return div_shade_colors;
+                   case RenderMethod.CELL_DIFF_STATE:
+                       return diff_state_colors;
+                   case RenderMethod.CELL_DIFF_SHADE:
+                       return diff_shade_colors;
+                   case RenderMethod.CELL_DEATH_STATE:
+                       return death_state_colors;
+                   case RenderMethod.CELL_DEATH_SHADE:
+                       return death_shade_colors;
+                   case RenderMethod.CELL_GEN:
+                       return gen_colors;
+                   case RenderMethod.CELL_GEN_SHADE:
+                       return gen_shade_colors;
+               }
+            return null;
+        }
+
     }
 
     public class RenderMol
@@ -9088,17 +9692,93 @@ namespace Daphne
 
     }
 
-    public class RenderPop
+    public class RenderPop:INotifyPropertyChanged
     {
-        public bool renderOn { get; set; }                 // toggles rendering
-        public RenderMethod renderMethod { get; set; }      // indicates the render option
+        private RenderMethod _renderMethod;                 // indicates the render option
+
+        private bool _renderOn;
+
+        public bool renderOn 
+        {
+            get
+            {
+                return _renderOn;
+            }
+
+            set
+            {
+                if (_renderOn != value)
+                {
+                    _renderOn = value;
+                    OnPropertyChanged("renderOn");
+                }
+            }
+        }
+
         public string name { get; set; }                    // exist to facilitate eding scheme
-        public string renderLabel { get; set; }                   // cell or mol population's label
+        public string renderLabel { get; set; }             // cell or mol population's label
+
+        //information used to display legend
+        [JsonIgnore]
+        private List<RenderColor> renderColors;
+        [JsonIgnore]
+        public List<RenderColor> RenderColors
+        {
+            get
+            {
+                if (renderColors == null)
+                {
+                    RenderSkin renderSkin = SystemOfPersistence.static_SelectedRenderSkin;
+                    if (renderSkin != null)
+                    {
+                        this.renderColors = renderSkin.GetUsedRenderColors(renderLabel, renderMethod);
+                    }
+                }
+
+                return renderColors;
+            }
+            set
+            {
+                renderColors = value;
+                OnPropertyChanged("RenderColors");
+            }
+        }
 
         public RenderPop()
         {
             renderLabel = "";
         }
+
+        public RenderMethod renderMethod 
+        {
+            get
+            {
+                return _renderMethod;
+            }
+            set
+            {
+                if (_renderMethod == value) return;
+                _renderMethod = value;
+                RenderSkin renderSkin = SystemOfPersistence.static_SelectedRenderSkin;
+                if (renderSkin != null)
+                {
+                    this.RenderColors = renderSkin.GetUsedRenderColors(renderLabel, renderMethod);
+                }
+                OnPropertyChanged("renderMethod");
+            }
+        }
+
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
     }
 
@@ -9156,7 +9836,78 @@ namespace Daphne
                 var mol = er.molecules[i];
                 AddRenderMol(mol.entity_guid, mol.Name);
             }
+        }
 
+        /// <summary>
+        /// update hint that is used to display legend.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="er"></param>
+        public void UpdateColorHint(EntityRepository er)
+        {
+            foreach (var cell in er.cells)
+            {
+                string label = cell.renderLabel;
+                RenderCell rc = null;
+                foreach (RenderCell r in this.renderCells)
+                {
+                    if (r.renderLabel == label)
+                    {
+                        rc = r;
+                        break;
+                    }
+                }
+                List<string> div_states = cell.div_scheme == null ? null : cell.div_scheme.States;
+                ObservableCollection<RenderColor> colors1 = this.GetRenderColors(label, RenderMethod.CELL_DIV_STATE);
+                ObservableCollection<RenderColor> colors2 = this.GetRenderColors(label, RenderMethod.CELL_DIV_SHADE);
+                if (colors1 == null || colors2 == null) continue;
+                int i = 0;
+                if (div_states != null)
+                {
+                    for (i = 0; i < div_states.Count && i < colors1.Count; i++)
+                    {
+                        colors1[i].hint = div_states[i];
+                        colors2[i].hint = div_states[i];
+                    }
+                }
+                else
+                {
+                    colors1[i].hint = "Unspecified";
+                    colors2[i].hint = "Unspecified";
+                    i++;
+                }
+                for (; i < colors1.Count; i++)
+                {
+                    colors1[i].hint = "";
+                    colors2[i].hint = "";
+                }
+
+
+                List<string> diff_states = cell.diff_scheme == null ? null : cell.diff_scheme.States;
+                colors1 = this.GetRenderColors(label, RenderMethod.CELL_DIFF_STATE);
+                colors2 = this.GetRenderColors(label, RenderMethod.CELL_DIFF_SHADE);
+                if (colors1 == null || colors2 == null) continue;
+                i = 0;
+                if (diff_states != null)
+                {
+                    for (i = 0; i < diff_states.Count && i < colors1.Count; i++)
+                    {
+                        colors1[i].hint = diff_states[i];
+                        colors2[i].hint = diff_states[i];
+                    }
+                }
+                else
+                {
+                    colors1[i].hint = "Unspecified";
+                    colors2[i].hint = "Unspecified";
+                    i++;
+                }
+                for (; i < colors1.Count; i++)
+                {
+                    colors1[i].hint = "";
+                    colors2[i].hint = "";
+                }
+            }
         }
 
         //default color
@@ -9184,15 +9935,15 @@ namespace Daphne
                 if (ColorHelper.resetColorPicker(c) == true) break;
             }
 
-            renc.base_color = new RenderColor(ColorHelper.pickASolidColor());
-
-
+            renc.base_color = new RenderColor(ColorHelper.pickASolidColor(), name);
+          
             //cell_pop
             ColorHelper.resetColorPicker();
             List<Color> colorlist = ColorHelper.pickASetOfColor(8);
-            foreach (Color color in colorlist)
+            for (int i = 0; i < colorlist.Count; i++)
             {
-                renc.cell_pop_colors.Add(new RenderColor(color));
+                var color = colorlist[i];
+                renc.cell_pop_colors.Add(new RenderColor(color, i.ToString()));
             }
 
             //diff_state
@@ -9226,34 +9977,31 @@ namespace Daphne
 
             //death_state
             colorlist = ColorHelper.pickASetOfColor(2);
-            foreach (Color color in colorlist)
-            {
-                renc.death_state_colors.Add(new RenderColor(color));
-            }
+            renc.death_state_colors.Add(new RenderColor(colorlist[0], "live"));
+            renc.death_state_colors.Add(new RenderColor(colorlist[1], "dead"));
 
             //death_state_shade
             //colorlist = ColorHelper.pickColorShades(ColorHelper.pickASolidColor(), 2);
             colorlist = ColorHelper.pickColorShades(colorlist[0], 2, true);
-            foreach (Color color in colorlist)
-            {
-                renc.death_shade_colors.Add(new RenderColor(color));
-            }
+            renc.death_shade_colors.Add(new RenderColor(colorlist[0], "live"));
+            renc.death_shade_colors.Add(new RenderColor(colorlist[0], "dead"));
 
             //gen_colors
             colorlist = ColorHelper.pickASetOfColor(12);
-            foreach (Color color in colorlist)
+            for (int i = 0; i < colorlist.Count; i++)
             {
-                renc.gen_colors.Add(new RenderColor(color));
+                var color = colorlist[i];
+                renc.gen_colors.Add(new RenderColor(color, i.ToString()));
             }
 
             //gene_color_shade
             //colorlist = ColorHelper.pickColorShades(ColorHelper.pickASolidColor(), 12);
             colorlist = ColorHelper.pickColorShades(colorlist[0], 12, true);
-            foreach (Color color in colorlist)
+            for (int i = 0; i < colorlist.Count; i++)
             {
-                renc.gen_shade_colors.Add(new RenderColor(color));
-            }
-            
+                var color = colorlist[i];
+                renc.gen_shade_colors.Add(new RenderColor(color, i.ToString()));
+            }            
             renderCells.Add(renc);
         }
 
@@ -9362,6 +10110,49 @@ namespace Daphne
             SerializeToFile();
             this.originalContent = jsonSpec;
         }
+
+        internal List<RenderColor> GetUsedRenderColors(string renderLabel, RenderMethod renderMethod)
+        {
+            RenderCell rc = null;
+            List<RenderColor> ret_colors = null;
+            for (int i = 0; i < this.renderCells.Count; i++)
+            {
+                if (renderCells[i].renderLabel == renderLabel)
+                {
+                    rc = renderCells[i];
+                    break;
+                }
+            }
+            if (rc != null)
+            {
+                ret_colors = new List<RenderColor>();
+                var src_colors = rc.GetColors(renderMethod);
+                foreach (var c in src_colors)
+                {
+                    if (c.hint != "") ret_colors.Add(c);
+                }
+            }
+            return ret_colors;
+        }
+
+        internal ObservableCollection<RenderColor> GetRenderColors(string renderLabel, RenderMethod renderMethod)
+        {
+            RenderCell rc = null;
+            ObservableCollection<RenderColor> src_colors = null;
+            for (int i = 0; i < this.renderCells.Count; i++)
+            {
+                if (renderCells[i].renderLabel == renderLabel)
+                {
+                    rc = renderCells[i];
+                    break;
+                }
+            }
+            if (rc != null)
+            {
+                src_colors = rc.GetColors(renderMethod);
+            }
+            return src_colors;
+        }
     }
 
     public class RenderPopOptions
@@ -9436,6 +10227,17 @@ namespace Daphne
         {
             return this.molPopOptions.Where(x => x.renderLabel == label).SingleOrDefault();
         }
+    
+    
+        public void RenderSkinChanged()
+        {
+            foreach (RenderPop rp in this.cellPopOptions)
+            {
+                //force refresh
+                rp.RenderColors = null;
+            }
+        }
+    
     }
 
 

@@ -85,39 +85,188 @@
         
         <shared:PixelSnapper DockPanel.Dock="Top">
             <Menu x:Name="MainMenu">
-                <!--><MenuItem Header="Edit"/>-->
                 <MenuItem Header="File" Name="fileMenu">
-                    <MenuItem Header="New Protocol" Name="newScenario" Click="newScenario_Click"></MenuItem>
-                    <MenuItem Header="Load Protocol..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
-                    <MenuItem Header="Restore default path" Name="defaultPath" Click="defaultFolder" />
-                    <MenuItem Header="Save Protocol" Name="saveScenario" Command="ApplicationCommands.Save" />
-                    <MenuItem Header="Save Protocol As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
-                    <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
-                    <Separator />
+                    <MenuItem Header="New Protocol" Name="newScenario" Click="newScenario_Click">
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Load a blank protocol. With the blank protocol, you will need to use the Stores menu to get entities 
+                                            (genes, molecules, etc.) to add to your simulation protocol.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                    <MenuItem Header="Load Protocol..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Select and load a different protocol or saved state file for a tissue simulation or vat reaction complex simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                    <MenuItem Header="Restore default path" Name="defaultPath" Click="defaultFolder" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Restore the default directory for load and save operations to the Daphne default path.
+                                            You may need to use this if you saved a protocol outside the default directory.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                    <MenuItem Header="Save Protocol" Name="saveScenario" Command="ApplicationCommands.Save">
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                VerticalAlignment="Top" Padding="5" Width="200">
+                                            Save the current protocol with the same file name and directory path as when it was loaded.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>                   
+                    <MenuItem Header="Save Protocol As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Save the current protocol with a different file name or directory path.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>            
+                    <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Save the state of the current simulation to a file. 
+                                            The saved state file can be loaded, like a protocol, and used as the initial state for a new simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>                       
+                    <Separator />                 
                     <MenuItem Header="Export in SBML" Name="ExportSBML">
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Save the current protocol as an SBML model. 
+                                            Some Daphne constructs may not be supported by SBML and may be exported as annotations.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
                         <MenuItem Header="Simulation Model" Name="ExportModelSBML" Click="ExportSBML_Click" />
                         <MenuItem Header="Reaction Complex" Name="ExportComplexSBML" Click="ExportReactionComplexSBML_Click" />
-                    </MenuItem>
+                    </MenuItem>                    
                     <MenuItem Header="Import from SBML" Name="ImportSBML" Click="ImportSBML_Click" />
-
-                    <!--<Separator />
-                    <MenuItem Header="Load 2P text file into database..." Name="parse2Ptext" Click="parse2Ptext_Click" />-->
+                    <Separator />                 
+                    <MenuItem Header="Load past experiment..." Name="loadExp" Click="OpenExpSelectWindow" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Load results from a previous simulation for playback and analysis. 
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>                                      
+                    <MenuItem Header="Export as AVI" Name="exportAVI" IsEnabled="False" Click="ExportAVI" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                    VerticalAlignment="Top" Padding="5" Width="200">
+                                        Save the simulation playback as an AVI movie file. 
+                                        The AVI file can be viewed with desktop applications, such as Windows Media Player, and can be 
+                                        embedded in a PowerPoint presentation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
                     <Separator />
-                    <MenuItem Header="Load past experiment..." Name="loadExp" Click="OpenExpSelectWindow" />
-                    <MenuItem Header="Export AVI" Name="exportAVI" IsEnabled="False" Click="ExportAVI" />
-                    <Separator />
-                    <!--<local:RecentFileList x:Name="recentFileList" />-->
-                    <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
-                </MenuItem>
+ 
+                    <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                    VerticalAlignment="Top" Padding="5" Width="200">
+                                        Exit the Daphne application. 
+                                        You will be prompted to save the current protocol or user store if they have been modified.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                </MenuItem>               
+                
                 <MenuItem Header="File" Name="userStoreFileMenu" Visibility="Collapsed">
-                    <MenuItem Header="Save Store" Name="fileSaveStore" Click="menuAdminSave_Click" />
-                    <MenuItem Header="Save Store As..." Name="fileSaveStoreAs" Click="menuAdminSaveAs_Click" />
+                    <MenuItem Header="Save Store" Name="fileSaveStore" Click="menuAdminSave_Click" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                    VerticalAlignment="Top" Padding="5" Width="200">
+                                        Save the changes to your User Store to the default file.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                    <MenuItem Header="Save Store As..." Name="fileSaveStoreAs" Click="menuAdminSaveAs_Click" >
+                        <MenuItem.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                    VerticalAlignment="Top" Padding="5" Width="200">
+                                        Save the changes to your User Store in a different file.
+                                        Note that you user store is loaded when Daphne is started or a new protocol is loaded and 
+                                        is always read from the userstore.json file in the default Stores directory. 
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
                 </MenuItem>
                 
                 <MenuItem Header="Analysis" Name="analysisMenu" IsEnabled="False" >
-                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="CellPopDynMenu_Click"/>
-                    <MenuItem Header="Cell Lineage..." Name="LineageAnalMenu" Click="OpenLineageWindow" />
-                    <MenuItem Header="Cell Tracks" Name="fitMenu" Click="cellTracksMenu_Click" Visibility="Collapsed" />
+                    <MenuItem Header="Cell Population Dynamics..." Name="analCellPopDynMenu" Click="CellPopDynMenu_Click">
+                        <MenuItem.ToolTip>
+                            <TextBlock Text="Plot cell populations or subpopulations as a function of time."/>
+                        </MenuItem.ToolTip>              
+                    </MenuItem>
+                    <MenuItem Header="Cell Lineage..." Name="LineageAnalMenu" Click="OpenLineageWindow" >
+                        <MenuItem.ToolTip>
+                            <TextBlock Text="Create a pedigree analysis of a selected founder cell."/>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                    <MenuItem Header="Cell Tracks" Name="fitMenu" Click="cellTracksMenu_Click" Visibility="Collapsed" >
+                        <MenuItem.ToolTip>
+                            <TextBlock Text="Plot the trajectory of a selected cell."/>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">
@@ -159,9 +308,11 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ReacComplexChartWindow}"
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
                                     ConverterParameter=ReacComplexChartWindow}" />
-                    <MenuItem x:Name="menu_CellPopDyn" Header="Cell Population Dynamics"  
+                    <MenuItem x:Name="menu_CellPopDyn" Header="Cell Population Dynamics"
+                              IsEnabled="{Binding ElementName=analysisMenu, Path=IsEnabled}"
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=plotToolWindow}" />
-                    <MenuItem x:Name="menu_CellLineage" Header="Cell Lineage"  
+                    <MenuItem x:Name="menu_CellLineage" Header="Cell Lineage" 
+                               IsEnabled="{Binding ElementName=analysisMenu, Path=IsEnabled}"
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=lineageWindow}" />
 
                     <!-- This one is not yet functional -->
@@ -172,6 +323,19 @@
                 </MenuItem>
                 
                 <MenuItem Header="Stores"                 Name="pushMenu">
+                    <MenuItem.ToolTip>
+                        <ToolTip>
+                            <StackPanel Width="200" Orientation="Horizontal">
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                    VerticalAlignment="Top" Padding="5" Width="200">
+                                        View the Daphne (published) Store, your User Store, and the Protocol Store.
+                                        You can get entities (molecules, genes, etc.) from the Daphne or User Store and add them to the Protocol Store
+                                        to be available for adding to your simulation protocol.
+                                        You can also save entities that you have created or modified in the protocol to your User Store.
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </MenuItem.ToolTip>
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
                     <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" 
                               Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
@@ -192,7 +356,8 @@
                     <Separator />
                     <MenuItem Header="Export All" Name="allExport" Click="allExport_Click" />
                 </MenuItem>
-                <MenuItem Header="Administration" Name="AdminMenu">
+                
+                <MenuItem Header="Edit User Store" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
                     <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" Visibility="Collapsed" />
                     <MenuItem Header="Save" Name="menuAdminSave" Visibility="Collapsed" Click="menuAdminSave_Click"/>
@@ -201,14 +366,16 @@
                 </MenuItem>
               
                 <MenuItem Header="Help">
-                    <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
-                    <MenuItem Header="Tech help" Name="techHelp" Click="techHelp_click" />
-                    <!-- Commented out for now. Do we need this? -->
-                    <!--<MenuItem Header="Tech help" Name="techHelp" >
-                        <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
-                        <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
-                        <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
-                    </MenuItem>-->
+                    <MenuItem Header="User documentation..." Name="techHelp" Click="techHelp_click">
+                        <MenuItem.ToolTip>
+                            <TextBlock Text="Online documentation."/>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
+                    <MenuItem Header="Developer documentation..." Name="devHelp" Click="devHelp_click">
+                        <MenuItem.ToolTip>
+                            <TextBlock Text="Documentation for software developers."/>
+                        </MenuItem.ToolTip>
+                    </MenuItem>
                     <MenuItem Header="About..." Name="helpAbout" Click="helpAbout_Click" />
                 </MenuItem>
             </Menu>
@@ -399,7 +566,7 @@
         <shared:PixelSnapper DockPanel.Dock="Bottom">
             <StatusBar x:Name="statusBar" Padding="0,2,0,0">
                 <StatusBarItem x:Name="statusBarMessagePanel" Content="Ready:  Protocol" />
-                <Button x:Name="ReturnToProtocolButton" Margin="20,0" Visibility="Collapsed" Click="ReturnToProtocolButton_Click"
+                <Button x:Name="ReturnToProtocolButton" Margin="20,0" Visibility="Collapsed" Click="menuProtocolStore_Click"
                         Background="{shared:LinearGradientBrush #FF549EF4, #FFBFD8F4, GradientType=TopToBottom}" >Return to protocol</Button>
             </StatusBar>
         </shared:PixelSnapper>
@@ -422,7 +589,7 @@
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
-                <docking:SplitContainer Orientation="Vertical">
+                <docking:SplitContainer x:Name="dockingSplitContainer" Orientation="Vertical">
 
                     <docking:SplitContainer.Resources>
                         <DataTemplate x:Key="cellTabTemplate">
@@ -451,7 +618,7 @@
                     
                     <!-- VTK Windows Forms Host panel -->
                     <!-- Workspace -->
-                    <docking:Workspace>
+                    <docking:Workspace SizeChanged="Workspace_SizeChanged">
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
                             <docking:TabbedMdiContainer Name="MdiTabContainer" Background="LightGray">
                                 <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige"
@@ -499,8 +666,7 @@
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
-                                                <ContentControl>
-                                                    
+                                                <ContentControl>                                                   
                                                     <StackPanel Orientation="Vertical">
                                                         <!--This is a hidden check box but we use it to figure out if tracks are active or not-->
                                                         <CheckBox x:Name="chkTracks" IsChecked="{Binding Path=TracksActive}" Visibility="Collapsed"/>
@@ -542,7 +708,7 @@
                                                 </ContentControl>
                                                 <Separator ToolBar.OverflowMode="AsNeeded"/>
 
-                                                <Grid>
+                                                <Grid PreviewMouseDown="Grid_PreviewMouseDown">
                                                     <Expander x:Name="CellOptionsExpander"
                                                               ExpandDirection="Down" 
                                                               MinWidth="112"
@@ -553,7 +719,7 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                              Expanded="CellOptionsExpander_Expanded"
+                                                              ToolTip="Rendering choices (color and shape) for cells."
                                                                 >
                                                     </Expander>
                                                     <Popup x:Name="CellOptionsPopup"  AllowsTransparency="True" PopupAnimation="Fade"
@@ -562,15 +728,16 @@
                                                            ComboBox.SelectionChanged="CellsColorByCB_SelectionChanged"
                                                            CheckBox.Checked="CellRenderOnOffChanged"
                                                            CheckBox.Unchecked="CellRenderOnOffChanged"
+                                                           StaysOpen="False"
                                                            >
                                                         <StackPanel Orientation="Vertical">
-                                                            <local:CellOptions DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}"
+                                                            <local:CellOptions x:Name="cell_ops" DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}"
                                                                                Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
                                                         </StackPanel>
                                                     </Popup>
                                                 </Grid>
 
-                                                <Grid>
+                                                <Grid Mouse.PreviewMouseDown="Grid_PreviewMouseDown_1">
                                                     <Expander x:Name="ECMOptionsExpander"
                                                               MinWidth="114"
                                                               ExpandDirection="Down" 
@@ -581,8 +748,13 @@
                                                               BorderThickness="1"
                                                               BorderBrush="Black"
                                                               Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                              Expanded="ECMOptionsExpander_Expanded"
                                                             >
+                                                        <Expander.ToolTip>
+                                                            <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
+                                                                Color options for rendering ECM molecular concentrations.
+                                                                Warning: Rendering ECM molecular concentrations will make the simulation run more slowly.
+                                                            </TextBlock> 
+                                                        </Expander.ToolTip>
                                                     </Expander>
                                                     <Popup x:Name="ECMOptionsPopup"  AllowsTransparency="False"
                                                            PlacementTarget="{Binding ElementName=ECMOptionsExpander}" 
@@ -590,9 +762,10 @@
                                                            IsOpen="{Binding ElementName=ECMOptionsExpander, Path=IsExpanded}"
                                                            CheckBox.Checked="MolPopRenderOnOffChanged"
                                                            CheckBox.Unchecked="MolPopRenderOnOffChanged"
+                                                           StaysOpen="False"
                                                            >
-                                                        <StackPanel Orientation="Vertical">
-                                                            <local:ECMMolecules DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
+                                                        <StackPanel x:Name="ecm_options_stackpanel" Orientation="Vertical">
+                                                            <local:ECMMolecules x:Name="ecm_mol_ops" DataContext="{Binding ElementName=ComponentsToolWindow, Path=DataContext}" 
                                                                                 Tag="{Binding ElementName=vtkDisplay_DockPanel, Path=DataContext}"/>
                                                         </StackPanel>
                                                     </Popup>
@@ -639,12 +812,14 @@
                                                                              SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                              />
                                                 <Separator ToolBar.OverflowMode="Never" />
-                                                <Button Content="Export" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="52" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>                                                
+                                                <Button Content="Export" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" 
+                                                        VerticalAlignment="Center" Width="52" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"
+                                                        ToolTip="Save the 3D view to a file."/>                                                
                                             </ToolBar>
                                         </ToolBarTray>
 
                                         <!-- VTK render window -->
-                                        <ContentPresenter MinHeight="100" Content="{Binding Wfh}" />
+                                        <ContentPresenter Content="{Binding Wfh}" />
                                     </DockPanel>
                                 </docking:DocumentWindow>
                                 <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Store" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
@@ -666,55 +841,315 @@
                                 <lin:CellLineageControl x:Name="lineageWindow" Title="Cell Lineage" Visibility="Visible"
                                                         ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  />
 
-                                <!--DataContext="{Binding Path=MainWindow.SOP.Protocol.scenario}"-->
-
                             </docking:TabbedMdiContainer>
                         </docking:TabbedMdiHost>
                     </docking:Workspace>
 
-                    <!-- skg 8/12/12 Cell Molecular Info -->
-                    <docking:ToolWindowContainer x:Name="Tool1" docking:DockSite.ControlSize="1,260" >
-                        <docking:ToolWindow x:Name="ToolWinCellInfo" Title="Cell Data" >
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                                <StackPanel>
-                                <shared:PixelSnapper DockPanel.Dock="Top">
-                                    <ToolBarTray>
-                                        <ToolBar Name="CellInfoToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor" Height="30">
-                                            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
-                                                <Label FontSize="12" FontFamily="Verdana" FontWeight="Bold" Width="60" Height="24" Margin="20,2">Cell Id:</Label>
-                                                <TextBox x:Name="txtCellIdent" FontSize="12" FontFamily="Verdana" FontWeight="Bold" Text="" Height="24" Width="50" Margin="20,2"></TextBox>
-                                                <Button x:Name="btnShowCellInfoById" Margin="20,0" Height="24" Width="80" Click="btnShowCellInfoById_Click">Update</Button>
-                                            </StackPanel>
-                                        </ToolBar>
-                                    </ToolBarTray>
-                                </shared:PixelSnapper>
+                    <!-- Cell Molecular Info -->
+                    <docking:ToolWindowContainer x:Name="Tool1" docking:DockSite.ControlSize="1,260">
+                        <docking:ToolWindow x:Name="ToolWinCellInfo" Title="Cell Data">
+                                <DockPanel>
+                                    <shared:PixelSnapper DockPanel.Dock="Top">
+                                        <ToolBarTray>
+                                            <ToolBar Name="CellInfoToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor" Height="Auto">
+                                                <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                                                    <Label FontSize="12" FontFamily="Verdana" FontWeight="Bold" Height="24" Margin="0,0,5,0">Cell Id</Label>
+                                                <TextBox x:Name="txtCellIdent" FontSize="12" FontFamily="Verdana" FontWeight="Bold" Text="" Height="24" MinWidth="50" Margin="0,0,5,0"></TextBox>
+                                                <Button x:Name="btnShowCellInfoById" Margin="0,0,5,0" Height="24" Width="80" Click="btnShowCellInfoById_Click">Update</Button>
+                                                </StackPanel>
+                                            </ToolBar>
+                                        </ToolBarTray>
+                                    </shared:PixelSnapper>
 
-                                <Grid x:Name="CellInfoGrid">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
+                                    <Grid x:Name="CellInfoGrid">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
                                         <TabControl x:Name="CellInfoTabControl" Grid.Row="0" Grid.Column="0" TabStripPlacement="Bottom"  >
 
-                                            <TabItem Header="Molecular" x:Name="TabItemMolConcs" >
-                                            <StackPanel>
-                                                <TextBlock x:Name="tbMolConcs" TextAlignment="Left"></TextBlock>
-                                                    <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="32*"/>
-                                                        <RowDefinition Height="32*" />
-                                                    </Grid.RowDefinitions>                                                    
+                                            <TabItem Header="Plasma Membrane" x:Name="TabItemMembrane" >
+                                            <DockPanel >
+                                                <Grid DockPanel.Dock="Bottom">
+                                                    <ListView x:Name="lvMembraneMolConcs" Margin="0,4" MinHeight="100" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                        <ListView.View>
+                                                            <GridView>                                                                                                                                
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
+                                                                <GridViewColumn Width="120"  Header="Molecule">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Path=Molecule}"></TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>                                                                
+                                                                <GridViewColumn Width="200">
+                                                                    <GridViewColumn.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock HorizontalAlignment="Left">Concentration (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">2</Run>)
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.HeaderTemplate>
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" ZeroEpsilon="0.000001"  IsReadOnly="True" Number="{Binding Path=Concentration}"
+                                                                                    TextFieldWidth="75" >
+                                                                            </uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+
+                                                                <GridViewColumn Width="250" >
+                                                                    <GridViewColumn.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock HorizontalAlignment="Left">Gradient (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.HeaderTemplate>
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <StackPanel Orientation="Horizontal" >
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[0]}" 
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center"/>
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[1]}"
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center" Margin="6,0,0,0"  />
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[2]}"
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center" Margin="6,0,0,0" />
+                                                                            </StackPanel>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            </GridView>
+
+                                                        </ListView.View>
+                                                    </ListView>
                                                 </Grid>
-                                                    <Grid>
-                                                    <ListView x:Name="lvCellMolConcs" Margin="0,4"
-                                                      MinHeight="100" MaxHeight="150" >
+                                            </DockPanel>
+                                        </TabItem>
+
+                                            <TabItem Header="Cytosol" x:Name="TabItemCytosol" >
+                                            <DockPanel >
+                                                <Grid DockPanel.Dock="Bottom">
+                                                    <ListView x:Name="lvCytosolMolConcs" Margin="0,4" MinHeight="100" ScrollViewer.VerticalScrollBarVisibility="Auto">
                                                         <ListView.View>
                                                             <GridView>
                                                                 <GridView.ColumnHeaderContainerStyle>
                                                                     <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
+                                                                <GridViewColumn Width="120"  Header="Molecule">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Path=Molecule}"></TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                                <GridViewColumn Width="200">
+                                                                    <GridViewColumn.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock HorizontalAlignment="Left">Concentration (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.HeaderTemplate>
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" ZeroEpsilon="0.000001"  IsReadOnly="True" Number="{Binding Path=Concentration}"
+                                                                                    TextFieldWidth="75" >
+                                                                            </uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+
+                                                                <GridViewColumn Width="250" >
+                                                                    <GridViewColumn.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock HorizontalAlignment="Left">Gradient (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">4</Run>)
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.HeaderTemplate>
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <StackPanel Orientation="Horizontal" >
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[0]}" 
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center"/>
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[1]}"
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center" Margin="6,0,0,0"  />
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[2]}"
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center" Margin="6,0,0,0" />
+                                                                            </StackPanel>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            </GridView>
+
+                                                        </ListView.View>
+                                                    </ListView>
+                                                </Grid>
+                                            </DockPanel>
+                                        </TabItem>
+
+                                            <TabItem Header="ECM" x:Name="TabItemECM" >
+                                            <DockPanel >
+                                                <Grid DockPanel.Dock="Bottom">
+                                                    <ListView x:Name="lvECMMolConcs" Margin="0,4" MinHeight="100" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                        <ListView.View>
+                                                            <GridView>
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
+                                                                <GridViewColumn Width="120"  Header="Molecule">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Path=Molecule}"></TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                                <GridViewColumn Width="200">
+                                                                    <GridViewColumn.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock HorizontalAlignment="Left">Concentration (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.HeaderTemplate>
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" ZeroEpsilon="0.000001"  IsReadOnly="True" Number="{Binding Path=Concentration}"
+                                                                                    TextFieldWidth="75" >
+                                                                            </uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+
+                                                                <GridViewColumn Width="250" >
+                                                                    <GridViewColumn.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock HorizontalAlignment="Left">Gradient (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">4</Run>)
+                                                                            </TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.HeaderTemplate>
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <StackPanel Orientation="Horizontal" >
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[0]}" 
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center"/>
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[1]}"
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center" Margin="6,0,0,0"  />
+                                                                                <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[2]}"
+                                                                                    TextFieldWidth="75" HorizontalAlignment="Center" Margin="6,0,0,0" />
+                                                                            </StackPanel>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            </GridView>
+
+                                                        </ListView.View>
+                                                    </ListView>
+                                                </Grid>
+                                            </DockPanel>
+                                        </TabItem>
+
+                                            <TabItem Header="Spatial" x:Name="TabItemCellInfo" DataContext="MainWindow">
+                                                <DockPanel>
+                                                    <ListView x:Name="lvCellXVF" Margin="0,4" MinHeight="100" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                        <ListView.View>
+                                                            <GridView>
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
+
+                                                                <GridViewColumn Width="120" Header="Property">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Path=name}"></TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="   X">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=x}"></uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="   Y" >
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=y}"></uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="   Z">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=z}"></uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+                                                            </GridView>
+                                                        </ListView.View>
+                                                    </ListView>
+                                                </DockPanel>
+
+                                            </TabItem>                                            
+                                            
+                                            <TabItem Header="Differentiation" x:Name="TabItemCellDiff" >
+                                                <DockPanel>
+                                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                                                        <TextBlock Margin="0,0,10,0">Current State</TextBlock>
+                                                        <TextBox x:Name="txtCellState" Width="200" Margin="0,0,0,0" IsReadOnly="True"></TextBox>
+                                                    </StackPanel>
+                                                    <ListView x:Name="lvCellDiff" Margin="0,4"
+                                                        MinHeight="100"
+                                                        VerticalAlignment="Top"
+                                                        ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                        <ListView.View>
+                                                            <GridView>
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
                                                                         <Setter Property="Height" Value="Auto"></Setter>
                                                                         <Setter Property="Background">
                                                                             <Setter.Value>
@@ -727,39 +1162,18 @@
                                                                     </Style>
                                                                 </GridView.ColumnHeaderContainerStyle>
 
-                                                                <GridViewColumn Width="120" Header="Molecule">
+                                                                <GridViewColumn Width="120" Header="Gene">
                                                                     <GridViewColumn.CellTemplate>
                                                                         <DataTemplate>
-                                                                            <TextBlock Text="{Binding Path=Molecule}"></TextBlock>
-                                                                        </DataTemplate>
-                                                                    </GridViewColumn.CellTemplate>
-                                                                </GridViewColumn>
-                                                                <GridViewColumn Width="120" Header="Concentration">
-                                                                    <GridViewColumn.CellTemplate>
-                                                                        <DataTemplate>
-                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" ZeroEpsilon="0.000001"  IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
+                                                                            <TextBlock Text="{Binding Path=Name}"></TextBlock>
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
 
-                                                                <GridViewColumn Width="100" Header="Gradient X">
+                                                                <GridViewColumn Width="150" Header="Gene Activation Levels">
                                                                     <GridViewColumn.CellTemplate>
                                                                         <DataTemplate>
-                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[0]}"></uc:DoublesBox>
-                                                                        </DataTemplate>
-                                                                    </GridViewColumn.CellTemplate>
-                                                                </GridViewColumn>
-                                                                <GridViewColumn Width="100" Header="Gradient Y" >
-                                                                    <GridViewColumn.CellTemplate>
-                                                                        <DataTemplate>
-                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[1]}"></uc:DoublesBox>
-                                                                        </DataTemplate>
-                                                                    </GridViewColumn.CellTemplate>
-                                                                </GridViewColumn>
-                                                                <GridViewColumn Width="100" Header="Gradient Z">
-                                                                    <GridViewColumn.CellTemplate>
-                                                                        <DataTemplate>
-                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[2]}"></uc:DoublesBox>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Activation}"></uc:DoublesBox>
                                                                         </DataTemplate>
                                                                     </GridViewColumn.CellTemplate>
                                                                 </GridViewColumn>
@@ -767,175 +1181,69 @@
                                                             </GridView>
                                                         </ListView.View>
                                                     </ListView>
+                                                </DockPanel>
+                                            </TabItem>
+                                            <TabItem Header="Division" x:Name="TabItemCellDiv" >
+                                                <DockPanel>
+                                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                                                        <TextBlock Margin="0,0,10,0">Current State</TextBlock>
+                                                        <TextBox x:Name="txtDivCellState" Width="200" Margin="0,0,10,0" IsReadOnly="True"></TextBox>
+                                                        <TextBlock Margin="10,0,10,0">Generation</TextBlock>
+                                                        <TextBox x:Name="txtDivCellGen" Width="200" Margin="0,0,10,0" IsReadOnly="True"></TextBox>
+                                                    </StackPanel>
+                                                    <ListView x:Name="lvCellDiv" Margin="0,4"
+                                                        MinHeight="100"
+                                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                              VerticalAlignment="Top"
+                                                            >
+                                                        <ListView.View>
+                                                            <GridView>
+                                                                <GridView.ColumnHeaderContainerStyle>
+                                                                    <Style TargetType="GridViewColumnHeader">
+                                                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                                                        <Setter Property="Height" Value="Auto"></Setter>
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Offset="0.0" Color="White" />
+                                                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </GridView.ColumnHeaderContainerStyle>
+
+                                                                <GridViewColumn Width="120" Header="Gene">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Path=Name}"></TextBlock>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+
+                                                                <GridViewColumn Width="150" Header="Gene Activation Levels">
+                                                                    <GridViewColumn.CellTemplate>
+                                                                        <DataTemplate>
+                                                                            <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Activation}"></uc:DoublesBox>
+                                                                        </DataTemplate>
+                                                                    </GridViewColumn.CellTemplate>
+                                                                </GridViewColumn>
+
+                                                            </GridView>
+                                                        </ListView.View>
+                                                    </ListView>
+                                                </DockPanel>
+                                            </TabItem>
+                                            <TabItem Header="Time Trajectory" x:Name="TabItemTimeTraj" Visibility="Hidden">
+                                                <Grid>
+                                                    <WindowsFormsHost Margin="21" x:Name="winFormsHostTimeTraj" >
+                                                        <wf:Panel x:Name="pChartTimeTraj" Visible="True"/>
+                                                    </WindowsFormsHost>
                                                 </Grid>
-                                            </StackPanel>
-                                        </TabItem>
-                                        <TabItem Header="Spatial" x:Name="TabItemCellInfo" DataContext="MainWindow">
-                                            <StackPanel>
-                                                <!--<TextBlock x:Name="tbCellConc" TextAlignment="Left"></TextBlock>-->
-                                                    <TextBlock TextAlignment="Left" Text ="{Binding ElementName=tbMolConcs, Path=Text}" />
-                                                    <ListView x:Name="lvCellXVF" Margin="0,4"
-                                                      MinHeight="100" MaxHeight="150"
-                                                    >
-                                                    <ListView.View>
-                                                        <GridView>
-                                                            <GridView.ColumnHeaderContainerStyle>
-                                                                <Style TargetType="GridViewColumnHeader">
-                                                                    <Setter Property="Height" Value="Auto"></Setter>
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Offset="0.0" Color="White" />
-                                                                                <GradientStop Offset="1.0" Color="Beige" />
-                                                                            </LinearGradientBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </Style>
-                                                            </GridView.ColumnHeaderContainerStyle>
-
-                                                            <GridViewColumn Width="120" Header="Property">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBlock Text="{Binding Path=name}"></TextBlock>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-                                                            <GridViewColumn Width="100" Header="X">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=x}"></uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-                                                            <GridViewColumn Width="100" Header="Y" >
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=y}"></uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-                                                            <GridViewColumn Width="100" Header="Z">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=z}"></uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-                                                        </GridView>
-                                                    </ListView.View>
-                                                </ListView>
-                                            </StackPanel>
-
-                                        </TabItem>
-                                        <TabItem Header="Differentiation" x:Name="TabItemCellDiff" >
-                                            <StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                        <!--<TextBlock x:Name="tbMolConcs" TextAlignment="Left"></TextBlock>-->
-                                                        <TextBlock TextAlignment="Left" Margin="0,4" Text ="{Binding ElementName=tbMolConcs, Path=Text}" />
-                                                        <TextBlock Margin="40,4">Current State:</TextBlock>
-                                                        <TextBox x:Name="txtCellState" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
-                                                </StackPanel>
-                                                <ListView x:Name="lvCellDiff" Margin="0,4"
-                                                      MinHeight="100" MaxHeight="150"
-                                                    >
-                                                    <ListView.View>
-                                                        <GridView>
-                                                            <GridView.ColumnHeaderContainerStyle>
-                                                                <Style TargetType="GridViewColumnHeader">
-                                                                    <Setter Property="Height" Value="Auto"></Setter>
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Offset="0.0" Color="White" />
-                                                                                <GradientStop Offset="1.0" Color="Beige" />
-                                                                            </LinearGradientBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </Style>
-                                                            </GridView.ColumnHeaderContainerStyle>
-
-                                                            <GridViewColumn Width="120" Header="Gene">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBlock Text="{Binding Path=Name}"></TextBlock>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-
-                                                            <GridViewColumn Width="150" Header="Gene Activation Levels">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Activation}"></uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-
-                                                        </GridView>
-                                                    </ListView.View>
-                                                </ListView>
-                                            </StackPanel>
-                                        </TabItem>
-                                        <TabItem Header="Division" x:Name="TabItemCellDiv" >
-                                            <StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <!--<TextBlock TextAlignment="Left"></TextBlock>-->
-                                                        <TextBlock TextAlignment="Left" Margin="0,4" Text ="{Binding ElementName=tbMolConcs, Path=Text}" />
-                                                        <TextBlock Margin="40,4">Current State:</TextBlock>
-                                                        <TextBox x:Name="txtDivCellState" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
-                                                        <TextBlock Margin="10,4">Generation:</TextBlock>
-                                                        <TextBox x:Name="txtDivCellGen" Width="200" Margin="10,0" IsReadOnly="True"></TextBox>
-                                                </StackPanel>
-                                                <ListView x:Name="lvCellDiv" Margin="0,4"
-                                                      MinHeight="100" MaxHeight="150"
-                                                    >
-                                                    <ListView.View>
-                                                        <GridView>
-                                                            <GridView.ColumnHeaderContainerStyle>
-                                                                <Style TargetType="GridViewColumnHeader">
-                                                                    <Setter Property="Height" Value="Auto"></Setter>
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Offset="0.0" Color="White" />
-                                                                                <GradientStop Offset="1.0" Color="Beige" />
-                                                                            </LinearGradientBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </Style>
-                                                            </GridView.ColumnHeaderContainerStyle>
-
-                                                            <GridViewColumn Width="120" Header="Gene">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBlock Text="{Binding Path=Name}"></TextBlock>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-
-                                                            <GridViewColumn Width="150" Header="Gene Activation Levels">
-                                                                <GridViewColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Activation}"></uc:DoublesBox>
-                                                                    </DataTemplate>
-                                                                </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>
-
-                                                        </GridView>
-                                                    </ListView.View>
-                                                </ListView>
-                                            </StackPanel>
-                                        </TabItem>
-                                        <TabItem Header="Time Trajectory" x:Name="TabItemTimeTraj" Visibility="Hidden">
-                                            <Grid>
-                                                <WindowsFormsHost Margin="21" x:Name="winFormsHostTimeTraj" >
-                                                    <wf:Panel x:Name="pChartTimeTraj" Visible="True"/>
-                                                </WindowsFormsHost>
-                                            </Grid>
-                                        </TabItem>
-                                    </TabControl>
-                                </Grid>
-                                </StackPanel>
-                            </ScrollViewer>
+                                            </TabItem>
+                                        </TabControl>
+                                    </Grid>
+                                </DockPanel>
                         </docking:ToolWindow>
                     </docking:ToolWindowContainer>
                 </docking:SplitContainer>

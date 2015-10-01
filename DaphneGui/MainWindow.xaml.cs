@@ -264,8 +264,6 @@ namespace DaphneGui
         }
 
         public CellInfo SelectedCellInfo { get; set; }
-        public ObservableCollection<CellMolecularInfo> currentConcs { get; set; }
-
         public static RoutedCommand SelectReportFolderCommand = new RoutedCommand();
         public static DocumentWindow ST_VTKDisplayDocWindow;
         public static CellStudioToolWindow ST_CellStudioToolWindow;
@@ -286,7 +284,9 @@ namespace DaphneGui
 
             InitializeComponent();
 
+            ReacComplexChartWindow.MW = this;
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
+
             ST_RenderSkinWindow = renderSkinWindow;
             ST_VTKDisplayDocWindow = VTKDisplayDocWindow;
             ST_CellStudioToolWindow = CellStudioToolWindow;
@@ -299,8 +299,7 @@ namespace DaphneGui
             this.ToolWinCellInfo.Close();
 
             SelectedCellInfo = new CellInfo();
-            currentConcs = new ObservableCollection<CellMolecularInfo>();
-
+ 
             //DO NOT DELETE THIS
             //This code creates the DaphneStore and UserStore.
             //Only run this code during development.
@@ -737,7 +736,7 @@ namespace DaphneGui
             ProtocolCreators.CreateBlankProtocol(protocol);
             protocol.SerializeToFile();
 
-            //DRIVER-LOCOMOTOR SCENARIO
+            // DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\simple_chemotaxis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             protocol.SerializeToFile();
@@ -748,34 +747,33 @@ namespace DaphneGui
             ////Serialize to json
             //protocol.SerializeToFile();
 
-            //RECEPTOR HOMEOSTASIS SCENARIO
+            // RECEPTOR HOMEOSTASIS Protocol
             protocol = new Protocol("Config\\receptor_homeostasis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateLigandReceptorProtocol(protocol);
-            //serialize to json
             protocol.SerializeToFile();
 
-            //GC SCENARIO
+            // Centroblast-Centrocyte recycling protocol
             protocol = new Protocol("Config\\centroblast-centrocyte_recycling.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.Create_CB_CC_Recycling_Protocol(protocol);
             protocol.SerializeToFile();
 
-            //GC SCENARIO
+            // Germinal Center Protocol
             protocol = new Protocol("Config\\simple_germinal_center.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateGCProtocol(protocol);
             protocol.SerializeToFile();
 
 
-            // BLANK VAT-REACTION-COMPLEX SCENARIO
+            // BLANK VAT-REACTION-COMPLEX Protocol
             protocol = new Protocol("Config\\vatRC_blank.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
             protocol.SerializeToFile();
 
-            // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
+            // VAT REACTION-COMPLEX - LIGAND RECEPTOR Protocol
             protocol = new Protocol("Config\\vatRC_ligand_receptor.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
             protocol.SerializeToFile();
 
-            // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
+            // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING Protocol
             protocol = new Protocol("Config\\vatRC_2SiteAbBinding.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
             protocol.SerializeToFile();
@@ -835,7 +833,6 @@ namespace DaphneGui
             saveScenarioUsingDialog();
             tempFileContent = false;
         }
-
 
         /// <summary>
         /// Imports a model specification in SBML
@@ -1079,7 +1076,7 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
             dlg.OverwritePrompt = true;
-            dlg.InitialDirectory = orig_path;
+            dlg.InitialDirectory = orig_path + @"\Stores";
             dlg.FileName = "new_store"; // Default file name
             dlg.DefaultExt = ".json"; // Default file extension
             dlg.Filter = "Daphne Stores JSON docs (.json)|*.json"; // Filter files by extension
@@ -1427,13 +1424,32 @@ namespace DaphneGui
             #endregion
         }
 
+        private bool vcrExecutionTest()
+        {
+            if (protocolChanged() == true)
+            {
+                MessageBox.Show("The protocol changed. Playback can no longer be executed and will get disabled.", "Playback warning");
+                VCR_Toolbar.IsEnabled = false;
+                return false;
+            }
+            return true;
+        }
+
         private void VCRbutton_First_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.MoveToFrame(0, false);
         }
 
         private void VCRbutton_Play_Checked(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             DataStorageMenu.IsEnabled = false;
             vcrControl.SetFlag(VCRControl.VCR_ACTIVE);
         }
@@ -1446,21 +1462,37 @@ namespace DaphneGui
 
         private void VCRbutton_Back_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.Advance(-1);
         }
 
         private void VCRbutton_Forward_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.Advance(1);
         }
 
         private void VCRbutton_Last_Click(object sender, RoutedEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.MoveToFrame(vcrControl.TotalFrames - 1);
         }
 
         private void VCRSlider_LeftMouse_Down(object sender, MouseButtonEventArgs e)
         {
+            if (vcrExecutionTest() == false)
+            {
+                return;
+            }
             vcrControl.SaveFlags();
             vcrControl.SetInactive();
         }
@@ -1842,13 +1874,26 @@ namespace DaphneGui
 
         private void techHelp_click(object sender, RoutedEventArgs e)
         {
-            if (dw.HasBeenClosed)
-            {
-                dw = new DocWindow();
-            }
-            dw.webBrowser.Navigate(new Uri("http://computationalimmunology.bu.edu/"));
-            dw.topicBox.Text = "Gaussian Processes";
-            dw.Show();
+            //if (dw.HasBeenClosed)
+            //{
+            //    dw = new DocWindow();
+            //}
+            //dw.webBrowser.Navigate(new Uri("http://computationalimmunology.bu.edu/"));
+            //dw.topicBox.Text = "Gaussian Processes";
+            //dw.Show();
+
+            //---------------------------------------------------------------------------------------
+
+            //Method 1 - This works fine except for title cut off at top plus some missing toolbar items.
+            System.Diagnostics.Process.Start("http://computationalimmunology.bu.edu");
+
+            //Method 2
+            //openit("http://computationalimmunology.bu.edu");
+
+            //Method 3
+            //ProcessStartInfo startInfo = new ProcessStartInfo("iexplore.exe", "http://computationalimmunology.bu.edu/");
+            //Process.Start(startInfo);
+
         }
 
         private void fittingHelp_click(object sender, RoutedEventArgs e)
@@ -1906,7 +1951,7 @@ namespace DaphneGui
             pushMenu.IsEnabled = true;
             AdminMenu.IsEnabled = true;
 
-            saveStoreFiles();
+            //saveStoreFiles();
             saveTempFiles();
             // don't handle the vcr
             updateGraphicsAndGUI(-1);
@@ -1928,6 +1973,13 @@ namespace DaphneGui
             AdminMenu.IsEnabled = false;
             mutex = true;
 
+            //activate chartwindow when run button is clicked
+            //instead of calling activate repeated when use draw slider
+            //in the ReacComplexChartWindow
+            if (SOP.Protocol.scenario is VatReactionComplexScenario)
+            {
+                ReacComplexChartWindow.Activate();
+            }
             runSim(true);
         }
 
@@ -2100,7 +2152,7 @@ namespace DaphneGui
         /// <returns></returns>
         private Protocol ReadJson(string jsonScenarioString)
         {
-            Protocol protocol;
+            Protocol protocol, retval;
 
             // load past experiment
             if (jsonScenarioString != "")
@@ -2112,12 +2164,12 @@ namespace DaphneGui
                 {
                     SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
                     LevelContext = protocol;
-                    return protocol;
+                    retval = protocol;
                 }
                 catch
                 {
                     handleLoadFailure("That configuration has problems. Please select another experiment.");
-                    return null;
+                    retval = null;
                 }
             }
             else
@@ -2130,15 +2182,37 @@ namespace DaphneGui
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
                     SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
                     LevelContext = protocol;
-                    return protocol;
+                    retval = protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
                 catch
                 {
                     handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
-                    return null;
+                    retval = null;
                 }
             }
+            // check for protocol version
+            if (retval != null && retval.Version != System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor)
+            {
+                MessageBoxResult res;
+                string message = string.Format("Protocol version mismatch. You are using Daphne version {0} and are trying to open a protocol with version {1}.\n\n" +
+                                               "Press 'No' to abort, then open a different protocol (recommended).\n\n" +
+                                               "Press 'Yes' to proceed. This will attempt to update the protocol, allowing you to save it.\n" +
+                                               "Note: proceeding can have unexpected consequences in the execution.", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor, retval.Version);
+
+                res = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+                if (res == MessageBoxResult.No)
+                {
+                    handleLoadFailure("");
+                    retval = null;
+                }
+                else
+                {
+                    // update the version
+                    retval.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
+                }
+            }
+            return retval;
         }
 
         private void initialState(bool newFile, bool completeReset, Protocol protocol)
@@ -2201,7 +2275,9 @@ namespace DaphneGui
                     ToolWin.Tag = sop;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
+                    {
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    }
 
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinTissue)ToolWin);
@@ -2220,8 +2296,6 @@ namespace DaphneGui
                 {
                     // create the simulation
                     sim = new TissueSimulation();
-                    // set the reporter's path
-                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     // vtk data basket to hold vtk data for entities with graphical representation
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
@@ -2252,7 +2326,9 @@ namespace DaphneGui
                     ReacComplexChartWindow.redraw_flag = false;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
+                    {
                         ProtocolToolWindowContainer.Items.Clear();
+                    }
 
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
@@ -2263,16 +2339,22 @@ namespace DaphneGui
                 {
                     // create the simulation
                     sim = new VatReactionComplex();
-                    // set the reporter's path
-                    sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
                     vtkDataBasket = new VTKVatRCDataBasket();
                     gc = new VTKNullGraphicsController();
                 }
             }
             else
             {
-                throw new NotImplementedException();
+                // only create during construction or when the type changes
+                if (sim == null || sim is NullSimulation == false)
+                {
+                    // create the simulation
+                    sim = new NullSimulation();
+                    gc = new VTKNullGraphicsController();
+                }
             }
+            // set the reporter's path
+            sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
 
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             if (vtkDisplay_DockPanel.DataContext != gc)
@@ -2286,12 +2368,20 @@ namespace DaphneGui
             if (postConstruction == true && AssumeIDE() == true)
             {
                 sim.Load(sop.Protocol, completeReset, repetition);
+                if (sim is NullSimulation == true)
+                {
+                    return;
+                }
             }
             else
             {
                 try
                 {
                     sim.Load(sop.Protocol, completeReset, repetition);
+                    if (sim is NullSimulation == true)
+                    {
+                        return;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -2387,7 +2477,7 @@ namespace DaphneGui
         /// <summary>
         /// handle a problem during loading: blank the vtk screen and bulk of the gui
         /// </summary>
-        /// <param name="s">message to display</param>
+        /// <param name="s">message to display, pass "" to skip displaying the exception</param>
         private void handleLoadFailure(string s)
         {
             loadSuccess = false;
@@ -2403,7 +2493,10 @@ namespace DaphneGui
             //////////gc.Cleanup();
             //////////gc.Rwc.Invalidate();
             displayTitle("");
-            showExceptionBox(s);
+            if (s != "")
+            {
+                showExceptionBox(s);
+            }
         }
 
         /// <summary>
@@ -2441,6 +2534,10 @@ namespace DaphneGui
         /// </summary>
         private void closeOutputFiles()
         {
+            if (sim is NullSimulation == true)
+            {
+                return;
+            }
             sim.Reporter.CloseReporter();
             finishHDF5();
         }
@@ -2792,24 +2889,57 @@ namespace DaphneGui
             return false;
         }
 
-        private void saveStore(Level store, string storeName)
+        private bool isWriteProtected(string FileName)
         {
-            FileInfo info = new FileInfo(store.FileName);
+            FileInfo info = new FileInfo(FileName);
+
             if (info.IsReadOnly == false || !info.Exists)
             {
-                store.SerializeToFile(false);
-                if (storeName == "DaphneStore")
+                return false;
+            }
+
+            return true;
+        }
+
+        private void updateOrigStoreContent(Level store, string storeName)
+        {
+            if (storeName == "DaphneStore")
+            {
+                orig_daphne_store_content = store.SerializeToString();
+            }
+            else if (storeName == "UserStore")
+            {
+                orig_user_store_content = store.SerializeToString();
+            }
+        }
+
+        private void saveStore(Level store, string storeName)
+        {
+            if (isWriteProtected(store.FileName) == false)
+            {
+                MessageBoxResult result = saveStoreDialog(store.FileName);
+
+                // apply changes, save if needed
+                if (result == MessageBoxResult.Yes)
                 {
-                    orig_daphne_store_content = store.SerializeToString();
+                    store.SerializeToFile(false);
+                    updateOrigStoreContent(store, storeName);
                 }
-                else if (storeName == "UserStore")
+                else if (result == MessageBoxResult.No)
                 {
-                    orig_user_store_content = store.SerializeToString();
+                    if (saveStoreUsingDialog(store, storeName) == true)
+                    {
+                        updateOrigStoreContent(store, storeName);
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
             else
             {
-                string messageBoxText = "The file is write protected: " + sop.DaphneStore.FileName;
+                string messageBoxText = "The file is write protected: " + store.FileName;
                 string caption = "File write protected";
                 MessageBoxButton button = MessageBoxButton.OK;
                 MessageBoxImage icon = MessageBoxImage.Warning;
@@ -2820,13 +2950,13 @@ namespace DaphneGui
         private void saveStoreFiles()
         {
             //DaphneStore
-            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content && CellStudioToolWindow.DataContext == SOP.DaphneStore)
+            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
             {
                 saveStore(sop.DaphneStore, "DaphneStore");
             }
 
             //UserStore
-            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content && CellStudioToolWindow.DataContext == SOP.UserStore)
+            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
                 saveStore(sop.UserStore, "UserStore");
             }
@@ -3118,6 +3248,18 @@ namespace DaphneGui
             return MessageBox.Show(messageBoxText, caption, button, icon);
         }
 
+        public MessageBoxResult saveStoreDialog(string storeName)
+        {
+            // Configure the message box to be displayed
+            string messageBoxText = "Store entities have changed. Do you want to overwrite the information in " + storeName + "?";
+            string caption = "Store changed";
+            MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            MessageBoxImage icon = MessageBoxImage.Warning;
+
+            // Display message box
+            return MessageBox.Show(messageBoxText, caption, button, icon);
+        }
+
         public void DisplayCellInfo(int cellID)
         {
             if (SimulationBase.dataBasket.Cells.ContainsKey(cellID) == false)
@@ -3127,16 +3269,15 @@ namespace DaphneGui
             }
 
             Cell selectedCell = SimulationBase.dataBasket.Cells[cellID];
-            List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
+            List<CellMolecularInfo> membraneConcs = new List<CellMolecularInfo>();
+            List<CellMolecularInfo> cytosolConcs = new List<CellMolecularInfo>();
+            List<CellMolecularInfo> ecmConcs = new List<CellMolecularInfo>();
 
             txtCellIdent.Text = cellID.ToString();
-
-            //enhancement - get cell location, velocity, force
-            //double cellConc = selectedCell.
-            tbMolConcs.Text = "Cell Id: " + cellID;
-
             SelectedCellInfo.ciList.Clear();
-            currentConcs.Clear();
+            membraneConcs.Clear();
+            cytosolConcs.Clear();
+            ecmConcs.Clear();
 
             CellXVF xvf = new CellXVF();
             xvf.name = "Location (μm)";
@@ -3153,13 +3294,12 @@ namespace DaphneGui
             SelectedCellInfo.ciList.Add(xvf);
 
             xvf = new CellXVF();
-            xvf.name = "Force (μm/min2)";
+            xvf.name = "Force (μm/min" + "\u00b2" + ")";
             xvf.x = selectedCell.SpatialState.F[0];
             xvf.y = selectedCell.SpatialState.F[1];
             xvf.z = selectedCell.SpatialState.F[2];
             SelectedCellInfo.ciList.Add(xvf);
 
-            //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
 
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
@@ -3168,29 +3308,24 @@ namespace DaphneGui
                 string mol_name = er.molecules_dict[kvp.Key].Name;
                 double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
-
-                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Molecule = mol_name;
                 cmi.Concentration = conc;
-                // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
-                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                membraneConcs.Add(cmi);
             }
+            lvMembraneMolConcs.ItemsSource = membraneConcs;
+
             foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
                 double conc = kvp.Value.Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
-
-                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Molecule = mol_name;
                 cmi.Concentration = conc;
-                // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
-                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                cytosolConcs.Add(cmi);
             }
+            lvCytosolMolConcs.ItemsSource = cytosolConcs;
 
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
@@ -3198,16 +3333,13 @@ namespace DaphneGui
                 string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
                 double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X.ArrayCopy);
                 CellMolecularInfo cmi = new CellMolecularInfo();
-
-                cmi.Molecule = "ECM: " + name;
+                cmi.Molecule = name;
                 cmi.Concentration = conc;
                 cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X.ArrayCopy);
                 cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X.ArrayCopy));
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                ecmConcs.Add(cmi);
             }
-
-            lvCellMolConcs.ItemsSource = currConcs;
+            lvECMMolConcs.ItemsSource = ecmConcs;
 
             //Cell differentiation
             int nDiffState = selectedCell.DifferentiationState;
@@ -3222,11 +3354,8 @@ namespace DaphneGui
                     CellGeneInfo cgi = new CellGeneInfo();
                     cgi.Name = selectedCell.Genes[selectedCell.Differentiator.gene_id[i]].Name;
                     cgi.Activation = selectedCell.Differentiator.activity[nDiffState, i];
-                    //double d = selectedCell.Differentiator.activity[nDiffState, i];
-                    //activities.Add(d);  // = selectedCell.Differentiator.activity[nDiffState];
                     gene_activations.Add(cgi);
                 }
-                //lvCellDiff.ItemsSource = activities;
                 lvCellDiff.ItemsSource = gene_activations;
             }
 
@@ -3253,7 +3382,6 @@ namespace DaphneGui
             }
 
             ToolWinCellInfo.Open();
-            TabItemMolConcs.Visibility = System.Windows.Visibility.Visible;
         }
 
         // This sets whether the Open command can be executed, which enables/disables the menu item
@@ -3284,6 +3412,13 @@ namespace DaphneGui
             {
                 applyTempFilesAndSave(true);
             }
+
+            saveStoreFiles();
+            ////UserStore
+            //if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
+            //{
+            //    saveStore(sop.UserStore, "UserStore");
+            //}
 
             Nullable<bool> result = loadScenarioUsingDialog();
 
@@ -3419,6 +3554,11 @@ namespace DaphneGui
 
             SetMouseLeftState(index, true);
 
+            if (index ==1 || index == 2)
+            {
+                HandToolButton.IsChecked = true;
+            }
+
             if (gc is VTKFullGraphicsController == true)
             {
                 VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)gc;
@@ -3430,6 +3570,16 @@ namespace DaphneGui
                 else
                 {
                     gcHandle.HandToolButton_IsEnabled = true;
+                }
+
+                if (e.RemovedItems.Count > 0)
+                {
+                    var item = e.RemovedItems[0];
+                    int old_index = cb.Items.IndexOf(item);
+                    if (old_index == 1)
+                    {
+                        gcHandle.HideCellTracks();
+                    }
                 }
             }
         }
@@ -3469,12 +3619,6 @@ namespace DaphneGui
 
         private void prepareProtocol(Protocol protocol)
         {
-            // prevent further loading if the protocol is invalid
-            if (protocol == null)
-            {
-                return;
-            }
-
             // show the inital state
             lockAndResetSim(true, protocol);
             if (loadSuccess == false)
@@ -3723,7 +3867,16 @@ namespace DaphneGui
 
         private void menuAdminSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            saveStoreUsingDialog(sop.UserStore, "UserStore");
+            if (CellStudioToolWindow.DataContext == SOP.UserStore)
+            {
+                saveStoreUsingDialog(sop.UserStore, "UserStore");
+                updateOrigStoreContent(sop.UserStore, "UserStore");
+            }
+            else
+            {
+                saveStoreUsingDialog(sop.DaphneStore, "DaphneStore");
+                updateOrigStoreContent(sop.DaphneStore, "DaphneStore");
+            }
         }
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
@@ -3810,44 +3963,12 @@ namespace DaphneGui
             DisplayCellInfo(cellid);
         }
 
-        private void CellOptionsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            ECMOptionsExpander.IsExpanded = false;
-        }
-
-        private void ECMOptionsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            CellOptionsExpander.IsExpanded = false;
-        }
-
         private void MolPopRenderOnOffChanged(object sender, RoutedEventArgs e)
         {
             vtkDataBasket.SetupVTKData(sop.Protocol);
             gc.CreatePipelines();
             UpdateGraphics();
             (gc as VTKFullGraphicsController).RWC.Invalidate();
-        }
-
-        private void ReturnToProtocolButton_Click(object sender, RoutedEventArgs e)
-        {
-            statusBarMessagePanel.Content = "Ready:  Protocol";
-            ProtocolToolWindow.Open();
-            LevelContext = SOP.Protocol;
-            ComponentsToolWindow.DataContext = SOP.Protocol;
-            CellStudioToolWindow.DataContext = SOP.Protocol;
-            applyButton.IsEnabled = true;
-            ReturnToProtocolButton.Visibility = Visibility.Collapsed;
-            menuProtocolStore.IsEnabled = false;
-            pushMenu.Visibility = Visibility.Visible;
-
-            if (SOP.Protocol.scenario is TissueScenario)
-            {
-                VTKDisplayDocWindow.Activate();
-            }
-            else
-            {
-                ReacComplexChartWindow.Activate();
-            }
         }
 
         //This code moves the popup controls if main window moves
@@ -3858,9 +3979,6 @@ namespace DaphneGui
                 var offset = CellOptionsPopup.HorizontalOffset;
                 CellOptionsPopup.HorizontalOffset = offset + 1;
                 CellOptionsPopup.HorizontalOffset = offset;
-
-                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
-                //CellOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             }
 
             if (ECMOptionsPopup.IsOpen)
@@ -3868,23 +3986,21 @@ namespace DaphneGui
                 var offset = ECMOptionsPopup.HorizontalOffset;
                 ECMOptionsPopup.HorizontalOffset = offset + 1;
                 ECMOptionsPopup.HorizontalOffset = offset;
-
-                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;    
-                //ECMOptionsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             }
         }
 
         private void menuAdminSave_Click(object sender, RoutedEventArgs e)
         {
-            //If we're in UserStore or DaphneStore mode, do this and return.
             if (CellStudioToolWindow.DataContext == SOP.UserStore)
             {
-                saveStore(sop.UserStore, "UserStore");
+                SOP.UserStore.SerializeToFile(false);
+                updateOrigStoreContent(SOP.UserStore, "UserStore");
                 return;
             }
             else if (CellStudioToolWindow.DataContext == SOP.DaphneStore)
             {
-                saveStore(sop.DaphneStore, "DaphneStore");
+                SOP.DaphneStore.SerializeToFile(false);
+                updateOrigStoreContent(SOP.DaphneStore, "DaphneStore"); 
                 return;
             }
         }
@@ -3915,6 +4031,49 @@ namespace DaphneGui
                 bgPicker.Visibility = Visibility.Collapsed;
         }
 
+        private void Workspace_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (tabbedMdiHost.ActualHeight < 150)
+            {
+                dockingSplitContainer.ResizeSlots(1, 3);
+            }
+        }
+
+        //mehtod related to close popup for ecmoptions and celloptions
+        private void Grid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+
+            if (CellOptionsPopup.IsOpen == true)
+            {
+                Visual visual = e.OriginalSource as Visual;
+                if (visual.IsDescendantOf(cell_ops)) return;
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void Grid_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
+        {
+            if (ECMOptionsPopup.IsOpen == true)
+            {
+                Visual visual = e.OriginalSource as Visual;
+                if (visual.IsDescendantOf(ecm_mol_ops)) return;
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void ECMOptionsPopup_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ECMOptionsExpander.IsExpanded = false;
+        }
+
+        private void Grid_LostFocus(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
 
@@ -3978,6 +4137,8 @@ namespace DaphneGui
         {
             if (values[0] == null || values[1] == null)
                 return null;
+            //added to avoid a crash - need more investigation - AH
+            if (values[0] is string == false) return null;
 
             string text = (string)values[0];
             bool tracksActive = (bool)values[1];
