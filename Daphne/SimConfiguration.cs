@@ -1909,18 +1909,18 @@ namespace Daphne
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigMolecule cm = dd as ConfigMolecule;
+                //foreach (var dd in e.OldItems)
+                //{
+                //    ConfigMolecule cm = dd as ConfigMolecule;
 
-                    foreach (ConfigMolecularPopulation cmp in scenario.environment.comp.molpops.ToList())
-                    {
-                        if (cmp.molecule.entity_guid == cm.entity_guid)
-                        {
-                            scenario.environment.comp.molpops.Remove(cmp);
-                        }
-                    }
-                }
+                //    foreach (ConfigMolecularPopulation cmp in scenario.environment.comp.molpops.ToList())
+                //    {
+                //        if (cmp.molecule.entity_guid == cm.entity_guid)
+                //        {
+                //            scenario.environment.comp.molpops.Remove(cmp);
+                //        }
+                //    }
+                //}
             }
         }
 
@@ -2863,6 +2863,37 @@ namespace Daphne
             return cellHasMolecule;
         }
 
+        private bool ValidateReaction(ConfigReaction cr)
+        {
+            bool valid = true;
+
+            foreach (string guid in cr.reactants_molecule_guid_ref)
+            {
+                //if (comp.molecules_dict.ContainsKey(guid) == true)
+                //{
+                //    cytosol.Reactions.Remove(cr);
+                //    break;
+                //}
+
+
+                //if (cytosol.reactions_dict.ContainsKey(guid) == false && FindGene(guid) == null && membrane.reactions_dict.ContainsKey(guid) == false)
+                //{
+                //    cytosol.Reactions.Remove(cr);
+                //    break;
+                //}
+
+
+                //if (cytosol.reactions_dict.ContainsKey(guid) == false && membrane.reactions_dict.ContainsKey(guid) == false)
+                //{
+                //    cytosol.Reactions.Remove(cr);
+                //    break;
+                //}
+            }
+
+
+            return valid;
+        }
+
     }
 
     public class SimulationParams : EntityModelBase
@@ -3358,54 +3389,54 @@ namespace Daphne
             return true;
         }
 
-        /// <summary>
-        /// Check for a valid ECS reaction. 
-        /// All bulk molecules must be present in the ECS.
-        /// All boundary molecules must be present, as a whole group, in the membrane of at least one cell type.
-        /// There must be at least one bulk molecule.
-        /// </summary>
-        /// <param name="cr"></param>
-        /// <param name="scenario"></param>
-        /// <returns></returns>
-        public bool ValidateReaction(ConfigReaction cr, Protocol protocol)
-        {
-            bool bBulkOK = false;
-            bool bBoundOK = false;
+        ///// <summary>
+        ///// Check for a valid ECS reaction. 
+        ///// All bulk molecules must be present in the ECS.
+        ///// All boundary molecules must be present, as a whole group, in the membrane of at least one cell type.
+        ///// There must be at least one bulk molecule.
+        ///// </summary>
+        ///// <param name="cr"></param>
+        ///// <param name="scenario"></param>
+        ///// <returns></returns>
+        //public bool ValidateReaction(ConfigReaction cr, Protocol protocol)
+        //{
+        //    bool bBulkOK = false;
+        //    bool bBoundOK = false;
 
-            ObservableCollection<string> boundMols = new ObservableCollection<string>();
-            boundMols = cr.GetBoundaryMolecules(protocol.entity_repository);
-            if (boundMols.Count == 0)
-            {
-                bBoundOK = true;
-            }
-            else
-            {
-                foreach (CellPopulation cellpop in ((TissueScenario)protocol.scenario).cellpopulations)
-                {
-                    if (cellpop.Cell.membrane.HasMolecules(boundMols) == true)
-                    {
-                        bBoundOK = true;
-                        break;
-                    }
-                }
-            }
+        //    ObservableCollection<string> boundMols = new ObservableCollection<string>();
+        //    boundMols = cr.GetBoundaryMolecules(protocol.entity_repository);
+        //    if (boundMols.Count == 0)
+        //    {
+        //        bBoundOK = true;
+        //    }
+        //    else
+        //    {
+        //        foreach (CellPopulation cellpop in ((TissueScenario)protocol.scenario).cellpopulations)
+        //        {
+        //            if (cellpop.Cell.membrane.HasMolecules(boundMols) == true)
+        //            {
+        //                bBoundOK = true;
+        //                break;
+        //            }
+        //        }
+        //    }
 
-            ObservableCollection<string> bulkMols = new ObservableCollection<string>();
-            bulkMols = cr.GetBulkMolecules(protocol.entity_repository);
-            if (bulkMols.Count > 0)
-            {
-                if (comp.HasMolecules(bulkMols) == true)
-                {
-                    bBulkOK = true;
-                }
-            }
-            else
-            {
-                bBulkOK = false;
-            }
+        //    ObservableCollection<string> bulkMols = new ObservableCollection<string>();
+        //    bulkMols = cr.GetBulkMolecules(protocol.entity_repository);
+        //    if (bulkMols.Count > 0)
+        //    {
+        //        if (comp.HasMolecules(bulkMols) == true)
+        //        {
+        //            bBulkOK = true;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        bBulkOK = false;
+        //    }
 
-            return (bBoundOK & bBulkOK);
-        }
+        //    return (bBoundOK & bBulkOK);
+        //}
     }
 
 
@@ -5870,6 +5901,14 @@ namespace Daphne
                 molpops.Remove(delMolPop);
             }
         }
+
+        //public void CheckReactionsAgainstMolpops()
+        //{
+        //    foreach (ConfigReaction cr in Reactions)
+        //    {
+
+        //    }
+        //}
     }
 
     public enum ReactionType
@@ -7404,7 +7443,6 @@ namespace Daphne
             return false;
         }
 
-
         /// <summary>
         /// Force distributed parameters to reinitialize on the next Sample.
         /// This is needed in order to get reproducible results for the same global seed value.
@@ -7561,6 +7599,68 @@ namespace Daphne
             }
 
             return true;
+        }
+
+        public void CheckCytosolReactions()
+        {
+            foreach (ConfigReaction cr in cytosol.Reactions)
+            {
+                foreach (string guid in cr.reactants_molecule_guid_ref)
+                {
+                    if (cytosol.reactions_dict.ContainsKey(guid) == false && membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (cytosol.reactions_dict.ContainsKey(guid) == false && FindGene(guid) == null && membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.products_molecule_guid_ref)
+                {
+                    if (cytosol.reactions_dict.ContainsKey(guid) == false && membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void CheckMembraneReactions()
+        {
+            foreach (ConfigReaction cr in membrane.Reactions)
+            {
+                foreach (string guid in cr.reactants_molecule_guid_ref)
+                {
+                    if (membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+                foreach (string guid in cr.products_molecule_guid_ref)
+                {
+                    if (membrane.reactions_dict.ContainsKey(guid) == false)
+                    {
+                        cytosol.Reactions.Remove(cr);
+                        break;
+                    }
+                }
+            }
         }
     }
 
