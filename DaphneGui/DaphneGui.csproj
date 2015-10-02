@@ -554,8 +554,12 @@
     <Content Include="Config\simple_germinal_center.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Config\Stores\daphnestore.json" />
-    <None Include="Config\Stores\userstore.json" />
+    <Content Include="Config\Stores\daphnestore.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\Stores\userstore.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
