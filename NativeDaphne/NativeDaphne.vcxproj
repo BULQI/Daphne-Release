@@ -175,6 +175,7 @@
     <ClCompile Include="Nt_Cell.cpp" />
     <ClCompile Include="Nt_CellPopulation.cpp" />
     <ClCompile Include="Nt_CollisionManager.cpp" />
+    <ClCompile Include="Nt_Compartment.cpp" />
     <ClCompile Include="Nt_Darray.cpp" />
     <ClCompile Include="Nt_Interpolation.cpp" />
     <ClCompile Include="Nt_Manifolds.cpp" />

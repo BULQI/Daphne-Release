@@ -4,6 +4,7 @@
 #include "Nt_MolecularPopulation.h"
 #include "Nt_Reaction.h"
 #include "NtInterpolatedRectangularPrism.h"
+#include "Nt_Manifolds.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -144,44 +145,10 @@ namespace NativeDaphne
 		}
 
 
-		//void RemoveMemberCompartment(int index)
-		//{
-		//	//remove molpop and reactions for a cell with the given index.
-		//	for (int i=0; i< NtPopulations->Count; i++)
-		//	{
-		//		NtPopulations[i]->RemoveMolecularPopulation(index);
-		//	}
-
-		//	//remove reactions
-		//	for (int i=0; i< NtBulkReactions->Count; i++)
-		//	{
-		//		NtBulkReactions[i]->RemoveReaction(index);
-		//	}
-
-		//	if (NtBoundaryReactions->Count > 0)
-		//	{
-		//		if (this->manifoldType != Nt_ManifoldType::TinyBallCollection)
-		//		{
-		//			throw gcnew Exception("Error RemoveMemberCompartment: wrong compartment");
-		//		}
-		//		Nt_ReactionSet^ rxn_set = NtBoundaryReactions[0];
-		//		rxn_set->RemoveReactions(index);
-		//	}
-		//}
-
 		// gmk: Pulation, Put in NT_ECS with virtual and override?
 		//given boundaryId, return cellpopulationId
 		int GetCellPulationId(int boundary_id)
 		{
-			//debug 
-			//if (BoundaryToCellpopMap != nullptr && boundary_id == 0)
-			//{
-			//	for each (KeyValuePair<int, int>^ item in BoundaryToCellpopMap)
-			//	{
-			//		int key = item->Key;
-			//		int val = item->Value;
-			//	}
-			//}
 
 			if (BoundaryToCellpopMap != nullptr && BoundaryToCellpopMap->ContainsKey(boundary_id) == true)
 			{
@@ -229,6 +196,8 @@ namespace NativeDaphne
 		//map boundaryId to its array index in NtBoundaries.
 		Dictionary<int, int>^ BoundaryIndexMap;
 
+		Manifold^ Interior;
+
 		//this is the id of the interior in the upper level.
 		int InteriorId;
 
@@ -268,6 +237,9 @@ namespace NativeDaphne
 		!Nt_Compartment()
 		{
 		}
+
+		//"factory pattern" to create specific compartments
+		static Nt_Compartment^ getCompartment(Manifold^ m);
 
 		void AddNtBoundary(int population_id, int boundary_id, Nt_Compartment^ c)
 		{
@@ -441,15 +413,16 @@ namespace NativeDaphne
 
 		Transform^ BoundaryTransform;
 		
-		Nt_Cytosol(double r) : Nt_Compartment(Nt_ManifoldType::TinyBall)
+		Nt_Cytosol(TinyBall^ tb) : Nt_Compartment(Nt_ManifoldType::TinyBall)
 		{
-			CellRadius = r;
+			CellRadius = tb->Extent(0);
+			Interior = tb;
 			BoundaryTransform = gcnew Transform(false);
 		}
 
-		Nt_Cytosol(double r, Nt_ManifoldType mtype) : Nt_Compartment(mtype)
+		Nt_Cytosol(double d, Nt_ManifoldType mtype) : Nt_Compartment(mtype)
 		{
-			CellRadius = r;
+			CellRadius = d;
 			BoundaryTransform = gcnew Transform(false);
 		}
 
@@ -514,9 +487,9 @@ namespace NativeDaphne
 	public:
 		double CellRadius;
 
-		Nt_PlasmaMembrane(double r) : Nt_Compartment(Nt_ManifoldType::TinySphere)
+		Nt_PlasmaMembrane(TinySphere^ ts) : Nt_Compartment(Nt_ManifoldType::TinySphere)
 		{
-			CellRadius = r;
+			CellRadius = ts->Extent(0);
 		}
 
 		Nt_PlasmaMembrane(double r, Nt_ManifoldType type) : Nt_Compartment(type)
@@ -575,6 +548,27 @@ namespace NativeDaphne
 
 		List<int>^ BoundaryKeys; //to keep sync with boundary in molpop
 
+		Nt_ECS(InterpolatedRectangularPrism^ m) : Nt_Compartment(Nt_ManifoldType::InterpolatedRectangularPrism)
+		{
+			NodesPerSide = (int *)malloc(3 * sizeof(int));
+			NodesPerSide[0] = m->NodesPerSide(0);
+			NodesPerSide[1] = m->NodesPerSide(1);;
+			NodesPerSide[2] = m->NodesPerSide(2);;
+			StepSize = m->StepSize();
+			//IsToroidal = toroidal;
+			BoundaryTransforms = gcnew Dictionary<int, Transform^>();
+			ir_prism = new NtInterpolatedRectangularPrism(NodesPerSide, StepSize, IsToroidal);
+
+			//data used for updateBounary
+			Positions = NULL;
+			BoundaryKeys = gcnew List<int>();
+			boundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+
+			initialized = false;
+		}
+
+
+
 		Nt_ECS(array<int> ^extents, double step_size, bool toroidal) : Nt_Compartment(Nt_ManifoldType::InterpolatedRectangularPrism)
 		{
 			NodesPerSide = (int *)malloc(3 * sizeof(int));
@@ -585,10 +579,13 @@ namespace NativeDaphne
 			IsToroidal = toroidal;
 			BoundaryTransforms = gcnew Dictionary<int, Transform^>();
 			ir_prism = new NtInterpolatedRectangularPrism(NodesPerSide, StepSize, IsToroidal);
-			initialized = false;
+
+			//data used for updateBounary
 			Positions = NULL;
 			BoundaryKeys = gcnew List<int>();
 			boundaryReactions = gcnew Dictionary<int, Nt_ReactionSet^>();
+
+			initialized = false;
 		}
 
 		~Nt_ECS()
@@ -636,6 +633,8 @@ namespace NativeDaphne
 				Nt_MolecularPopulation^ pop = NtPopulations[i];
 				pop->initialize(this);
 			}
+
+			//for diffusion
 
 			initialized = true;
 		}

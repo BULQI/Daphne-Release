@@ -30,30 +30,9 @@ namespace Daphne
             NaturalBoundaries = new Dictionary<int, Manifold>();
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
             //create specialized base compartments if needed
-            if (Interior is TinyBall)
-            {
-                var tmp = Interior as TinyBall;
-                baseComp = new Nt_Cytosol(interior.Extent(0));
-                baseComp.InteriorId = Interior.Id;
-            }
-            else if (Interior is TinySphere)
-            {
-                baseComp = new Nt_PlasmaMembrane(interior.Extent(0));
-            }
-            else if (Interior is InterpolatedRectangularPrism)
-            {
-                int[] extents = new int[3];
-                var m = Interior as InterpolatedRectangularPrism;
-                extents[0] = m.NodesPerSide(0);
-                extents[1] = m.NodesPerSide(1);
-                extents[2] = m.NodesPerSide(2);
-                baseComp = new Nt_ECS(extents, m.StepSize(), false);
-            }
-            else
-            {
-                //generic
-                baseComp = new Nt_Compartment();
-            }
+            baseComp = Nt_Compartment.getCompartment(interior);
+
+            
             baseComp.InteriorId = Interior.Id;
             
         }

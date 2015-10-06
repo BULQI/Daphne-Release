@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <xmmintrin.h>
 
+
+#include "NtInterpolation.h"
+
 //#define DO_PREFETCH
 
 using namespace std;
@@ -326,7 +329,40 @@ namespace NativeDaphneLibrary
 	}
 
 	//not yet implemented
-	int NtInterpolatedRectangularPrism::Laplacian(double *, double *, int){ return 0;}
+	int NtInterpolatedRectangularPrism::Laplacian(double *sfarray, double *retval, int n)
+	{ 
+
+		dscal(n, 0.0, retval, 1);
+		dscal(n, 0.0, _tmparr, 1);
+
+		int step2 = NodesPerSide0 * NodesPerSide1;
+		int shifts[7] = {0, 1, -1, NodesPerSide0, -NodesPerSide0, step2, -step2};
+		for (int i= 1; i< 7; i++)
+		{
+			int shift = shifts[i]; //src shift relative to dst
+			if (shift > 0)
+			{
+				dcopy(n-shift, sfarray + shift, 1, _tmparr, 1);
+			}
+			else 
+			{
+				dcopy(n, sfarray, 1, _tmparr-shift, 1);
+			}
+			//modify slot not folowing rule.
+			int *sindex = lpindex + (i-1)*step2;
+			int *pindex = sindex + step2;
+			int *dindex = sfindex + (i-1)*step2;
+
+			while (sindex != pindex)
+			{
+				_tmparr[*sindex++] = sfarray[*dindex++];
+			}
+			daxpy(n, 1.0, _tmparr, 1, retval, 1);
+		}
+		dscal(n, coef2, retval, 1);
+		daxpy(n, coef1, sfarray, 1, retval, 1);
+		return 0;
+	}
 
 
 

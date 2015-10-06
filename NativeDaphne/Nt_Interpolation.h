@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Nt_ManifoldUtilities.h"
+#include "NtInterpolation.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -8,7 +9,7 @@ using namespace System::Security;
 using namespace System::Linq;
 using namespace System::Text;
 using namespace MathNet::Numerics::LinearAlgebra::Double;
-//using namespace NativeDaphneLibrary;
+using namespace NativeDaphneLibrary;
 
 namespace Nt_ManifoldRing
 {
@@ -121,6 +122,12 @@ namespace Nt_ManifoldRing
         /// <param name="to">Field specified on the interior manifold</param>
         /// <returns>The field after imposing Dirichlet boundary conditions</returns>
 		virtual ScalarField^ DirichletBC(ScalarField^ from, Transform^ t, ScalarField^ sf);
+
+		//get toroidal property
+		bool isToroidal()
+		{
+			return toroidal;
+		}
     };
 
     /// <summary>
@@ -138,18 +145,32 @@ namespace Nt_ManifoldRing
         array<array<LocalMatrix>^>^ gradientOperatorJagged;
         array<int>^ idxarr;
 
+		//for unmanaged code
+		NtTrilinear3D *NtInstance;
+
+
 	public:
 		Trilinear3D() : NodeInterpolator()
         {
             interpolationOperator = gcnew array<LocalMatrix>(8);
+			NtInstance = NULL;
         }
+
+		~Trilinear3D()
+		{
+			this->!Trilinear3D();
+		}
+
+		!Trilinear3D()
+		{
+			if (NtInstance != NULL)delete NtInstance;
+		}
 
 		virtual void Init(InterpolatedNodes^ m, bool _toroidal) override;
 
 	protected:
         // Don't need to account for toroidal BCs with this low-order scheme. 
 		virtual array<LocalMatrix>^ interpolationMatrix(array<double>^ x) override;
-
 
 		array<LocalMatrix>^ interpolationMatrix_original(array<double>^ x);
 
@@ -163,6 +184,8 @@ namespace Nt_ManifoldRing
 		
 	public:
 		virtual double Integration(ScalarField^ sf) override;
+
+		virtual ScalarField^ Laplacian(ScalarField^ sf) override;
     };
 
     /// <summary>

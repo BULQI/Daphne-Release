@@ -154,6 +154,7 @@
     <ClInclude Include="NtCollisionManager.h" />
     <ClInclude Include="NtGrid.h" />
     <ClInclude Include="NtInterpolatedRectangularPrism.h" />
+    <ClInclude Include="NtInterpolation.h" />
     <ClInclude Include="NTRandomNumberGenerator.h" />
     <ClInclude Include="NtUtility.h" />
     <ClInclude Include="stdafx.h" />

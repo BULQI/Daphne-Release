@@ -382,9 +382,9 @@ namespace NativeDaphne
 		{
 			initialized = false;
 			//cell special states information
-			//todo check disopose of these objects
-			Cytosol = gcnew Nt_Cytosol(Nt_Cell::defaultRadius);
-			PlasmaMembrane = gcnew Nt_PlasmaMembrane(Nt_Cell::defaultRadius);
+			//to do check disposal of these objects
+			Cytosol = gcnew Nt_Cytosol(Nt_Cell::defaultRadius, Nt_ManifoldType::TinyBallCollection);
+			PlasmaMembrane = gcnew Nt_PlasmaMembrane(Nt_Cell::defaultRadius, Nt_ManifoldType::TinySphereCollection);
 			ComponentCells->Clear();
 			deadCells->Clear();
 			ntCellDictionary->Clear();

@@ -243,6 +243,13 @@ namespace Nt_ManifoldRing
 		NodePerSide1 = m->NodesPerSide(1);
 		NodePerSide2 = m->NodesPerSide(2);
 		idxarr = gcnew array<int>(3);
+
+		int *tmp = (int *)malloc(3 *sizeof(int));
+		tmp[0] = NodePerSide0;
+		tmp[1] = NodePerSide1;
+		tmp[2] = NodePerSide2;
+		NtInstance = new NtTrilinear3D(tmp, m->StepSize(), _toroidal);
+		free(tmp);
 	}
 
 
@@ -943,7 +950,48 @@ namespace Nt_ManifoldRing
 		return sum * m->StepSize() * m->StepSize() * m->StepSize();
 	}
 
+	//for debug only - compare reuslts between managed and unmanged code
+	//ScalarField^ Trilinear3D :: Laplacian(ScalarField^ sf)
+	//{
+	//	ScalarField^ sf1 = NodeInterpolator::Laplacian(sf);
+
+	//	double *sfarray = sf->ArrayPointer;
+	//	double *lparray = laplacian->ArrayPointer;
+	//	int len = sf->darray->Length;
+	//	double *test_array = (double *)malloc(len * sizeof(double));
+	//	NtInstance->Laplacian(sfarray, test_array, sf->darray->Length);
+
+	//	for (int i = 0; i< len; i++)
+	//	{
+	//		double a = test_array[i];
+	//		double b = lparray[i];
+	//		double diff = a  > b ? a-b : b-a;
+	//		if (diff > 1.0e-16)
+	//		{
+	//			throw gcnew Exception("Debug Error: laplacian result differ");
+	//		}
+	//	}
+	//	free(test_array);
+	//	return laplacian;
+	//}
 	
+	ScalarField^ Trilinear3D :: Laplacian(ScalarField^ sf)
+	{
+		if (NtInstance != NULL)
+		{
+			double *sfarray = sf->ArrayPointer;
+			double *lparray = laplacian->ArrayPointer;
+			NtInstance->Laplacian(sfarray, lparray, sf->darray->Length);
+			return laplacian;
+		}
+		else 
+		{
+			//original method
+			return NodeInterpolator::Laplacian(sf);
+		}
+	}
+
+
 	//********************************************
 	// implementation of Trilinear2D
 	//********************************************
