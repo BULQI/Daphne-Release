@@ -345,7 +345,7 @@ namespace Daphne
         {
             this.Comp.Step(dt);
 
-            //apply ECS/membrane boundary flux - specific to ECS/Membrane
+            //apply ECS/membrane boundary flux 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
                 MolecularPopulation molpop = kvp.Value;
@@ -374,7 +374,7 @@ namespace Daphne
 
             }
 
-            //update ECS/Membrane boundary
+            //update ECS/Membrane boundary - specific to ECS/Membrane
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Comp.Populations)
             {
                 kvp.Value.UpdateECSMembraneBoundary();
