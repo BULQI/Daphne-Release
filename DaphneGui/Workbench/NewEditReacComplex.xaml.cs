@@ -57,14 +57,20 @@ namespace DaphneGui
         private ConfigCompartment comp;
         private EntityRepository er;
 
+        //Added for LevelContext - Protocol or UserStore or DaphneStore.
+        //This window is not a child of the MainWindow so we cannot use the
+        //GetLevelContext method.
+        private Level level;
+
         //To create a new rc
-        public NewEditReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp, EntityRepository _er)
+        public NewEditReacComplex(ReactionComplexDialogType type, ConfigCompartment _comp, Level _level)
         {
             InitializeComponent();
             this.Owner = Application.Current.MainWindow;
             dlgType = type;
             comp = _comp;
-            er = _er;
+            er = _level.entity_repository;
+            level = _level;
             Title = "New Reaction Complex";
             Initialize();
             lbAllReactions.ItemsSource = LeftList;
@@ -73,14 +79,15 @@ namespace DaphneGui
         }
 
         //To edit an existing rc
-        public NewEditReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp, EntityRepository _er)    
+        public NewEditReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc, ConfigCompartment _comp, Level _level)    
         {
             InitializeComponent();
             this.Owner = Application.Current.MainWindow;
             dlgType = type;
             selectedRC = crc;
             comp = _comp;
-            er = _er;
+            er = _level.entity_repository;
+            level = _level;
             Title = "Edit Reaction Complex";
             Initialize();
         }
@@ -90,7 +97,7 @@ namespace DaphneGui
             LeftList.Clear();
             RightList.Clear();
 
-            Level level = MainWindow.SOP.Protocol;
+            //Level level = MainWindow.SOP.Protocol;
 
             //if adding a new rc
             if (dlgType == ReactionComplexDialogType.NewComplex)
@@ -203,7 +210,7 @@ namespace DaphneGui
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             bool edited = false;
-            Protocol level = MainWindow.SOP.Protocol;
+            //Protocol level = MainWindow.SOP.Protocol;
 
             string rcname = txtRcName.Text;
             rcname = rcname.Trim();
@@ -242,11 +249,15 @@ namespace DaphneGui
                 }
                 if (edited)
                 {
-                    if (MainWindow.SOP.Protocol.scenario.GetType() == typeof(VatReactionComplexScenario))
+                    //This is only for Vat Protocol
+                    if (level is Protocol)
                     {
-                        VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
-                        s.InitializeAllMols();
-                        s.InitializeAllReacs();
+                        if (MainWindow.SOP.Protocol.scenario.GetType() == typeof(VatReactionComplexScenario))
+                        {
+                            VatReactionComplexScenario s = MainWindow.SOP.Protocol.scenario as VatReactionComplexScenario;
+                            s.InitializeAllMols(true);
+                            s.InitializeAllReacs();
+                        }
                     }
                 }
             }
@@ -265,7 +276,8 @@ namespace DaphneGui
                 foreach (ConfigReaction reac in RightList)
                 {
                     crc.reactions.Add(reac);
-                    crc.AddReactionMolPopsAndGenes(reac, MainWindow.SOP.Protocol.entity_repository);
+                    //crc.AddReactionMolPopsAndGenes(reac, MainWindow.SOP.Protocol.entity_repository);
+                    crc.AddReactionMolPopsAndGenes(reac, level.entity_repository);
                 }
 
                 if (comp != null)

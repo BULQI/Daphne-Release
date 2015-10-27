@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Daphne;
+using System.Numerics;
 using ManifoldRing;
 using System.IO;
 using System.Windows.Markup;
 using System.Windows.Data;
+
+using Daphne;
 
 namespace DaphneGui
 {
@@ -54,7 +56,9 @@ namespace DaphneGui
                 //get filename to save
                 Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-                filepath_prefix = Path.Combine(filepath_prefix, System.IO.Path.GetFileNameWithoutExtension(sp));
+                // HS: don't know why the full path would be needed; observe for side-effects and if no issues remove
+                //filepath_prefix = Path.Combine(filepath_prefix, System.IO.Path.GetFileNameWithoutExtension(sp));
+                filepath_prefix = System.IO.Path.GetFileNameWithoutExtension(sp);
                 dlg.InitialDirectory = orig_path;
                 dlg.FileName = filepath_prefix + "-" + save_counter + ".json";
                 dlg.DefaultExt = ".json"; // Default file extension
@@ -110,20 +114,20 @@ namespace DaphneGui
             foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
                 Cell cell = kvp.Value;
-
-                int cell_set_id = cell.Population_id;
-
                 CellPopulation target_cp = ((TissueScenario)ProtocolSaver.scenario).cellpopulation_dict[cell.Population_id];
+                CellState cell_state = new CellState();
+
                 target_cp.number++;
 
-                CellState cell_state = new CellState();
                 cell_state.setSpatialState(cell.SpatialState);
+                cell_state.setDeathDriverState(cell.DeathBehavior);
+                cell_state.setDivisonDriverState(cell.Divider.Behavior);
+                cell_state.setDifferentiationDriverState(cell.Differentiator.Behavior);
 
-                cell_state.setDeathDriverState(cell.DeathBehavior.CurrentState);
-                cell_state.setDivisonDriverState(cell.Divider.CurrentState);
-                cell_state.setDifferentiationDriverState(cell.DifferentiationState);
                 cell_state.setGeneState(cell.Genes);
-                cell_state.setCellGeneration(cell.generation);
+                cell_state.CellGeneration = cell.generation;
+                cell_state.Cell_id = cell.Cell_id;
+                cell_state.Lineage_id = cell.Lineage_id.ToString();
 
                 Dictionary<string, MolecularPopulation> membrane_mol_pop_dict = cell.PlasmaMembrane.Populations;
                 foreach (KeyValuePair<string, MolecularPopulation> kvpair in membrane_mol_pop_dict)
@@ -138,9 +142,17 @@ namespace DaphneGui
                     MolecularPopulation mp = kvpair.Value;
                     cell_state.addMolPopulation(kvpair.Key, mp);
                 }
+
+                if (SimulationBase.cellManager.DeadDict.ContainsKey(cell.Cell_id) == true)
+                {
+                    cell_state.setRemovalState(SimulationBase.cellManager.DeadDict[cell.Cell_id]);
+                }
+
                 target_cp.CellStates.Add(cell_state);
                 //target_cp.cell_list.Add(cell_state);
             }
+
+            ProtocolSaver.sim_params.globalRandomSeed = Daphne.Rand.MersenneTwister.Next();
 
             ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];

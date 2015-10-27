@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows;
+using System.Numerics;
 
 using HDF5DotNet;
 
@@ -289,6 +290,7 @@ namespace Daphne
                 H5D.write(dset, typeId, data);
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -301,8 +303,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_INT);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(int);
 
                 if (data == null || data.Length != size)
@@ -311,6 +313,7 @@ namespace Daphne
                 }
                 H5D.read(dset, typeId, new H5Array<int>(data));
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
@@ -331,6 +334,7 @@ namespace Daphne
                 H5D.write(dset, typeId, data);
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -343,8 +347,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_LLONG);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(long);
 
                 if (data == null || data.Length != size)
@@ -353,6 +357,7 @@ namespace Daphne
                 }
                 H5D.read(dset, typeId, new H5Array<long>(data));
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
@@ -373,6 +378,7 @@ namespace Daphne
                 H5D.write(dset, typeId, data);
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -385,8 +391,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_DOUBLE);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(double);
 
                 if (data == null || data.Length != size)
@@ -395,6 +401,38 @@ namespace Daphne
                 }
                 H5D.read(dset, typeId, new H5Array<double>(data));
                 H5D.close(dset);
+                H5T.close(typeId);
+            }
+        }
+
+        /// <summary>
+        /// write a list of string datasets
+        /// </summary>
+        /// <param name="name">name stem</param>
+        /// <param name="data">array of strings</param>
+        public void writeDSStrings(string name, string[] data)
+        {
+            for (int i = 0; i < data.Length; i++)
+            {
+                writeString(name + i, data[i]);
+            }
+        }
+
+        /// <summary>
+        /// read a list of string datasets
+        /// </summary>
+        /// <param name="name">name stem for each string (each string is a set with an index appended)</param>
+        /// <param name="size">number of strings in the set</param>
+        /// <param name="data">array of strings</param>
+        public void readDSStrings(string name, int size, ref string[] data)
+        {
+            if (data == null || data.Length != size)
+            {
+                data = new string[size];
+            }
+            for (int i = 0; i < size; i++)
+            {
+                readString(name + i, ref data[i]);
             }
         }
 
@@ -416,6 +454,7 @@ namespace Daphne
                 H5D.write(dset, typeId, new H5Array<char>(data.ToArray()));
                 H5D.close(dset);
                 H5S.close(spaceId);
+                H5T.close(typeId);
             }
         }
 
@@ -428,8 +467,8 @@ namespace Daphne
         {
             if (groupStack.Count > 0)
             {
-                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 H5DataTypeId typeId = H5T.copy(H5T.H5Type.NATIVE_SHORT);
+                H5DataSetId dset = H5D.open(groupStack.Last(), name);
                 long size = H5D.getStorageSize(dset) / sizeof(char);
 
                 char[] tmp = new char[size];
@@ -437,6 +476,7 @@ namespace Daphne
                 H5D.read(dset, typeId, new H5Array<char>(tmp));
                 data = new string(tmp);
                 H5D.close(dset);
+                H5T.close(typeId);
             }
         }
 
@@ -551,9 +591,20 @@ namespace Daphne
             close(true);
         }
 
-        public abstract void StartHDF5File(SimulationBase sim, string protocolString);
+        public abstract void StartHDF5File(SimulationBase sim, string protocolString, bool trunc);
         public abstract void WriteReporterFileNames();
         public abstract void ReadReporterFileNames();
+    }
+
+    public class NullHDF5File : HDF5FileBase
+    {
+        public NullHDF5File()
+        {
+        }
+
+        public override void StartHDF5File(SimulationBase sim, string protocolString, bool trunc) { }
+        public override void WriteReporterFileNames() { }
+        public override void ReadReporterFileNames() { }
     }
 
     public class VatReactionComplexHDF5File : HDF5FileBase
@@ -565,13 +616,13 @@ namespace Daphne
             hSim = sim;
         }
 
-        public override void StartHDF5File(SimulationBase sim, string protocolString)
+        public override void StartHDF5File(SimulationBase sim, string protocolString, bool trunc)
         {
             if (assembleFullPath(hSim.Reporter.UniquePath, hSim.Reporter.FileNameBase, "rep", ".hdf5", true) == false)
             {
                 MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            openWrite(true);
+            openWrite(trunc);
             // group for this experiment
             createGroup("/Experiment");
 
@@ -599,13 +650,13 @@ namespace Daphne
             hSim = sim;
         }
 
-        public override void StartHDF5File(SimulationBase sim, string protocolString)
+        public override void StartHDF5File(SimulationBase sim, string protocolString, bool trunc)
         {
             if (assembleFullPath(hSim.Reporter.UniquePath, hSim.Reporter.FileNameBase, "vcr", ".hdf5", true) == false)
             {
                 MessageBox.Show("Error setting HDF5 filename. File might be currently open.", "HDF5 error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            openWrite(true);
+            openWrite(trunc);
             // group for this experiment
             createGroup("/Experiment");
 
@@ -650,6 +701,7 @@ namespace Daphne
                     M_COUNT = 2;
         private int cellCount;
         private int[] cellIds, cellGens, cellPopIds, cellBehaviors;
+        private string[] cellLineageIds;
         private double[] cellStateSpatial;
         private double[][] ecsMolpops, cellStateGenes, cellStateMolecules;
         private TissueSimulationHDF5File hdf5file;
@@ -682,6 +734,17 @@ namespace Daphne
             get
             {
                 return cellIds;
+            }
+        }
+
+        /// <summary>
+        /// access array of lineage ids in this frame
+        /// </summary>
+        public string[] CellLineageIds
+        {
+            get
+            {
+                return cellLineageIds;
             }
         }
 
@@ -910,6 +973,7 @@ namespace Daphne
                     cellGens = new int[cellCount];
                     cellPopIds = new int[cellCount];
                     cellBehaviors = new int[cellCount * B_COUNT];
+                    cellLineageIds = new string[cellCount];
                 }
                 // need to do this regardless whether the cell number changed; it could be the same if the same number of cells died and got born, but
                 // depending on cell type we could have different gene numbers
@@ -932,6 +996,8 @@ namespace Daphne
                         cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + j] = c.SpatialState.V[j];
                         cellStateSpatial[i * CellSpatialState.Dim + CellSpatialState.SingleDim * S_FORCE + j] = c.SpatialState.F[j];
                     }
+                    // lineage id
+                    cellLineageIds[i] = c.Lineage_id.ToString();
                     // generation
                     cellGens[i] = c.generation;
                     // population
@@ -1027,8 +1093,12 @@ namespace Daphne
                 state.spState.V[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_VEL + i];
                 state.spState.F[i] = cellStateSpatial[idx * CellSpatialState.Dim + CellSpatialState.SingleDim * S_FORCE + i];
             }
+            // cell id
+            state.Cell_id = cellIds[idx];
+            // lineage id
+            state.Lineage_id = cellLineageIds[idx];
             // set the generation
-            state.setCellGeneration(cellGens[idx]);
+            state.CellGeneration = cellGens[idx];
             // death
             state.setDeathDriverState(cellBehaviors[idx * B_COUNT + B_DEATH]);
             // division
@@ -1123,6 +1193,8 @@ namespace Daphne
 
                 // ids
                 hdf5file.writeDSInt("CellIDs", dims, new H5Array<int>(cellIds));
+                // lineage ids
+                hdf5file.writeDSStrings("CellLineage", cellLineageIds);
                 // generations
                 hdf5file.writeDSInt("CellGens", dims, new H5Array<int>(cellGens));
                 // population ids
@@ -1189,6 +1261,8 @@ namespace Daphne
             {
                 // ids
                 hdf5file.readDSInt("CellIDs", ref cellIds);
+                // lineage ids
+                hdf5file.readDSStrings("CellLineage", cellCount, ref cellLineageIds);
                 // generations
                 hdf5file.readDSInt("CellGens", ref cellGens);
                 // population ids

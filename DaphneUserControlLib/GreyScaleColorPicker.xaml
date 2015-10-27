@@ -1,0 +1,90 @@
+﻿<UserControl x:Class="DaphneUserControlLib.GreyScaleColorPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:DaphneUserControlLib"
+             xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+             mc:Ignorable="d" 
+             
+             x:Name="ucColorPicker"
+             >
+
+    <!--d:DesignHeight="300" d:DesignWidth="300"-->
+
+    <UserControl.Resources>
+
+        <local:ColorListEnumToStringConverter x:Key="ColorListEnumToStringConv" />
+        <local:ColorListEnumToBrushConverter x:Key="ColorListEnumToBrushConv" />
+        <local:ColorListEnumToIntConverter x:Key="ColorListEnumToIntConv" />
+        
+        <DataTemplate x:Key="colorItemTemplate">
+            <StackPanel Orientation="Horizontal">
+
+                <Rectangle Width="12" Height="12" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListEnumToBrushConv}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="5">
+                                    <Setter Property="Fill" Value="{Binding Path=SelectedColor}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+
+                </Rectangle>
+                <TextBlock  Text="{Binding Converter={StaticResource ColorListEnumToStringConv}}" Margin="5,0,0,0"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <ObjectDataProvider x:Key="colorList"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:ColorList" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+    </UserControl.Resources>
+
+<!--SelectedItem="{Binding ElementName=ucColorPicker, Path=SelectedColorEnum, Converter={StaticResource ColorListEnumToStringConv}}"-->
+<!--SelectedValue="{Binding ElementName=ucColorPicker, Path=SelectedColorEnum, Converter={StaticResource ColorListEnumToStringConv}}"-->
+    
+    <StackPanel x:Name="ColorStackPanel" Orientation="Horizontal">
+        <ComboBox x:Name="cbBackColor"  HorizontalAlignment="Left" Margin="0,2"
+                        ItemsSource="{Binding Source={StaticResource colorList}}"
+                        ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
+                        SelectionChanged="cbBackColor_SelectionChanged"
+                        SelectedIndex="{Binding ElementName=ucColorPicker, Path=SelectedColorEnum, Converter={StaticResource ColorListEnumToIntConv}}"
+                        >
+        </ComboBox>
+
+        <StackPanel>
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=cbBackColor, Path=SelectedIndex}" Value="5">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <editors:ColorEditBox x:Name="cellColorEditBox" 
+                                    CheckBoxVisibility="Collapsed"
+                                    SpinnerVisibility="Collapsed"
+                                    Width="140"
+                                    HorizontalAlignment="Left" 
+                                    Format="a r g b"
+                                    Value="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,2" >
+
+            </editors:ColorEditBox>
+        </StackPanel>
+
+    </StackPanel>
+    
+</UserControl>

@@ -4,6 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
         xmlns:local="clr-namespace:DaphneGui"
+        xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Save3DView" Width="500" Height="250">
     
     <Window.Resources>
@@ -19,7 +20,7 @@
                             <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding}" Value="5">
-                                    <Setter Property="Fill" Value="{Binding Path=CustomColor}"/>
+                                    <Setter Property="Fill" Value="{Binding Path=CurrentColor}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -44,7 +45,7 @@
     <Grid Margin="10,10">
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
@@ -60,11 +61,14 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="Background Color:" Margin="0,0" Grid.Column="0" Grid.Row="0" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <uc:GreyScaleColorPicker x:Name="picker" Grid.Column="1" Grid.Row="0" VerticalAlignment="Bottom"  SelectedColor="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        
         <ComboBox x:Name="cbBackColor"  HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0" Margin="0,2"
                         ItemsSource="{Binding Source={StaticResource colorList}}"
                         ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
                         SelectedIndex="{Binding Path=PredefColorIndex, Converter={StaticResource ColorListToIntConv}}"       
                         SelectionChanged="cbBackColor_SelectionChanged"
+                        Visibility="Collapsed"
                         >
         </ComboBox>
 
@@ -86,7 +90,7 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=CustomColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Value="{Binding Path=CurrentColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="0,2" >
 
             </editors:ColorEditBox>

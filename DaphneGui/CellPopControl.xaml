@@ -32,7 +32,13 @@
                                 Fill="{Binding Converter={StaticResource CellPopulationToSolidBrushConv}}"
                                 Stroke="Black" StrokeThickness="0.5"/>
 
-                    <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0" MinHeight="20"/>
+                    <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0" MinHeight="20"
+                                ToolTipService.ShowOnDisabled="True" >
+                        <TextBlock.ToolTip>
+                            <TextBlock MaxWidth="300" TextAlignment="Left" TextWrapping="Wrap" Text="{Binding Path=Cell.description}">
+                            </TextBlock>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
 
                     <StackPanel Orientation="Horizontal">
 
@@ -187,7 +193,7 @@
                     <uc:DoublesBox x:Name="dbl_x_trans"
                                    Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"     
                                    SNUpperThreshold="1000"
@@ -210,7 +216,7 @@
                     <uc:DoublesBox x:Name="dbl_x_scale"
                                    Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -233,7 +239,7 @@
                     <uc:DoublesBox x:Name="dbl_y_trans"
                                    Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -255,7 +261,7 @@
                     <uc:DoublesBox x:Name="dbl_y_scale"
                                    Grid.Column="3" Grid.Row="3"   Grid.ColumnSpan="2" 
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -278,7 +284,7 @@
                     <uc:DoublesBox x:Name="dbl_z_trans"
                                    Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="2"  
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -299,7 +305,7 @@
                     <uc:DoublesBox x:Name="dbl_z_scale"
                                    Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -401,19 +407,17 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="population name" Margin="6,0" TextWrapping="Wrap"
+                        <!--<TextBlock Text="population name" Margin="6,0" TextWrapping="Wrap"
                                     Grid.Column="0" Grid.Row="1"  
                                     HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
                                  Grid.Column="1" Grid.Row="1"  Margin="0,2" >
-
                             <TextBox.ToolTip>
                                 <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
                                     A user-defined name for the cell population. The default is the name of the cell type.
                                 </TextBlock>
                             </TextBox.ToolTip>
-
-                        </TextBox> 
+                        </TextBox>--> 
 
                         <TextBlock Text="cell type" Margin="6,0"
                                         Grid.Column="0" Grid.Row="0"  

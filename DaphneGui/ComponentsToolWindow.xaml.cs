@@ -74,7 +74,7 @@ namespace DaphneGui
         private void btnAddGene_Click(object sender, RoutedEventArgs e)
         {
             Level level = (Level)(this.DataContext);
-            ConfigGene gm = new ConfigGene("g", 0, 0);
+            ConfigGene gm = new ConfigGene("g", 2, 1);
             gm.Name = gm.GenerateNewName(level, "New");
             
             level.entity_repository.genes.Add(gm);
@@ -89,7 +89,7 @@ namespace DaphneGui
         {
             Level level = (Level)(this.DataContext);
             ConfigMolecule gm = new ConfigMolecule();
-            gm.Name = gm.GenerateNewName(level, "_New");
+            gm.Name = gm.GenerateNewName(level, "New");
 
             level.entity_repository.molecules.Add(gm);
             MainWindow.SOP.SelectedRenderSkin.AddRenderMol(gm.renderLabel, gm.Name);
@@ -159,11 +159,7 @@ namespace DaphneGui
                 return;
 
             Level level = this.DataContext as Level;
-            if (level is Protocol)
-            {
-                Protocol p = level as Protocol;
-                cm.ValidateName(p);
-            }
+            cm.ValidateName(level);
 
             int index = dgLibMolecules.SelectedIndex;
             dgLibMolecules.InvalidateVisual();
@@ -171,6 +167,11 @@ namespace DaphneGui
             dgLibMolecules.SelectedIndex = index;
             cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
             dgLibMolecules.ScrollIntoView(cm);
+        }
+
+        private void MolLocation_Changed(object sender, RoutedEventArgs e)
+        {
+            MolTextBox_LostFocus(sender, e);
         }
 
         //LIBRARY REACTIONS EVENT HANDLERS        

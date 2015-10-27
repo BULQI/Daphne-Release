@@ -32,7 +32,7 @@ namespace DaphneGui
         #region context_menus
         private void ContextMenuDeleteGenes_Click(object sender, RoutedEventArgs e)
         {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            Level level = MainWindow.GetLevelContext(this);
 
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
@@ -42,13 +42,13 @@ namespace DaphneGui
             {
                 bool isSelected = DataGridBehavior.GetHighlightColumn(col);
                 string gene_name = col.Header as string;
-                string guid = MainWindow.SOP.Protocol.findGeneGuid(gene_name, MainWindow.SOP.Protocol);
+                string guid = level.findGeneGuid(gene_name, level);
                 if (isSelected && guid != null && guid.Length > 0)
                 {
                     //diff_scheme.genes.Remove(guid);
                     diff_scheme.DeleteGene(guid);
                 }
-          }
+            }
                     
         }
 
@@ -80,19 +80,76 @@ namespace DaphneGui
             //Update row headers in both grids
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
             DiffSchemeDataGrid.update_datagrid_rowheaders(this.DivRegGrid);
-
         }
 
-        private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
+        private void ContextMenuInsertStateAbove_Click(object sender, RoutedEventArgs e)
         {
             DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
             var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
 
-            if (diff_scheme == null) 
+            if (diff_scheme == null)
                 return;
 
+            if (dataGrid.SelectedIndex < -1)
+                return;
+
+            DiffSchemeDataGrid diffSchemeDG = FindLogicalParent<DiffSchemeDataGrid>(dataGrid);
+            if (diffSchemeDG == null)
+                return;
+
+            if (dataGrid.SelectedIndex < 0)
+                return;
+
+            // These next two statements are needed to prevent a crash during the Refresh operations, below.
+            // The crash occurs when the user is still in editing mode in a cell and the Refresh method is called.
+            // This is a known bug and fix.
+            dataGrid.CommitEdit();
+            dataGrid.CommitEdit();
+            diffSchemeDG.DivRegGrid.CommitEdit();
+            diffSchemeDG.DivRegGrid.CommitEdit();
+
             string stateName = diff_scheme.GenerateStateName();
-            diff_scheme.AddState(stateName);            
+            diff_scheme.InsertState(stateName, dataGrid.SelectedIndex);
+
+            CollectionViewSource.GetDefaultView(diffSchemeDG.EpigeneticMapGridDiv.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(diffSchemeDG.DivRegGrid.ItemsSource).Refresh();
+        }
+
+        private void ContextMenuInsertStateBelow_Click(object sender, RoutedEventArgs e)
+        {
+            DataGrid dataGrid = (sender as MenuItem).CommandTarget as DataGrid;
+            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+
+            if (diff_scheme == null)
+                return;
+
+            if (dataGrid.SelectedIndex < -1)
+                return;
+
+            DiffSchemeDataGrid diffSchemeDG = FindLogicalParent<DiffSchemeDataGrid>(dataGrid);
+            if (diffSchemeDG == null)
+                return;
+
+            // Only allow insert before the last, cytokinetic, state of a division scheme
+            if (diffSchemeDG.Name == "DivSchemeGrid" && dataGrid.SelectedIndex == diff_scheme.Driver.states.Count - 1)
+            {
+                System.Windows.MessageBox.Show("Cannot add a state after the cytokinetic state in a cell division scheme.");
+                return;
+            }
+
+            // These next two statements are needed to prevent a crash during the Refresh operations, below.
+            // The crash occurs when the user is still in editing mode in a cell and the Refresh method is called.
+            // This is a known bug and fix and the duplicates are necessary.
+            dataGrid.CommitEdit();
+            dataGrid.CommitEdit();
+            diffSchemeDG.DivRegGrid.CommitEdit();
+            diffSchemeDG.DivRegGrid.CommitEdit();
+
+            string stateName = diff_scheme.GenerateStateName();
+            diff_scheme.InsertState(stateName, dataGrid.SelectedIndex + 1);
+
+            CollectionViewSource.GetDefaultView(diffSchemeDG.EpigeneticMapGridDiv.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(diffSchemeDG.DivRegGrid.ItemsSource).Refresh();
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -291,15 +348,17 @@ namespace DaphneGui
 
         private static void CreateGeneColumns(DataGrid dataGrid, ObservableCollection<string> genes)
         {
-            //foreach (var item in dataGrid.Columns)
-            //{
-            //    var col = item as DataGridTextColumn;
-            //    if (col != null) col.Binding = null;
-            //}
             dataGrid.Columns.Clear();
             if (genes == null)return;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
+            Level level = MainWindow.GetLevelContext(cdc);
+            if (level == null)
+            {
+                return;
+            } 
+            EntityRepository er = level.entity_repository;
+
             //create columns
             int count = 0;
             foreach (var gene_guid in genes)
@@ -340,7 +399,10 @@ namespace DaphneGui
 
             dataGrid.Columns.Clear();
             if (states == null || states.Count == 0) return;
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
+            Level level = MainWindow.GetLevelContext(dataGrid);
+            EntityRepository er = level.entity_repository;
+
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
 
             int count = 0;
@@ -432,15 +494,12 @@ namespace DaphneGui
             ConfigTransitionScheme diffScheme = e.NewValue as ConfigTransitionScheme;
             if (diffScheme == null) return;
 
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
             if (DiffSchemeTarget == "EpigeneticMap")
-            {
-                //CreateGeneColumns(dataGrid, diffScheme.genes);
+            {               
             }
             else
             {
-                //CreateStateColumns(dataGrid, diffScheme.Driver.states);
                 dataGrid.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
                 dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
             }
@@ -472,12 +531,20 @@ namespace DaphneGui
 
         private static void dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-
             DataGrid dataGrid = sender as DataGrid;
             var diffScheme = GetDiffSchemeSource(dataGrid);
             string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
             if (diffScheme == null) return;
             int index = e.Row.GetIndex();
+
+            //Enable all items (rows) - later disable cytokinetic row.
+            for (int i = 0; i < diffScheme.Driver.states.Count; i++)
+            {
+                DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(i);
+                if (row == null) continue;
+                row.IsEnabled = true;
+            }
+
             if (index < diffScheme.Driver.states.Count)
             {
                 //e.Row.Header = context.RowHeaders[index];
@@ -489,6 +556,17 @@ namespace DaphneGui
                 binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 dgr.SetBinding(DataGridRowHeader.ContentProperty, binding);
                 e.Row.Header = dgr;
+
+                //This section is very important for disabling cytokinetic rows in both grids
+                string sname = diffScheme.Driver.states[index];
+                if (dataGrid.Name == "EpigeneticMapGridDiv" && sname == "cytokinetic")
+                {
+                    e.Row.IsEnabled = false;
+                }
+                if (dataGrid.Name == "DivRegGrid" && sname == "cytokinetic")
+                {
+                    e.Row.IsEnabled = false;
+                }
             }
 
         }
@@ -559,19 +637,7 @@ namespace DaphneGui
         }
 
         #endregion
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            var diff_scheme = DiffSchemeDataGrid.GetDiffSchemeSource(EpigeneticMapGridDiv);
-            int x = 0;
-            x++;
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.EpigeneticMapGridDiv, diff_scheme);
-
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
-            //DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
-            //DataContext = diff_scheme;
-        }
+        
     }
 
 

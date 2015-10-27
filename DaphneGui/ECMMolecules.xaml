@@ -105,7 +105,7 @@
 
                     <TextBox Background="LightGray" Foreground="Black" BorderBrush="White" BorderThickness="1" Grid.Row="1" Grid.Column="0" 
                              IsReadOnly="True" HorizontalAlignment="Left" VerticalContentAlignment="Center"
-                             Height="30" Width="{Binding ElementName=dgRenderMolDetails1, Path=ActualWidth}">ECM Cube</TextBox>
+                             Height="30" Width="{Binding ElementName=dgRenderMolDetails1, Path=ActualWidth}">ECM Volume</TextBox>
                     <ComboBox Margin="100,0,0,0" Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="Black" Background="#FFF5F2DF" HorizontalAlignment="Left" Height="24"
                               ItemsSource="{Binding ElementName=ECMMolsControl, Path=Tag.ECSRenderingMethodNames}" 
                               SelectedValue="{Binding ElementName=ECMMolsControl, Path=Tag.ECSRenderingMethod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="150"

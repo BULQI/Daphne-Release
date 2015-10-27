@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="DaphneGui.ReactionComplexControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DaphneGui"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
@@ -14,8 +15,9 @@
     <StackPanel Orientation="Vertical" Margin="8">
         <StackPanel>
             <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
-            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150"
+            <ListBox x:Name="ListBoxReactionComplexes" MinHeight="20" MaxHeight="150" MinWidth="100"
                             ItemsSource="{Binding reaction_complexes}"
+                            ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                             DisplayMemberPath="Name"
                             IsSynchronizedWithCurrentItem="True"
                             SelectionChanged="ListBoxReactionComplexes_SelectionChanged">
@@ -89,7 +91,7 @@
         <!--REACTIONS-->
         <StackPanel Margin="0,2" >
             <TextBlock Text="Reactions" />
-            <ListView x:Name="ListViewReacComplexReactions" MaxHeight="150"
+            <ListView x:Name="ListViewReacComplexReactions" MaxHeight="500"
                     ItemsSource="{Binding ElementName=ListBoxReactionComplexes, Path=SelectedItem.reactions, Mode=TwoWay}"
                     SelectedIndex="0" >
                 <ListView.View>
@@ -108,14 +110,20 @@
                             </Style>
                         </GridView.ColumnHeaderContainerStyle>
 
-                        <GridViewColumn Width="80" Header="Rate constant">
+                        <GridViewColumn Width="120" Header="Rate constant">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-
+                        <GridViewColumn x:Name="colUnits" Width="120" Header="Units">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" Foreground="Black"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <GridViewColumn Width="300" Header="Reaction" >
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -127,6 +135,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <local:ResizeThumb DataContext="{Binding ElementName=ListViewReacComplexReactions}" />
         </StackPanel>
 
     </StackPanel>

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 using System.IO;
-using System.IO.Compression;
 
 using ManifoldRing;
 using System.Globalization;
@@ -15,13 +15,13 @@ namespace Daphne
     {
         protected DateTime startTime;
         protected string fileNameBase, fileNameAssembled;
-        protected bool needsFileNameWrite;
+        public bool NeedsFileNameWrite { get; set; }
         public string AppPath { get; set; } // non uri
         public string UniquePath { get; set; }
 
         public ReporterBase()
         {
-            needsFileNameWrite = false;
+            NeedsFileNameWrite = false;
         }
 
         /// <summary>
@@ -136,18 +136,6 @@ namespace Daphne
             return s;
         }
 
-        public abstract void StartReporter(SimulationBase sim, string protocolFileName);
-        public abstract void AppendReporter();
-        public abstract void CloseReporter();
-
-        public abstract void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File);
-        public abstract void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File);
-
-        public abstract void AppendDeathEvent(int cell_id, int cellpop_id);
-        public abstract void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id);
-        public abstract void AppendExitEvent(int cell_id, int cellpop_id);
-
-        public abstract void ReactionsReport();
         protected void WriteReactionsList(StreamWriter writer, List<ConfigReaction> reactions)
         {
             foreach (ConfigReaction cr in reactions)
@@ -156,6 +144,38 @@ namespace Daphne
             }
         }
 
+        public virtual CellTrackData ProvideCellTrackData(int cellID)
+        {
+            return null;
+        }
+
+        public virtual CellPopulationDynamicsData ProvideCellPopulationDynamicsData(CellPopulation pop)
+        {
+            return null;
+        }
+
+        public virtual Dictionary<int, FounderInfo> ProvideFounderCells()
+        {
+            return null;
+        }
+
+        public virtual Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
+        {
+            return null;
+        }
+
+        public abstract void StartReporter(string protocolFileName);
+        public abstract void AppendReporter();
+        public abstract void CloseReporter();
+
+        public abstract void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File);
+        public abstract void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File);
+
+        public abstract void AppendDeathEvent(Cell cell);
+        public abstract void AppendDivisionEvent(Cell cell, Cell daughter);
+        public abstract void AppendExitEvent(Cell cell);
+
+        public abstract void ReactionsReport();
     }
 
     public abstract class SimulationReporterFiles
@@ -165,6 +185,27 @@ namespace Daphne
         }
 
         public abstract void clearFileStrings();
+    }
+
+    public class NullReporter : ReporterBase
+    {
+        public NullReporter()
+        {
+        }
+
+        public override void StartReporter(string protocolFileName) { }
+        public override void AppendReporter() { }
+        public override void CloseReporter() { }
+
+        public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File) { }
+        public override void ReadReporterFileNamesFromHDF5(HDF5FileBase hdf5File) { }
+
+        public override void AppendDeathEvent(Cell cell) { }
+        public override void AppendDivisionEvent(Cell cell, Cell daughter) { }
+        public override void AppendExitEvent(Cell cell) { }
+
+        public override void ReactionsReport() { }
+
     }
 
     public class TissueSimulationReporterFiles : SimulationReporterFiles
@@ -239,8 +280,14 @@ namespace Daphne
         private Dictionary<int, TransitionEventReporter> exitEvents;
         private TissueSimulationReporterFiles tsFiles;
 
-        public TissueSimulationReporter()
+        public TissueSimulationReporter(SimulationBase sim)
         {
+            if (sim is TissueSimulation == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            hSim = sim as TissueSimulation;
             cell_files = new Dictionary<int, StreamWriter>();
             deathEvents = new Dictionary<int, TransitionEventReporter>();
             divisionEvents = new Dictionary<int, TransitionEventReporter>();
@@ -248,16 +295,10 @@ namespace Daphne
             tsFiles = new TissueSimulationReporterFiles();
         }
 
-        public override void StartReporter(SimulationBase sim, string protocolFileName)
+        public override void StartReporter(string protocolFileName)
         {
-            if (sim is TissueSimulation == false)
-            {
-                throw new InvalidCastException();
-            }
-
-            needsFileNameWrite = true;
+            NeedsFileNameWrite = true;
             tsFiles.clearFileStrings();
-            hSim = sim as TissueSimulation;
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             CloseReporter();
             createUniqueFolderName(protocolFileName, false);
@@ -290,7 +331,7 @@ namespace Daphne
             {
                 if (((ReportECM)c.report_mp).mean == true)
                 {
-                    header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    header += "\t" + c.molecule.Name;
                     create = true;
                 }
             }
@@ -328,7 +369,7 @@ namespace Daphne
             {
                 if (c.report_mp.mp_extended > ExtendedReport.NONE)
                 {
-                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    string name = c.molecule.Name;
                     StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + hSim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
@@ -373,7 +414,7 @@ namespace Daphne
             // create a file stream for each cell population
             foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
-                string header = "cell_id\ttime";
+                string header = "cell_id\ttime\tlineage_id";
                 bool create = false;
 
                 if (cp.report_xvf.position == true)
@@ -409,6 +450,11 @@ namespace Daphne
                         create = true;
                     }
                 }
+                if (cp.reportStates.Generation == true)
+                {
+                        header += "\tgeneration";
+                        create = true;
+                }
                 if (cp.reportStates.Death == true)
                 {
                     if (cp.Cell.death_driver != null)
@@ -428,7 +474,7 @@ namespace Daphne
 
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
-                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                        string name = mp.molecule.Name;
 
                         if (mp.report_mp.mp_extended > ExtendedReport.NONE)
                         {
@@ -447,7 +493,7 @@ namespace Daphne
                 // ecm probe concentrations
                 foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                 {
-                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                    string name = mp.molecule.Name;
 
                     if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                     {
@@ -487,8 +533,8 @@ namespace Daphne
 
                 foreach (Cell c in SimulationBase.dataBasket.Populations[cp.cellpopulation_id].Values)
                 {
-                    // cell_id time
-                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, hSim.AccumulatedTime);
+                    // cell_id lineage_id time
+                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}\t{2}", c.Cell_id, hSim.AccumulatedTime, c.Lineage_id);
 
                     if (cp.report_xvf.position == true)
                     {
@@ -510,6 +556,10 @@ namespace Daphne
                     if (cp.reportStates.Division == true)
                     {
                         cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
+                    }
+                    if (cp.reportStates.Generation == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.generation);
                     }
                     if (cp.reportStates.Death == true)
                     {
@@ -547,8 +597,6 @@ namespace Daphne
                     // ecm probe concentrations
                     foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                     {
-                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
-
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
                             cell_files[cp.cellpopulation_id].Write("\t{0:G4}", SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(c.SpatialState.X));
@@ -592,7 +640,7 @@ namespace Daphne
 
                     tsFiles.CellTypeDeath.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} death events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
-                    writer.WriteLine("cell_id\ttime");
+                    writer.WriteLine("cell_id\ttime\tlineage_id");
                     deathEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
                 if (cp.reportStates.Division == true)
@@ -600,8 +648,8 @@ namespace Daphne
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_divisionEvents", "txt");
 
                     tsFiles.CellTypeDivision.Add(cp.cellpopulation_id, fileNameAssembled);
-                    writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);                
-                    writer.WriteLine("cell_id\ttime\tdaughter_id");
+                    writer.WriteLine("Cell {0} division events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
+                    writer.WriteLine("cell_id\ttime\tdaughter_id\tgeneration\tmother_lineage_id\tdaughter1_lineage_id\tdaughter2_lineage_id");
                     divisionEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
                 if (cp.reportStates.Exit == true)
@@ -610,7 +658,7 @@ namespace Daphne
 
                     tsFiles.CellTypeExit.Add(cp.cellpopulation_id, fileNameAssembled);
                     writer.WriteLine("Cell {0} exit events from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
-                    writer.WriteLine("cell_id\ttime");
+                    writer.WriteLine("cell_id\ttime\tlineage_id");
                     exitEvents.Add(cp.cellpopulation_id, new TransitionEventReporter(writer));
                 }
             }
@@ -636,35 +684,35 @@ namespace Daphne
             exitEvents.Clear();
         }
 
-        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        public override void AppendDeathEvent(Cell cell)
         {
             if (deathEvents != null)
             {
-                if (deathEvents.ContainsKey(cellpop_id))
+                if (deathEvents.ContainsKey(cell.Population_id))
                 {
-                    deathEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                    deathEvents[cell.Population_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell));
                 }
             }
         }
 
-        public override void AppendDivisionEvent(int cell_id, int cellpop_id, int daughter_id)
+        public override void AppendDivisionEvent(Cell cell, Cell daughter)
         {
             if (divisionEvents != null)
             {
-                if (divisionEvents.ContainsKey(cellpop_id))
+                if (divisionEvents.ContainsKey(cell.Population_id))
                 {
-                    divisionEvents[cellpop_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell_id, daughter_id));
+                    divisionEvents[cell.Population_id].AddEvent(new DivisionEvent(hSim.AccumulatedTime, cell, daughter));
                 }
             }
         }
 
-        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        public override void AppendExitEvent(Cell cell)
         {
             if (exitEvents != null)
             {
-                if (exitEvents.ContainsKey(cellpop_id))
+                if (exitEvents.ContainsKey(cell.Population_id))
                 {
-                    exitEvents[cellpop_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell_id));
+                    exitEvents[cell.Population_id].AddEvent(new TransitionEvent(hSim.AccumulatedTime, cell));
                 }
             }
         }
@@ -731,11 +779,11 @@ namespace Daphne
         public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File)
         {
             // write only once
-            if (needsFileNameWrite == false)
+            if (NeedsFileNameWrite == false)
             {
                 return;
             }
-            needsFileNameWrite = false;
+            NeedsFileNameWrite = false;
 
             int i;
 
@@ -922,6 +970,474 @@ namespace Daphne
             hdf5File.closeGroup();
         }
 
+        /// <summary>
+        /// extracts and returns the track data for a cell
+        /// </summary>
+        /// <param name="cellID">the cell's id</param>
+        /// <returns>track data with lists of times and matching positions</returns>
+        public override CellTrackData ProvideCellTrackData(int cellID)
+        {
+            CellTrackData data = null;
+
+            // does the cell exist?
+            if(SimulationBase.dataBasket.Cells.ContainsKey(cellID) == true)
+            {
+                Cell c = SimulationBase.dataBasket.Cells[cellID];
+                CellPopulation cellPop = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(c.Population_id);
+
+                // is the needed data there?
+                if (cellPop.report_xvf.position == true && tsFiles.CellTypeReport.ContainsKey(c.Population_id) == true)
+                {
+                    string file = tsFiles.CellTypeReport[c.Population_id],
+                           path = hSim.HDF5FileHandle.FilePath,
+                           line;
+                    string[] parts;
+                    int cell_id = 0, time = 0, pos_x = 0, pos_y = 0, pos_z = 0, total = 5, assigned = 0;
+                    StreamReader stream = new StreamReader(path + file);
+
+                    // read description
+                    stream.ReadLine();
+                    // read header
+                    line = stream.ReadLine();
+                    // find indices of interest
+                    parts = line.Split();
+                    for(int i = 0; i < parts.Length && assigned < total; i++)
+                    {
+                        if(parts[i] == "cell_id")
+                        {
+                            cell_id = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "time")
+                        {
+                            time = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_x")
+                        {
+                            pos_x = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_y")
+                        {
+                            pos_y = i;
+                            assigned++;
+                        }
+                        else if(parts[i] == "pos_z")
+                        {
+                            pos_z = i;
+                            assigned++;
+                        }
+                    }
+                    data = new CellTrackData(cellID);
+                    while ((line = stream.ReadLine()) != null)
+                    {
+                        parts = line.Split('\t');
+                        if (Convert.ToInt32(parts[cell_id]) == cellID)
+                        {
+                            data.Times.Add(Convert.ToDouble(parts[time]));
+                            data.Positions.Add(new double[] { Convert.ToDouble(parts[pos_x]), Convert.ToDouble(parts[pos_y]), Convert.ToDouble(parts[pos_z]) });
+                        }
+                    }
+                    stream.Close();
+                }
+            }
+            if (data != null)
+            {
+                // sort by time
+                data.Sort();
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// extract the cell population dynamics data
+        /// </summary>
+        /// <param name="pop">cell population we want to plot</param>
+        /// <returns>an object with lists for the state names for processing and lists for the times and matching states</returns>
+        public override CellPopulationDynamicsData ProvideCellPopulationDynamicsData(CellPopulation pop)
+        {
+            CellPopulationDynamicsData data = null;
+
+            // is the needed data there?
+            if ((pop.reportStates.Death == true || pop.reportStates.Differentiation == true || pop.reportStates.Division == true) &&
+                tsFiles.CellTypeReport.ContainsKey(pop.cellpopulation_id) == true)
+            {
+                string file = tsFiles.CellTypeReport[pop.cellpopulation_id],
+                       path = hSim.HDF5FileHandle.FilePath,
+                       line;
+                string[] parts;
+                int time = 0, death = -1, diff = -1, div = -1, total = 1, assigned = 0,
+                    ipart;
+                double dtime;
+                StreamReader stream = new StreamReader(path + file);
+
+                // create the data
+                data = new CellPopulationDynamicsData(pop);
+                // we can only read out states that were reported
+                if (pop.reportStates.Death == true)
+                {
+                    total++;
+                }
+                if (pop.reportStates.Differentiation == true)
+                {
+                    total++;
+                }
+                if (pop.reportStates.Division == true)
+                {
+                    total++;
+                }
+                // read description
+                stream.ReadLine();
+                // read header
+                line = stream.ReadLine();
+                // find indices of interest
+                parts = line.Split();
+                for (int i = 0; i < parts.Length && assigned < total; i++)
+                {
+                    if (parts[i] == "time")
+                    {
+                        time = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "DeathState")
+                    {
+                        death = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "DiffState")
+                    {
+                        diff = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "DivState")
+                    {
+                        div = i;
+                        assigned++;
+                    }
+                }
+
+                // now read all remaining lines and process them / add up the dynamics values per cell
+                while ((line = stream.ReadLine()) != null)
+                {
+                    parts = line.Split('\t');
+                    dtime = Convert.ToDouble(parts[time]);
+                    // add zero entries for this time if it is a new time (checked in the function)
+                    data.AddSet(dtime);
+
+                    // now the individual states
+                    // death
+                    if (death >= 0)
+                    {
+                        // the entry converted to int
+                        ipart = Convert.ToInt32(parts[death]);
+                        // increment that state
+                        data.IncrementState(CellPopulationDynamicsData.State.DEATH, ipart, dtime);
+                    }
+                    // diff
+                    if (diff >= 0)
+                    {
+                        // the entry converted to int
+                        ipart = Convert.ToInt32(parts[diff]);
+                        // increment that state
+                        data.IncrementState(CellPopulationDynamicsData.State.DIFF, ipart, dtime);
+                    }
+                    // div
+                    if (div >= 0)
+                    {
+                        // the entry converted to int
+                        ipart = Convert.ToInt32(parts[div]);
+                        // increment that state
+                        data.IncrementState(CellPopulationDynamicsData.State.DIV, ipart, dtime);
+                    }
+                }
+                stream.Close();
+            }
+            if (data != null)
+            {
+                // sort by the time
+                data.Sort();
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// return a dictionary of founder cells, can be null if none exist or the needed reporting is off
+        /// </summary>
+        /// <returns></returns>
+        public override Dictionary<int, FounderInfo> ProvideFounderCells()
+        {
+            Dictionary<int, FounderInfo> data = null;
+            data = new Dictionary<int, FounderInfo>();
+
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
+            {
+                // a founder cell needs the division reporting file present; no need to look at reporting options, presence of file is sufficient in this case
+                if (tsFiles.CellTypeDivision.ContainsKey(cp.cellpopulation_id) == true)
+                {
+                    string file = tsFiles.CellTypeReport[cp.cellpopulation_id],
+                           path = hSim.HDF5FileHandle.FilePath,
+                           line;
+                    string[] parts;
+                    int time = 0, cell_id = 0, lineage_id = 0, total = 3, assigned = 0;
+                    StreamReader stream = new StreamReader(path + file);
+
+                    // read description
+                    stream.ReadLine();
+                    // read header
+                    line = stream.ReadLine();
+                    // find indices of interest
+                    parts = line.Split();
+                    for (int i = 0; i < parts.Length && assigned < total; i++)
+                    {
+                        if (parts[i] == "time")
+                        {
+                            time = i;
+                            assigned++;
+                        }
+                        else if (parts[i] == "cell_id")
+                        {
+                            cell_id = i;
+                            assigned++;
+                        }
+                        else if (parts[i] == "lineage_id")
+                        {
+                            lineage_id = i;
+                            assigned++;
+                        }
+                    }
+                    
+                    while ((line = stream.ReadLine()) != null)
+                    {
+                        parts = line.Split('\t');
+                        if (Convert.ToDouble(parts[time]) == 0)
+                        {
+                            data.Add(Convert.ToInt32(parts[cell_id]), new FounderInfo(BigInteger.Parse(parts[lineage_id]), cp.cellpopulation_id));
+                        }
+                    }
+                    stream.Close();
+                }
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// extract the genealogy information for a founder cell
+        /// </summary>
+        /// <param name="founder">data for the founder cell</param>
+        /// <returns>the dictionary of genealogy objects</returns>
+        public override Dictionary<BigInteger, GenealogyInfo> ProvideGenealogyData(FounderInfo founder)
+        {
+            Dictionary<BigInteger, GenealogyInfo> data = new Dictionary<BigInteger, GenealogyInfo>();
+            string file = tsFiles.CellTypeDivision[founder.Population_Id],
+                   path = hSim.HDF5FileHandle.FilePath,
+                   line;
+            string[] parts;
+            int time = 0, generation = 0, mother_lineage_id = 0, daughter1_lineage_id = 0, daughter2_lineage_id = 0, total = 5, assigned = 0;
+            StreamReader stream = new StreamReader(path + file);
+
+            // add the founder cell
+            data.Add(founder.Lineage_Id, new GenealogyInfo(0, founder.Lineage_Id, 0));
+
+            // process divisions
+            // read description
+            stream.ReadLine();
+            // read header
+            line = stream.ReadLine();
+            // find indices of interest
+            parts = line.Split();
+            for (int i = 0; i < parts.Length && assigned < total; i++)
+            {
+                if (parts[i] == "time")
+                {
+                    time = i;
+                    assigned++;
+                }
+                else if (parts[i] == "generation")
+                {
+                    generation = i;
+                    assigned++;
+                }
+                else if (parts[i] == "mother_lineage_id")
+                {
+                    mother_lineage_id = i;
+                    assigned++;
+                }
+                else if (parts[i] == "daughter1_lineage_id")
+                {
+                    daughter1_lineage_id = i;
+                    assigned++;
+                }
+                else if (parts[i] == "daughter2_lineage_id")
+                {
+                    daughter2_lineage_id = i;
+                    assigned++;
+                }
+            }
+
+            List<DivisionContainer> divList = new List<DivisionContainer>();
+            DivisionContainer div;
+
+            // gather the division events first to sort them before usage
+            while ((line = stream.ReadLine()) != null)
+            {
+                parts = line.Split('\t');
+                div = new DivisionContainer();
+                div.time = Convert.ToDouble(parts[time]);
+                div.generation = Convert.ToInt32(parts[generation]);
+                div.mother = BigInteger.Parse(parts[mother_lineage_id]);
+                div.daughter1 = BigInteger.Parse(parts[daughter1_lineage_id]);
+                div.daughter2 = BigInteger.Parse(parts[daughter2_lineage_id]);
+                divList.Add(div);
+            }
+            stream.Close();
+            // sort by time
+            divList = divList.OrderBy(o => o.time).ToList();
+
+            // now update existing GenealogyInfo objects (mother), add new ones (daughters)
+            foreach(DivisionContainer dc in divList)
+            {
+                // an entry for this cell must exist
+                if (data.ContainsKey(dc.mother) == true)
+                {
+                    GenealogyInfo entry = data[dc.mother];
+
+                    // update the mother
+                    entry.EventType = GenealogyInfo.GI_DIVIDE;
+                    entry.EventTime = dc.time;
+                    // create daughter 1
+                    entry = new GenealogyInfo(dc.time, dc.daughter1, dc.generation);
+                    data.Add(dc.daughter1, entry);
+                    // create daughter 2
+                    entry = new GenealogyInfo(dc.time, dc.daughter2, dc.generation);
+                    data.Add(dc.daughter2, entry);
+                }
+            }
+
+            int lineage_id = 0;
+            List<DeathExitContainer> deathExitList = new List<DeathExitContainer>();
+            DeathExitContainer deathExit;
+
+            // process deaths
+            if (tsFiles.CellTypeDeath.ContainsKey(founder.Population_Id))
+            {
+                file = tsFiles.CellTypeDeath[founder.Population_Id];
+                total = 2;
+                assigned = 0;
+                stream = new StreamReader(path + file);
+
+                // read description
+                stream.ReadLine();
+                // read header
+                line = stream.ReadLine();
+                // find indices of interest
+                parts = line.Split();
+                for (int i = 0; i < parts.Length && assigned < total; i++)
+                {
+                    if (parts[i] == "time")
+                    {
+                        time = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "lineage_id")
+                    {
+                        lineage_id = i;
+                        assigned++;
+                    }
+                }
+
+                //List<DeathExitContainer> deathExitList = new List<DeathExitContainer>();
+                //DeathExitContainer deathExit;
+
+                // gather the death events first to sort them before usage
+                while ((line = stream.ReadLine()) != null)
+                {
+                    parts = line.Split('\t');
+                    deathExit = new DeathExitContainer();
+                    deathExit.time = Convert.ToDouble(parts[time]);
+                    deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
+                    deathExitList.Add(deathExit);
+                }
+                stream.Close();
+                // sort by time
+                deathExitList = deathExitList.OrderBy(o => o.time).ToList();
+
+                // update existing GenealogyInfo objects
+                foreach (DeathExitContainer dec in deathExitList)
+                {
+                    // an entry for this cell must exist
+                    if (data.ContainsKey(dec.lineage) == true)
+                    {
+                        GenealogyInfo entry = data[dec.lineage];
+
+                        // update the existing cell
+                        entry.EventType = GenealogyInfo.GI_DIE;
+                        entry.EventTime = dec.time;
+                    }
+                }
+            }
+
+            // process exits
+            if (tsFiles.CellTypeExit.ContainsKey(founder.Population_Id))
+            {
+                file = tsFiles.CellTypeExit[founder.Population_Id];
+                total = 2;
+                assigned = 0;
+                stream = new StreamReader(path + file);
+
+                // read description
+                stream.ReadLine();
+                // read header
+                line = stream.ReadLine();
+                // find indices of interest
+                parts = line.Split();
+                for (int i = 0; i < parts.Length && assigned < total; i++)
+                {
+                    if (parts[i] == "time")
+                    {
+                        time = i;
+                        assigned++;
+                    }
+                    else if (parts[i] == "lineage_id")
+                    {
+                        lineage_id = i;
+                        assigned++;
+                    }
+                }
+
+                deathExitList.Clear();
+
+                // gather the exit events first to sort them before usage
+                while ((line = stream.ReadLine()) != null)
+                {
+                    parts = line.Split('\t');
+                    deathExit = new DeathExitContainer();
+                    deathExit.time = Convert.ToDouble(parts[time]);
+                    deathExit.lineage = BigInteger.Parse(parts[lineage_id]);
+                    deathExitList.Add(deathExit);
+                }
+                stream.Close();
+                // sort by time
+                deathExitList = deathExitList.OrderBy(o => o.time).ToList();
+
+                // update existing GenealogyInfo objects
+                foreach (DeathExitContainer dec in deathExitList)
+                {
+                    // an entry for this cell must exist
+                    if (data.ContainsKey(dec.lineage) == true)
+                    {
+                        GenealogyInfo entry = data[dec.lineage];
+
+                        // update the existing cell
+                        entry.EventType = GenealogyInfo.GI_EXIT;
+                        entry.EventTime = dec.time;
+                    }
+                }
+            }
+
+            return data;
+        }
     }
 
     public class CompartmentMolpopReporter
@@ -1000,24 +1516,24 @@ namespace Daphne
         private VatReactionComplexReporterFiles vatRCfiles;
         public bool reportOn;
 
-        public VatReactionComplexReporter()
-        {
-            compMolpopReporter = new CompartmentMolpopReporter();
-            vatRCfiles = new VatReactionComplexReporterFiles();
-            reportOn = false;
-        }
-
-        public override void StartReporter(SimulationBase sim, string protocolFileName)
+        public VatReactionComplexReporter(SimulationBase sim)
         {
             if (sim is VatReactionComplex == false)
             {
                 throw new InvalidCastException();
             }
 
-            needsFileNameWrite = true;
-            vatRCfiles.clearFileStrings();
             hSim = sim as VatReactionComplex;
-            createUniqueFolderName(protocolFileName, reportOn == false);
+            compMolpopReporter = new CompartmentMolpopReporter();
+            vatRCfiles = new VatReactionComplexReporterFiles();
+            reportOn = false;
+        }
+
+        public override void StartReporter(string protocolFileName)
+        {
+            NeedsFileNameWrite = true;
+            vatRCfiles.clearFileStrings();
+            createUniqueFolderName(protocolFileName, reportOn == true);
 
             if (reportOn == false)
             {
@@ -1069,7 +1585,7 @@ namespace Daphne
                 {
                     if (SimulationBase.dataBasket.Environment.Comp.Populations.ContainsKey(configMolPop.molecule.entity_guid))
                     {
-                        header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[configMolPop.molecule.entity_guid].Name;
+                        header += "\t" + configMolPop.molecule.Name;
                         create = true;
                     }
                 }
@@ -1101,17 +1617,17 @@ namespace Daphne
             }
         }
 
-        public override void AppendDeathEvent(int cell_id, int cellpop_id)
+        public override void AppendDeathEvent(Cell cell)
         {
             throw new NotImplementedException();
         }
 
-        public override void AppendDivisionEvent(int mother_id, int cellpop_id, int daughter_id)
+        public override void AppendDivisionEvent(Cell cell, Cell daughter)
         {
             throw new NotImplementedException();
         }
 
-        public override void AppendExitEvent(int cell_id, int cellpop_id)
+        public override void AppendExitEvent(Cell cell)
         {
             throw new NotImplementedException();
         }
@@ -1148,11 +1664,11 @@ namespace Daphne
         public override void WriteReporterFileNamesToHDF5(HDF5FileBase hdf5File)
         {
             // only write once
-            if (needsFileNameWrite == false)
+            if (NeedsFileNameWrite == false)
             {
                 return;
             }
-            needsFileNameWrite = false;
+            NeedsFileNameWrite = false;
 
             // create group
             hdf5File.createGroup("ReporterFiles");
@@ -1239,16 +1755,18 @@ namespace Daphne
     {
         public double time;
         public int cell_id;
+        BigInteger lineage_id;
 
-        public TransitionEvent(double _time, int _cell_id)
+        public TransitionEvent(double _time, Cell cell)
         {
             time = _time;
-            cell_id = _cell_id;
+            cell_id = cell.Cell_id;
+            lineage_id = cell.Lineage_id;
         }
 
         public virtual void WriteLine(StreamWriter writer)
         {
-            writer.WriteLine("{0}\t{1}", this.cell_id, this.time);
+            writer.WriteLine("{0}\t{1}\t{2}", cell_id, time, lineage_id);
         }
     }
 
@@ -1258,16 +1776,338 @@ namespace Daphne
     public class DivisionEvent : TransitionEvent
     {
         public int daughter_id;
+        public int generation;
+        BigInteger mother_lineage_id, daughter1_lineage_id, daugher2_lineage_id;
 
-        public DivisionEvent(double _time, int _cell_id, int _daughter_id)
-            : base(_time, _cell_id)
+        public DivisionEvent(double _time, Cell cell, Cell daughter)
+            : base(_time, cell)
         {
-            daughter_id = _daughter_id;
+            daughter_id = daughter.Cell_id;
+            generation = cell.generation;
+            mother_lineage_id = cell.Lineage_id / 2;
+            daughter1_lineage_id = cell.Lineage_id;
+            daugher2_lineage_id = daughter.Lineage_id;
         }
 
         public override void WriteLine(StreamWriter writer)
         {
-            writer.WriteLine("{0}\t{1}\t{2}", this.cell_id, this.time, this.daughter_id);
+            writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", cell_id, time, daughter_id, generation, mother_lineage_id, daughter1_lineage_id, daugher2_lineage_id);
+        }
+    }
+
+    public class CellPopulationDynamicsData : ReporterData
+    {
+        public enum State { DEATH, DIV, DIFF };
+        public List<double> Times { get; private set; }
+        private Dictionary<int, List<int>> deathStates;
+        private Dictionary<int, List<int>> divStates;
+        private Dictionary<int, List<int>> diffStates;
+        private Dictionary<double, int> times_dict;
+
+
+        /// <summary>
+        /// constructor creates the data structures to be filled for a population's dynamics plot
+        /// </summary>
+        /// <param name="pop">the population to be plotted</param>
+        public CellPopulationDynamicsData(CellPopulation pop)
+        {
+            // read out the possible states in this population
+            ConfigCell cell = pop.Cell;
+            int i;
+
+            Times = new List<double>();
+            times_dict = new Dictionary<double, int>();
+            
+            // death
+            if (pop.reportStates.Death == true)
+            {
+                deathStates = new Dictionary<int, List<int>>();
+                for (i = 0; i < cell.death_driver.states.Count; i++)
+                {
+                    deathStates.Add(i, new List<int>());
+                }
+            }
+            // diff
+            if (pop.reportStates.Differentiation == true)
+            {
+                diffStates = new Dictionary<int, List<int>>();
+                for (i = 0; i < cell.diff_scheme.Driver.states.Count; i++)
+                {
+                    diffStates.Add(i, new List<int>());
+                }
+            }
+            // div
+            if (pop.reportStates.Division == true)
+            {
+                divStates = new Dictionary<int, List<int>>();
+                for (i = 0; i < cell.div_scheme.Driver.states.Count; i++ )
+                {
+                    divStates.Add(i, new List<int>());
+                }
+            }
+        }
+
+        /// <summary>
+        /// add a zeroed set of states at a given time
+        /// </summary>
+        /// <param name="time">time step value</param>
+        public void AddSet(double time)
+        {
+            // only append one set per timestep
+            if (times_dict.ContainsKey(time) == true)
+            {
+                return;
+            }
+
+            // add the time
+            Times.Add(time);
+            // use a dictionary for fast lookup, save the list index as value;
+            // it will serve to access the correct state
+            times_dict.Add(time, Times.Count - 1);
+
+            // add a counter for each state, set to zero
+
+            //skg added ifs 6/3/15
+            if (deathStates != null)
+            {
+                foreach (List<int> l in deathStates.Values)
+                {
+                    l.Add(0);
+                }
+            }
+            if (diffStates != null)
+            {
+                foreach (List<int> l in diffStates.Values)
+                {
+                    l.Add(0);
+                }
+            }
+            if (divStates != null)
+            {
+                foreach (List<int> l in divStates.Values)
+                {
+                    l.Add(0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// increment the last entry for the state with the given index
+        /// </summary>
+        /// <param name="state">enum identifying the state</param>
+        /// <param name="index">state index</param>
+        /// <param name="time">the current time</param>
+        public void IncrementState(State state, int index, double time)
+        {
+            if (state == State.DEATH)
+            {
+                deathStates[index][times_dict[time]]++;
+            }
+            else if (state == State.DIFF)
+            {
+                diffStates[index][times_dict[time]]++;
+            }
+            else if (state == State.DIV)
+            {
+                divStates[index][times_dict[time]]++;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// retrieve the series for a state
+        /// </summary>
+        /// <param name="state">enum identifying the state</param>
+        /// <param name="name">state index</param>
+        public List<int> GetState(State state, int index)
+        {
+            if (state == State.DEATH)
+            {
+                return deathStates[index];
+            }
+            else if (state == State.DIFF)
+            {
+                return diffStates[index];
+            }
+            else if (state == State.DIV)
+            {
+                return divStates[index];
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int itmp, minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // states
+                    foreach (List<int> list in deathStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                    foreach (List<int> list in divStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                    foreach (List<int> list in diffStates.Values)
+                    {
+                        itmp = list[i];
+                        list[i] = list[minloc];
+                        list[minloc] = itmp;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// class encapsulating the information needed for the founder cells
+    /// </summary>
+    public class FounderInfo
+    {
+        public BigInteger Lineage_Id { get; set; }
+        public int  Population_Id { get; set; }
+
+        public FounderInfo(BigInteger lineage_id, int population_id)
+        {
+            Lineage_Id = lineage_id;
+            Population_Id = population_id;
+        }
+    }
+
+    /// <summary>
+    /// class encapsulating the genealogy information for lineage analysis
+    /// </summary>
+    public class GenealogyInfo
+    {
+        // lineage id of the mother cell before division
+        public BigInteger Lineage_Id;
+        // the number of divisions to reach this current cell
+        public int Generation;
+        // simulation clock time for this event
+        public double EventTime;
+        // simulation clock time for birth time
+        public double BirthTime;
+        // constant values defined in this class
+        public int EventType;
+        // not in use, yet
+        public double IgAffinity;
+        // not in use, yet
+        public double ExpectedMutations;
+        // constants
+        public static int GI_BIRTH = 0,
+                          GI_DIE = 1,
+                          GI_EXIT = 2,
+                          GI_DIVIDE = 3;
+
+        /// <summary>
+        /// constructor with parameters all event types have in common
+        /// </summary>
+        /// <param name="tBirth">birth time</param>
+        /// <param name="lineage_id">lineage id</param>
+        /// <param name="generation">generation</param>
+        public GenealogyInfo(double tBirth, BigInteger lineage_id, int generation)
+        {
+            Lineage_Id = lineage_id;
+            Generation = generation;
+            EventTime = -1;
+            EventType = GI_BIRTH;
+            BirthTime = tBirth;
+            IgAffinity = 0;
+        }
+
+        /// <summary>
+        /// return the relative event time
+        /// </summary>
+        /// <returns></returns>
+        public double RelativeEventTime()
+        {
+            return EventTime - BirthTime;
+        }
+
+        /// <summary>
+        /// return the daughter lineage id
+        /// </summary>
+        /// <param name="daughter">daughter 0 or 1</param>
+        /// <returns>daughter's lineage id</returns>
+        public BigInteger Daughter(int daughter)
+        {
+            if (daughter != 0)
+            {
+                daughter = 1;
+            }
+            return Lineage_Id * 2 + daughter;
+        }
+
+        /// <summary>
+        /// true if the object represents a division
+        /// </summary>
+        /// <returns>true for division</returns>
+        public bool IsDivision()
+        {
+            return EventType == GI_DIVIDE;
+        }
+    }
+
+    /// <summary>
+    /// save division events for sorting
+    /// </summary>
+    public class DivisionContainer
+    {
+        public double time;
+        public int generation;
+        public BigInteger mother, daughter1, daughter2;
+
+        public DivisionContainer()
+        {
+        }
+    }
+
+    /// <summary>
+    /// save death and exit events for sorting
+    /// </summary>
+    public class DeathExitContainer
+    {
+        public double time;
+        public BigInteger lineage;
+
+        public DeathExitContainer()
+        {
         }
     }
 }

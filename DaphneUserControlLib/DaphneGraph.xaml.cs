@@ -9,17 +9,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ActiproSoftware.Windows.Controls.Docking;
 
-namespace DaphneGui
+namespace DaphneUserControlLib
 {
     /// <summary>
-    /// Interaction logic for CellDetailsToolsWindow.xaml
+    /// Interaction logic for DaphneGraph.xaml
     /// </summary>
-    public partial class CellDetailsToolWindow : ToolWindow
+    public partial class DaphneGraph : UserControl
     {
-        public CellDetailsToolWindow()
+        public DaphneGraph()
         {
             InitializeComponent();
         }

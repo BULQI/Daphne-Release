@@ -9,12 +9,39 @@ namespace Daphne
     public class CellManager : IDynamic
     {
         private Dictionary<int, double[]> deadDict = null;
-        private int[] tempDeadKeys = null;
+        public Dictionary<int, double[]> DeadDict
+        {
+            get
+            {
+                return deadDict;
+            }
+
+            set
+            {
+                deadDict = value;
+            }
+        }
         public DistributedParameter Phagocytosis;
 
         public CellManager()
         {
             deadDict = new Dictionary<int, double[]>();
+        }
+
+        /// <summary>
+        /// have all cells take a step forward according to the burn-in update x += mu * f * dt
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="mu"></param>
+        public void Burn_inStep(double dt, double mu)
+        {
+            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
+            {
+                for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
+                {
+                    kvp.Value.SpatialState.X[i] += mu * kvp.Value.SpatialState.F[i] * dt;
+                }
+            }
         }
 
         public void Step(double dt)
@@ -90,7 +117,7 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
-                    SimulationBase.dataBasket.DivisionEvent(kvp.Value.Cell_id, kvp.Value.Population_id, c.Cell_id);
+                    SimulationBase.dataBasket.DivisionEvent(kvp.Value, c);
                 }
            }
 
@@ -107,8 +134,7 @@ namespace Daphne
             // process death list
             if (deadDict != null)
             {
-                tempDeadKeys = deadDict.Keys.ToArray<int>();
-                foreach(int key in tempDeadKeys)
+                foreach (int key in deadDict.Keys.ToArray<int>())
                 {
                     // increment elapsed time since death
                     double[] d = deadDict[key];

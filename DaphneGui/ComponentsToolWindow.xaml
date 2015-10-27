@@ -6,13 +6,12 @@
                     xmlns:daph="clr-namespace:Daphne;assembly=Daphne"                    
                     xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
-                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
+                                  
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     ImageSource="Images/Properties16.png"
                     x:Name="MyComponentsWindow"
                     Loaded="MyComponentsWindow_Loaded"
                     >
-
 
     <docking:ToolWindow.Resources>
         <!--<daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />-->
@@ -41,6 +40,20 @@
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
 
         <local:selectedRCToBoolConverter x:Key="selectedRCToBoolConv"/>
+
+        <CollectionViewSource x:Key="ER_Molecules" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.molecules}"/>
+        <CollectionViewSource x:Key="ER_Genes" Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}},Path=LevelContext.entity_repository.genes}"/>
+
+        <CompositeCollection x:Key="MoleculesAndGenes">
+            <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Molecules}}" />
+            <CollectionContainer Collection="{Binding Source={StaticResource ResourceKey=ER_Genes}}" />
+        </CompositeCollection>
+        <CollectionViewSource x:Key="ComponentMoleculesListView"  
+            Source="{Binding Source={StaticResource ResourceKey=MoleculesAndGenes}}"
+            />
+
+
+
 
     </docking:ToolWindow.Resources>
 
@@ -103,7 +116,9 @@
                                             </LinearGradientBrush>
                                         </Setter.Value>
                                     </Setter>
-                                </Style>
+                                <!--<Setter Property="ToolTip" Value="{Binding ElementName=dgLibGenes, Path=Items.Count}" />-->
+                                <Setter Property="ToolTip" Value="{Binding ElementName=dgLibGenes, Path=ItemsSource.Count}" />
+                            </Style>
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
@@ -198,8 +213,9 @@
                             <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200" SortMemberPath="Name"  >
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          LostFocus="MolTextBox_LostFocus">
+                                        <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" 
+                                                 Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                 LostFocus="MolTextBox_LostFocus" LostKeyboardFocus="MolTextBox_LostFocus">
                                         </TextBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -209,7 +225,8 @@
                                 <DataGridTemplateColumn.CellTemplate >
                                     <DataTemplate>
                                         <!--<TextBox Width="80" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
-                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiff, Path=Width-8}"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                                        <!--<uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiff, Path=Width-8}"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
+                                        <uc:DoublesBox TextFieldWidth="75"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -235,8 +252,9 @@
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"  IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}">
-                                        </CheckBox>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"  
+                                                  IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}"
+                                                  Click="MolLocation_Changed"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -254,18 +272,18 @@
             </Expander>
                 <!-- LIBRARY REACTIONS -->
                 <Expander
-                                Padding="5" 
-                                ExpandDirection="Down"
-                                IsExpanded="False"
-                                Header="Reactions"                                              
-                                x:Name="ReactionsExpander"
-                                Margin="0,4,0,0" 
-                                Canvas.ZIndex="1"
-                                BorderThickness="1"
-                                BorderBrush="Black"                        
-                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"  
-                                Expanded="ReactionsExpander_Expanded"
-                                >
+                    Padding="5" 
+                    ExpandDirection="Down"
+                    IsExpanded="False"
+                    Header="Reactions"                                              
+                    x:Name="ReactionsExpander"
+                    Margin="0,4,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"                        
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"  
+                    Expanded="ReactionsExpander_Expanded"
+                    >
                     <StackPanel>
                         <ListView x:Name="lvReactions" 
                                           ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
@@ -294,7 +312,7 @@
                                         </Style>
                                     </GridView.ColumnHeaderContainerStyle>
 
-                                    <GridViewColumn x:Name="colRate" Width="120" Header="Rate constant">
+                                    <GridViewColumn x:Name="colRate" Width="90" Header="Rate constant">
                                         <GridViewColumn.CellTemplate>
 
                                             <DataTemplate>
@@ -308,6 +326,13 @@
                                                                    >
                                                 </uc:DoublesBox>
 
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn x:Name="colUnits" Width="120" Header="Units">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" Foreground="Black"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -342,7 +367,7 @@
                         <Expander 
                                     Padding="5" ExpandDirection="Down"
                                     IsExpanded="False"
-                                    Header="New Reaction"                                                  
+                                    Header="Create New Reaction"                                                  
                                     x:Name="AddReaction"
                                     Margin="0,4,0,0" 
                                     Canvas.ZIndex="1"
@@ -353,7 +378,9 @@
                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5"
                                     HorizontalAlignment="Left">
                             <Grid>
-                                <local:AddReactionControl Tag="component_reacs"/>
+                            <local:AddReactionControl Tag="component_reacs"  MoleculeCollection="{Binding Source={StaticResource ComponentMoleculesListView}}"
+                                     ARCReactions ="{Binding Path=entity_repository.reactions}"                       
+                                    />
                             </Grid>
                         </Expander>
                     </StackPanel>
@@ -398,7 +425,7 @@
                         <Expander 
                             Padding="5" ExpandDirection="Down"
                             IsExpanded="False"
-                            Header="New Reaction"                                                  
+                            Header="Create New Reaction"                                                  
                             x:Name="AddNewReaction"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
@@ -412,7 +439,10 @@
                             >
                             
                             <Grid>
-                                <local:AddReactionControl Tag="component_rc" DataContext="{Binding}" CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" />
+                                <local:AddReactionControl Tag="component_rc" MoleculeCollection="{Binding Source={StaticResource ER_Molecules}}" DataContext="{Binding}" 
+                                                          CurrentReactionComplex="{Binding ElementName=RCControl, Path=SelectedReactionComplex}" 
+                                                           ARCReactions="{Binding ElementName=RCControl, Path=SelectedReactionComplex.reactions}"                          
+                                    />
                             </Grid>
                         </Expander>
                     </StackPanel>

@@ -7,32 +7,36 @@
                     xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
-                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+                    xmlns:plot="clr-namespace:DaphneGui.CellPopDynamics"
                     ImageSource="Images/Properties16.png"
                     x:Name="toolWinTissue"
                     >
 
     <docking:ToolWindow.Resources>
-        <CollectionViewSource x:Key="EcsBulkMoleculesListView" Source="{Binding Path=Protocol.entity_repository.molecules}"/>
 
-        <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
-        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
-        <local:CellToVisibilityConverter x:Key="CellToVisibilityConv" />
-        
-        <ObjectDataProvider x:Key="RenderMethodEnum"
+            <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+            <local:CellToVisibilityConverter x:Key="CellToVisibilityConv" />
+
+            <ObjectDataProvider x:Key="RenderMethodEnum"
                             MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="daph:RenderMethod" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        
-        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
-        
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="daph:RenderMethod" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        </ResourceDictionary>
     </docking:ToolWindow.Resources>
-    
+
     <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
         <TabControl.Resources>
@@ -45,13 +49,6 @@
         </TabControl.Resources>
 
         
-        <!-- SIM SETUP -->
-        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>                     
-                </ScrollViewer>
-            </TabItem>
-
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" Loaded="ECMTabItem_Loaded" AutomationProperties.AutomationId="DaphneECMTab" >
             <TabItem.Resources>
@@ -89,14 +86,7 @@
 
                         <local:DaphneStackPanel x:Name="CellPropertiesPanel">
 
-                            <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
-                                <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
-                                        DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
-                                        
-                                        />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0" Height="32">
                                 <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." 
                                         DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
                                         Click="PushCellButton_Click" ToolTipService.ShowDuration="8000">
@@ -113,6 +103,13 @@
                                     </Button.ToolTip>
 
                                 </Button>
+                            </StackPanel>
+                            
+                            <StackPanel x:Name="PropertyHost" Margin="10,0">
+                                <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
+                                        DataContext="{Binding ElementName=CellPopControl, Path=SelectedCell}"
+                                        
+                                        />
                             </StackPanel>
 
                             <StackPanel Margin="10,0">
@@ -139,12 +136,6 @@
                             Expanded="CellDeathParamsExpander_Expanded">
 
                         <StackPanel Orientation="Vertical" >
-                            <!--<StackPanel.ToolTip>
-                                <StackPanel Width="400" >
- 
-                                </StackPanel>
-                            </StackPanel.ToolTip>-->
-
                             <TextBlock Text="Rate of removal of dead cells" Margin="6,6,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Width="300" TextWrapping="Wrap" >
                                 <TextBlock.ToolTip>
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
@@ -155,6 +146,11 @@
 
                             </TextBlock>
                             <local:ParamDistrControl Tag="CONTINUOUS" DataContext="{Binding Path=Protocol.sim_params.Phagocytosis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <ContentControl Name="CellRemoval_MeanValueDisplay"
+                                Content="{Binding Path=Protocol.sim_params.Phagocytosis}"
+                                ContentTemplate="{StaticResource ProbDistrMeanValue_Template}" 
+                                Margin="6"
+                                />
                         </StackPanel>
 
                     </Expander>
@@ -241,6 +237,13 @@
 
                 </StackPanel>
 
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- SIM SETUP -->
+        <TabItem x:Name="tabSimSetup" Header="Simulation Settings"  AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <local:SimSetupControl DataContext="{Binding}" x:Name="simSetupControl"/>
             </ScrollViewer>
         </TabItem>
 
@@ -484,7 +487,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridCheckBoxColumn Header="Death" Width="60"                 
+                                <DataGridCheckBoxColumn Header="Death" Width="20"                 
                                     Binding="{Binding Path=reportStates.Death, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -494,7 +497,7 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
-                                <DataGridCheckBoxColumn Header="Division" Width="60"                 
+                                <DataGridCheckBoxColumn Header="Division" Width="40"                 
                                     Binding="{Binding Path=reportStates.Division, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -504,6 +507,16 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
+                                <DataGridCheckBoxColumn Header="Generation" Width="70"                 
+                                    Binding="{Binding Path=reportStates.Generation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding Cell.div_scheme}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                             
                                 <DataGridCheckBoxColumn Header="Differentiation" Width="85"                
                                     Binding="{Binding Path=reportStates.Differentiation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
@@ -514,7 +527,7 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
-                                <DataGridCheckBoxColumn Header="Exiting" Width="85"                
+                                <DataGridCheckBoxColumn Header="Exiting" Width="20"                
                                     Binding="{Binding Path=reportStates.Exit, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -777,10 +790,28 @@
                             >
 
                             <StackPanel  Orientation="Horizontal" >
-                                <TextBlock  HorizontalAlignment="Left" Text="ECM and cell reactions" Margin="0,0,6,0"/>
+                                <TextBlock  HorizontalAlignment="Left" Text="Text file listing ECM and cell reactions" Margin="0,0,6,0"/>
                                 <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Protocol.scenario.reactionsReport, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                             </StackPanel>
                     </Expander>
+
+                    <!--Cell Population Dynamics-->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Cell Population Dynamics"
+                            Margin="0,16,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        
+                        <StackPanel>
+                            <plot:CellPopDynOptions x:Name="plotOptions" DataContext="{Binding Path=Protocol.scenario}" Tag="Reports" ></plot:CellPopDynOptions>
+                        </StackPanel>
+
+                    </Expander>
+                    <!--<plot:PlotOptions x:Name="plotOptions" ></plot:PlotOptions>-->
 
                 </StackPanel>
             </ScrollViewer>
@@ -847,6 +878,7 @@
                               CanUserAddRows="False"
                               BorderThickness="1"
                               BorderBrush="Black"
+                              RowDetailsTemplate="{StaticResource CellOptionRowDetailTemplate}"
                             >
 
                             <DataGrid.ColumnHeaderStyle>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 using ManifoldRing;
@@ -73,6 +74,10 @@ namespace Daphne
         /// The radius of the cell
         /// </summary>
         private double radius;
+        /// <summary>
+        /// used in toroidal boundary condition
+        /// </summary>
+        public static double SafetySlab = 1e-3;
 
         /// <summary>
         /// the cell's behaviors (death, division, differentiation)
@@ -102,7 +107,7 @@ namespace Daphne
             genes.Add(gene_guid, gene);
         }
 
-        public Cell(double radius, int id)
+        public Cell(double radius)
         {
             if (radius <= 0)
             {
@@ -117,21 +122,6 @@ namespace Daphne
             spatialState.X = new double[CellSpatialState.SingleDim];
             spatialState.V = new double[CellSpatialState.SingleDim];
             spatialState.F = new double[CellSpatialState.SingleDim];
-
-            // the safe id must be larger than the largest one in use
-            // if the passed id is legitimate, use it
-            if (id > -1)
-            {
-                Cell_id = id;
-                if (id >= SafeCell_id)
-                {
-                    SafeCell_id = id + 1;
-                }
-            }
-            else
-            {
-                Cell_id = SafeCell_id++;
-            }
         }
 
         [Inject]
@@ -231,6 +221,16 @@ namespace Daphne
         /// <param name="state">the state</param>
         public void SetCellState(CellState state)
         {
+            // cell id
+            if (state.Cell_id > -1)
+            {
+                Cell_id = state.Cell_id;
+            }
+            // lineage id
+            if (state.Lineage_id != "")
+            {
+                Lineage_id = BigInteger.Parse(state.Lineage_id);
+            }
             // spatial
             setSpatialState(state.spState);
             // generation
@@ -239,19 +239,48 @@ namespace Daphne
             if (state.cbState.deathDriverState != -1)
             {
                 Alive = state.cbState.deathDriverState == 0;
+                DeathBehavior.CurrentState = state.cbState.deathDriverState;
+                if (state.cbState.deathDistrState != null)
+                {
+                    Dictionary<int, TransitionDriverElement> drivers = DeathBehavior.Drivers[DeathBehavior.CurrentState];
+                    ((DistrTransitionDriverElement)drivers[1]).Restore(state.cbState.deathDistrState);
+                }
             }
             if (state.cbState.divisionDriverState != -1)
             {
-                DividerState = state.cbState.divisionDriverState;
+                DividerState = Divider.CurrentState = Divider.Behavior.CurrentState = state.cbState.divisionDriverState;
+
+                if (state.cbState.divisionDistrState.Count > 0)
+                {
+                    Dictionary<int, TransitionDriverElement> drivers = Divider.Behavior.Drivers[DividerState];
+                    foreach (KeyValuePair<int, double[]> kvp in state.cbState.divisionDistrState)
+                    {
+                        ((DistrTransitionDriverElement)drivers[kvp.Key]).Restore(kvp.Value);
+                    }
+                }
             }
             if (state.cbState.differentiationDriverState != -1)
             {
-                DifferentiationState = state.cbState.differentiationDriverState;
+                DifferentiationState = Differentiator.CurrentState = Differentiator.Behavior.CurrentState = state.cbState.differentiationDriverState;
+
+                if (state.cbState.differentiationDistrState.Count > 0)
+                {
+                    Dictionary<int, TransitionDriverElement> drivers = Differentiator.Behavior.Drivers[DifferentiationState];
+                    foreach (KeyValuePair<int, double[]> kvp in state.cbState.differentiationDistrState)
+                    {
+                        ((DistrTransitionDriverElement)drivers[kvp.Key]).Restore(kvp.Value);
+                    }
+                }
             }
             // genes
             SetGeneActivities(state.cgState.geneDict);
             // molecules
             SetMolPopConcentrations(state.cmState.molPopDict);
+            // dead cell removal
+            if (state.cbState.removalDistrState != null)
+            {
+                SimulationBase.cellManager.DeadDict.Add(Cell_id, state.cbState.removalDistrState);
+            }
         }
 
         public void setSpatialState(CellSpatialState s)
@@ -430,12 +459,17 @@ namespace Daphne
             }
 
             // create daughter
-            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius), new ConstructorArgument("id", -1));
+            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
+            // generate new cell id, pass -1 to use safeCellId++
+            daughter.Cell_id = DataBasket.GenerateSafeCellId(-1);
             // same population id
             daughter.Population_id = Population_id;
             daughter.renderLabel = renderLabel;
             this.generation++;
             daughter.generation = generation;
+            // lineage ids
+            this.Lineage_id *= 2;
+            daughter.Lineage_id = this.Lineage_id + 1;
             // same state
             daughter.setSpatialState(spatialState);
             // but offset the daughter randomly
@@ -455,7 +489,7 @@ namespace Daphne
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
             {
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.Cytosol));
-
+                newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
                 daughter.Cytosol.Populations.Add(kvp.Key, newMP);
             }
@@ -463,7 +497,7 @@ namespace Daphne
             foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
             {
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.PlasmaMembrane));
-
+                newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
                 daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
             }
@@ -480,11 +514,8 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
-            string cell_guid;
-
             if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
                 configComp[0] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.cytosol;
                 configComp[1] = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulation_dict[daughter.Population_id].Cell.membrane;
             }
@@ -500,9 +531,9 @@ namespace Daphne
             transcription_reacs = SimulationBase.ProtocolHandle.GetTranscriptionReactions(configComp[0]);
 
             // cytosol bulk reactions
-            SimulationBase.AddCompartmentBulkReactions(daughter.Cytosol, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[0]);
+            SimulationBase.AddCompartmentBulkReactions(daughter.Cytosol, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[0], null);
             // membrane bulk reactions
-            SimulationBase.AddCompartmentBulkReactions(daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[1]);
+            SimulationBase.AddCompartmentBulkReactions(daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[1], null);
 
             // boundary reactions
             // all daughter cells will have the molecules as long as the mother had them,
@@ -510,7 +541,7 @@ namespace Daphne
 
             SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs, null);
             // transcription reactions
-            SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
+            SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs, null);
 
             // add the cell's membrane to the ecs boundary
             ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(daughter.PlasmaMembrane.Interior);
@@ -542,11 +573,16 @@ namespace Daphne
             // death
             LoadTransitionDriverElements(daughter, daughter.DeathBehavior, DeathBehavior);
             daughter.DeathBehavior.CurrentState = DeathBehavior.CurrentState;
-            daughter.DeathBehavior.InitializeState();
+            // For distribution-driven transitions, the daughter will be assigned the same clock and time-to-next event values as the mother.
+            // InitializeState() doesn't do anything, for molecule-driven transitions.
+            // So, no need to run InitializeState.            
+            // daughter.DeathBehavior.InitializeState();
 
             // division
             if (Divider.nStates > 1)
             {
+                // The daughter cell will start at state 0 of the cell cycle (as does the mother). 
+                // For distribution-driven transitions, choose the time-to-next event in the IntializeState method.
                 daughter.Divider.Initialize(Divider.nStates, Divider.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Divider.Behavior, Divider.Behavior);
                 Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
@@ -560,6 +596,9 @@ namespace Daphne
             // differentiation
             if (Differentiator.nStates > 1)
             {
+                // The daughter cell will start in the same differentiation state as the mother. 
+                // For distribution-driven transitions, the daughter will be assigned the same clock and time-to-next event values as the mother.
+                // So, no need to run InitializeState.
                 daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
                 LoadTransitionDriverElements(daughter, daughter.Differentiator.Behavior, Differentiator.Behavior);
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
@@ -567,7 +606,6 @@ namespace Daphne
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
                 daughter.DifferentiationState = daughter.Differentiator.CurrentState = daughter.Differentiator.Behavior.CurrentState = Differentiator.CurrentState;
                 daughter.SetGeneActivities(daughter.Differentiator);
-                daughter.Differentiator.Behavior.InitializeState();
             }
 
             return daughter;
@@ -591,6 +629,8 @@ namespace Daphne
                     else
                     {
                         DistrTransitionDriverElement tde = new DistrTransitionDriverElement();
+                        tde.clock = ((DistrTransitionDriverElement)kvp_inner.Value).clock;
+                        tde.timeToNextEvent = ((DistrTransitionDriverElement)kvp_inner.Value).timeToNextEvent;
                         tde.distr = ((DistrTransitionDriverElement)kvp_inner.Value).distr.Clone();
                         // add it to the daughter
                         daughter_behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
@@ -608,8 +648,8 @@ namespace Daphne
         public double DragCoefficient { get; set; }
         public StochLocomotor StochLocomotor { get; set; } 
 
-        public int Cell_id { get; private set; }
-        public static int SafeCell_id = 0;
+        public int Cell_id { get; set; }
+        public BigInteger Lineage_id { get; set; }
         public int Population_id { get; set; }
         protected int[] gridIndex = { -1, -1, -1 };
         public static double defaultRadius = 5.0;
@@ -760,13 +800,11 @@ namespace Daphne
             {
                 for (int i = 0; i < SimulationBase.dataBasket.Environment.Comp.Interior.Dim; i++)
                 {
-                    double safetySlab = 1e-3;
-
                     // displace the cell such that it wraps around
                     if (SpatialState.X[i] < 0.0)
                     {
-                        // use a small fudge factor to displace the cell just back into the grid
-                        SpatialState.X[i] = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i) - safetySlab;
+                        // use a small safety distance to displace the cell just back into the grid
+                        SpatialState.X[i] = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i) - SafetySlab;
                     }
                     else if (SpatialState.X[i] > SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i))
                     {
@@ -783,6 +821,64 @@ namespace Daphne
                     {
                         // cell exits
                         exiting = true;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// data structure for single cell track data
+    /// </summary>
+    public class CellTrackData : ReporterData
+    {
+        public List<double> Times { get; set; }
+        public List<double[]> Positions { get; set; }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public CellTrackData(int key)
+        {
+            Times = new List<double>();
+            Positions = new List<double[]>();
+        }
+
+        /// <summary>
+        /// do a selection sort to make sure the data is sorted by the time
+        /// </summary>
+        public void Sort()
+        {
+            int minloc;
+            double dtmp, min;
+
+            for (int i = 0; i < Times.Count - 1; i++)
+            {
+                // assume min is in starting position
+                min = Times[i];
+                minloc = i;
+                // find the minimum's location
+                for (int j = i + 1; j < Times.Count; j++)
+                {
+                    if (Times[j] < min)
+                    {
+                        min = Times[j];
+                        minloc = j;
+                    }
+                }
+                // swap if needed
+                if (minloc != i)
+                {
+                    // times
+                    dtmp = Times[i];
+                    Times[i] = Times[minloc];
+                    Times[minloc] = dtmp;
+                    // position
+                    for (int j = 0; j < 3; j++)
+                    {
+                        dtmp = Positions[i][j];
+                        Positions[i][j] = Positions[minloc][j];
+                        Positions[minloc][j] = dtmp;
                     }
                 }
             }

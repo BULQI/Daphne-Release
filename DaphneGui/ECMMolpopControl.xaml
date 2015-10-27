@@ -16,12 +16,18 @@
 
     <UserControl.Resources>
 
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"
+                              Source="{Binding Path=Protocol.entity_repository.molecules}" 
+                              />
+        <CollectionViewSource x:Key="EcsMoleculesListView"
                               Source="{Binding Path=Protocol.entity_repository.molecules}" 
                               />
         <CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
                                   Source="{Binding Path=Protocol.entity_repository.reactions}"
-                                  Filter="ecmAvailableReactionsListView_Filter" />
+                                  Filter="ecmAvailableReactionsListView_Filter" />       
+        
         <CollectionViewSource x:Key="ecmAvailableReactionComplexesListView"  
                               Source="{Binding Path=Protocol.entity_repository.reaction_complexes}"
                               Filter="ecmAvailableReactionComplexesListView_Filter" />
@@ -34,6 +40,37 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <!-- molpop homogeneous distribution details -->
+        <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
+                <StackPanel Orientation="Vertical" Margin="20,0">
+                    <TextBlock>
+                        concentration (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                    </TextBlock>
+                    <uc:DoublesBox     HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                >
+                    </uc:DoublesBox>
+                </StackPanel>
+            </StackPanel> 
+        </Grid>
+    </DataTemplate>       
+           
         <!-- molpop explicit -->
         <DataTemplate DataType="{x:Type daph:MolPopExplicit}">
             <StackPanel>
@@ -76,14 +113,7 @@
                     <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="0,-4">
                         <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
                                            Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="100" ToolTipService.ShowDuration="80000">
-                                <!--<TextBlock.ToolTip>
-                                        <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                            This option creates a linear profile along the selected dimension of the simulation space for the selected molecular population. 
-                                            Use the combo box to the right to select the spatial dimension along which the linear profile will be established. 
-                                            You can refer to the axes in the lower left portion of the 3D graphics window for the orientation of the simulation space.
-                                        </TextBlock>                                
-                                </TextBlock.ToolTip>-->                            
+                                           Width="100" ToolTipService.ShowDuration="80000">                      
                         </TextBlock>
                         <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
@@ -110,22 +140,22 @@
                     </ComboBox>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
-                        <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
-                                           HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="160"/>
-                    </StackPanel>
+                    <TextBlock x:Name="tbConc" Margin="0,0"  HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" Width="160">
+                        concentration (molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>)
+                    </TextBlock>
+                </StackPanel>
                     <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
                     <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100" ToolTipService.ShowDuration="80000">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                                <DataTrigger Binding="{Binding Path=boundary_face}" Value="X">
                                                     <Setter Property="Text" Value="x=0"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                                <DataTrigger Binding="{Binding Path=boundary_face}" Value="Y">
                                                     <Setter Property="Text" Value="y=0"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                                <DataTrigger Binding="{Binding Path=boundary_face}" Value="Z">
                                                     <Setter Property="Text" Value="z=0"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -160,13 +190,13 @@
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                    <DataTrigger Binding="{Binding Path=boundary_face}" Value="X">
                                         <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SOP.Protocol.scenario.environment.extent_x, StringFormat='x={0}'}"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                    <DataTrigger Binding="{Binding Path=boundary_face}" Value="Y">
                                         <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SOP.Protocol.scenario.environment.extent_y, StringFormat='y={0}'}"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                    <DataTrigger Binding="{Binding Path=boundary_face}" Value="Z">
                                         <Setter Property="Text" Value="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SOP.Protocol.scenario.environment.extent_z, StringFormat='z={0}'}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -292,7 +322,7 @@
                 <uc:DoublesBox x:Name="dbl_x_trans"
                                    Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"    
                                    SNUpperThreshold="1000"
@@ -312,7 +342,7 @@
                 <uc:DoublesBox x:Name="dbl_x_scale"
                                    Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -335,7 +365,7 @@
                 <uc:DoublesBox x:Name="dbl_y_trans"
                                    Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"   
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -355,7 +385,7 @@
                 <uc:DoublesBox x:Name="dbl_y_scale"
                                    Grid.Column="3" Grid.Row="3"   Grid.ColumnSpan="2" 
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -378,7 +408,7 @@
                 <uc:DoublesBox x:Name="dbl_z_trans"
                                    Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="2"  
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -400,7 +430,7 @@
                 <uc:DoublesBox x:Name="dbl_z_scale"
                                    Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
                                    TextFieldWidth="70"
-                                   SliderWidth="40"
+                                   SliderWidth="80"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
                                    SNUpperThreshold="1000"
@@ -422,7 +452,6 @@
             </Grid>
         </DataTemplate>
         
-
         <!-- molpop gaussian distribution details template-->
         <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
             <StackPanel Orientation="Vertical">
@@ -445,7 +474,9 @@
 
                         <uc:DoublesBox SliderEnabled="False" Width="80" Number="{Binding Path=peak_concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         </uc:DoublesBox>
-                        <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                        <TextBlock VerticalAlignment="Center" Margin="2,0,0,0">
+                            molec/µm<Run FontFamily="Palatino Linotype" Typography.Variants="Superscript">3</Run>
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
                 <ContentControl Name="GaussianBoxSpecDetails"
@@ -526,12 +557,12 @@
                                 Header="Details" x:Name="MolDetailsExpander"  Margin="0,-15,0,0"  Canvas.ZIndex="1"
                     >
                         <StackPanel Orientation="Vertical" x:Name="molpopDetailsVertStack">
-                        <StackPanel x:Name="molpopDetailsHorizStack" Orientation="Horizontal">
+                        <StackPanel x:Name="molpopDetailsHorizStack" Orientation="Vertical"> 
                         <StackPanel>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
+                                            <!--<ColumnDefinition Width="Auto" />-->
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
                                             <RowDefinition />
@@ -545,13 +576,8 @@
                                             <RowDefinition />
                                         </Grid.RowDefinitions>
                                         <!-- display molpop name -->
-                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+                                        <!--<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                             <TextBlock Text="population name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60" TextWrapping="Wrap">
-                                                <!--<TextBlock.ToolTip>
-                                                    <TextBlock MaxWidth="200" TextAlignment="Left" TextWrapping="Wrap">
-                                                        A user-defined name for the molecular population. The default is the name of the molecule.
-                                                    </TextBlock>
-                                                </TextBlock.ToolTip>-->
                                             </TextBlock>
                                             <TextBox Text="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left">
                                                 <TextBox.ToolTip>
@@ -560,7 +586,7 @@
                                                     </TextBlock>
                                                 </TextBox.ToolTip>
                                             </TextBox>
-                                        </StackPanel>
+                                        </StackPanel>-->
                                         <!-- Display and allow selection of molecule type -->
                                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                             <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60">
@@ -661,7 +687,7 @@
                                             <ContentControl Name="MolPopDistributionDetails"
                                                     Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
                                                     ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                    Margin="6,2"/>
+                                                    Margin="6,2" Tag="Bulk"/>
                                         </StackPanel>
 
                                     </Grid>
@@ -724,18 +750,6 @@
                 <StackPanel>
                     
                     <!-- Reactions -->
-                    <!--<StackPanel>
-                        <StackPanel.ToolTip>
-                            <StackPanel Width="200" Orientation="Horizontal">
-                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
-                                                Click Add button to add a reaction to the extracellular medium from a list of reactions in the list box below.
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel.ToolTip>
-                        <TextBlock Text="Reactions in ECM" FontWeight="Bold" Margin="0,-10,0,0" >
-                        </TextBlock>
-                    </StackPanel>-->
-
                     <ListView x:Name="lvEcsReactions"
                               ItemsSource="{Binding Path=Protocol.scenario.environment.comp.Reactions}"
                               SelectedIndex="-1" ToolTipService.ShowDuration="80000">
@@ -743,7 +757,7 @@
                         <ListView.ToolTip>
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Width="200" >
                                     This is a list of the reactions involving molecules in the extracellular medium. 
-                                    Some of these reactions may involve molecules in the cell membrane.
+                                    Molecules in the cell plasma membrane have a pipe "|" appended to the molecule name.
                                 </TextBlock>
                         </ListView.ToolTip>
                         
@@ -762,8 +776,7 @@
                                         </Setter>
                                     </Style>
                                 </GridView.ColumnHeaderContainerStyle>
-
-                                <GridViewColumn Width="100" Header="Rate constant">
+                                <GridViewColumn Width="90" Header="Rate constant">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <uc:DoublesBox SliderEnabled="False" Width="70" Number="{Binding rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -771,7 +784,14 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                    <GridViewColumn Width="300" Header="Reaction" >
+                                <GridViewColumn Width="120" Header="Units">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="300" Header="Reaction" >
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding TotalReactionString}">
@@ -820,7 +840,7 @@
                                Expanded="AddReacExpander_Expanded"
                                 >
                         <StackPanel Orientation="Vertical" Margin="10,0">
-                            <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
+                            <!--<TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />-->
                             <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
                                                 ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
                                                 SelectedIndex="0"
@@ -848,6 +868,13 @@
                                                     <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
                                                                 Number="{Binding rate_const}">
                                                     </uc:DoublesBox>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="120" Header="Units">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Rate_constant_units, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -900,7 +927,10 @@
                                 >
 
                         <Grid>
-                            <local:AddReactionControl Tag="ecs" Margin="0,6" />
+                            <local:AddReactionControl Tag ="ecs" MoleculeCollection="{Binding Source={StaticResource EcsMoleculesListView}}" Margin="0,6" 
+                                ARCComp="{Binding Path=Protocol.scenario.(daph:TissueScenario.environment).(daph:ConfigECSEnvironment.comp)}"
+                                ARCReactions="{Binding Path=Protocol.scenario.(daph:TissueScenario.environment).(daph:ConfigECSEnvironment.comp).Reactions}"
+                            />
                         </Grid>
                     </Expander>
 
@@ -909,21 +939,20 @@
 
             <!-- Reaction Complexes -->
             <Expander
-                        Visibility="Visible"
-                        Padding="5" 
-                        ExpandDirection="Down"
-                            IsExpanded="False"
-                            Header="Reaction Complexes"                                            
-                            x:Name="ReacCompExpander"
-                            Margin="0,5,0,0" 
-                            Canvas.ZIndex="1"
-                        BorderThickness="1"
-                        BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                        Expanded="ReacCompExpander_Expanded">
+                Visibility="Visible"
+                Padding="5" 
+                ExpandDirection="Down"
+                IsExpanded="False"
+                Header="Reaction Complexes"                                            
+                x:Name="ReacCompExpander"
+                Margin="0,5,0,0" 
+                Canvas.ZIndex="1"
+                BorderThickness="1"
+                BorderBrush="Black"
+                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                Expanded="ReacCompExpander_Expanded">                               
 
                 <StackPanel>
-
                     <StackPanel>
                         <StackPanel.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
@@ -935,11 +964,11 @@
                         <TextBlock Text="Reaction Complexes" Margin="0,-10,0,0" >
                         </TextBlock>
 
-                        <ListBox x:Name="ReactionComplexListBox" MinHeight="20" 
+                        <ListBox x:Name="ReactionComplexListBox" MinHeight="20"
                                     ItemsSource="{Binding Path=Protocol.scenario.environment.comp.reaction_complexes}" 
+                                    ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                     DisplayMemberPath="Name"
                                     SelectedIndex="0"
-                                    ToolTip="{Binding Path=description}"
                                  />
 
                     </StackPanel>
@@ -956,19 +985,19 @@
                     </StackPanel>
 
                     <Expander ExpandDirection="Down"
-                                    IsExpanded="False"
-                                    Header="Details"
-                                    x:Name="ReactionComplexDetailsExpander"
-                                    Margin="0,5,0,0" 
-                                    Canvas.ZIndex="1"
-                                    BorderThickness="1"
-                                    BorderBrush="Black"
-                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                                IsExpanded="False"
+                                Header="Details"
+                                x:Name="ReactionComplexDetailsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <StackPanel Orientation="Vertical" >
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
+                                <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" MinWidth="100"
                                                 Text="{Binding  ElementName=ReactionComplexListBox, 
                                                                 Path=SelectedItem.Name}" 
                                                                 />
@@ -995,16 +1024,7 @@
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <StackPanel Orientation="Vertical" Margin="10,0">
-                            <StackPanel.Resources>
-                                <DataTemplate x:Key="reacCxListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Path=Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                            </StackPanel.Resources>
-
-                            <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                            <!--<TextBlock Text="Available Reaction Complexes"  Margin="0,0,6,0" />-->
                             <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                                                                                             
                                      ItemsSource="{Binding Source={StaticResource ecmAvailableReactionComplexesListView}}"   
                                      ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"

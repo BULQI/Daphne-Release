@@ -144,7 +144,7 @@ namespace DaphneGui
             ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
             ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((ToolWinBase)MainWindow.ToolWin).RegionFocusToGUISection));
 
-            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+            ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
         }
 
         private void btnRegenerateCellPositions_Click(object sender, RoutedEventArgs e)
@@ -223,7 +223,7 @@ namespace DaphneGui
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
                     cpg.gauss_spec = null;
-                    ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+                    ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
                 cellPop.cellPopDist.Initialize();
@@ -277,7 +277,7 @@ namespace DaphneGui
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
                     cpg.gauss_spec = null;
-                    ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+                    ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
                 }
             }
 
@@ -559,6 +559,9 @@ namespace DaphneGui
             {
                 int rows_to_add = numNew - numOld;
                 cp.cellPopDist.AddByDistr(rows_to_add);
+                // Causes a new random seed for the random source
+                // Otherwise we will get the same values every time if this is followed by Apply()
+                cp.cellPopDist.Reset();
             }
             else if (numNew < numOld)
             {
@@ -596,7 +599,7 @@ namespace DaphneGui
                 CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
                 cpg.gauss_spec = null;
             }
-            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
+            ((VTKFullGraphicsController)MainWindow.GC).RWC.Invalidate();
 
             //Remove the cell population
             scenario.cellpopulations.Remove(current_item);

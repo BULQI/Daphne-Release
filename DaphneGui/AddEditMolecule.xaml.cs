@@ -95,5 +95,6 @@ namespace DaphneGui
             //If called by ecs, we need to hide the membrane bound check box, by using a different template from xaml.
             Caller = Tag as string;
         }
+
     }
 }

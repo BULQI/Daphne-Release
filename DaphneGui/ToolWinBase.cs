@@ -402,6 +402,7 @@ namespace DaphneGui
                     case "ComponentsToolWindow_Genes":
                     case "CatalogGenes":
                     case "CatalogCells":
+                    case "cellPopDynWindow":
                         return Visibility.Visible;
                 }
             }
@@ -708,7 +709,7 @@ namespace DaphneGui
         public object ConvertBack(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            Debugger.Break();
+            //Debugger.Break();
             return value;
         }
     }

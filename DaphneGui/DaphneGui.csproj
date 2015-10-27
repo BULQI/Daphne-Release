@@ -95,6 +95,14 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Abt.Controls.SciChart.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Abt.Controls.SciChart3D.Wpf, Version=3.32.0.6026, Culture=neutral, PublicKeyToken=b55dd9efe817e823, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="ActiproSoftware.Docking.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Docking.Wpf.dll</HintPath>
@@ -104,6 +112,7 @@
     <Reference Include="ActiproSoftware.Editors.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v13.2.0592\Assemblies\ActiproSoftware.Editors.Wpf.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ActiproSoftware.Shared.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -114,6 +123,17 @@
     </Reference>
     <Reference Include="HDF5DotNet">
       <HintPath>..\dependencies\hdf5\HDF5DotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\iTextSharp\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.pdfa, Version=5.5.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\iTextSharp\itextsharp.pdfa.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.xtra">
+      <HintPath>..\dependencies\iTextSharp\itextsharp.xtra.dll</HintPath>
     </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
@@ -138,12 +158,15 @@
       <HintPath>..\packages\Ninject.Extensions.Factory.3.0.2-unstable-6\lib\net40\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="ReachFramework" />
     <Reference Include="SBMLayer">
       <HintPath>..\dependencies\SBMLayer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
@@ -164,9 +187,6 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="Xceed.Wpf.Toolkit">
-      <HintPath>..\dependencies\Xceed.Wpf.Toolkit.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -175,9 +195,6 @@
     </ApplicationDefinition>
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="AddDiffState.xaml.cs">
-      <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddEditGene.xaml.cs">
       <DependentUpon>AddEditGene.xaml</DependentUpon>
@@ -191,12 +208,30 @@
     <Compile Include="CellDetailsControl.xaml.cs">
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellDetailsReadOnlyControl.xaml.cs">
+      <DependentUpon>CellDetailsReadOnlyControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellHoverInfo.xaml.cs">
+      <DependentUpon>CellHoverInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellLineage\CellLineageChartSurface.cs" />
+    <Compile Include="CellLineage\CellLineageControl.xaml.cs">
+      <DependentUpon>CellLineageControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
     <Compile Include="CellOptions.xaml.cs">
       <DependentUpon>CellOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Charting\CellPopChartSurface.cs" />
     <Compile Include="CellPopControl.xaml.cs">
       <DependentUpon>CellPopControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynamicsChartSurface.cs" />
+    <Compile Include="CellPopDynamics\CellPopDynOptions.xaml.cs">
+      <DependentUpon>CellPopDynOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellPopDynamics\CellPopDynToolWindow.xaml.cs">
+      <DependentUpon>CellPopDynToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
@@ -204,12 +239,18 @@
     <Compile Include="CellStudioToolWindow.xaml.cs">
       <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellTrackTool.cs" />
+    <Compile Include="Charting\DoubleSeries.cs" />
+    <Compile Include="Charting\XYPoint.cs" />
     <Compile Include="ComponentsToolWindow.xaml.cs">
       <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DaphneStackPanel.cs" />
     <Compile Include="DiffSchemeDataGrid.xaml.cs">
       <DependentUpon>DiffSchemeDataGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DiffSchemeReadOnlyDataGrid.xaml.cs">
+      <DependentUpon>DiffSchemeReadOnlyDataGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
@@ -229,6 +270,9 @@
     </Compile>
     <Compile Include="ParamDistrControl.xaml.cs">
       <DependentUpon>ParamDistrControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ParamDistrReadOnlyControl.xaml.cs">
+      <DependentUpon>ParamDistrReadOnlyControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
@@ -280,10 +324,6 @@
       <DependentUpon>ChartViewToolWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Workbench\DiffScheme.cs" />
-    <Compile Include="Workbench\EditRCReactions.xaml.cs">
-      <DependentUpon>EditRCReactions.xaml</DependentUpon>
-    </Compile>
     <Compile Include="GuiExtension.cs" />
     <Compile Include="RecentFileList.cs" />
     <Compile Include="TextSearchFilter.cs" />
@@ -292,10 +332,6 @@
       <DependentUpon>NewEditReacComplex.xaml</DependentUpon>
     </Compile>
     <Page Include="About.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="AddDiffState.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -315,6 +351,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CellDetailsReadOnlyControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellHoverInfo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellLineage\CellLineageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -322,6 +370,14 @@
     <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynOptions.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellPopDynamics\CellPopDynToolWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="CellPropertiesControl.xaml">
       <SubType>Designer</SubType>
@@ -342,6 +398,10 @@
     <Page Include="DiffSchemeDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DiffSchemeReadOnlyDataGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -364,6 +424,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ParamDistrControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ParamDistrReadOnlyControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -419,10 +483,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Workbench\EditRCReactions.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -454,36 +514,23 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Images\background.png" />
+    <Resource Include="Images\bucket.png" />
     <Resource Include="Images\LeftArrow_48x48.png" />
     <Resource Include="Images\RightArrow_48x48.png" />
     <Resource Include="Images\arrow-32x32.png" />
     <Resource Include="Daphne.ico" />
-    <Content Include="help\DaphneDevHelp.shfbproj" />
+    <Content Include="Config\simple_germinal_center.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="help\DaphneDevHelp.shfbproj" />
     <EmbeddedResource Include="Licences.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <Content Include="Config\daphne_daphnestore.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\daphne_userstore.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\daphne_vatRC_2SiteAbBinding_scenario.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\daphne_vatRC_blank_scenario.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\daphne_vatRC_ligand_receptor_scenario.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Config\RenderSkin\default_skin.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\blank_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Config\centroblast-centrocyte_recycling.json">
@@ -492,9 +539,30 @@
     <Content Include="Config\simple_chemotaxis.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="help\Documentation.chm">
+    <Content Include="Config\blank_protocol.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="Config\vatRC_2SiteAbBinding.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\vatRC_blank.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\vatRC_ligand_receptor.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\receptor_homeostasis.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\Stores\daphnestore.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\Stores\userstore.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="help\Documentation.chm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

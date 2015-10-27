@@ -35,40 +35,9 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            cell.ValidateName(MainWindow.SOP.Protocol);
+            Level level = MainWindow.GetLevelContext(this);
+            cell.ValidateName(level);
         }
-
-        private void cbLocoDriver_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //Don't want to do anything when first display this combo box
-            //Only do something if user really clicked and selected a different scheme
-
-            if (isUserInteraction == false)
-                return;
-
-            isUserInteraction = false;
-
-            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-            //    return;
-
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
-
-            ComboBox combo = sender as ComboBox;
-
-            if (combo.SelectedIndex == -1)
-                return;
-
-            ConfigMolecule cm = (ConfigMolecule)cbLocomotorDriver1.SelectedItem;
-            string guid = cm.entity_guid;
-            if (cm.Name == "None")
-                guid = "";
-
-            cell.locomotor_mol_guid_ref = guid;
-            //cell.locomotor_mol_guid_ref = ((ConfigMolecule)cbLocomotorDriver1.SelectedItem).entity_guid;
-        }
-
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -86,31 +55,43 @@ namespace DaphneGui
                 return;
             }
 
-            int locoMol = -1;
-
             foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
             {
                 ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
-                if (configMolpop.molecule.entity_guid == cell.locomotor_mol_guid_ref)
-                {
-                    locoMol = cell.cytosol.molpops.IndexOf(configMolpop);
-                }
             }
-
-            cbLocomotorDriver1.SelectedIndex = locoMol;
-
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            CellPropertiesGrid.IsEnabled = true;
+
+            // Tag is set in PushBetweenLevels.xaml when pushing cells
+            if (Tag == null)
+                return;
+
+            // Turn off edit capability when pushing cells between stores
+            string temp = Tag.ToString().ToLower();
+            if (temp == "false")
+                CellPropertiesGrid.IsEnabled = false;
         }
 
-        bool isUserInteraction;
-        private void cbLocomotorDriver1_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        protected virtual void PushCellButton_Click2(object sender, RoutedEventArgs e)
         {
-            isUserInteraction = true;
+            Button button = sender as Button;
+
+            if (button == null)
+                return;
+
+            ConfigCell cell = button.DataContext as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            //Push cell
+            ConfigCell newcell = cell.Clone(true);
+            MainWindow.GenericPush(newcell);
         }
-        
+
     }
 
     public class RadiusValidator : ValidationRule

@@ -100,7 +100,7 @@ namespace DaphneUserControlLib
             }
             //Don't need scientific notation
             else
-            {
+            {                
                 if (digits == 0)
                     digits++;
 
@@ -119,7 +119,7 @@ namespace DaphneUserControlLib
                     string sTemp = sNum.Replace("-", "");
                     sTemp = sTemp.TrimStart(trimZeroes);
                     int nLen = sTemp.Length;
-                    int nDiff = digits - nLen;
+                    int nDiff = decimalPlaces - nLen;
                     if (nDiff > 0)
                     {
                         sNum = sNum + "." + sZeroes.Substring(0, nDiff);

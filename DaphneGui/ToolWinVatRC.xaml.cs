@@ -102,9 +102,7 @@ namespace DaphneGui
             if (finished)
             {
                 MW.ReacComplexChartWindow.Tag = MainWindow.Sim;
-                MW.ReacComplexChartWindow.MW = MW;
                 MW.ReacComplexChartWindow.DataContext = this.Protocol;
-                MW.ReacComplexChartWindow.Activate();
                 MW.ReacComplexChartWindow.Render();
                 
             }
@@ -143,7 +141,6 @@ namespace DaphneGui
         public override void PushMoleculeFilter(object configMols, Level level)
         {
             ObservableCollection<ConfigMolecule> mols = configMols as ObservableCollection<ConfigMolecule>;
-            EntityRepository er = level.entity_repository;   //MainWindow.SOP.Protocol.entity_repository;
             // Filter out boundary mols
             foreach (ConfigMolecule mol in mols.ToList())
             {
@@ -198,5 +195,10 @@ namespace DaphneGui
             }
         }
 
+        private void BulkMoleculeFilter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule m = e.Item as ConfigMolecule;
+            e.Accepted = (m.molecule_location == MoleculeLocation.Bulk);
+        }
     }
 }
