@@ -36,7 +36,7 @@ using Ninject;
 using Ninject.Parameters;
 
 using Daphne;
-using ManifoldRing;
+using Nt_ManifoldRing;
 using Workbench;
 
 using System.Collections.ObjectModel;
@@ -48,6 +48,8 @@ using SBMLayer;
 using System.Security.Principal;
 using System.Globalization;
 using DaphneUserControlLib;
+using NativeDaphne;
+
 using DaphneGui.CellPopDynamics;
 using DaphneGui.CellLineage;
 
@@ -3052,8 +3054,17 @@ namespace DaphneGui
             }
         }
 
+        //timer used to measure performace
+        public static Stopwatch mywatch;
+        public static bool enable_clock = false;
+
         private void runSim_Tissue(bool repeat)
         {
+            if (enable_clock == true)
+            {
+                mywatch = Stopwatch.StartNew();
+            }
+
             //Whenever we run the simulation, the Tracks option should be turned off.
             //If it was previously selected, then change it to None.
             VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
@@ -3144,7 +3155,7 @@ namespace DaphneGui
                     lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
                 }
                 else
-                {
+                {                    
                     MessageBoxResult result = toolWin.ScenarioContentChanged();
 
                     // Process message box results
@@ -3320,12 +3331,12 @@ namespace DaphneGui
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
                 string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
-                double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
+                double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X.ArrayCopy);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = name;
                 cmi.Concentration = conc;
-                cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X.ArrayCopy);
+                cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X.ArrayCopy));
                 ecmConcs.Add(cmi);
             }
             lvECMMolConcs.ItemsSource = ecmConcs;

@@ -14,7 +14,7 @@ namespace Daphne
     public abstract class ITransitionDriver : IDynamic
     {
         public bool TransitionOccurred { get; set; }
-        public int CurrentState { get; set; }
+        public virtual int CurrentState { get; set; }
         public int PreviousState { get; set; }
         public int FinalState { get; set; }
         public abstract void AddDriverElement(int origin, int destination, TransitionDriverElement driverElement);
@@ -117,6 +117,10 @@ namespace Daphne
     {
         private Dictionary<int, Dictionary<int, TransitionDriverElement>> drivers;
         private List<int> events;
+        /// <summary>
+        /// added to speed up access - AH
+        /// </summary>
+        Dictionary<int, TransitionDriverElement> CurrentDriver;
 
         /// <summary>
         /// Constructor
@@ -129,6 +133,28 @@ namespace Daphne
             PreviousState = 0;
             FinalState = 0;
             events = new List<int>();
+            CurrentDriver = null;
+        }
+
+        public override int CurrentState
+        {
+            get
+            {
+                return base.CurrentState;
+            }
+
+            set
+            {
+                if (drivers != null && drivers.ContainsKey(value))
+                {
+                    CurrentDriver = drivers[value];
+                }
+                else
+                {
+                    CurrentDriver = null;
+                }
+                base.CurrentState = value;
+            }
         }
 
         /// <summary>
@@ -156,6 +182,7 @@ namespace Daphne
             {
                 FinalState = destination;
             }
+            if (drivers.ContainsKey(CurrentState)) CurrentDriver = drivers[CurrentState];
         }
 
         /// <summary>
@@ -172,12 +199,9 @@ namespace Daphne
         /// <param name="dt">The time interval for the evolution (double).</param>
         public override void Step(double dt)
         {
-            if ( (drivers.Count == 0) || (!drivers.ContainsKey(CurrentState)) )
-            {
-                return;
-            }
+            if (CurrentDriver == null) return;
 
-            foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+            foreach (KeyValuePair<int, TransitionDriverElement> kvp in CurrentDriver)
             {
                 if (kvp.Value.TransitionOccurred(dt) == true)
                 {
@@ -224,6 +248,7 @@ namespace Daphne
                 {
                     kvp.Value.Initialize();
                 }
+                CurrentDriver = drivers[CurrentState];
             }
         }
     }

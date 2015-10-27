@@ -7,8 +7,8 @@ using Ninject;
 using Ninject.Modules;
 using Ninject.Extensions.Factory;
 
-using ManifoldRing;
-
+using Nt_ManifoldRing;
+using Gene = NativeDaphne.Nt_Gene;
 namespace Daphne
 {
     /// <summary>

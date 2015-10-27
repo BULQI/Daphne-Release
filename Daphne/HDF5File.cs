@@ -5,8 +5,8 @@ using System.Text;
 using System.IO;
 using System.Windows;
 using System.Numerics;
-
 using HDF5DotNet;
+using CellSpatialState = NativeDaphne.Nt_CellSpatialState;
 
 namespace Daphne
 {

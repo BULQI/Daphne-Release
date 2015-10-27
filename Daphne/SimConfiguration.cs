@@ -19,6 +19,9 @@ using System.Windows.Markup;
 
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
+using NativeDaphne;
+using Gene = NativeDaphne.Nt_Gene;
+using CellSpatialState = NativeDaphne.Nt_CellSpatialState;
 
 
 namespace Daphne
@@ -8219,9 +8222,10 @@ namespace Daphne
 
         public CellState()
         {
-            spState.X = new double[3];
-            spState.V = new double[3];
-            spState.F = new double[3];
+            spState = new Nt_CellSpatialState();
+            spState.X = new Nt_Darray(3);
+            spState.V = new Nt_Darray(3);
+            spState.F = new Nt_Darray(3);
 
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
@@ -8233,16 +8237,20 @@ namespace Daphne
 
         public CellState(double x, double y, double z) : this()
         {
+            spState = new Nt_CellSpatialState();
+            spState.X = new Nt_Darray(3);
             spState.X[0] = x;
             spState.X[1] = y;
             spState.X[2] = z;
+            spState.V = new Nt_Darray(3);
+            spState.F = new Nt_Darray(3);
         }
 
         public void setSpatialState(CellSpatialState state)
         {
-            Array.Copy(state.X, spState.X, 3);
-            Array.Copy(state.V, spState.V, 3);
-            Array.Copy(state.F, spState.F, 3);
+            Nt_Darray.Copy(state.X, spState.X, 3);
+            Nt_Darray.Copy(state.V, spState.V, 3);
+            Nt_Darray.Copy(state.F, spState.F, 3);
         }
 
         public void addMolPopulation(string key, MolecularPopulation mp)
@@ -8327,7 +8335,6 @@ namespace Daphne
                         {
                             DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
                             cbState.differentiationDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
-                            Console.WriteLine("diff: {0}\t{1}\t{2}", behavior.CurrentState, d.timeToNextEvent, d.clock);
                         }
                     }
                 }
@@ -9356,13 +9363,13 @@ namespace Daphne
             {
                 readconcs = readText.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(s => double.Parse(s)).ToArray();
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 MessageBox.Show(string.Format("This file contains invalid data. \nAll molecular concentrations set to zero."),
                    "Invalid data", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            catch (OverflowException ex)
+            catch (OverflowException)
             {
                 MessageBox.Show(string.Format("This file contains a value that is out of range. \nAll molecular concentrations set to zero."),
                    "Data out of range", MessageBoxButton.OK, MessageBoxImage.Warning);

@@ -14,7 +14,9 @@ using Daphne;
 using Kitware.VTK;
 using System.Diagnostics;
 using System.Windows.Media;
-using ManifoldRing;
+using Nt_ManifoldRing;
+
+
 
 namespace DaphneGui
 {
@@ -748,7 +750,7 @@ namespace DaphneGui
 
             cellID.SetValue(idx, cell.Cell_id);
 
-            double[] pos = cell.SpatialState.X;
+            var pos = cell.SpatialState.X;
             points.SetPoint(idx, pos[0], pos[1], pos[2]);
 
             //this should not happen

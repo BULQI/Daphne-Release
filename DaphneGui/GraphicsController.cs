@@ -2011,6 +2011,12 @@ namespace DaphneGui
                 }
             }
             rwc.Invalidate();
+            if (progress >= 100 && MainWindow.enable_clock)
+            {
+                MainWindow.mywatch.Stop();
+                var time_elapsed = MainWindow.mywatch.Elapsed.TotalSeconds;
+                System.Windows.MessageBox.Show(string.Format("total time of simuliation is {0} seconds", time_elapsed));
+            }
         }
 
         // utility to wait for redraw completion

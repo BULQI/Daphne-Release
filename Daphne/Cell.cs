@@ -5,85 +5,31 @@ using System.Text;
 using System.Numerics;
 
 using MathNet.Numerics.LinearAlgebra.Double;
-using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
-
+using NativeDaphne;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using Nt_ManifoldRing;
+using Gene = NativeDaphne.Nt_Gene;
 
 namespace Daphne
 {
-    public struct CellSpatialState
-    {
-        public double[] X;
-        public double[] V;
-        public double[] F;
-
-        public static int SingleDim = 3, Dim = 3 * SingleDim;
-    }
-
-    public class Gene
-    {
-        public string Name { get; private set; }
-        public int CopyNumber { get; private set; }
-        // Activation level may be adjusted depending on cell state 
-        public double ActivationLevel { get; set; }
-
-        public Gene(string name, int copyNumber, double actLevel)
-        {
-            Name = name;
-            CopyNumber = copyNumber;
-            ActivationLevel = actLevel;
-        }
-    }
-
     public class Cytosol : Attribute { }
     public class Membrane : Attribute { }
 
     /// <summary>
     /// The basic representation of a biological cell. 
     /// </summary>
-    public class Cell : IDynamic
+    public class Cell : Nt_Cell, IDynamic
     {
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is alive or dead.
-        /// </summary>
-        private bool alive;
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is ready to divide. 
-        /// </summary>
-        private bool cytokinetic;
-        /// <summary>
-        /// a flag that signals that the cell is motile
-        /// </summary>
-        private bool isMotile = true;
-        /// <summary>
-        /// a flag that signals that the cell responds to chemokine gradients
-        /// </summary>
-        private bool isChemotactic = true;
-        /// <summary>
-        /// a flag that signals that the cell is subject to stochastic forces
-        /// </summary>
-        private bool isStochastic = true;
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is exiting the simulation space.
-        /// </summary>
-        private bool exiting;
-
-        /// <summary>
-        /// The radius of the cell
-        /// </summary>
-        private double radius;
-        /// <summary>
-        /// used in toroidal boundary condition
-        /// </summary>
-        public static double SafetySlab = 1e-3;
-
         /// <summary>
         /// the cell's behaviors (death, division, differentiation)
         /// </summary>
         private ITransitionDriver deathBehavior;
         private ITransitionScheme differentiator, divider;
+
+        private StochLocomotor stochLocomotor; 
 
 
         /// <summary>
@@ -92,36 +38,25 @@ namespace Daphne
         public string renderLabel;
         public int generation;
 
-        /// <summary>
-        /// the genes in a cell
-        /// NOTE: should these be in the cytoplasm
-        /// </summary>
-        //public List<Gene> genes;
-        private Dictionary<string, Gene> genes;
-        public Dictionary<string, Gene> Genes
-        {
-            get { return genes; }
-        }
-        public void AddGene(string gene_guid, Gene gene)
-        {
-            genes.Add(gene_guid, gene);
-        }
-
-        public Cell(double radius)
+        public Cell(double radius) :base (radius)
         {
             if (radius <= 0)
             {
                 throw new Exception("Cell radius must be greater than zero.");
             }
+            isMotile = true;
+            isChemotactic = true;
+            isStochastic = true;
             alive = true;
             cytokinetic = false;
             this.radius = radius;
             genes = new Dictionary<string, Gene>();
             exiting = false;
 
-            spatialState.X = new double[CellSpatialState.SingleDim];
-            spatialState.V = new double[CellSpatialState.SingleDim];
-            spatialState.F = new double[CellSpatialState.SingleDim];
+            spatialState = new Nt_CellSpatialState();
+            spatialState.X = new Nt_Darray(Nt_CellSpatialState.SingleDim);
+            spatialState.V = new Nt_Darray(Nt_CellSpatialState.SingleDim);
+            spatialState.F = new Nt_Darray(Nt_CellSpatialState.SingleDim);
         }
 
         [Inject]
@@ -130,6 +65,7 @@ namespace Daphne
         {
             Cytosol = c;
             Cytosol.Interior.Initialize(new double[] { radius });
+            base.BaseCytosol = c.BaseComp;
             if (PlasmaMembrane != null)
             {
                 initBoundary();
@@ -142,6 +78,7 @@ namespace Daphne
         {
             PlasmaMembrane = c;
             PlasmaMembrane.Interior.Initialize(new double[] { radius });
+            base.BasePlasmaMembrane = c.BaseComp;
             if (Cytosol != null)
             {
                 initBoundary();
@@ -185,13 +122,13 @@ namespace Daphne
         private void initBoundary()
         {
             // boundary and position
-            Cytosol.Boundaries.Add(PlasmaMembrane.Interior.Id, PlasmaMembrane);
+            Cytosol.AddBoundary(PlasmaMembrane.Interior.Id, PlasmaMembrane);
             Cytosol.BoundaryTransforms.Add(PlasmaMembrane.Interior.Id, new Transform(false));
         }
 
         public void setSpatialState(double[] s)
         {
-            if(s.Length != CellSpatialState.Dim)
+            if (s.Length != Nt_CellSpatialState.Dim)
             {
                 throw new Exception("Cell state length implausible.");
             }
@@ -199,24 +136,24 @@ namespace Daphne
             int i;
 
             // position
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.X[i] = s[i];
             }
             // velocity
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
-                spatialState.V[i] = s[i + CellSpatialState.SingleDim];
+                spatialState.V[i] = s[i + Nt_CellSpatialState.SingleDim];
             }
             // force
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
-                spatialState.F[i] = s[i + 2 * CellSpatialState.SingleDim];
+                spatialState.F[i] = s[i + 2 * Nt_CellSpatialState.SingleDim];
             }
         }
 
         /// <summary>
-        /// set the state
+        /// set the state as used in rendering; does not set the state for simulation purposes
         /// </summary>
         /// <param name="state">the state</param>
         public void SetCellState(CellState state)
@@ -281,29 +218,31 @@ namespace Daphne
             {
                 SimulationBase.cellManager.DeadDict.Add(Cell_id, state.cbState.removalDistrState);
             }
+ 
         }
 
-        public void setSpatialState(CellSpatialState s)
+        public void setSpatialState(Nt_CellSpatialState s)
         {
             int i;
 
             // position
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.X[i] = s.X[i];
             }
             // velocity
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.V[i] = s.V[i];
             }
             // force
-            for (i = 0; i < CellSpatialState.SingleDim; i++)
+            for (i = 0; i < Nt_CellSpatialState.SingleDim; i++)
             {
                 spatialState.F[i] = s.F[i];
             }
         }
         
+        //public static System.IO.StreamWriter debug_writer = null;
         /// <summary>
         /// Drives the cell's dynamics through time-step dt. The dynamics is applied in-place: the
         /// cell's state is changed directly through this method.
@@ -311,30 +250,9 @@ namespace Daphne
         /// <param name="dt">Time interval.</param>
         public void Step(double dt) 
         {
-            // we are using the simplest kind of integrator here. It should be made more sophisticated at some point.
-            Cytosol.Step(dt);
-
-            //apply cytosol/membrane boundary flux - specific to cytosol/Membrane
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
-            {
-                MolecularPopulation molpop = kvp.Value;
-                ScalarField conc = molpop.Conc;
-                foreach (KeyValuePair<int, ScalarField> item in molpop.BoundaryFluxes)
-                {
-                    conc.DiffusionFluxTerm(item.Value, molpop.Comp.BoundaryTransforms[item.Key], dt);
-                    item.Value.reset(0);
-                }
-            }
-
-            //update cytosol/membrane boundary
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
-            {
-                kvp.Value.UpdateCytosolMembraneBoundary();
-            }
-
-            PlasmaMembrane.Step(dt);
-
-            // step the cell behaviors
+            
+            //Cell's reactions/molpop/updateboundaries are handled by
+            //cellpopulation.step(). only the transition schemes are handled here.
 
             // death
             deathBehavior.Step(dt);
@@ -371,6 +289,12 @@ namespace Daphne
                 Differentiator.TransitionOccurred = false;
                 DifferentiationState = Differentiator.CurrentState;
             }
+            
+            //moved to middle layer
+            //if (alive && isMotile && (!exiting))
+            //{
+            //    this.EnforceBC();
+            //}
         }
 
         public void SetGeneActivities(ITransitionScheme scheme)
@@ -387,10 +311,10 @@ namespace Daphne
         }
 
         /// <summary>
-        /// save gene activity from saved values
+        /// save gene activity from saved values.
         /// </summary>
-        /// <param name="geneDict">saved values in a dictionary</param>
-        public void SetGeneActivities(Dictionary<string, double> geneDict)
+        /// <param name="geneDict"></param>
+        public void SetGeneActivities(Dictionary<String, double> geneDict)
         {
             foreach (var kvp in geneDict)
             {
@@ -423,7 +347,6 @@ namespace Daphne
                 kvp.Value.Initialize("explicit", molPopDict[kvp.Key]);
             }
         }
-
         /// <summary>
         /// Returns the force the cell applies to the environment.
         /// </summary>
@@ -491,7 +414,7 @@ namespace Daphne
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.Cytosol));
                 newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
-                daughter.Cytosol.Populations.Add(kvp.Key, newMP);
+                daughter.Cytosol.AddMolecularPopulation(kvp.Key, newMP);
             }
             // membrane molpops
             foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
@@ -499,7 +422,7 @@ namespace Daphne
                 MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.PlasmaMembrane));
                 newMP.IsDiffusing = kvp.Value.IsDiffusing;
                 newMP.Initialize("explicit", kvp.Value.CopyArray());
-                daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
+                daughter.PlasmaMembrane.AddMolecularPopulation(kvp.Key, newMP);
             }
             // genes
             foreach (KeyValuePair<string, Gene> kvp in Genes)
@@ -543,11 +466,17 @@ namespace Daphne
             // transcription reactions
             SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs, null);
 
+            /* this needs to be added after adding the cell*/
+            /*
+            ((ECSEnvironment)SimulationBase.dataBasket.Environment).Comp.AddBoundary(daughter.Population_id, daughter.PlasmaMembrane.Interior.Id, daughter.PlasmaMembrane);
             // add the cell's membrane to the ecs boundary
             ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(daughter.PlasmaMembrane.Interior);
             // add ECS boundary reactions, where applicable
             List<ConfigReaction> reacs = SimulationBase.ProtocolHandle.GetReactions(SimulationBase.ProtocolHandle.scenario.environment.comp, true);
             SimulationBase.AddCompartmentBoundaryReactions(SimulationBase.dataBasket.Environment.Comp, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, reacs, null);
+            */
+             // behaviors
+           
 
             // behaviors
 
@@ -641,72 +570,54 @@ namespace Daphne
 
         public int DifferentiationState, DividerState;
 
-        public Locomotor Locomotor { get; set; }
+        private Locomotor locomotor;
+
+        public Locomotor Locomotor 
+        {
+            get
+            {
+                return locomotor;
+            }
+            set
+            {
+                locomotor = value;
+                if (locomotor != null)
+                {
+                    this.Driver = locomotor.Driver;
+                    this.TransductionConstant = locomotor.TransductionConstant;
+                }
+                else
+                {
+                    this.Driver = null;
+                    this.TransductionConstant = 0.0;
+                }
+            }
+        }
+
+        public BigInteger Lineage_id { get; set; }
+
         public Compartment Cytosol { get; private set; }
         public Compartment PlasmaMembrane { get; private set; }
-        private CellSpatialState spatialState;
-        public double DragCoefficient { get; set; }
-        public StochLocomotor StochLocomotor { get; set; } 
 
-        public int Cell_id { get; set; }
-        public BigInteger Lineage_id { get; set; }
-        public int Population_id { get; set; }
-        protected int[] gridIndex = { -1, -1, -1 };
-        public static double defaultRadius = 5.0;
-
-        public CellSpatialState SpatialState
+        public StochLocomotor StochLocomotor 
         {
-            get { return spatialState; }
-            set { spatialState = value; }
-        }
-
-        public bool IsMotile
-        {
-            get { return isMotile; }
-            set { isMotile = value; }
-        }
-        public bool IsChemotactic
-        {
-            get { return isChemotactic; }
-            set { isChemotactic = value; }
-
-        }
-        public bool IsStochastic
-        {
-            get { return isStochastic; }
-            set { isStochastic = value; }
-
-        }
-        public bool Alive
-        {
-            get { return alive; }
-            set { alive = value; }
-        }
-
-        public bool Cytokinetic
-        {
-            get { return cytokinetic; }
-            set { cytokinetic = value; }
-        }
-
-        public double Radius
-        {
-            get { return radius; }
-        }
-
-        /// <summary>
-        /// retrieve the cell's grid index
-        /// </summary>
-        public int[] GridIndex
-        {
-            get { return gridIndex; }
-        }
-
-        public bool Exiting
-        {
-            get { return exiting; }
-            set { exiting = value; }
-        }
+            get
+            {
+                return stochLocomotor;
+            }
+            set
+            {
+                stochLocomotor = value;
+                if (stochLocomotor != null)
+                {
+                    Sigma = stochLocomotor.Sigma;
+                }
+                else
+                {
+                    Sigma = 0;
+                }
+            }
+        } 
 
         /// <summary>
         /// set force to zero
@@ -714,17 +625,6 @@ namespace Daphne
         public void resetForce()
         {
             spatialState.F[0] = spatialState.F[1] = spatialState.F[2] = 0;
-        }
-
-        /// <summary>
-        /// accumulate the force vector
-        /// </summary>
-        /// <param name="f"></param>
-        public void addForce(double[] f)
-        {
-            spatialState.F[0] += f[0];
-            spatialState.F[1] += f[1];
-            spatialState.F[2] += f[2];
         }
 
         /// <summary>
@@ -803,7 +703,7 @@ namespace Daphne
                     // displace the cell such that it wraps around
                     if (SpatialState.X[i] < 0.0)
                     {
-                        // use a small safety distance to displace the cell just back into the grid
+                        // use a small fudge factor to displace the cell just back into the grid
                         SpatialState.X[i] = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i) - SafetySlab;
                     }
                     else if (SpatialState.X[i] > SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i))
@@ -826,7 +726,6 @@ namespace Daphne
             }
         }
     }
-
     /// <summary>
     /// data structure for single cell track data
     /// </summary>
