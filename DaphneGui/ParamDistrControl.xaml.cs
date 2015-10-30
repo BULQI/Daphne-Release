@@ -91,8 +91,8 @@ namespace DaphneGui
 
                 case ParameterDistributionType.CATEGORICAL:
                     CategoricalParameterDistribution new_categorical_distr = new CategoricalParameterDistribution();
-                    new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(distr_parameter.ConstValue, 0.5));
-                    new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(distr_parameter.ConstValue + 1.0, 0.5));  
+                    new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(0.0, 0.5));
+                    new_categorical_distr.ProbMass.Add(new CategoricalDistrItem(1.0, 0.5));  
                     distr_parameter.ParamDistr = new_categorical_distr;
                     distr_parameter.DistributionType = ParameterDistributionType.CATEGORICAL;
                     break;
@@ -248,8 +248,6 @@ namespace DaphneGui
                     distr.isInitialized = false;
                 }
             }
-
-            //distr.Normalize();
         }
 
         private void menuProbMassDelete_Click(object sender, RoutedEventArgs e)
