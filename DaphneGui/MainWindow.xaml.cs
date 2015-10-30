@@ -496,7 +496,8 @@ namespace DaphneGui
             }
             else
             {
-                file = "simple_chemotaxis.json";
+                //file = "simple_chemotaxis.json";
+                file = "centroblast-centrocyte_recycling.json";
             }
 
             int repeat = 0;
@@ -736,12 +737,16 @@ namespace DaphneGui
             ProtocolCreators.CreateBlankProtocol(protocol);
             protocol.SerializeToFile();
 
+            // We need to assign this field for protocols that deploy cells.
+            // Otherwise, we get a crash in cellPop.cellPopDist.MaxCellsToAdd()
+            SystemOfPersistence.HProtocol = protocol;
+
             // DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\simple_chemotaxis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             protocol.SerializeToFile();
 
-            ////DIFFUSIION SCENARIO - no longer needed
+            ////DIFFUSIION SCENARIO - for testing, only
             //protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             //ProtocolCreators.CreateDiffusionProtocol(protocol);
             ////Serialize to json

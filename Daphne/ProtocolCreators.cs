@@ -464,9 +464,6 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            // We need this to successfully execute cellPop.cellPopDist.Initialize();
-            SystemOfPersistence.HProtocol = protocol;
-
             protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
@@ -594,14 +591,6 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
             }
-            //foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
-            //{
-            //    ReportECM reportECM = new ReportECM();
-            //    reportECM.molpop_guid_ref = mpECM.molpop_guid;
-            //    reportECM.mp_extended = ExtendedReport.COMPLETE;
-            //    cellPop.ecm_probe.Add(reportECM);
-            //    //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
-            //}
 
             protocol.reporter_file_name = "Loco_test";
 

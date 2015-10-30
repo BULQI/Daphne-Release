@@ -1,7 +1,7 @@
 {
   "experiment_name": "Blank Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "344b54c2-efe2-468b-be3c-a4567548357d",
+  "experiment_guid": "c48bae47-4154-47a4-af00-ec6c7f0420b2",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
@@ -35,7 +35,7 @@
     },
     "phi1": 100.0,
     "phi2": 0.0,
-    "globalRandomSeed": 718358509
+    "globalRandomSeed": 688537308
   },
   "reporter_file_name": "",
   "entity_repository": {
@@ -54,7 +54,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 2,
-        "entity_guid": "b99cca44-e456-4f5c-9458-2eb8719c6705",
+        "entity_guid": "cf3fb926-aacf-4918-9692-52f0e471f624",
         "description": ""
       },
       {
@@ -69,7 +69,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 0,
-        "entity_guid": "24f91aa0-6a1c-438b-9804-d66dba31fd6f",
+        "entity_guid": "330631c3-b99c-41ae-9b25-4a96765847b2",
         "description": ""
       },
       {
@@ -83,7 +83,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 3,
-        "entity_guid": "65430497-53a8-4ebe-aedd-13badb1504bd",
+        "entity_guid": "0d54568a-5618-4395-a101-89697bf6e809",
         "description": ""
       },
       {
@@ -97,7 +97,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 4,
-        "entity_guid": "fe142dc2-153b-414b-ade4-ffc2263b875c",
+        "entity_guid": "9bae0a00-3082-477b-8af5-6fa80ba1a6e6",
         "description": ""
       },
       {
@@ -112,7 +112,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 1,
-        "entity_guid": "b2794809-8bd5-4a6f-9dae-8e596bb0ffe1",
+        "entity_guid": "da06ef66-0fcf-4f60-a6be-38a4174284d3",
         "description": ""
       },
       {
@@ -126,7 +126,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 5,
-        "entity_guid": "3062861f-6d95-4ac6-a49d-c5b03cc205eb",
+        "entity_guid": "23109922-a747-4105-8c8f-1ea7f96ff89d",
         "description": ""
       },
       {
@@ -142,7 +142,7 @@
         ],
         "isBoundary": true,
         "reac_type": 14,
-        "entity_guid": "fe2c3e5e-f488-46a7-87bf-5f3b3fc8181f",
+        "entity_guid": "e1ed0f95-6396-4464-8855-b51ea91fbf66",
         "description": ""
       },
       {
@@ -157,7 +157,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 15,
-        "entity_guid": "c4a23260-8c77-4820-8f4f-82af8612d51a",
+        "entity_guid": "b63b23ca-a90a-4d83-ae63-94357a0657df",
         "description": ""
       },
       {
@@ -172,7 +172,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 16,
-        "entity_guid": "165517dd-2457-4c0d-a4bc-8884de700c84",
+        "entity_guid": "ad654795-3b86-4c27-957f-eaa1abbd9c72",
         "description": ""
       },
       {
@@ -186,7 +186,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 18,
-        "entity_guid": "efc85d47-bb0b-4876-a293-a4091741244b",
+        "entity_guid": "ac4178cb-0610-458e-8c6e-d5bd4c3e2081",
         "description": ""
       },
       {
@@ -200,7 +200,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 19,
-        "entity_guid": "e1d6d72e-b04a-4c8e-9ec0-8eae14e44b6d",
+        "entity_guid": "4fe30169-f222-4163-85cb-ca8a1cf42bb9",
         "description": ""
       },
       {
@@ -215,7 +215,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 6,
-        "entity_guid": "e09cc101-b790-44a2-8536-c2838bb7e131",
+        "entity_guid": "2c912fdd-793e-4f38-a813-8adb3e01c086",
         "description": ""
       },
       {
@@ -229,7 +229,7 @@
         ],
         "isBoundary": false,
         "reac_type": 7,
-        "entity_guid": "4b62599f-09eb-4ad3-a52a-ced03b32f988",
+        "entity_guid": "b227d4fe-f449-4bd6-b6cf-dd3587498b14",
         "description": ""
       },
       {
@@ -246,7 +246,7 @@
         ],
         "isBoundary": false,
         "reac_type": 8,
-        "entity_guid": "22c83583-6811-49bf-93f5-05065cb81d3b",
+        "entity_guid": "1d03a03f-c5bd-41b6-9afa-6dc69da333e0",
         "description": ""
       },
       {
@@ -260,7 +260,7 @@
         ],
         "isBoundary": false,
         "reac_type": 9,
-        "entity_guid": "ba6fcb06-fc90-4f45-a533-69d4b3ab8cac",
+        "entity_guid": "42bda9cc-ce2d-4816-ba06-8c37300e466b",
         "description": ""
       },
       {
@@ -276,7 +276,7 @@
         ],
         "isBoundary": false,
         "reac_type": 10,
-        "entity_guid": "0c101e1f-0bd3-409e-9d96-0e59e64fea94",
+        "entity_guid": "b92bd3d8-b5cd-4afd-864e-a4535236fef2",
         "description": ""
       },
       {
@@ -292,7 +292,7 @@
         ],
         "isBoundary": false,
         "reac_type": 11,
-        "entity_guid": "f1ee1ebc-4558-4d90-90cf-202333557e26",
+        "entity_guid": "5b2dac43-68eb-469e-a071-5fe7eed62569",
         "description": ""
       },
       {
@@ -309,7 +309,7 @@
         ],
         "isBoundary": false,
         "reac_type": 13,
-        "entity_guid": "3b89b32e-8a85-41d4-b74d-87c7a4430149",
+        "entity_guid": "d905bc94-3626-4ff5-be7e-a92efdd84078",
         "description": ""
       },
       {
@@ -325,7 +325,7 @@
         ],
         "isBoundary": false,
         "reac_type": 12,
-        "entity_guid": "a79ed77b-a965-4876-bf89-b1742c6a5e35",
+        "entity_guid": "d57dc99d-1a63-4e8d-b4bd-269cc7251754",
         "description": ""
       },
       {
@@ -339,7 +339,7 @@
         ],
         "isBoundary": false,
         "reac_type": 20,
-        "entity_guid": "e7159980-4943-4688-95fb-34c69f5fa4ad",
+        "entity_guid": "1d6276c6-bc86-4d82-8c6f-66d3a4f78612",
         "description": ""
       }
     ],
