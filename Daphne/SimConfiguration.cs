@@ -1636,7 +1636,6 @@ namespace Daphne
         /// <param name="tempFiles">true when wanting to serialize temporary file(s)</param>
         public void SerializeToFile(bool tempFiles = false)
         {
-            //skg daphne serialize to json Thursday, April 18, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
@@ -1661,7 +1660,6 @@ namespace Daphne
         /// <returns>level content as string</returns>
         public string SerializeToString()
         {
-            //skg daphne serialize to json string Wednesday, May 08, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
