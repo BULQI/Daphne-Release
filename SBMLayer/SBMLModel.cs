@@ -10,11 +10,12 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using libsbmlcs;
 using Daphne;
-using ManifoldRing;
+//using ManifoldRing;
 
 //C# alias to avoid having to fully qualify UNIT_KINDS
 using unitType = libsbmlcs.libsbml;
 using System.Collections.ObjectModel;
+using Nt_ManifoldRing;
 
 
 namespace SBMLayer
