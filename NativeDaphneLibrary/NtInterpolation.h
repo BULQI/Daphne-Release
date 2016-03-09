@@ -56,7 +56,7 @@ namespace NativeDaphneLibrary
 			toroidal = _toroidal;
 
 			//data for laplacian
-			int alloc_size = nodePerSide0 * nodePerSide1 * 6;
+			int alloc_size = nodePerSide0 * nodePerSide1 * nodePerSide2 * 6;
 			//the index corresponding to i in the laplacian.array[i]
 			lpindex = (int *)malloc(alloc_size * sizeof(int));
 			//this corresponding to the index in operator[i][j].index
