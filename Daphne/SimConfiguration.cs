@@ -7791,7 +7791,7 @@ namespace Daphne
         /// </summary>
         /// <param name="pos">the position of the next cell</param>
         /// <returns></returns>
-        protected bool inBounds(double[] pos)
+        public bool InBounds(double[] pos)
         {
             // if this is not assigned yet, find it
             findWallDis();
@@ -7827,10 +7827,23 @@ namespace Daphne
         /// <returns></returns>
         public bool AddByPosition(double[] pos)
         {
-            if (inBounds(pos) == true)
+            if (InBounds(pos) == true && duplicatePosition(pos) == false)
             {
                 cellPop.CellStates.Add(new CellState(pos[0], pos[1], pos[2]));
                 return true;
+            }
+            return false;
+        }
+
+        private bool duplicatePosition(double[] pos)
+        {
+            //for (int i = 0; i < cellPop.CellStates.Count; i++)
+            foreach(CellState cs in cellPop.CellStates)
+            {
+                if (cs.X == Math.Round(pos[0], 2) && cs.Y == Math.Round(pos[1], 2) && cs.Z == Math.Round(pos[2], 2))
+               {
+                   return true;
+               }
             }
             return false;
         }
@@ -7950,8 +7963,10 @@ namespace Daphne
         /// <summary>
         /// Check that all cells are in-bounds. 
         /// </summary>
-        public void CheckPositions()
+        public bool CheckPositions()
         {
+            bool changed = false;
+
             if (cellPop != null)
             {
                 double[] pos;
@@ -7961,7 +7976,7 @@ namespace Daphne
                 for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
                     pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                    if (inBounds(pos) == false)
+                    if (InBounds(pos) == false || duplicatePosition(pos) == true)
                     {
                         cellPop.CellStates.RemoveAt(i);
                     }
@@ -7973,9 +7988,12 @@ namespace Daphne
                 if (cellsToAdd > 0)
                 {
                     AddByDistr(cellsToAdd);
+                    changed = true;
                 }
             }
+            return changed;
         }
+       
     }
 
     /// <summary>

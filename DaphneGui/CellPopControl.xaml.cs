@@ -281,6 +281,8 @@ namespace DaphneGui
                 }
             }
 
+            MainWindow.ToolWin.Apply();
+
             // needed by the slider?
             ToolBarTray tr = new ToolBarTray();
 
@@ -438,51 +440,13 @@ namespace DaphneGui
                 return;
 
             // Remove out-of-bounds cells
-            bool changed = false;
-            for (int i = cp.CellStates.Count - 1; i >= 0; i--)
+            bool anyChange  = cp.cellPopDist.CheckPositions();
+
+            if (anyChange == true)
             {
-                double[] pos = new double[3] { cp.CellStates[i].X, cp.CellStates[i].Y, cp.CellStates[i].Z };
-                // X
-                if (cp.CellStates[i].X < 0)
-                {
-                    pos[0] = 0;
-                    changed = true;
-                }
-                if (cp.CellStates[i].X > cp.cellPopDist.Extents[0])
-                {
-                    pos[0] = cp.cellPopDist.Extents[0];
-                    changed = true;
-                }
-                // Y
-                if (cp.CellStates[i].Y < 0)
-                {
-                    pos[1] = 0;
-                    changed = true;
-                }
-                if (cp.CellStates[i].Y > cp.cellPopDist.Extents[1])
-                {
-                    pos[1] = cp.cellPopDist.Extents[1];
-                    changed = true;
-                }
-                // Z
-                if (cp.CellStates[i].Z < 0)
-                {
-                    pos[2] = 0;
-                    changed = true;
-                }
-                if (cp.CellStates[i].Z > cp.cellPopDist.Extents[2])
-                {
-                    pos[2] = cp.cellPopDist.Extents[2];
-                    changed = true;
-                }
-                if (changed)
-                {
-                    // Can't update coordinates directly or the datagrid doesn't update properly
-                    // (e.g., cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];)
-                    cp.CellStates.RemoveAt(i);
-                    cp.cellPopDist.AddByPosition(pos);
-                }
+                MainWindow.ToolWin.Apply();
             }
+
         }
 
         /// <summary>
@@ -499,6 +463,7 @@ namespace DaphneGui
             if (e.Key == Key.V &&
                 (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
+                // gmk: Do we ever get here?
                 string s = (string)Clipboard.GetData(DataFormats.Text);
 
                 char[] delim = { '\t', '\r', '\n' };
@@ -508,9 +473,8 @@ namespace DaphneGui
                 int n = 3 * (int)Math.Floor(paste.Length / 3.0);
                 for (int i = 0; i < n; i += 3)
                 {
-                    cp.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
+                    cp.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]) ));
                 }
-
                 cp.number = cp.CellStates.Count;
 
             }
@@ -527,6 +491,50 @@ namespace DaphneGui
 
         private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
         {
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cp == null)
+                return;
+
+            string s = (string)Clipboard.GetData(DataFormats.Text);
+            if (s == null)
+                return;
+
+            char[] delim = { '\t', '\r', '\n' };
+            string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+            if (paste == null)
+                return;
+
+            bool invalid = false;
+            int num_invalid = 0;
+            double x, y, z;
+
+            cp.CellStates.Clear();
+            int n = 3 * (int)Math.Floor(paste.Length / 3.0);
+            for (int i = 0; i < n; i += 3)
+            {
+                if (Double.TryParse(paste[i], out x) && Double.TryParse(paste[i + 1], out y) && Double.TryParse(paste[i + 2], out z))
+                {
+                    if (cp.cellPopDist.AddByPosition(new double[] { x, y, z }) == false)
+                    {
+                        invalid = true;
+                        num_invalid++;
+                    }
+                }
+                else
+                {
+                    invalid = true;
+                    num_invalid++;
+                }
+            }
+
+            cp.number = cp.CellStates.Count;
+
+            if (invalid == true)
+            {
+                MessageBox.Show("Ignored " + num_invalid.ToString() + " invalid cell coordinates.");
+            }
+
+            MainWindow.ToolWin.Apply();
         }
 
         private void menuCoordinatesTester_Click(object sender, RoutedEventArgs e)
