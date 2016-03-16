@@ -2358,8 +2358,12 @@ namespace DaphneGui
                     gc = new VTKNullGraphicsController();
                 }
             }
-            // set the reporter's path
-            sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
+
+            if (newFile == true)
+            {
+                // set the reporter's path
+                sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
+            }
 
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             if (vtkDisplay_DockPanel.DataContext != gc)
