@@ -151,8 +151,8 @@ namespace NativeDaphneLibrary
 		int idxarr[3];
 		int NPS01 = NodesPerSide0 * NodesPerSide1;
 		idxarr[2] = index/NPS01;
-		idxarr[1] = (index%NPS01)/NodesPerSide1;
-		idxarr[0] = (index%NPS01)%NodesPerSide1;
+		idxarr[1] = (index%NPS01)/NodesPerSide0;
+		idxarr[0] = (index%NPS01)%NodesPerSide0;
 
 		if (idxarr[0] == NodesPerSide0 - 1)
 		{
