@@ -564,15 +564,17 @@
                                                         Header="Actual Cell Locations"
                                                         x:Name="LocationsExpander"
                                                         >
+
                                                         <StackPanel Orientation="Vertical" Margin="10,0">
                                                             <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80" MaxHeight="220"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" RowHeaderWidth="0"
                                                                     VerticalContentAlignment="Center" CanUserAddRows="False" BorderThickness="1" BorderBrush="Black"
-                                                                    KeyDown="dgLocations_KeyDown" ClipboardCopyMode="ExcludeHeader" 
+                                                                    KeyDown="dgLocations_KeyDown"  
                                                                     SourceUpdated="dgLocations_Unloaded"  
-                                                                    LostFocus="dgLocations_CheckPositions"
-                                                                    VirtualizingStackPanel.VirtualizationMode="Standard"
+                                                                    LostFocus="dgLocations_CheckPositions" 
+                                                                    VirtualizingStackPanel.VirtualizationMode="Standard" 
+                                                                    SelectionMode="Single" SelectionUnit="Cell"
                                                                     >
                                                             <DataGrid.ContextMenu>
                                                                 <ContextMenu >

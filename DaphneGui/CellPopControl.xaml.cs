@@ -440,7 +440,7 @@ namespace DaphneGui
                 return;
 
             // Remove out-of-bounds cells
-            bool anyChange  = cp.cellPopDist.CheckPositions();
+            bool anyChange = cp.cellPopDist.CheckPositions();
 
             if (anyChange == true)
             {
@@ -491,6 +491,12 @@ namespace DaphneGui
 
         private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
         {
+            MessageBoxResult result = MessageBox.Show("Replace all cell positions with content of clipboard (No)?","Question",MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
                 return;
@@ -654,8 +660,6 @@ namespace DaphneGui
                 SelectedCell = cp.Cell;
             }
         }
-
-
     }
 
 

@@ -7827,7 +7827,7 @@ namespace Daphne
         /// <returns></returns>
         public bool AddByPosition(double[] pos)
         {
-            if (InBounds(pos) == true && duplicatePosition(pos) == false)
+            if (InBounds(pos) == true && duplicatePosition(pos, -1) == false)
             {
                 cellPop.CellStates.Add(new CellState(pos[0], pos[1], pos[2]));
                 return true;
@@ -7835,15 +7835,20 @@ namespace Daphne
             return false;
         }
 
-        private bool duplicatePosition(double[] pos)
+        private bool duplicatePosition(double[] pos, int item)
         {
-            //for (int i = 0; i < cellPop.CellStates.Count; i++)
-            foreach(CellState cs in cellPop.CellStates)
+            for (int i = 0; i < cellPop.CellStates.Count; i++)
             {
+                if (i == item)
+                {
+                    continue;
+                }
+
+                CellState cs = cellPop.CellStates[i];
                 if (cs.X == Math.Round(pos[0], 2) && cs.Y == Math.Round(pos[1], 2) && cs.Z == Math.Round(pos[2], 2))
-               {
-                   return true;
-               }
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -7976,7 +7981,7 @@ namespace Daphne
                 for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
                     pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                    if (InBounds(pos) == false || duplicatePosition(pos) == true)
+                    if (InBounds(pos) == false || duplicatePosition(pos, i) == true)
                     {
                         cellPop.CellStates.RemoveAt(i);
                     }
