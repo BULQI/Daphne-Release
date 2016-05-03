@@ -1206,7 +1206,7 @@ namespace Daphne
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Reactions in Cytosol
-            type = new string[] { "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|" };
+            type = new string[] { "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|", "A* -> A" };
                                           //"A* -> A", "gApop -> sApop + gApop" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -2693,7 +2693,7 @@ namespace Daphne
             //
             // Barroso, Munoz, et al.
             // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
-            // The FASEB Journal vol. 26 no. 12 4841-485
+            //// The FASEB Journal vol. 26 no. 12 4841-485
             // (measured) CXCL13/CXCR5 binding affinity:  KD = 30.4 molec/um^3
             // (measured) K_on = 7.7e-3 um^3/#-min
             // (measured) K_off = 0.21 1/min
