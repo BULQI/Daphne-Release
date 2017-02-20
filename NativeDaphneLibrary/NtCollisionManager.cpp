@@ -12,8 +12,7 @@
 
 #include "NtCollisionManager.h"
 
-using namespace std;
-typedef list<int> LISTINT;
+typedef std::list<int> LISTINT;
 
 namespace NativeDaphneLibrary
 {
@@ -32,7 +31,7 @@ namespace NativeDaphneLibrary
 			IsToroidal = gtoroidal;
 			GridSize = gridSize;
 
-			pairs = new unordered_map<long, NtCellPair *>();
+			pairs = new std::unordered_map<long, NtCellPair *>();
 			max_pair_count = 0;
 
 
@@ -287,12 +286,12 @@ namespace NativeDaphneLibrary
 	{
 		if (pairs->count(key) == 0)
 		{
-			throw new exception("Error: pair with key not found!");
+			throw new std::exception("Error: pair with key not found!");
 		}
 		NtCellPair *pair = (*pairs)[key];
 		if (pair == NULL)
 		{
-			throw new exception("Error: pair with key is NULL!");
+			throw new std::exception("Error: pair with key is NULL!");
 		}
 		return new (pair) NtCellPair(key, _a, _b);
 	}

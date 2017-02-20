@@ -10,8 +10,6 @@
 
 //#define DO_PREFETCH
 
-using namespace std;
-
 namespace NativeDaphneLibrary
 {
 

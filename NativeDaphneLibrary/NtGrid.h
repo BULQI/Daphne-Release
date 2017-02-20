@@ -14,9 +14,6 @@
 #include "NtUtility.h"
 #include "NtCellPair.h"
 
-
-using namespace std;
-
 namespace NativeDaphneLibrary
 {
 

@@ -10,7 +10,6 @@
 #include "NtUtility.h"
 #include "NtCollisionManager.h"
 
-using namespace std;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Security;
@@ -42,7 +41,7 @@ namespace NativeDaphne
         /// <param name="gridStep">voxel width in microns</param>
         Nt_CollisionManager(array<double>^ gridSize, double gridStep, bool _isEcsToroidal) : Nt_Grid(gridSize, gridStep)
         {
-            grid = gcnew array<Dictionary<int, Nt_Cell^>^, 3>(gridPts[0], gridPts[1], gridPts[2]);
+            grid = gcnew cli::array<Dictionary<int, Nt_Cell^>^, 3>(gridPts[0], gridPts[1], gridPts[2]);
 			remove_key_pair_lock = gcnew Object();
 			isToroidal = _isEcsToroidal;
 			

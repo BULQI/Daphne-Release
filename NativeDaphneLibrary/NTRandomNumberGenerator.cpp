@@ -6,8 +6,6 @@
 #include <stdexcept>
 #include <acml.h>
 
-using namespace std;
-
 namespace NativeDaphneLibrary
 {
 
@@ -81,17 +79,17 @@ namespace NativeDaphneLibrary
 		buffer_backup = (double *)_aligned_realloc(buffer_backup, alloc_size * sizeof(double), 32);
 		if (buffer == NULL || buffer_backup == NULL)
 		{
-			throw new exception("Error allocating random number buffer.\n");
+			throw new std::exception("Error allocating random number buffer.\n");
 		}
 		drandgaussian(buffer_size, mean, variance, _state, buffer, &info);
 		if (info != 0)
 		{
-			throw new exception("Error generating random number");
+			throw new std::exception("Error generating random number");
 		}
 		drandgaussian(buffer_size, mean, variance, _state, buffer_backup, &info);
 		if (info != 0)
 		{
-			throw new exception("Error generating random number");
+			throw new std::exception("Error generating random number");
 		}
 
 		backup_ready = 1;
@@ -107,7 +105,7 @@ namespace NativeDaphneLibrary
 		drandgaussian(buffer_size, mean, variance, _state, buffer_backup, &info);
 		if (info != 0)
 		{
-			throw new exception("Error generating random number");
+			throw new std::exception("Error generating random number");
 		}
 		return true;
 	}

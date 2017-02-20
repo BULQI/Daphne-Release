@@ -13,8 +13,6 @@
 #include "NtGrid.h"
 #include "NtCellPair.h"
 
-using namespace std;
-
 namespace NativeDaphneLibrary
 {
 
@@ -41,7 +39,7 @@ namespace NativeDaphneLibrary
 		//but does not affect the running.
 		//to remove the warning, use another container
 		//or other tricks. we are disabling it for now
-		vector<NtCellPair *> FreePairList;
+		std::vector<NtCellPair *> FreePairList;
 
 	public:
 		static double *GridSize;
@@ -51,7 +49,7 @@ namespace NativeDaphneLibrary
 
 		static int max_pair_count;
 
-		unordered_map<long, NtCellPair *> *pairs;
+		std::unordered_map<long, NtCellPair *> *pairs;
 
 		int ReserveStorageSize;
 		NtCellPair *PairArrayStorage;
@@ -136,7 +134,7 @@ namespace NativeDaphneLibrary
 		{
 			//if we already have it
 			if (pairs->count(key) > 0)return false;
-			pairs->insert(make_pair(key, p));
+			pairs->insert(std::make_pair(key, p));
 			
 			//debug - checking maximum pairs
 			int nPairs = NextFreeIndex - (int)FreePairList.size();

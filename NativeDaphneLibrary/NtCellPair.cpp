@@ -10,8 +10,6 @@
 #include "NtCellPair.h"
 #include "NtCollisionManager.h"
 
-using namespace std;
-
 namespace NativeDaphneLibrary
 {
 

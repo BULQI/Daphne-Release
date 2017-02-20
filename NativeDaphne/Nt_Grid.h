@@ -106,9 +106,9 @@ namespace NativeDaphne
         /// <summary>
         /// retrieve the grid units
         /// </summary>
-        property array<int>^ GridPts
+        property cli::array<int>^ GridPts
         {
-			array<int>^ get()
+			cli::array<int>^ get()
 			{
 				return gridPts;
 			}
@@ -119,7 +119,7 @@ namespace NativeDaphne
         /// </summary>
         /// <param name="pos">position to test</param>
         /// <returns>tuple with indices; negative for out of bounds</returns>
-        void findGridIndex(Nt_Darray^ pos, array<int>^ idx)
+        void findGridIndex(Nt_Darray^ pos, cli::array<int>^ idx)
         {
             //save one allocation
 			double *pos_ptr = pos->NativePointer;
@@ -160,7 +160,7 @@ namespace NativeDaphne
             return (unsigned)idx[0] < (unsigned)gridPts[0] && (unsigned)idx[1] < (unsigned)gridPts[1] && (unsigned)idx[2] < (unsigned)gridPts[2];;
         }
 
-		bool legalIndex(array<int>^ idx)
+		bool legalIndex(cli::array<int>^ idx)
 		{
 			return (unsigned)idx[0] < (unsigned)gridPts[0] && (unsigned)idx[1] < (unsigned)gridPts[1] && (unsigned)idx[2] < (unsigned)gridPts[2];
 		}
@@ -186,7 +186,7 @@ namespace NativeDaphne
 
 		static double static_GridStepInverse;
 
-		static array<int>^ static_GridPts;
+		static cli::array<int>^ static_GridPts;
 
 		protected:
         /// <summary>
@@ -197,11 +197,11 @@ namespace NativeDaphne
         /// <summary>
         /// grid extents in microns
         /// </summary>
-        array<double>^ gridSize;
+        cli::array<double>^ gridSize;
         /// <summary>
         /// number of voxels in each dimension
         /// </summary>
-        array<int>^ gridPts;
+        cli::array<int>^ gridPts;
 		private:
 		double volume, volumeVoxel;
     };
