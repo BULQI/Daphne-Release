@@ -107,11 +107,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NATIVEDAPHNELIBRARY_EXPORTS;%(PreprocessorDefinitions);COMPILE_FLAG</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(UniversalCRT_IncludePath);C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libacml_mp_dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(UniversalCRT_LibraryPath_x64);C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
