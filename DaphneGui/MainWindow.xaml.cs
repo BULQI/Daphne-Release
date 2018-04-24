@@ -130,6 +130,7 @@ namespace DaphneGui
 
         private DocWindow dw;
         private Thread simThread;
+        private ManualResetEvent startSimEvent = new ManualResetEvent(false);
         public static Cell selectedCell = null;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
@@ -2574,6 +2575,8 @@ namespace DaphneGui
         {
             while (true)
             {
+                //wating for siginal to continue
+                startSimEvent.WaitOne();
                 lock (sim)
                 {
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
@@ -2642,6 +2645,7 @@ namespace DaphneGui
 
                         if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
                         {
+                            startSimEvent.Reset(); //stop loop.
                             // handle reruns
                             if (repeatInProgress() == true)
                             {
@@ -2683,6 +2687,7 @@ namespace DaphneGui
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateInt(updateGraphicsAndGUI), -1);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
+                        startSimEvent.Reset();
                     }
                     else if (vcrControl != null && vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
                     {
@@ -3029,6 +3034,8 @@ namespace DaphneGui
         /// <param name="firstRun">true if this is a single-shot simulation or the first iteration of a repeated run</param>
         internal void runSim(bool firstRun)
         {
+            //starting the simulation loop.
+            startSimEvent.Set();
             if (firstRun == true)
             {
                 repetition = 1;
@@ -3065,7 +3072,7 @@ namespace DaphneGui
 
         //timer used to measure performace
         public static Stopwatch mywatch;
-        public static bool enable_clock = false;
+        public static bool enable_clock = true;
 
         private void runSim_Tissue(bool repeat)
         {
