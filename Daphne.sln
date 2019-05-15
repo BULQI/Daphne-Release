@@ -83,6 +83,7 @@ Global
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Mixed Platforms.Build.0 = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Win32.ActiveCfg = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x64.ActiveCfg = Debug|x64
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x64.Build.0 = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x86.ActiveCfg = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x86.Build.0 = Debug|x64
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Any CPU.ActiveCfg = Release|x86
@@ -150,6 +151,7 @@ Global
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|Win32.ActiveCfg = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|Win32.Build.0 = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|x64.ActiveCfg = Debug
+		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|x64.Build.0 = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|x86.ActiveCfg = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Any CPU.ActiveCfg = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Mixed Platforms.ActiveCfg = Release
@@ -176,6 +178,7 @@ Global
 		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Debug|Win32.Build.0 = Debug|Win32
 		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Debug|x64.ActiveCfg = Debug|x64
+		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Debug|x64.Build.0 = Debug|x64
 		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Debug|x86.ActiveCfg = Debug|Win32
 		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Release|Any CPU.ActiveCfg = Release|Win32
 		{D2CFBC2C-1206-4DB4-B832-5A0CCBA4A3B6}.Release|Mixed Platforms.ActiveCfg = Release|x64
@@ -207,38 +210,5 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {41BE4E82-5FAC-47B5-93FE-46BEC0C09607}
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 10
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://tfs.bumc.bu.edu:8080/tfs/bu-micro-msi
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Daphne\\Daphne.csproj
-		SccProjectName1 = Daphne
-		SccLocalPath1 = Daphne
-		SccProjectUniqueName2 = Interface\\Interface.csproj
-		SccProjectName2 = Interface
-		SccLocalPath2 = Interface
-		SccProjectUniqueName3 = DaphneGui\\DaphneGui.csproj
-		SccProjectName3 = DaphneGui
-		SccLocalPath3 = DaphneGui
-		SccProjectUniqueName4 = SBMLayer\\SBMLayer.csproj
-		SccProjectName4 = SBMLayer
-		SccLocalPath4 = SBMLayer
-		SccProjectUniqueName5 = DaphneInstall\\DaphneInstall.vdproj
-		SccProjectName5 = DaphneInstall
-		SccLocalPath5 = DaphneInstall
-		SccProjectUniqueName6 = DaphneUserControlLib\\DaphneUserControlLib.csproj
-		SccProjectName6 = DaphneUserControlLib
-		SccLocalPath6 = DaphneUserControlLib
-		SccProjectUniqueName7 = NativeDaphne\\NativeDaphne.vcxproj
-		SccProjectName7 = NativeDaphne
-		SccLocalPath7 = NativeDaphne
-		SccProjectUniqueName8 = NativeDaphneLibrary\\NativeDaphneLibrary.vcxproj
-		SccProjectName8 = NativeDaphneLibrary
-		SccLocalPath8 = NativeDaphneLibrary
-		SccProjectUniqueName9 = DaphneInstallMac\\DaphneInstallMac.vdproj
-		SccProjectName9 = DaphneInstallMac
-		SccLocalPath9 = DaphneInstallMac
 	EndGlobalSection
 EndGlobal
