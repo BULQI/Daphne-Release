@@ -78,8 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>c:\AMD\acml5.3.1\ifort64_mp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>c:\AMD\acml5.3.1\ifort64_mp\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\dependencies\acml;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\dependencies\acml;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
