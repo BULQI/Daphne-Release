@@ -6,4 +6,6 @@ To build and run Daphne, you will need the following,
 2. Microsoft Visual C++ 2010 SP1 Redistributable Package (x64), which is needed by HDF5 dlls.
 3. Actipro license (https://www.actiprosoftware.com/products/controls/wpf) for Editors and Docking & MID controls.
 
+Alternatively, you can install daphne with the prebuilt DaphneInstaller.msi included in this repository.
+
 
