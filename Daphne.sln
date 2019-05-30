@@ -155,7 +155,6 @@ Global
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Debug|x86.ActiveCfg = Debug
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Any CPU.ActiveCfg = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Mixed Platforms.ActiveCfg = Release
-		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Mixed Platforms.Build.0 = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Win32.ActiveCfg = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|Win32.Build.0 = Release
 		{10B2BDAF-B87B-43B7-9C76-8037044BC803}.Release|x64.ActiveCfg = Release

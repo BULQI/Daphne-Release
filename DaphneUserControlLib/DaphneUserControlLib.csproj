@@ -78,10 +78,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Abt.Controls.SciChart.Wpf">
-      <HintPath>..\..\Daphne-main\dependencies\SciChart\Abt.Controls.SciChart.Wpf.dll</HintPath>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="Abt.Controls.SciChart3D.Wpf">
-      <HintPath>..\..\Daphne-main\dependencies\SciChart\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
+      <HintPath>..\dependencies\SciChart\Abt.Controls.SciChart3D.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="ActiproSoftware.Editors.Wpf, Version=13.2.592.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

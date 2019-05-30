@@ -1132,10 +1132,6 @@ namespace Daphne
 
                 if (cell.Genes.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && cell.Cytosol.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
                 {
-                ConfigReaction cr = config_reacs[i];
-
-                if (cell.Genes.ContainsKey(cr.modifiers_molecule_guid_ref[0]) == true && cell.Cytosol.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) == true)
-                {
                 var r = new Transcription(cell.Genes[cr.modifiers_molecule_guid_ref[0]],
                                                              	cell.Cytosol.Populations[cr.products_molecule_guid_ref[0]],
                                                                 cr.rate_const);
