@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +29,7 @@ namespace Daphne
     public abstract class ITransitionDriver : IDynamic
     {
         public bool TransitionOccurred { get; set; }
-        public int CurrentState { get; set; }
+        public virtual int CurrentState { get; set; }
         public int PreviousState { get; set; }
         public int FinalState { get; set; }
         public abstract void AddDriverElement(int origin, int destination, TransitionDriverElement driverElement);
@@ -117,6 +132,10 @@ namespace Daphne
     {
         private Dictionary<int, Dictionary<int, TransitionDriverElement>> drivers;
         private List<int> events;
+        /// <summary>
+        /// added to speed up access - AH
+        /// </summary>
+        Dictionary<int, TransitionDriverElement> CurrentDriver;
 
         /// <summary>
         /// Constructor
@@ -129,6 +148,28 @@ namespace Daphne
             PreviousState = 0;
             FinalState = 0;
             events = new List<int>();
+            CurrentDriver = null;
+        }
+
+        public override int CurrentState
+        {
+            get
+            {
+                return base.CurrentState;
+            }
+
+            set
+            {
+                if (drivers != null && drivers.ContainsKey(value))
+                {
+                    CurrentDriver = drivers[value];
+                }
+                else
+                {
+                    CurrentDriver = null;
+                }
+                base.CurrentState = value;
+            }
         }
 
         /// <summary>
@@ -156,6 +197,7 @@ namespace Daphne
             {
                 FinalState = destination;
             }
+            if (drivers.ContainsKey(CurrentState)) CurrentDriver = drivers[CurrentState];
         }
 
         /// <summary>
@@ -172,12 +214,9 @@ namespace Daphne
         /// <param name="dt">The time interval for the evolution (double).</param>
         public override void Step(double dt)
         {
-            if ( (drivers.Count == 0) || (!drivers.ContainsKey(CurrentState)) )
-            {
-                return;
-            }
+            if (CurrentDriver == null) return;
 
-            foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
+            foreach (KeyValuePair<int, TransitionDriverElement> kvp in CurrentDriver)
             {
                 if (kvp.Value.TransitionOccurred(dt) == true)
                 {
@@ -224,6 +263,7 @@ namespace Daphne
                 {
                     kvp.Value.Initialize();
                 }
+                CurrentDriver = drivers[CurrentState];
             }
         }
     }

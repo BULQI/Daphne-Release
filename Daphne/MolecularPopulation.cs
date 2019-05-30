@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +21,8 @@ using System.Text;
 
 using Ninject;
 using Ninject.Parameters;
-
-using ManifoldRing;
+using NativeDaphne;
+using Nt_ManifoldRing;
 
 namespace Daphne
 {
@@ -34,34 +49,38 @@ namespace Daphne
     }
 
 
-    public class MolecularPopulation : IDynamic
+    public class MolecularPopulation : Nt_MolecularPopulation, IDynamic
     {
         // the individuals that make up this MolecularPopulation
         public Molecule Molecule { get; private set; }
         private Compartment compartment;
-        private readonly Manifold manifold;
-        private ScalarField concentration;
+        //private readonly Manifold manifold;
+        //private ScalarField concentration;
         private Dictionary<int, ScalarField> boundaryFluxes;
         private readonly Dictionary<int, ScalarField> boundaryConcs,
                                                       naturalBoundaryFluxes,
                                                       naturalBoundaryConcs;
-        // Switch that allows us to turn off diffusion.
-        // Diffusion is on, by default.
-        public bool IsDiffusing { get; set; }
+        //// Switch that allows us to turn off diffusion.
+        //// Diffusion is on, by default.
+        //public bool IsDiffusing { get; set; }
         public Dictionary<int, MolBoundaryType> boundaryCondition;
-        // the molecule guid reference
-        public string MoleculeKey { get; set; }
 
-        public Manifold Man
-        {
-            get { return manifold; }
-        }
+        //public Manifold Man
+        //{
+        //    get { return manifold; }
+        //}
 
-        public ScalarField Conc
-        {
-            get { return concentration; }
-            set { concentration = value; }
-        }
+        //public ScalarField Conc
+        //{
+        //    get 
+        //    {
+        //        return concentration; 
+        //    }
+        //    set 
+        //    {
+        //        concentration = value; 
+        //    }
+        //}
 
         public Compartment Comp
         {
@@ -90,23 +109,35 @@ namespace Daphne
             get { return naturalBoundaryConcs; }
         }
 
-        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp)
+        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp) : base(comp.Interior, moleculeKey, mol.Name, mol.DiffusionCoefficient)
         {
-            concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-            manifold = comp.Interior;
+            //concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
             Molecule = mol;
             MoleculeKey = moleculeKey;
             compartment = comp;
+            base.Compartment = comp.BaseComp;
             boundaryCondition = new Dictionary<int, MolBoundaryType>();
 
             // true boundaries
             boundaryFluxes = new Dictionary<int, ScalarField>();
             boundaryConcs = new Dictionary<int, ScalarField>();
-            foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
+
+            //the addition has to be in order in the middle layer
+            foreach (var kvp in compartment.NtBoundaries)
             {
-                AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
+                var compartment_list = kvp.Value;
+                foreach (Nt_Compartment nc in compartment_list)
+                {
+                    var key = nc.InteriorId;
+                    var interior = compartment.Boundaries[key].Interior;
+                    AddBoundaryFluxConc(key, interior);
+                }
             }
 
+            //foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
+            //{
+            //    AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
+            //}
             // natural boundaries
             naturalBoundaryFluxes = new Dictionary<int, ScalarField>();
             naturalBoundaryConcs = new Dictionary<int, ScalarField>();
@@ -129,8 +160,18 @@ namespace Daphne
 
             boundaryFluxes.Add(key, boundFlux);
             boundaryConcs.Add(key, boundConc);
+            base.AddNtBoundaryFluxConc(key, boundConc, boundFlux);
         }
 
+        public void RemoveBoundaryFluxConc(int key)
+        {
+            if (boundaryConcs.ContainsKey(key))
+            {
+                BoundaryConcs.Remove(key);
+                BoundaryFluxes.Remove(key);
+                base.RemoveNtBoundaryFluxConc(key);
+            }
+        }
 
         public void Initialize(string type, double[] parameters)
         {

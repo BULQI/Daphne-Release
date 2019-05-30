@@ -1,12 +1,31 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using NativeDaphne;
+using Gene = NativeDaphne.Nt_Gene;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace Daphne
 {
-    public class CellManager : IDynamic
+    public class CellManager : Nt_CellManager, IDynamic
     {
         private Dictionary<int, double[]> deadDict = null;
         public Dictionary<int, double[]> DeadDict
@@ -41,85 +60,98 @@ namespace Daphne
                 {
                     kvp.Value.SpatialState.X[i] += mu * kvp.Value.SpatialState.F[i] * dt;
                 }
+                kvp.Value.updateGridIndex();
             }
         }
 
+        //for debug
+        public static int iteration_count = 0;
+
         public void Step(double dt)
         {
+
             List<int> removalList = null;
             List<Cell> daughterList = null;
 
-            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
+            iteration_count++;
+
+            int cell_count = SimulationBase.dataBasket.Cells.Count;
+            //steps through cell populations - it is ONLY handling reactions for now.
+            foreach (CellsPopulation cellpop in SimulationBase.dataBasket.Populations.Values)
             {
-                // cell takes a step
-                if (kvp.Value.Alive == true)
+                //currently all reactions are handled in population level.
+                cellpop.step(dt);
+            }
+
+            foreach (Cell cell in SimulationBase.dataBasket.Cells.Values)
+            {
+                // cell takes a step - only handling cells trans
+                if (cell.Alive == true)
                 {
-                    kvp.Value.Step(dt);
+                    cell.Step(dt);
                 }
 
-                // still alive and motile
-                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
+                // for debugging checking between 4230282 and 4245283, 15000 iterations in between. 
+                if (iteration_count < 0)
                 {
-                    if (kvp.Value.IsChemotactic)
+                    Debug.WriteLine("===============cell id = {0}=================", cell.Cell_id);
+                    Debug.WriteLine("----membrane----");
+                    foreach (var item in cell.PlasmaMembrane.Populations)
                     {
-                        // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
-                        // add the chemotactic force (accumulate it into the force variable)
-                        kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
-                    }
-                    // apply the boundary force
-                    kvp.Value.BoundaryForce();
-                    // apply stochastic force
-                    if (kvp.Value.IsStochastic)
-                    {
-                        kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]= {3}\tconc[3]= {4}\t{5}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], tmp.darray[3], item.Value.Molecule.Name);
                     }
 
-                    // A simple implementation of movement. For testing.
-                    for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
+                    Debug.WriteLine("----Cytosol----");
+                    foreach (var item in cell.Cytosol.Populations)
                     {
-                        kvp.Value.SpatialState.X[i] += kvp.Value.SpatialState.V[i] * dt;
-                        kvp.Value.SpatialState.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.SpatialState.V[i] + kvp.Value.SpatialState.F[i]) * dt;
+                        var tmp = item.Value.Conc;
+                        Debug.WriteLine("it={0}\tconc[0]= {1}\tconc[1]= {2}\tconc[2]= {3}\tconc[3]= {4}\t{5}",
+                            iteration_count, tmp.darray[0], tmp.darray[1], tmp.darray[2], tmp.darray[3], item.Value.Molecule.Name);
                     }
 
-                    // enforce boundary condition
-                    kvp.Value.EnforceBC();
+                    Debug.WriteLine("---location---");
+                    Debug.WriteLine("positon = {0} {1} {2}", cell.SpatialState.X[0], cell.SpatialState.X[1], cell.SpatialState.X[2]);
+
                 }
 
                 // if the cell  moved out of bounds schedule its removal
-                if (kvp.Value.Exiting == true)
+                if (cell.Exiting == true)
                 {
                     if (removalList == null)
                     {
                         removalList = new List<int>();
                     }
-                    removalList.Add(kvp.Value.Cell_id);
+                    removalList.Add(cell.Cell_id);
                 }
 
                 // if the cell died schedule its (stochastic) removal
-                if (kvp.Value.Alive == false) 
+                if (cell.Alive == false)
                 {
-                    if (!deadDict.ContainsKey(kvp.Value.Cell_id))
+                    if (!deadDict.ContainsKey(cell.Cell_id))
                     {
                         // start clock at 0 and sample the distribution for the time of removal
-                        deadDict.Add(kvp.Value.Cell_id, new double[] {0.0, Phagocytosis.Sample()});
+                        deadDict.Add(cell.Cell_id, new double[] { 0.0, Phagocytosis.Sample() });
+                        //remove the cell's chemistry and all its associated boundaries
+                        SimulationBase.dataBasket.RemoveCell(cell.Cell_id, false);
                     }
                 }
-                
+
                 // cell division
-                if (kvp.Value.Cytokinetic == true)
+                if (cell.Cytokinetic == true) //if (cell_count < 50 && cell.Cytokinetic == true)
                 {
                     // divide the cell, return daughter
-                    Cell c = kvp.Value.Divide();
-
+                    Cell c = cell.Divide();
                     if (daughterList == null)
                     {
                         daughterList = new List<Cell>();
                     }
                     daughterList.Add(c);
 
-                    SimulationBase.dataBasket.DivisionEvent(kvp.Value, c);
+                    SimulationBase.dataBasket.DivisionEvent(cell, c);
                 }
-           }
+            }
 
             // process removal list
             if (removalList != null)
@@ -157,6 +189,14 @@ namespace Daphne
                     // add the cell
                     SimulationBase.AddCell(c);
                     // cell's membrane was added to the ecs in Cell.Divide()
+                    if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+                    {
+                        ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(c.PlasmaMembrane.Interior);
+                        // add ECS boundary reactions, where applicable
+                        List<ConfigReaction> reacs = SimulationBase.ProtocolHandle.GetReactions(SimulationBase.ProtocolHandle.scenario.environment.comp, true);
+                        SimulationBase.AddCompartmentBoundaryReactions(SimulationBase.dataBasket.Environment.Comp, c.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, reacs, null);
+                    }
+
                 }
             }
         }
@@ -166,10 +206,31 @@ namespace Daphne
         /// </summary>
         public void ResetCellForces()
         {
-            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
+            foreach (CellsPopulation cellpop in SimulationBase.dataBasket.Populations.Values)
             {
-                c.resetForce();
+                cellpop.resetForce();
             }
+        }
+
+
+        internal void InitializeNtCellManager()
+        {
+            double extend1 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0);
+            double extend2 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1);
+            double extend3 = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2);
+
+            bool ECS_flag = SimulationBase.dataBasket.Environment is ECSEnvironment;
+            bool toroidal_flag = false;
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+            {
+                toroidal_flag = ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal;
+            }
+
+            //bool boundary_force_flag = SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false;
+
+            base.SetEnvironmentExtents(extend1, extend2, extend3, ECS_flag, toroidal_flag, Pair.Phi1);
+            int seed = SimulationBase.ProtocolHandle.sim_params.globalRandomSeed;
+            base.InitializeNormalDistributionSampler(0.0, 1.0, seed);
         }
     }
 }

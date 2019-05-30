@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿//#define ALL_COLLISIONS
 using System;
 using System.Collections.Generic;
@@ -5,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using NativeDaphne;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -23,11 +39,30 @@ namespace Daphne
         public CollisionManager(Vector gridSize, double gridStep) : base(gridSize, gridStep)
         {
             grid = new Dictionary<int, Cell>[gridPts[0], gridPts[1], gridPts[2]];
+
+            if (useNativeCollisionManager == true)
+            {
+                bool toroidal = false;
+                if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+                {
+                    toroidal = (SimulationBase.dataBasket.Environment as ECSEnvironment).toroidal;
+                }
+
+                nt_collisionManager = new Nt_CollisionManager(gridSize.ToArray(), gridStep, toroidal);
+                nt_collisionManager.set_parameter_Ph1(SimulationBase.ProtocolHandle.sim_params.phi1);
+            }
         }
 
         public void Step(double dt)
         {
-            update();
+            if (useNativeCollisionManager)
+            {
+                nt_collisionManager.Step(dt);
+            }
+            else
+            {
+                update();
+            }
         }
 
         private bool clearSeparation(Pair p)
@@ -139,6 +174,12 @@ namespace Daphne
         /// <param name="del">cell to be deleted</param>
         public void RemoveAllPairsContainingCell(Cell del)
         {
+            if (useNativeCollisionManager == true)
+            {
+                nt_collisionManager.RemoveAllPairsContainingCell(del);
+                return;
+            }
+
             if (pairs != null && pairs.Count > 0 && del != null)
             {
                 foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
@@ -198,6 +239,12 @@ namespace Daphne
         /// <param name="del">the cell to be removed</param>
         public void RemoveCellFromGrid(Cell del)
         {
+            if (useNativeCollisionManager == true)
+            {
+                nt_collisionManager.RemoveCellFromGrid(del);
+                return;
+            }
+
             // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
             if (legalIndex(del.GridIndex) == true && grid[del.GridIndex[0], del.GridIndex[1], del.GridIndex[2]] != null)
             {
@@ -366,7 +413,7 @@ namespace Daphne
             // remove the pairs that got scheduled for removal
             if (removalPairKeys != null)
             {
-                foreach (int key in removalPairKeys)
+                foreach (long key in removalPairKeys)
                 {
                     pairs.Remove(key);
                 }
@@ -383,7 +430,7 @@ namespace Daphne
                         {
                             for (int k = -1; k <= 1; k++)
                             {
-                                int[] test = neighbor(cell.GridIndex, i, j, k);
+                                int[] test = neighbor(cell.GridIndex.ToArray(), i, j, k);
 
                                 // don't go outside the grid
                                 if (legalIndex(test) == true && grid[test[0], test[1], test[2]] != null)
@@ -521,5 +568,8 @@ namespace Daphne
 
         private Dictionary<long, Pair> pairs;
         private Dictionary<int, Cell>[, ,] grid;
+
+        public Nt_CollisionManager nt_collisionManager;
+        bool useNativeCollisionManager = true;
     }
 }

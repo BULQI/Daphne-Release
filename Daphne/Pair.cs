@@ -1,10 +1,25 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿//#define ALL_PAIRS
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using MathNet.Numerics.LinearAlgebra.Double;
+using NativeDaphne;
 
 namespace Daphne
 {
@@ -50,10 +65,11 @@ namespace Daphne
         {
             //Vector tmp = new DenseVector(a.SpatialState.X);
             //tmp = (DenseVector)tmpArr.Subtract(new DenseVector(b.SpatialState.X));
-            double x = a.SpatialState.X[0] - b.SpatialState.X[0];
-            double y = a.SpatialState.X[1] - b.SpatialState.X[1];
-            double z = a.SpatialState.X[2] - b.SpatialState.X[2];
-
+            Nt_Darray a_X = a.SpatialState.X;
+            Nt_Darray b_X = b.SpatialState.X;
+            double x = a_X[0] - b_X[0];
+            double y = a_X[1] - b_X[1];
+            double z = a_X[2] - b_X[2];
             // correction for periodic boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
@@ -128,7 +144,6 @@ namespace Daphne
         {
             get { return dist; }
         }
-
         // abstract member functions
 
         protected abstract void bond();
@@ -215,10 +230,12 @@ namespace Daphne
                     //a.addForce(normal.Multiply(-force).ToArray());
                     //b.addForce(normal.Multiply(force).ToArray());
 
-                    //performance tuning.
-                    double dx = b.SpatialState.X[0] - a.SpatialState.X[0];
-                    double dy = b.SpatialState.X[1] - a.SpatialState.X[1];
-                    double dz = b.SpatialState.X[2] - a.SpatialState.X[2];
+                    //performance tuning
+                    var b_X = b.SpatialState.X;
+                    var a_X = a.SpatialState.X;
+                    double dx = b_X[0] - a_X[0];
+                    double dy = b_X[1] - a_X[1];
+                    double dz = b_X[2] - a_X[2];
 
                     double tmplen = Math.Sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -237,6 +254,7 @@ namespace Daphne
             }
         }
 
+ 
 #if ALL_PAIRS
         /// <summary>
         /// apply the pair force but do not change b_ij

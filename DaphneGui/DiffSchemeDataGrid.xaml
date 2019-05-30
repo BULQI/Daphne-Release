@@ -71,16 +71,16 @@
     
     <StackPanel Orientation="Vertical" x:Name="spDivRegPanel">
 
-        <!--Cell Name-->
-        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
+        <!--Scheme Name: disable for now since we aren't allowing users to swap in schemes -->
+        <!--<StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
             <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
             <TextBox x:Name="txtDivName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
                      Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        </StackPanel>
+        </StackPanel>-->
        
         <!-- starting state -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
-            <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,6,0,0" ToolTip="State numbering begins with 0.">
+            <TextBlock Text="Scheme starting state" Margin="0,0,0,6" HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="50" />
             <local:ParamDistrControl Tag="DISCRETE" DataContext="{Binding Driver.CurrentState, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
         </StackPanel>
         

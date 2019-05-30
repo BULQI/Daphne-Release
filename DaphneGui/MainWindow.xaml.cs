@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿// enable ASSUME_DEBUGGER for "Start without debugging", i.e. when Debugger.IsAttached == false
 //#define ASSUME_DEBUGGER // NOTE: NEVER CHECK IN ENABLED
 
@@ -36,7 +51,7 @@ using Ninject;
 using Ninject.Parameters;
 
 using Daphne;
-using ManifoldRing;
+using Nt_ManifoldRing;
 using Workbench;
 
 using System.Collections.ObjectModel;
@@ -48,6 +63,8 @@ using SBMLayer;
 using System.Security.Principal;
 using System.Globalization;
 using DaphneUserControlLib;
+using NativeDaphne;
+
 using DaphneGui.CellPopDynamics;
 using DaphneGui.CellLineage;
 
@@ -128,6 +145,7 @@ namespace DaphneGui
 
         private DocWindow dw;
         private Thread simThread;
+        private ManualResetEvent startSimEvent = new ManualResetEvent(false);
         public static Cell selectedCell = null;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
@@ -494,7 +512,8 @@ namespace DaphneGui
             }
             else
             {
-                file = "simple_chemotaxis.json";
+                //file = "simple_chemotaxis.json";
+                file = "centroblast-centrocyte_recycling.json";
             }
 
             int repeat = 0;
@@ -734,12 +753,16 @@ namespace DaphneGui
             ProtocolCreators.CreateBlankProtocol(protocol);
             protocol.SerializeToFile();
 
+            // We need to assign this field for protocols that deploy cells.
+            // Otherwise, we get a crash in cellPop.cellPopDist.MaxCellsToAdd()
+            SystemOfPersistence.HProtocol = protocol;
+
             // DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\simple_chemotaxis.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             protocol.SerializeToFile();
 
-            ////DIFFUSIION SCENARIO - no longer needed
+            ////DIFFUSIION SCENARIO - for testing, only
             //protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             //ProtocolCreators.CreateDiffusionProtocol(protocol);
             ////Serialize to json
@@ -2351,8 +2374,12 @@ namespace DaphneGui
                     gc = new VTKNullGraphicsController();
                 }
             }
-            // set the reporter's path
-            sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
+
+            if (newFile == true)
+            {
+                // set the reporter's path
+                sim.Reporter.AppPath = new Uri(appPath + @"\Generated\").LocalPath;
+            }
 
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             if (vtkDisplay_DockPanel.DataContext != gc)
@@ -2563,6 +2590,8 @@ namespace DaphneGui
         {
             while (true)
             {
+                //wating for siginal to continue
+                startSimEvent.WaitOne();
                 lock (sim)
                 {
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
@@ -2631,6 +2660,7 @@ namespace DaphneGui
 
                         if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
                         {
+                            startSimEvent.Reset(); //stop loop.
                             // handle reruns
                             if (repeatInProgress() == true)
                             {
@@ -2672,6 +2702,7 @@ namespace DaphneGui
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateInt(updateGraphicsAndGUI), -1);
                         sim.RunStatus = SimulationBase.RUNSTAT_OFF;
+                        startSimEvent.Reset();
                     }
                     else if (vcrControl != null && vcrControl.CheckFlag(VCRControl.VCR_ACTIVE) == true)
                     {
@@ -3018,6 +3049,8 @@ namespace DaphneGui
         /// <param name="firstRun">true if this is a single-shot simulation or the first iteration of a repeated run</param>
         internal void runSim(bool firstRun)
         {
+            //starting the simulation loop.
+            startSimEvent.Set();
             if (firstRun == true)
             {
                 repetition = 1;
@@ -3052,8 +3085,17 @@ namespace DaphneGui
             }
         }
 
+        //timer used to measure performace
+        public static Stopwatch mywatch;
+        public static bool enable_clock = false;
+
         private void runSim_Tissue(bool repeat)
         {
+            if (enable_clock == true)
+            {
+                mywatch = Stopwatch.StartNew();
+            }
+
             //Whenever we run the simulation, the Tracks option should be turned off.
             //If it was previously selected, then change it to None.
             VTKFullGraphicsController full = (VTKFullGraphicsController)MainWindow.GC;
@@ -3144,7 +3186,7 @@ namespace DaphneGui
                     lockSaveStartSim(repeat || MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
                 }
                 else
-                {
+                {                    
                     MessageBoxResult result = toolWin.ScenarioContentChanged();
 
                     // Process message box results
@@ -3320,12 +3362,12 @@ namespace DaphneGui
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
                 string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
-                double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
+                double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X.ArrayCopy);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = name;
                 cmi.Concentration = conc;
-                cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X.ArrayCopy);
+                cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X.ArrayCopy));
                 ecmConcs.Add(cmi);
             }
             lvECMMolConcs.ItemsSource = ecmConcs;

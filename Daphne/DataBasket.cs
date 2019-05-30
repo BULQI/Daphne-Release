@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,7 +23,7 @@ using System.Text;
 //using LangProcLib;
 using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
-
+using Gene = NativeDaphne.Nt_Gene;
 namespace Daphne
 {
     /// <summary>
@@ -27,7 +42,7 @@ namespace Daphne
         /// <summary>
         /// cell populations
         /// </summary>
-        private Dictionary<int, Dictionary<int, Cell>> populations;
+        private Dictionary<int, CellsPopulation> populations;
         /// <summary>
         /// dictionary of molecules
         /// </summary>
@@ -77,7 +92,7 @@ namespace Daphne
         {
             hSim = s;
             cells = new Dictionary<int,Cell>();
-            populations = new Dictionary<int, Dictionary<int, Cell>>();
+            populations = new Dictionary<int, CellsPopulation>();
             molecules = new Dictionary<string, Molecule>();
             genes = new Dictionary<string, Gene>();
             ResetTrackData();
@@ -116,7 +131,7 @@ namespace Daphne
         /// <summary>
         /// accessor for the populations
         /// </summary>
-        public Dictionary<int, Dictionary<int, Cell>> Populations
+        public Dictionary<int, CellsPopulation> Populations
         {
             get { return populations; }
         }
@@ -171,7 +186,7 @@ namespace Daphne
         {
             if (populations.ContainsKey(id) == false)
             {
-                populations.Add(id, new Dictionary<int, Cell>());
+                populations.Add(id, new CellsPopulation(id));
                 return true;
             }
             return false;
@@ -190,32 +205,51 @@ namespace Daphne
                 cell.GridIndex[0] = cell.GridIndex[1] = cell.GridIndex[2] = -1;
                 // add the cell
                 cells.Add(cell.Cell_id, cell);
-                // add it to the population
-                populations[cell.Population_id].Add(cell.Cell_id, cell);
+
+                //add the cell to the population, which have a middle layer instance
+                populations[cell.Population_id].AddCell(cell.Cell_id, cell);
+
+                //the is for global access in the middle layer, this is needed since the
+                //middle layer does not have access to the databasket.
+                CellManager.cellDictionary.Add(cell.Cell_id, cell);
                 return true;
             }
             return false;
         }
 
+
         /// <summary>
-        /// remove a cell
+        /// remove a cell.
+        /// when a cell is dead but before removed, they don't participate in chemistry, but they still
+        /// particiapte in collision, the complete removal is set to false to indicate that.
         /// </summary>
-        /// <param name="key">the cell's key</param>
-        /// <returns>true if the cell was successfully removed</returns>
-        public bool RemoveCell(int key)
+        /// <param name="key">Cell_id</param>
+        /// <param name="complete_removal">false if removing chemistry only</param>
+        /// <returns>false if cel l not found in the system, otherwise true</returns>
+        public bool RemoveCell(int key, bool complete_removal = true)
         {
+
             if (cells.ContainsKey(key) == true)
             {
                 Cell cell = cells[key];
 
-                // remove all pairs that contain this cell
-                hSim.CollisionManager.RemoveAllPairsContainingCell(cell);
-                // remove the cell from the grid
-                hSim.CollisionManager.RemoveCellFromGrid(cell);
-                // remove the cell from the population
-                populations[cell.Population_id].Remove(cell.Cell_id);
-                // remove the cell itself
-                hSim.RemoveCell(cell);
+                Populations[cell.Population_id].RemoveCell(cell.Cell_id, complete_removal);
+                //remove chemistry if exists
+                if (Environment.Comp.Boundaries.ContainsKey(cell.PlasmaMembrane.Interior.Id) == true)
+                {
+                    hSim.RemoveCell(cell);
+                }
+
+                if (complete_removal == true)
+                {
+                    // remove all pairs that contain this cell
+                    hSim.CollisionManager.RemoveAllPairsContainingCell(cell);
+                    // remove the cell from the grid
+                    hSim.CollisionManager.RemoveCellFromGrid(cell);
+                    CellManager.cellDictionary.Remove(cell.Cell_id);
+
+                    Cells.Remove(cell.Cell_id);
+                }
                 return true;
             }
             return false;
@@ -237,9 +271,9 @@ namespace Daphne
                 // rekey the cell in the grid
                 hSim.CollisionManager.RekeyCellInGrid(cell, oldKey);
                 // add the new key in the population
-                populations[cell.Population_id].Add(cells[oldKey].Cell_id, cell);
+                populations[cell.Population_id].AddCell(cells[oldKey].Cell_id, cell);
                 // remove the old key from the population
-                populations[cell.Population_id].Remove(oldKey);
+                populations[cell.Population_id].RemoveCell(oldKey);
                 // add the new key
                 cells.Add(cells[oldKey].Cell_id, cell);
                 // remove the old key

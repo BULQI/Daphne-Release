@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -464,9 +479,6 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            // We need this to successfully execute cellPop.cellPopDist.Initialize();
-            SystemOfPersistence.HProtocol = protocol;
-
             protocol.Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
 
             protocol.InitializeStorageClasses();
@@ -594,14 +606,6 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
             }
-            //foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
-            //{
-            //    ReportECM reportECM = new ReportECM();
-            //    reportECM.molpop_guid_ref = mpECM.molpop_guid;
-            //    reportECM.mp_extended = ExtendedReport.COMPLETE;
-            //    cellPop.ecm_probe.Add(reportECM);
-            //    //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
-            //}
 
             protocol.reporter_file_name = "Loco_test";
 
@@ -1217,7 +1221,7 @@ namespace Daphne
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Reactions in Cytosol
-            type = new string[] { "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|" };
+            type = new string[] { "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|", "A* -> A" };
                                           //"A* -> A", "gApop -> sApop + gApop" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -2704,7 +2708,7 @@ namespace Daphne
             //
             // Barroso, Munoz, et al.
             // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
-            // The FASEB Journal vol. 26 no. 12 4841-485
+            //// The FASEB Journal vol. 26 no. 12 4841-485
             // (measured) CXCL13/CXCR5 binding affinity:  KD = 30.4 molec/um^3
             // (measured) K_on = 7.7e-3 um^3/#-min
             // (measured) K_off = 0.21 1/min

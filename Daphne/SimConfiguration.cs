@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2019 Kepler Laboratory of Quantitative Immunology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,6 +34,9 @@ using System.Windows.Markup;
 
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
+using NativeDaphne;
+using Gene = NativeDaphne.Nt_Gene;
+using CellSpatialState = NativeDaphne.Nt_CellSpatialState;
 
 
 namespace Daphne
@@ -1633,7 +1651,6 @@ namespace Daphne
         /// <param name="tempFiles">true when wanting to serialize temporary file(s)</param>
         public void SerializeToFile(bool tempFiles = false)
         {
-            //skg daphne serialize to json Thursday, April 18, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
@@ -1658,7 +1675,6 @@ namespace Daphne
         /// <returns>level content as string</returns>
         public string SerializeToString()
         {
-            //skg daphne serialize to json string Wednesday, May 08, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
@@ -7790,7 +7806,7 @@ namespace Daphne
         /// </summary>
         /// <param name="pos">the position of the next cell</param>
         /// <returns></returns>
-        protected bool inBounds(double[] pos)
+        public bool InBounds(double[] pos)
         {
             // if this is not assigned yet, find it
             findWallDis();
@@ -7826,10 +7842,28 @@ namespace Daphne
         /// <returns></returns>
         public bool AddByPosition(double[] pos)
         {
-            if (inBounds(pos) == true)
+            if (InBounds(pos) == true && duplicatePosition(pos, -1) == false)
             {
                 cellPop.CellStates.Add(new CellState(pos[0], pos[1], pos[2]));
                 return true;
+            }
+            return false;
+        }
+
+        private bool duplicatePosition(double[] pos, int item)
+        {
+            for (int i = 0; i < cellPop.CellStates.Count; i++)
+            {
+                if (i == item)
+                {
+                    continue;
+                }
+
+                CellState cs = cellPop.CellStates[i];
+                if (cs.X == Math.Round(pos[0], 2) && cs.Y == Math.Round(pos[1], 2) && cs.Z == Math.Round(pos[2], 2))
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -7949,8 +7983,10 @@ namespace Daphne
         /// <summary>
         /// Check that all cells are in-bounds. 
         /// </summary>
-        public void CheckPositions()
+        public bool CheckPositions()
         {
+            bool changed = false;
+
             if (cellPop != null)
             {
                 double[] pos;
@@ -7960,7 +7996,7 @@ namespace Daphne
                 for (int i = cellPop.CellStates.Count - 1; i >= 0; i--)
                 {
                     pos = new double[3] { cellPop.CellStates[i].X, cellPop.CellStates[i].Y, cellPop.CellStates[i].Z };
-                    if (inBounds(pos) == false)
+                    if (InBounds(pos) == false || duplicatePosition(pos, i) == true)
                     {
                         cellPop.CellStates.RemoveAt(i);
                     }
@@ -7972,9 +8008,12 @@ namespace Daphne
                 if (cellsToAdd > 0)
                 {
                     AddByDistr(cellsToAdd);
+                    changed = true;
                 }
             }
+            return changed;
         }
+       
     }
 
     /// <summary>
@@ -8219,9 +8258,10 @@ namespace Daphne
 
         public CellState()
         {
-            spState.X = new double[3];
-            spState.V = new double[3];
-            spState.F = new double[3];
+            spState = new Nt_CellSpatialState();
+            spState.X = new Nt_Darray(3);
+            spState.V = new Nt_Darray(3);
+            spState.F = new Nt_Darray(3);
 
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
@@ -8233,16 +8273,20 @@ namespace Daphne
 
         public CellState(double x, double y, double z) : this()
         {
+            spState = new Nt_CellSpatialState();
+            spState.X = new Nt_Darray(3);
             spState.X[0] = x;
             spState.X[1] = y;
             spState.X[2] = z;
+            spState.V = new Nt_Darray(3);
+            spState.F = new Nt_Darray(3);
         }
 
         public void setSpatialState(CellSpatialState state)
         {
-            Array.Copy(state.X, spState.X, 3);
-            Array.Copy(state.V, spState.V, 3);
-            Array.Copy(state.F, spState.F, 3);
+            Nt_Darray.Copy(state.X, spState.X, 3);
+            Nt_Darray.Copy(state.V, spState.V, 3);
+            Nt_Darray.Copy(state.F, spState.F, 3);
         }
 
         public void addMolPopulation(string key, MolecularPopulation mp)
@@ -8327,7 +8371,6 @@ namespace Daphne
                         {
                             DistrTransitionDriverElement d = (DistrTransitionDriverElement)kvp.Value;
                             cbState.differentiationDistrState.Add(kvp.Key, new double[] { d.timeToNextEvent, d.clock });
-                            Console.WriteLine("diff: {0}\t{1}\t{2}", behavior.CurrentState, d.timeToNextEvent, d.clock);
                         }
                     }
                 }
@@ -9356,13 +9399,13 @@ namespace Daphne
             {
                 readconcs = readText.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(s => double.Parse(s)).ToArray();
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 MessageBox.Show(string.Format("This file contains invalid data. \nAll molecular concentrations set to zero."),
                    "Invalid data", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            catch (OverflowException ex)
+            catch (OverflowException)
             {
                 MessageBox.Show(string.Format("This file contains a value that is out of range. \nAll molecular concentrations set to zero."),
                    "Data out of range", MessageBoxButton.OK, MessageBoxImage.Warning);
