@@ -33,7 +33,7 @@ namespace Daphne
         /// </summary>
         /// <param name="a">cell a</param>
         /// <param name="b">cell b</param>
-        public Pair(Cell a, Cell b)
+        public Pair(Cell a,  Cell b)
         {
             this.a = a;
             this.b = b;
