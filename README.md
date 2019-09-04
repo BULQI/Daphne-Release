@@ -8,6 +8,9 @@ You will need the following for software development:
 2. Microsoft Visual C++ 2010 SP1 Redistributable Package (x64), which is needed by HDF5 dlls.
 3. Actipro license (https://www.actiprosoftware.com/products/controls/wpf) for Editors and Docking & MID controls.
 
+You can find more information about this software package at http://computationalimmunology.bu.edu/
+
+
 
 
 
